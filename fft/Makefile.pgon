@@ -1,0 +1,40 @@
+# Makefile for Intel Paragon with SUNMOS and MPI
+
+SHELL = /bin/sh
+.IGNORE:
+
+# System-specific settings
+
+F77 =		$(MOS_PATH)/sif77
+F77FLAGS =	-O3 -Knoieee
+CC =		$(MOS_PATH)/sicc
+CCFLAGS =	-O3 -Knoieee -DFFT_INTEL
+#CCFLAGS =	-O3 -Knoieee -DFFT_INTEL -DPACK_POINTER
+#CCFLAGS =	-O3 -Knoieee -DFFT_INTEL -DMEMCPY
+#CCFLAGS =	-O3 -Knoieee -DFFT_FFTW -I$(HOME)/fft/fftw/src
+LINK =		$(MOS_PATH)/sif77
+LINKFLAGS =	-Knoieee -L/Net/local/mpi/lib/paragon/sunmos
+USRLIB =
+#		$(HOME)/fft/fftw/lib/libfftw_mos.a
+SYSLIB =	-lkmath -lmpi
+SIZE =		$(PARAGON_PATH)/size860
+
+# Link rule
+
+$(EXE):	$(OBJ)
+	$(LINK) $(LINKFLAGS) $(OBJ) $(USRLIB) $(SYSLIB) -o $(EXE)
+	$(SIZE) $(EXE)
+
+# Compilation rules
+
+.f.o:
+	@cp $< $*.F
+	$(F77) $(F77FLAGS) -c $*.F
+	@rm $*.F
+
+.c.o:
+	$(CC) $(CCFLAGS) -c $<
+
+# Individual dependencies
+
+$(OBJ):	$(INC)

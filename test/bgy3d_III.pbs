@@ -1,0 +1,43 @@
+#!/bin/sh --login
+#
+#PBS -N BGY3dM_H2O
+#PBS -q default
+#PBS -l nodes=16:ppn=2
+#PBS -l walltime=100:29:00
+#PBS -j oe
+#PBS -k oe
+#PBS -m abe
+#PBS -M jager@ins.uni-bonn.de
+
+cd $PBS_O_WORKDIR
+
+# Header Information
+echo Running on master host `hostname`
+echo Time is `date`
+echo Directory is `pwd`
+echo This jobs runs on the following nodes:
+echo `cat $PBS_NODEFILE`
+# Define number of processors
+NPROCS=`wc -l < $PBS_NODEFILE`
+echo This job has allocated $NPROCS processors
+
+# Run the parallel MPI job,
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYH2O -N 256 -rho 0.0334 -pair -norm_tol 1.0e-3 -max_iter 10000 -damp_start 0.1 -lambda 0.1 
+
+
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGY2site -N 64 -rho 0.0334 -beta 1.6889 -pair -norm_tol 1.0e-2 -max_iter 10000 -L 10.0 -zpad 10.0 -damp_start 1.0 -lambda 0.002
+
+
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYH2ONewton -N 100 -rho 0.0334 -pair -norm_tol 1.0e-3 -snes_mf -snes_monitor -ksp_monitor -damp_start 0.00  -zpad 16.0 
+
+
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYH2O -N 128 -rho 0.01 -pair -norm_tol 1.0e-2 -max_iter 10000 -zpad 12.0 -damp_start 0.0 -lambda 0.1
+
+# site-site
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGY3site -N 64 -rho 0.012 -beta 1.6889 -pair -norm_tol 1.0e-2 -max_iter 10000 -L 12.0 -zpad 12.0 -damp_start 1.0 -lambda 0.01
+
+# site
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYM3site -N 128 -rho 0.01 -beta 1.3988 -pair -norm_tol 1.0e-2 -max_iter 10000 -L 14.0 -zpad 14.0 -damp_start 1.0 -lambda 0.01
+#mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYM3site -N 128 -rho 0.01 -beta 1.3988 -pair -norm_tol 1.0e-2 -max_iter 10000 -L 14.0 -zpad 14.0 -damp_start 0.8 -lambda 0.01
+
+mpirun  -machinefile $PBS_NODEFILE -np $NPROCS ./bgy3d -BGYM3site -N 128 -rho 0.0334 -beta 1.6889 -pair -norm_tol 1.0e-2 -max_iter 10000 -L 12.0 -zpad 12.0 -damp_start 0.0 -lambda 0.01G

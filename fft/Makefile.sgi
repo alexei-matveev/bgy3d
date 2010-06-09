@@ -1,0 +1,40 @@
+# Makefile for SGI O2/R10000
+
+SHELL = /bin/sh
+.IGNORE:
+
+# System-specific settings
+
+F77 =		f77
+F77FLAGS =	-O -n32  -I/usr/local/mpi/include
+CC =		cc
+CCFLAGS =	-O -n32 -DFFT_SGI -I/usr/local/mpi/include
+#CCFLAGS =	-O -n32 -DFFT_SGI -DPACK_POINTER -I/usr/local/mpi/include
+#CCFLAGS =	-O -n32 -DFFT_SGI -DPACK_MEMCPY -I/usr/local/mpi/include
+#CCFLAGS =	-O -n32 -DFFT_FFTW -I/usr/local/mpi/include \
+#			-I$(HOME)/fft/fftw/include
+LINK =		f77
+LINKFLAGS =	-O -n32 -L/usr/local/mpi/lib/IRIX/ch_p4
+USRLIB =	-lmpi
+#USRLIB =	-lmpi \
+#		$(HOME)/fft/fftw/lib/libfftw.a
+SYSLIB =	-lcomplib.sgimath -lm
+SIZE =		size
+
+# Link rule
+
+$(EXE):	$(OBJ)
+	$(LINK) $(LINKFLAGS) $(OBJ) $(USRLIB) $(SYSLIB) -o $(EXE)
+	$(SIZE) $(EXE)
+
+# Compilation rules
+
+.f.o:
+	$(F77) $(F77FLAGS) -c $<
+
+.c.o:
+	$(CC) $(CCFLAGS) -c $<
+
+# Individual dependencies
+
+$(OBJ):	$(INC)

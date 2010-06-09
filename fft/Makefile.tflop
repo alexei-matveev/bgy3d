@@ -1,0 +1,40 @@
+# Makefile for Intel Tflops with MPI
+
+SHELL = /bin/sh
+.IGNORE:
+
+# System-specific settings
+
+F77 =		$(TFLOP_PATH)/cif77
+F77FLAGS =	-O4
+CC =		$(TFLOP_PATH)/cicc
+CCFLAGS =	-O4 -DFFT_INTEL
+#CCFLAGS =	-O4 -DFFT_INTEL -DPACK_POINTER
+#CCFLAGS =	-O4 -DFFT_INTEL -DPACK_MEMCPY
+#CCFLAGS =	-O4 -DFFT_FFTW -I$(HOME)/fft/fftw/src
+LINK =		$(TFLOP_PATH)/cif77
+LINKFLAGS =
+USRLIB =	$(HOME)/bin/sjp_tflop.a
+#		$(HOME)/fft/fftw/lib/libfftw_tflop.a
+SYSLIB =	-lkmath -lmpi
+SIZE =		xsize
+
+# Link rule
+
+$(EXE):	$(OBJ)
+	$(LINK) $(LINKFLAGS) $(OBJ) $(USRLIB) $(SYSLIB) -o $(EXE)
+	$(SIZE) $(EXE)
+
+# Compilation rules
+
+.f.o:
+	@cp $< $*.F
+	$(F77) $(F77FLAGS) -c $*.F
+	@rm $*.F
+
+.c.o:
+	$(CC) $(CCFLAGS) -c $<
+
+# Individual dependencies
+
+$(OBJ):	$(INC)

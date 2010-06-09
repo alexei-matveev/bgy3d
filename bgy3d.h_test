@@ -1,0 +1,104 @@
+/*==========================================================*/
+/*  $Id: bgy3d.h,v 1.4 2006-07-25 13:33:43 jager Exp $ */
+/*==========================================================*/
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <assert.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "petscsnes.h"
+#include "petscda.h"
+#include "fft_3d.h"
+
+#ifndef BGY3d_H
+#define BGY3d_H
+
+#define real double
+#define SQR(a)   ((a)*(a))
+#define FOR_DIM  for(dim=0;dim<3;dim++)
+
+/* which dimension of the vector equation is solved ? */
+#define VEC_DIM 1
+
+#define INDEX3d(i,n) ((i[0])+((n[0])*((i[1])+ (i[2]) *(n[1]))))
+
+int verbosity=0;
+
+static char helptext[]="Solving BGY3d equation.\n";
+
+typedef struct ProblemData
+{
+  real interval[2];     /* min and max of the domain: 3d-box*/
+  real h[3];               /* mesh width */
+  real beta;            /* 1/kT */
+  real rho;             /* density */
+  int N[3], N3;                /* global Grid size */
+  
+  real g_xm;            /* g^(N_M)(x_M) */
+
+
+  /* Parallel stuff */
+  int id;                   /* id of this process */
+  int np;                   /* number of processes */
+  int n[3];                 /* local grid size */
+  int nbr_right[3], nbr_left[3];  /* neighboring processes */
+  
+} *PData;
+
+typedef struct BGY3dField
+{
+  PetscScalar d[3];
+}Field;
+
+typedef struct BGY3dParameterStruct
+{
+  int vec_dim;        /* Dimension of equation */
+  DA da;
+  Vec x;             /* grid in real space */
+  Vec force;         /* force on the grid*/
+  Vec Ftimesg2 ;      /* force*g2 */
+  FFT_DATA *Ftimesg2_fft;
+  
+  Mat M;               /* Matrix for FD-Approximation */
+  Vec boundary;        /* Vector for right boundary: g=1 */
+  void *LJ_params;   /* sigma and epsilon  */
+
+  
+  Vec v1,v2, v3;        /* Vectors for intermediate results */
+  Vec pre;
+  
+  /* Parallel FFT */
+  struct fft_plan_3d *fft_plan;
+
+
+  PData PD;            /* pointer to ProblemData */
+
+} *BGY3dParameter;
+BGY3dParameter BGY3dParameter_malloc(PData PD);
+void BGY3dParameter_free(BGY3dParameter params);
+
+
+/* functions */
+void PData_CreateParallel(PData PD);
+real** Load_Molecule(int *N);
+void Molecule_free( real **x_M, int N);
+void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim);
+Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim);
+void CreateInitialGuess(BGY3dParameter params, Vec g);
+void CreateInitialGuessFromg2(BGY3dParameter params, Vec g);
+int start_debugger(void );
+PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
+PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
+			 void *pa);
+FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+			    FFT_DATA *g_fft, int x[3], int n[3], real c);
+void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+		       FFT_DATA *g_fft, int x[3], int n[3], real c);
+PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
+void ConvolutionTest(BGY3dParameter params);
+#endif

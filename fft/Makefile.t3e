@@ -1,0 +1,37 @@
+# Makefile for Cray T3E
+
+SHELL = /bin/sh
+.IGNORE:
+.SUFFIXES:	.o .c .f .F
+
+# System-specific settings
+
+F77 =		f90
+F77FLAGS =	-M 1110 -dp -O3,unroll2
+CC =		cc
+CCFLAGS =	-O2 -DFFT_T3E -DT3E_KLUDGE
+LINK =		cc
+LINKFLAGS =	"-Dstreams=on"
+USRLIB =
+SYSLIB =	-lmpi
+SIZE =		size
+
+# Link rule
+
+$(EXE):	$(OBJ)
+	$(LINK) $(LINKFLAGS) $(OBJ) $(USRLIB) $(SYSLIB) -o $(EXE)
+	$(SIZE) $(EXE)
+
+# Compilation rules
+
+.f.o:
+	@cp $< $*.F
+	$(F77) $(F77FLAGS) -c $*.F
+	@rm $*.F
+
+.c.o:
+	$(CC) $(CCFLAGS) -c $<
+
+# Individual dependencies
+
+$(OBJ):	$(INC)
