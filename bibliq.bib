@@ -1,3 +1,17 @@
+@string{ CPL    = { Chem. Phys. Lett. } }
+@string{ CR     = { Chem. Rev. } }
+@string{ JCP    = { J. Chem. Phys. } }
+@string{ JPC    = { J. Phys. Chem.} }
+@string{ JPCA   = { J. Phys. Chem. A} }
+@string{ JPCB   = { J. Phys. Chem. B} }
+@string{ JPCC   = { J. Phys. Chem. C} }
+@string{ JACS   = { J. Am. Chem. Soc. } }
+@string{ PRA    = { Phys. Rev. A } }
+@string{ PRB    = { Phys. Rev. B } }
+@string{ PRL    = { Phys. Rev. Lett. } }
+@string{ IJQC   = { Int. J. Quantum Chem. } }
+@string{ THEOCHEM       = { J. Mol. Struct.: THEOCHEM } }
+
 @article{streett76I,
   author =	{ W. B. Streett and D. J. Tildesley },
   title =	{ Computer Simulations of Polyatomic Molecules. \protect{I}. \protect{M}onte \protect{C}arlo Studies of Hard Diatomics },
@@ -45,9 +59,19 @@
 }
 
 % Onsager36 http://dx.doi.org/10.1021/ja01299a050
+@article{onsager36,
+author = {Onsager, Lars},
+title = {Electric Moments of Molecules in Liquids},
+journal = JACS,
+volume = {58},
+number = {8},
+pages = {1486-1493},
+year = {1936},
+doi = {10.1021/ja01299a050},
+URL = {http://pubs.acs.org/doi/abs/10.1021/ja01299a050},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/ja01299a050}
+}
 
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1021/ja01299a050
 
 % RH85 http://dx.doi.org/10.1111/j.1749-6632.1986.tb20945.x
 %ARTICLE{1986NYASA.482..143R,
@@ -70,9 +94,19 @@
 % http://adsabs.harvard.edu/doi/10.1039/P29930000799
 
 % TP94 http://dx.doi.org/10.1021/cr00031a013
-
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1021/cr00031a013
+@ARTICLE{tomasi94,
+  author = {Tomasi, Jacopo and Persico, Maurizio},
+  title = {Molecular Interactions in Solution: An Overview of Methods Based
+    on Continuous Distributions of the Solvent},
+  journal = CR,
+  year = {1994},
+  volume = {94},
+  pages = {2027-2094},
+  number = {7},
+  doi = {10.1021/cr00031a013},
+  eprint = {http://pubs.acs.org/doi/pdf/10.1021/cr00031a013},
+  url = {http://pubs.acs.org/doi/abs/10.1021/cr00031a013}
+}
 
 % CT99 http://dx.doi.org/10.1021/cr960149m
 
@@ -80,14 +114,33 @@
 % http://adsabs.harvard.edu/doi/10.1021/cr960149m
 
 % OL00 http://dx.doi.org/10.1021/cr990052a
-
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1021/cr990052a
+@ARTICLE{orozco00,
+  author = {Orozco, Modesto and Luque, F. Javier},
+  title = {Theoretical Methods for the Description of the Solvent Effect in
+    Biomolecular Systems},
+  journal = CR,
+  year = {2000},
+  volume = {100},
+  pages = {4187-4226},
+  number = {11},
+  doi = {10.1021/cr990052a},
+  eprint = {http://pubs.acs.org/doi/pdf/10.1021/cr990052a},
+  url = {http://pubs.acs.org/doi/abs/10.1021/cr990052a}
+}
 
 % TMC05 http://dx.doi.org/10.1021/cr9904009
-
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1021/cr9904009
+@ARTICLE{tomasi05,
+  author = {Tomasi, Jacopo and Mennucci, Benedetta and Cammi, Roberto},
+  title = {Quantum Mechanical Continuum Solvation Models},
+  journal = CR,
+  year = {2005},
+  volume = {105},
+  pages = {2999-3094},
+  number = {8},
+  doi = {10.1021/cr9904009},
+  eprint = {http://pubs.acs.org/doi/pdf/10.1021/cr9904009},
+  url = {http://pubs.acs.org/doi/abs/10.1021/cr9904009}
+}
 
 % Chandler78 http://dx.doi.org/10.1146/annurev.pc.29.100178.002301
 %ARTICLE{1978ARPC...29..441C,
@@ -105,9 +158,22 @@
 }
 
 % GT08 http://dx.doi.org/10.1002/bip.20877
+@article{grochowski08,
+author = {Grochowski, Paweł and Trylska, Joanna},
+title = {Continuum molecular electrostatics, salt effects, and counterion binding ---
+         A review of the \protect{P}oisson--\protect{B}oltzmann theory and its modifications},
+journal = {Biopolymers},
+volume = {89},
+number = {2},
+publisher = {Wiley Subscription Services, Inc., A Wiley Company},
+issn = {1097-0282},
+url = {http://dx.doi.org/10.1002/bip.20877},
+doi = {10.1002/bip.20877},
+pages = {93--113},
+keywords = {Poisson--Boltzmann model, RNA, ion binding, ionic size effects, electrostatic potential, fluctuation potential},
+year = {2008},
+}
 
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1002/bip.20877
 
 % Henderson83 http://dx.doi.org/10.1016/0079-6816(83)90004-7
 %ARTICLE{1983PrSS...13..197H,
@@ -128,7 +194,7 @@
 @ARTICLE{Cossi04,
    author = {{Cossi}, M.},
     title = "{Continuum solvation model for infinite periodic systems}",
-  journal = {Chemical Physics Letters},
+  journal = CPL,
      year = 2004,
     month = jan,
    volume = 384,
@@ -149,7 +215,7 @@
    author = {{Cossi}, M. and {Rega}, N. and {Scalmani}, G. and {Barone}, V.
 	},
     title = "{Polarizable dielectric model of solvation with inclusion of charge penetration effects}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Association, addition, insertion, cluster formation},
      year = 2001,
     month = apr,
@@ -166,7 +232,7 @@
    author = {{Improta}, R. and {Scalmani}, G. and {Frisch}, M.~J. and {Barone}, V.
 	},
     title = "{Toward effective and reliable fluorescence energies in solution by a new state specific polarizable continuum model time dependent density functional theory approach}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Liquids},
      year = 2007,
     month = aug,
@@ -183,7 +249,7 @@
 @ARTICLE{SF10,
    author = {{Scalmani}, G. and {Frisch}, M.~J.},
     title = "{Continuous surface charge polarizable continuum models of solvation. I. General formalism}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {density functional theory, infrared spectra, optical rotation, Raman spectra, reaction kinetics theory, solvation, solvent effects, vibrational states, Solvent effects on reactivity, Optical activity and dichroism, Rotation, vibration, and vibration-rotation constants, Vibrational analysis, Transition state theory and statistical theories of rate constants, Association, addition, insertion, cluster formation, Infrared spectra, Raman and Rayleigh spectra},
      year = 2010,
     month = mar,
@@ -201,7 +267,7 @@
    author = {{Cossi}, M. and {Scalmani}, G. and {Rega}, N. and {Barone}, V.
 	},
     title = "{New developments in the polarizable continuum model for quantum mechanical and classical calculations on molecules in solution}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {CONTINUUM MODELING, MATHEMATICAL MODELS, MOLECULAR STRUCTURE, QUANTUM MECHANICS, QUANTUM THEORY, Structure of liquids},
      year = 2002,
     month = jul,
@@ -227,7 +293,7 @@
 @ARTICLE{CT01,
    author = {{Corni}, S. and {Tomasi}, J.},
     title = "{Enhanced response properties of a chromophore physisorbed on a metal particle}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Ab initio calculations of adsorbate structure and reactions},
      year = 2001,
     month = feb,
@@ -248,7 +314,7 @@
 @ARTICLE{Kim96,
    author = {{Kim}, H.~J.},
     title = "{Electronically adiabatic reaction field approach to solvation. I. Theoretical formulation via multipole expansion in a fluctuating cavity}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1996,
     month = oct,
    volume = 105,
@@ -264,7 +330,7 @@
    author = {{Cammi}, R. and {Corni}, S. and {Mennucci}, B. and {Tomasi}, J.
 	},
     title = "{Electronic excitation energies of molecules in solution: State specific and linear response methods for nonequilibrium continuum solvation models}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Environmental and solvent effects, Calculations and mathematical techniques in atomic and molecular physics},
      year = 2005,
     month = mar,
@@ -282,7 +348,7 @@
    author = {{Scalmani}, G. and {Frisch}, M.~J. and {Mennucci}, B. and {Tomasi}, J. and 
 	{Cammi}, R. and {Barone}, V.},
     title = "{Geometries and properties of excited states in the gas phase and in solution: Theory and application of a time-dependent density functional theory polarizable continuum model}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Density-functional theory, Environmental and solvent effects, General molecular conformation and symmetry; stereochemistry},
      year = 2006,
     month = mar,
@@ -359,7 +425,7 @@
    author = {{Scherlis}, D.~A. and {Fattebert}, J.-L. and {Gygi}, F. and 
 	{Cococcioni}, M. and {Marzari}, N.},
     title = "{A unified electrostatic and cavitation model for first-principles molecular dynamics in solution}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
    eprint = {arXiv:cond-mat/0510157},
  keywords = {Computer simulation of liquid structure, Molecular liquids, Molecular dynamics and other numerical methods, General molecular conformation and symmetry; stereochemistry, Association, addition, insertion, cluster formation},
      year = 2006,
@@ -373,9 +439,18 @@
 }
 
 % Gao96 http://dx.doi.org/10.1021/ar950140r
-
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1021/ar950140r
+@article{gao96,
+author = {Gao, Jiali},
+title = {Hybrid Quantum and Molecular Mechanical Simulations: An Alternative Avenue to Solvent Effects in Organic Chemistry},
+journal = {Acc. Chem. Res.},
+volume = {29},
+number = {6},
+pages = {298-305},
+year = {1996},
+doi = {10.1021/ar950140r},
+URL = {http://pubs.acs.org/doi/abs/10.1021/ar950140r},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/ar950140r},
+}
 
 % GFBJKS01 http://dx.doi.org/10.1021/jp002747h
 
@@ -389,10 +464,10 @@
 
 % THK93 http://dx.doi.org/10.1016/0009-2614(93)85655-8
 %ARTICLE{1993CPL...214..391T,
-@ARTICLE{THK93,
+@ARTICLE{ten-no93,
    author = {{Ten-No}, S. and {Hirata}, F. and {Kato}, S.},
     title = "{A hybrid approach for the solvent effect on the electronic structure of a solute based on the RISM and Hartree-Fock equations}",
-  journal = {Chemical Physics Letters},
+  journal = CPL,
      year = 1993,
     month = nov,
    volume = 214,
@@ -406,8 +481,8 @@
 %ARTICLE{1972JChPh..57.1930C,
 @ARTICLE{CA72,
    author = {{Chandler}, D. and {Andersen}, H.~C.},
-    title = "{Optimized Cluster Expansions for Classical Fluids. II. Theory of Molecular Liquids}",
-  journal = {J. Chem. Phys.},
+    title = "{Optimized Cluster Expansions for Classical Fluids. \protect{II}. Theory of Molecular Liquids}",
+  journal = JCP,
      year = 1972,
     month = sep,
    volume = 57,
@@ -417,12 +492,12 @@
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
-% PP92 http://dx.doi.org/10.1063/1.463485
+% perkyns92 http://dx.doi.org/10.1063/1.463485
 %ARTICLE{1992JChPh..97.7656P,
-@ARTICLE{PP92,
+@ARTICLE{perkyns92,
    author = {{Perkyns}, J. and {Montgomery Pettitt}, B.},
     title = "{A site-site theory for finite concentration saline solutions}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1992,
     month = nov,
    volume = 97,
@@ -432,12 +507,12 @@
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
-% YK00 http://dx.doi.org/10.1063/1.1289465
+% yoshida00 http://dx.doi.org/10.1063/1.1289465
 %ARTICLE{2000JChPh.113.4974Y,
-@ARTICLE{YK00,
+@ARTICLE{yoshida00,
    author = {{Yoshida}, N. and {Kato}, S.},
-    title = "{Molecular Ornstein-Zernike approach to the solvent effects on solute electronic structures in solution}",
-  journal = {J. Chem. Phys.},
+    title = "{Molecular Ornstein--Zernike approach to the solvent effects on solute electronic structures in solution}",
+  journal = JCP,
  keywords = {Environmental and solvent effects, Structure of liquids, Numerical approximation and analysis},
      year = 2000,
     month = sep,
@@ -452,13 +527,31 @@
 
 % Unable resolve this DOI using ADS database
 % http://adsabs.harvard.edu/doi/10.1002/(SICI)1096-987X(19990715)20:9<928::AID-JCC4>3.0.CO;2-X
+@ARTICLE{kovalenko99,
+  author = {Kovalenko, Andriy and Ten-no, Seiichiro and Hirata, Fumio},
+  title = {Solution of three-dimensional reference interaction site model and
+    hypernetted chain equations for simple point charge water by modified
+    method of direct inversion in iterative subspace},
+  journal = {J. Comp. Chem.},
+  year = {1999},
+  volume = {20},
+  pages = {928--936},
+  number = {9},
+  doi = {10.1002/(SICI)1096-987X(19990715)20:9<928::AID-JCC4>3.0.CO;2-X},
+  issn = {1096-987X},
+  keywords = {water, reference interaction site model, hypernetted chain closure,
+    3-dimensional site profiles, direct inversion in iterative subspace},
+  publisher = {John Wiley \& Sons, Inc.},
+  url = {http://dx.doi.org/10.1002/(SICI)1096-987X(19990715)20:9<928::AID-JCC4>3.0.CO;2-X}
+}
+
 
 % KH00a http://dx.doi.org/10.1063/1.481676
 %ARTICLE{2000JChPh.11210391K,
-@ARTICLE{KH00a,
+@ARTICLE{kovalenko00a,
    author = {{Kovalenko}, A. and {Hirata}, F.},
     title = "{Potentials of mean force of simple ions in ambient aqueous solution. I. Three-dimensional reference interaction site model approach}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Structure of liquids, Integral equations},
      year = 2000,
     month = jun,
@@ -471,10 +564,10 @@
 
 % KH00b http://dx.doi.org/10.1063/1.1305885
 %ARTICLE{2000JChPh.113.2793K,
-@ARTICLE{KH00b,
+@ARTICLE{kovalenko00b,
    author = {{Kovalenko}, A. and {Hirata}, F.},
     title = "{Hydration free energy of hydrophobic solutes studied by a reference interaction site model with a repulsive bridge correction and a thermodynamic perturbation method}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Association, addition, insertion, cluster formation, Thermodynamics of solutions, Theory and models of liquid structure},
      year = 2000,
     month = aug,
@@ -485,12 +578,27 @@
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
+@ARTICLE{griebel08,
+   author = {{Griebel}, M. and {Jager}, L.},
+    title = "{The BGY3dM model for the approximation of solvent densities}",
+  journal = JCP,
+ keywords = {Environmental and solvent effects, Molecular dynamics and particle methods, Molecular dynamics and other numerical methods},
+     year = 2008,
+    month = nov,
+   volume = 129,
+   number = 17,
+    pages = {174511-+},
+      doi = {10.1063/1.2991296},
+   adsurl = {http://adsabs.harvard.edu/abs/2008JChPh.129q4511G},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
 % Erratum http://dx.doi.org/10.1063/1.3059418
 %ARTICLE{2009JChPh.130c9901G,
-@ARTICLE{Erratum,
+@ARTICLE{griebel08:erratum,
    author = {{Griebel}, M. and {Jager}, L.},
     title = "{Publisher's note: ``The BGY3dM model for the approximation of solvent densities'' [J. Chem. Phys. 129, 174511 (2008)]}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Publisher's note, Environmental and solvent effects},
      year = 2009,
     month = jan,
@@ -500,6 +608,15 @@
       doi = {10.1063/1.3059418},
    adsurl = {http://adsabs.harvard.edu/abs/2009JChPh.130c9901G},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@phdthesis{jager07diss,
+  type =        { Dissertation },
+  author =      { Lucas Jager },
+  title =       { Fluid density approximation for an implicit solvent model },
+  school =      { Rheinische Friedrich--Wilhelms--Universit\"{a}t Bonn },
+  year =        { 2007 },
+  url = { file://home/matveev/attach/dfg/literature/JagerDiss.pdf },
 }
 
 % SF90 http://dx.doi.org/10.1080/00268979000101551
@@ -512,7 +629,7 @@
 @ARTICLE{TL94,
    author = {{Taylor}, M.~P. and {Lipson}, J.~E.~G.},
     title = "{A site-site Born-Green-Yvon equation for hard sphere dimers}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1994,
     month = jan,
    volume = 100,
@@ -523,9 +640,21 @@
 }
 
 % Chipman02 http://dx.doi.org/10.1007/s00214-001-0302-1
-
-% Unable resolve this DOI using ADS database
-% http://adsabs.harvard.edu/doi/10.1007/s00214-001-0302-1
+@article{chipman02,
+   author = {Chipman, Daniel M.},
+   affiliation = {Radiation Laboratory, University of Notre Dame, Notre Dame, IN 46556, USA e-mail: chipman.1@nd.edu US},
+   title = {Comparison of solvent reaction field representations},
+   journal = THEOCHEM,
+   publisher = {Springer Berlin / Heidelberg},
+   issn = {1432-881X},
+   keyword = {Physics and Astronomy},
+   pages = {80-89},
+   volume = {107},
+   issue = {2},
+   url = {http://dx.doi.org/10.1007/s00214-001-0302-1},
+   doi  = {10.1007/s00214-001-0302-1},
+   year = {2002}
+}
 
 % SBKK06 http://dx.doi.org/10.1016/j.fluid.2006.01.019
 
@@ -542,7 +671,7 @@
 @ARTICLE{Chipman00,
    author = {{Chipman}, D.~M.},
     title = "{Reaction field treatment of charge penetration}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Association, addition, insertion, cluster formation, Computational modeling; simulation},
      year = 2000,
     month = apr,
@@ -558,7 +687,7 @@
 @ARTICLE{CM00,
    author = {{Canc{\`e}s}, E. and {Mennucci}, B.},
     title = "{Comment on ``Reaction field treatment of charge penetration'' [J. Chem. Phys. 112, 5558 (2000)]}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Association, addition, insertion, cluster formation, Computational modeling; simulation},
      year = 2001,
     month = mar,
@@ -594,7 +723,7 @@
 @ARTICLE{HG80,
    author = {{Haile}, J.~M. and {Gray}, C.~G.},
     title = "{Spherical harmonic expansions of the angular pair correlation function in molecular fluids}",
-  journal = {Chemical Physics Letters},
+  journal = CPL,
      year = 1980,
     month = dec,
    volume = 76,
@@ -630,7 +759,7 @@
    author = {{Nasluzov}, V.~A. and {Rivanenkov}, V.~V. and {Gordienko}, A.~B. and 
 	{Neyman}, K.~M. and {Birkenheuer}, U. and {R{\"o}sch}, N.},
     title = "{Cluster embedding in an elastic polarizable environment: Density functional study of Pd atoms adsorbed at oxygen vacancies of MgO(001)}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Chemisorption/physisorption: adsorbates on surfaces, Point defects  and defect clusters},
      year = 2001,
     month = nov,
@@ -662,7 +791,7 @@
    author = {{Nasluzov}, V.~A. and {Shulimovich}, T.~V. and {Ivanova-Shor}, E.~A. and 
 	{Shor}, A.~M. and {R{\"o}sch}, N.},
     title = "{Small gold species at hydroxylated alumina surfaces. A computational study using embedded-cluster models of {$\alpha$}-Al_{2}O_{3}(0001)}",
-  journal = {Chemical Physics Letters},
+  journal = CPL,
      year = 2010,
     month = jul,
    volume = 494,
@@ -724,7 +853,7 @@
 @ARTICLE{VIR08,
    author = {{Vladimirov}, E. and {Ivanova}, A. and {R{\"o}sch}, N.},
     title = "{Effect of solvent polarization on the reorganization energy of electron transfer from molecular dynamics simulations}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Ion-molecule, ion-ion, and charge-transfer reactions, Optical constants, Computational modeling; simulation, Solvent effects on reactivity, Potential energy surfaces for chemical reactions},
      year = 2008,
     month = nov,
@@ -751,7 +880,7 @@
 @ARTICLE{GRS10,
    author = {{George}, C.~B. and {Ratner}, M.~A. and {Szleifer}, I.},
     title = "{Langmuir monolayers with internal dipoles: Understanding phase behavior using Monte Carlo simulations}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Langmuir-Blodgett films, melting, metastable states, monolayers, Monte Carlo methods, surfactants, Structure: measurements and simulations, Phase transitions, Melting of specific substances, Metastable phases},
      year = 2010,
     month = jan,
@@ -774,7 +903,7 @@
    author = {{Mikkelsen}, K.~V. and {{\AA}gren}, H. and {Jensen}, H.~J.~A. and 
 	{Helgaker}, T.},
     title = "{A multiconfigurational self-consistent reaction-field method}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1988,
     month = sep,
    volume = 89,
@@ -784,13 +913,13 @@
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
-% MJJ94 http://dx.doi.org/10.1063/1.467069
+% mikkelsen94 http://dx.doi.org/10.1063/1.467069
 %ARTICLE{1994JChPh.100.6597M,
-@ARTICLE{MJJ94,
+@ARTICLE{mikkelsen94,
    author = {{Mikkelsen}, K.~V. and {J{\o}rgensen}, P. and {J{\o}rgen Aagaard Jensen}, H.
 	},
     title = "{A multiconfiguration self-consistent reaction field response method}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1994,
     month = may,
    volume = 100,
@@ -806,7 +935,7 @@
    author = {{Mikkelsen}, K.~V. and {Cesar}, A. and {{\AA}gren}, H. and {Jensen}, H.~J.~A.
 	},
     title = "{Multiconfigurational self-consistent reaction field theory for nonequilibrium solvation}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1995,
     month = nov,
    volume = 103,
@@ -827,7 +956,7 @@
    author = {{Sylvester-Hvid}, K.~O. and {Mikkelsen}, K.~V. and {Jonsson}, D. and 
 	{Norman}, P. and {A{\ring}Gren}, H.},
     title = "{Nonlinear optical response of molecules in a nonequilibrium solvation model}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Nonlinear optics, Photon interactions with molecules, Electric and magnetic moments , polarizability, and magnetic susceptibility},
      year = 1998,
     month = oct,
@@ -843,7 +972,7 @@
 @ARTICLE{CM99b,
    author = {{Christiansen}, O. and {Mikkelsen}, K.~V.},
     title = "{A coupled-cluster solvent reaction field method}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Coupled-cluster theory, Association, addition, insertion, cluster formation, Permittivity},
      year = 1999,
     month = jan,
@@ -865,7 +994,7 @@
    author = {{Kongsted}, J. and {Osted}, A. and {Mikkelsen}, K.~V. and {Christiansen}, O.
 	},
     title = "{Second harmonic generation second hyperpolarizability of water calculated using the combined coupled cluster dielectric continuum or different molecular mechanics methods}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Optical properties of bulk materials and thin films, Coupled-cluster theory, Electric and magnetic moments , polarizability, and magnetic susceptibility, Frequency conversion; harmonic generation, including higher-order harmonic generation, Intermolecular and atom-molecule potentials and forces, Environmental and solvent effects},
      year = 2004,
     month = feb,
@@ -892,7 +1021,7 @@
    author = {{Jorgensen}, W.~L. and {Chandrasekhar}, J. and {Madura}, J.~D. and 
 	{Impey}, R.~W. and {Klein}, M.~L.},
     title = "{Comparison of simple potential functions for simulating liquid water}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1983,
     month = jul,
    volume = 79,
@@ -912,7 +1041,7 @@
 @ARTICLE{MJ00,
    author = {{Mahoney}, M.~W. and {Jorgensen}, W.~L.},
     title = "{A five-site model for liquid water and the reproduction of the density anomaly by rigid, nonpolarizable potential functions}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Molecular liquids, Computer simulation of liquid structure, Theory and models of liquid structure, Permittivity, Distribution theory and Monte Carlo studies},
      year = 2000,
     month = may,
@@ -944,7 +1073,7 @@
    author = {{Hu}, H. and {Lu}, Z. and {Parks}, J.~M. and {Burger}, S.~K. and 
 	{Yang}, W.},
     title = "{Quantum mechanics/molecular mechanics minimum free-energy path for accurate reaction energetics in solution and enzymes: Sequential sampling and optimization on the potential of mean force surface}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
  keywords = {Thermodynamics of solutions, Quantum theory of reaction cross section, Ion-molecule, ion-ion, and charge-transfer reactions, Chemical exchanges},
      year = 2008,
     month = jan,
@@ -957,7 +1086,7 @@
 }
 
 @Article{ebner76,
-  title = {Density-functional theory of simple classical fluids. I. Surfaces},
+  title = {Density-functional theory of simple classical fluids. \protect{I}. \protect{S}urfaces},
   author = {Ebner, C.  and Saam, W. F. and Stroud, D. },
   journal = {Phys. Rev. A},
   volume = {14},
@@ -1028,7 +1157,7 @@
 @ARTICLE{1981JChPh..75.1953J,
    author = {{Johnson}, M. and {Nordholm}, S.},
     title = "{Generalized van der Waals theory. VI. Application to adsorption}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
      year = 1981,
     month = aug,
    volume = 75,
@@ -1041,7 +1170,7 @@
 @ARTICLE{marconi99,
    author = {{Marconi}, U.~M.~B. and {Tarazona}, P.},
     title = "{Dynamic density functional theory of fluids}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
    eprint = {arXiv:cond-mat/9810403},
  keywords = {Theory and models of liquid structure, Thermodynamic functions and equations of state, Fluctuation phenomena, random processes, noise, and Brownian motion, Stochastic processes},
      year = 1999,
@@ -1080,7 +1209,7 @@
 @ARTICLE{paramonov05,
    author = {{Paramonov}, P.~B. and {Lyuksyutov}, S.~F.},
     title = "{Density-functional description of water condensation in proximity of nanoscale asperity}",
-  journal = {J. Chem. Phys.},
+  journal = JCP,
    eprint = {arXiv:physics/0504028},
  keywords = {Evaporation and condensation, Adsorption/desorption kinetics, Molecular liquids},
      year = 2005,
@@ -1119,5 +1248,1705 @@
   month = {Apr},
   doi = {10.1103/PhysRev.110.1},
   publisher = {American Physical Society}
+}
+
+@ARTICLE{carnahan70,
+   author = {{Carnahan}, N.~F. and {Starling}, K.~E.},
+    title = "{Thermodynamic Properties of a Rigid-Sphere Fluid}",
+  journal = JCP,
+     year = 1970,
+    month = jul,
+   volume = 53,
+    pages = {600-603},
+      doi = {10.1063/1.1674033},
+   adsurl = {http://adsabs.harvard.edu/abs/1970JChPh..53..600C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@book{book:hirata03,
+  editor =      { Fumio Hirata },
+  title =       { Molecular Theory of Solvation }, 
+  series =      { Understanding chemical reactivity },
+  volume =      { 24 },
+  year =        { 2003 },
+  publisher =   { Kluwer Academic Publishers },
+  address =     { Dordrecht--Boston--London },
+}
+
+@book{book:landauV5,
+  author =      { L. D. Landau and E. M. Lifshitz },
+  title =       { Statistical physics }, 
+  series =      { Course of theoretical physics },
+  volume =      { 5 },
+  year =        { 2000 },
+  publisher =   { Butterworth--Heinemann },
+  address =     { New Delhi },
+}
+
+@book{book:griebel07,
+  author =      { Michael Griebel and Stephan Knapek and Gerhard Zumbusch },
+  title =       { Numerical simulations in molecular dynamics }, 
+  year =        { 2007 },
+  publisher =   { Springer },
+  address =     { Berlin--Heidelberg },
+}
+
+@book{book:bennaim74,
+  author =      { Arieh Ben-Naim },
+  title =       { Water and aqueous solutions }, 
+  year =        { 1974 },
+  publisher =   { Plenum },
+  address =     { New York--London },
+}
+
+@book{book:rice65,
+  author =      { Stuart A. Rice and Peter Gray },
+  title =       { The statistical mechanics of simple liquids }, 
+  year =        { 1965 },
+  publisher =   { Interscience },
+  address =     { New York--London--Sydney },
+}
+
+@book{book:hansen76,
+  author =      { Jean Pierre Hansen and Ian R. Mc\protect{D}onald },
+  title =       { Theory of simple liquids },
+  year =        { 1976 },
+  publisher =   { Academic Press },
+  address =     { London--New York--San Francisco },
+}
+
+@ARTICLE{debye23,
+   author = {P. Debye and E. H\"{u}ckel},
+    title = {The theory of electrolytes. \protect{I}. \protect{L}owering of freezing point and related phenomena.},
+  journal = {Physikalische Zeitschrift},
+     year = 1923,
+   volume = 24,
+    pages = {185--206},
+}
+
+@ARTICLE{lebowitz63,
+   author = {{Lebowitz}, J.~L. and {Percus}, J.~K.},
+    title = "{Statistical Thermodynamics of Nonuniform Fluids}",
+  journal = {J. Math. Phys.},
+     year = 1963,
+    month = jan,
+   volume = 4,
+    pages = {116-123},
+      doi = {10.1063/1.1703877},
+   adsurl = {http://adsabs.harvard.edu/abs/1963JMP.....4..116L},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{chandler86,
+   author = {{Chandler}, D. and {McCoy}, J.~D. and {Singer}, S.~J.},
+    title = "{Density functional theory of nonuniform polyatomic systems. \protect{I}. General formulation}",
+  journal = JCP,
+     year = 1986,
+    month = nov,
+   volume = 85,
+    pages = {5971-5976},
+      doi = {10.1063/1.451510},
+   adsurl = {http://adsabs.harvard.edu/abs/1986JChPh..85.5971C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{chandler72,
+   author = {{Chandler}, D. and {Andersen}, H.~C.},
+    title = "{Optimized Cluster Expansions for Classical Fluids. \protect{II}. Theory of Molecular Liquids}",
+  journal = JCP,
+     year = 1972,
+    month = sep,
+   volume = 57,
+    pages = {1930-1937},
+      doi = {10.1063/1.1678513},
+   adsurl = {http://adsabs.harvard.edu/abs/1972JChPh..57.1930C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{mullinax10,
+author = {Mullinax, J. W. and Noid, W. G.},
+title = {A Generalized-Yvon−Born−Green Theory for Determining Coarse-Grained Interaction Potentials†},
+journal = JPCC,
+volume = {114},
+number = {12},
+pages = {5661-5674},
+year = {2010},
+doi = {10.1021/jp9073976},
+
+URL = {http://pubs.acs.org/doi/abs/10.1021/jp9073976},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/jp9073976}
+}
+
+@ARTICLE{mullinax09,
+   author = {{Mullinax}, J.~W. and {Noid}, W.~G.},
+    title = "{Generalized Yvon-Born-Green Theory for Molecular Systems}",
+  journal = {Physical Review Letters},
+ keywords = {Theory, modeling, and computer simulation, Statistical mechanics of classical fluids, Theory and models of liquid structure, Biomolecules: structure and physical properties},
+     year = 2009,
+    month = nov,
+   volume = 103,
+   number = 19,
+    pages = {198104-+},
+      doi = {10.1103/PhysRevLett.103.198104},
+   adsurl = {http://adsabs.harvard.edu/abs/2009PhRvL.103s8104M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{fang10,
+author = {Fang, Ya-Hui and Liu, Zhi-Pan},
+title = {Mechanism and Tafel Lines of Electro-Oxidation of Water to Oxygen on RuO2(110)},
+journal = JACS,
+volume = {132},
+number = {51},
+pages = {18214-18222},
+year = {2010},
+doi = {10.1021/ja1069272},
+
+URL = {http://pubs.acs.org/doi/abs/10.1021/ja1069272},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/ja1069272}
+}
+
+@ARTICLE{sears03,
+   author = {{Sears}, M.~P. and {Frink}, L.~J.~D.},
+    title = "{A new efficient method for density functional theory calculations of inhomogeneous fluids}",
+  journal = {J. Comp. Phys.},
+     year = 2003,
+    month = sep,
+   volume = 190,
+    pages = {184-200},
+      doi = {10.1016/S0021-9991(03)00270-5},
+   adsurl = {http://adsabs.harvard.edu/abs/2003JCoPh.190..184S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{mennuci97,
+author = {Mennucci, B. and Canc\'{e}s, E. and Tomasi, J.},
+title = {Evaluation of Solvent Effects in Isotropic and Anisotropic Dielectrics and in Ionic Solutions
+    with a Unified Integral Equation Method: Theoretical Bases, Computational Implementation, and Numerical Applications},
+journal = JPCB,
+volume = {101},
+number = {49},
+pages = {10506-10517},
+year = {1997},
+doi = {10.1021/jp971959k},
+URL = {http://pubs.acs.org/doi/abs/10.1021/jp971959k},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/jp971959k}
+}
+
+@article{klamt93,
+author = {Klamt, A. and Sch\"{u}\"{u}rmann, G.},
+title  ="\protect{COSMO}: a new approach to dielectric screening in solvents with explicit expressions for the screening energy and its gradient",
+journal  ="J. Chem. Soc.{,} Perkin Trans. 2",
+year  ="1993",
+issue  ="5",
+pages  ="799-805",
+publisher  ="The Royal Society of Chemistry",
+doi  ="10.1039/P29930000799",
+url  ="http://dx.doi.org/10.1039/P29930000799",
+}
+
+@article{li03,
+   author = {Li, Hui and Pomelli, Christian S. and Jensen, Jan H.},
+   affiliation = {Department of Chemistry, University of Iowa, Iowa City, IA 52242, USA US},
+   title = {Continuum solvation of large molecules described by \protect{QM/MM}: a semi-iterative implementation of the \protect{PCM/EFP} interface},
+   journal = THEOCHEM,
+   publisher = {Springer Berlin / Heidelberg},
+   issn = {1432-881X},
+   keyword = {Physics and Astronomy},
+   pages = {71-84},
+   volume = {109},
+   issue = {2},
+   url = {http://dx.doi.org/10.1007/s00214-002-0427-x},
+   doi  = {10.1007/s00214-002-0427-x},
+   year = {2003}
+}
+
+@article{gordon01,
+author = {Gordon, Mark S. and Freitag, Mark A. and Bandyopadhyay, Pradipta and Jensen, Jan H. and Kairys, Visvaldas and Stevens, Walter J.},
+title = {The Effective Fragment Potential Method: A \protect{QM}-Based \protect{MM} Approach to Modeling Environmental Effects in Chemistry},
+journal = JPCA,
+volume = {105},
+number = {2},
+pages = {293-307},
+year = {2001},
+doi = {10.1021/jp002747h},
+URL = {http://pubs.acs.org/doi/abs/10.1021/jp002747h},
+eprint = {http://pubs.acs.org/doi/pdf/10.1021/jp002747h},
+}
+
+@ARTICLE{marcus56,
+   author = {{Marcus}, R.~A.},
+    title = "{On the Theory of Oxidation-Reduction Reactions Involving Electron Transfer. \protect{I}}",
+  journal = JCP,
+     year = 1956,
+    month = may,
+   volume = 24,
+    pages = {966-978},
+      doi = {10.1063/1.1742723},
+   adsurl = {http://adsabs.harvard.edu/abs/1956JChPh..24..966M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+@ARTICLE{marcus64,
+   author = {{Marcus}, R.~A.},
+    title = "{Chemical and Electrochemical Electron-Transfer Theory}",
+  journal = {Annual Review of Physical Chemistry},
+     year = 1964,
+    month = oct,
+   volume = 15,
+    pages = {155-196},
+      doi = {10.1146/annurev.pc.15.100164.001103},
+   adsurl = {http://adsabs.harvard.edu/abs/1964ARPC...15..155M},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+@ARTICLE{importa07,
+   author = {{Improta}, R. and {Scalmani}, G. and {Frisch}, M.~J. and {Barone}, V.
+	},
+    title = "{Toward effective and reliable fluorescence energies in solution by a new state specific polarizable continuum model time dependent density functional theory approach}",
+  journal = JCP,
+ keywords = {Liquids},
+     year = 2007,
+    month = aug,
+   volume = 127,
+   number = 7,
+    pages = {074504-+},
+      doi = {10.1063/1.2757168},
+   adsurl = {http://adsabs.harvard.edu/abs/2007JChPh.127g4504I},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+@ARTICLE{landau33,
+   author = {L.D. Landau},
+  journal = {Phys. Z. Sowjetunion},
+     year = 1933,
+   volume = 3,
+    pages = {644},
+}
+@ARTICLE{froelich54,
+   author = {H. Fr\"ohlich},
+    title = {Electrons in lattice fields},
+  journal = {Adv. Phys.},
+     year = 1954,
+   volume = 3,
+   number = 11,
+    pages = {325-361},
+      doi = {10.1080/00018735400101213 },
+}
+
+@article{kamerlin11,
+author = {Kamerlin, Shina C. L. and Vicatos,  Spyridon and Dryga, Anatoly and Warshel, Arieh},
+title = {Coarse-Grained (Multiscale) Simulations in Studies of Biophysical and Chemical Systems},
+journal = {Annual Review of Physical Chemistry},
+volume = {62},
+number = {1},
+pages = {41-64},
+year = {2011},
+doi = {10.1146/annurev-physchem-032210-103335},
+URL = {http://www.annualreviews.org/doi/abs/10.1146/annurev-physchem-032210-103335},
+eprint = {http://www.annualreviews.org/doi/pdf/10.1146/annurev-physchem-032210-103335}
+}
+
+@article{noname,
+author = {Levitt M},
+author = {Warshel A},
+title = {Computer simulation of protein folding},
+journal = {Nature},
+volume = {253},
+pages = {694},
+year = {1975}
+}
+
+@article{noname,
+author = {Taketomi H},
+author = {Ueda Y},
+author = {Gō N},
+title = {Studies on protein folding, unfolding and fluctuations by computer simulation},
+journal = {Int. J. Pept. Res.},
+volume = {7},
+pages = {445},
+year = {1975}
+}
+
+@article{warshel79,
+author = {Warshel, A.},
+title = {Calculations of chemical processes in solutions},
+journal = JPC,
+volume = {83},
+pages = {1640},
+year = {1979},
+doi = {10.1021/j100475a014},
+}
+
+@article{noname,
+author = {Pullman A},
+author = {Pullman B},
+title = {New paths in the molecular orbital approach to solvation in biological molecules},
+journal = {Q. Rev. Biol.},
+volume = {7},
+pages = {506},
+year = {1975}
+}
+
+@article{liu96,
+author = {Liu, Y and Ichiye, T},
+title = {Soft sticky dipole potential for liquid water: a new model},
+journal = JPC,
+volume = {100},
+pages = {2723},
+year = {1996}
+}
+
+@article{papazyan97,
+author = {Papazyan, A. and Warshel, A.},
+title = {Continuum and dipole-lattice models of solvation},
+journal = JPC,
+volume = {101},
+pages = {11254},
+year = {1997}
+}
+
+@article{noname,
+author = {Burykin A},
+author = {Kato M},
+author = {Warshel A},
+title = {Exploring the origin of the ion selectivity of the KcsA potassium channel},
+journal = {Proteins},
+volume = {52},
+pages = {412},
+year = {2003}
+}
+
+@article{noname,
+author = {Freddolino PL},
+author = {Liu F},
+author = {Gruebele M},
+author = {Schulten K},
+title = {Ten-microsecond molecular dynamics simulation of a fast-folding WW domain},
+journal = {Biophys. J.},
+volume = {94},
+pages = {L75},
+year = {2008}
+}
+
+@article{noname,
+author = {Ayton GS},
+author = {Noid WG},
+author = {Voth GA},
+title = {Multiscale modeling of biomolecular systems: in serial and in parallel},
+journal = {Curr. Opin. Struct. Biol.},
+volume = {17},
+pages = {192},
+year = {2007}
+}
+
+@article{noname,
+author = {Saiz L},
+author = {Klein ML},
+title = {Computer simulation studies of model biological membranes},
+journal = {Acc. Chem. Res.},
+volume = {2002},
+pages = {482},
+year = {2002}
+}
+
+@article{noname,
+author = {Aksimentiev A},
+author = {Brunner R},
+author = {Cohen J},
+author = {Comer J},
+author = {Cruz-Chu E},
+title = {Computer modeling in biotechnology: a partner in development},
+journal = {Methods Mol. Biol.},
+volume = {474},
+pages = {181},
+year = {2008}
+}
+
+@article{noname,
+author = {Stein M},
+author = {Gabdoulline RR},
+author = {Wade RC},
+title = {Bridging from molecular simulation to biochemical networks},
+journal = {Curr. Opin. Struct. Biol.},
+volume = {17},
+pages = {166},
+year = {2007}
+}
+
+@article{noname,
+author = {Levinthal C.},
+title = {Are there pathways for protein folding?},
+journal = {J. Chim. Phys.},
+volume = {65},
+pages = {44},
+year = {1968}
+}
+
+@article{noname,
+author = {Hagler AT},
+author = {Honig B},
+title = {On the formation of protein tertiary structures on a computer},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {75},
+pages = {554},
+year = {1978}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Levitt A},
+title = {Folding and stability of helical proteins: carp myogen},
+journal = {J. Mol. Biol},
+volume = {106},
+pages = {421},
+year = {1976}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Levitt M},
+title = {Theoretical studies of enzymic reactions: dielectric, electrostatic and steric stabilization of the carbonium ion in the reaction of lysozyme},
+journal = {J. Mol. Biol.},
+volume = {103},
+pages = {227},
+year = {1976}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Sharma PK},
+author = {Kato M},
+author = {Xiang Y},
+author = {Liu H},
+author = {Olsson MHM},
+title = {Electrostatic basis for enzyme catalysis},
+journal = CR,
+volume = {106},
+pages = {3210},
+year = {2006}
+}
+
+@article{noname,
+author = {Nymeyer H},
+author = {García AE},
+author = {Onuchic JN},
+title = {Colloquium paper: folding funnels and frustration in off-lattice minimalist protein landscapes},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {95},
+pages = {5921},
+year = {1998}
+}
+
+@article{noname,
+author = {Thirumalai D},
+author = {Klimov DK},
+title = {Deciphering the timescales and mechanisms of protein folding using minimal off-lattice models},
+journal = {Curr. Opin. Struct. Biol.},
+volume = {10},
+pages = {197},
+year = {1999}
+}
+
+@article{noname,
+author = {Clementi C},
+title = {Coarse-grained models of protein folding: toy models or predictive tools?},
+journal = {Curr. Opin. Struct. Biol.},
+volume = {18},
+pages = {10},
+year = {2008}
+}
+
+@article{noname,
+author = {Wolynes PG.},
+title = {Recent successes of the energy landscape theory of protein folding and function},
+journal = {Q. Rev. Biophys.},
+volume = {38},
+pages = {405},
+year = {2005}
+}
+
+@article{noname,
+author = {Dill KA.},
+title = {Dominant forces in protein folding},
+journal = {Biochemistry},
+volume = {29},
+pages = {7133},
+year = {1990}
+}
+
+@article{noname,
+author = {Hinds DA},
+author = {Levitt M},
+title = {A lattice model for protein-structure prediction at low resolution},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {89},
+pages = {2536},
+year = {1992}
+}
+
+@article{noname,
+author = {Shakhnovich E},
+author = {Abkevich V},
+author = {Ptitsyn O},
+title = {Conserved residues and the mechanism of protein folding},
+journal = {Nature},
+volume = {379},
+pages = {96},
+year = {1996}
+}
+
+@article{noname,
+author = {Heath AP},
+author = {Kavraki LE},
+author = {Clementi C},
+title = {From coarse-grain to all-atom: toward multiscale analysis of protein landscapes},
+journal = {Proteins},
+volume = {68},
+pages = {646},
+year = {2007}
+}
+
+@article{noname,
+author = {Nymeyer H},
+author = {García AE},
+author = {Onuchic JN},
+title = {Folding funnels and frustration in off-lattice minimalist protein landscapes},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {95},
+pages = {5921},
+year = {1998}
+}
+
+@article{noname,
+author = {Pande VS},
+author = {Baker I},
+author = {Chapman J},
+author = {Elmer SP},
+author = {Khaliq S},
+title = {Atomistic protein folding simulations on the submillisecond time scale using worldwide distributed computing},
+journal = {Biopolymers},
+volume = {68},
+pages = {91},
+year = {2003}
+}
+
+@article{noname,
+author = {Sheinerman FB},
+author = {Brooks CL},
+title = {Calculations on folding of segment B1 of streptococcal protein G},
+journal = {J. Mol. Biol.},
+volume = {278},
+pages = {439},
+year = {1998}
+}
+
+@article{noname,
+author = {Roca M},
+author = {Messer B},
+author = {Hilvert D},
+author = {Warshel A},
+title = {On the relationship between folding and chemical landscapes in enzyme catalysis},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {105},
+pages = {13877},
+year = {2008}
+}
+
+@article{noname,
+author = {Fan ZZ},
+author = {Hwang J-K},
+author = {Warshel A},
+title = {Using simplified protein representation as a reference potential for all-atom calculations of folding free energy},
+journal = {Theor. Chem. Acc.},
+volume = {103},
+pages = {77},
+year = {1999}
+}
+
+@article{noname,
+author = {Matysiak S},
+author = {Clementi C},
+title = {Minimalistic protein model as a diagnostic tool for misfolding and aggregation},
+journal = {J. Mol. Biol.},
+volume = {363},
+pages = {297},
+year = {2006}
+}
+
+@article{kamerlin09,
+author = {Kamerlin, S. C. L. and Haranczyk, M. and Warshel, A.},
+title = {Progress in ab initio \protect{QM}/\protect{MM} free-energy simulations of electrostatic energies in proteins: accelerated \protect{QM}/\protect{MM} studies of pKa, redox reactions and solvation free energies},
+journal = JPCB,
+volume = {113},
+pages = {1253},
+year = {2009},
+doi = {10.1021/jp8071712},
+}
+
+@article{noname,
+author = {Luzhkov V},
+author = {Warshel A},
+title = {Microscopic models for quantum mechanical calculations of chemical processes in solutions: LD/AMPAC and SCAAS/AMPAC calculations of solvation energies},
+journal = {J. Comput. Chem.},
+volume = {13},
+pages = {199},
+year = {1992}
+}
+
+@article{noname,
+author = {Rosta E},
+author = {Haranczyk M},
+author = {Chu ZT},
+author = {Warshel A},
+title = {Accelerating \protect{QM}/\protect{MM} free energy calculations: representing the surroundings by an updated mean charge distribution},
+journal = JPCB,
+volume = {112},
+pages = {5680},
+year = {2008}
+}
+
+@article{noname,
+author = {Rosta E},
+author = {Klähn M},
+author = {Warshel A},
+title = {Towards accurate ab initio \protect{QM}/\protect{MM} calculations of free-energy profiles of enzymatic reactions},
+journal = JPCB,
+volume = {110},
+pages = {2934},
+year = {2006}
+}
+
+@article{noname,
+author = {Wesolowski TA},
+author = {Warshel A},
+title = {Frozen density functional approach for ab initio calculations of solvated molecules},
+journal = JPC,
+volume = {97},
+pages = {8050},
+year = {1993}
+}
+
+@article{noname,
+author = {Hwang J-K},
+author = {Warshel A},
+title = {A quantized classical path approach for calculations of quantum mechanical rate constants},
+journal = JPC,
+volume = {97},
+pages = {10053},
+year = {1993}
+}
+
+@article{noname,
+author = {Hwang J-K},
+author = {Warshel A},
+title = {How important are quantum mechanical nuclear motions in enzyme catalysis?},
+journal = {J. Am. Chem. Soc.},
+volume = {118},
+pages = {11745},
+year = {1996}
+}
+
+@article{noname,
+author = {Messer BM},
+author = {Roca M},
+author = {Chu ZT},
+author = {Vicatos S},
+author = {Kilshtain A},
+author = {Warshel A},
+title = {Multiscale simulations of protein landscapes: using coarse grained models as reference potentials to full explicit models},
+journal = {Proteins},
+volume = {78},
+pages = {1212},
+year = {2010}
+}
+
+@article{noname,
+author = {Roca M},
+author = {Vardi-Kilshtain A},
+author = {Warshel A},
+title = {Toward accurate screening in computer-aided enzyme design},
+journal = {Biochemistry},
+volume = {48},
+pages = {3046},
+year = {2009}
+}
+
+@article{noname,
+author = {Shurki A},
+author = {Warshel A},
+title = {Structure/function correlations of proteins using \protect{MM}, \protect{QM}/\protect{MM}, and related approaches: methods, concepts, pitfalls, and current progress},
+journal = {Adv. Protein Chem.},
+volume = {66},
+pages = {249},
+year = {2003}
+}
+
+@article{noname,
+author = {Riccardi D},
+author = {Schaefer P},
+author = {Cui Q},
+title = {pKa calculations in solution and proteins with \protect{QM}/\protect{MM} free energy perturbation simulations: a quantitative test of \protect{QM}/\protect{MM} protocols},
+journal = JPCB,
+volume = {109},
+pages = {17715},
+year = {2005}
+}
+
+@article{noname,
+author = {Rothlisberger U},
+author = {Carloni P},
+author = {Doclo K},
+author = {Parrinello M},
+title = {A comparative study of galactose oxidase and active site analogs based on \protect{QM}/\protect{MM} Car-Parrinello simulations},
+journal = {J. Biol. Inorg. Chem.},
+volume = {5},
+pages = {236},
+year = {2000}
+}
+
+@article{noname,
+author = {Zheng J},
+author = {Wang D},
+author = {Thiel W},
+author = {Shaik S},
+title = {\protect{QM}/\protect{MM} study of mechanisms for compound I formation in the catalytic cycle of cytochrome P450cam},
+journal = {J. Am. Chem. Soc.},
+volume = {128},
+pages = {13204},
+year = {2006}
+}
+
+@article{noname,
+author = {Ranaghan KE},
+author = {Mulholland AJ},
+title = {Conformational effects in enzyme catalysis: \protect{QM}/\protect{MM} free energy calculation of the ‘NAC’ contribution in chorismate mutase},
+journal = {Chem. Commun.},
+volume = {2004},
+pages = {1238},
+year = {2004}
+}
+
+@article{noname,
+author = {Olsson MHM},
+author = {Hong G},
+author = {Warshel A},
+title = {Frozen density functional free energy simulations of redox proteins: computational studies of the reduction potential of plastocyanin and rusticyanin},
+journal = {J. Am. Chem. Soc.},
+volume = {125},
+pages = {5025},
+year = {2003}
+}
+
+@article{noname,
+author = {Zhang Y},
+author = {Liu H},
+author = {Yang W},
+title = {Free energy calculation on enzyme reactions with an efficient iterative procedure to determine minimum energy paths on a combined ab initio \protect{QM}/\protect{MM} potential energy surface},
+journal = JCP,
+volume = {112},
+pages = {3483},
+year = {2000}
+}
+
+@article{noname,
+author = {Rod TH},
+author = {Ryde U},
+title = {Quantum mechanical free energy barrier for an enzymatic reaction},
+journal = {Phys. Rev. Lett.},
+volume = {94},
+pages = {138302},
+year = {2005}
+}
+
+@article{noname,
+author = {Liu WB},
+author = {Wood RH},
+author = {Doren DJ},
+title = {Density and temperature dependences of hydration free energy of Na+ and Cl− at supercritical conditions predicted by ab initio/classical free energy perturbation},
+journal = JPCB,
+volume = {107},
+pages = {9505},
+year = {2003}
+}
+
+@article{noname,
+author = {Iftimie R},
+author = {Salahub D},
+author = {Schofield J},
+title = {An efficient Monte Carlo method for calculating ab initio transition state theory reaction rates in solution},
+journal = JCP,
+volume = {119},
+pages = {11285},
+year = {2003}
+}
+
+@article{noname,
+author = {Crespo A},
+author = {Marti MA},
+author = {Estrin DA},
+author = {Roitberg AE},
+title = {Multiple-steering \protect{QM}/\protect{MM} calculation of the free energy profile in chorismate mutase},
+journal = {J. Am. Chem. Soc.},
+volume = {127},
+pages = {6940},
+year = {2005}
+}
+
+@article{noname,
+author = {Pradipta B.},
+title = {Accelerating quantum mechanical/molecular mechanical sampling using pure molecular mechanical potential as an importance function: the case of effective fragment potential},
+journal = JCP,
+volume = {122},
+pages = {091102},
+year = {2005}
+}
+
+@article{noname,
+author = {Wesolowski T},
+author = {Muller RP},
+author = {Warshel A},
+title = {Ab initio frozen density functional calculations of proton transfer reactions in solution},
+journal = JPC,
+volume = {100},
+pages = {15444},
+year = {1996}
+}
+
+@article{noname,
+author = {Kamerlin SCL},
+author = {Warshel A},
+title = {The EVB as a quantitative tool for formulating simulations and analyzing biological and chemical reactions},
+journal = {Faraday Discuss.},
+volume = {145},
+pages = {71},
+year = {2010}
+}
+
+@article{noname,
+author = {Wesolowski T},
+author = {Warshel A},
+title = {Ab initio free energy perturbation calculations of solvation free energy using the frozen density functional approach},
+journal = JPC,
+volume = {98},
+pages = {5183},
+year = {1994}
+}
+
+@article{noname,
+author = {Olsson MHM},
+author = {Warshel A},
+title = {Solute solvent dynamics and energetics in enzyme catalysis: the SN2 reaction of dehalogenase as a general benchmark},
+journal = {J. Am. Chem. Soc.},
+volume = {126},
+pages = {15167},
+year = {2004}
+}
+
+@article{noname,
+author = {Warshel A},
+title = {Dynamics of reactions in polar solvents: semiclassical trajectory studies of electron-transfer and proton-transfer reactions},
+journal = JPC,
+volume = {86},
+pages = {2218},
+year = {1982}
+}
+
+@article{noname,
+author = {Hwang J-K},
+author = {King G},
+author = {Creighton S},
+author = {Warshel A},
+title = {Simulation of free energy relationships and dynamics of SN2 reactions in aqueous solution},
+journal = {J. Am. Chem. Soc.},
+volume = {110},
+pages = {5297},
+year = {1988}
+}
+
+@article{noname,
+author = {Štrajbl M},
+author = {Shurki A},
+author = {Warshel A},
+title = {Converting conformational changes to electrostatic energy in molecular motors: the energetics of ATP synthase},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {100},
+pages = {14834},
+year = {2003}
+}
+
+@article{noname,
+author = {Pisliakov AV},
+author = {Cao J},
+author = {Kamerlin SCL},
+author = {Warshel A},
+title = {Enzyme millisecond conformational dynamics do not catalyze the chemical step},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {106},
+pages = {17359},
+year = {2009}
+}
+
+@article{noname,
+author = {Hatcher E},
+author = {Soudackov AV},
+author = {Hammes-Schiffer S},
+title = {Proton-coupled electron transfer in soybean lipoxygenase: dynamical behavior and temperature dependence of kinetic isotope effects},
+journal = {J. Am. Chem. Soc.},
+volume = {129},
+pages = {187},
+year = {2007}
+}
+
+@article{noname,
+author = {Watney JB},
+author = {Agarwal PK},
+author = {Hammes-Schiffer S},
+title = {Effect of mutation on enzyme motion in dihydrofolate reductase},
+journal = {J. Am. Chem. Soc.},
+volume = {125},
+pages = {3745},
+year = {2003}
+}
+
+@article{noname,
+author = {Mones L},
+author = {Kulhánek P},
+author = {Simon I},
+author = {Laio A},
+author = {Fuxreiter M},
+title = {The energy gap as a universal reaction coordinate for the study of chemical reactions},
+journal = JPCB,
+volume = {113},
+pages = {7867},
+year = {2009}
+}
+
+@article{noname,
+author = {Hong G},
+author = {Rosta E},
+author = {Warshel A},
+title = {Using the constrained DFT approach in generating diabatic surfaces and off diagonal empirical valence bond terms for modeling reactions in condensed phases},
+journal = JPCB,
+volume = {110},
+pages = {19570},
+year = {2006}
+}
+
+@article{noname,
+author = {Wesolowski TA},
+author = {Weber J},
+title = {Kohn-Sham equations with constrained electron density: an iterative evaluation of the ground-state electron density of interacting molecules},
+journal = {Chem. Phys. Lett.},
+volume = {248},
+pages = {71},
+year = {1996}
+}
+
+@article{noname,
+author = {Wu Q},
+author = {Kaduk B},
+author = {Van Voorhis T},
+title = {Constrained density functional theory based configuration interaction improved the prediction of reaction barrier heights},
+journal = JCP,
+volume = {130},
+pages = {034109},
+year = {2009}
+}
+
+@article{noname,
+author = {Jackson TA},
+author = {Karapetian A},
+author = {Miller A-F},
+author = {Brunold TC},
+title = {Probing the geometric and electronic structures of the low-temperature azide adduct and the product-inhibited form of oxidized manganese superoxide dismutase},
+journal = {Biochemistry},
+volume = {44},
+pages = {1504},
+year = {2005}
+}
+
+@article{noname,
+author = {Wu Q},
+author = {Van Voorhis T},
+title = {Direct calculation of electron transfer parameters through constrained density functional theory},
+journal = JPCA,
+volume = {110},
+pages = {9212},
+year = {2006}
+}
+
+@article{noname,
+author = {Xiang Y},
+author = {Warshel A},
+title = {Quantifying free energy profiles of proton transfer reactions in solution and proteins by using a diabatic FDFT mapping},
+journal = JPCA,
+volume = {112},
+pages = {1007},
+year = {2008}
+}
+
+@article{noname,
+author = {Wu Q},
+author = {Van Voorhis T},
+title = {Direct optimization method to study constrained systems within density-functional theory},
+journal = {Phys. Rev. A},
+volume = {72},
+pages = {024502},
+year = {2005}
+}
+
+@article{noname,
+author = {Oberhofer H},
+author = {Blumberger J},
+title = {Charge constrained density functional molecular dynamics for simulation of condensed phase electron transfer reactions},
+journal = JCP,
+volume = {131},
+pages = {064101},
+year = {2009}
+}
+
+@article{noname,
+author = {Schmidt JR},
+author = {Shenvi N},
+author = {Tully JC},
+title = {Controlling spin contamination using constrained density functional theory},
+journal = JCP,
+volume = {129},
+pages = {114110},
+year = {2008}
+}
+
+@article{noname,
+author = {Cembran A},
+author = {Song L},
+author = {Mo Y},
+author = {Gao J},
+title = {Block-localized density functional theory (BLDFT), diabatic coupling and their use in valence bond theory for representing reactive potential energy surfaces},
+journal = {J. Chem. Theory Comput.},
+volume = {5},
+pages = {2702},
+year = {2009}
+}
+
+@article{noname,
+author = {de la Lande A},
+author = {Salahub DR},
+title = {Derivation of interpretative models for long range electron transfer from constrained density functional theory},
+journal = {J. Mol. Struct.},
+volume = {943},
+pages = {115},
+year = {2010}
+}
+
+@article{noname,
+author = {Kamerlin SCL},
+author = {Cao J},
+author = {Rosta E},
+author = {Warshel A},
+title = {On unjustifiably misrepresenting the EVB approach while simultaneously adopting it},
+journal = JPCB,
+volume = {113},
+pages = {10905},
+year = {2009}
+}
+
+@article{noname,
+author = {Laio A},
+author = {Parrinello M},
+title = {Escaping free-energy minima},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {99},
+pages = {12562},
+year = {2002}
+}
+
+@article{noname,
+author = {Muller RP},
+author = {Warshel A},
+title = {Ab initio calculations of free energy barriers for chemical reactions in solution},
+journal = JPC,
+volume = {99},
+pages = {17516},
+year = {1995}
+}
+
+@article{noname,
+author = {Huber T},
+author = {Torda AE},
+author = {van Gunsteren WF},
+title = {Local elevation: a method for improving the searching properties of molecular dynamics simulations},
+journal = {J. Comput. Aided Mol. Des.},
+volume = {8},
+pages = {695},
+year = {1994}
+}
+
+@article{noname,
+author = {Ensing B},
+author = {De Vivo M},
+author = {Liu Z},
+author = {Moore P},
+author = {Klein ML},
+title = {Metadynamics as a tool for exploring free energy landscapes of chemical reactions},
+journal = {Acc. Chem. Res.},
+volume = {39},
+pages = {73},
+year = {2006}
+}
+
+@article{noname,
+author = {Bolhuis PG},
+author = {Dellago C},
+author = {Chandler D},
+author = {Geissler P},
+title = {Transition path sampling, throwing ropes over rough mountain passes, in the dark},
+journal = {Annu. Rev. Phys. Chem.},
+volume = {53},
+pages = {291},
+year = {2002}
+}
+
+@article{noname,
+author = {Dellago C},
+author = {Bolhuis PG},
+author = {Geissler P},
+title = {Transition path sampling},
+journal = {Adv. Chem. Phys.},
+volume = {123},
+pages = {1},
+year = {2003}
+}
+
+@article{noname,
+author = {Saven JG},
+author = {Wang JG},
+author = {Wolynes PG},
+title = {Kinetics of protein folding: the dynamics of globally connected rough energy landscapes with biases},
+journal = JCP,
+volume = {101},
+pages = {11037},
+year = {1994}
+}
+
+@article{noname,
+author = {Wang MC},
+author = {Uhlenbeck GE},
+title = {On the theory of the Brownian motion \protect{II}},
+journal = {Rev. Mod. Phys.},
+volume = {17},
+pages = {323},
+year = {1945}
+}
+
+@article{noname,
+author = {Wong YT},
+author = {Clark TW},
+author = {Shen J},
+author = {McCammon JA},
+title = {Molecular-dynamics simulation of substrate-enzyme interactions in the active-site channel of superoxide-dismutase},
+journal = {Mol. Simul.},
+volume = {10},
+pages = {277},
+year = {1993}
+}
+
+@article{noname,
+author = {Adelman SA.},
+title = {Fokker-Plank equations for simple non-Markovian systems},
+journal = JCP,
+volume = {64},
+pages = {124},
+year = {1976}
+}
+
+@article{noname,
+author = {Grote RF},
+author = {Hynes JT},
+title = {The stable states picture of chemical reactions. \protect{II}. Rate constants for condensed and gas phase reaction models},
+journal = JCP,
+volume = {73},
+pages = {2715},
+year = {1980}
+}
+
+@article{noname,
+author = {Kurnikova MG},
+author = {Waldeck DH},
+author = {Coalson RD},
+title = {A molecular dynamics study of dielectric friction},
+journal = JCP,
+volume = {105},
+pages = {628},
+year = {1995}
+}
+
+@article{noname,
+author = {Jarzynski C},
+title = {Nonequilibrium equality for free energy differences},
+journal = {Phys. Rev. Lett.},
+volume = {78},
+pages = {2690},
+year = {1997}
+}
+
+@article{noname,
+author = {Gullingsrud JR},
+author = {Braun R},
+author = {Schulten K},
+title = {Reconstructing potentials of mean force through time series analysis of steered molecular dynamics simulations},
+journal = {J. Comp. Chem.},
+volume = {151},
+pages = {190},
+year = {1999}
+}
+
+@article{noname,
+author = {Kamerlin SCL},
+author = {Warshel A},
+title = {At the dawn of the 21st century: Is dynamics the missing link for understanding enzyme catalysis?},
+journal = {Proteins},
+volume = {78},
+pages = {1339},
+year = {2010}
+}
+
+@article{noname,
+author = {Chen J},
+author = {Dima RI},
+author = {Thirumalai D},
+title = {Allosteric communcation in dihydrofolate reductase: signaling network and pathways for closed to occluded transition and back},
+journal = {J. Mol. Biol.},
+volume = {374},
+pages = {250},
+year = {2007}
+}
+
+@article{noname,
+author = {Karplus M.},
+title = {The role of conformation transitions in adenylate kinase},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {107},
+pages = {E71},
+year = {2010}
+}
+
+@article{noname,
+author = {Hummer G},
+title = {Catching a protein in the act},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {107},
+pages = {2381},
+year = {2010}
+}
+
+@article{noname,
+author = {Kamerlin SCL},
+author = {Warshel A},
+title = {Reply to Karplus: Conformational dynamics have no role in the chemical step},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {107},
+pages = {E72},
+year = {2010}
+}
+
+@article{noname,
+author = {Khandogin J},
+author = {Brooks CL},
+title = {Constant pH molecular dynamics with proton tautomerism},
+journal = {Biophys. J.},
+volume = {89},
+pages = {141},
+year = {2005}
+}
+
+@article{noname,
+author = {Baptista AM},
+author = {Martel PJ},
+author = {Soares CM},
+title = {Simulation of electron-proton coupling with a Monte Carlo method: application to cytochrome c3 using continuum electrostatics},
+journal = {Biophys. J.},
+volume = {6},
+pages = {2978},
+year = {1999}
+}
+
+@article{noname,
+author = {Olsson MHM},
+author = {Warshel A},
+title = {Monte Carlo simulations of proton pumps: on the working principles of the biological valve that controls proton pumping in cytochrome c oxidase},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {103},
+pages = {6500},
+year = {2006}
+}
+
+@article{noname,
+author = {Braun-Sand S},
+author = {Burykin A},
+author = {Chu ZT},
+author = {Warshel A},
+title = {Realistic simulations of proton transport along the gramicidin channel: demonstrating the importance of solvation effects},
+journal = JPCB,
+volume = {109},
+pages = {583},
+year = {2005}
+}
+
+@article{noname,
+author = {Braun-Sand S},
+author = {Strajbl M},
+author = {Warshel A},
+title = {Studies of proton translocations in biological systems: simulating proton transport in carbonic anhydrase by EVB based models},
+journal = {Biophys. J.},
+volume = {87},
+pages = {2221},
+year = {2004}
+}
+
+@article{noname,
+author = {Kato M},
+author = {Pisliakov AV},
+author = {Warshel A},
+title = {The barrier for proton transport in aquaporins as a challenge for electrostatic models: the role of protein relaxation in mutational calculations},
+journal = {Proteins},
+volume = {64},
+pages = {829},
+year = {2006}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Sharma PK},
+author = {Kato M},
+author = {Parson WW},
+title = {Modeling electrostatic effects in proteins},
+journal = {Biochim. Biophys. Acta},
+volume = {1764},
+pages = {1647},
+year = {2006}
+}
+
+@article{noname,
+author = {Kurnikova MG},
+author = {Coalson RD},
+author = {Graf P},
+author = {Nitzan A},
+title = {A lattice relaxation algorithm for three-dimensional Poisson-Nernst-Planck theory with application to ion transport through the gramicidin A channel},
+journal = {Biophys. J.},
+volume = {76},
+pages = {642},
+year = {1999}
+}
+
+@article{noname,
+author = {Liu H},
+author = {Shi Y},
+author = {Chen XS},
+author = {Warshel A},
+title = {Simulating the electrostatic guidance of the vectorial translocations in hexameric helicases and translocases},
+journal = {Proc. Natl. Acad. Sci. USA},
+volume = {106},
+pages = {7449},
+year = {2009}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Chu ZT},
+title = {Nature of the surface crossing process in bacteriorhodopsin: computer simulations of the quantum dynamics of the primary photochemical event},
+journal = JPCB,
+volume = {105},
+pages = {9857},
+year = {2001}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Parson WW},
+title = {Dynamics of biochemical and biophysical reactions: insight from computer simulations},
+journal = {Q. Rev. Biophys.},
+volume = {34},
+pages = {563},
+year = {2001}
+}
+
+@article{noname,
+author = {Braun-Sand S},
+author = {Sharma PK},
+author = {Chu ZT},
+author = {Pisliakov AV},
+author = {Warshel A},
+title = {The energetics of the primary proton transfer in bacteriorhodopsin revisited: It is a sequential light induced charge separation after all},
+journal = {Biochim. Biophys. Acta},
+volume = {1777},
+pages = {441},
+year = {2008}
+}
+
+@article{noname,
+author = {Lee FS},
+author = {Chu ZT},
+author = {Bolger MB},
+author = {Warshel A},
+title = {Calculations of antibody antigen interactions: microscopic and semimicroscopic evaluation of the free energies of binding of phosphorylcholine analogs to Mcpc603},
+journal = {Protein Eng.},
+volume = {5},
+pages = {215},
+year = {1992}
+}
+
+@article{noname,
+author = {Warshel A},
+author = {Sussman F},
+author = {King G},
+title = {Free energy of charges in solvated proteins: microscopic calculations using a reversible charging process},
+journal = {Biochemistry},
+volume = {25},
+pages = {8368},
+year = {1986}
+}
+
+@article{noname,
+author = {Tomasi J},
+author = {Persico M},
+title = {Molecular interactions in solution: an overview of methods based on continuous distributions of the solvent},
+journal = CR,
+volume = {94},
+pages = {2027},
+year = {1994}
+}
+
+@article{noname,
+author = {Muegge I},
+author = {Tao H},
+author = {Warshel A},
+title = {A fast estimate of electrostatic group contributions to the free energy of protein-inhibitor binding},
+journal = {Protein Eng.},
+volume = {10},
+pages = {1363},
+year = {1997}
+}
+
+@article{noname,
+author = {Sham YY},
+author = {Chu ZT},
+author = {Tao H},
+author = {Warshel A},
+title = {Examining methods for calculations of binding free energies: LRA, LIE, PDLD-LRA, and PDLD/S-LRA calculations of ligands binding to an HIV protease},
+journal = {Proteins},
+volume = {39},
+pages = {393},
+year = {2000}
+}
+
+@article{noname,
+author = {Marrink SJ},
+author = {Risselada HJ},
+author = {Yefimov S},
+author = {Tieleman DP},
+author = {de Vries AH},
+title = {The MARTINI force field: coarse grained model for biomolecular simulations},
+journal = JPCB,
+volume = {111},
+pages = {7812},
+year = {2007}
+}
+
+@article{noname,
+author = {Essiz SG},
+author = {Coalson RD},
+title = {Dynamic linear response theory for conformational relaxation of proteins},
+journal = JPCB,
+volume = {113},
+pages = {10859},
+year = {2009}
+}
+
+@article{noname,
+author = {Parson WW},
+author = {Warshel A},
+title = {Dependence of photosynthetic electron-transfer kinetics on temperature and energy in a density-matrix model},
+journal = JPCB,
+volume = {},
+pages = {10474},
+year = {2004}
+}
+
+@article{noname,
+author = {Calderon CP},
+author = {Janosi L},
+author = {Kosztin I},
+title = {Using stochastic models calibrated from nanosecond nonequilibrium simulations to approximate mesoscale information},
+journal = JCP,
+volume = {130},
+pages = {144908},
+year = {2009}
+}
+
+@article{noname,
+author = {Calderon CP.},
+title = {On the use of local diffusion models for path ensemble averaging in potential of mean force computations},
+journal = JCP,
+volume = {126},
+pages = {084106},
+year = {2007}
+}
+
+@article{noname,
+author = {Jimenez JC},
+author = {Ozaki T},
+title = {An approximate innovation method for the estimation of diffusion processes from discrete data},
+journal = {J. Time Ser. Anal.},
+volume = {27},
+pages = {77},
+year = {2005}
+}
+
+@article{noname,
+author = {Savelyev A},
+author = {Papoian GA},
+title = {Molecular renormalization group coarse-graining of polymer chains: application to double-stranded DNA},
+journal = {Biophys. J.},
+volume = {96},
+pages = {4044},
+year = {2009}
+}
+
+@article{noname,
+author = {Savelyev A},
+author = {Papoian GA},
+title = {Molecular renormalization group coarse-graining of electrolyte solutions: applications to aqueous NaCl and KCL},
+journal = JPCB,
+volume = {113},
+pages = {7785},
+year = {2009}
+}
+
+@article{noname,
+author = {Hwang J-K},
+author = {Chu ZT},
+author = {Yadav A},
+author = {Warshel A},
+title = {Simulations of quantum mechanical corrections for rate constants of hydride-transfer reactions in enzymes and solutions},
+journal = JPC,
+volume = {95},
+pages = {8445},
+year = {1991}
+}
+
+@article{noname,
+author = {Wang Q},
+author = {Hammes-Schiffer S},
+title = {Hybrid quantum/classical path integral approach for simulation of hydrogen transfer reactions in enzymes},
+journal = JCP,
+volume = {126},
+pages = {184102},
+year = {2006}
+}
+
+@article{noname,
+author = {Major DT},
+author = {Gao JL},
+title = {Implementation of the bisection sampling method in path integral simulations},
+journal = {J. Mol. Graph. Model.},
+volume = {24},
+pages = {121},
+year = {2005}
+}
+
+@article{noname,
+author = {Wang M},
+author = {Lu Z},
+author = {Yang W},
+title = {Nuclear quantum effects on an enzyme-catalyzed reaction with reaction path potential: proton transfer in triosephosphate isomerase},
+journal = JCP,
+volume = {124},
+pages = {124516},
+year = {2006}
+}
+
+@article{noname,
+author = {Major DT},
+author = {Heroux A},
+author = {Orville AM},
+author = {Valley MP},
+author = {Fitzpatrick PF},
+author = {Gao J},
+title = {Differential quantum tunneling contributions in nitroalkane oxidase catalyzed and the uncatalyzed proton transfer reaction},
+journal = {Proc. Natl. Acad. Sci. USA.},
+volume = {},
+pages = {},
+year = {2010}
+}
+
+@article{noname,
+author = {Craig I},
+author = {Manolopoulos DE},
+title = {Quantum statistics and classical mechanics: real time correlation functions from ring polymer molecular dynamics},
+journal = JCP,
+volume = {121},
+pages = {3368},
+year = {2004}
+}
+
+@article{noname,
+author = {Åqvist J},
+author = {Warshel A},
+title = {Energetics of ion permeation through membrane channels: solvation of Na+ by Gramicidin A},
+journal = {Biophys. J.},
+volume = {56},
+pages = {171},
+year = {1989}
+}
+
+@article{noname,
+author = {Faraldo-Goméz J},
+author = {Smith GR},
+author = {Sansom MSP},
+title = {Setting up and optimization of membrane protein simulations},
+journal = {Eur. Biophys. J.},
+volume = {31},
+pages = {217},
+year = {2002}
+}
+
+@article{noname,
+author = {Feller SE},
+author = {Pastor RW},
+title = {Constant surface tension simulations of lipid bilayers: the sensitivity of surface areas and compressibilities},
+journal = JCP,
+volume = {111},
+pages = {1281},
+year = {1999}
+}
+
+@article{noname,
+author = {Essmann U},
+author = {Berkowitz ML},
+title = {Dynamical properties of phospholipid bilayers from computer simulation},
+journal = {Biophys. J.},
+volume = {76},
+pages = {2081},
+year = {1999}
+}
+
+@article{noname,
+author = {Armen RS},
+author = {Uitto OD},
+author = {Feller SE},
+title = {Phospholipid component volumes: determination and application to bilayer structure calculations},
+journal = {Biophys. J.},
+volume = {75},
+pages = {734},
+year = {1998}
+}
+
+@article{noname,
+author = {Tobias DJ},
+author = {Tu KC},
+author = {Klein ML},
+title = {Atomic-scale molecular dynamics simulations of lipid membranes},
+journal = {Curr. Opin. Colloid Interface Sci.},
+volume = {2},
+pages = {15},
+year = {1997}
 }
 
