@@ -46,7 +46,7 @@ typedef struct ProblemData
   real beta;            /* 1/kT */
   real rho;             /* density */
   int N[3], N3;                /* global Grid size */
-  
+
   real g_xm;            /* g^(N_M)(x_M) */
 
 
@@ -55,7 +55,7 @@ typedef struct ProblemData
   int np;                   /* number of processes */
   int n[3];                 /* local grid size */
   int nbr_right[3], nbr_left[3];  /* neighboring processes */
-  
+
 } *PData;
 
 /* typedef struct BGY3dField */
@@ -81,18 +81,18 @@ typedef struct BGY3dParameterStruct
   Vec force_single;  /* simple force between 2 atoms */
   Vec Ftimesg2 ;      /* force*g2 */
   FFT_DATA *Ftimesg2_fft;
-  
+
   Mat M;               /* Matrix for FD-Approximation */
   Vec boundary;        /* Vector for right boundary: g=1 */
   void *LJ_params;   /* sigma and epsilon  */
 
-  
+
   Vec v1,v2, v3;        /* Vectors for intermediate results */
   Vec pre;
 #ifdef MATPRECOND
   MatPrecond MP;
 #endif
-  
+
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
 
@@ -124,13 +124,13 @@ typedef struct HNC3dDataStruct
 
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
-  
+
   /* things for arbitrary molecule shape */
   Vec c, v;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
-  
 
-  
+
+
   PData PD;            /* pointer to ProblemData */
 } *HNC3dData;
 
@@ -150,11 +150,11 @@ typedef struct HNC3dNewtonStruct
   void *LJ_params;   /* sigma and epsilon  */
   real beta, rho;
   Vec pre;
-  
+
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
-  
+
   PData PD;            /* pointer to ProblemData */
 } *HNC3dNewtonData;
 
@@ -176,9 +176,9 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
 PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
 PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa);
-FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft, int x[3], int n[3], real c);
-void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
 		       FFT_DATA *g_fft, int x[3], int n[3], real c);
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 void ConvolutionTest(BGY3dParameter params);
@@ -235,7 +235,7 @@ typedef struct BGY3dDivStruct
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
-  
+
 
 
   PData PD;
@@ -255,7 +255,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f);
 void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f);
 void AssembleSystemMatrix_part2(BGY3dDivData BDD, Mat SM);
 void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f);
-void ComputeBGY3dDiv_F(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g, 
+void ComputeBGY3dDiv_F(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
 		       Vec b, Vec f);
 void ComputeRHS2(BGY3dDivData BDD, Vec b);
 void ShiftVec(DA da, Vec g, Vec scratch, int N[3]);
@@ -264,7 +264,7 @@ void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM);
 /* bgy3dtest */
 Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim);
 void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K);
-void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g, 
+void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 		    real sigma_K);
 
 /* bgy3dfourier */
@@ -273,7 +273,7 @@ typedef struct BGY3dFourierStruct
   DA da;
   Vec f[3];
   Vec v[3];
- 
+
   void *LJ_params;   /* sigma and epsilon  */
   real beta, rho;
 
@@ -282,7 +282,7 @@ typedef struct BGY3dFourierStruct
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
-  
+
 
 
   PData PD;
@@ -311,7 +311,7 @@ typedef struct BGY3dDiatomicStruct
   DA da;
   Vec f[3];
   Vec v[3];
- 
+
   void *LJ_params;   /* sigma and epsilon  */
   real beta, rho;
 
@@ -320,7 +320,7 @@ typedef struct BGY3dDiatomicStruct
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
-  
+
 
 
   PData PD;
@@ -338,41 +338,41 @@ typedef struct BGY3dDiatomicABStruct
   DA da;
   Vec fa[3],fb[3],fab[3];
   Vec v[3];
- 
+
   void *LJ_paramsa, *LJ_paramsb,*LJ_paramsab ;   /* sigma and epsilon  */
   real beta, rho;
 
   real norm_const, c_ab, c_aab;
-  
+
   Vec ga_ini, gb_ini, gab_ini;
 
 
   /* Parallel FFT */
   //struct fft_plan_3d *fft_plan;
   fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft, *fft_scratch;
-  
+
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
-  
+
 
   PData PD;
 
 }*BGY3dDiatomicABData;
 BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD);
 void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD);
-void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD, Vec f1[3], real sign1, 
-			   Vec g1a, Vec g1b, 
-			   Vec f2[3], real sign2, 
+void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD, Vec f1[3], real sign1,
+			   Vec g1a, Vec g1b,
+			   Vec f2[3], real sign2,
 			   Vec g21, Vec g2b, Vec dg, Vec g_help);
-void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2, 
+void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 			   Vec dg, Vec dg_help);
-void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2, 
+void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 				   Vec dg, Vec dg_help);
 Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim);
 void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg);
-fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g, 
-				fftw_complex *g_fft, fftw_complex *work, 
+fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
+				fftw_complex *g_fft, fftw_complex *work,
 				int x[3], int n[3], real c);
-void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g, 
+void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 			    fftw_complex *g_fft, fftw_complex *work,
 			    int x[3], int n[3], real c);
 
@@ -392,7 +392,7 @@ typedef struct BGY3dH2OStruct
 
   Vec cH, cHO, cO;
 
- 
+
   void *LJ_paramsH, *LJ_paramsO,*LJ_paramsHO ;   /* sigma and epsilon  */
   real beta, rho;
   real rho_H, rho_O;
@@ -415,7 +415,7 @@ typedef struct BGY3dH2OStruct
   fftw_complex *(fg2OO_fft[3]), *(fg2HH_fft[3]), *(fg2HO_fft[3]);
   fftw_complex *(fg2OOl_fft[3]), *(fg2HHl_fft[3]), *(fg2HOl_fft[3]);
   fftw_complex *(fO_fft[3]), *(fH_fft[3]);
-  
+
 #ifdef L_BOUNDARY
   Mat M;
   KSP ksp;
@@ -451,7 +451,7 @@ typedef struct H2OSdgStruct
 typedef struct H2OSdgFStruct
 {
   PetscScalar dgHre, dgHim, dgOre, dgOim;
-  
+
 } H2OSdgF;
 
 void Smooth_Function(BGY3dH2OData BHD, Vec g, real RL, real RR, real shift);
@@ -469,31 +469,31 @@ real Coulomb( real r, void *params);
 real Coulomb_grad( real r, real rx, void *params);
 void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
 void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
-void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, void *LJ_params, 
+void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, void *LJ_params,
 			real damp, real zpad);
 void ComputeH2O_g(Vec g, Vec g0, Vec dg);
-void Compute_dg_H2O_inter(BGY3dH2OData BHD, 
-			  Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b, 
+void Compute_dg_H2O_inter(BGY3dH2OData BHD,
+			  Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
 			  fftw_complex *coul1_fft, real rho1, real shift1,
-			  Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b, 
-			  fftw_complex *coul2_fft, real rho2, real shift2, 
+			  Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
+			  fftw_complex *coul2_fft, real rho2, real shift2,
 			  Vec dg, Vec dg_help);
-void Compute_dg_H2O_intra(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2, 
+void Compute_dg_H2O_intra(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 			  fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
 void Compute_dg_H2O_intra_ln(BGY3dH2OData BHD, Vec g, real rab, Vec dg, Vec dg_help);
 void Compute_dg_H2O_intra_lnII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help);
 void Compute_dg_H2O_intra_lnIII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help);
-void Solve_NormalizationH2O_small(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t, 
+void Solve_NormalizationH2O_small(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad);
-void Solve_NormalizationH2O_smallII(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t, 
+void Solve_NormalizationH2O_smallII(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad);
 Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim);
 Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim);
 void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ);
 void VecSetRandom_H2O(Vec g, real mag);
-void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg, 
+void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
-void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab, 
+void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab,
 					Vec dg, Vec dg_help);
 void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad);
 void ImposeBoundaryCondition( BGY3dH2OData BHD, Vec g);
@@ -507,8 +507,8 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim);
 void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ);
 void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad);
 real ComputeCharge(BGY3dH2OData BHD, Vec g1, Vec g2);
-void Compute_H2O_interS(BGY3dH2OData BHD, 
-			fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft, 
+void Compute_H2O_interS(BGY3dH2OData BHD,
+			fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help);
 void WriteH2OSNewtonSolution(BGY3dH2OData BHD, Vec u);
 void WriteH2OSNewtonPlain(BGY3dH2OData BHD, Vec u);
