@@ -407,7 +407,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   int i[3], x[3], n[3];
   Vec dgH, dgO, gH, gO, help;
   Vec tO, tH, help2, ff;
-  real zpad, norm;
+  real zpad; //, norm;
   static int counter=0;
   counter++;
   if( verbosity>0)
@@ -590,7 +590,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   int i[3], x[3], n[3], index, N3;
   Vec dgH, dgO, gH, gO, help;
   Vec tO, tH, help2, ff;
-  real zpad, norm;
+  real zpad; //, norm;
   fftw_complex *uO_fft, *uH_fft;
   static int counter=0;
   counter++;
@@ -990,7 +990,7 @@ void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, V
 {
   PData PD;
   Vec gradO, gradH;
-  int i, iter=0;
+  int iter=0; // i
   real fu, fu_h, cO=1.0, cH=1.0, c, dcO, dcH;
 
   //PetscPrintf(PETSC_COMM_WORLD,"Minimization starts...\n");
@@ -1081,7 +1081,7 @@ Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
   BGY3dH2OData BHD;
   Vec u, f, b, v1, v2;
   real damp, damp_start=0.0, zpad=100.0;
-  Mat M, A;
+  // Mat M, A;
   PetscTruth flg;
 
   assert(g_ini == PETSC_NULL);
@@ -1197,7 +1197,7 @@ Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim)
   BGY3dH2OData BHD;
   Vec u, f, b;
   real damp, damp_start=0.0, zpad=100.0;
-  Mat M, A;
+  // Mat M, A;
   PetscTruth flg;
 
   assert(g_ini == PETSC_NULL);
