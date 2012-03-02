@@ -57,7 +57,7 @@ typedef complex single FFT_DATA;
 #endif
 
 #ifdef FFT_FFTW
-#include "dfftw.h"
+#include "fftw.h"
 typedef FFTW_COMPLEX FFT_DATA;
 #endif
 
@@ -108,7 +108,7 @@ typedef complex double FFT_DATA;
 #endif
 
 #ifdef FFT_FFTW
-#include "dfftw.h"
+#include "fftw.h"
 typedef FFTW_COMPLEX FFT_DATA;
 #endif
 
