@@ -11,6 +11,8 @@
 
 #include "bgy3d.h"
 
+static char helptext[] = "Solving BGY3d equation.\n";
+
 int verbosity=0;
 
 typedef Vec Solver(PData PD, Vec g_ini, int vdim);

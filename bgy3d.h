@@ -37,8 +37,6 @@
 
 extern int verbosity;
 
-static char helptext[]="Solving BGY3d equation.\n";
-
 typedef struct ProblemData
 {
   real interval[2];     /* min and max of the domain: 3d-box*/
