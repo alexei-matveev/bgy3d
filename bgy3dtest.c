@@ -218,7 +218,6 @@ Vec BGY3dDivFourier_test(PData PD, Vec g_ini, int vdim)
 {
   BGY3dDivData BDD;
   Vec g,  f, rhs;
-  Mat SM;
   PetscScalar sigma_g=1.0, sigma_K=1.0, f_norm_l2, f_norm_max;
   int N3;
   PetscTruth flg;
@@ -261,7 +260,6 @@ Vec BGY3dDivFourier_test(PData PD, Vec g_ini, int vdim)
 
   VecDestroy(rhs);
   VecDestroy(g);
-  MatDestroy(SM);
 
   BGY3dDivData_free(BDD);
 
