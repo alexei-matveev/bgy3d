@@ -180,16 +180,33 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
   assert( n[0]*n[1]*n[2] == total_local_size);
+
+  /*
+   * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
+   * statement  in  the if-block.   It  is  not  suitable for  use  in
+   * functions  returning  anything   that  but  PetscErrorCode.  This
+   * function returns BGY3dH2OData.
+   */
+
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD->gH_ini)); CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->gO_ini));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->gHO_ini));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucH));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucO));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucHO));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2H));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2O));CHKERRQ(ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2HO));CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->gH_ini)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->gO_ini)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->ucH)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->ucO)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2H)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2O)); // CHKERRQ(ierr);
+  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2HO)); // CHKERRQ(ierr);
+  assert (!ierr);
   DACreateGlobalVector(da, &(BHD->gH));
   DACreateGlobalVector(da, &(BHD->gO));
   DACreateGlobalVector(da, &(BHD->dgH));
@@ -203,13 +220,20 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
   FOR_DIM
     {
 
-      ierr = DACreateGlobalVector(da, &(BHD->fH[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fH_l[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO_l[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO_l[dim]));CHKERRQ(ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->v[dim]));CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fH[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fO[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fHO[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fH_l[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fO_l[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->fHO_l[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->v[dim])); // CHKERRQ(ierr);
+      assert (!ierr);
     }
 
 

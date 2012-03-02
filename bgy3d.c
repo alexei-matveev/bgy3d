@@ -784,22 +784,37 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  ierr = PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);CHKERRQ(ierr);
+  /*
+   * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
+   * statement  in  the if-block.   It  is  not  suitable for  use  in
+   * functions  returning  anything   that  but  PetscErrorCode.  This
+   * function returns a Vec.
+   */
+
+  ierr = PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg); // CHKERRQ(ierr);
+  assert (!ierr);
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr);
-    ierr = PCShellSetApply(pc,Compute_Preconditioner);CHKERRQ(ierr);
-    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr);
+    ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
+    assert (!ierr);
+    ierr = PCShellSetApply(pc,Compute_Preconditioner); // CHKERRQ(ierr);
+    assert (!ierr);
+    ierr = PCShellSetContext(pc,params); // CHKERRQ(ierr);
+    assert (!ierr);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
 #ifdef MATPRECOND
-  ierr = PetscOptionsHasName(PETSC_NULL,"-mat_precond",&flg);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(PETSC_NULL,"-mat_precond",&flg); // CHKERRQ(ierr);
+  assert (!ierr);
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr);
-    ierr = PCShellSetApply(pc,Compute_Preconditioner_Mat);CHKERRQ(ierr);
-    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr);
+    ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
+    assert (!ierr);
+    ierr = PCShellSetApply(pc,Compute_Preconditioner_Mat); // CHKERRQ(ierr);
+    assert (!ierr);
+    ierr = PCShellSetContext(pc,params); // CHKERRQ(ierr);
+    assert (!ierr);
   }
 #endif
 
@@ -832,7 +847,8 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
 
 
   /* set Function */
-  ierr = PetscOptionsHasName(PETSC_NULL,"-kirkwood",&flg);CHKERRQ(ierr);
+  ierr = PetscOptionsHasName(PETSC_NULL,"-kirkwood",&flg); // CHKERRQ(ierr);
+  assert (!ierr);
   if (flg)
     {
       SNESSetFunction(snes, F, Compute_F_Kirkwood, params);
