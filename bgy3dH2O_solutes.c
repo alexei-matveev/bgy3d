@@ -232,9 +232,9 @@ void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real 
   DA da;
   PData PD;
   PetscScalar ***gHini_vec, ***gOini_vec;
-  PetscScalar ***ucH_vec, ***ucO_vec;
+  // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
-  real r[3], r_s, h[3], interval[2], beta, L, fac;
+  real r[3], r_s, h[3], interval[2], beta, L; //, fac;
   int x[3], n[3], i[3], dim, N[3], k;
   real *p_O, *p_H;
 
