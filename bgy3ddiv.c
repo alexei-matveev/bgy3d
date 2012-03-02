@@ -1785,7 +1785,7 @@ Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
   PC pc;
   real a=0.9;
   int max_iter=25, iter, l_iter, np;
-  PetscScalar dg_norm, f_norm, f2_norm, r_norm, norm_tol=1.0e-6;
+  PetscScalar dg_norm, f_norm, r_norm, norm_tol=1.0e-6; // f2_norm
   PetscTruth flg, kflg;
 
   assert(g_ini == PETSC_NULL);
@@ -1923,8 +1923,8 @@ Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
       //VecNorm(f, NORM_2, &f2_norm);
 
 
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg, f f2 function norm: %e, %e, %e\tRnorm= %e after %d iterations.\n",
-		  iter+1, dg_norm, f_norm, f2_norm, r_norm, l_iter);
+      PetscPrintf(PETSC_COMM_WORLD, "iter %d: dg, f function norm: %e, %e\tRnorm= %e after %d iterations.\n",
+		  iter+1, dg_norm, f_norm, r_norm, l_iter);
 
       if(f_norm<norm_tol)
 	{
