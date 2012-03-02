@@ -1,4 +1,12 @@
 # Include Slepc and Petsc
+# on Debian Lenny do
+#
+#   export PETSC_DIR=/usr/lib/petscdir/2.3.3
+#
+# Then
+#
+#   make all
+#
 include ${PETSC_DIR}/bmake/common/base
 
 # Shell
