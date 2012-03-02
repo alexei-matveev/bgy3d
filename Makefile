@@ -36,7 +36,7 @@ LDFLAGS  =
 
 
 
-INCDIRS = ${PETSC_INCLUDE} -I./fft/ -I/home/opt64/packages/fftw-2.1.5/include/ 
+INCDIRS = ${PETSC_INCLUDE} -I./fft
 LIBDIRS = 
 LIBS    = -lm -lfftw -lfftw_mpi  ${PETSC_LIB} 
 
