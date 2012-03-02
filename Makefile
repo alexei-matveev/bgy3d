@@ -55,6 +55,12 @@ bgy3d : $(OBJECTS)
 #	cp $@ test_H2OII/
 #	cp $@ test_H2OIII/
 
+#
+# One of the include files defines a target named clean already, we
+# augment its prerequisites here:
+#
+clean: myclean
+
 myclean:
 	rm -f *.o fft/*.o 
 	rm -f bgy3d
