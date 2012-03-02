@@ -24,29 +24,29 @@ int main(int argc, char **argv)
   int dim;
   int np;
   Vec g, g_ini;
-  PetscTruth flg; 
+  PetscTruth flg;
   Solver *s=NULL;
   PetscViewer viewer;
 
-  verbosity=0;  
+  verbosity=0;
 
   PetscInitialize( &argc, &argv, (char*)0, helptext);
-  
+
 
   MPI_Comm_size(PETSC_COMM_WORLD, &np);
   PetscPrintf(PETSC_COMM_WORLD, "NP= %d\n", np);
-  
-  
+
+
   /* computation time measurement start point */
   MPI_Barrier( PETSC_COMM_WORLD);
   mpi_start = MPI_Wtime();
-  
+
   /* Read the command line options */
-  
+
   /* Grid points in 1 dimension */
   ierr = PetscOptionsGetInt(PETSC_NULL,"-N",&N, PETSC_NULL);CHKERRQ(ierr);
-  
- 
+
+
   /* inverse temperature */
   ierr = PetscOptionsGetReal(PETSC_NULL,"-beta",&beta,
 			     PETSC_NULL);CHKERRQ(ierr);
@@ -60,14 +60,14 @@ int main(int argc, char **argv)
   ierr = PetscOptionsGetReal(PETSC_NULL,"-mesh",&h,
 			     PETSC_NULL);CHKERRQ(ierr);
 
-  
+
   /*=================================*/
   /* set Problem Data */
   /*=================================*/
   PD = (PData) malloc(sizeof(*PD));
-  if(N==0) 
+  if(N==0)
     N= (int) ceil((interval[1]-interval[0])/h);
-  else 
+  else
     h = (interval[1]-interval[0])/N;
   FOR_DIM
     PD->N[dim] = N;
@@ -93,24 +93,24 @@ int main(int argc, char **argv)
   PetscPrintf(PETSC_COMM_WORLD, "rho = %f\n", rho);
 
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
- 
+
   //if(PD->id==1)
 /*   start_debugger(); */
 /*   sleep(5); */
-  
+
 
   /* Read method to solve from command line */
   ierr = PetscOptionsHasName(PETSC_NULL,"-simple",&flg);CHKERRQ(ierr);
-  if (flg) 
+  if (flg)
     s = BGY3d_solve;
   /* ierr = PetscOptionsHasName(PETSC_NULL,"-full",&flg);CHKERRQ(ierr); */
 /*   if (flg)  */
 /*     s = BGY3d_vec_solve; */
   ierr = PetscOptionsHasName(PETSC_NULL,"-HNC",&flg);CHKERRQ(ierr);
-  if (flg) 
+  if (flg)
     s = HNC3d_Solve_h;
   ierr = PetscOptionsHasName(PETSC_NULL,"-HNCNewton",&flg);CHKERRQ(ierr);
-  if (flg) 
+  if (flg)
     s = HNC3dNewton2_solve;
   ierr = PetscOptionsHasName(PETSC_NULL,"-DIV",&flg);CHKERRQ(ierr);
   if (flg)
@@ -165,20 +165,20 @@ int main(int argc, char **argv)
 	  VecLoad(viewer,VECMPI, &g_ini);
 	  PetscViewerDestroy(viewer);
 	  PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
-	  
+
 	  g= (*s)(PD, g_ini, 0);
-	  
-	  
+
+
 	}
       else
 	g= (*s)(PD, PETSC_NULL, 0);
-      
+
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);
       mpi_stop = MPI_Wtime();
-      PetscPrintf(PETSC_COMM_WORLD,"Total computation time: %.4f s\n", 
+      PetscPrintf(PETSC_COMM_WORLD,"Total computation time: %.4f s\n",
 		  mpi_stop-mpi_start);
-  
+
 
 
       /* Output result */
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 	  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
 	  VecView(g,viewer);
 	  PetscViewerDestroy(viewer);
-	  
+
 	  /* save g to binary file */
 	  PetscOptionsHasName(PETSC_NULL,"-save",&flg);
 	  if(flg)
@@ -199,21 +199,21 @@ int main(int argc, char **argv)
 	      PetscViewerDestroy(viewer);
 	      PetscPrintf(PETSC_COMM_WORLD,"Result written to file \"g.bin\".\n");
 	    }
-	  
+
 	  VecDestroy(g);
 	}
-      
+
     }
   else
     PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGYFOURIER, -BGYTEST, -BGYDIATOMIC, -HNC or -HNCNewton !\n");
-      
 
-  
-  
+
+
+
   free(PD);
-  
-  
-  
+
+
+
 
   ierr = PetscFinalize();CHKERRQ(ierr);
 
@@ -239,7 +239,7 @@ real Lennard_Jones(real r, void *LJ_params)
   if(fabs(re)>epsilon*CUTOFF)
     return epsilon*CUTOFF;
   else
-    return re; 
+    return re;
 }
 
 real Lennard_Jones_grad(real r, real xr, void *LJ_params)
@@ -247,18 +247,18 @@ real Lennard_Jones_grad(real r, real xr, void *LJ_params)
   real epsilon, sigma, sr6, sr, re;
 
   r=r+SHIFT;
-  
+
   epsilon = ((double*)LJ_params)[0];
   sigma   = ((double*)LJ_params)[1];
-  
-  if(xr==0) 
+
+  if(xr==0)
     return 0;
-  if(r==0) 
+  if(r==0)
     return -epsilon*CUTOFF;
 
   sr = sigma/r;
   sr6 = SQR(sr)*SQR(sr)*SQR(sr);
-  
+
   re = -24.*epsilon*sr6/r*(2.*sr6-1.)*xr/r;
 
   //re = -24.*epsilon*pow(sigma,6.0)/pow(r,7.0)*(2.*pow(sigma,6.0)/pow(r,6.0)-1.)*xr/r;
@@ -268,30 +268,30 @@ real Lennard_Jones_grad(real r, real xr, void *LJ_params)
   else if(re<-epsilon*CUTOFF)
     return -epsilon*CUTOFF;
   else
-    return re; 
+    return re;
 }
 
 void PData_CreateParallel(PData PD)
 {
-  
+
   MPI_Comm_size(PETSC_COMM_WORLD, &(PD->np));
   MPI_Comm_rank(PETSC_COMM_WORLD, &(PD->id));
 }
-  
+
 
 BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 {
   BGY3dParameter params;
   DA da;
   int n[3], x[3], i[3], dim, N_g2, index, N_M, k, ic1, ic2, ic3, N[3];
-  PetscScalar ***x_vec, ***force_vec, ***Ftimesg2_vec, ***boundary_vec,h[3], 
+  PetscScalar ***x_vec, ***force_vec, ***Ftimesg2_vec, ***boundary_vec,h[3],
     ***force_single_vec, interval[2];
   PetscScalar r[3], r_s, L, *g2_vec, h_g2;
   PetscViewer pview;
   Vec g2;
   real **x_M;
   int bufsize;
-  
+
   params = (BGY3dParameter) malloc(sizeof(*params));
 
   params->vec_dim = vdim;
@@ -299,7 +299,7 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
   ((real*)(params->LJ_params))[0] = 1.0;   /* espilon */
   ((real*)(params->LJ_params))[1] = 1.0;   /* sigma   */
 
-  
+
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
   FOR_DIM
@@ -310,12 +310,12 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 
   /* Create distributed array */
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2], 
+	     PD->N[0], PD->N[1], PD->N[2],
 	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 	     1,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(params->da));
 
   da = params->da;
-  
+
   /* Create global vectors */
   DACreateGlobalVector(da, &(params->x));
   VecDuplicate(params->x, &(params->force));
@@ -328,15 +328,15 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
   VecDuplicate(params->x, &(params->pre));
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   if( verbosity >2)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n", 
+      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n",
 			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2]);
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
-  
+
   /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix( da, MATMPIAIJ, &(params->M));
   ComputeMatrixStencil(PD, da, params->M, vdim);
@@ -353,13 +353,13 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
   VecLoad( pview, VECSEQ, &g2);
   VecGetSize(g2,&N_g2);
   h_g2 = L/N_g2;
- 
-  
+
+
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
 
-  
- 
+
+
   VecSet(params->force,0.0);
   DAVecGetArray(da, params->x, &x_vec);
   DAVecGetArray(da, params->force, &force_vec);
@@ -374,8 +374,8 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 	{
 	  /* set x vector */
 	  x_vec[i[2]][i[1]][i[0]] = i[0]*h[0]+interval[0];
-	  
-	 
+
+
 
 	  /* set force vector */
 	  /* loop over particles and grid */
@@ -389,7 +389,7 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 		}
 
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	      force_vec[i[2]][i[1]][i[0]] += 
+	      force_vec[i[2]][i[1]][i[0]] +=
 		Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 	    }
 
@@ -401,30 +401,30 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 	      if( i[dim]>=N[dim]/2)
 		r[dim] -= L;
 	    }
-	  
+
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
-	  force_single_vec[i[2]][i[1]][i[0]] = 
+	  force_single_vec[i[2]][i[1]][i[0]] =
 	    Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 
 	  index =(int) floor(r_s/h_g2);
 	  /* g2=1 if r_s>l */
-	  if(index >= N_g2-1) 
-	    Ftimesg2_vec[i[2]][i[1]][i[0]] = 
+	  if(index >= N_g2-1)
+	    Ftimesg2_vec[i[2]][i[1]][i[0]] =
 	      Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 	  else
 	    {
-	      Ftimesg2_vec[i[2]][i[1]][i[0]] = 
+	      Ftimesg2_vec[i[2]][i[1]][i[0]] =
 		Lennard_Jones_grad( r_s, r[vdim], params->LJ_params)*
 		(g2_vec[index]+ (g2_vec[index+1]-g2_vec[index])/h_g2*
 		 (r_s-index*h_g2));
-		
+
 	    }
- 
+
 	}
-  
- 
-  
+
+
+
   /* set boundary vector: r:g=1 l:g=-1 */
 #ifdef CENTRALDIFF
   ic1=(vdim)%3;
@@ -456,24 +456,24 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 	  boundary_vec[i[2]][i[1]][i[0]] = 1;
     }
 #endif
- 
- 
 
-  
+
+
+
   DAVecRestoreArray(da, params->x, &x_vec);
   DAVecRestoreArray(da, params->force, &force_vec);
   DAVecRestoreArray(da, params->force_single, &force_single_vec);
   DAVecRestoreArray(da, params->Ftimesg2, &Ftimesg2_vec);
   DAVecRestoreArray(da, params->boundary, &boundary_vec);
   VecRestoreArray(g2, &g2_vec);
-  
+
 /*   VecView(params->boundary,PETSC_VIEWER_STDERR_WORLD); */
 /*   VecView(params->force,PETSC_VIEWER_STDERR_WORLD);  */
 /*   VecView(params->Ftimesg2,PETSC_VIEWER_STDERR_WORLD); */
 /*    exit(1);   */
 
-  
-  
+
+
   /* Create plan for 3d fft */
   params->fft_plan = fft_3d_create_plan(PETSC_COMM_WORLD,
 					PD->N[0], PD->N[1], PD->N[2],
@@ -486,31 +486,31 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 					0,
 					0,
 					&bufsize);
-  if(params->fft_plan == NULL) 
+  if(params->fft_plan == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
 		  PD->id);
       exit(1);
     }
 
-  
+
   /* Compute fft for f*g2 */
   params->Ftimesg2_fft = NULL;
-  params->Ftimesg2_fft = ComputeFFTfromVec(da, params->fft_plan, 
-  					   params->Ftimesg2, 
+  params->Ftimesg2_fft = ComputeFFTfromVec(da, params->fft_plan,
+  					   params->Ftimesg2,
   					   params->Ftimesg2_fft, x, n, 0);
 
   params->PD=PD;
-  
+
   /* Initialize matrix preconditioner */
 #ifdef MATPRECOND
   params->MP = MatPrecond_malloc(params);
-#endif 
+#endif
 /*   MatView(params->MP->P,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
 
   VecDestroy(g2);
-  
+
   Molecule_free(x_M, N_M);
 
   return params;
@@ -531,17 +531,17 @@ void BGY3dParameter_free(BGY3dParameter params)
   VecDestroy(params->v3);
   VecDestroy(params->pre);
 
-  fft_3d_destroy_plan(params->fft_plan); 
+  fft_3d_destroy_plan(params->fft_plan);
 
 #ifdef MATPRECOND
   MatPrecond_free(params->MP);
 #endif
 
   free(params->LJ_params);
-  
+
   free(params);
 }
-  
+
 #ifdef MATPRECOND
 MatPrecond MatPrecond_malloc(BGY3dParameter params)
 {
@@ -553,14 +553,14 @@ MatPrecond MatPrecond_malloc(BGY3dParameter params)
   PetscScalar v;
   real beta, h[3];
   Mat P;
-  
+
   MP = (MatPrecond) malloc(sizeof(*MP));
 
   PD=params->PD;
 
   DAGetCorners(params->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
-  
+
 
   /* copy M to P */
   DAGetMatrix( params->da, MATMPIAIJ, &(MP->P));
@@ -592,19 +592,19 @@ MatPrecond MatPrecond_malloc(BGY3dParameter params)
   DAVecRestoreArray(params->da, params->force, &force_vec);
   MatAssemblyBegin(P,MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(P,MAT_FINAL_ASSEMBLY);
-  
+
   /* initialize linear solver for preconditioning */
   KSPCreate(PETSC_COMM_WORLD, &(MP->ksp));
   KSPGetPC(MP->ksp, &(MP->pc));
   PCSetType(MP->pc, PCBJACOBI);
-  
-  /* successive calls to KSPSolve will not recompute 
+
+  /* successive calls to KSPSolve will not recompute
      preconditioner factorization*/
   KSPSetOperators(MP->ksp, MP->P, MP->P, SAME_PRECONDITIONER);
 
   KSPSetFromOptions(MP->ksp);
-  
-  
+
+
   return MP;
 }
 
@@ -635,7 +635,7 @@ real** Load_Molecule(int *N)
     PetscPrintf(PETSC_COMM_WORLD,"Reading molecule data:\n%d particles\n", *N);
 
   x_M= (real**) malloc(sizeof(*x_M)*(*N));
- 
+
 
   for(i=0; i<*N; i++)
     {
@@ -646,7 +646,7 @@ real** Load_Molecule(int *N)
 	  exit(1);
 	}
       if(verbosity>2)
-	PetscPrintf(PETSC_COMM_WORLD,"%f %f %f\n", x_M[i][0], 
+	PetscPrintf(PETSC_COMM_WORLD,"%f %f %f\n", x_M[i][0],
 		    x_M[i][1], x_M[i][2]);
     }
   fclose(fp);
@@ -659,7 +659,7 @@ real** Load_Molecule(int *N)
 void Molecule_free( real **x_M, int N_M)
 {
   int index;
-  
+
   for(index=0; index<N_M; index++)
     free(x_M[index]);
   free(x_M);
@@ -672,9 +672,9 @@ void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
   int x[3], n[3], i[3], N[3], dim;
   MatStencil col[2],row;
   PetscScalar v[2];
-  
-  
-  
+
+
+
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
@@ -704,7 +704,7 @@ void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
 	    case 2: col[0].k -=1; col[1].k +=1;break;
 	    default: PetscPrintf(PETSC_COMM_WORLD,"VEC_DIM value out of bounds.\n"); exit(1);
 	    }
-			       
+
 	  /* values to enter */
 	  v[0]=-0.5;
 	  v[1]= 0.5;
@@ -739,7 +739,7 @@ void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
 	    case 2: col[1].k +=1;break;
 	    default: PetscPrintf(PETSC_COMM_WORLD,"VEC_DIM value out of bounds.\n"); exit(1);
 	    }
-			       
+
 	  /* values to enter */
 	  v[0]=-1;
 	  v[1]= 1;
@@ -753,7 +753,7 @@ void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
 
   MatAssemblyBegin(M,MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(M,MAT_FINAL_ASSEMBLY);
-  
+
 }
 
 Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
@@ -768,7 +768,7 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
   PetscTruth flg;
 
   params = BGY3dParameter_malloc(PD, vec_dim);
-  
+
   ConvolutionTest(params);
   exit(1);
 
@@ -777,7 +777,7 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
   SNESCreate(PETSC_COMM_WORLD, &snes);
   SNESGetKSP(snes,&ksp);
   KSPGetPC(ksp, &pc);
-  
+
   /* set rtol, atol, dtol, maxits */
   // KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
   KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
@@ -787,9 +787,9 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
   ierr = PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);CHKERRQ(ierr);
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr); 
-    ierr = PCShellSetApply(pc,Compute_Preconditioner);CHKERRQ(ierr); 
-    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr); 
+    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr);
+    ierr = PCShellSetApply(pc,Compute_Preconditioner);CHKERRQ(ierr);
+    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
@@ -797,17 +797,17 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
   ierr = PetscOptionsHasName(PETSC_NULL,"-mat_precond",&flg);CHKERRQ(ierr);
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr); 
-    ierr = PCShellSetApply(pc,Compute_Preconditioner_Mat);CHKERRQ(ierr); 
-    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr); 
+    ierr = PCSetType(pc,PCSHELL);CHKERRQ(ierr);
+    ierr = PCShellSetApply(pc,Compute_Preconditioner_Mat);CHKERRQ(ierr);
+    ierr = PCShellSetContext(pc,params);CHKERRQ(ierr);
   }
 #endif
-  
-  
-  
+
+
+
   VecDuplicate(params->x, &F);
-  
-  
+
+
   //MatDuplicate(params->M, MAT_DO_NOT_COPY_VALUES, &J);
   DAGetMatrix( params->da, MATMPIAIJ, &J);
 
@@ -816,24 +816,24 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
       VecDuplicate(params->x, &g);
       CreateInitialGuessFromg2(params, g);
       //CreateInitialGuess(params, g);
-      
+
     }
   else
     g=g_ini;
- 
+
 /*   VecSet(g, 0.0);   */
 /*   Compute_F(snes, g, F, (void*) params); */
-  //VecView(g,PETSC_VIEWER_STDERR_WORLD); 
+  //VecView(g,PETSC_VIEWER_STDERR_WORLD);
   VecView(g,PETSC_VIEWER_STDERR_WORLD);
   exit(1);
- 
+
 
   //TestPreconditioner(params->MP, g,F);
-  
+
 
   /* set Function */
   ierr = PetscOptionsHasName(PETSC_NULL,"-kirkwood",&flg);CHKERRQ(ierr);
-  if (flg) 
+  if (flg)
     {
       SNESSetFunction(snes, F, Compute_F_Kirkwood, params);
     }
@@ -850,30 +850,30 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
 
   /* runtime options will override default parameters */
   SNESSetFromOptions(snes);
-  
+
   /* solve problem */
   ierr=SNESSolve(snes, PETSC_NULL, g);
- 
- 
-  
-  
-  
+
+
+
+
+
   /* write out solution */
   SNESGetSolution(snes, &g);
   //VecView(g,PETSC_VIEWER_STDERR_WORLD);
   //Compute_F_Kirkwood(snes, g, F, (void*) params);
   //VecView(F,PETSC_VIEWER_STDERR_WORLD);
-  
+
   VecDestroy(F);
   MatDestroy(J);
   SNESDestroy(snes);
   BGY3dParameter_free(params);
-  
+
 
   return g;
 }
-  
-  
+
+
 void CreateInitialGuess(BGY3dParameter params, Vec g)
 {
   DA da;
@@ -908,7 +908,7 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  
+
 	  /* loop over particles and grid */
 	  for(k=0; k<N_M; k++)
 	    {
@@ -920,17 +920,17 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 		}
 
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	      
-	      g_vec[i[2]][i[1]][i[0]] *= 
+
+	      g_vec[i[2]][i[1]][i[0]] *=
 		exp(-beta* Lennard_Jones( r_s, params->LJ_params));
-	    }	 
+	    }
 	}
   DAVecRestoreArray(da, g, &g_vec);
-  
+
 /*   VecView(g,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
   Molecule_free(x_M, N_M);
-  
+
 }
 
 
@@ -966,7 +966,7 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
   VecLoad( pview, VECSEQ, &g2);
   VecGetSize(g2,&N_g2);
   h_g2 = L/N_g2;
-  
+
 
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
@@ -980,7 +980,7 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  
+
 	  /* loop over particles and grid */
 	  for(k=0; k<N_M; k++)
 	    {
@@ -994,21 +994,21 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
 	      index =(int) floor(r_s/h_g2);
-	      if(index >= N_g2-1) 
+	      if(index >= N_g2-1)
 		g_vec[i[2]][i[1]][i[0]] *=1.0;
 	      else
-		g_vec[i[2]][i[1]][i[0]] *= 
+		g_vec[i[2]][i[1]][i[0]] *=
 		g2_vec[index]+ (g2_vec[index+1]-g2_vec[index])/h_g2*
 		  (r_s-index*h_g2);
-	      
-	    }	 
+
+	    }
 	}
   DAVecRestoreArray(da, g, &g_vec);
   VecRestoreArray(g2, &g2_vec);
 
   VecDestroy(g2);
   Molecule_free(x_M, N_M);
-  
+
 }
 
 
@@ -1032,15 +1032,15 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 
   /* get size of local grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   max_i = n[0]*n[1]*n[2];
-  
+
   fft_gFg2 = (FFT_DATA*) calloc(max_i,sizeof(*fft_gFg2));
   Ftimesg2_fft = params->Ftimesg2_fft;
 
   /* g = fft(g) */
   fft_data = NULL;
-  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data, 
+  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data,
 				    x, n, 0.0);
 
   /* fft_data = fft_data * Ftimesg2_fft */
@@ -1048,15 +1048,15 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
     {
       fft_gFg2[i].re = fft_data[i].re*Ftimesg2_fft[i].re
 	-fft_data[i].im*Ftimesg2_fft[i].im;
-      
+
       fft_gFg2[i].im = fft_data[i].re*Ftimesg2_fft[i].im
 	+fft_data[i].im*Ftimesg2_fft[i].re;
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2, 
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2,
 				    x, n, 0.0);
- 
+
 /*   VecView(f,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1); */
   /****************************************/
@@ -1081,14 +1081,14 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 
   /* f=f*g */
   VecPointwiseMult(f, f, g);
-  
+
   /* f=f*h^3/N^3*h[dim]*beta*rho/g^M(x_M) */
   VecScale(f, PD->h[0]*PD->h[1]*PD->h[2]*
 	   PD->h[vdim]*PD->rho*PD->beta/PD->g_xm
 	   /PD->N[0]/PD->N[1]/PD->N[2]);
-  
+
 /*   VecView(f,PETSC_VIEWER_STDERR_WORLD);  */
- 
+
 
   /* v1 = M*g+B */
   MatMultAdd(params->M, g, params->boundary, params->v1);
@@ -1109,11 +1109,11 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 /*   exit(1);   */
 
   free(fft_data);
-  free(fft_gFg2);  
+  free(fft_gFg2);
 
   return 0;
 }
-  
+
 
 PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa)
@@ -1143,18 +1143,18 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 
   FOR_DIM
     N[dim] = PD->N[dim];
-  
+
   /* get size of local grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   max_i = n[0]*n[1]*n[2];
-  
+
   fft_gFg2 = (FFT_DATA*) calloc(max_i,sizeof(*fft_gFg2));
   Ftimesg2_fft = params->Ftimesg2_fft;
 
   /* g = fft(g) */
   fft_data = NULL;
-  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data, 
+  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data,
 				    x, n, -1.0);
 
   /* fft_data = fft_data * Ftimesg2_fft */
@@ -1162,27 +1162,27 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
     {
       fft_gFg2[k].re = fft_data[k].re*Ftimesg2_fft[k].re
 	-fft_data[k].im*Ftimesg2_fft[k].im;
-      
+
       fft_gFg2[k].im = fft_data[k].re*Ftimesg2_fft[k].im
 	+fft_data[k].im*Ftimesg2_fft[k].re;
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2, 
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2,
 				    x, n, 0.0);
- 
-  
+
+
 
   /* f*=beta*rho*h/g^M(x_M)*/
   VecScale(f,PD->h[0]*PD->h[1]*PD->h[2]*
 	  PD->beta*PD->rho*PD->h[vdim]/PD->g_xm/PD->N[0]/PD->N[1]/PD->N[2]);
   /* f=f+beta*h*force */
   VecAXPY(f,PD->beta*PD->h[vdim], params->force);
-  
+
 #ifndef CENTRALDIFF
   /*f=f-1 */
   VecShift(f,-1.0);
-#endif  
+#endif
 
   /* insert entries into J */
   DAVecGetArray(da, f, &f_vec);
@@ -1215,7 +1215,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 	  /* values to enter */
 	  v[0]= -0.5;
 	  v[1]= f_vec[i[2]][i[1]][i[0]];
-	  v[2]=  0.5; 
+	  v[2]=  0.5;
 #else
 	  switch(vdim)
 	    {
@@ -1228,9 +1228,9 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 	  v[0]= f_vec[i[2]][i[1]][i[0]];
 	  v[1]= 1;
 #endif
-			       
-	  
-	
+
+
+
 #ifdef CENTRALDIFF
 	  /* Boundary */
 	  if( i[vdim]== 0)
@@ -1246,18 +1246,18 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 	  else
 	    MatSetValuesStencil(*B,1,&row,2,col,v,INSERT_VALUES);
 #endif
-	    
+
 	}
   MatAssemblyBegin(*B,MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(*B,MAT_FINAL_ASSEMBLY);
   DAVecRestoreArray(da, f, &f_vec);
 
 
-  //VecView(params->v1,PETSC_VIEWER_STDERR_WORLD); 
+  //VecView(params->v1,PETSC_VIEWER_STDERR_WORLD);
 /*   MatView(*B,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
   free(fft_data);
-  free(fft_gFg2);  
+  free(fft_gFg2);
 
   return 0;
 }
@@ -1281,23 +1281,23 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
   vdim = params->vec_dim;
   v1 = params->v1;
   v2 = params->v2;
- 
+
 
   /* get size of local grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   max_i = n[0]*n[1]*n[2];
-  
+
   fft_fgg = (FFT_DATA*) calloc(max_i,sizeof(*fft_fgg));
 
   /* g = fft(g) */
   fft_g = NULL;
-  fft_g = ComputeFFTfromVec(da, params->fft_plan, g, fft_g, 
+  fft_g = ComputeFFTfromVec(da, params->fft_plan, g, fft_g,
 				    x, n, 0.0);
   /* f*g = fft(f*g) */
   VecPointwiseMult(v1, g, params->force_single);
   fft_fg = NULL;
-  fft_fg = ComputeFFTfromVec(da, params->fft_plan, v1, fft_fg, 
+  fft_fg = ComputeFFTfromVec(da, params->fft_plan, v1, fft_fg,
 				    x, n, 0.0);
 
   /* fft(g) * fft(f*g) */
@@ -1305,16 +1305,16 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
     {
       fft_fgg[i].re = fft_g[i].re*fft_fg[i].re
 	-fft_g[i].im*fft_fg[i].im;
-      
+
       fft_fgg[i].im = fft_g[i].re*fft_fg[i].im
 	+fft_g[i].im*fft_fg[i].re;
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_fgg, 
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_fgg,
 				    x, n, 0.0);
- 
-  
+
+
   /****************************************/
   /* Set Preconditioner                   */
   /****************************************/
@@ -1336,14 +1336,14 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 
   /* f=f*g */
   VecPointwiseMult(f, f, g);
-  
+
   /* f=f*h^3/N^3*h[dim]*beta*rho/g^M(x_M) */
   VecScale(f, PD->h[0]*PD->h[1]*PD->h[2]*
 	   PD->h[vdim]*PD->rho*PD->beta
 	   /PD->N[0]/PD->N[1]/PD->N[2]);
-  
-  //VecView(f,PETSC_VIEWER_STDERR_WORLD); 
- 
+
+  //VecView(f,PETSC_VIEWER_STDERR_WORLD);
+
 
   /* v1 = M*g+B */
   MatMultAdd(params->M, g, params->boundary, v1);
@@ -1357,19 +1357,19 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
   VecAXPY(f,1.0,params->v1);
   VecAXPY(f,1.0,params->v2);
 
- 
+
 
 /*   VecView(g,PETSC_VIEWER_STDERR_WORLD);  */
 /*   VecView(f,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
-  
+
   free(fft_g);
   free(fft_fg);
   free(fft_fgg);
 
   return 0;
 }
-  
+
 
 
 
@@ -1377,12 +1377,12 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y)
 {
   BGY3dParameter params;
-  PetscErrorCode ierr; 
-  
+  PetscErrorCode ierr;
+
   params = (BGY3dParameter) pa;
   ierr=VecPointwiseMult(y,params->pre,x);
-  
-  
+
+
 /*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
 
@@ -1394,8 +1394,8 @@ PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 {
   BGY3dParameter params;
   MatPrecond MP;
-  PetscErrorCode ierr; 
-  
+  PetscErrorCode ierr;
+
   params = (BGY3dParameter) pa;
   MP = params->MP;
 
@@ -1404,21 +1404,21 @@ PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 
   ierr = KSPSolve(MP->ksp, x, y);
 
-  
-  //VecView(params->pre,PETSC_VIEWER_STDERR_WORLD); 
-  //exit(1); 
+
+  //VecView(params->pre,PETSC_VIEWER_STDERR_WORLD);
+  //exit(1);
 
   return ierr;
 }
 #endif
 
 
-FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft, int x[3], int n[3], real c)
 {
   int index=0, i[3];
   PetscScalar ***g_vec;
-  
+
   if(g_fft==NULL)
     g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*g_fft));
 
@@ -1437,19 +1437,19 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 	}
   DAVecRestoreArray(da, g, &g_vec);
   /* forward fft */
-  fft_3d(g_fft, g_fft, 1, fft_plan); 
-  
+  fft_3d(g_fft, g_fft, 1, fft_plan);
+
   return g_fft;
 
 }
 
 
-void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g, 
+void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft, int x[3], int n[3], real c)
 {
   int index=0, i[3];
   PetscScalar ***g_vec;
-  
+
   if(g_fft==NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Error: g_fft==NULL!\n");
@@ -1457,8 +1457,8 @@ void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
     }
 
   /* backward fft */
-  fft_3d(g_fft, g_fft, -1, fft_plan); 
-  
+  fft_3d(g_fft, g_fft, -1, fft_plan);
+
   DAVecGetArray(da, g, &g_vec);
   /* loop over local portion of grid */
   /* Attention: order of indices is not variable */
@@ -1468,11 +1468,11 @@ void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  //g_vec[i[2]][i[1]][i[0]] = g_fft[index].re*2.+c; // Factor 2!!!
-	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re+c; 
+	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re+c;
 	  index++;
 	}
   DAVecRestoreArray(da, g, &g_vec);
-  
+
 
 }
 
@@ -1511,13 +1511,13 @@ void ConvolutionTest(BGY3dParameter params)
   FOR_DIM
     N[dim] = PD->N[dim];
   L= PD->interval[1]-PD->interval[0];
-    
+
 
   /* get size of local grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   max_i = n[0]*n[1]*n[2];
-  
+
   VecDuplicate(params->x, &a);
   VecDuplicate(params->x, &b);
   VecDuplicate(params->x, &c);
@@ -1529,11 +1529,11 @@ void ConvolutionTest(BGY3dParameter params)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{  
-	  
+	{
+
 	  FOR_DIM
 	    r[dim] = i[dim]*h[dim]+PD->interval[0]-x_mid[dim];
-	    
+
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
 	  a_vec[i[2]][i[1]][i[0]] = exp(-r_s*r_s/2.)/pow(2.*M_PI,1.5);
@@ -1554,30 +1554,30 @@ void ConvolutionTest(BGY3dParameter params)
 
   fft_a=NULL;
   fft_b=NULL;
-  fft_a =  ComputeFFTfromVec(da, params->fft_plan, a, fft_a, 
+  fft_a =  ComputeFFTfromVec(da, params->fft_plan, a, fft_a,
 				    x, n, 0.0);
-  fft_b =  ComputeFFTfromVec(da, params->fft_plan, b, fft_b, 
+  fft_b =  ComputeFFTfromVec(da, params->fft_plan, b, fft_b,
 			      x, n, 0.0);
   fft_c = (FFT_DATA*) calloc(max_i, sizeof(*fft_c));
 
   for(index=0; index<max_i; index++)
     {
-      fft_c[index].re = fft_a[index].re*fft_b[index].re 
+      fft_c[index].re = fft_a[index].re*fft_b[index].re
 	- fft_a[index].im*fft_b[index].im;
-      fft_c[index].im = fft_a[index].re*fft_b[index].im 
+      fft_c[index].im = fft_a[index].re*fft_b[index].im
 	+ fft_a[index].im*fft_b[index].re;
-      
+
     }
-  
-  ComputeVecfromFFT(da, params->fft_plan, c, fft_c, 
+
+  ComputeVecfromFFT(da, params->fft_plan, c, fft_c,
 		    x, n, 0.0);
   VecScale(c,  PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
-  VecView(a,PETSC_VIEWER_STDERR_WORLD); 
-  VecView(b,PETSC_VIEWER_STDERR_WORLD); 
-  VecView(c,PETSC_VIEWER_STDERR_WORLD); 
-  
-  
+  VecView(a,PETSC_VIEWER_STDERR_WORLD);
+  VecView(b,PETSC_VIEWER_STDERR_WORLD);
+  VecView(c,PETSC_VIEWER_STDERR_WORLD);
+
+
 
   VecDestroy(a);
   VecDestroy(b);
@@ -1598,9 +1598,9 @@ void TestPreconditioner(MatPrecond MP, Vec x, Vec y)
 
   KSPSolve(MP->ksp, x, y);
 
-  VecView(x,PETSC_VIEWER_STDERR_WORLD); 
-  VecView(y,PETSC_VIEWER_STDERR_WORLD); 
-  MatView(P,PETSC_VIEWER_STDERR_WORLD); 
+  VecView(x,PETSC_VIEWER_STDERR_WORLD);
+  VecView(y,PETSC_VIEWER_STDERR_WORLD);
+  MatView(P,PETSC_VIEWER_STDERR_WORLD);
   exit(1);
 
 }
