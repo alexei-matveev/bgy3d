@@ -481,7 +481,7 @@ void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], ic[3], dim, k, N[3], border;
+  int x[3], n[3], i[3], dim, N[3], border; // ic[3], k;
   PetscScalar ***gfrom_vec, ***gto_vec;
 
   PD = BHD->PD;
@@ -657,7 +657,7 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
   PData PD;
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
-  PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
+  // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
   PetscScalar ***wHO_vec, ***wHH_vec;
   real r[3], r_s, h[3], interval[2], beta, L, wconst_HO, wconst_HH, wG;
   int x[3], n[3], i[3], dim;
@@ -875,9 +875,9 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   DA da;
   PData PD;
   PetscScalar ***gHini_vec, ***gOini_vec;
-  PetscScalar ***ucH_vec, ***ucO_vec;
+  // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
-  real r[3], r_s, h[3], interval[2], beta, L, fac;
+  real r[3], r_s, h[3], interval[2], beta, L; // fac;
   int x[3], n[3], i[3], dim, N[3];
 
 
@@ -1326,7 +1326,7 @@ typedef struct StepDataStruct
 PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 {
   StepData SD;
-  real res, con, sumO, sumH;
+  real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;
   BGY3dH2OData BHD;
   PData PD;
