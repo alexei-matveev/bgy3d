@@ -79,13 +79,12 @@ include $(OBJECTS:.o=.d)
 # Comment out this rule if you are using a different compiler.
 #%.o %.d: %.c
 #	$(CC) -MT "$*.o $*.d " -MD -MP $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
-%.o %.d: %.c
-	$(CC) -M -MF '$*.d' -MP $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
-	$(CC) -o '$*.o' $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
+%.d: %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -M -MF $(*).d -MP $(<)
 
 # The next two rules are fairly portable across compilers.
 %.o: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
+	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -o $(*).o -c $(<)
 
 # node capital D here, this rule has no effect:
 %.D: %.c
