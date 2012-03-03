@@ -4042,8 +4042,9 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 
 
 	}
-      else
-	;
+      else {
+        // nothing
+      }
 
       //PetscPrintf(PETSC_COMM_WORLD,"\n");
 
@@ -4803,8 +4804,9 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 
 
 	}
-      else
-	;
+      else {
+        // nothing
+      }
 
       //PetscPrintf(PETSC_COMM_WORLD,"\n");
 
