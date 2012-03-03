@@ -1332,10 +1332,9 @@ Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
 
 
 	}
-      else
-	;
-
-
+      else {
+        // nothing
+      }
 
       if(dga_norm<=norm_tol &&  dgb_norm<=norm_tol && dgab_norm<=norm_tol &&
 	 dgba_norm<=norm_tol)
