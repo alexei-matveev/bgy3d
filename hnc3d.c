@@ -18,19 +18,19 @@ HNC3dData HNC3dData_malloc(PData PD)
   int bufsize, k, N_M, N_c1d, index;
   Vec c_1d;
   PetscViewer pview;
-  
+
 
   HD = (HNC3dData) malloc(sizeof(*HD));
- 
+
 
   HD->LJ_params = (void* ) malloc(sizeof(real)*2);
   ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
   ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
-  
+
   HD->beta = PD->beta;
   HD->rho  = PD->rho;
   beta = PD->beta;
-  
+
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
   L=interval[1]-interval[0];
@@ -41,12 +41,12 @@ HNC3dData HNC3dData_malloc(PData PD)
 
   /* Create distributed array */
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2], 
+	     PD->N[0], PD->N[1], PD->N[2],
 	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 	     1,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(HD->da));
 
   da = HD->da;
-  
+
   /* Create global vectors */
   DACreateGlobalVector(da, &(HD->pot));
   VecDuplicate(HD->pot, &(HD->c));
@@ -54,15 +54,15 @@ HNC3dData HNC3dData_malloc(PData PD)
   VecDuplicate(HD->pot, &(HD->h_ini));
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   if( verbosity >2)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n", 
+      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n",
 			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2]);
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
-  
+
 
   /* Load c_1d from file */
   /* c_1d has to be on a grid [0,L] with L=interval[1]-interval[0] */
@@ -72,12 +72,12 @@ HNC3dData HNC3dData_malloc(PData PD)
   VecGetSize(c_1d,&N_c1d);
   h_c1d = L/N_c1d;
 
-  
+
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
 
-  
- 
+
+
   VecSet(HD->pot,0.0);
   VecSet(HD->h_ini,1.0);
   DAVecGetArray(da, HD->pot, &pot_vec);
@@ -89,7 +89,7 @@ HNC3dData HNC3dData_malloc(PData PD)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	 
+
 
 	  /* set force vector */
 	  /* loop over particles and grid */
@@ -102,11 +102,11 @@ HNC3dData HNC3dData_malloc(PData PD)
 /* 		    r[dim] -= L; */
 		}
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	      pot_vec[i[2]][i[1]][i[0]] += 
+	      pot_vec[i[2]][i[1]][i[0]] +=
 		//exp(-r_s*r_s);
 		Lennard_Jones( r_s, HD->LJ_params);
 
-	      hini_vec[i[2]][i[1]][i[0]] *= 
+	      hini_vec[i[2]][i[1]][i[0]] *=
 		exp(-beta* Lennard_Jones( r_s, HD->LJ_params));
 
 	    }
@@ -125,8 +125,8 @@ HNC3dData HNC3dData_malloc(PData PD)
 	     (r_s-index*h_c1d));
 
 	}
-  
- 
+
+
   DAVecRestoreArray(da, HD->c, &c_vec);
   DAVecRestoreArray(da, HD->h_ini, &hini_vec);
   DAVecRestoreArray(da, HD->pot, &pot_vec);
@@ -136,8 +136,8 @@ HNC3dData HNC3dData_malloc(PData PD)
 /*    VecView(HD->h_ini,PETSC_VIEWER_STDERR_WORLD);  */
 /*    exit(1);   */
 
-  
-  
+
+
   /* Create plan for 3d fft */
   HD->fft_plan = fft_3d_create_plan(PETSC_COMM_WORLD,
 					PD->N[0], PD->N[1], PD->N[2],
@@ -150,7 +150,7 @@ HNC3dData HNC3dData_malloc(PData PD)
 					0,
 					0,
 					&bufsize);
-  if(HD->fft_plan == NULL) 
+  if(HD->fft_plan == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
 		  PD->id);
@@ -158,14 +158,14 @@ HNC3dData HNC3dData_malloc(PData PD)
     }
 
   HD->c_fft = NULL;
-  HD->c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, HD->c, HD->c_fft, 
+  HD->c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, HD->c, HD->c_fft,
 				x, n, 0);
   HD->h_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
   HD->ch_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
-  
+
 
   HD->PD=PD;
-  
+
   Molecule_free(x_M, N_M);
   VecDestroy(c_1d);
 
@@ -179,19 +179,19 @@ void HNC3dData_free(HNC3dData HD)
   VecDestroy(HD->c);
   VecDestroy(HD->v);
   DADestroy(HD->da);
-  fft_3d_destroy_plan(HD->fft_plan); 
-  
+  fft_3d_destroy_plan(HD->fft_plan);
+
   free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
   free(HD->ch_fft);
-  
- 
+
+
   free(HD);
 }
 
 
-/* Solve h and c of HNC equation simultaneously, fixpoint iteration */ 
+/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
 Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
 {
   HNC3dData HD;
@@ -215,12 +215,12 @@ Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
   PetscOptionsGetInt(PETSC_NULL,"-slow_iter",&slow_iter, PETSC_NULL);
   /* Number of total iterations */
   PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
-  
+
   HD = HNC3dData_malloc(PD);
-  
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
-  iL3 = 1./pow(PD->interval[1]-PD->interval[0],3); 
+
+  iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
 
   VecDuplicate(HD->pot, &c);
   VecDuplicate(HD->pot, &g);
@@ -231,7 +231,7 @@ Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
   /* Set initial guess */
   VecSet(g,0.0);
   VecSet(c,0.0);
-  
+
   /* set fft data */
   c_fft = NULL;
   cg_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*cg_fft));
@@ -241,38 +241,38 @@ Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
     {
       if(k>3)
 	lambda =0.1;
-      
+
       /* set g_old=g */
       VecCopy(g, g_old);
       VecCopy(c, c_old);
 
       Compute_c_HNC(HD, g, c, x, n);
-      
+
       /* simple mixing: c = lambda*c+(1-lambda)*c_old */
       VecAXPBY(c, (1-lambda), lambda, c_old);
-      
+
       c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft, x, n, 0);
-      
+
 
       Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
-      
+
       ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft, x, n, 0);
-      
+
       VecScale(g, iL3);
 /*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
 /*       exit(1);   */
       /* gg=g-g_old */
       VecWAXPY(gg, -1.0, g_old, g);
-      
+
       VecNorm(gg, NORM_2, &g_norm);
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n", k,
 		  g_norm, lambda);
 
-     
-      
+
+
       if( g_norm < 1.0e-30)
       break;
-      
+
     }
 
   /* g= gamma+c+1 */
@@ -291,7 +291,7 @@ Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
   free(cg_fft);
 
   HNC3dData_free(HD);
-  
+
   return g;
 }
 
@@ -303,11 +303,11 @@ void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
   real beta;
 
   beta = HD->beta;
-  
+
   DAVecGetArray(HD->da, g, &g_vec);
   DAVecGetArray(HD->da, c, &c_vec);
   DAVecGetArray(HD->da, HD->pot, &pot_vec);
-  
+
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
@@ -323,7 +323,7 @@ void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
   /* c=c-g-1 */
   VecAXPY(c, -1.0, g);
   VecShift(c, -1.0);
-  
+
 
 }
 
@@ -341,7 +341,7 @@ void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
   DAVecGetArray(HD->da, t, &t_vec);
   rho = HD->rho;
   h3 = (h[0]*h[1]*h[2]);
-  
+
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
@@ -355,7 +355,7 @@ void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
 			      - 2.*SQR(rho)*re*SQR(im)) / nenner;
 	  cg_fft[index].im = (SQR(rho)*(SQR(re)-SQR(im))*im +
 			      2.*rho*re*im*(1.-rho*re)) / nenner;
-	  
+
 	  //cg_fft[index].im =0;
 	  t_vec[i[2]][i[1]][i[0]] = c_fft[index].im;
 	  index++;
@@ -373,9 +373,9 @@ void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c)
 {
   HNCField ***g_vec;
   int i[3], ic[3], dim, k[3], j[3];
-  
+
   DAVecGetArray(HD->da, g, &g_vec);
-  
+
   FOR_DIM
     {
       ic[0]=(dim)%3;
@@ -394,8 +394,8 @@ void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c)
 		j[ic[1]]=i[ic[1]];
 		j[ic[2]]=i[ic[2]];
 		g_vec[i[2]][i[1]][i[0]].h = 2*g_vec[k[2]][k[1]][k[0]].h
-		  -g_vec[j[2]][j[1]][j[0]].h; 
-		 
+		  -g_vec[j[2]][j[1]][j[0]].h;
+
 	      }
 	}
       if( x[ic[0]]+n[ic[0]] == HD->PD->N[ic[0]])
@@ -412,7 +412,7 @@ void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c)
 		j[ic[2]]=i[ic[2]];
 		g_vec[i[2]][i[1]][i[0]].h = 2*g_vec[k[2]][k[1]][k[0]].h
 		  -g_vec[j[2]][j[1]][j[0]].h;
-		
+
 	      }
 	}
     }
@@ -431,19 +431,19 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
   PetscScalar r[3], r_s, L, h[3];
   real **x_M;
   int bufsize, k, N_M;
-  
-  
+
+
   HD = (HNC3dNewtonData) malloc(sizeof(*HD));
- 
+
 
   HD->LJ_params = (void* ) malloc(sizeof(real)*2);
   ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
   ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
-  
+
   HD->beta = PD->beta;
   HD->rho  = PD->rho;
 
-  
+
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
   L=interval[1]-interval[0];
@@ -454,42 +454,42 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
 
   /* Create distributed array */
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2], 
+	     PD->N[0], PD->N[1], PD->N[2],
 	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 	     2,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(HD->da));
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2], 
+	     PD->N[0], PD->N[1], PD->N[2],
 	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 	     1,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(HD->da1));
 
 
   da = HD->da;
-  
+
   /* Create global vectors */
   DACreateGlobalVector(da, &(HD->pot));
   VecDuplicate(HD->pot, &(HD->pre));
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   if( verbosity >2)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n", 
+      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n",
 			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2]);
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
-  
 
-  
+
+
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
   PetscPrintf(PETSC_COMM_WORLD,"HNCNewton ignores solute data from file \"molecule\"!\n");
   if( N_M >1 )
     {
       PetscPrintf(PETSC_COMM_WORLD,"HNCNewton can only handle 1 atom in solute!\n");
-      
+
     }
- 
+
   VecSet(HD->pot,0.0);
   DAVecGetArray(da, HD->pot, &pot_vec);
   /* loop over local portion of grid */
@@ -497,7 +497,7 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	 
+
 
 	  /* set force vector */
 	  /* loop over particles and grid */
@@ -509,25 +509,25 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
 		  if( i[dim] >= N[dim]/2)
 		    r[dim]-=L;
 		}
-		  
+
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	      pot_vec[i[2]][i[1]][i[0]].h += 
+	      pot_vec[i[2]][i[1]][i[0]].h +=
 		//exp(-r_s*r_s);
 		Lennard_Jones( r_s, HD->LJ_params);
 	    }
 
 	}
-  
- 
+
+
 
   DAVecRestoreArray(da, HD->pot, &pot_vec);
- 
+
 
 /*   VecView(HD->pot,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1);  */
 
-  
-  
+
+
   /* Create plan for 3d fft */
   HD->fft_plan = fft_3d_create_plan(PETSC_COMM_WORLD,
 					PD->N[0], PD->N[1], PD->N[2],
@@ -540,7 +540,7 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
 					0,
 					0,
 					&bufsize);
-  if(HD->fft_plan == NULL) 
+  if(HD->fft_plan == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
 		  PD->id);
@@ -551,9 +551,9 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
   HD->h_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
   HD->ch_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
 
- 
+
   HD->PD=PD;
-  
+
   Molecule_free(x_M, N_M);
 
   return HD;
@@ -566,8 +566,8 @@ void HNC3dNewtonData_free(HNC3dNewtonData HD)
   VecDestroy(HD->pre);
   DADestroy(HD->da);
   DADestroy(HD->da1);
-  fft_3d_destroy_plan(HD->fft_plan); 
-  
+  fft_3d_destroy_plan(HD->fft_plan);
+
   free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
@@ -612,26 +612,26 @@ PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa)
 	  c = g_vec[i[2]][i[1]][i[0]].c;
 	  h = g_vec[i[2]][i[1]][i[0]].h;
 	  exppot = exp(-beta*pot_vec[i[2]][i[1]][i[0]].h+h-c);
-	  
+
 	  c_fft[index].re =  c;
 	  c_fft[index].im =  0;
 	  h_fft[index].re =  h;
 	  h_fft[index].im =  0;
-	  
+
 	  f_vec[i[2]][i[1]][i[0]].h = h+1-exppot;
 	  f_vec[i[2]][i[1]][i[0]].c = c+1-exppot;
-	  
+
 	  /* preconditioner */
 /* 	  pre_vec[i[2]][i[1]][i[0]].h = 1-exppot; */
 /* 	  pre_vec[i[2]][i[1]][i[0]].c = 1+exppot; */
 
 	  index++;
 	}
-  
+
   /* 3d FFT */
   fft_3d(c_fft, c_fft, 1, HD->fft_plan);
   fft_3d(h_fft, h_fft, 1, HD->fft_plan);
-  
+
   /* convolution */
   for(index=0; index<n[0]*n[1]*n[2]; index++)
     {
@@ -660,12 +660,12 @@ PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa)
   DAVecRestoreArray(da, f, &f_vec);
   DAVecRestoreArray(da, HD->pot, &pot_vec);
   DAVecRestoreArray(da, HD->pre, &pre_vec);
-  
+
 /*   VecOutput_hc(HD, g, 0); */
 /*   exit(1); */
 
    //SetBoundaryValue(HD, f, x, n, 0);
-  
+
   /* preconditioner */
   VecReciprocal(HD->pre);
 
@@ -675,12 +675,12 @@ PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa)
 PetscErrorCode ComputeHNC_Preconditioner(void *pa,Vec x,Vec y)
 {
   HNC3dNewtonData HD;
-  PetscErrorCode ierr; 
-  
+  PetscErrorCode ierr;
+
   HD = (HNC3dNewtonData) pa;
   ierr = VecPointwiseMult(y,HD->pre,x);
-  
-  
+
+
 /*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
 
@@ -695,13 +695,13 @@ Vec Compute_gfromhc(HNC3dNewtonData HD, Vec hc)
   Vec g;
 
   DACreateGlobalVector(HD->da1, &g);
-  
-  
+
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   DAVecGetArray(HD->da1, g, &g_vec);
   DAVecGetArray(HD->da, hc, &hc_vec);
-  
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -723,13 +723,13 @@ void VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc)
   Vec g;
 
   DACreateGlobalVector(HD->da1, &g);
-  
-  
+
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   DAVecGetArray(HD->da1, g, &g_vec);
   DAVecGetArray(HD->da, hc, &hc_vec);
-  
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -742,10 +742,10 @@ void VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc)
 	}
   DAVecRestoreArray(HD->da1, g, &g_vec);
   DAVecRestoreArray(HD->da, hc, &hc_vec);
-  
+
   VecView(g,PETSC_VIEWER_STDERR_WORLD);
   VecDestroy(g);
-  
+
 }
 
 void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc)
@@ -753,7 +753,7 @@ void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc)
   HNCField ***hc_vec, ***pot_vec;
   int n[3], x[3], i[3];
   real beta;
-  
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   beta = HD->beta;
@@ -771,7 +771,7 @@ void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc)
 	}
   DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
   DAVecRestoreArray(HD->da, hc, &hc_vec);
-  
+
 }
 
 /* solving for h and c of HNC equation with Newton */
@@ -783,14 +783,14 @@ Vec HNC3dNewton_solve(PData PD, Vec g_ini, int vdim)
   KSP ksp;
   PC  pc;
   PetscTruth flg;
-  
+
   assert(g_ini==PETSC_NULL);
   HD = HNC3dNewtonData_malloc(PD);
 
   /* Create global vectors */
   VecDuplicate(HD->pot, &F);
   VecDuplicate(HD->pot, &hc);
-  
+
   /* initial guess */
   //VecSet(hc, 0.0);
   CreateInitialGuess_HNC(HD, hc);
@@ -805,7 +805,7 @@ Vec HNC3dNewton_solve(PData PD, Vec g_ini, int vdim)
   KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
-  
+
   PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
@@ -819,30 +819,30 @@ Vec HNC3dNewton_solve(PData PD, Vec g_ini, int vdim)
 /*   ComputeHNC_F(snes, g, F, (void*) HD);  */
 /*   VecView(F,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);   */
-  
+
   SNESSetFunction(snes, F, ComputeHNC_F, HD);
 
   /* runtime options will override default parameters */
   SNESSetFromOptions(snes);
-  
+
   /* solve problem */
   SNESSolve(snes, PETSC_NULL, hc);
- 
 
-  
+
+
   /* write out solution */
   SNESGetSolution(snes, &hc);
-  
+
   g = Compute_gfromhc(HD, hc);
 
 
   /* free stuff */
   HNC3dNewtonData_free(HD);
-  
+
   VecDestroy(F);
   VecDestroy(hc);
   SNESDestroy(snes);
-  
+
   return g;
 
 }
@@ -856,7 +856,7 @@ Vec HNC3dNewton2_solve(PData PD, Vec g_ini, int vdim)
   SNES snes;
   KSP ksp;
   PC  pc;
-  
+
   assert(g_ini==PETSC_NULL);
 
   HD = HNC3dData_malloc(PD);
@@ -864,7 +864,7 @@ Vec HNC3dNewton2_solve(PData PD, Vec g_ini, int vdim)
   /* Create global vectors */
   VecDuplicate(HD->pot, &F);
   VecDuplicate(HD->pot, &h);
-  
+
   /* initial guess */
   VecSet(h, 0.0);
   VecCopy(HD->c, h);
@@ -879,37 +879,37 @@ Vec HNC3dNewton2_solve(PData PD, Vec g_ini, int vdim)
   KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
-  
+
   /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
   PCSetType( pc, PCNONE);
 
 /*   ComputeHNC_F(snes, g, F, (void*) HD);  */
 /*   VecView(F,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);   */
-  
+
   SNESSetFunction(snes, F, ComputeHNC2_F, HD);
 
   /* runtime options will override default parameters */
   SNESSetFromOptions(snes);
-  
+
   /* solve problem */
   SNESSolve(snes, PETSC_NULL, h);
- 
 
-  
+
+
   /* write out solution */
   SNESGetSolution(snes, &h);
-  
-  
+
+
 
 
   /* free stuff */
   HNC3dData_free(HD);
-  
+
   VecDestroy(F);
-  
+
   SNESDestroy(snes);
-  
+
   /* g=h+1 */
   VecShift(h,1.0);
 
@@ -930,11 +930,11 @@ PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 
   HD = (HNC3dData) pa;
   PD = HD->PD;
-  
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   VecSet(HD->v, 0.0);
-  
+
   /* fft(h) */
   ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft, x, n, 0);
 
@@ -960,7 +960,7 @@ PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 
   /* v = fft^-1(fft(c)*fft(h)) */
   ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft, x, n, 0);
-  
+
   VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
 
@@ -976,20 +976,20 @@ PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  
+
 	  f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
 					 rho*v_vec[i[2]][i[1]][i[0]]);
 	}
   DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
   DAVecRestoreArray(HD->da, HD->v, &v_vec);
   DAVecRestoreArray(HD->da, f, &f_vec);
-  
+
   /* f=f+h+1 */
   VecAXPY(f, 1.0, h);
   VecShift(f, 1.0);
-  
+
   //VecView(HD->v,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1); 
+  //exit(1);
   return 0;
 }
 
@@ -1008,11 +1008,11 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 
   HD = (HNC3dData) pa;
   PD = HD->PD;
-  
+
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   VecSet(HD->v, 0.0);
-  
+
   /* fft(h) */
   ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft, x, n, 0);
 
@@ -1038,7 +1038,7 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 
   /* v = fft^-1(fft(c)*fft(h)) */
   ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft, x, n, 0);
-  
+
   VecScale(HD->v, rho*PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
 
@@ -1055,9 +1055,9 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  
+
 	  f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]
-					 + h_vec[i[2]][i[1]][i[0]] 
+					 + h_vec[i[2]][i[1]][i[0]]
 					 - c_vec[i[2]][i[1]][i[0]]);
 	}
   DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
@@ -1069,9 +1069,9 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
   VecAXPY(f, 1.0, HD->v);
   VecAXPY(f, 1.0, HD->c);
   VecShift(f, 1.0);
-  
+
   VecView(HD->v,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1); 
+  //exit(1);
   return 0;
 }
 
@@ -1106,7 +1106,7 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
   HD = HNC3dData_malloc(PD);
   rho = HD->rho;
   beta = HD->beta;
-  
+
   PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",lambda);
   PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
   PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
@@ -1114,10 +1114,10 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
 
 
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
-  
 
-  
+
+
+
   VecDuplicate(HD->pot, &h);
   VecDuplicate(HD->pot, &h_old);
   VecDuplicate(HD->pot, &gg);
@@ -1140,16 +1140,16 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
 /*       if(k>slow_iter) */
 /* 	lambda =0.9; */
 
-      
+
 
       /* set h_old=h */
       VecCopy(h, h_old);
-      
+
       /* new */
       //VecShift(h,-1);
       /* fft(h) */
       ComputeFFTfromVec(HD->da, HD->fft_plan, h, h_fft, x, n, 0);
-      
+
       /* fft(h)*fft(c) */
       index=0;
       /* set int(h)=0 for numerical stabilization */
@@ -1165,10 +1165,10 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
 		+c_fft[index].im*h_fft[index].re;
 	      index++;
 	    }
-      
+
       /* v=fft^-1(fft(h)*fft(c)) */
       ComputeVecfromFFT(HD->da, HD->fft_plan, v, ch_fft, x, n, 0);
-      
+
       VecScale(v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
       DAVecGetArray(HD->da, HD->pot, &pot_vec);
@@ -1181,15 +1181,15 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
 	  for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	    {
 	      h_vec[i[2]][i[1]][i[0]]=rho*(exp(-beta*pot_vec[i[2]][i[1]][i[0]]
-					       + v_vec[i[2]][i[1]][i[0]])-1.0); 
+					       + v_vec[i[2]][i[1]][i[0]])-1.0);
 /* 	      h_vec[i[2]][i[1]][i[0]]=(exp(-beta*pot_vec[i[2]][i[1]][i[0]] */
 /* 					   + rho*v_vec[i[2]][i[1]][i[0]])-0.0); */
 	    }
 /*       PetscPrintf(PETSC_COMM_WORLD,"%e\t%e\t%e\n", h_vec[0][0][0], pot_vec[0][0][0],  */
 /*       		  v_vec[0][0][0]); */
-      
+
       DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-      
+
 /*       DAVecGetArray(HD->da, h_old, &pot_vec); */
 /*       PetscPrintf(PETSC_COMM_WORLD,"%e\t%e\n",h_vec[0][64][64], h_vec[0][64][64]-pot_vec[0][64][64]); */
 /*       g_norm = h_vec[0][64][64]-pot_vec[0][64][64]; */
@@ -1204,7 +1204,7 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
       /* gg=h-h_old */
       VecWAXPY(gg, -1.0, h_old, h);
       VecNorm(gg, NORM_INFINITY, &g_norm);
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n", 
+      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n",
 		  k+1, g_norm, lambda);
 
       if(g_norm < norm_tol)
@@ -1216,12 +1216,12 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
       else
 	/* simple mixing: h = lambda*h+(1-lambda)*h_old */
 	VecAXPBY(h, (1-lambda), lambda, h_old);
-     
+
 /*       VecSum(h, &g_norm); */
 /*       VecSum(h_old, &gold_norm); */
 /*       PetscPrintf(PETSC_COMM_WORLD,"%e\n",g_norm*PD->h[0]*PD->h[1]*PD->h[2]/1000); */
 /*       VecShift(h,-g_norm*PD->h[0]*PD->h[1]*PD->h[2]/1000); */
-      
+
     }
 
   /* g= h+1 */
@@ -1233,9 +1233,9 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
   /* free stuff */
   VecDestroy(h_old);
   VecDestroy(gg);
-  
+
 
   HNC3dData_free(HD);
-  
+
   return h;
 }
