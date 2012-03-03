@@ -491,6 +491,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ);
 void VecSetRandom_H2O(Vec g, real mag);
 void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
+void Compute_dg_H2O_intraIII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+                             fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
 void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab,
 					Vec dg, Vec dg_help);
 void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad);
