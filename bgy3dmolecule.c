@@ -18,7 +18,7 @@ BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD)
   int i[3], x[3], n[3], dim;
   PetscScalar ***(fa_vec[3]),***(fb_vec[3]),***(fab_vec[3]);
   PetscScalar ***gaini_vec, ***gbini_vec, ***gabini_vec;
-  int bufsize, np;
+  int np;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
   PetscInt lx[1], ly[1], *lz;
 
@@ -282,7 +282,7 @@ void ComputeDiatomicAB_g_old(BGY3dDiatomicABData BDD, Vec g, Vec g0, Vec dg)
   DA da;
   int x[3], n[3], i[3];
   PetscScalar ***g_vec, ***dg_vec;
-  real g_norm;
+  // real g_norm;
 
   da = BDD->da;
 
@@ -321,7 +321,7 @@ void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg)
 {
   int local_size, i;
   PetscScalar *g_vec, *dg_vec;
-  real g_norm;
+  // real g_norm;
 
 
 
@@ -580,7 +580,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   DA da;
   int x[3], n[3], i[3], dim, index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, beta;
+  real fac, k_fac, L, k, h, beta; // sign;
 
   PD=BDD->PD;
 
@@ -798,7 +798,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
   DA da;
   int x[3], n[3], i[3], dim, index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, beta;
+  real fac, k_fac, L, k, h, beta; // sign;
 
   PD=BDD->PD;
 
@@ -985,7 +985,7 @@ void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec gab, V
 			 real norm_tol)
 {
   int i;
-  real tab_norm, ta_norm, tb_norm, a=0.2, g_norm, h;
+  real tab_norm, ta_norm, tb_norm, h; // a=0.2, g_norm, h;
 
   h = BDD->PD->h[0]*BDD->PD->h[1]*BDD->PD->h[2]/1000.;
 
@@ -1111,7 +1111,7 @@ Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
   PetscScalar dga_norm, dgb_norm, dgab_norm, norm_tol=1.0e-6;
 
   PetscScalar dgba_norm;
-  PetscTruth kflg, load_flag;
+  PetscTruth kflg; //, load_flag;
   PetscViewer viewer;
 
   assert(g_ini == PETSC_NULL);
