@@ -531,7 +531,7 @@ void ComputeH2O_g(Vec g, Vec g0, Vec dg)
 {
   int local_size, i;
   PetscScalar *g_vec, *dg_vec, *g0_vec;
-  real g_norm, k;
+  real  k; // g_norm
 
 
 
@@ -724,7 +724,7 @@ void ComputeH2O_Renormalization( BGY3dH2OData BHD, Vec g)
 {
   PData PD;
   real vsum, h3, *h;
-  PetscScalar *g_vec;
+  // PetscScalar *g_vec;
 
   PD = BHD->PD;
   h = PD->h;
@@ -800,7 +800,7 @@ void Zeropad_Function(BGY3dH2OData BHD, Vec g, real ZP, real shift)
   PData PD;
   int x[3], n[3], i[3], dim, border, N[3];
   PetscScalar ***g_vec;
-  real r[3], r_s, h[3], interval[2], s, r_rl_2, rr_rl_2r, rr_rl_3;
+  real h[3], interval[2]; //r[3], r_s, s, r_rl_2, rr_rl_2r, rr_rl_3;
 
   PD = BHD->PD;
   da = BHD->da;
@@ -1931,10 +1931,10 @@ void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], dim, index, N[3], ic[3]; //, local_size;
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta;
-  PetscScalar *v_vec, *tg_vec;
+  // PetscScalar *v_vec, *tg_vec;
 
 
   PD=BHD->PD;
@@ -2638,7 +2638,7 @@ void Compute_dg_H2O_intra_lnII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg,
   int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]);
   real fac, L, k, h, beta, k_fac;
-  PetscScalar *g_vec, *v_vec;
+  PetscScalar *g_vec; //, *v_vec;
 
 
   PD=BHD->PD;
@@ -2833,7 +2833,7 @@ void Compute_dg_H2O_intra_lnIII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg
   int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]), *n_fft;
   real fac, L, k, h, beta, k_fac;
-  PetscScalar *g_vec, *v_vec;
+  PetscScalar *g_vec; //, *v_vec;
 
 
   PD=BHD->PD;
@@ -3235,9 +3235,9 @@ void Compute_dg_H2O_normalization_inter(BGY3dH2OData BHD, Vec g1, Vec g2,
   DA da;
   int x[3], n[3], i[3], dim, index, N[3], ic[3];
   fftw_complex  *g1_fft, *g2_fft, *dg_fft, *scratch;
-  real fac, L, k, h, beta, sign;
-  PetscScalar *g_vec;
-  int local_size;
+  real fac, L, h, beta, sign; // k
+  // PetscScalar *g_vec;
+  // int local_size;
   PD=BHD->PD;
 
   da = BHD->da;
@@ -3513,14 +3513,14 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ, damp_start=0.0;
-  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad, norm;
-  int max_iter=25, iter, in_iter, mycount=0, upwards=0, namecount=0;
+  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad; //, norm;
+  int max_iter=25, iter, mycount=0, upwards=0, namecount=0; // in_iter
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm, norm_tol=1.0e-2;
   PetscScalar dgH_old, dgHO_old, dgO_old;
   real ti;
   int iteri;
-  PetscScalar dgOH_norm;
+  // PetscScalar dgOH_norm;
   PetscTruth kflg, load_flag;
   PetscViewer viewer;
 
@@ -4207,13 +4207,13 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ, damp_start=0.0;
-  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad, norm;
-  int max_iter=25, iter, in_iter, mycount=0, upwards=0, namecount=0;
+  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad; //, norm;
+  int max_iter=25, iter, mycount=0, upwards=0, namecount=0; // in_iter
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm, norm_tol=1.0e-2;
   PetscScalar dgH_old, dgHO_old, dgO_old;
 
-  PetscScalar dgOH_norm;
+  // PetscScalar dgOH_norm;
   PetscTruth kflg, load_flag;
   PetscViewer viewer;
 
