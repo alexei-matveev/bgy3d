@@ -87,12 +87,10 @@ include $(OBJECTS:.o=.d)
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
 
-%.d: %.c
+# node capital D here, this rule has no effect:
+%.D: %.c
 	set -e; $(CC) -M $(CFLAGS) $(LDFLAGS) $(INCDIRS) $< \
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
 	[ -s $@ ] || rm -f $@
-
-
-
 
 #---End of Makefile---
