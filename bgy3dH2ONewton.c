@@ -908,8 +908,8 @@ Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim)
   PetscTruth kflg, flg;
   Vec u, f, b, v1, v2;
   real damp, damp_start=0.0, zpad=100.0;
-  Mat M;
-  int local_size;
+  // Mat M;
+  // int local_size;
 
   assert(g_ini == PETSC_NULL);
 
@@ -1043,7 +1043,7 @@ Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim)
 
 Vec BGY3d_SolveNewton_H2O_MG(PData PD, Vec g_ini, int vdim)
 {
-  int n, nmax;
+  int nmax; // n;
 
 
 
