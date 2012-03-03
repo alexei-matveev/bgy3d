@@ -5,7 +5,7 @@
 #
 # Then
 #
-#   make
+#   make -s
 #
 all: bgy3d
 
