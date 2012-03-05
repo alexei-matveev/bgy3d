@@ -1511,7 +1511,7 @@ void ComputeBGY3dDiv_F3(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
 			Vec b, Vec f, PetscTruth kflg)
 {
   int dim;
-  Vec help[3], part[dim];
+  Vec help[3], part[3]; // was declared as part[dim];
 
 
   FOR_DIM
