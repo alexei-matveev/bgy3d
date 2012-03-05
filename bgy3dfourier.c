@@ -11,7 +11,7 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
 {
   BGY3dFourierData BDD;
   DA da;
-  real interval[2], h[3], N[3], L, r[3], r_s, **x_M, beta, h_g2;
+  real interval[2], h[3], N[3], L, r[3], r_s, **x_M, beta; //, h_g2;
   int i[3], x[3], n[3], dim, N_M, k,  N_g2, index;
   PetscScalar  ***(f_vec[3]), ***gini_vec, ***(v2_vec[3]);
   PetscScalar *g2_vec;
@@ -98,7 +98,7 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
       VecLoad( pview, VECSEQ, &g2);
       PetscViewerDestroy(pview);
       VecGetSize(g2,&N_g2);
-      h_g2 = L/N_g2;
+      // h_g2 = L/N_g2;
 
       //g2_vec[0] = g2_vec[1]+g2_vec[1]-g2_vec[2];
     }
@@ -213,6 +213,9 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
     }
   else
     {
+      // only used in this branch, declare inside the block:
+      real h_g2 = L / N_g2;
+
       VecGetArray(g2, &g2_vec);
       /* loop over local portion of grid */
       for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
