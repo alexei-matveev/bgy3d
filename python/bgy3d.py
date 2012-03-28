@@ -114,7 +114,8 @@ def moments2(h, r0=(0, 0, 0)):
 
 def sinc_hole(N, a=None, R=None):
     """
-    Returns an N x N x N distribution g(x) = 1 - sinc(|x|).
+    Returns an N x N x N distribution g(x) = 1 - sinc(|x - a| / R) for
+    use in testing.
 
     >>> vol = sinc_hole(5)
 
