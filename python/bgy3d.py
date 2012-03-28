@@ -45,7 +45,7 @@ def moments1(h, r0=(0, 0, 0)):
     Computes the  lowest momenta of  the distribution in  integer grid
     coordinates.
 
-    >>> m = moments1(sinc_hole(64))
+    >>> m = moments1(sinc_hole(64) - 1.0)
     >>> m[1:4] / m[0]
     array([ 31.5,  31.5,  31.5])
     """
@@ -90,7 +90,7 @@ def moments2(h, r0=(0, 0, 0)):
     Computes the  lowest momenta of  the distribution in  integer grid
     coordinates.
 
-    >>> m = moments2(sinc_hole(64))
+    >>> m = moments2(sinc_hole(64) - 1.0)
     >>> m[1:4] / m[0]
     array([ 31.5,  31.5,  31.5])
     """
