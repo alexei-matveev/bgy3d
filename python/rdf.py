@@ -48,8 +48,16 @@ def grid_distance(N, center):
 
 def layer_interval(r, dr):
     '''
-    Return number N, if r locates between Nth and N+1th shell, of which layer distance
-    between each layer is dr.
+    Return  number N, if  r locates  between Nth  and N+1th  shell, of
+    which layer distance between each layer is dr. FIXME: maybe return
+    an integer instead?
+
+    >>> layer_interval(1.1, 1.0)
+    1.0
+    >>> layer_interval(0.9, 1.0)
+    0.0
+    >>> layer_interval(0.5, 1.0)
+    0.0
     '''
     from math import floor
 
