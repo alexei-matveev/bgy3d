@@ -168,8 +168,9 @@ def test(path):
     save_file(r, rdf)
 
 if __name__ == "__main__":
-    
-    test("./g2H_32.bin")
+    import doctest
+    doctest.testmod()
+    # test("./g2H_32.bin")
 
 
 
