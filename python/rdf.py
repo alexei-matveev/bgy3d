@@ -27,6 +27,15 @@ def delta_V(r, dr):
 def grid_distance(N, center):
     '''
     Return the distance of each grid point to the center of the box
+
+    >>> r = grid_distance(3, (1, 1, 1))
+
+    Middle plane:
+
+    >>> r[1]
+    array([[ 1.41421356,  1.        ,  1.41421356],
+           [ 1.        ,  0.        ,  1.        ],
+           [ 1.41421356,  1.        ,  1.41421356]])
     '''
     # Generate a N x N x N grid mesh
     t = np.mgrid[0:N, 0:N, 0:N]
