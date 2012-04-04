@@ -66,7 +66,21 @@ def layer_interval(r, dr):
 
 def get_rdf(g, dr, interval=(-10, 10)):
     '''
-    Return shell radius spacing with dr and radial components of distribution functions
+    Return  shell radius  spacing  with dr  and  radial components  of
+    distribution functions.
+
+    The interval  of grid box is  (-10, 10) by default  which is often
+    used in BGY3D code.
+
+    >>> N, R, dR = 20, 2.0, 1.0
+    >>> g3 = bgy.sinc_hole(N, R=R)
+    >>> rs, gs = get_rdf(g3, dr=dR)
+
+    FIXME: the interface of get_rdf()  is somewhat cryptic, why do the
+    following two arrays show no sign of similarity?
+
+    #>> gs
+    #>> 1.0 - np.sinc(rs / R)
     '''
 
     # Number of grids in each direction
