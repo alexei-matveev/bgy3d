@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import bgy3d as bgy
 import numpy as np
