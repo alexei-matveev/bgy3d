@@ -64,7 +64,7 @@ def layer_interval(r, dr):
     return floor(r / dr)
 
 
-def get_rdf(g, dr):
+def get_rdf(g, dr, interval=(-10, 10)):
     '''
     Return shell radius spacing with dr and radial components of distribution functions
     '''
@@ -80,9 +80,6 @@ def get_rdf(g, dr):
 
     # Get the coordinate distances from each grid point to the center
     rgrid = grid_distance(N, center)
-
-    # the interval of grid box is [-10 : 10]
-    interval = [-10, 10]
 
     # Size of each grid point
     gsize = (interval[1] - interval[0]) / float(N) 
