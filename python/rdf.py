@@ -100,9 +100,9 @@ def get_rdf(g, dr, interval=(-10, 10)):
     acc_g = np.zeros(int(Rmax / dr))
 
     # Loop over the grid storing g and accumulate the value in each layer
-    for i in range(N):
-        for j in range(N):
-            for k in range(N):
+    for i in xrange(N):
+        for j in xrange(N):
+            for k in xrange(N):
                 R = rgrid[i, j, k]
                 # Ensure we'are still in the max shell
                 if R <= Rmax:
