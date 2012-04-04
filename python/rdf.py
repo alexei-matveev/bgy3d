@@ -6,12 +6,23 @@ import numpy as np
 def delta_V(r, dr):
     '''
     Return the volume of layer between shell(r + dr) and shell(r)
-              4
-    delta_V = - * PI * [(r + dr) ^ 3 - r ^ 3]
-              3
-    while r is shell radius and dr is bin width between two shells 
+
+          4                  3   3
+    dV = --- * PI * [(r + dr) - r ]
+          3
+
+    while r is shell radius and dr is bin width between two shells.
+
+    Note the difference in precision:
+
+    >>> r, dr = 1.0e6, 1.0e-6
+    >>> 4. / 3. * np.pi * ((r + dr)**3 - r**3)
+    12566638.696932279
+
+    >>> delta_V(r, dr)
+    12566370.614371737
     '''
-    return 4 * np.pi * ( 3 * r * dr * ( r + dr ) + dr**3 ) / 3
+    return 4.0 * np.pi * (3.0 * r * dr * (r + dr) + dr**3) / 3.0
 
 def grid_distance(N, center):
     '''
