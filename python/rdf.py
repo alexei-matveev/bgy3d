@@ -63,6 +63,33 @@ def layer_interval(r, dr):
 
     return floor(r / dr)
 
+# Greatest Common Divisor algorithm, get from google
+# http://code.activestate.com/recipes/577282-finding-the-gcd-of-a-list-of-numbers-aka-reducing-/
+def GCD(a,b):
+    '''
+    Return the GCD of two numbers
+
+    >>> GCD(6,9)
+    3
+    >>> GCD(4.0, 8.0)
+    4.0
+    '''
+    return abs(a) if b==0 else GCD(b, a%b)
+
+def GCD_List(list):
+    '''
+    Return the GCD of a list of numbers
+
+    >>> a = [2, 4, 6, 8]
+    >>> GCD_List(a)
+    2
+    >>> b = [3.0, 6.0, 9.0]
+    >>> GCD_List(b)
+    3.0
+    '''
+    return reduce(GCD, list)
+
+
 
 def get_rdf(g, dr, interval=(-10, 10)):
     '''
