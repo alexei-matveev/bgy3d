@@ -90,6 +90,98 @@ def GCD_List(list):
     return reduce(GCD, list)
 
 
+def get_one(g, vec=[1, 1, 1]):
+    '''
+    Return radial components of distribution function along with relevant distances 
+    in a single direction determined by vec, which defaulted as [1, 1, 1]
+
+    >>> N, R = 20, 2.0
+    >>> g3 = bgy.sinc_hole(N, R=R)
+    >>> rs, gs = get_one(g3)
+
+    >>> gs
+    array([ 0.28111293,  1.19780139,  0.92713167,  1.01024038,  1.02594318,
+            0.95473599,  1.05195458,  0.95099858,  1.03919611,  0.97466649])
+    >> 1.0 - np.sinc(rs / R)
+    array([ 0.28111293,  1.19780139,  0.92713167,  1.01024038,  1.02594318,
+            0.95473599,  1.05195458,  0.95099858,  1.03919611,  0.97466649])
+    '''
+    # Number of grids in each direction
+    N = bgy.root3(np.size(g))
+
+    # Get the zero and first moments 
+    m = bgy.moments1(1.0 - g)
+
+    # Get the center of the grid
+    center = np.empty(3,dtype='float')
+    center = m[1:4] / m[0]
+    center = [round(center[i], 1) for i in range(3)]
+
+    # Get the coordinate distances from each grid point to the center
+    rgrid = grid_distance(N, center)
+
+    # Get GCD of three component of direction vector
+    v_gcd = GCD_List(vec)
+
+    # Then get the reduced direction vector
+    vec_new = [vec[i] / v_gcd for i in range(3)]
+
+    # cor_ini: initial grid for iteration in each direction
+    # Nmax: max iterations times in each direction
+    # if the center looks like:
+    #   center = [10, 9.5, 10]
+    # and shape(g) = [20, 20, 20]
+    # then we have different strategies for vec = [1, 1, 1] and vec = [1, -1, 1]
+    # if vec = [1, 1, 1], iteration begins from [10, 10, 10], and ends after 20 - 10 = 10 times
+    # if vec = [1, -1, 1], iteration begins from [10, 9, 10], and ends after 9 - 0 + 1 = 10 times
+    cor_ini = np.empty(3)
+    Nmax = np.empty(3)
+
+    # Get initial grid and max iteration times in each direction
+    for i in range(3):
+        # center coordinate is fractional
+        if center[i] % 1 != 0:
+            # begins from the left nearest grid if vec[i] < 0
+            if vec_new[i] < 0:
+                cor_ini[i] = np.round(center[i] - 0.5, 1)
+                Nmax[i] = abs(int((cor_ini[i] + 1) / vec_new[i]))
+            # begins from the right nearest grid if vec[i] > 0
+            elif vec_new[i] > 0:
+                cor_ini[i] = np.round(center[i] + 0.5, 1)
+                Nmax[i] = abs(int((N - cor_ini[i]) / vec_new[i]))
+            # always begins from the left nearest grid if vec[i] = 0
+            else:
+                cor_ini[i] = np.round(center[i], 1)
+                Nmax[i] = float("inf")
+        else:
+        # simpler if center coordinates is integers, but iteration times in different directions might vary
+            cor_ini[i] = center[i]
+            if vec_new[i] < 0:
+                Nmax[i] = abs(int((cor_ini[i] + 1) / vec_new[i]))
+            elif vec_new[i] > 0:
+                Nmax[i] = abs(int((N - cor_ini[i]) / vec_new[i]))
+            else:
+                Nmax[i] = float("inf")
+
+    # Actual iteration times is the mininum of those in three direction
+    # Might improve this if PBS applied
+    N_iter = int(min(Nmax))
+
+    # rs: distances
+    # gs: value of distribution function
+    rs = np.empty(N_iter)
+    gs = np.empty(N_iter)
+
+    for ii in range(N_iter):
+        # Get grid coordinates in each direction
+        cor_xx = cor_ini[0] + ii * vec_new[0]
+        cor_yy = cor_ini[1] + ii * vec_new[1]
+        cor_zz = cor_ini[2] + ii * vec_new[2]
+        rs[ii] = rgrid[cor_xx, cor_yy, cor_zz]
+        gs[ii] = g[cor_xx, cor_yy, cor_zz]
+
+    return rs, gs
+
 
 def get_rdf(g, dr, interval=(-10, 10)):
     '''
