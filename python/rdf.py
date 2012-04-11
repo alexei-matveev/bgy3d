@@ -184,6 +184,9 @@ def save_file(r, g):
                 inputting = False
             else:
                 opt = raw_input("Unknown options, enter 'y' or 'n'")
+    else:
+        f = file("rdf.npz", "wb")
+
     np.savez(f, R = r, rdf = g)
     f.close()
 
