@@ -318,7 +318,9 @@ def test(path):
     # dr = 0.15625
     # For N = 256, try dr = 20 / 256
     # dr = 0.078125
-    r, rdf = get_rdf(g, dr)
+    # r, rdf = get_rdf(g, dr)
+    r, rdf = get_one(g)
+
 
 #    print r
 #    print rdf
