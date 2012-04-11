@@ -210,6 +210,7 @@ def get_rdf(g, dr, interval=(-10, 10)):
 
     # Get the center of the grid
     center = m[1:4] / m[0]
+    # print "center=", center
 
     # Get the coordinate distances from each grid point to the center
     rgrid = grid_distance(N, center)
@@ -230,31 +231,55 @@ def get_rdf(g, dr, interval=(-10, 10)):
     Rshell = np.empty(int(Rmax / dr))
 
     # Array to store accumulated g in each layer
-    acc_g = np.zeros(int(Rmax / dr))
+    # acc_g = np.zeros(int(Rmax / dr))
+
+    # import time
+    # print "A", time.time()
+
+    # FIXME: why stopping with array operations here?
+    ind = np.empty(rgrid.shape, dtype='int')
+
+    # fill an integer array with data, converted to integer:
+    ind[:, :, :] = np.floor(rgrid / dr)
+
+    acc = np.zeros(1 + np.max(ind))
+
+    for i, gi in zip(ind.flat, g.flat):
+        acc[i] += gi
+
+    # print "B", time.time()
 
     # Loop over the grid storing g and accumulate the value in each layer
-    for i in xrange(N):
-        for j in xrange(N):
-            for k in xrange(N):
-                R = rgrid[i, j, k]
-                # Ensure we'are still in the max shell
-                if R <= Rmax:
-                    # r<= R < r + dr
-                    R_interval = layer_interval(R, dr)
-                    # Accumulate the value of g in this layer
-                    acc_g[R_interval] += g[i, j, k] 
+    # for i in xrange(N):
+    #     for j in xrange(N):
+    #         for k in xrange(N):
+    #             R = rgrid[i, j, k]
+    #             # Ensure we'are still in the max shell
+    #             if R <= Rmax:
+    #                 # r<= R < r + dr
+    #                 R_interval = layer_interval(R, dr)
+    #                 # assert R_interval == bins[i, j, k]
+    #                 # Accumulate the value of g in this layer
+    #                 acc_g[R_interval] += g[i, j, k] 
 
+    # print "C", time.time()
+
+    # print "1=", acc_g
+    # print "2=", acc
     # First mutiply accumulated g by volume of each grid occupy
-    acc_g *= gvol
+    # acc_g *= gvol
+    acc *= gvol
 
     # Then divide it by the volume of the layer between two shells
     for ii in range(int(Rmax / dr)):
         # Get the radius of each shell
         Rshell[ii] = ii * dr
-        acc_g[ii] /= delta_V(Rshell[ii], dr)
+        # acc_g[ii] /= delta_V(Rshell[ii], dr)
+        acc[ii] /= delta_V(Rshell[ii], dr)
 
 
-    return Rshell, acc_g
+    # return Rshell, acc_g
+    return Rshell, acc
 
 def save_file(r, g):
     '''
