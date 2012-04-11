@@ -90,7 +90,7 @@ def GCD_List(list):
     return reduce(GCD, list)
 
 
-def get_one(g, vec=[1, 1, 1]):
+def get_one(g, vec=[1, 1, 1], interval=(-10, 10)):
     '''
     Return radial components of distribution function along with relevant distances 
     in a single direction determined by vec, which defaulted as [1, 1, 1]
@@ -119,6 +119,12 @@ def get_one(g, vec=[1, 1, 1]):
 
     # Get the coordinate distances from each grid point to the center
     rgrid = grid_distance(N, center)
+
+    # Size of each grid point
+    gsize = (interval[1] - interval[0]) / float(N) 
+
+    # Now convert rgrid to REAL unit
+    rgrid *= gsize
 
     # Get GCD of three component of direction vector
     v_gcd = GCD_List(vec)
