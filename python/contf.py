@@ -21,7 +21,7 @@ def m2dat(path):
         newfile = fileprefix + ".dat"
         # Check whether file with the same name exists
         if os.path.isfile(newfile):
-            print "file '" + newfile + "' alreay exists"
+            print "file '" + newfile + "' already exists"
             print "overwrite/continue to use/write to new? (o/c/n)"
             try:
                 opt = raw_input()
