@@ -31,8 +31,9 @@ def m2dat(path):
                         inputting = False
                         # Remove the first and last line of the .m file
                         # redirect the content to the new file.
-                        cmdstring = "sed -e '1d; $d' " + path + " > " + newfile
-                        os.system(cmdstring)
+                        # cmdstring = "sed -e '1d; $d' " + path + " > " + newfile
+                        # os.system(cmdstring)
+                        continue
                     elif opt == 'n':
                         try:
                             newfile = raw_input("Enter a new file name:")
@@ -50,16 +51,7 @@ def m2dat(path):
                         exit()
                     else:
                         opt = raw_input("Unknown options, enter 'y' or 'n' ('q' to quit)")
-                # Load the plain txt file
-                f = file(newfile,'r')
-                vec = np.loadtxt(f)
-                f.close()
 
-                # Reshape the array
-                n = bgy.root3(np.size(vec))
-                vec.shape = (n, n, n)
-
-                return vec
 
             except KeyboardInterrupt:
                 print "\nUser terminated."
@@ -69,6 +61,22 @@ def m2dat(path):
                 exit()
             #except:
             #    print '\nSome error/exception occurred.'
+
+        # Remove the first and last line of the .m file
+        # redirect the content to the new file.
+        cmdstring = "sed -e '1d; $d' " + path + " > " + newfile
+        os.system(cmdstring)
+
+        # Load the plain txt file
+        f = file(newfile,'r')
+        vec = np.loadtxt(f)
+        f.close()
+
+        # Reshape the array
+        n = bgy.root3(np.size(vec))
+        vec.shape = (n, n, n)
+
+        return vec
 
 
 
