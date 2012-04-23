@@ -142,7 +142,7 @@ def poly_fit(x, y, deg = 5):
 
     >>> x = np.linspace(0, 2.0 * np.pi, 10)
     >>> y = np.sin(x)
-    >>> find_extrm(x, y)
+    >>> poly_fit(x, y)
     Polynomial fitting: 
     local minimum is -1.0046 at x = 4.7241
     local maximum is 1.0046 at x = 1.5591
