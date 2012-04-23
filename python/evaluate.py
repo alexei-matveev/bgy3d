@@ -141,7 +141,7 @@ def poly_fit(x, y, deg = 5):
 
     >>> x = np.linspace(0, 2.0 * np.pi, 10)
     >>> y = np.sin(x)
-    >>> poly_fit(x, y)
+    >>> xm, ym = poly_fit(x, y)
     Polynomial fitting: 
     local minimum is -1.0046 at x = 4.7241
     local maximum is 1.0046 at x = 1.5591
@@ -161,8 +161,8 @@ def poly_fit(x, y, deg = 5):
     proots = np.roots(pcoef1)
     
     # Arrays to store local extrema
-    xm = np.empty(np.size(proots))
-    ym = np.empty(np.size(proots))
+    xm = np.empty(0)
+    ym = np.empty(0)
 
     # Number of found local extrema
     count = 0
@@ -174,14 +174,13 @@ def poly_fit(x, y, deg = 5):
         der2 = np.polyval(pcoef2, xr)
         # Ensure it's real number and locates in the interval
         if xr.imag == 0 and xr >= x[0] and xr <= x[-1] :
-            xm[count] = xr
-            # jocal maximum if 2nd derivative is negative
+            xm = np.append(xm, xr.real)
+            ym = np.append(ym, float(np.polyval(coef1, xm[count])))
+            # Local maximum if 2nd derivative is negative
             if der2 < 0:
-                ym[count] = float(np.polyval(coef1, xm[count]))
                 print "local maximum is %6.4f at x = %6.4f" % (ym[count], xm[count])
             # Local minimum if 2nd derivative is positive
             elif der2 > 0:
-                ym[count] = float(np.polyval(coef1, xm[count]))
                 print "local minimum is %6.4f at x = %6.4f" % (ym[count], xm[count])
             count += 1
 
@@ -200,16 +199,19 @@ def poly_fit(x, y, deg = 5):
         # Plot original and fitted function data
         plt.plot(x, y, 'gs-', xx, yy, 'b--', linewidth = 2)
         # Plot the local maximum/minimum
-        plt.plot(xm[:count], ym[:count], 'ro', ms = 6)
+        # plt.plot(xm[:count], ym[:count], 'ro', ms = 6)
+        plt.plot(xm, ym, 'ro', ms = 6)
         plt.show()
+
+    return xm, ym
 
 def test(path):
 
     r, g = loadbin(path)
     # r, g = loadtxt(path)
     rinter, ginter = get_interval(r, g, interval = (3.5, 4.5))
-    poly_fit(rinter, ginter)
-    interplt_fit(rinter, ginter, [4], [True])
+    xmp, ymp = poly_fit(rinter, ginter)
+    xmi, ymi = interplt_fit(rinter, ginter, [4], [True])
 
 if __name__ == '__main__':
 
