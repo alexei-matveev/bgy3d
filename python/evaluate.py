@@ -70,7 +70,7 @@ def interplt_fit(x, y, x0, max, kind = 5):
     >>> y = np.sin(x)
     >>> x0 = [1.5, 4.5]
     >>> max = [True, False]
-    >>> interplt_fit(x, y, x0, max)
+    >>> xm, ym = interplt_fit(x, y, x0, max)
     Interpolating: 
     Optimization terminated successfully.
              Current function value: -0.999934
@@ -97,31 +97,28 @@ def interplt_fit(x, y, x0, max, kind = 5):
     yy = spline_fit(xx)
 
     # Arrays to store local minimum/maximum
-    xmin = np.empty(0)
-    ymin = np.empty(0)
-    xmax = np.empty(0)
-    ymax = np.empty(0)
+    xm = np.empty(0)
+    ym = np.empty(0)
 
     # count numbers
-    maxcount = 0
-    mincount = 0
+    mcount = 0
 
     print "Interpolating: "
     for x0i, mi in zip(x0, max):
         # Local maximum
         if mi:
-            xmax = np.append(xmax, fmin(vspline_fit, x0i))
-            ymax = np.append(ymax, spline_fit(xmax[maxcount]))
-            print "local maximum is %6.4f at x = %6.4f" % (ymax[maxcount], xmax[maxcount])
-            maxcount += 1
+            xm = np.append(xm, fmin(vspline_fit, x0i))
+            ym = np.append(ym, spline_fit(xm[mcount]))
+            print "local maximum is %6.4f at x = %6.4f" % (ym[mcount], xm[mcount])
+            mcount += 1
         # Local minimum
         else:
-            xmin = np.append(xmin, fmin(spline_fit, x0i))
-            ymin = np.append(ymin, spline_fit(xmin[mincount]))
-            print "local minimum is %6.4f at x = %6.4f" % (ymin[mincount], xmin[mincount])
-            mincount += 1
+            xm = np.append(xm, fmin(spline_fit, x0i))
+            ym = np.append(ym, spline_fit(xm[mcount]))
+            print "local minimum is %6.4f at x = %6.4f" % (ym[mcount], xm[mcount])
+            mcount += 1
 
-    if maxcount == 0 and mincount == 0 :
+    if mcount == 0:
         print " No local minimum/maximum found in [%6.4f, %6.4f]" % (x[0], x[-1])
         print " Choose another interval space."
         exit()
@@ -131,8 +128,10 @@ def interplt_fit(x, y, x0, max, kind = 5):
         # Plot original data and interpolate function
         plt.plot(x, y, 'gs-', xx, yy, 'b--', linewidth = 2)
         # Plot local extrema
-        plt.plot(xmin[:], ymin[:], xmax[:], ymax[:], 'ro', ms = 8)
+        plt.plot(xm[:], ym[:], 'ro', ms = 8)
         plt.show()
+
+    return xm, ym
 
 
 
