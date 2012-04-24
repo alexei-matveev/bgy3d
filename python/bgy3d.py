@@ -112,6 +112,45 @@ def moments2(h, r0=(0, 0, 0)):
     # Return a flat array of four moments:
     return array([m0] + m1)
 
+def moments2nd(h, r0 = (0, 0, 0)):
+    """
+    Computes the second momenta of the distribution in integer grid
+    coordinates.
+
+    >>> m1 = moments1(sinc_hole(64) - 1.0)
+    >>> center = m1[1:4] / m1[0]
+    >>> m2 = moments2nd(sinc_hole(64) - 1.0, center)
+    >>> m2 / m1[0]
+    array([ -8.08456013e-13,   3.06434477e-14,   8.46290161e-14,
+             5.96045623e+02,   1.29571417e-11,   2.68220530e+03])
+
+    """
+
+    N = root3(size(h))
+
+    t = mgrid[0:N]
+ 
+    x = t[:, None, None] - r0[0]
+    y = t[None, :, None] - r0[1]
+    z = t[None, None, :] - r0[2]
+
+    # Second moments
+    # < x * y >
+    mxy = sum(x * y * h)
+    # < y * z >
+    myz = sum(y * z * h)
+    # < z * x >
+    mzx = sum(z * x * h)
+    # < z^2 - 1/3 * r^2 >
+    mz2 = sum((2 * z**2 - x**2 + y**2) / 3.0 * h)
+    # < x^2 - y^2 >
+    mx2y2 = sum(( x**2 - y**2) * h)
+    # < r^2 >
+    mr2 = sum( ( x**2 + y**2 + z**2) *h )
+
+    return array((mxy, myz, mzx, mz2, mx2y2, mr2))
+
+
 def sinc_hole(N, a=None, R=None):
     """
     Returns an N x N x N distribution g(x) = 1 - sinc(|x - a| / R) for
