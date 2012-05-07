@@ -79,7 +79,7 @@ function main(){
             echo -e "Run $workname:"
             mkdir -p $workdir
             # FIXME: maybe passing command line parameters from here rather than setting in makefile?
-            make -f Makefile_test BGY2site WORK_DIR=$workdir EXE=$bgyexe  2>&1 | tee $testout
+            make -f Makefile BGY2site WORK_DIR=$workdir EXE=$bgyexe  2>&1 | tee $testout
 
             # Get moments information for each particle pair
             echo "Caculating moments of distribution functions:"
@@ -97,7 +97,7 @@ function main(){
             mkdir -p $workdir
             # Check g2 function data first 
             solute_init $PWD/test_HCl $workdir
-            make -f Makefile_test BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
+            make -f Makefile BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
 
             # Get moments information for each particle pair
             echo "Caculating moments of distribution functions:"
@@ -113,7 +113,7 @@ function main(){
             if [ -f "test_*" ]; then
                 workdir=(`ls -d test_* | awk -F" " '{print $1}'`)
                 for((i=0;i<${#workdir[@]};i++));do
-                    make -f Makefile_test clean WORK_DIR=${workdir[$i]}
+                    make -f Makefile clean WORK_DIR=${workdir[$i]}
                 done
             else
                 echo "No test directory"
