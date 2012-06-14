@@ -227,6 +227,9 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
 /******************************/
 /* Create initial solute data */
 /******************************/
+// FIX ME: see (5.106) and (5.08) in the thesis
+// FIX ME: return BHD->gH_ini and BHD->gO_ini ( beta*(VM_LJ + VM_coulomb_short) )
+// FIX ME: and BHD->ucH, BHD->ucO ( beta * VM_coulomb_long ), but is beta missing here ??
 void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad)
 {
   DA da;
@@ -526,7 +529,7 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 	  FOR_DIM
 	    r[dim] = i[dim]*h[dim]+interval[0]-x0[dim];
 
-
+          // FIX ME: Gaussian distribution
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
 	  v_vec[i[2]][i[1]][i[0]] = fac*exp(-SQR(r_s*G));
@@ -535,6 +538,7 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 
 	}
   DAVecRestoreArray(da, uc, &v_vec);
+  // FIX ME: convert to fft_complex
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, uc, fft_data,
  			 BHD->fft_scratch, x, n, 0);
 
@@ -568,6 +572,7 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 	      dg_fft[index].im = 0;
 	    }
 	  else
+          // FIX ME: Fourier component of V_coulomb_long ??
 	    {
 	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]))/SQR(L);
 	      fac = h3*EPSILON0INV/M_PI/k;
@@ -583,6 +588,7 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 	}
 
   /* FFT */
+  // fft_complex to Vec
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, uc, dg_fft,
 			 BHD->fft_scratch, x, n, 0);
   VecScale(uc, 1./L/L/L);
