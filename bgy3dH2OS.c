@@ -825,16 +825,24 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 /*   exit(1);   */
 
   /* Compute FFT(F*g^2) */
+  // FIX ME: F*g2 = (F_LJ + F_coulomb_short) * g2 + (F_coulomb_long * g2 - F_coulomb_long) + F_coulomb_long
+  // FIX ME: see (5.101) and (5.102) in Jager's thesis
+  // FIX ME: FFT(F_coulomb_long) has been calculated as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft by ComputeFFTfromCoulomb() above
   FOR_DIM
     {
       /* OO */
+      // FIX ME: (F_LJ + F_coulomb_short) * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
+      // FIX ME: FFT((F_LJ + F_coulomb_short) * g2) 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim],
 			     BHD->fft_scratch, x, n, 0);
       /* Coulomb long */
+      // FIX ME: F_coulomb_long * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
+      // FIX ME: F_coulomb_long * g2 - F_coulomb_long
       VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
+      // FIX ME: FFT(F_coulomb_long * g2 - F_coulomb_long)
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim],
 			     BHD->fft_scratch, x, n, 0);
       /* HH */
@@ -1552,6 +1560,9 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	{
 	  damp_LJ=0;
 	  //a0=0.4;
+          // FIX ME: return F * g2, not the calculation of F is divided due to long range Coulomb interation
+          // FIX ME: see comments in the function
+          // FIX ME: here F is force within solvents particles
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
 	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
