@@ -1599,8 +1599,13 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
       //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
 
+      // FIX ME: p116-177 in thesis: Boundary Conditions
+      // FIX ME: (5.107) -(5.110)
+      // FIX ME: first impose boundary condistion
+      // FIX ME: then solve laplacian equation and substrate from g0
       ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
       ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
+      // FIX ME: then correct g0 with boundary condition again
       Zeropad_Function(BHD, g0O, zpad, 0.0);
       Zeropad_Function(BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
