@@ -459,8 +459,11 @@ void BGY3dH2OData_free(BGY3dH2OData BHD);
 Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim);
 Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim);
 Vec BGY3d_solve_4site(PData PD, Vec g_ini, int vdim);
-real Coulomb_short( real r, void *params);
-real Coulomb_short_grad( real r, real rx, void *params);
+// Replaced void pointer as real number in Coulomb_short() and Coulomb_short_grad()
+// real Coulomb_short( real r, void *params);
+real Coulomb_short( real r, real SQRq);
+// real Coulomb_short_grad( real r, real rx, void *params);
+real Coulomb_short_grad( real r, real rx, real SQRq);
 real Coulomb_long( real r, void *params);
 real Coulomb_long_grad( real r, real rx, void *params);
 real Coulomb( real r, void *params);
