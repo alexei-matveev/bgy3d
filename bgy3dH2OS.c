@@ -772,11 +772,16 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 
  	      /* Coulomb short */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
+		// damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
+                // Following the form in BGY3dH2OData_malloc() 
+                // to pass member of void pointer
+		damp * Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsH))[2]);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
+		// damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
+		damp * Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsO))[2]);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		// damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		damp * Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsHO))[2]);
 
 	      /* Coulomb long */
 /*  	      fH_vec[dim][i[2]][i[1]][i[0]] +=  */
@@ -955,9 +960,13 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
 	  /* Coulomb short */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    damp*beta* Coulomb_short( r_s, BHD->LJ_paramsH);
+	    // damp*beta* Coulomb_short( r_s, BHD->LJ_paramsH);
+            // Following the form in BGY3dH2OData_malloc() 
+            // to pass member of void pointer
+	    damp*beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsH))[2]);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    damp*beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
+	    // damp*beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
+	    damp*beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsHO))[2]);
 
 
 	  /* Coulomb long */
