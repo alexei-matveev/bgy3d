@@ -307,11 +307,14 @@ real LJ_repulsive(real r, void *LJ_params)
 }
 
 
-real Coulomb_short( real r, void *params)
+// Alternate void pointer as real number
+// real Coulomb_short( real r, void *params)
+real Coulomb_short( real r, real SQRq)
 {
   real q2, re;
 
-  q2 = ((double*)params)[2];
+  // q2 = ((double*)params)[2];
+  q2 = SQRq;
 
    if(r==0)
      {
@@ -337,11 +340,14 @@ real Coulomb_short( real r, void *params)
     return re;
 }
 
-real Coulomb_short_grad( real r, real rx, void *params)
+// Alternate void pointer as real number
+// real Coulomb_short_grad( real r, real rx, void *params)
+real Coulomb_short_grad( real r, real rx, real SQRq )
 {
   real q2, re;
 
-  q2 = ((double*)params)[2];
+  // q2 = ((double*)params)[2];
+  q2 = SQRq;
 
   if(rx==0)
     return 0;
