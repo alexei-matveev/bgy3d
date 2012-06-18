@@ -255,11 +255,16 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 
 	  /* Coulomb short */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, BHD->LJ_paramsH);
+            // Following the form in BGY3dH2OData_Pair_malloc() 
+            // to pass member of void pointer
+	    // beta* Coulomb_short( r_s, BHD->LJ_paramsH);
+	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsH))[2]);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, BHD->LJ_paramsO);
+	    // beta* Coulomb_short( r_s, BHD->LJ_paramsO);
+	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsO))[2]);
 	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
+	    // beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
+	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsHO))[2]);
 
 	  /* Coulomb long */
 /* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
@@ -290,11 +295,16 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 
  	      /* Coulomb short */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
+		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
+                // Following the form in BGY3dH2OData_Pair_malloc() 
+                // to pass member of void pointer
+		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsH))[2]);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
+		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
+		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsO))[2]);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsHO))[2]);
 
 	      /* Coulomb long */
 /*  	      fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
