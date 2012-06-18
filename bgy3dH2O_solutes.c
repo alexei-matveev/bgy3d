@@ -331,9 +331,13 @@ void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real 
 
 	      /* Coulomb short */
 	      gHini_vec[i[2]][i[1]][i[0]] +=
-		damp*beta* Coulomb_short( r_s, (void*)p_H);
+		// damp*beta* Coulomb_short( r_s, (void*)p_H);
+                // replace void pointer as real number
+		damp*beta* Coulomb_short( r_s, p_H[2]);
 	      gOini_vec[i[2]][i[1]][i[0]] +=
-		damp*beta* Coulomb_short( r_s, (void*)p_O);
+		// damp*beta* Coulomb_short( r_s, (void*)p_O);
+                // replace void pointer as real number
+		damp*beta* Coulomb_short( r_s, p_O[2]);
 
 
 	      /* Coulomb long */
