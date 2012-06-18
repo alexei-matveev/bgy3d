@@ -1579,7 +1579,9 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
           // FIX ME: return BHD->gH_ini, BHD->gO_ini (see definition above)
           // FIX ME: and BHD->ucH, BHD->ucO, which are VM_Coulomb_long, but should they multiply by beta?
-	  RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
+	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
+          // Change solute as HCl for standard test
+          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
       else if(damp==0.0)
@@ -1589,7 +1591,9 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
 	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-	  RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
+	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
+          // Change solute as HCl for standard test
+          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
       else
@@ -1601,7 +1605,9 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  RecomputeInitialFFTs(BHD, (damp), 1.0);
 	  //RecomputeInitialSoluteData(BHD, (damp), 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, (damp), 1.0, zpad);
-	  RecomputeInitialSoluteData_Hexane(BHD, (damp), 1.0, zpad);
+	  // RecomputeInitialSoluteData_Hexane(BHD, (damp), 1.0, zpad);
+          // Change solute as HCl for standard test
+          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
 
