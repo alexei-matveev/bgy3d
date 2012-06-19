@@ -830,24 +830,24 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 /*   exit(1);   */
 
   /* Compute FFT(F*g^2) */
-  // FIX ME: F*g2 = (F_LJ + F_coulomb_short) * g2 + (F_coulomb_long * g2 - F_coulomb_long) + F_coulomb_long
-  // FIX ME: see (5.101) and (5.102) in Jager's thesis
-  // FIX ME: FFT(F_coulomb_long) has been calculated as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft by ComputeFFTfromCoulomb() above
+  // XXX: F*g2 = (F_LJ + F_coulomb_short) * g2 + (F_coulomb_long * g2 - F_coulomb_long) + F_coulomb_long
+  // XXX: see (5.101) and (5.102) in Jager's thesis
+  // XXX: FFT(F_coulomb_long) has been calculated as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft by ComputeFFTfromCoulomb() above
   FOR_DIM
     {
       /* OO */
-      // FIX ME: (F_LJ + F_coulomb_short) * g2 
+      // XXX: (F_LJ + F_coulomb_short) * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
-      // FIX ME: FFT((F_LJ + F_coulomb_short) * g2) 
+      // XXX: FFT((F_LJ + F_coulomb_short) * g2) 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim],
 			     BHD->fft_scratch, x, n, 0);
       /* Coulomb long */
-      // FIX ME: F_coulomb_long * g2 
+      // XXX: F_coulomb_long * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
-      // FIX ME: F_coulomb_long * g2 - F_coulomb_long
+      // XXX: F_coulomb_long * g2 - F_coulomb_long
       VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
-      // FIX ME: FFT(F_coulomb_long * g2 - F_coulomb_long)
+      // XXX: FFT(F_coulomb_long * g2 - F_coulomb_long)
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim],
 			     BHD->fft_scratch, x, n, 0);
       /* HH */
@@ -1525,8 +1525,8 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
-// FIX ME: here g0 = beta * (VM_LJ + VM_coulomb_short) actually
-// FIX ME: see: (5.106) and (5.108) in Jager's thesis
+// XXX: here g0 = beta * (VM_LJ + VM_coulomb_short) actually
+// XXX: see: (5.106) and (5.108) in Jager's thesis
   g0H=BHD->gH_ini;
   g0O=BHD->gO_ini;
 
@@ -1571,14 +1571,14 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	{
 	  damp_LJ=0;
 	  //a0=0.4;
-          // FIX ME: return F * g2, not the calculation of F is divided due to long range Coulomb interation
-          // FIX ME: see comments in the function
-          // FIX ME: here F is force within solvents particles
+          // XXX: return F * g2, not the calculation of F is divided due to long range Coulomb interation
+          // XXX: see comments in the function
+          // XXX: here F is force within solvents particles
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
 	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-          // FIX ME: return BHD->gH_ini, BHD->gO_ini (see definition above)
-          // FIX ME: and BHD->ucH, BHD->ucO, which are VM_Coulomb_long, but should they multiply by beta?
+          // XXX: return BHD->gH_ini, BHD->gO_ini (see definition above)
+          // XXX: and BHD->ucH, BHD->ucO, which are VM_Coulomb_long, but should they multiply by beta?
 	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
           // Change solute as HCl for standard test
           RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
@@ -1614,13 +1614,13 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
       //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
 
-      // FIX ME: p116-177 in thesis: Boundary Conditions
-      // FIX ME: (5.107) -(5.110)
-      // FIX ME: first impose boundary condistion
-      // FIX ME: then solve laplacian equation and substrate from g0
+      // XXX: p116-177 in thesis: Boundary Conditions
+      // XXX: (5.107) -(5.110)
+      // XXX: first impose boundary condistion
+      // XXX: then solve laplacian equation and substrate from g0
       ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
       ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
-      // FIX ME: then correct g0 with boundary condition again
+      // XXX: then correct g0 with boundary condition again
       Zeropad_Function(BHD, g0O, zpad, 0.0);
       Zeropad_Function(BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
