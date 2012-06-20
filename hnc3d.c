@@ -18,14 +18,19 @@ HNC3dData HNC3dData_malloc(PData PD)
   int bufsize, k, N_M, N_c1d, index;
   Vec c_1d;
   PetscViewer pview;
+  real epsilon, sigma;
 
 
   HD = (HNC3dData) malloc(sizeof(*HD));
 
 
-  HD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
-  ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
+  // HD->LJ_params = (void* ) malloc(sizeof(real)*2);
+  // ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
+  // ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
+  HD->LJ_params[0] = 1.0;
+  HD->LJ_params[1] = 1.0;
+  epsilon = HD->LJ_params[0];
+  sigma = HD->LJ_params[1];
 
   HD->beta = PD->beta;
   HD->rho  = PD->rho;
@@ -104,10 +109,12 @@ HNC3dData HNC3dData_malloc(PData PD)
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	      pot_vec[i[2]][i[1]][i[0]] +=
 		//exp(-r_s*r_s);
-		Lennard_Jones( r_s, HD->LJ_params);
+		// Lennard_Jones( r_s, HD->LJ_params);
+		Lennard_Jones( r_s, epsilon, sigma);
 
 	      hini_vec[i[2]][i[1]][i[0]] *=
-		exp(-beta* Lennard_Jones( r_s, HD->LJ_params));
+		// exp(-beta* Lennard_Jones( r_s, HD->LJ_params));
+		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 
 	    }
 	  /* set c-vector */
@@ -181,7 +188,7 @@ void HNC3dData_free(HNC3dData HD)
   DADestroy(HD->da);
   fft_3d_destroy_plan(HD->fft_plan);
 
-  free(HD->LJ_params);
+  // free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
   free(HD->ch_fft);
@@ -431,14 +438,19 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
   PetscScalar r[3], r_s, L, h[3];
   real **x_M;
   int bufsize, k, N_M;
+  real epsilon, sigma;
 
 
   HD = (HNC3dNewtonData) malloc(sizeof(*HD));
 
 
-  HD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
-  ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
+  // HD->LJ_params = (void* ) malloc(sizeof(real)*2);
+  // ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
+  // ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
+  HD->LJ_params[0] = 1.0;
+  HD->LJ_params[1] = 1.0;
+  epsilon = HD->LJ_params[0];
+  sigma = HD->LJ_params[1];
 
   HD->beta = PD->beta;
   HD->rho  = PD->rho;
@@ -513,7 +525,8 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	      pot_vec[i[2]][i[1]][i[0]].h +=
 		//exp(-r_s*r_s);
-		Lennard_Jones( r_s, HD->LJ_params);
+		// Lennard_Jones( r_s, HD->LJ_params);
+		Lennard_Jones( r_s, epsilon, sigma);
 	    }
 
 	}
@@ -568,7 +581,7 @@ void HNC3dNewtonData_free(HNC3dNewtonData HD)
   DADestroy(HD->da1);
   fft_3d_destroy_plan(HD->fft_plan);
 
-  free(HD->LJ_params);
+  // free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
   free(HD->ch_fft);
