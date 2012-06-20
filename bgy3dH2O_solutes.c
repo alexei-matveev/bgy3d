@@ -325,9 +325,11 @@ void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real 
 
 	      /* Lennard-Jones */
 	      gHini_vec[i[2]][i[1]][i[0]] +=
-		damp_LJ * beta* Lennard_Jones( r_s, (void*)p_H);
+		// damp_LJ * beta* Lennard_Jones( r_s, (void*)p_H);
+		damp_LJ * beta* Lennard_Jones( r_s, p_H[0], p_H[1]);
 	      gOini_vec[i[2]][i[1]][i[0]] +=
-		damp_LJ * beta* Lennard_Jones( r_s, (void*)p_O);
+		// damp_LJ * beta* Lennard_Jones( r_s, (void*)p_O);
+		damp_LJ * beta* Lennard_Jones( r_s, p_O[0], p_O[1]);
 
 	      /* Coulomb short */
 	      gHini_vec[i[2]][i[1]][i[0]] +=
