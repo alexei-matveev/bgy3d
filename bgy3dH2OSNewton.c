@@ -57,22 +57,31 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
   /****************************************************/
 
   /* water hydrogen */
-  BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
-  ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
-  ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
+  // BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
+  // ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
+  // ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
+  BHD->LJ_paramsH[0] = eH;  /* epsilon  */
+  BHD->LJ_paramsH[1] = sH;  /* sigma    */
+  BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
 
   /* water oxygen */
-  BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
-  ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
-  ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
+  // BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
+  // ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
+  // ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
+  BHD->LJ_paramsO[0] = eO;  /* epsilon  */
+  BHD->LJ_paramsO[1] = sO;  /* sigma    */
+  BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
 
   /* water O-H mixed parameters */
-  BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
-  ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
-  ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
+  // BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
+  // ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
+  // ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
+  BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
+  BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
+  BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
 
   /****************************************************/
 
@@ -350,9 +359,9 @@ void BGY3dH2OData_Newton_free2(BGY3dH2OData BHD)
   DADestroy(BHD->da);
   DADestroy(BHD->da_newton);
   DADestroy(BHD->da_newtonF);
-  free(BHD->LJ_paramsH);
-  free(BHD->LJ_paramsO);
-  free(BHD->LJ_paramsHO);
+  // free(BHD->LJ_paramsH);
+  // free(BHD->LJ_paramsO);
+  // free(BHD->LJ_paramsHO);
 
   fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
   fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
