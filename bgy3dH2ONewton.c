@@ -53,6 +53,9 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
   PetscInt lx[1], ly[1], *lz;
   H2Odg ***pre_vec;
+  real epsilonH, epsilonO, epsilonHO;
+  real sigmaH, sigmaO, sigmaHO;
+  real q2H, q2O, q2HO;
 
   BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
 
@@ -61,22 +64,40 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   /****************************************************/
 
   /* water hydrogen */
-  BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
-  ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
-  ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
+  // BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
+  // ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
+  // ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
+  BHD->LJ_paramsH[0] = eH;  /* epsilon  */
+  BHD->LJ_paramsH[1] = sH;  /* sigma    */
+  BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
+  epsilonH = BHD->LJ_paramsH[0];
+  sigmaH = BHD->LJ_paramsH[1];
+  q2H = BHD->LJ_paramsH[2];
 
   /* water oxygen */
-  BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
-  ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
-  ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
+  // BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
+  // ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
+  // ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
+  BHD->LJ_paramsO[0] = eO;  /* epsilon  */
+  BHD->LJ_paramsO[1] = sO;  /* sigma    */
+  BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
+  epsilonO = BHD->LJ_paramsO[0];
+  sigmaO = BHD->LJ_paramsO[1];
+  q2O = BHD->LJ_paramsO[2];
 
   /* water O-H mixed parameters */
-  BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
-  ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
-  ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
-  ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
+  // BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
+  // ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
+  // ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
+  // ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
+  BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
+  BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
+  BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
+  epsilonHO = BHD->LJ_paramsHO[0];
+  sigmaHO = BHD->LJ_paramsHO[1];
+  q2HO = BHD->LJ_paramsHO[2];
 
   /****************************************************/
 
@@ -247,24 +268,27 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 
 	  /* Lennard-Jones */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, BHD->LJ_paramsH);
+	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsH);
+	    beta* Lennard_Jones( r_s, epsilonH, sigmaH);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, BHD->LJ_paramsO);
+	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsO);
+	    beta* Lennard_Jones( r_s, epsilonO, sigmaO);
 	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, BHD->LJ_paramsHO);
+	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsHO);
+	    beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
 
 	  /* Coulomb short */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
             // Following the form in BGY3dH2OData_Pair_malloc() 
             // to pass member of void pointer
 	    // beta* Coulomb_short( r_s, BHD->LJ_paramsH);
-	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsH))[2]);
+	    beta* Coulomb_short( r_s, q2H);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
 	    // beta* Coulomb_short( r_s, BHD->LJ_paramsO);
-	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsO))[2]);
+	    beta* Coulomb_short( r_s, q2O);
 	  gHOini_vec[i[2]][i[1]][i[0]] +=
 	    // beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
-	    beta* Coulomb_short( r_s, ((real*)(BHD->LJ_paramsHO))[2]);
+	    beta* Coulomb_short( r_s, q2HO);
 
 	  /* Coulomb long */
 /* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
@@ -287,24 +311,27 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 	    {
 	      /* Lennard-Jones */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsH);
+		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsH);
+		Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsO);
+		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsO);
+		Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsHO);
+		Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
 
  	      /* Coulomb short */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
 		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
                 // Following the form in BGY3dH2OData_Pair_malloc() 
                 // to pass member of void pointer
-		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsH))[2]);
+		Coulomb_short_grad( r_s, r[dim], q2H);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
 		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
-		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsO))[2]);
+		Coulomb_short_grad( r_s, r[dim], q2O);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
 		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
-		Coulomb_short_grad( r_s, r[dim], ((real*)(BHD->LJ_paramsHO))[2]);
+		Coulomb_short_grad( r_s, r[dim], q2HO);
 
 	      /* Coulomb long */
 /*  	      fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
@@ -379,12 +406,18 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   BHD->ucHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
   /* Compute fft from Coulomb potential (long) */
-  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
+  /* ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
 			BHD->LJ_paramsHO, 1.0);
   ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
 			BHD->LJ_paramsH, 1.0);
   ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
-			BHD->LJ_paramsO, 1.0);
+			BHD->LJ_paramsO, 1.0); */
+  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
+			q2HO, 1.0);
+  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
+			q2H, 1.0);
+  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
+			q2O, 1.0);
 
   FOR_DIM
     {
@@ -445,9 +478,9 @@ void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
   MatDestroy(BHD->M);
   KSPDestroy(BHD->ksp);
 #endif
-  free(BHD->LJ_paramsH);
-  free(BHD->LJ_paramsO);
-  free(BHD->LJ_paramsHO);
+  // free(BHD->LJ_paramsH);
+  // free(BHD->LJ_paramsO);
+  // free(BHD->LJ_paramsHO);
 
   fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
   fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
