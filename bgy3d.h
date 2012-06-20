@@ -82,7 +82,8 @@ typedef struct BGY3dParameterStruct
 
   Mat M;               /* Matrix for FD-Approximation */
   Vec boundary;        /* Vector for right boundary: g=1 */
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];    /* sigma and epsilon, seems we don't need charge here;*/
 
 
   Vec v1,v2, v3;        /* Vectors for intermediate results */
@@ -117,7 +118,8 @@ typedef struct HNC3dDataStruct
   DA da;
   Vec pot;
   Vec h_ini;
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];   /* sigma and epsilon  */
   real beta, rho;
 
   /* Parallel FFT */
@@ -145,7 +147,8 @@ typedef struct HNC3dNewtonStruct
 {
   DA da, da1;
   Vec pot;
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];   /* sigma and epsilon  */
   real beta, rho;
   Vec pre;
 
@@ -161,7 +164,8 @@ void HNC3dNewtonData_free(HNC3dNewtonData HD);
 
 
 /* functions */
-real Lennard_Jones(real r, void *LJ_params);
+// real Lennard_Jones(real r, void *LJ_params);
+real Lennard_Jones(real r, real epsilon, real sigma);
 void PData_CreateParallel(PData PD);
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
@@ -225,7 +229,8 @@ typedef struct BGY3dDivStruct
   Mat M;
   Mat FD[3];
 
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];   /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini, g_SA;
@@ -244,7 +249,8 @@ BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg);
 void BGY3dDivData_free(BGY3dDivData BDD);
 
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M);
-real Lennard_Jones_grad(real r, real xr, void *LJ_params);
+// real Lennard_Jones_grad(real r, real xr, void *LJ_params);
+real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim);
 Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim);
 void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim);
@@ -272,7 +278,8 @@ typedef struct BGY3dFourierStruct
   Vec f[3];
   Vec v[3];
 
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];   /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini;
@@ -310,7 +317,8 @@ typedef struct BGY3dDiatomicStruct
   Vec f[3];
   Vec v[3];
 
-  void *LJ_params;   /* sigma and epsilon  */
+  // void *LJ_params;   /* sigma and epsilon  */
+  real LJ_params[2];   /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini;
@@ -337,7 +345,8 @@ typedef struct BGY3dDiatomicABStruct
   Vec fa[3],fb[3],fab[3];
   Vec v[3];
 
-  void *LJ_paramsa, *LJ_paramsb,*LJ_paramsab ;   /* sigma and epsilon  */
+  // void *LJ_paramsa, *LJ_paramsb,*LJ_paramsab ;   /* sigma and epsilon  */
+  real LJ_paramsa[2], LJ_paramsb[2], LJ_paramsab[2] ;   /* sigma and epsilon  */
   real beta, rho;
 
   real norm_const, c_ab, c_aab;
@@ -391,7 +400,8 @@ typedef struct BGY3dH2OStruct
   Vec cH, cHO, cO;
 
 
-  void *LJ_paramsH, *LJ_paramsO,*LJ_paramsHO ;   /* sigma and epsilon  */
+  // void *LJ_paramsH, *LJ_paramsO,*LJ_paramsHO ;   /* sigma and epsilon  */
+  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ;   /* sigma, epsilon and charge(product)  */
   real beta, rho;
   real rho_H, rho_O;
 
@@ -464,13 +474,21 @@ Vec BGY3d_solve_4site(PData PD, Vec g_ini, int vdim);
 real Coulomb_short( real r, real SQRq);
 // real Coulomb_short_grad( real r, real rx, void *params);
 real Coulomb_short_grad( real r, real rx, real SQRq);
-real Coulomb_long( real r, void *params);
-real Coulomb_long_grad( real r, real rx, void *params);
-real Coulomb( real r, void *params);
-real Coulomb_grad( real r, real rx, void *params);
-void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
+// real Coulomb_long( real r, void *params);
+// real Coulomb_long_grad( real r, real rx, void *params);
+// real Coulomb( real r, void *params);
+// real Coulomb_grad( real r, real rx, void *params);
+real Coulomb_long( real r, real q2);
+real Coulomb_long_grad( real r, real rx, real q2);
+real Coulomb( real r, real q2);
+real Coulomb_grad( real r, real rx, real q2);
+/* void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
 void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
 void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, void *LJ_params,
+			real damp, real zpad); */
+void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, real q2, real damp);
+void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], fftw_complex *fft_data, real q2, real damp);
+void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, real q2,
 			real damp, real zpad);
 void ComputeH2O_g(Vec g, Vec g0, Vec dg);
 void Compute_dg_H2O_inter(BGY3dH2OData BHD,
