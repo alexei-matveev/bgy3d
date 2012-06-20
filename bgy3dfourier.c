@@ -19,13 +19,18 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
   PetscViewer pview;
   int bufsize;
   PetscTruth g2_flg;
+  real epsilon, sigma;
 
   BDD = (BGY3dFourierData) malloc(sizeof(*BDD));
 
 
-  BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
-  ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
+  // BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
+  // ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
+  // ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
+  BDD->LJ_params[0] = 1.0;
+  BDD->LJ_params[1] = 1.0;
+  epsilon = BDD->LJ_params[0];
+  sigma = BDD->LJ_params[1];
 
   BDD->beta = PD->beta;
   BDD->rho  = PD->rho;
@@ -164,13 +169,15 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
 
 	      FOR_DIM
 		f_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
 
 
 
 	      gini_vec[i[2]][i[1]][i[0]] *=
-		exp(-beta* Lennard_Jones( r_s, BDD->LJ_params));
+		// exp(-beta* Lennard_Jones( r_s, BDD->LJ_params));
+		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 	    }
 
 	  /*	}*/
@@ -199,7 +206,8 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
 
 	      FOR_DIM
 		v2_vec[dim][i[2]][i[1]][i[0]] =
-		Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
 	    }
 
@@ -240,13 +248,15 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
 	    {
 	      FOR_DIM
 		v2_vec[dim][i[2]][i[1]][i[0]] =
-		Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+		Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 	    }
 	      else
 		{
 		  FOR_DIM
 		    v2_vec[dim][i[2]][i[1]][i[0]] =
-		    Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params)*
+		    // Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params)*
+		    Lennard_Jones_grad( r_s, r[dim], epsilon, sigma)*
 		    (g2_vec[index]+ (g2_vec[index+1]-g2_vec[index])/h_g2*
 		     (r_s-index*h_g2));
 		}
@@ -325,13 +335,18 @@ BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD)
   int i[3], x[3], n[3], dim;
   PetscScalar ***(f_vec[3]), ***gini_vec;
   int bufsize;
+  real epsilon, sigma;
 
   BDD = (BGY3dFourierData) malloc(sizeof(*BDD));
 
 
-  BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
-  ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
+  // BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
+  // ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
+  // ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
+  BDD->LJ_params[0] = 1.0;
+  BDD->LJ_params[1] = 1.0;
+  epsilon = BDD->LJ_params[0];
+  sigma = BDD->LJ_params[1];
 
 
   BDD->beta = PD->beta;
@@ -406,7 +421,8 @@ BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD)
 
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	  gini_vec[i[2]][i[1]][i[0]] *=
-	    exp(-beta* Lennard_Jones( r_s, BDD->LJ_params));
+	    // exp(-beta* Lennard_Jones( r_s, BDD->LJ_params));
+	    exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 
 
 
@@ -421,7 +437,8 @@ BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD)
 
 	  FOR_DIM
 	    f_vec[dim][i[2]][i[1]][i[0]] +=
-	    Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+	    // Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
+	    Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
 
 
@@ -495,7 +512,7 @@ void BGY3dFourierData_free(BGY3dFourierData BDD)
   free(BDD->gfg2_fft);
   VecDestroy(BDD->g_ini);
   DADestroy(BDD->da);
-  free(BDD->LJ_params);
+  // free(BDD->LJ_params);
 
   fft_3d_destroy_plan(BDD->fft_plan);
 
