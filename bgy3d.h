@@ -39,21 +39,19 @@ extern int verbosity;
 
 typedef struct ProblemData
 {
-  real interval[2];     /* min and max of the domain: 3d-box*/
-  real h[3];               /* mesh width */
-  real beta;            /* 1/kT */
-  real rho;             /* density */
-  int N[3], N3;                /* global Grid size */
+  real interval[2];             /* min and max of the domain: 3d-box*/
+  real h[3];                    /* mesh width */
+  real beta;                    /* 1/kT */
+  real rho;                     /* density */
+  int N[3], N3;                 /* global Grid size */
 
-  real g_xm;            /* g^(N_M)(x_M) */
-
+  real g_xm;                    /* g^(N_M)(x_M) */
 
   /* Parallel stuff */
-  int id;                   /* id of this process */
-  int np;                   /* number of processes */
-  int n[3];                 /* local grid size */
-  int nbr_right[3], nbr_left[3];  /* neighboring processes */
-
+  int id;                        /* id of this process */
+  int np;                        /* number of processes */
+  int n[3];                      /* local grid size */
+  int nbr_right[3], nbr_left[3]; /* neighboring processes */
 } *PData;
 
 /* typedef struct BGY3dField */
