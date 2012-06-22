@@ -27,7 +27,7 @@
 #define FOR_DIM  for(dim=0;dim<3;dim++)
 
 /* which dimension of the vector equation is solved ? */
-#define VEC_DIM 1
+/* UNUSED: #define VEC_DIM 1 */
 
 #define CUTOFF 1.0e+8
 #define SHIFT 0.0
