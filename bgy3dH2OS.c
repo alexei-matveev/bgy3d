@@ -1649,7 +1649,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  //RecomputeInitialSoluteData_Methanol(BHD, (damp), 1.0, zpad);
 	  // RecomputeInitialSoluteData_Hexane(BHD, (damp), 1.0, zpad);
           // Change solute as HCl for standard test
-          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
+          RecomputeInitialSoluteData_HCl(BHD, (damp), 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
 
