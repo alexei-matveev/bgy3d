@@ -110,7 +110,7 @@ function main(){
             ;;
 
         clean)
-            if [ -d test_* ]; then
+            if [[ -n `ls | grep test_` ]]; then
                 workdir=(`ls -d test_* | awk -F" " '{print $1}'`)
                 for((i=0;i<${#workdir[@]};i++));do
                     make -f Makefile clean WORK_DIR=${workdir[$i]}
