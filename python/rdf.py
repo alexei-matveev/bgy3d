@@ -46,6 +46,31 @@ def grid_distance(N, center):
     # shape(r) = (N, N, N)
     return r
 
+def grid_distanceI(N, center, interval=(-10, 10)):
+    '''
+    Return the distances grid with specified center coordinates
+
+    >>> r = grid_distanceI(4, (0, 0, 0))
+
+    Middle plane:
+
+    >>> r[2]
+    array([[ 14.14213562,  11.18033989,  10.        ,  11.18033989],
+           [ 11.18033989,   7.07106781,   5.        ,   7.07106781],
+           [ 10.        ,   5.        ,   0.        ,   5.        ],
+           [ 11.18033989,   7.07106781,   5.        ,   7.07106781]])
+
+    '''
+    # Generate a N x N x N grid mesh
+    t = np.mgrid[0:N, 0:N, 0:N]
+
+    h = (interval[1] - interval[0]) / float(N)
+
+    # This is what has been done in bgy3 code
+    r = np.sqrt((t[0] * h + interval[0] - center[0])**2 + (t[1] * h + interval[0] - center[1])**2 + (t[2] * h + interval[0] - center[2])**2)
+
+    return r
+
 def layer_interval(r, dr):
     '''
     Return  number N, if  r locates  between Nth  and N+1th  shell, of
@@ -186,6 +211,51 @@ def get_one(g, vec=[1, 1, 1], interval=(-10, 10)):
         cor_zz = cor_ini[2] + ii * vec_new[2]
         rs[ii] = rgrid[cor_xx, cor_yy, cor_zz]
         gs[ii] = g[cor_xx, cor_yy, cor_zz]
+
+    return rs, gs
+
+def get_oneI(g, r, shift=[0, 0, 0], vec=[1, 1, 1]):
+    '''
+    Get distribution and distance long vec[], beginning with [N/2, N/2, N/2] + shift[]
+
+    >>> N, R = 20, 2.0
+    >>> g3 = bgy.sinc_hole(N, a=[N/2, N/2, N/2], R=R)
+    >>> r = grid_distanceI(N, (0, 0, 0))
+    >>> rs, gs = get_oneI(g3, r)
+    >>> gs
+    array([ 0.        ,  0.84982674,  1.13706676,  0.88325222,  1.09130441,
+            0.93671148,  1.03540533,  0.98980842,  0.98972468,  1.02459974])
+    >>> 1.0 - np.sinc(rs / R)
+    array([ 0.        ,  0.84982674,  1.13706676,  0.88325222,  1.09130441,
+            0.93671148,  1.03540533,  0.98980842,  0.98972468,  1.02459974])
+
+    '''
+
+
+    # Number of grids in each direction
+    N = bgy.root3(np.size(g))
+
+    norm_vec = np.array(vec) / GCD_List(vec)
+
+    # Choose [N/2, N/2, N/2] as start
+    inicor = N / 2 + np.array(shift)
+
+    rs = np.empty(0)
+    gs = np.empty(0)
+    cor = np.empty(3)
+    k = 0;
+
+    while True:
+        for i in range(3):
+            cor[i] = inicor[i] + k * vec[i]
+
+        if np.max(cor) < N and np.min(cor) > 0:
+            rs = np.append(rs, r[cor[0], cor[1], cor[2]])
+            gs = np.append(gs, g[cor[0], cor[1], cor[2]])
+            k += 1
+        else:
+            break
+
 
     return rs, gs
 
