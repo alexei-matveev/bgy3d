@@ -214,14 +214,13 @@ def get_one(g, vec=[1, 1, 1], interval=(-10, 10)):
 
     return rs, gs
 
-def get_oneI(g, r, shift=[0, 0, 0], vec=[1, 1, 1]):
+def get_oneI(g, cor_center=[0, 0, 0], grid_center=[0, 0, 0], vec=[1, 1, 1], interval=[-10, 10]):
     '''
     Get distribution and distance long vec[], beginning with [N/2, N/2, N/2] + shift[]
 
     >>> N, R = 20, 2.0
     >>> g3 = bgy.sinc_hole(N, a=[N/2, N/2, N/2], R=R)
-    >>> r = grid_distanceI(N, (0, 0, 0))
-    >>> rs, gs = get_oneI(g3, r)
+    >>> rs, gs = get_oneI(g3)
     >>> gs
     array([ 0.        ,  0.84982674,  1.13706676,  0.88325222,  1.09130441,
             0.93671148,  1.03540533,  0.98980842,  0.98972468,  1.02459974])
@@ -235,10 +234,13 @@ def get_oneI(g, r, shift=[0, 0, 0], vec=[1, 1, 1]):
     # Number of grids in each direction
     N = bgy.root3(np.size(g))
 
+    # Get grid of distances to the specified center
+    r = grid_distanceI(N, cor_center, interval)
+
     norm_vec = np.array(vec) / GCD_List(vec)
 
     # Choose [N/2, N/2, N/2] as start
-    inicor = N / 2 + np.array(shift)
+    inicor = N / 2 + np.array(grid_center)
 
     rs = np.empty(0)
     gs = np.empty(0)
