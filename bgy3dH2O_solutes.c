@@ -24,6 +24,46 @@ typedef struct SoluteStruct
   real q[MAXATOM];           /* charges */
   int max_atoms;
 }Solute;
+
+/* FIXME: QM solute type */
+typedef struct QM_SoluteStruct
+{
+    char names[MAXATOM][5];   /* atom types */
+    real x[MAXATOM][3];        /* the coordinates  */
+    real sigma[MAXATOM];       /* sigma for LJ */
+    real epsilon[MAXATOM];     /* epsilon for LJ */
+    int max_atoms;
+    // Gaussian: C * exp(-B * (x - A)**2)
+    real C[MAXATOM];
+    real B[MAXATOM];
+    real A[MAXATOM][3];
+} QM_Solute;
+
+/***********************************/
+/* Test QM Solute */
+/***********************************/
+static QM_Solute QMS_Tester =
+  {
+    { "H","Cl"},
+    { { 0.6285, 0.0, 0.0},
+      {-0.6285, 0.0, 0.0}},
+    {2.735, 3.353},
+    {0.03971, 0.51434},
+    2,
+    {0.06206531, -0.06206531},
+    {1.44, 1.44},
+    { { 0.6285, 0.0, 0.0},
+      {-0.6285, 0.0, 0.0}},
+  };
+
+
+
+void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ);
+void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
+void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A);
+void ConvertQMSolute(Solute *S, QM_Solute *QMS);
+void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *S, real damp, real damp_LJ, real zpad);
+
 void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad);
 
 /*********************************/
@@ -87,8 +127,16 @@ static Solute HydrogenChloride =
 
 void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
+#ifdef QM
+  QM_Solute QMS_HCl;
+  ConvertQMSolute(&HydrogenChloride, &QMS_HCl);
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl(QM).\n");
+  RecomputeInitialSoluteData_QM(BHD, &QMS_HCl, damp, damp_LJ, zpad);
+#endif
+#ifndef QM
   PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
   RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ, zpad);
+#endif
 }
 
 
@@ -605,4 +653,252 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 /*  VecView(uc,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
 
+}
+
+void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, real damp_LJ, real zpad)
+{
+    DA da;
+    Vec gs, sumgs; /* Vector for gaussian */
+    int k;
+    PetscViewer viewer;
+
+    da = BHD->da;
+    DACreateGlobalVector(da, &gs);
+    DACreateGlobalVector(da, &sumgs);
+    VecSet(gs, 0.0);
+    VecSet(sumgs, 0.0);
+    VecSet(BHD->ucH, 0.0);
+    VecSet(BHD->ucO, 0.0);
+
+    PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
+    // LJ potential energy
+    ComputeSoluteDatafromLJ_QM(BHD, QMS, damp_LJ);
+
+    // Create charge distribution for each atom center
+    // then sum them up
+    for(k=0; k<QMS->max_atoms; k++)
+    {
+        CreateGaussian(BHD, gs, QMS->C[k], QMS->B[k], QMS->A[k]);
+        VecAXPY(sumgs, 1.0, gs);
+    }
+    /*    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], gs, qH, damp);
+        VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
+        ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], gs, qO, damp);
+        VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
+     } */
+    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qH, damp);
+    VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
+    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qO, damp);
+    VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
+    /* print  to check */
+    PetscPrintf(PETSC_COMM_WORLD, "Writing binarys \n");
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJH.bin", FILE_MODE_WRITE, &viewer);
+    VecView(BHD->gH_ini, viewer);
+    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJO.bin", FILE_MODE_WRITE, &viewer);
+    VecView(BHD->gO_ini, viewer);
+    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "gs.bin", FILE_MODE_WRITE, &viewer);
+    VecView(sumgs, viewer);
+    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucH.bin", FILE_MODE_WRITE, &viewer);
+    VecView(BHD->ucH, viewer);
+    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucO.bin", FILE_MODE_WRITE, &viewer);
+    VecView(BHD->ucO, viewer);
+    PetscViewerDestroy(viewer);
+
+    // exit(1);
+    VecDestroy(gs);
+    VecDestroy(sumgs);
+
+}
+
+// Calculate LJ potential
+void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
+{
+    PetscScalar ***gHini_vec, ***gOini_vec;
+    real *p_O, *p_H;
+    real r[3], r_s, interval[2], beta, h[3];
+    int x[3], n[3], i[3], dim, k;
+
+    interval[0] = BHD->PD->interval[0];
+    FOR_DIM
+        h[dim] = BHD->PD->h[dim];
+    beta = BHD->PD->beta;
+    /* Get local portion of the grid */
+    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    p_H = (real*) malloc(2*sizeof(real));
+    p_O = (real*) malloc(2*sizeof(real));
+
+    VecSet(BHD->gH_ini, 0.0);
+    VecSet(BHD->gO_ini, 0.0);
+    DAVecGetArray(BHD->da, BHD->gH_ini, &gHini_vec);
+    DAVecGetArray(BHD->da, BHD->gO_ini, &gOini_vec);
+
+    /* loop over solute atoms, but only LJ interactions */
+    for(k = 0; k < S->max_atoms; k++)
+    {
+        p_O[0] = sqrt( eO * S->epsilon[k]);
+        p_O[1] = 0.5*( sO + S->sigma[k]);
+
+        p_H[0] = sqrt( eH * S->epsilon[k]);
+        p_H[1] = 0.5*( sH + S->sigma[k]);
+
+        /* loop over local portion of grid */
+        for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+        {
+            for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+            {
+                for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+                {
+                    FOR_DIM
+                        r[dim] = i[dim] * h[dim] + interval[0] - S->x[k][dim];
+
+                    r_s = sqrt( SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
+
+                    /* Lennard-Jones */
+                    gHini_vec[i[2]][i[1]][i[0]] +=
+                         damp_LJ * beta * Lennard_Jones(r_s, p_H[0], p_H[1]);
+                    gOini_vec[i[2]][i[1]][i[0]] +=
+                         damp_LJ * beta * Lennard_Jones(r_s, p_O[0], p_O[1]);
+                }
+            }
+        }
+    }
+
+    DAVecRestoreArray(BHD->da, BHD->gH_ini, &gHini_vec);
+    DAVecRestoreArray(BHD->da, BHD->gO_ini, &gOini_vec);
+    free(p_H);
+    free(p_O);
+
+}
+
+// Create gaussian on 3d cartesian grid
+void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A)
+{
+    PetscScalar ***gs_vec;
+    real r[3], r_s, interval[2], h[3];
+    int x[3], n[3], i[3], dim;
+
+    interval[0] = BHD->PD->interval[0];
+    FOR_DIM
+        h[dim] = BHD->PD->h[dim];
+
+    DAVecGetArray(BHD->da, gs, &gs_vec);
+
+    /* Get local portion of the grid */
+    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+    /* loop over local portion of grid */
+    for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    {
+        for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+        {
+            for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+            {
+                FOR_DIM
+                    r[dim] = i[dim] * h[dim] + interval[0] - A[dim];
+
+                r_s =  SQR(r[0]) + SQR(r[1]) + SQR(r[2]);
+                gs_vec[i[2]][i[1]][i[0]] = C * exp(-1.0 * B * r_s);
+            }
+        }
+    }
+
+    DAVecRestoreArray(BHD->da, gs, &gs_vec);
+}
+
+// Solve Poisson Equation in Fourier space and get elestrostatic potential by inverse FFT
+void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp)
+{
+    int x[3], n[3], i[3], ic[3], N[3], dim, index;
+    real h[3], interval[2], k, fac, L, h3; /* , sign; */
+    fftw_complex *fft_gs, *fft_uc;
+
+    interval[0] = BHD->PD->interval[0];
+    interval[1] = BHD->PD->interval[1];
+    L = interval[1] - interval[0];
+    FOR_DIM
+        h[dim] = BHD->PD->h[dim];
+    FOR_DIM
+        N[dim] = BHD->PD->N[dim];
+    h3 = h[0] * h[1] * h[2];
+    fft_gs = BHD->g_fft;
+    fft_uc = BHD->gfg2_fft;
+    VecSet(uc, 0.0);
+    /* Get local portion of the grid */
+    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    /* Get fft of gs
+      gs(i, j, k) => fft_gs(ki, kj, kk)*/
+    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, gs, fft_gs, BHD->fft_scratch, x, n, 0);
+
+    /* Solving Poisson Equation(SI) with FFT and IFFT:
+      -1.0 * LAPLACIAN(V(x, y, z)) = 1/epsilon0 * rho(x, y, z)
+    because: x = i * h, y = i * h, z = k * h, h = L / n
+    =>-1.0 * n^2/L^2 * LAPLACIAN(uc(i, j, k)) = 1/epsilon0 * gs(i, j, k)
+    FFT(see FFTW manual "What FFTW Really Computes"):
+    => 4*pi^2 * n^2/L^2 * (kx^2 + ky^2 + kz^2)/n^2 * fft_uc(kx, ky, kz) = 1/epsilon0 * fft_gs(kx, ky, kz)
+    => fft_uc(kx, ky, kz) = 1 / [(4 * pi * epsilon0) * pi * (kx^2 + ky^2 + kz^2)/L^2] * fft_gs(kx, ky, kz)
+    IFFT(see FFTW manual "What FFTW Really Computes"):
+    because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
+    => uc(i, j, k) = h^3/L^3 * IFFT(fft_uc(kx, ky, kz)) */
+    index = 0;
+    for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    {
+        for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+        {
+            for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+            {
+
+                FOR_DIM
+                {
+                    if( i[dim] <= N[dim] / 2)
+                        ic[dim] = i[dim];
+                    else
+                        ic[dim] = i[dim] - N[dim];
+                }
+
+                if(ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+                {
+                    fft_uc[index].re = 0;
+                    fft_uc[index].im = 0;
+                }
+                else
+                {
+                    k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+                    // EPSILON0INV = 1 / 4 * pi * epsilon0
+                    fac = h3 * EPSILON0INV / M_PI / k;
+                    // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+                    fft_uc[index].re = damp * q * fac * fft_gs[index].re;
+                    fft_uc[index].im = damp * q * fac * fft_gs[index].im;
+                }
+                index++;
+            }
+        }
+    }
+    /* IFFT(fft_uc(kx, ky, kz)) / L^3 */
+    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
+    VecScale(uc, 1./L/L/L);
+}
+
+// Get gaussian coefficients from point charge
+void ConvertQMSolute(Solute *S, QM_Solute *QMS)
+{
+    int i, j;
+    QMS->max_atoms = S->max_atoms;
+
+    for(i = 0; i<QMS->max_atoms; i++)
+    {
+        for (j = 0; j<3; j++)
+        {
+            QMS->names[i][j] = S->names[i][j];
+            QMS->x[i][j] = S->x[i][j];
+            QMS->A[i][j] = S->x[i][j];
+        }
+        QMS->epsilon[i] = S->epsilon[i];
+        QMS->sigma[i] = S->sigma[i];
+        QMS->B[i] = G * G;
+        QMS->C[i] = S->q[i] * (G / sqrt(M_PI))*(G / sqrt(M_PI))*(G / sqrt(M_PI));
+    }
 }
