@@ -26,23 +26,23 @@ typedef struct SoluteStruct
 }Solute;
 
 /* FIXME: QM solute type */
-typedef struct QM_SoluteStruct
-{
-    char names[MAXATOM][5];   /* atom types */
-    real x[MAXATOM][3];        /* the coordinates  */
-    real sigma[MAXATOM];       /* sigma for LJ */
-    real epsilon[MAXATOM];     /* epsilon for LJ */
-    int max_atoms;
-    // Gaussian: C * exp(-B * (x - A)**2)
-    real C[MAXATOM];
-    real B[MAXATOM];
-    real A[MAXATOM][3];
-} QM_Solute;
+// typedef struct QM_SoluteStruct
+// {
+//     char names[MAXATOM][5];   /* atom types */
+//     real x[MAXATOM][3];        /* the coordinates  */
+//     real sigma[MAXATOM];       /* sigma for LJ */
+//     real epsilon[MAXATOM];     /* epsilon for LJ */
+//     int max_atoms;
+//     // Gaussian: C * exp(-B * (x - A)**2)
+//     real C[MAXATOM];
+//     real B[MAXATOM];
+//     real A[MAXATOM][3];
+// } QM_Solute;
 
 /***********************************/
 /* Test QM Solute */
 /***********************************/
-static QM_Solute QMS_Tester =
+/*static QM_Solute QMS_Tester =
   {
     { "H","Cl"},
     { { 0.6285, 0.0, 0.0},
@@ -54,15 +54,15 @@ static QM_Solute QMS_Tester =
     {1.44, 1.44},
     { { 0.6285, 0.0, 0.0},
       {-0.6285, 0.0, 0.0}},
-  };
+  }; */
 
 
 
-void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ);
+void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ);
 void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
-void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A);
-void ConvertQMSolute(Solute *S, QM_Solute *QMS);
-void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *S, real damp, real damp_LJ, real zpad);
+void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real widht, real *x0);
+// void ConvertQMSolute(Solute *S, QM_Solute *QMS);
+void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad);
 
 void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad);
 
@@ -127,15 +127,12 @@ static Solute HydrogenChloride =
 
 void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
-#ifdef QM
-  QM_Solute QMS_HCl;
-  ConvertQMSolute(&HydrogenChloride, &QMS_HCl);
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl(QM).\n");
-  RecomputeInitialSoluteData_QM(BHD, &QMS_HCl, damp, damp_LJ, zpad);
-#endif
-#ifndef QM
   PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
+#ifndef QM
   RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ, zpad);
+#endif
+#ifdef QM
+  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ, zpad);
 #endif
 }
 
@@ -655,7 +652,8 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 
 }
 
-void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, real damp_LJ, real zpad)
+// void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad)
 {
     DA da;
     Vec gs, sumgs; /* Vector for gaussian */
@@ -672,13 +670,14 @@ void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, 
 
     PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
     // LJ potential energy
-    ComputeSoluteDatafromLJ_QM(BHD, QMS, damp_LJ);
+    ComputeSoluteDatafromLJ_QM(BHD, S, damp_LJ);
 
     // Create charge distribution for each atom center
     // then sum them up
-    for(k=0; k<QMS->max_atoms; k++)
+    for(k=0; k<S->max_atoms; k++)
     {
-        CreateGaussian(BHD, gs, QMS->C[k], QMS->B[k], QMS->A[k]);
+        // G is predefind in bgy3d_SolventParameters.h
+        CreateGaussian(BHD, gs, S->q[k], G, S->x[k]);
         VecAXPY(sumgs, 1.0, gs);
     }
     /*    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], gs, qH, damp);
@@ -715,7 +714,7 @@ void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, 
 }
 
 // Calculate LJ potential
-void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
+void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
 {
     PetscScalar ***gHini_vec, ***gOini_vec;
     real ffpara_H[2], ffpara_O[2];
@@ -771,10 +770,11 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
 }
 
 // Create gaussian on 3d cartesian grid
-void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A)
+// rho(r) = q * [ width / sqrt(pi)]^3 * exp[-width^2 * (r - x0)^2]
+void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, real *x0)
 {
     PetscScalar ***gs_vec;
-    real r[3], r_s, interval[2], h[3];
+    real r[3], r_s, interval[2], h[3], prefac;
     int x[3], n[3], i[3], dim;
 
     interval[0] = BHD->PD->interval[0];
@@ -786,6 +786,7 @@ void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A)
     /* Get local portion of the grid */
     DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
+    prefac = pow(width / sqrt(M_PI), 3.0) * q;
     /* loop over local portion of grid */
     for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     {
@@ -794,10 +795,10 @@ void CreateGaussian(BGY3dH2OData BHD, Vec gs, real C, real B, real *A)
             for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
             {
                 FOR_DIM
-                    r[dim] = i[dim] * h[dim] + interval[0] - A[dim];
+                    r[dim] = i[dim] * h[dim] + interval[0] - x0[dim];
 
                 r_s =  SQR(r[0]) + SQR(r[1]) + SQR(r[2]);
-                gs_vec[i[2]][i[1]][i[0]] = C * exp(-1.0 * B * r_s);
+                gs_vec[i[2]][i[1]][i[0]] = prefac * exp(-1.0 * width * width * r_s);
             }
         }
     }
@@ -878,6 +879,7 @@ void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, r
     VecScale(uc, 1./L/L/L);
 }
 
+/*
 // Get gaussian coefficients from point charge
 void ConvertQMSolute(Solute *S, QM_Solute *QMS)
 {
@@ -898,3 +900,4 @@ void ConvertQMSolute(Solute *S, QM_Solute *QMS)
         QMS->C[i] = S->q[i] * (G / sqrt(M_PI))*(G / sqrt(M_PI))*(G / sqrt(M_PI));
     }
 }
+*/
