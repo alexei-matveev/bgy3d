@@ -67,10 +67,12 @@ OBJECTS = \
 
 bgy3d : $(OBJECTS)
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $(OBJECTS) ${LIBDIRS} ${LIBS}
-#	cp $@ test/
-#	cp $@ test_H2O/
-#	cp $@ test_H2OII/
-#	cp $@ test_H2OIII/
+
+#
+# Dont call the target "test" because we have a directory called so:
+#
+test-all:
+	make -C ./test
 
 #
 # One of the include files defines a target named clean already, we
