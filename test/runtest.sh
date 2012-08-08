@@ -23,7 +23,7 @@ function diff_out(){
     target=$1
     std=$2
     if [ -f $target -o -f $std ]; then
-        if (diff $target $std) then 
+        if (diff $target $std) then
             echo "No differences!"
         else
             echo -e "Possible problems with $target, see diffs above."
@@ -39,7 +39,7 @@ function solute_init(){
     local svtdir curdir
     svtdir=$1
     curdir=$2
-    if [ ! -f $curdir/g2H.bin -o ! -f $curdir/g2O.bin -o ! -f $curdir/g2HO.bin ]; then 
+    if [ ! -f $curdir/g2H.bin -o ! -f $curdir/g2O.bin -o ! -f $curdir/g2HO.bin ]; then
         if [ -f $svtdir/g2H.bin -o -f $svtdir/g2O.bin -o -f $svtdir/g2HO.bin ]; then
             ln -sf $svtdir/g2H.bin $curdir/g2H.bin
             ln -sf $svtdir/g2O.bin $curdir/g2O.bin
@@ -61,7 +61,7 @@ function main(){
     # Name test directories with initial "test_"
     workname=test_$cmd
 
-    # Use absolute path 
+    # Use absolute path
     workdir=$PWD/$workname
 
     # Set output file
@@ -72,10 +72,10 @@ function main(){
     resmoments=$workdir/$cmd\_moments.out
     stdmoments=$STDOUT/$cmd\_moments.out
 
-    case "$cmd" in 
+    case "$cmd" in
 
         # 2-site bgy3d, HCl as solvent
-        HCl) 
+        HCl)
             echo -e "Run $workname:"
             mkdir -p $workdir
             # FIXME: maybe passing command line parameters from here rather than setting in makefile?
@@ -95,7 +95,7 @@ function main(){
         HClM)
             echo -e "Run $workname:"
             mkdir -p $workdir
-            # Check g2 function data first 
+            # Check g2 function data first
             solute_init $PWD/test_HCl $workdir
             make -f Makefile BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
 
@@ -127,7 +127,7 @@ function main(){
             echo "clean :   Clean test directories"
             ;;
 
-        *)   
+        *)
             echo "Unknown options"
             echo "type './runtest.sh help' for more information"
             exit 1
@@ -141,6 +141,6 @@ function main(){
 }
 
 main $*
-             
+
 
 
