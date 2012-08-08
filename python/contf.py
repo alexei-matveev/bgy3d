@@ -9,8 +9,8 @@ def m2dat(path):
     Convert vec*.m file to plain txt data file, defaulted new filename is vec*.dat.
 
     '''
-    
-    if os.path.isfile(path): 
+
+    if os.path.isfile(path):
         # Get the file name, by removing the directory prefix
         filename = path.split(os.sep)[-1]
 
@@ -81,7 +81,7 @@ def m2dat(path):
 
 
     else:
-        print "'" + path + "' not exist." 
+        print "'" + path + "' not exist."
         exit()
 
 def get_plane(g, plane = 3):
@@ -92,7 +92,7 @@ def get_plane(g, plane = 3):
     3 : plane z = 0 (default)
     '''
 
-    # Get the zero and first moments 
+    # Get the zero and first moments
     m = bgy.moments1(1.0 - g)
 
     # Round the center of the grid to the nearest integer
@@ -128,7 +128,7 @@ def contrf_plt(pd, interval = (-10, 10)):
     x = np.linspace(interval[0], interval[1], NX)
     y = np.linspace(interval[0], interval[1], NY)
 
-    cs = plt.contourf(x, y, pd) 
+    cs = plt.contourf(x, y, pd)
     cbar = plt.colorbar(cs)
     plt.show()
 
