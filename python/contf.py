@@ -2,7 +2,6 @@
 import os
 import bgy3d as bgy
 import numpy as np
-import pylab as plt
 
 def m2dat(path):
     '''
@@ -121,6 +120,11 @@ def contrf_plt(pd, interval = (-10, 10)):
     '''
     Draw the contourf plot of selected plane, defaulted interval is (-10, 10)
     '''
+
+    # FIXME: Importing  this at  the top level  will break  in console
+    # runs,  this needs  an X  display. So  do this  only  when really
+    # needed:
+    import pylab as plt
 
     NX = pd.shape[1]
     NY = pd.shape[0]
