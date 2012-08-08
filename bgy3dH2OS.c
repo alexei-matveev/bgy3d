@@ -1902,36 +1902,49 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 /* 	  else  */
 /* 	    a=0.01; */
 	   /* (fancy) step size control */
+
+          /*
+           * FIXME: weired  logic.  The  code below appears  to modify
+           * "upwards",  "a1", and  "mycount" by  eventually resetting
+           * the latter to  zero. The goal might be  to tweak the real
+           * coefficient  "a1"   depending  on  iteration   count  and
+           * convergence.    Everytime  "mycount"   becomes   >20  the
+           * coefficient "a1" is  changed. The compiler is complaining
+           * that "upwards, dgH_old, dgO_old maybe used uninitialized"
+           * here. At the moment I  am not able to confirm/reject that
+           * claim.
+           */
 	  mycount++;
-	  if( ((iter-1)%10) &&
-	      (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
+
+	  if (((iter - 1) % 10) &&
+             (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
 	    {
-	      upwards=1;
+	      upwards = 1;
 	    }
-	  else if(iter>20 && !((iter-1)%10) && upwards==0 &&
-		  (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
+	  else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
+		  (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
 	    {
-	      a1 /=2.;
-	      if(a1<a0)
-		a1=a0;
-	      mycount=0;
+	      a1 /= 2.;
+	      if(a1 < a0)
+		a1 = a0;
+	      mycount = 0;
 	    }
 	  else
-	    upwards=0;
+	    upwards = 0;
 
-	  if(mycount>20 && a1<=0.5)
+	  if (mycount > 20 && a1 <= 0.5)
 	    {
-	      a1*=2.;
-	      mycount=0;
+	      a1 *= 2.;
+	      mycount = 0;
 	    }
-	  else if(mycount>20 && a1>0.5)
+	  else if (mycount > 20 && a1 > 0.5)
 	    {
-	      a1=1.0;
-	      mycount=0;
+	      a1 = 1.0;
+	      mycount = 0;
 	    }
 	  PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-	  dgH_old = dgH_norm/a;
-	  dgO_old = dgO_norm/a;
+	  dgH_old = dgH_norm / a;
+	  dgO_old = dgO_norm / a;
 
 	  /*********************************/
 
