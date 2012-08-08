@@ -1932,16 +1932,19 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  else
 	    upwards = 0;
 
-	  if (mycount > 20 && a1 <= 0.5)
-	    {
-	      a1 *= 2.;
-	      mycount = 0;
+          if (mycount > 20) {
+            /*
+             * Scale  the coefficient "a1"  up by  a factor,  but make
+             * sure it is not above 1.0. Reset mycount.
+             */
+            if (a1 <= 0.5) {
+	      a1 *= 2.0;
 	    }
-	  else if (mycount > 20 && a1 > 0.5)
-	    {
+            else {
 	      a1 = 1.0;
-	      mycount = 0;
 	    }
+            mycount = 0;
+          }
 	  PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
 	  dgH_old = dgH_norm / a;
 	  dgO_old = dgO_norm / a;
