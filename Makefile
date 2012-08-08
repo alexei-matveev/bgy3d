@@ -46,7 +46,24 @@ LIBS    = -lm -lfftw -lfftw_mpi  ${PETSC_LIB}
 # Make rules
 #--------------------------------------------------------------------------------
 
-OBJECTS =  bgy3d.o functions.o hnc3d.o bgy3ddiv.o bgy3dtest.o bgy3dfourier.o bgy3dmolecule.o bgy3dH2O.o bgy3dH2OS.o bgy3dH2ONewton.o bgy3dH2OSNewton.o bgy3dH2O_solutes.o fft/fft_3d.o fft/fft_3d_f.o fft/pack_3d.o fft/remap_3d.o fft/factor.o 
+OBJECTS = \
+	bgy3d.o \
+	functions.o \
+	hnc3d.o \
+	bgy3ddiv.o \
+	bgy3dtest.o \
+	bgy3dfourier.o \
+	bgy3dmolecule.o \
+	bgy3dH2O.o \
+	bgy3dH2OS.o \
+	bgy3dH2ONewton.o \
+	bgy3dH2OSNewton.o \
+	bgy3dH2O_solutes.o \
+	fft/fft_3d.o \
+	fft/fft_3d_f.o \
+	fft/pack_3d.o \
+	fft/remap_3d.o \
+	fft/factor.o 
 
 bgy3d : $(OBJECTS)
 	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $(OBJECTS) ${LIBDIRS} ${LIBS}
