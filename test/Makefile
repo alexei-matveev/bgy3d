@@ -28,13 +28,10 @@ EXE ?= ../bgy3d
 all: BGY2site
 
 BGY2site:
-	-@cd ${WORK_DIR}; \
-	    ${EXE} -BGY2site ${CMDFLAG}
-	-@cd $(CURDIR)
+	(cd ${WORK_DIR}; ${EXE} -BGY2site ${CMDFLAG})
 
 BGYM2site:
-	-@cd ${WORK_DIR}; \
-	    ${EXE} -BGYM2site ${CMDFLAG}
+	(cd ${WORK_DIR}; ${EXE} -BGYM2site ${CMDFLAG})
 
 clean:
 	rm -rf ${WORK_DIR}
