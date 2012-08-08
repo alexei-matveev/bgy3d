@@ -72,7 +72,7 @@ bgy3d : $(OBJECTS)
 # Dont call the target "test" because we have a directory called so:
 #
 test-all:
-	make -C ./test
+	$(MAKE) -C ./test
 
 #
 # One of the include files defines a target named clean already, we
