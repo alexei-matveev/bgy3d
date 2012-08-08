@@ -718,7 +718,7 @@ void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, 
 void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
 {
     PetscScalar ***gHini_vec, ***gOini_vec;
-    real *p_O, *p_H;
+    real ffpara_H[2], ffpara_O[2];
     real r[3], r_s, interval[2], beta, h[3];
     int x[3], n[3], i[3], dim, k;
 
@@ -728,8 +728,6 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
     beta = BHD->PD->beta;
     /* Get local portion of the grid */
     DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-    p_H = (real*) malloc(2*sizeof(real));
-    p_O = (real*) malloc(2*sizeof(real));
 
     VecSet(BHD->gH_ini, 0.0);
     VecSet(BHD->gO_ini, 0.0);
@@ -739,11 +737,11 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
     /* loop over solute atoms, but only LJ interactions */
     for(k = 0; k < S->max_atoms; k++)
     {
-        p_O[0] = sqrt( eO * S->epsilon[k]);
-        p_O[1] = 0.5*( sO + S->sigma[k]);
+        ffpara_O[0] = sqrt( eO * S->epsilon[k]);
+        ffpara_O[1] = 0.5*( sO + S->sigma[k]);
 
-        p_H[0] = sqrt( eH * S->epsilon[k]);
-        p_H[1] = 0.5*( sH + S->sigma[k]);
+        ffpara_H[0] = sqrt( eH * S->epsilon[k]);
+        ffpara_H[1] = 0.5*( sH + S->sigma[k]);
 
         /* loop over local portion of grid */
         for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -759,9 +757,9 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
 
                     /* Lennard-Jones */
                     gHini_vec[i[2]][i[1]][i[0]] +=
-                         damp_LJ * beta * Lennard_Jones(r_s, p_H[0], p_H[1]);
+                         damp_LJ * beta * Lennard_Jones(r_s, ffpara_H[0], ffpara_H[1]);
                     gOini_vec[i[2]][i[1]][i[0]] +=
-                         damp_LJ * beta * Lennard_Jones(r_s, p_O[0], p_O[1]);
+                         damp_LJ * beta * Lennard_Jones(r_s, ffpara_O[0], ffpara_O[1]);
                 }
             }
         }
@@ -769,8 +767,6 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, QM_Solute *S, real damp_LJ)
 
     DAVecRestoreArray(BHD->da, BHD->gH_ini, &gHini_vec);
     DAVecRestoreArray(BHD->da, BHD->gO_ini, &gOini_vec);
-    free(p_H);
-    free(p_O);
 
 }
 
