@@ -213,7 +213,11 @@ int main(int argc, char **argv)
 
   ierr = PetscFinalize();CHKERRQ(ierr);
 
-  return 1;
+  /*
+   * Original version of BGY3D  executable returned 1. Make interprets
+   * non-zero codes as a failure, so this was changed to 0:
+   */
+  return 0;
 }
 
 
