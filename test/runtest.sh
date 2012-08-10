@@ -1,21 +1,30 @@
 #!/bin/bash
 
+#
+# FIXME: will not  work if executed from arbitrary  directory. We need
+# to locate  the python scripts.  All references are relative  to this
+# directory:
+#
+dir=$PWD
+
 # Set python helper function directory
-PYDIR=$(dirname `pwd`)/python
-if ! [ -e $PYDIR ] ; then
+PYDIR=$dir/../python
+
+if [ ! -d $PYDIR ] ; then
     echo "Check the python helper function directory."
     exit 1
 fi
 
 # Set path for bgy3d executable
-bgyexe=$(dirname `pwd`)/bgy3d
-if ! [ -f $bgyexe ] ; then
+bgyexe=$dir/../bgy3d
+
+if [ ! -x $bgyexe ] ; then
     echo "Check the bgy3d executable."
     exit 1
 fi
 
 # Directory containing standard outputs
-STDOUT=$PWD/out
+STDOUT=$dir/out
 
 # Comparing two files
 function diff_out(){
@@ -62,7 +71,7 @@ function main(){
     workname=test_$cmd
 
     # Use absolute path
-    workdir=$PWD/$workname
+    workdir=$dir/$workname
 
     # Set output file
     testout=$workdir/$workname.out
@@ -96,7 +105,7 @@ function main(){
             echo -e "Run $workname:"
             mkdir -p $workdir
             # Check g2 function data first
-            solute_init $PWD/test_HCl $workdir
+            solute_init $dir/test_HCl $workdir
             make -f Makefile BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
 
             # Get moments information for each particle pair
