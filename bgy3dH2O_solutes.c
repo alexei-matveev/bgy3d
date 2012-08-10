@@ -25,6 +25,8 @@ static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const 
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 
+static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon, real sigma, real fact, Vec v);
+
 /*********************************/
 /* Water */
 /*********************************/
@@ -671,57 +673,93 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
 // Calculate LJ potential
 static void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, const Solute *S, real damp_LJ)
 {
-    PetscScalar ***gHini_vec, ***gOini_vec;
-    real ffpara_H[2], ffpara_O[2];
-    real r[3], r_s, interval[2], beta, h[3];
-    int x[3], n[3], i[3], dim, site;
+    /*
+     * Beta is that the  (inverse) temperature. For historical reasons
+     * the solute field acting on solvent sites is defined having this
+     * factor.
+     */
+    real factor = damp_LJ * BHD->PD->beta;
 
-    interval[0] = BHD->PD->interval[0];
+    /*
+     * Fill LJ-interaction of  H and O sites with  the solute into the
+     * respective arrays.
+     *
+     * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
+     * #defined at some obscure place:
+     */
+    lj_field(BHD->da, BHD->PD, S, eH, sH, factor, BHD->gH_ini);
+    lj_field(BHD->da, BHD->PD, S, eO, sO, factor, BHD->gO_ini);
+}
+
+/*
+ * Calculate LJ  interaction of an LJ-site  characterized by (epsilon,
+ * sigma)  and the solute  S with  an overall  factor "fact"  at every
+ * point of the local grid.
+ *
+ * Vec v is the intent(out) argument.
+ */
+static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon, real sigma, real fact, Vec v)
+{
+    PetscScalar ***vec;
+    real h[3];
+    int i0, j0, k0;
+    int ni, nj, nk;
+
+    /*
+     * FIXME: do we really assume that intervals for x-, y- and z- are
+     * the same? This  basically means the corner of  the unit cell is
+     * at (offset, offset, offset):
+     */
+    real offset = PD->interval[0];
+
     FOR_DIM
-        h[dim] = BHD->PD->h[dim];
-    beta = BHD->PD->beta;
+        h[dim] = PD->h[dim];
+
     /* Get local portion of the grid */
-    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-    VecSet(BHD->gH_ini, 0.0);
-    VecSet(BHD->gO_ini, 0.0);
-    DAVecGetArray(BHD->da, BHD->gH_ini, &gHini_vec);
-    DAVecGetArray(BHD->da, BHD->gO_ini, &gOini_vec);
+    /* FIXME: maybe use assignment instead of += below? */
+    // VecSet(v, 0.0);
+    DAVecGetArray (da, v, &vec);
 
-    /* loop over solute atoms, but only LJ interactions */
-    for(site = 0; site < S->max_atoms; site++)
-    {
-        ffpara_O[0] = sqrt( eO * S->epsilon[site]);
-        ffpara_O[1] = 0.5*( sO + S->sigma[site]);
+    /* loop over local portion of grid */
+    for (int k = k0; k < k0 + nk; k++) {
 
-        ffpara_H[0] = sqrt( eH * S->epsilon[site]);
-        ffpara_H[1] = 0.5*( sH + S->sigma[site]);
+        real z = k * h[2] + offset;
 
-        /* loop over local portion of grid */
-        for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-        {
-            for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-            {
-                for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-                {
-                    FOR_DIM
-                        r[dim] = i[dim] * h[dim] + interval[0] - S->x[site][dim];
+        for (int j = j0; j < j0 + nj; j++) {
 
-                    r_s = sqrt( SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
+            real y = j * h[1] + offset;
+
+            for (int i = i0; i < i0 + ni; i++) {
+
+                real x = i * h[0] + offset;
+
+                /* Sum LJ-contribution from all solute sites: */
+                real field = 0.0;
+
+                for (int site = 0; site < S->max_atoms; site++) {
+
+                    /* Interaction parameters for a pair of LJ sites: */
+                    real e2 = sqrt (epsilon * S->epsilon[site]);
+                    real s2 = 0.5 * (sigma + S->sigma[site]);
+
+                    /* Distance from a grid point to this site: */
+                    real r_s = sqrt (SQR(x - S->x[site][0]) +
+                                     SQR(y - S->x[site][1]) +
+                                     SQR(z - S->x[site][2]));
 
                     /* Lennard-Jones */
-                    gHini_vec[i[2]][i[1]][i[0]] +=
-                         damp_LJ * beta * Lennard_Jones(r_s, ffpara_H[0], ffpara_H[1]);
-                    gOini_vec[i[2]][i[1]][i[0]] +=
-                         damp_LJ * beta * Lennard_Jones(r_s, ffpara_O[0], ffpara_O[1]);
+                    field += fact * Lennard_Jones (r_s, e2, s2);
                 }
+
+                /* We just  finished computing the field at  (i, j, k)
+                   point of the grid: */
+                vec[k][j][i] = field;
             }
         }
     }
-
-    DAVecRestoreArray(BHD->da, BHD->gH_ini, &gHini_vec);
-    DAVecRestoreArray(BHD->da, BHD->gO_ini, &gOini_vec);
-
+    DAVecRestoreArray (da, v, &vec);
 }
 
 // Create gaussian on 3d cartesian grid
