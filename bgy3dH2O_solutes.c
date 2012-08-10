@@ -17,11 +17,11 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 
 typedef struct SoluteStruct
 {
-  char names[MAXATOM][5];   /* atom types */
-  real x[MAXATOM][3];        /* the coordinates  */
-  real sigma[MAXATOM];       /* sigma for LJ */
-  real epsilon[MAXATOM];     /* epsilon for LJ */
-  real q[MAXATOM];           /* charges */
+  char names[MAXATOM][5];       /* atom types */
+  real x[MAXATOM][3];           /* the coordinates  */
+  real sigma[MAXATOM];          /* sigma for LJ */
+  real epsilon[MAXATOM];        /* epsilon for LJ */
+  real q[MAXATOM];              /* charges */
   int max_atoms;
 }Solute;
 
