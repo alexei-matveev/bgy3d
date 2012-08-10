@@ -7,7 +7,7 @@
 
 #define MAXATOM 20
 
-typedef struct SoluteStruct
+typedef struct Solute
 {
   char names[MAXATOM][5];       /* atom types */
   real x[MAXATOM][3];           /* the coordinates  */
@@ -15,7 +15,7 @@ typedef struct SoluteStruct
   real epsilon[MAXATOM];        /* epsilon for LJ */
   real q[MAXATOM];              /* charges */
   int max_atoms;
-}Solute;
+} Solute;
 
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
