@@ -30,7 +30,7 @@
 
 #define real double
 #define SQR(a)   ((a)*(a))
-#define FOR_DIM  for(dim=0;dim<3;dim++)
+#define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
 /* which dimension of the vector equation is solved ? */
 /* UNUSED: #define VEC_DIM 1 */
