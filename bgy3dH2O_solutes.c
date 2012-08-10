@@ -19,7 +19,6 @@ typedef struct SoluteStruct
 
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
-static void ComputeSoluteDatafromLJ_QM (BGY3dH2OData BHD, const Solute *S, real damp_LJ);
 static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
 static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const real *x0);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
@@ -626,8 +625,25 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
     VecSet(BHD->ucO, 0.0);
 
     PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
-    // LJ potential energy
-    ComputeSoluteDatafromLJ_QM(BHD, S, damp_LJ);
+
+    /*
+     * Calculate LJ potential for all solvent sites.
+     *
+     * Beta is that the  (inverse) temperature. For historical reasons
+     * the solute field acting on solvent sites is defined having this
+     * factor.
+     */
+    real factor = damp_LJ * BHD->PD->beta;
+
+    /*
+     * Fill LJ-interaction of  H and O sites with  the solute into the
+     * respective arrays.
+     *
+     * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
+     * #defined at some obscure place:
+     */
+    lj_field(BHD->da, BHD->PD, S, eH, sH, factor, BHD->gH_ini);
+    lj_field(BHD->da, BHD->PD, S, eO, sO, factor, BHD->gO_ini);
 
     // Create charge distribution for each atom center
     // then sum them up
@@ -668,27 +684,6 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
     VecDestroy(gs);
     VecDestroy(sumgs);
 
-}
-
-// Calculate LJ potential
-static void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, const Solute *S, real damp_LJ)
-{
-    /*
-     * Beta is that the  (inverse) temperature. For historical reasons
-     * the solute field acting on solvent sites is defined having this
-     * factor.
-     */
-    real factor = damp_LJ * BHD->PD->beta;
-
-    /*
-     * Fill LJ-interaction of  H and O sites with  the solute into the
-     * respective arrays.
-     *
-     * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
-     * #defined at some obscure place:
-     */
-    lj_field(BHD->da, BHD->PD, S, eH, sH, factor, BHD->gH_ini);
-    lj_field(BHD->da, BHD->PD, S, eO, sO, factor, BHD->gO_ini);
 }
 
 /*
