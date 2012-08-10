@@ -24,6 +24,7 @@ static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const 
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 
+static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *S);
 static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon, real sigma, real fact, Vec v);
 
 /*********************************/
@@ -731,31 +732,42 @@ static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon
 
                 real x = i * h[0] + offset;
 
-                /* Sum LJ-contribution from all solute sites: */
-                real field = 0.0;
-
-                for (int site = 0; site < S->max_atoms; site++) {
-
-                    /* Interaction parameters for a pair of LJ sites: */
-                    real e2 = sqrt (epsilon * S->epsilon[site]);
-                    real s2 = 0.5 * (sigma + S->sigma[site]);
-
-                    /* Distance from a grid point to this site: */
-                    real r_s = sqrt (SQR(x - S->x[site][0]) +
-                                     SQR(y - S->x[site][1]) +
-                                     SQR(z - S->x[site][2]));
-
-                    /* Lennard-Jones */
-                    field += fact * Lennard_Jones (r_s, e2, s2);
-                }
-
-                /* We just  finished computing the field at  (i, j, k)
-                   point of the grid: */
-                vec[k][j][i] = field;
+                /*
+                 * Sum LJ-contributions  from all  solute sites at (i,  j, k)
+                 * point of the grid:
+                 */
+                vec[k][j][i] = fact * lj (x, y, z, epsilon, sigma, S);
             }
         }
     }
     DAVecRestoreArray (da, v, &vec);
+}
+
+/*
+ * Interaction of  an LJ site (epsilon,  sigma) at (x, y,  z) with the
+ * solute S:
+ */
+static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *S)
+{
+    /* Sum LJ-contribution from all solute sites: */
+    real field = 0.0;
+
+    for (int site = 0; site < S->max_atoms; site++) {
+
+        /* Interaction parameters for a pair of LJ sites: */
+        real e2 = sqrt (epsilon * S->epsilon[site]);
+        real s2 = 0.5 * (sigma + S->sigma[site]);
+
+        /* Distance from a grid point to this site: */
+        real r_s = sqrt (SQR(x - S->x[site][0]) +
+                         SQR(y - S->x[site][1]) +
+                         SQR(z - S->x[site][2]));
+
+        /* Lennard-Jones */
+        field += Lennard_Jones (r_s, e2, s2);
+    }
+
+    return field;
 }
 
 // Create gaussian on 3d cartesian grid
