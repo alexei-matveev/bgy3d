@@ -25,39 +25,6 @@ typedef struct SoluteStruct
   int max_atoms;
 }Solute;
 
-/* FIXME: QM solute type */
-// typedef struct QM_SoluteStruct
-// {
-//     char names[MAXATOM][5];   /* atom types */
-//     real x[MAXATOM][3];        /* the coordinates  */
-//     real sigma[MAXATOM];       /* sigma for LJ */
-//     real epsilon[MAXATOM];     /* epsilon for LJ */
-//     int max_atoms;
-//     // Gaussian: C * exp(-B * (x - A)**2)
-//     real C[MAXATOM];
-//     real B[MAXATOM];
-//     real A[MAXATOM][3];
-// } QM_Solute;
-
-/***********************************/
-/* Test QM Solute */
-/***********************************/
-/*static QM_Solute QMS_Tester =
-  {
-    { "H","Cl"},
-    { { 0.6285, 0.0, 0.0},
-      {-0.6285, 0.0, 0.0}},
-    {2.735, 3.353},
-    {0.03971, 0.51434},
-    2,
-    {0.06206531, -0.06206531},
-    {1.44, 1.44},
-    { { 0.6285, 0.0, 0.0},
-      {-0.6285, 0.0, 0.0}},
-  }; */
-
-
-
 void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ);
 void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
 void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real widht, real *x0);
@@ -652,7 +619,6 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 
 }
 
-// void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, QM_Solute *QMS, real damp, real damp_LJ, real zpad)
 void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad)
 {
     DA da;
@@ -878,26 +844,3 @@ void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, r
     ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
     VecScale(uc, 1./L/L/L);
 }
-
-/*
-// Get gaussian coefficients from point charge
-void ConvertQMSolute(Solute *S, QM_Solute *QMS)
-{
-    int i, j;
-    QMS->max_atoms = S->max_atoms;
-
-    for(i = 0; i<QMS->max_atoms; i++)
-    {
-        for (j = 0; j<3; j++)
-        {
-            QMS->names[i][j] = S->names[i][j];
-            QMS->x[i][j] = S->x[i][j];
-            QMS->A[i][j] = S->x[i][j];
-        }
-        QMS->epsilon[i] = S->epsilon[i];
-        QMS->sigma[i] = S->sigma[i];
-        QMS->B[i] = G * G;
-        QMS->C[i] = S->q[i] * (G / sqrt(M_PI))*(G / sqrt(M_PI))*(G / sqrt(M_PI));
-    }
-}
-*/
