@@ -115,7 +115,7 @@ function main(){
             echo -e "\nMoments for Cl-HCl:" | tee -a $resmoments
             python ${PYDIR}/testmoments.py $workdir/vecO-0.m 2>&1 | tee -a $resmoments
             # mv temp files
-            rm -rf ./vec*.dat
+            rm -f ./vec*.dat
             ;;
 
         clean)
