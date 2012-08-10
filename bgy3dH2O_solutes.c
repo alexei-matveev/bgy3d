@@ -241,7 +241,7 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
   // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
   real r[3], r_s, h[3], interval[2], beta, L; //, fac;
-  int x[3], n[3], i[3], dim, N[3], k;
+  int x[3], n[3], i[3], N[3], k;
   real *p_O, *p_H;
 
 
@@ -410,7 +410,7 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], ic[3], N[3], dim, index;
+  int x[3], n[3], i[3], ic[3], N[3], index;
   real r[3], r_s, h[3], interval[2], k, fac, L, sign, fac2, L2;
   fftw_complex *fft_data;
 
@@ -498,7 +498,7 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], ic[3], N[3], dim, index;
+  int x[3], n[3], i[3], ic[3], N[3], index;
   real r[3], r_s, h[3], interval[2], k, fac, L, sign, h3;
   fftw_complex *fft_data, *dg_fft;
   PetscScalar ***v_vec;
@@ -730,7 +730,7 @@ static void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, const r
 {
     PetscScalar ***gs_vec;
     real r[3], r_s, interval[2], h[3], prefac;
-    int x[3], n[3], i[3], dim;
+    int x[3], n[3], i[3];
 
     interval[0] = BHD->PD->interval[0];
     FOR_DIM
@@ -764,7 +764,7 @@ static void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, const r
 // Solve Poisson Equation in Fourier space and get elestrostatic potential by inverse FFT
 void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp)
 {
-    int x[3], n[3], i[3], ic[3], N[3], dim, index;
+    int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k, fac, L, h3; /* , sign; */
     fftw_complex *fft_gs, *fft_uc;
 
