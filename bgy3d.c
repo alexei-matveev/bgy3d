@@ -295,7 +295,7 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
   Vec g2;
   real **x_M;
   int bufsize;
-  // Local LJ params 
+  // Local LJ params
   real epsilon, sigma;
 
   params = (BGY3dParameter) malloc(sizeof(*params));
