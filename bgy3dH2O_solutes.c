@@ -685,7 +685,7 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
     PetscScalar ***gHini_vec, ***gOini_vec;
     real ffpara_H[2], ffpara_O[2];
     real r[3], r_s, interval[2], beta, h[3];
-    int x[3], n[3], i[3], dim, k;
+    int x[3], n[3], i[3], dim, site;
 
     interval[0] = BHD->PD->interval[0];
     FOR_DIM
@@ -700,13 +700,13 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
     DAVecGetArray(BHD->da, BHD->gO_ini, &gOini_vec);
 
     /* loop over solute atoms, but only LJ interactions */
-    for(k = 0; k < S->max_atoms; k++)
+    for(site = 0; site < S->max_atoms; site++)
     {
-        ffpara_O[0] = sqrt( eO * S->epsilon[k]);
-        ffpara_O[1] = 0.5*( sO + S->sigma[k]);
+        ffpara_O[0] = sqrt( eO * S->epsilon[site]);
+        ffpara_O[1] = 0.5*( sO + S->sigma[site]);
 
-        ffpara_H[0] = sqrt( eH * S->epsilon[k]);
-        ffpara_H[1] = 0.5*( sH + S->sigma[k]);
+        ffpara_H[0] = sqrt( eH * S->epsilon[site]);
+        ffpara_H[1] = 0.5*( sH + S->sigma[site]);
 
         /* loop over local portion of grid */
         for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -716,7 +716,7 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
                 for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
                 {
                     FOR_DIM
-                        r[dim] = i[dim] * h[dim] + interval[0] - S->x[k][dim];
+                        r[dim] = i[dim] * h[dim] + interval[0] - S->x[site][dim];
 
                     r_s = sqrt( SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
 
