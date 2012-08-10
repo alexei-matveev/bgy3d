@@ -613,8 +613,6 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
 {
     DA da;
     Vec gs, sumgs; /* Vector for gaussian */
-    int k;
-    PetscViewer viewer;
 
     da = BHD->da;
     DACreateGlobalVector(da, &gs);
@@ -647,21 +645,29 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
 
     // Create charge distribution for each atom center
     // then sum them up
-    for(k=0; k<S->max_atoms; k++)
+    for(int site = 0; site < S->max_atoms; site++)
     {
         // G is predefind in bgy3d_SolventParameters.h
-        CreateGaussian(BHD, gs, S->q[k], G, S->x[k]);
+        CreateGaussian(BHD, gs, S->q[site], G, S->x[site]);
         VecAXPY(sumgs, 1.0, gs);
     }
-    /*    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], gs, qH, damp);
-        VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
-        ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], gs, qO, damp);
-        VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
-     } */
+
     ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qH, damp);
     VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
     ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qO, damp);
     VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
+
+    VecDestroy(gs);
+    VecDestroy(sumgs);
+}
+
+/*
+ * For debug purposes:
+ */
+static void dump (BGY3dH2OData BHD)
+{
+    PetscViewer viewer;
+
     /* print  to check */
     PetscPrintf(PETSC_COMM_WORLD, "Writing binarys \n");
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJH.bin", FILE_MODE_WRITE, &viewer);
@@ -670,8 +676,8 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJO.bin", FILE_MODE_WRITE, &viewer);
     VecView(BHD->gO_ini, viewer);
     PetscViewerDestroy(viewer);
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "gs.bin", FILE_MODE_WRITE, &viewer);
-    VecView(sumgs, viewer);
+    /* PetscViewerBinaryOpen(PETSC_COMM_WORLD, "gs.bin", FILE_MODE_WRITE, &viewer); */
+    /* VecView(sumgs, viewer); */
     PetscViewerDestroy(viewer);
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucH.bin", FILE_MODE_WRITE, &viewer);
     VecView(BHD->ucH, viewer);
@@ -679,11 +685,6 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
     PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucO.bin", FILE_MODE_WRITE, &viewer);
     VecView(BHD->ucO, viewer);
     PetscViewerDestroy(viewer);
-
-    // exit(1);
-    VecDestroy(gs);
-    VecDestroy(sumgs);
-
 }
 
 /*
