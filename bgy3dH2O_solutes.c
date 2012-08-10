@@ -3,15 +3,7 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-
 #include "bgy3d_SolventParameters.h"
-
-
-
-void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, real x0[3], real q2,
-				  real damp);
-void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q2,
-				  real damp);
 
 #define MAXATOM 20
 
@@ -25,13 +17,13 @@ typedef struct SoluteStruct
   int max_atoms;
 }Solute;
 
-void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ);
-void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
-void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real widht, real *x0);
-// void ConvertQMSolute(Solute *S, QM_Solute *QMS);
-void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad);
-
-void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad);
+static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
+static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
+static void ComputeSoluteDatafromLJ_QM (BGY3dH2OData BHD, const Solute *S, real damp_LJ);
+static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
+static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const real *x0);
+static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad);
+static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad);
 
 /*********************************/
 /* Water */
@@ -242,7 +234,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
 // XXX:  see (5.106) and (5.08) in the thesis
 // XXX:  return BHD->gH_ini and BHD->gO_ini ( beta*(VM_LJ + VM_coulomb_short) )
 // XXX:  and BHD->ucH, BHD->ucO ( beta * VM_coulomb_long ), but is beta missing here ??
-void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad)
+static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad)
 {
   DA da;
   PData PD;
@@ -415,8 +407,7 @@ void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, Solute *S, real damp, real 
 }
 
 
-void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, real x0[3], real q2,
-				  real damp)
+static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
 {
   DA da;
   PData PD;
@@ -504,8 +495,7 @@ void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, real x0[3], real q2,
 }
 
 
-void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q2,
-				    real damp)
+static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
 {
   DA da;
   PData PD;
@@ -619,7 +609,7 @@ void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, real x0[3], real q
 
 }
 
-void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real damp_LJ, real zpad)
+static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad)
 {
     DA da;
     Vec gs, sumgs; /* Vector for gaussian */
@@ -680,7 +670,7 @@ void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, Solute *S, real damp, real 
 }
 
 // Calculate LJ potential
-void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
+static void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, const Solute *S, real damp_LJ)
 {
     PetscScalar ***gHini_vec, ***gOini_vec;
     real ffpara_H[2], ffpara_O[2];
@@ -737,7 +727,7 @@ void ComputeSoluteDatafromLJ_QM(BGY3dH2OData BHD, Solute *S, real damp_LJ)
 
 // Create gaussian on 3d cartesian grid
 // rho(r) = q * [ width / sqrt(pi)]^3 * exp[-width^2 * (r - x0)^2]
-void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, real *x0)
+static void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, const real x0[3])
 {
     PetscScalar ***gs_vec;
     real r[3], r_s, interval[2], h[3], prefac;
