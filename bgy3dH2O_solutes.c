@@ -22,8 +22,8 @@ static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real
 static void ComputeSoluteDatafromLJ_QM (BGY3dH2OData BHD, const Solute *S, real damp_LJ);
 static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
 static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const real *x0);
-static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad);
-static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad);
+static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
+static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 
 /*********************************/
 /* Water */
@@ -44,7 +44,7 @@ static Solute Water =
 void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
-  RecomputeInitialSoluteData_II(BHD, &Water, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &Water, damp, damp_LJ);
 }
 
 /*********************************/
@@ -66,7 +66,7 @@ static Solute CarbonDisulfide =
 void RecomputeInitialSoluteData_CS2(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
-  RecomputeInitialSoluteData_II(BHD, &CarbonDisulfide, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &CarbonDisulfide, damp, damp_LJ);
 }
 
 /*********************************/
@@ -88,10 +88,9 @@ void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, r
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
 #ifndef QM
-  RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ, zpad);
-#endif
-#ifdef QM
-  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ);
+#else
+  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ);
 #endif
 }
 
@@ -152,7 +151,7 @@ static Solute Methanol =
 void RecomputeInitialSoluteData_Methanol(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
-  RecomputeInitialSoluteData_II(BHD, &Methanol, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &Methanol, damp, damp_LJ);
 }
 
 
@@ -192,7 +191,7 @@ static Solute Hexane =
 void RecomputeInitialSoluteData_Hexane(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
-  RecomputeInitialSoluteData_II(BHD, &Hexane, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &Hexane, damp, damp_LJ);
 }
 
 /* BUTANOIC ACID */
@@ -224,7 +223,7 @@ static Solute ButanoicAcid =
 void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Butanoic Acid.\n");
-  RecomputeInitialSoluteData_II(BHD, &ButanoicAcid, damp, damp_LJ, zpad);
+  RecomputeInitialSoluteData_II(BHD, &ButanoicAcid, damp, damp_LJ);
 }
 
 
@@ -234,7 +233,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
 // XXX:  see (5.106) and (5.08) in the thesis
 // XXX:  return BHD->gH_ini and BHD->gO_ini ( beta*(VM_LJ + VM_coulomb_short) )
 // XXX:  and BHD->ucH, BHD->ucO ( beta * VM_coulomb_long ), but is beta missing here ??
-static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad)
+static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
   DA da;
   PData PD;
@@ -609,7 +608,7 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
 
 }
 
-static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ, real zpad)
+static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
     DA da;
     Vec gs, sumgs; /* Vector for gaussian */
