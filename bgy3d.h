@@ -17,7 +17,13 @@
 #include "fft_3d.h"
 #include "petscdmmg.h"
 
-//#define M_PI 3.141592653589793
+/*
+ * C99 standards removes M_PI from math.h, the digits were copied from
+ * /usr/include/math.h:
+ */
+#ifndef M_PI
+# define M_PI 3.14159265358979323846
+#endif
 
 #ifndef BGY3d_H
 #define BGY3d_H
