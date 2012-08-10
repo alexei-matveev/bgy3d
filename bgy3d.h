@@ -58,7 +58,17 @@ typedef struct ProblemData
   int np;                        /* number of processes */
   int n[3];                      /* local grid size */
   int nbr_right[3], nbr_left[3]; /* neighboring processes */
-} *PData;
+} ProblemData;
+
+/*
+ * FIXME: "Never _ever_ make the  "pointerness" part of the type", (by
+ * Linus Torvalds).  Use of  PData in type declaration is discouraged.
+ * Consider  converting  "PData  PD"  to "ProblemData  *PD".   From  a
+ * practical point of  view "const PData PD" does  not help protecting
+ * the fields of the struct in the body of the function whereas "const
+ * ProblemData *PD" does.
+ */
+typedef struct ProblemData *PData; /* DEPRECATED! */
 
 /* typedef struct BGY3dField */
 /* { */
