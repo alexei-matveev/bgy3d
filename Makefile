@@ -32,7 +32,7 @@ srcdir = .
 # Compiler and compiler options
 CC       = gcc 
 CPPFLAGS = 
-CFLAGS   = -Wall -O2 -DFFT_FFTW $(USERFLAGS)
+CFLAGS   = -std=c99 -Wall -Wextra -O2 -DFFT_FFTW $(USERFLAGS)
 #CFLAGS	 =   -g  -Wall  -DFFT_FFTW $(USERFLAGS)
 LDFLAGS  = 
 
