@@ -12,7 +12,7 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
   BGY3dFourierData BDD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, **x_M, beta; //, h_g2;
-  int i[3], x[3], n[3], dim, N_M, k,  N_g2, index;
+  int i[3], x[3], n[3], N_M, k,  N_g2, index;
   PetscScalar  ***(f_vec[3]), ***gini_vec, ***(v2_vec[3]);
   PetscScalar *g2_vec;
   Vec g2, g2_3d;
@@ -332,7 +332,7 @@ BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD)
   BGY3dFourierData BDD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, beta;
-  int i[3], x[3], n[3], dim;
+  int i[3], x[3], n[3];
   PetscScalar ***(f_vec[3]), ***gini_vec;
   int bufsize;
   real epsilon, sigma;
@@ -499,9 +499,6 @@ BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD)
 
 void BGY3dFourierData_free(BGY3dFourierData BDD)
 {
-  int dim;
-
-
   FOR_DIM
     {
       VecDestroy(BDD->f[dim]);
@@ -524,7 +521,7 @@ void ExtractAxis(BGY3dFourierData BDD, Vec g, int axis)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, N[3], ic[3];
+  int x[3], n[3], i[3], N[3], ic[3];
   PetscScalar ***g_vec;
 
 
@@ -592,7 +589,7 @@ void Compute_dg_kirk(BGY3dFourierData BDD, Vec g, Vec dg)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   FFT_DATA *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac;
 
@@ -692,7 +689,7 @@ void Compute_dg(BGY3dFourierData BDD, Vec g, Vec dg)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   FFT_DATA *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac;
 
