@@ -78,7 +78,6 @@ Vec BGY3d_vec_solve(PData PD, Vec g_ini, int vdim)
 BGY3dParameterVec BGY3dParameterVec_malloc(PData PD)
 {
   BGY3dParameterVec par_vec;
-  int dim;
 
   par_vec = (BGY3dParameterVec) malloc(sizeof(*par_vec));
 
@@ -97,8 +96,6 @@ BGY3dParameterVec BGY3dParameterVec_malloc(PData PD)
 
 void BGY3dParameterVec_free(BGY3dParameterVec par_vec)
 {
-  int dim;
-
   FOR_DIM
     {
       VecDestroy(par_vec->fl[dim]);
@@ -123,13 +120,10 @@ void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g)
 PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa)
 {
   BGY3dParameterVec par_vec;
-  int dim;
 
   par_vec = (BGY3dParameterVec) pa;
 
-
-
-  for(dim=0; dim<3; dim++)
+  for(int dim = 0; dim < 3; dim++)
     Compute_F(snes, g, par_vec->fl[dim],
 		       (void *) par_vec->params[dim]);
 
