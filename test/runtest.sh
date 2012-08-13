@@ -29,16 +29,16 @@ STDOUT=$dir/out
 # Comparing two files
 function diff_out(){
     local target std
-    target=$1
-    std=$2
-    if [ -f $target -o -f $std ]; then
-        if (diff $target $std) then
+    old=$1
+    new=$2
+    if [ -f $old -o -f $new ]; then
+        if (diff $old $new) then
             echo "No differences!"
         else
-            echo -e "Possible problems with $target, see diffs above."
+            echo -e "Possible problems with $new, see diffs above."
         fi
     else
-        echo -e "Cannot find $target/$std."
+        echo -e "Cannot find $old/$new."
         exit 1
     fi
 }
@@ -146,7 +146,7 @@ function main(){
 
     # Check differences
     echo -e "\nComparing with verified outputs:"
-    diff_out $resmoments $stdmoments
+    diff_out $stdmoments $resmoments
 }
 
 main $*
