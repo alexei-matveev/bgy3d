@@ -317,37 +317,29 @@ real LJ_repulsive(real r, real epsilon, real sigma)
 }
 
 
-// Alternate void pointer as real number
-// real Coulomb_short( real r, void *params)
-real Coulomb_short( real r, real q2)
+/* NOTE: so far  in all cases the returned  result contains the factor
+   q2. */
+real Coulomb_short (real r, real q2)
 {
-  // real q2, re;
-  real re;
+    real re;
 
-  // q2 = ((double*)params)[2];
+    if (r==0) {
+        /* FIXME: pointless branch here: */
+        if (q2 > 0)
+            return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
+        else
+            return EPSILON0INV * q2 * (CUTOFF*1.0e-5); //1.0e+4;
+    }
 
-   if(r==0)
-     {
-       if( q2>0)
-	 return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
-       else
-	 return EPSILON0INV * q2 * (CUTOFF*1.0e-5); //1.0e+4;
-     }
+    re = EPSILON0INV * q2 * erfc(G * r) / r;
 
-
-
-  re = EPSILON0INV * q2 * erfc(G*r)/r;
-
-
-
-  /* check for large values */
-  /* remember: exp(-re) will be computed */
-  if(fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF*1.0e-5)))
-    return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
-/*   else if( -re>1e+1) */
-/*     return -1e+1; */
-  else
-    return re;
+    /* Check for large values remember: exp(-re) will be computed: */
+    if(fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF*1.0e-5)))
+        return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
+    /*   else if( -re>1e+1) */
+    /*     return -1e+1; */
+    else
+        return re;
 }
 
 // Alternate void pointer as real number
