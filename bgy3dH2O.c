@@ -31,7 +31,7 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
   BGY3dH2OData BHD;
   DA da;
   real interval[2], h[3], N[3], L, beta, maxL;
-  int x[3], n[3], dim;
+  int x[3], n[3];
 
   int np;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
@@ -245,8 +245,6 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
 
 void BGY3dH2OData_free(BGY3dH2OData BHD)
 {
-  int dim;
-
   MPI_Barrier( PETSC_COMM_WORLD);
 
   FOR_DIM
@@ -632,7 +630,7 @@ void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad)
 {
   DA da;
   PData PD;
-  int x[3], n[3], dim, index, p_id, p_idr=0, *recv_count;
+  int x[3], n[3], index, p_id, p_idr=0, *recv_count;
 
 
   PD = BHD->PD;
@@ -644,7 +642,7 @@ void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad)
 
   index = (int) ceil((-PD->interval[0]-zpad)/PD->h[0]);
   recv_count = (int*) malloc(PD->np*sizeof(int));
-  for(dim=0; dim<PD->np; dim++)
+  for(int dim = 0; dim < PD->np; dim++)
     recv_count[dim] = 1;
 
   if( index      >= x[0] && index      < x[0]+n[0] &&
@@ -703,7 +701,7 @@ real ImposeBoundaryConditionII( BGY3dH2OData BHD, Vec g, real zpad)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], index=0, index_sum, dim;
+  int x[3], n[3], i[3], index=0, index_sum;
   real b_data, r[3], r_s, h[3], interval[2], data_sum;
   PetscScalar ***g_vec;
 
@@ -775,7 +773,7 @@ void Smooth_Function(BGY3dH2OData BHD, Vec g, real RL, real RR, real shift)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim;
+  int x[3], n[3], i[3];
   PetscScalar ***g_vec;
   real r[3], r_s, h[3], interval[2], s, r_rl_2, rr_rl_2r, rr_rl_3;
 
@@ -828,7 +826,7 @@ void Zeropad_Function(BGY3dH2OData BHD, Vec g, real ZP, real shift)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, border, N[3];
+  int x[3], n[3], i[3], border, N[3];
   PetscScalar ***g_vec;
   real h[3], interval[2]; //r[3], r_s, s, r_rl_2, rr_rl_2r, rr_rl_3;
 
@@ -883,7 +881,7 @@ void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3],
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], ic[3], N[3], dim, index;
+  int x[3], n[3], i[3], ic[3], N[3], index;
   PetscScalar ***v_vec;
   // real r[3], r_s, h[3], interval[2], k, fac, L, q2, sign, h3;
   real r[3], r_s, h[3], interval[2], k, fac, L, sign, h3;
@@ -1037,7 +1035,7 @@ void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3] , Vec f_l[3],
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], ic[3], N[3], dim, index;
+  int x[3], n[3], i[3], ic[3], N[3], index;
   // real h[3], interval[2], k, fac, L, q2, sign, h3;
   real h[3], interval[2], k, fac, L, sign, h3;
   fftw_complex *(fs_fft[3]),*(fl_fft[3]);
@@ -1168,7 +1166,7 @@ void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, real q2,
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], ic[3], N[3], dim, index;
+  int x[3], n[3], i[3], ic[3], N[3], index;
   // real h[3], interval[2], k, fac, L, q2, sign, h3;
   real h[3], interval[2], k, fac, L, sign, h3;
   fftw_complex  *fs_fft,*fl_fft;
@@ -1275,7 +1273,7 @@ void ComputeInitialGuess(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec dgHO, real damp
   PData PD;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
   real r[3], r_s, h[3], interval[2], beta;
-  int x[3], n[3], i[3], dim;
+  int x[3], n[3], i[3];
   real q2H, q2O, q2HO;
 
   q2H = BHD->LJ_paramsH[2];
@@ -1365,7 +1363,7 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   PetscScalar ***cH_vec, ***cHO_vec, ***cO_vec;
   real r[3], r_s, h[3], interval[2], beta, L;
-  int x[3], n[3], i[3], dim, k;
+  int x[3], n[3], i[3], k;
   // local LJ params and charge product
   real q2H, q2O, q2HO;
   real epsilonH, epsilonO, epsilonHO;
@@ -1633,7 +1631,7 @@ void Compute_dg_H2O_inter(BGY3dH2OData BHD,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign, confac;
 
@@ -1887,7 +1885,7 @@ void Compute_dg_H2O_intra(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta;
 
@@ -2023,7 +2021,7 @@ void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3]; //, local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3]; //, local_size;
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta;
   // PetscScalar *v_vec, *tg_vec;
@@ -2276,7 +2274,7 @@ void Compute_dg_H2O_intraIII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta;
   PetscScalar *v_vec, *tg_vec;
@@ -2608,7 +2606,7 @@ void Compute_dg_H2O_intra_ln(BGY3dH2OData BHD, Vec g, real rab, Vec dg, Vec dg_h
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
   real fac, L, k, h, beta;
   PetscScalar *g_vec;
@@ -2727,7 +2725,7 @@ void Compute_dg_H2O_intra_lnII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]);
   real fac, L, k, h, beta, k_fac;
   PetscScalar *g_vec; //, *v_vec;
@@ -2922,7 +2920,7 @@ void Compute_dg_H2O_intra_lnIII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]), *n_fft;
   real fac, L, k, h, beta, k_fac;
   PetscScalar *g_vec; //, *v_vec;
@@ -3173,7 +3171,7 @@ void Compute_Zero_Correction(BGY3dH2OData BHD, Vec dg)
 {
   PData PD;
   DA da;
-  int x[3], n[3], dim, N[3];
+  int x[3], n[3], N[3];
   fftw_complex *g_fft, *scratch;
   real L, h;
 
@@ -3209,7 +3207,7 @@ void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
   real fac, L, k, h, beta;
   PetscScalar *g_vec;
@@ -3325,7 +3323,7 @@ void Compute_dg_H2O_normalization_inter(BGY3dH2OData BHD, Vec g1, Vec g2,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g1_fft, *g2_fft, *dg_fft, *scratch;
   real fac, L, h, beta, sign; // k
   // PetscScalar *g_vec;
