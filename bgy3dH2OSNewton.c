@@ -44,7 +44,7 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
   BGY3dH2OData BHD;
   DA da;
   real interval[2], h[3], N[3], L, beta;
-  int x[3], n[3], dim;
+  int x[3], n[3];
   int np;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
   PetscInt lx[1], ly[1], *lz;
@@ -304,8 +304,6 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
 
 void BGY3dH2OData_Newton_free2(BGY3dH2OData BHD)
 {
-  int dim;
-
   MPI_Barrier( PETSC_COMM_WORLD);
 
   FOR_DIM
