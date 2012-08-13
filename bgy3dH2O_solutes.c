@@ -20,12 +20,27 @@ typedef struct Solute
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
-static void CreateGaussian (BGY3dH2OData BHD, Vec gs, real q, real widht, const real *x0);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
 
+/*
+ * These two functions  obey the same interface. They  are supposed to
+ * get parameters of the solvent site  such as its location and the LJ
+ * parameters, a description of the solute a return a real number such
+ * as an interaction energy or the charge density:
+ */
 static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *S);
-static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon, real sigma, real fact, Vec v);
+static real rho (real x, real y, real z, real epsilon, real sigma, const Solute *S);
+
+/*
+ * This function expects a callback obeying the above interface as one
+ * of the arguments:
+ */
+static void field (DA da, const ProblemData *PD,
+                   const Solute *S,
+                   real epsilon, real sigma, real fact,
+                   double (*f)(real x, real y, real z, real eps, real sig, const Solute *S),
+                   Vec v);
 
 /*********************************/
 /* Water */
@@ -612,24 +627,13 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
 
 static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
-    DA da;
-    Vec gs, sumgs; /* Vector for gaussian */
-
-    da = BHD->da;
-    DACreateGlobalVector(da, &gs);
-    DACreateGlobalVector(da, &sumgs);
-    VecSet(gs, 0.0);
-    VecSet(sumgs, 0.0);
-    VecSet(BHD->ucH, 0.0);
-    VecSet(BHD->ucO, 0.0);
-
     PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
     /*
      * Calculate LJ potential for all solvent sites.
      *
-     * Beta is that the  (inverse) temperature. For historical reasons
-     * the solute field acting on solvent sites is defined having this
+     * Beta is  the (inverse) temperature. For  historical reasons the
+     * solute  field acting on  solvent sites  is defined  having this
      * factor.
      */
     real factor = damp_LJ * BHD->PD->beta;
@@ -640,26 +644,40 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
      *
      * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
      * #defined at some obscure place:
+     *
+     * We  supply lj()  as a  callback  function that  is supposed  to
+     * compute the LJ field for a site in the presense of the solute:
      */
-    lj_field(BHD->da, BHD->PD, S, eH, sH, factor, BHD->gH_ini);
-    lj_field(BHD->da, BHD->PD, S, eO, sO, factor, BHD->gO_ini);
+    field (BHD->da, BHD->PD, S, eH, sH, factor, lj, BHD->gH_ini);
+    field (BHD->da, BHD->PD, S, eO, sO, factor, lj, BHD->gO_ini);
 
-    // Create charge distribution for each atom center
-    // then sum them up
-    for(int site = 0; site < S->max_atoms; site++)
-    {
-        // G is predefind in bgy3d_SolventParameters.h
-        CreateGaussian(BHD, gs, S->q[site], G, S->x[site]);
-        VecAXPY(sumgs, 1.0, gs);
-    }
+    /*
+     * Compute  the  charge  density  of  the  solute.   The  callback
+     * function rho()  sums charge  distribution for each  solute site
+     * and  does not use  (epsilon, sigma)  parameters of  the solvent
+     * site, so that we provide  -1.0 for them.  The overall factor is
+     * 1.0 (idependent of the solvent charge):
+     */
 
-    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qH, damp);
-    VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
-    ComputeSoluteDatafromCoulomb_QM(BHD, BHD->v[0], sumgs, qO, damp);
-    VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
+    Vec rho_solute; /* Vector for solute charge density */
 
-    VecDestroy(gs);
-    VecDestroy(sumgs);
+    DACreateGlobalVector (BHD->da, &rho_solute);
+
+    field (BHD->da, BHD->PD, S, -1.0, -1.0, 1.0, rho, rho_solute);
+
+    /*
+     * This solves  the Poisson equation and  puts resulting potential
+     * into a pre-allocated (?) vector BHD->v[0].
+     */
+    ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0, damp);
+
+    VecDestroy (rho_solute);
+
+    VecSet (BHD->ucH, 0.0);
+    VecAXPY (BHD->ucH, qH, BHD->v[0]);
+
+    VecSet (BHD->ucO, 0.0);
+    VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
 
 /*
@@ -689,13 +707,20 @@ static void dump (BGY3dH2OData BHD)
 }
 
 /*
- * Calculate LJ  interaction of an LJ-site  characterized by (epsilon,
- * sigma)  and the solute  S with  an overall  factor "fact"  at every
- * point of the local grid.
+ * Calculate a  real field "f"  for the solvent site  characterized by
+ * (epsilon, sigma)  in the presence of  the solute S  with an overall
+ * factor "fact" at every point (x, y, z) of the local grid.
  *
- * Vec v is the intent(out) argument.
+ * The function f(x,  y, z, eps, sig,  S) can be lj() or  rho() as two
+ * examples.
+ *
+ * Vector "v" is the intent(out) argument.
  */
-static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon, real sigma, real fact, Vec v)
+static void field(DA da, const ProblemData *PD,
+                  const Solute *S,
+                  real epsilon, real sigma, real fact,
+                  real (*f)(real x, real y, real z, real eps, real sig, const Solute *S),
+                  Vec v)
 {
     PetscScalar ***vec;
     real h[3];
@@ -715,8 +740,6 @@ static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon
     /* Get local portion of the grid */
     DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-    /* FIXME: maybe use assignment instead of += below? */
-    // VecSet(v, 0.0);
     DAVecGetArray (da, v, &vec);
 
     /* loop over local portion of grid */
@@ -733,10 +756,11 @@ static void lj_field(DA da, const ProblemData *PD, const Solute *S, real epsilon
                 real x = i * h[0] + offset;
 
                 /*
-                 * Sum LJ-contributions  from all  solute sites at (i,  j, k)
-                 * point of the grid:
+                 * Compute the field f at (x, y, z) <-> (i, j, k) e.g.
+                 * by summing (LJ) contributions from all solute sites
+                 * at that grid point:
                  */
-                vec[k][j][i] = fact * lj (x, y, z, epsilon, sigma, S);
+                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, S);
             }
         }
     }
@@ -770,41 +794,40 @@ static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *
     return field;
 }
 
-// Create gaussian on 3d cartesian grid
-// rho(r) = q * [ width / sqrt(pi)]^3 * exp[-width^2 * (r - x0)^2]
-static void CreateGaussian(BGY3dH2OData BHD, Vec gs, real q, real width, const real x0[3])
+/*
+ * Charge  density  of  the solute  S  at  (x,  y, z).   Solvent  site
+ * parameters (epsilon, sigma) are here to keep the interface of rho()
+ * the same as that of lj().
+ *
+ * Each gaussian is evaluated as:
+ *
+ *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
+ */
+static real rho (real x, real y, real z,
+                 real epsilon /* unused */, real sigma /* unused */,
+                 const Solute *S)
 {
-    PetscScalar ***gs_vec;
-    real r[3], r_s, interval[2], h[3], prefac;
-    int x[3], n[3], i[3];
+    /* G  is predefind  in bgy3d_SolventParameters.h  FIXME:  make the
+       gaussian width a property of  the (solute) site in the same way
+       as the charge of the site. */
+    real prefac = pow(G / sqrt(M_PI), 3.0);
 
-    interval[0] = BHD->PD->interval[0];
-    FOR_DIM
-        h[dim] = BHD->PD->h[dim];
+    /* Sum Gaussian contributions from all solute sites: */
+    real field = 0.0;
 
-    DAVecGetArray(BHD->da, gs, &gs_vec);
+    for (int site = 0; site < S->max_atoms; site++) {
 
-    /* Get local portion of the grid */
-    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+        /* Square of the distance from a grid point to this site: */
+        real r2 = (SQR(x - S->x[site][0]) +
+                   SQR(y - S->x[site][1]) +
+                   SQR(z - S->x[site][2]));
 
-    prefac = pow(width / sqrt(M_PI), 3.0) * q;
-    /* loop over local portion of grid */
-    for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    {
-        for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-        {
-            for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-            {
-                FOR_DIM
-                    r[dim] = i[dim] * h[dim] + interval[0] - x0[dim];
-
-                r_s =  SQR(r[0]) + SQR(r[1]) + SQR(r[2]);
-                gs_vec[i[2]][i[1]][i[0]] = prefac * exp(-1.0 * width * width * r_s);
-            }
-        }
+        /* Gaussian  distribution, note  that G  is not  a  width, but
+           rather an inverse of it: */
+        field += prefac * S->q[site] * exp(- G * G * r2);
     }
 
-    DAVecRestoreArray(BHD->da, gs, &gs_vec);
+    return field;
 }
 
 // Solve Poisson Equation in Fourier space and get elestrostatic potential by inverse FFT
