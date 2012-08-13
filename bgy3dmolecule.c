@@ -15,7 +15,7 @@ BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD)
   BGY3dDiatomicABData BDD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, beta;
-  int i[3], x[3], n[3], dim;
+  int i[3], x[3], n[3];
   PetscScalar ***(fa_vec[3]),***(fb_vec[3]),***(fab_vec[3]);
   PetscScalar ***gaini_vec, ***gbini_vec, ***gabini_vec;
   int np;
@@ -267,8 +267,6 @@ BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD)
 
 void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
 {
-  int dim;
-
   MPI_Barrier( PETSC_COMM_WORLD);
 
   FOR_DIM
@@ -402,7 +400,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, rho, h, sign;
 
@@ -598,7 +596,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta; // sign;
 
@@ -717,7 +715,7 @@ void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3], local_size;
+  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
   real fac, L, k, h, beta;
   PetscScalar *g_vec;
@@ -816,7 +814,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta; // sign;
 
@@ -908,7 +906,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign, beta;
 
