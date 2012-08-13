@@ -255,20 +255,15 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
   DA da;
   PData PD;
   PetscScalar ***gHini_vec, ***gOini_vec;
-  // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
   real r[3], r_s, h[3], interval[2], beta, L; //, fac;
   int x[3], n[3], i[3], N[3], k;
   real *p_O, *p_H;
 
-
-
   PD = BHD->PD;
   da = BHD->da;
 
-
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
-
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -285,7 +280,6 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
   p_O = (real*) malloc(3*sizeof(real));
   p_H = (real*) malloc(3*sizeof(real));
 
-
   VecSet(BHD->gH_ini, 0.0);
   VecSet(BHD->gO_ini, 0.0);
   VecSet(BHD->gHO_ini, 0.0);
@@ -299,12 +293,9 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
       VecSet(BHD->fHO_l[dim],0.0);
     }
 
-
   DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
   DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
 
-/*   DAVecGetArray(da, BHD->ucH, &ucH_vec); */
-/*   DAVecGetArray(da, BHD->ucO, &ucO_vec); */
   FOR_DIM
     {
       DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
@@ -339,52 +330,21 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
 	      FOR_DIM
 		r[dim] = i[dim]*h[dim]+interval[0] - S->x[k][dim];
 
-
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
 
 	      /* Lennard-Jones */
 	      gHini_vec[i[2]][i[1]][i[0]] +=
-		// damp_LJ * beta* Lennard_Jones( r_s, (void*)p_H);
 		damp_LJ * beta* Lennard_Jones( r_s, p_H[0], p_H[1]);
+
 	      gOini_vec[i[2]][i[1]][i[0]] +=
-		// damp_LJ * beta* Lennard_Jones( r_s, (void*)p_O);
 		damp_LJ * beta* Lennard_Jones( r_s, p_O[0], p_O[1]);
 
 	      /* Coulomb short */
 	      gHini_vec[i[2]][i[1]][i[0]] +=
-		// damp*beta* Coulomb_short( r_s, (void*)p_H);
-                // replace void pointer as real number
 		damp*beta* Coulomb_short( r_s, p_H[2]);
+
 	      gOini_vec[i[2]][i[1]][i[0]] +=
-		// damp*beta* Coulomb_short( r_s, (void*)p_O);
-                // replace void pointer as real number
 		damp*beta* Coulomb_short( r_s, p_O[2]);
-
-
-	      /* Coulomb long */
-	      /* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
-	      /* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
-	      /* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
-
-	      /* Coulomb */
-	      /* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsH); */
-	      /* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsO); */
-	      /* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-	      /* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsHO); */
-
-/* 	      ucH_vec[i[2]][i[1]][i[0]] +=  */
-/* 		damp * beta* Coulomb_long( r_s, (void*)p_H); */
-/* 	      ucO_vec[i[2]][i[1]][i[0]] +=  */
-/* 		damp * beta* Coulomb_long( r_s, (void*)p_O); */
-
-
-
 	    }
 
       ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  p_O[2], damp);
@@ -396,30 +356,9 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
 
   DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
   DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
-/*   DAVecRestoreArray(da, BHD->ucH, &ucH_vec); */
-/*   DAVecRestoreArray(da, BHD->ucO, &ucO_vec); */
-
-
-/*   ComputeFFTSoluteII(BHD, BHD->ucH , BHD->ucHO, BHD->LJ_paramsHO, damp, zpad); */
-/*   VecScale(BHD->ucH, beta); */
-/*   VecAXPY( BHD->gH_ini, beta, BHD->ucHO); */
-
-/*   ComputeFFTSoluteII(BHD, BHD->ucO , BHD->ucHO, BHD->LJ_paramsO,  damp, zpad); */
-/*   VecAXPY( BHD->gO_ini, beta, BHD->ucHO); */
-/*   VecScale(BHD->ucO, beta); */
-
-  /* Shift uc's */
-/*   VecSum(BHD->ucH, &fac); */
-/*   VecShift(BHD->ucH, -fac/N[0]/N[1]/N[2]); */
-/*   VecSum(BHD->ucO, &fac); */
-/*   VecShift(BHD->ucO, -fac/N[0]/N[1]/N[2]); */
-
-/*   VecView(BHD->ucH,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
 
   free(p_O);
   free(p_H);
-
 }
 
 
