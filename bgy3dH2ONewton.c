@@ -45,7 +45,7 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   BGY3dH2OData BHD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, beta;
-  int i[3], x[3], n[3], dim;
+  int i[3], x[3], n[3];
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   PetscScalar ***gHini_vec, ***gOini_vec, ***gHOini_vec;
@@ -433,8 +433,6 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 
 void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
 {
-  int dim;
-
   MPI_Barrier( PETSC_COMM_WORLD);
 
   FOR_DIM
