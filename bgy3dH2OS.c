@@ -16,7 +16,7 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
   BGY3dH2OData BHD;
   DA da;
   real interval[2], h[3], N[3], L, beta, maxL;
-  int x[3], n[3], dim;
+  int x[3], n[3];
   int np;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
   PetscInt lx[1], ly[1], *lz;
@@ -312,8 +312,6 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
 
 void BGY3dH2OData_free2(BGY3dH2OData BHD)
 {
-  int dim;
-
   MPI_Barrier( PETSC_COMM_WORLD);
 
   FOR_DIM
@@ -382,7 +380,7 @@ void InitializeLaplaceMatrix(BGY3dH2OData BHD, real zpad)
   PData PD;
   Mat M;
   DA da;
-  int x[3], n[3], i[3], N[3], dim, border;
+  int x[3], n[3], i[3], N[3], border;
   MatStencil col[3],row;
   PetscScalar v[3], vb=1.0;
   real h[3];
@@ -490,7 +488,7 @@ void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, N[3], border; // ic[3], k;
+  int x[3], n[3], i[3], N[3], border; // ic[3], k;
   PetscScalar ***gfrom_vec, ***gto_vec;
 
   PD = BHD->PD;
@@ -590,7 +588,7 @@ void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2)
   real *xg, *g;
   real r[3], r_s, h[3], interval[2];
   int index=0;
-  int x[3], n[3], i[3], dim, k;
+  int x[3], n[3], i[3], k;
   PetscScalar ***g2_vec;
 
   da = BHD->da;
@@ -669,7 +667,7 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
   // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
   PetscScalar ***wHO_vec, ***wHH_vec;
   real r[3], r_s, h[3], interval[2], beta, L, wconst_HO, wconst_HH, wG;
-  int x[3], n[3], i[3], dim;
+  int x[3], n[3], i[3];
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
   real q2H, q2O, q2HO;
@@ -916,7 +914,7 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
   real r[3], r_s, h[3], interval[2], beta, L; // fac;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
   real q2H, q2O, q2HO;
@@ -1069,7 +1067,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign, confac;
 
@@ -1213,7 +1211,7 @@ void Compute_H2O_interS_C(BGY3dH2OData BHD,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, index, N[3], ic[3];
+  int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign, confac, dampfac;
 
