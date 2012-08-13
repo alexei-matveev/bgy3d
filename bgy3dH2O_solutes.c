@@ -17,7 +17,9 @@ typedef struct Solute
   int max_atoms;
 } Solute;
 
+#if 0
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
+#endif
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
@@ -362,6 +364,7 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
 }
 
 
+#if 0
 static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
 {
   DA da;
@@ -448,6 +451,7 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
 /*   exit(1); */
 
 }
+#endif
 
 
 static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
@@ -619,6 +623,7 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
     VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
 
+#if 0
 /*
  * For debug purposes:
  */
@@ -644,6 +649,7 @@ static void dump (BGY3dH2OData BHD)
     VecView(BHD->ucO, viewer);
     PetscViewerDestroy(viewer);
 }
+#endif
 
 /*
  * Calculate a  real field "f"  for the solvent site  characterized by
