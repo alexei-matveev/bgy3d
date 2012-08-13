@@ -12,7 +12,7 @@ Vec BGY3dDiv_solve_FourierTest(PData PD, Vec g_ini, int vdim)
 {
   Vec g[5];
   BGY3dFourierData BDD[5];
-  int i, dim, index;
+  int i, index;
 
 
   assert(g_ini == PETSC_NULL);
@@ -70,7 +70,7 @@ void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFouri
   DA damax, da;
   Vec dgint, gint;
   PetscScalar ***gint_vec, ***g_vec, norm2, norminf;
-  int i[3], n[3], x[3], il[3], ili[3], gi[3], dim;
+  int i[3], n[3], x[3], il[3], ili[3], gi[3];
   real h, v[3];
 
 
@@ -274,7 +274,7 @@ void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K)
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***(k_vec[3]);
   real h[3], r[3], r_s, facg, facK, L;
 
@@ -341,7 +341,7 @@ void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
   real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
 
@@ -399,7 +399,7 @@ void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 {
   PData PD;
   DA da;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
   real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
 
@@ -457,7 +457,7 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
   PData PD;
   Vec g1, g2;
   DA da;
-  int x[3], n[3], i[3], dim, N[3], k;
+  int x[3], n[3], i[3], N[3], k;
   PetscScalar ***g1_vec, ***g2_vec, ***s_vec;
   real h[3], r[3], r_s, facg1, facg2, facs, L, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft;
