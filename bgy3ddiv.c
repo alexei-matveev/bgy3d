@@ -40,7 +40,7 @@ BGY3dDivData BGY3dDivData_malloc(PData PD, PetscTruth flg)
   BGY3dDivData BDD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, **x_M, beta, h_g2;
-  int i[3], x[3], n[3], dim, N_M, k, ic1, ic2, ic3, N_g2, index;
+  int i[3], x[3], n[3], N_M, k, ic1, ic2, ic3, N_g2, index;
   PetscScalar ***ddU_vec, ***(f_vec[3]), ***boundary_vec, ***gini_vec, ***(v2_vec[3]), ***gSA_vec;
   PetscScalar *g2_vec;
   Vec g2;
@@ -325,7 +325,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg)
   BGY3dDivData BDD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, **x_M, beta, h_g2;
-  int i[3], x[3], n[3], dim, N_M, ic1, ic2, ic3, N_g2, index;
+  int i[3], x[3], n[3], N_M, ic1, ic2, ic3, N_g2, index;
   PetscScalar ***ddU_vec, ***(f_vec[3]), ***boundary_vec, ***gini_vec, ***(v2_vec[3]), ***gSA_vec;
   PetscScalar *g2_vec;
   Vec g2;
@@ -580,8 +580,6 @@ BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg)
 
 void BGY3dDivData_free(BGY3dDivData BDD)
 {
-  int dim;
-
   VecDestroy(BDD->ddU);
   FOR_DIM
     {
@@ -611,7 +609,7 @@ void BGY3dDivData_free(BGY3dDivData BDD)
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M)
 {
   PData PD;
-  int x[3], n[3], i[3], N[3], dim;
+  int x[3], n[3], i[3], N[3];
   MatStencil col[7],row;
   PetscScalar v[3], ***ddU_vec, ***(f_vec[3]);
   real h[3], beta;
@@ -721,7 +719,7 @@ void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M)
 void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim)
 {
   PData PD;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[3],row;
   PetscScalar v[3];
@@ -801,7 +799,7 @@ void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f)
 {
   PData PD;
   DA da;
-  int x[3], n[3], dim, k, max_k;
+  int x[3], n[3], k, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
 
@@ -862,7 +860,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 {
   PData PD;
   DA da;
-  int x[3], n[3], dim, k, max_k;
+  int x[3], n[3], k, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
 
@@ -955,7 +953,7 @@ void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col,row;
   PetscScalar ***f_vec;
@@ -1007,7 +1005,7 @@ void AssembleSystemMatrix2(BGY3dDivData BDD, Mat SM)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[2],row;
   PetscScalar ***(i_vec[3]), val[2];
@@ -1110,7 +1108,7 @@ void AssembleSystemMatrix_part2(BGY3dDivData BDD, Mat SM)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[3],row;
   PetscScalar ***(v_vec[3]), val[3], ***ddU_vec;
@@ -1200,7 +1198,7 @@ void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3];
+  int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[2],row;
   PetscScalar ***(i_vec[3]), val[2];
@@ -1280,9 +1278,6 @@ void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM)
 
 void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f)
 {
-  int dim;
-
-
   /* v= grad(g)*integral  */
   FOR_DIM
     {
@@ -1312,7 +1307,7 @@ void ComputeRHS2(BGY3dDivData BDD, Vec b)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3], ic1, ic2, ic3;
+  int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
 
@@ -1371,7 +1366,7 @@ void ComputeRHS_laplace(BGY3dDivData BDD, Vec b)
 {
   DA da;
   PData PD;
-  int x[3], n[3], i[3], dim, N[3], ic1, ic2, ic3;
+  int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
 
@@ -1431,7 +1426,7 @@ void ComputeRHS_laplace(BGY3dDivData BDD, Vec b)
 
 void ShiftVec(DA da, Vec g, Vec scratch, int N[3])
 {
-  int x[3], n[3], i[3], dim, ic[3], add[3];
+  int x[3], n[3], i[3], ic[3], add[3];
   PetscScalar  ***g_vec, ***temp_vec;
 
 
@@ -1527,7 +1522,6 @@ void ComputeBGY3dDiv_F2(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
 void ComputeBGY3dDiv_F3(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
 			Vec b, Vec f, PetscTruth kflg)
 {
-  int dim;
   Vec help[3], part[3]; // was declared as part[dim];
 
 
