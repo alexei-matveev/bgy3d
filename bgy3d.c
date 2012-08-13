@@ -23,7 +23,6 @@ int main(int argc, char **argv)
   int ierr, N=0;
   real beta=0.6061, rho=0.3, h=0.5, interval[2]={-5.0,5.0};
   real mpi_start, mpi_stop;
-  int dim;
   int np;
   Vec g, g_ini;
   PetscTruth flg;
@@ -287,7 +286,7 @@ BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
 {
   BGY3dParameter params;
   DA da;
-  int n[3], x[3], i[3], dim, N_g2, index, N_M, k, ic1, ic2, ic3, N[3];
+  int n[3], x[3], i[3], N_g2, index, N_M, k, ic1, ic2, ic3, N[3];
   PetscScalar ***x_vec, ***force_vec, ***Ftimesg2_vec, ***boundary_vec,h[3],
     ***force_single_vec, interval[2];
   PetscScalar r[3], r_s, L, *g2_vec, h_g2;
@@ -562,7 +561,7 @@ MatPrecond MatPrecond_malloc(BGY3dParameter params)
   MatPrecond MP;
   PData PD;
   PetscScalar ***force_vec;
-  int i[3], x[3], n[3], vdim, dim;
+  int i[3], x[3], n[3], vdim;
   MatStencil col,row;
   PetscScalar v;
   real beta, h[3];
@@ -683,7 +682,7 @@ void Molecule_free( real **x_M, int N_M)
 /* Initialize M-Matrix with appropriate stencil */
 void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
 {
-  int x[3], n[3], i[3], N[3], dim;
+  int x[3], n[3], i[3], N[3];
   MatStencil col[2],row;
   PetscScalar v[2];
 
@@ -908,7 +907,7 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 {
   DA da;
   PData PD;
-  int x[3], i[3], n[3], dim, N_M, k, N[3];
+  int x[3], i[3], n[3], N_M, k, N[3];
   PetscScalar ***g_vec, r[3], r_s;
   real **x_M, h[3], beta, interval[2], L;
   real epsilon, sigma;
@@ -973,7 +972,7 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 {
   DA da;
   PData PD;
-  int x[3], i[3], n[3], dim, N_M, k, N_g2, index, N[3];
+  int x[3], i[3], n[3], N_M, k, N_g2, index, N[3];
   PetscScalar ***g_vec, *g2_vec, r[3], r_s;
   real **x_M, h[3], beta, h_g2, L, interval[2];
   PetscViewer pview;
@@ -1157,7 +1156,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
   DA da;
   BGY3dParameter params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
-  int x[3], n[3], i[3], max_i, vdim, k, N[3], dim;
+  int x[3], n[3], i[3], max_i, vdim, k, N[3];
   Vec  f;
   PetscScalar ***f_vec, v[3];
   MatStencil col[3],row;
@@ -1533,7 +1532,7 @@ void ConvolutionTest(BGY3dParameter params)
   Vec a,b,c;
   FFT_DATA *fft_a, *fft_b, *fft_c;
   real x_mid[3], r[3], r_s, h[3];
-  int x[3], n[3], i[3], max_i, dim, N[3];
+  int x[3], n[3], i[3], max_i, N[3];
   PetscScalar ***a_vec, ***b_vec, L;
   int index=0;
 
