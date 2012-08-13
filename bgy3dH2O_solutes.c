@@ -27,12 +27,13 @@ static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, re
 
 /*
  * These two functions  obey the same interface. They  are supposed to
- * get parameters of the solvent site  such as its location and the LJ
- * parameters, a description of the solute a return a real number such
- * as an interaction energy or the charge density:
+ * get (1)  parameters of  the solvent site  such as its  location and
+ * force field  parameters, and  (2) a description  of the  solute and
+ * return a  real number such as  an interaction energy  or the charge
+ * density:
  */
-static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *S);
-static real rho (real x, real y, real z, real epsilon, real sigma, const Solute *S);
+static real ljc (real x, real y, real z, real epsilon, real sigma, real charge, const Solute *S);
+static real rho (real x, real y, real z, real epsilon, real sigma, real charge, const Solute *S);
 
 /*
  * This function expects a callback obeying the above interface as one
@@ -40,8 +41,10 @@ static real rho (real x, real y, real z, real epsilon, real sigma, const Solute 
  */
 static void field (DA da, const ProblemData *PD,
                    const Solute *S,
-                   real epsilon, real sigma, real fact,
-                   double (*f)(real x, real y, real z, real eps, real sig, const Solute *S),
+                   real epsilon, real sigma, real charge, real fact,
+                   double (*f)(real x, real y, real z,
+                               real eps, real sig, real chg,
+                               const Solute *S),
                    Vec v);
 
 /*********************************/
@@ -588,25 +591,30 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
      * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
      * #defined at some obscure place:
      *
-     * We  supply lj()  as a  callback  function that  is supposed  to
-     * compute the LJ field for a site in the presense of the solute:
+     * We  supply ljc()  as a  callback function  that is  supposed to
+     * compute the interaction  of a charged LJ solvent  site with the
+     * solute.
+     *
+     * At  this place  the (short  range) Coulomb  interaction  of the
+     * solvent  site  with  the  solute was  deliberately  omitted  by
+     * specifying zero charge of the solvent site:
      */
-    field (BHD->da, BHD->PD, S, eH, sH, factor, lj, BHD->gH_ini);
-    field (BHD->da, BHD->PD, S, eO, sO, factor, lj, BHD->gO_ini);
+    field (BHD->da, BHD->PD, S, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
+    field (BHD->da, BHD->PD, S, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
 
     /*
      * Compute  the  charge  density  of  the  solute.   The  callback
      * function rho()  sums charge  distribution for each  solute site
-     * and  does not use  (epsilon, sigma)  parameters of  the solvent
-     * site, so that we provide  -1.0 for them.  The overall factor is
-     * 1.0 (idependent of the solvent charge):
+     * and  does not use  (epsilon, sigma,  charge) parameters  of the
+     * solvent site,  so that we  provide -1.0 for them.   The overall
+     * factor is 1.0 (idependent of the solvent charge):
      */
 
     Vec rho_solute; /* Vector for solute charge density */
 
     DACreateGlobalVector (BHD->da, &rho_solute);
 
-    field (BHD->da, BHD->PD, S, -1.0, -1.0, 1.0, rho, rho_solute);
+    field (BHD->da, BHD->PD, S, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
 
     /*
      * This solves  the Poisson equation and  puts resulting potential
@@ -656,16 +664,18 @@ static void dump (BGY3dH2OData BHD)
  * (epsilon, sigma)  in the presence of  the solute S  with an overall
  * factor "fact" at every point (x, y, z) of the local grid.
  *
- * The function f(x,  y, z, eps, sig,  S) can be lj() or  rho() as two
- * examples.
+ * The function f(x, y, z, eps, sig,  chg, S) can be ljc() or rho() as
+ * two examples.
  *
  * Vector "v" is the intent(out) argument.
  */
-static void field(DA da, const ProblemData *PD,
-                  const Solute *S,
-                  real epsilon, real sigma, real fact,
-                  real (*f)(real x, real y, real z, real eps, real sig, const Solute *S),
-                  Vec v)
+static void field (DA da, const ProblemData *PD,
+                   const Solute *S,
+                   real epsilon, real sigma, real charge, real fact,
+                   real (*f)(real x, real y, real z,
+                             real eps, real sig, real chg,
+                             const Solute *S),
+                   Vec v)
 {
     PetscScalar ***vec;
     real h[3];
@@ -705,7 +715,7 @@ static void field(DA da, const ProblemData *PD,
                  * by summing (LJ) contributions from all solute sites
                  * at that grid point:
                  */
-                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, S);
+                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, charge, S);
             }
         }
     }
@@ -713,12 +723,14 @@ static void field(DA da, const ProblemData *PD,
 }
 
 /*
- * Interaction of  an LJ site (epsilon,  sigma) at (x, y,  z) with the
- * solute S:
+ * Interaction of a charged LJ site (epsilon, sigma, charge) at (x, y,
+ * z) with the solute S:
  */
-static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *S)
+static real ljc (real x, real y, real z,
+                 real epsilon, real sigma, real charge,
+                 const Solute *S)
 {
-    /* Sum LJ-contribution from all solute sites: */
+    /* Sum force field contribution from all solute sites: */
     real field = 0.0;
 
     for (int site = 0; site < S->max_atoms; site++) {
@@ -732,8 +744,13 @@ static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *
                          SQR(y - S->x[site][1]) +
                          SQR(z - S->x[site][2]));
 
-        /* Lennard-Jones */
+        /* 1. Lennard-Jones */
         field += Lennard_Jones (r_s, e2, s2);
+
+        /* 2. Coulomb,  short range part.  For  historical reasons the
+           overall scaling factor, the  product of solvent- and solute
+           site charges, is handled by the function itself: */
+        field += Coulomb_short (r_s, charge * S->q[site]);
     }
 
     return field;
@@ -741,15 +758,15 @@ static real lj (real x, real y, real z, real epsilon, real sigma, const Solute *
 
 /*
  * Charge  density  of  the solute  S  at  (x,  y, z).   Solvent  site
- * parameters (epsilon, sigma) are here to keep the interface of rho()
- * the same as that of lj().
+ * parameters (epsilon, sigma, charge)  are here to keep the interface
+ * of rho() the same as that of ljc().
  *
  * Each gaussian is evaluated as:
  *
  *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
  */
 static real rho (real x, real y, real z,
-                 real epsilon /* unused */, real sigma /* unused */,
+                 real epsilon, real sigma, real charge, /* all three unused */
                  const Solute *S)
 {
     /* G  is predefind  in bgy3d_SolventParameters.h  FIXME:  make the
