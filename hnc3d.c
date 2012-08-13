@@ -11,7 +11,7 @@ HNC3dData HNC3dData_malloc(PData PD)
 {
   HNC3dData HD;
   DA da;
-  int n[3], x[3], i[3], dim, N[3];
+  int n[3], x[3], i[3], N[3];
   PetscScalar ***pot_vec, interval[2], ***c_vec, *c1d_vec, ***hini_vec;
   PetscScalar r[3], r_s, L, h[3], beta;
   real **x_M, h_c1d;
@@ -379,7 +379,7 @@ void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
 void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c)
 {
   HNCField ***g_vec;
-  int i[3], ic[3], dim, k[3], j[3];
+  int i[3], ic[3], k[3], j[3];
 
   DAVecGetArray(HD->da, g, &g_vec);
 
@@ -432,7 +432,7 @@ HNC3dNewtonData HNC3dNewtonData_malloc(PData PD)
 {
   HNC3dNewtonData HD;
   DA da;
-  int n[3], x[3], i[3], dim, N[3];
+  int n[3], x[3], i[3], N[3];
   PetscScalar  interval[2];
   HNCField ***pot_vec;
   PetscScalar r[3], r_s, L, h[3];
