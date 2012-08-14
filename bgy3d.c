@@ -19,7 +19,7 @@ typedef Vec Solver(ProblemData *PD, Vec g_ini, int vdim);
 
 int main(int argc, char **argv)
 {
-  ProblemData *PD;
+  ProblemData PD;
   int ierr, N=0;
   real beta=0.6061, rho=0.3, h=0.5, interval[2]={-5.0,5.0};
   real mpi_start, mpi_stop;
@@ -65,29 +65,29 @@ int main(int argc, char **argv)
   /*=================================*/
   /* set Problem Data */
   /*=================================*/
-  PD = (PData) malloc(sizeof(*PD));
+
   if(N==0)
     N= (int) ceil((interval[1]-interval[0])/h);
   else
     h = (interval[1]-interval[0])/N;
   FOR_DIM
-    PD->N[dim] = N;
-  PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
+    PD.N[dim] = N;
+  PD.N3 = PD.N[0]*PD.N[1]*PD.N[2];
   FOR_DIM
-    PD->h[dim] = h;
-  PD->interval[0] = interval[0];
-  PD->interval[1] = interval[1];
-  PD->beta = beta;
-  PD->rho  = rho;
-  PD->g_xm = 1.0; /* deprecated */
+    PD.h[dim] = h;
+  PD.interval[0] = interval[0];
+  PD.interval[1] = interval[1];
+  PD.beta = beta;
+  PD.rho  = rho;
+  PD.g_xm = 1.0; /* deprecated */
 
-  PData_CreateParallel(PD);
+  PData_CreateParallel(&PD);
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD,PETSC_VIEWER_ASCII_MATLAB);
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_SELF,PETSC_VIEWER_ASCII_MATLAB);
   /*==================================*/
 
-  PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n",PD->N[0], PD->N[1], PD->N[2]);
-  PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n",PD->N3);
+  PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n",PD.N[0], PD.N[1], PD.N[2]);
+  PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n",PD.N3);
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", interval[0], interval[1]);
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", h);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", beta);
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
 
-  //if(PD->id==1)
+  //if(PD.id==1)
 /*   start_debugger(); */
 /*   sleep(5); */
 
@@ -167,12 +167,12 @@ int main(int argc, char **argv)
 	  PetscViewerDestroy(viewer);
 	  PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
 
-	  g= (*s)(PD, g_ini, 0);
+	  g= (*s)(&PD, g_ini, 0);
 
 
 	}
       else
-	g= (*s)(PD, PETSC_NULL, 0);
+	g= (*s)(&PD, PETSC_NULL, 0);
 
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);
@@ -207,8 +207,6 @@ int main(int argc, char **argv)
     }
   else
     PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGYFOURIER, -BGYTEST, -BGYDIATOMIC, -HNC or -HNCNewton !\n");
-
-  free(PD);
 
   ierr = PetscFinalize();CHKERRQ(ierr);
 
