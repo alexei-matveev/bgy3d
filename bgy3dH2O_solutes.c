@@ -328,7 +328,7 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
     DA da;
     PData PD;
     int x[3], n[3], i[3], ic[3], N[3], index;
-    real r[3], r_s, h[3], interval[2], k, fac, L, sign, h3;
+    real r[3], h[3], interval[2], k, fac, L, sign, h3;
     fftw_complex *fft_data, *dg_fft;
     PetscScalar ***v_vec;
 
@@ -361,7 +361,7 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
                     r[dim] = i[dim] * h[dim] + interval[0] - x0[dim];
 
                 // XXX:  Gaussian distribution
-                r_s = sqrt(SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
+                real r_s = sqrt(SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
 
                 v_vec[i[2]][i[1]][i[0]] = fac * exp(-SQR(r_s * G));
             }
@@ -371,24 +371,18 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
     ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, uc, fft_data,
                            BHD->fft_scratch, x, n, 0);
 
+    /* Loop over local portion of the k-grid: */
     index = 0;
-    /* loop over local portion of grid */
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
         for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
             for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++) {
                 /* set force vectors */
-
-                FOR_DIM
-                    r[dim] = i[dim] * h[dim] + interval[0];
-
-                r_s = sqrt(SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
 
                 FOR_DIM {
                     if (i[dim] <= N[dim] / 2)
                         ic[dim] = i[dim];
                     else
                         ic[dim] = i[dim] - N[dim];
-
                 }
 
                 if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
