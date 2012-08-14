@@ -719,9 +719,8 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
                 }
                 else {
                     k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-                    // EPSILON0INV = 1 / 4 * pi * epsilon0
+
                     fac = scale / k2;
-                    // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
                     /* Here  we compute  in place:  uc(kx, ky,  kz) :=
                        scale * rho(kx, ky, kz) / k^2 */
