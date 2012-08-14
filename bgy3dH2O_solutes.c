@@ -254,7 +254,7 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
 {
     DA da;
-    PData PD;
+    ProblemData *PD;
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k, fac, L, sign, fac2, L2;
     fftw_complex *fft_data;
@@ -323,7 +323,7 @@ static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
 {
     DA da;
-    PData PD;
+    ProblemData *PD;
     int x[3], n[3], i[3], ic[3], N[3], index;
     real r[3], h[3], interval[2], k, fac, L, sign, h3;
     fftw_complex *fft_data, *dg_fft;
