@@ -22,7 +22,7 @@ typedef struct Solute {
 } Solute;
 
 static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
-static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
+static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -134,7 +134,7 @@ static Solute ButanoicAcid =
 static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
     /* Functions that do the real work operate on array of sites: */
-    RecomputeInitialSoluteData_II (BHD, S->sites, S->n, damp, damp_LJ);
+    solute_field (BHD, S->sites, S->n, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
@@ -181,7 +181,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  *      BHD->ucO (beta * VM_coulomb_long), but is beta missing here?
  */
 
-static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
+static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
