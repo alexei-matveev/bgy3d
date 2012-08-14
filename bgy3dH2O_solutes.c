@@ -249,121 +249,78 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
 }
 
 
-/******************************/
-/* Create initial solute data */
-/******************************/
-// XXX:  see (5.106) and (5.08) in the thesis
-// XXX:  return BHD->gH_ini and BHD->gO_ini ( beta*(VM_LJ + VM_coulomb_short) )
-// XXX:  and BHD->ucH, BHD->ucO ( beta * VM_coulomb_long ), but is beta missing here ??
+/*
+ * Create initial solute data.
+ *
+ * XXX: See (5.106) and (5.08)  in the thesis.  Return BHD->gH_ini and
+ *      BHD->gO_ini (beta *  (VM_LJ + VM_coulomb_short)) and BHD->ucH,
+ *      BHD->ucO (beta * VM_coulomb_long), but is beta missing here?
+ */
 static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
-  DA da;
-  PData PD;
-  PetscScalar ***gHini_vec, ***gOini_vec;
-  PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
-  real r[3], r_s, h[3], interval[2], beta, L; //, fac;
-  int x[3], n[3], i[3], N[3], k;
-  real *p_O, *p_H;
-
-  PD = BHD->PD;
-  da = BHD->da;
-
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
-  FOR_DIM
-    h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
-
-  interval[0] = PD->interval[0];
-  L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  p_O = (real*) malloc(3*sizeof(real));
-  p_H = (real*) malloc(3*sizeof(real));
-
-  VecSet(BHD->gH_ini, 0.0);
-  VecSet(BHD->gO_ini, 0.0);
-  VecSet(BHD->gHO_ini, 0.0);
-  VecSet(BHD->ucH, 0.0);
-  VecSet(BHD->ucO, 0.0);
+  VecSet(BHD->gHO_ini, 0.0);    /* What is it used for? */
   VecSet(BHD->ucHO, 0.0);
   FOR_DIM
     {
-      VecSet(BHD->fH_l[dim],0.0);
-      VecSet(BHD->fO_l[dim],0.0);
-      VecSet(BHD->fHO_l[dim],0.0);
+      VecSet(BHD->fH_l[dim], 0.0);
+      VecSet(BHD->fO_l[dim], 0.0);
+      VecSet(BHD->fHO_l[dim], 0.0); /* What is it used for? */
     }
 
-  DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
-
+  /* FIXME: these are never references in the code below: */
+  PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
-      DAVecGetArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
+      DAVecGetArray(BHD->da, BHD->fH_l[dim], &(fHl_vec[dim]));
+      DAVecGetArray(BHD->da, BHD->fO_l[dim], &(fOl_vec[dim]));
     }
 
-  /* loop over solute atoms */
-  for(k=0; k<S->max_atoms; k++)
-    {
-      /* set parameters */
-      p_O[0] = sqrt( eO * S->epsilon[k]);
-      p_O[1] = 0.5*( sO + S->sigma[k]);
-      p_O[2] =  qO * S->q[k];
-      /* Empirical correction: add sigma 1.0 to small H */
-      //if( !strcmp(S->names[k], "OH") )// && p_O[2]<0)
-      //	p_O[1] += 1.0;
+  /*
+    Calculate FF potential for all solvent sites.
 
-      p_H[0] = sqrt( eH * S->epsilon[k]);
-      p_H[1] = 0.5*( sH + S->sigma[k]);
-      p_H[2] =  qH * S->q[k];
-      /* Empirical correction: add sigma 1.0 to small H */
-      //if( !strcmp(S->names[k], "OH") )//&& p_H[2]<0)
-      //	p_H[1] += 1.0;
+    Beta  is the  (inverse) temperature.   For historical  reasons the
+    solute  field  acting on  solvent  sites  is  defined having  this
+    factor.
 
+    FIXME:  scaling the  epsilon of  the  solvent site  by factor  X^2
+    scales the interaction with the  solute by factor X. Why not using
+    this fact instead of handling damp/damp_LJ separately?  Similarly,
+    scaling the  solvent site  charge by a  factor scales  the Coulomb
+    interaction.  At  least in the  two test examples the  two factors
+    are  identical.   Initial  version  of  the code  scaled  LJ-  and
+    short-range Coulomb interaction  using two different factors.  The
+    new code uses just one, that is why the assertion:
+  */
+  real factor = damp * BHD->PD->beta;
+  assert (damp == damp_LJ);
+  assert (factor >= 0.0);
 
-      /* loop over local portion of grid */
-      for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-	for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-	  for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	    {
-	      /* set force vectors */
-	      FOR_DIM
-		r[dim] = i[dim]*h[dim]+interval[0] - S->x[k][dim];
+  /*
+   * Fill ff-interaction  of H  and O sites  with the solute  into the
+   * respective arrays.
+   *
+   * FIXME: Force field parameters, (eH, sH, qH) and (eO, sO, qO), for
+   * H and O are #defined at some obscure place:
+   *
+   * We  supply ljc()  as  a  callback function  that  is supposed  to
+   * compute the  interaction of  a charged LJ  solvent site  with the
+   * solute.
+   */
+  field (BHD->da, BHD->PD, S, eH, sH, qH, factor, ljc, BHD->gH_ini);
+  field (BHD->da, BHD->PD, S, eO, sO, qO, factor, ljc, BHD->gO_ini);
 
-	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-	      /* Lennard-Jones */
-	      gHini_vec[i[2]][i[1]][i[0]] +=
-		damp_LJ * beta* Lennard_Jones( r_s, p_H[0], p_H[1]);
-
-	      gOini_vec[i[2]][i[1]][i[0]] +=
-		damp_LJ * beta* Lennard_Jones( r_s, p_O[0], p_O[1]);
-
-	      /* Coulomb short */
-	      gHini_vec[i[2]][i[1]][i[0]] +=
-		damp*beta* Coulomb_short( r_s, p_H[2]);
-
-	      gOini_vec[i[2]][i[1]][i[0]] +=
-		damp*beta* Coulomb_short( r_s, p_O[2]);
-	    }
-
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  p_O[2], damp);
+  /* Sum over over solute atoms */
+  VecSet(BHD->ucH, 0.0);
+  VecSet(BHD->ucO, 0.0);
+  for(int k = 0; k < S->max_atoms; k++) {
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  qO * S->q[k], damp);
       VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  p_H[2], damp);
+
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  qH * S->q[k], damp);
       VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
-
-    }
-
-  DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
-
-  free(p_O);
-  free(p_H);
+  }
 }
 
 
@@ -583,6 +540,7 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
      * factor.
      */
     real factor = damp_LJ * BHD->PD->beta;
+    assert (factor >= 0.0);
 
     /*
      * Fill LJ-interaction of  H and O sites with  the solute into the
