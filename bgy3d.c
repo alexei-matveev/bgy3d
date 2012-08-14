@@ -15,11 +15,11 @@ static char helptext[] = "Solving BGY3d equation.\n";
 
 int verbosity=0;
 
-typedef Vec Solver(PData PD, Vec g_ini, int vdim);
+typedef Vec Solver(ProblemData *PD, Vec g_ini, int vdim);
 
 int main(int argc, char **argv)
 {
-  PData PD;
+  ProblemData *PD;
   int ierr, N=0;
   real beta=0.6061, rho=0.3, h=0.5, interval[2]={-5.0,5.0};
   real mpi_start, mpi_stop;
@@ -274,7 +274,7 @@ real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma)
     return re;
 }
 
-void PData_CreateParallel(PData PD)
+void PData_CreateParallel(ProblemData *PD)
 {
 
   MPI_Comm_size(PETSC_COMM_WORLD, &(PD->np));
@@ -282,7 +282,7 @@ void PData_CreateParallel(PData PD)
 }
 
 
-BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim)
+BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim)
 {
   BGY3dParameter params;
   DA da;
@@ -559,7 +559,7 @@ void BGY3dParameter_free(BGY3dParameter params)
 MatPrecond MatPrecond_malloc(BGY3dParameter params)
 {
   MatPrecond MP;
-  PData PD;
+  ProblemData *PD;
   PetscScalar ***force_vec;
   int i[3], x[3], n[3], vdim;
   MatStencil col,row;
@@ -680,7 +680,7 @@ void Molecule_free( real **x_M, int N_M)
 
 
 /* Initialize M-Matrix with appropriate stencil */
-void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
+void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
 {
   int x[3], n[3], i[3], N[3];
   MatStencil col[2],row;
@@ -769,7 +769,7 @@ void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim)
 
 }
 
-Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
+Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
 {
   SNES snes;
   KSP ksp;
@@ -906,7 +906,7 @@ Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim)
 void CreateInitialGuess(BGY3dParameter params, Vec g)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], i[3], n[3], N_M, k, N[3];
   PetscScalar ***g_vec, r[3], r_s;
   real **x_M, h[3], beta, interval[2], L;
@@ -971,7 +971,7 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], i[3], n[3], N_M, k, N_g2, index, N[3];
   PetscScalar ***g_vec, *g2_vec, r[3], r_s;
   real **x_M, h[3], beta, h_g2, L, interval[2];
@@ -1049,7 +1049,7 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 
 PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   BGY3dParameter params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -1152,7 +1152,7 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   BGY3dParameter params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -1299,7 +1299,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 
 PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   BGY3dParameter params;
   FFT_DATA *fft_fg, *fft_g, *fft_fgg;
@@ -1527,7 +1527,7 @@ int start_debugger(void )
 
 void ConvolutionTest(BGY3dParameter params)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   Vec a,b,c;
   FFT_DATA *fft_a, *fft_b, *fft_c;
