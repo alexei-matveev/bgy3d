@@ -30,7 +30,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   1.2 //1.2  
+#define G   1.2 //1.2
 
 
 
@@ -57,7 +57,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   1.2 //1.2  
+#define G   1.2 //1.2
 
 
 
@@ -102,7 +102,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   1.2 //1.2  
+#define G   1.2 //1.2
 
 #endif
 
@@ -138,7 +138,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   0.8 //1.2  
+#define G   0.8 //1.2
 
 
 #endif
@@ -174,7 +174,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   0.8 //1.2 
+#define G   0.8 //1.2
 
 
 #endif
@@ -210,7 +210,7 @@
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   0.8 //1.2 
+#define G   0.8 //1.2
 
 
 #endif
@@ -248,11 +248,11 @@
 #define r_HH  1.5139
 #define r_OO  1.453
 #define r_HO  0.988
-#define r_HO2 
+#define r_HO2
 
 #define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
-#define G   1.2 //1.2  
+#define G   1.2 //1.2
 
 #endif
