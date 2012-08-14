@@ -21,9 +21,6 @@ typedef struct Solute {
     Site sites[];               /* site descriptions */
 } Solute;
 
-#if 0
-static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
-#endif
 static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
@@ -264,76 +261,6 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
   VecSet (BHD->ucO, 0.0);
   VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
-
-
-#if 0
-static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
-{
-    DA da;
-    ProblemData *PD;
-    int x[3], n[3], i[3], ic[3], N[3], index;
-    real h[3], interval[2], k, fac, L, sign, fac2, L2;
-    fftw_complex *fft_data;
-
-    PD = BHD->PD;
-    da = BHD->da;
-    fft_data = BHD->g_fft;
-
-    FOR_DIM
-        h[dim] = PD->h[dim];
-    FOR_DIM
-        N[dim] = PD->N[dim];
-
-    interval[0] = PD->interval[0];
-    L = PD->interval[1] - PD->interval[0];
-    L2 = 0.5 * L;
-
-    /* Get local portion of the grid */
-    DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-    /* Loop over local portion of the k-grid */
-    index = 0;
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-        for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-            for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-                {
-                    /* set force vectors */
-
-                    FOR_DIM {
-                        if (i[dim] <= N[dim] / 2)
-                            ic[dim] = i[dim];
-                        else
-                            ic[dim] = i[dim] - N[dim];
-                    }
-
-                    if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
-                        /* No  point  to  scale   zeros  with  q2  *  fac,
-                           obviousely: */
-                        fft_data[index].re = 0;
-                        fft_data[index].im = 0;
-                    }
-                    else {
-                        k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-                        fac = EPSILON0INV / M_PI / k;
-                        fac2= 2. * M_PI / L;
-                        sign = cos(fac2 * ic[0] * (x0[0] - L2)) * cos(fac2 * ic[1] * (x0[1] - L2))
-                            * cos(fac2 * ic[2] * (x0[2] - L2));
-                        // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-                        /* potential */
-                        fft_data[index].re = q2 * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
-                        fft_data[index].im = 0;
-
-                    }
-                    index++;
-                }
-
-    /* FFT potential */
-    ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, uc, fft_data,
-                           BHD->fft_scratch, x, n, 0);
-
-    VecScale(uc, 1./L/L/L);
-}
-#endif
 
 static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
