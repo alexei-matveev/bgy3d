@@ -190,14 +190,15 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
+  /* FIXME: an alternative version (QM) did not set them, nevertheless
+     the HCl case appeared to work. Are these really necessary? */
   VecSet(BHD->gHO_ini, 0.0);    /* What is it used for? */
   VecSet(BHD->ucHO, 0.0);
-  FOR_DIM
-    {
-      VecSet(BHD->fH_l[dim], 0.0);
-      VecSet(BHD->fO_l[dim], 0.0);
-      VecSet(BHD->fHO_l[dim], 0.0); /* What is it used for? */
-    }
+  FOR_DIM {
+    VecSet(BHD->fH_l[dim], 0.0);
+    VecSet(BHD->fO_l[dim], 0.0);
+    VecSet(BHD->fHO_l[dim], 0.0); /* What is it used for? */
+  }
 
   /*
     Calculate FF potential for all solvent sites.
