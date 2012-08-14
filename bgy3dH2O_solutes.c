@@ -5,16 +5,20 @@
 #include "bgy3d.h"
 #include "bgy3d_SolventParameters.h"
 
-#define MAXATOM 20
+typedef struct Site {
+    char name[5];            /* atom types. What are they used for? */
+    real x[3];               /* coordinates */
+    real sigma;              /* sigma for LJ */
+    real epsilon;            /* epsilon for LJ */
+    real charge;             /* charge */
+} Site;
 
-typedef struct Solute
-{
-  char names[MAXATOM][5];       /* atom types */
-  real x[MAXATOM][3];           /* the coordinates  */
-  real sigma[MAXATOM];          /* sigma for LJ */
-  real epsilon[MAXATOM];        /* epsilon for LJ */
-  real q[MAXATOM];              /* charges */
-  int max_atoms;
+/* Solute is  isomorphic to an  array of sites.  Consider  handling it
+   like that in the code.   Structs with flexible array members may be
+   confusing. Such struct is convenient for literal data, though: */
+typedef struct Solute {
+    int n;                      /* number of sites */
+    Site sites[];               /* site descriptions */
 } Solute;
 
 #if 0
@@ -47,129 +51,90 @@ static void field (DA da, const ProblemData *PD,
                                const Solute *S),
                    Vec v);
 
+// FIXME: maybe #include "solutes.h" instead?
+
 /*********************************/
 /* Water */
 /*********************************/
 
 static Solute Water =
-  {
-    { "O","OH","OH"},
-    { {-0.2929, 0.000, 0.000},
-      { 0.2929, 0.757, 0.000},
-      { 0.2929,-0.757, 0.000}},
-    {3.1506, 0.400, 0.400},
-    {0.1521, 0.046, 0.046},
-    {-0.834, 0.417, 0.417},
-    3
-  };
+  {3, {{"O", {-0.2929, 0.0, 0.0}, 3.1506, 0.1521, -0.834},
+       {"OH", {0.2929, 0.757, 0.0}, 0.4, 0.046, 0.417},
+       {"OH", {0.2929, -0.757, 0.0}, 0.4, 0.046, 0.417}}};
 
 /*********************************/
 /* CS2 */
 /*********************************/
 
 static Solute CarbonDisulfide =
-  {
-    { "C","S1","S2"},
-    { {0.0, 0.0, 0.0},
-      {-1.56, 0.0, 0.0},
-      { 1.56, 0.0, 0.0}},
-    {3.200, 3.520, 3.520},
-    {0.10128, 0.39500, 0.39500},
-    {-0.308, 0.154, 0.154},
-    3
-  };
+  {3, {{"C", {0.0, 0.0, 0.0}, 3.2, 0.10128, -0.308},
+       {"S1", {-1.56, 0.0, 0.0}, 3.52, 0.395, 0.154},
+       {"S2", {1.56, 0.0, 0.0}, 3.52, 0.395, 0.154}}};
 
 /*********************************/
 /* HCl */
 /*********************************/
 
 static Solute HydrogenChloride =
-  {
-    { "H","Cl"},
-    { { 0.6285, 0.0, 0.0},
-      {-0.6285, 0.0, 0.0}},
-    {2.735, 3.353},
-    {0.03971, 0.51434},
-    {0.2, -0.2},
-    2
-  };
+  {2, {{"H", {0.6285, 0.0, 0.0}, 2.735, 0.03971, 0.2},
+       {"Cl", {-0.6285, 0.0, 0.0}, 3.353, 0.51434, -0.2}}};
 
 /*********************************/
 /* Methanol */
 /*********************************/
 
 static Solute Methanol =
-  {
-    { "C","HC1","HC2","HC3","O","OH"},
-    { {-0.748,-0.015, 0.024},
-      {-1.293,-0.202,-0.901},
-      {-1.263, 0.754, 0.600},
-      {-0.699,-0.934, 0.609},
-      { 0.558, 0.420,-0.278},
-      { 0.716, 1.404, 0.137} },
-    {3.500, 2.5000, 2.5000, 2.5000, 3.1200, 0.400},
-    {0.066, 0.0300, 0.0300, 0.0300, 0.1700, 0.040},
-    {0.145, 0.0400, 0.0400, 0.0400, -0.683, 0.418 },
-    6
-  };
+  {6, {{"C", {-0.748, -0.015, 0.024}, 3.5, 0.066, 0.145},
+       {"HC1", {-1.293, -0.202, -0.901}, 2.5, 0.03, 0.04},
+       {"HC2", {-1.263, 0.754, 0.6}, 2.5, 0.03, 0.04},
+       {"HC3", {-0.699, -0.934, 0.609}, 2.5, 0.03, 0.04},
+       {"O", {0.558, 0.42, -0.278}, 3.12, 0.17, -0.683},
+       {"OH", {0.716, 1.404, 0.137}, 0.4, 0.04, 0.418}}};
 
 /*********************************/
 /* Hexane */
 /*********************************/
+
 static Solute Hexane =
-  {
-    { "C","C","C","C","C","C","H","H","H","H","H","H","H","H","H","H","H","H","H","H"},
-    { {1.709,  -2.812,   0.000},
-      {1.684,  -1.278,   0.000},
-      {0.245,  -0.753,   0.000},
-      {0.241,   0.779,   0.000},
-      {-1.198,   1.304,   0.000},
-      {-1.206,   2.834,   0.000},
-      {2.236,  -3.164,   0.887},
-      {2.232,  -3.164,  -0.890},
-      {0.691,  -3.204,   0.003},
-      {2.202,  -0.914,  -0.888},
-      {2.201,  -0.914,   0.890},
-      {-0.273,  -1.115,   0.889},
-      {-0.272,  -1.115,  -0.890},
-      {0.757,   1.142,  -0.890},
-      {0.757,   1.141,   0.890},
-      {-1.716,   0.944,   0.890},
-      {-1.716,   0.944,  -0.890},
-      {-0.696,   3.204,  -0.890},
-      {-0.696,   3.204,   0.890},
-      {-2.236,   3.190,   0.000} },
-    {3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 2.5, 2.5, 2.5, 2.5,2.5, 2.5,2.5, 2.5,2.5, 2.5,2.5, 2.5,2.5, 2.5},
-    {0.066, 0.066, 0.066, 0.066, 0.066, 0.066, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03},
-    {-0.180, -0.120, -0.120, -0.120, -0.120, -0.180, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06, 0.06 },
-    20
-  };
+  {20, {{"C", {1.709, -2.812, 0.0}, 3.5, 0.066, -0.18},
+        {"C", {1.684, -1.278, 0.0}, 3.5, 0.066, -0.12},
+        {"C", {0.245, -0.753, 0.0}, 3.5, 0.066, -0.12},
+        {"C", {0.241, 0.779, 0.0}, 3.5, 0.066, -0.12},
+        {"C", {-1.198, 1.304, 0.0}, 3.5, 0.066, -0.12},
+        {"C", {-1.206, 2.834, 0.0}, 3.5, 0.066, -0.18},
+        {"H", {2.236, -3.164, 0.887}, 2.5, 0.03, 0.06},
+        {"H", {2.232, -3.164, -0.89}, 2.5, 0.03, 0.06},
+        {"H", {0.691, -3.204, 0.003}, 2.5, 0.03, 0.06},
+        {"H", {2.202, -0.914, -0.888}, 2.5, 0.03, 0.06},
+        {"H", {2.201, -0.914, 0.89}, 2.5, 0.03, 0.06},
+        {"H", {-0.273, -1.115, 0.889}, 2.5, 0.03, 0.06},
+        {"H", {-0.272, -1.115, -0.89}, 2.5, 0.03, 0.06},
+        {"H", {0.757, 1.142, -0.89}, 2.5, 0.03, 0.06},
+        {"H", {0.757, 1.141, 0.89}, 2.5, 0.03, 0.06},
+        {"H", {-1.716, 0.944, 0.89}, 2.5, 0.03, 0.06},
+        {"H", {-1.716, 0.944, -0.89}, 2.5, 0.03, 0.06},
+        {"H", {-0.696, 3.204, -0.89}, 2.5, 0.03, 0.06},
+        {"H", {-0.696, 3.204, 0.89}, 2.5, 0.03, 0.06},
+        {"H", {-2.236, 3.19, 0.0}, 2.5, 0.03, 0.06}}};
 
 /* BUTANOIC ACID */
 /* H1 sigma and epsilon adopted */
+
 static Solute ButanoicAcid =
-  {
-    { "C1","O1","O2","C2","C3","C4", "OH", "H2", "H3", "H4", "H5", "H6", "H7", "H8"},
-    {
-      {1.422,  -0.017,   0.000},
-      {1.422,   1.353,   0.000},
-      {2.643,  -0.722,   0.000},
-      {0.100,  -0.780,   0.000},
-      {-1.060,   0.212,   0.000},
-      {-2.381,  -0.551,   0.000},
-      { 3.210,  -0.461,   0.882},
-      { 0.043,  -1.407,   0.890},
-      { 0.043,  -1.407,  -0.890},
-      {-1.002,   0.838,  -0.890},
-      {-1.002,   0.838,   0.890},
-      {-2.439,  -1.178,   0.890},
-      {-2.439,  -1.178,  -0.890},
-      {-3.210,   0.157,   0.000} },
-    {3.750, 2.960, 3.000, 3.500, 3.500, 3.500, 3.400, 2.500, 2.500, 2.500, 2.500, 2.500, 2.500, 2.500},
-    {0.105, 0.210, 0.170, 0.066, 0.066, 0.066, 0.046, 0.030, 0.030, 0.030, 0.030, 0.030, 0.030, 0.030},
-    {0.520,-0.440,-0.530,-0.120,-0.120,-0.180, 0.450, 0.060, 0.060, 0.060, 0.060,  0.060, 0.060, 0.060},
-    14
-  };
+  {14, {{"C1", {1.422, -0.017, 0.0}, 3.75, 0.105, 0.52},
+        {"O1", {1.422, 1.353, 0.0}, 2.96, 0.21, -0.44},
+        {"O2", {2.643, -0.722, 0.0}, 3.0, 0.17, -0.53},
+        {"C2", {0.1, -0.78, 0.0}, 3.5, 0.066, -0.12},
+        {"C3", {-1.06, 0.212, 0.0}, 3.5, 0.066, -0.12},
+        {"C4", {-2.381, -0.551, 0.0}, 3.5, 0.066, -0.18},
+        {"OH", {3.21, -0.461, 0.882}, 3.4, 0.046, 0.45},
+        {"H2", {0.043, -1.407, 0.89}, 2.5, 0.03, 0.06},
+        {"H3", {0.043, -1.407, -0.89}, 2.5, 0.03, 0.06},
+        {"H4", {-1.002, 0.838, -0.89}, 2.5, 0.03, 0.06},
+        {"H5", {-1.002, 0.838, 0.89}, 2.5, 0.03, 0.06},
+        {"H6", {-2.439, -1.178, 0.89}, 2.5, 0.03, 0.06},
+        {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
+        {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
 
 void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
@@ -268,11 +233,11 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
   /* Sum over over solute atoms */
   VecSet(BHD->ucH, 0.0);
   VecSet(BHD->ucO, 0.0);
-  for(int k = 0; k < S->max_atoms; k++) {
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  qO * S->q[k], damp);
+  for(int k = 0; k < S->n; k++) {
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->sites[k].x,  qO * S->sites[k].charge, damp);
       VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
 
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->x[k],  qH * S->q[k], damp);
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->sites[k].x,  qH * S->sites[k].charge, damp);
       VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
   }
 }
@@ -645,16 +610,16 @@ static real ljc (real x, real y, real z,
     /* Sum force field contribution from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < S->max_atoms; site++) {
+    for (int site = 0; site < S->n; site++) {
 
         /* Interaction parameters for a pair of LJ sites: */
-        real e2 = sqrt (epsilon * S->epsilon[site]);
-        real s2 = 0.5 * (sigma + S->sigma[site]);
+        real e2 = sqrt (epsilon * S->sites[site].epsilon);
+        real s2 = 0.5 * (sigma + S->sites[site].sigma);
 
         /* Distance from a grid point to this site: */
-        real r_s = sqrt (SQR(x - S->x[site][0]) +
-                         SQR(y - S->x[site][1]) +
-                         SQR(z - S->x[site][2]));
+        real r_s = sqrt (SQR(x - S->sites[site].x[0]) +
+                         SQR(y - S->sites[site].x[1]) +
+                         SQR(z - S->sites[site].x[2]));
 
         /* 1. Lennard-Jones */
         field += Lennard_Jones (r_s, e2, s2);
@@ -662,7 +627,7 @@ static real ljc (real x, real y, real z,
         /* 2. Coulomb,  short range part.  For  historical reasons the
            overall scaling factor, the  product of solvent- and solute
            site charges, is handled by the function itself: */
-        field += Coulomb_short (r_s, charge * S->q[site]);
+        field += Coulomb_short (r_s, charge * S->sites[site].charge);
     }
 
     return field;
@@ -689,16 +654,16 @@ static real rho (real x, real y, real z,
     /* Sum Gaussian contributions from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < S->max_atoms; site++) {
+    for (int site = 0; site < S->n; site++) {
 
         /* Square of the distance from a grid point to this site: */
-        real r2 = (SQR(x - S->x[site][0]) +
-                   SQR(y - S->x[site][1]) +
-                   SQR(z - S->x[site][2]));
+        real r2 = (SQR(x - S->sites[site].x[0]) +
+                   SQR(y - S->sites[site].x[1]) +
+                   SQR(z - S->sites[site].x[2]));
 
         /* Gaussian  distribution, note  that G  is not  a  width, but
            rather an inverse of it: */
-        field += prefac * S->q[site] * exp(- G * G * r2);
+        field += prefac * S->sites[site].charge * exp(- G * G * r2);
     }
 
     return field;
