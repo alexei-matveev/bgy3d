@@ -22,7 +22,6 @@ typedef struct Solute {
 } Solute;
 
 static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
-static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
 /*
@@ -276,67 +275,6 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
 
   /* MEMORY: deallocate huge array here! */
   VecDestroy (v);
-}
-
-static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
-{
-    PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
-
-    /*
-     * Calculate LJ potential for all solvent sites.
-     *
-     * Beta is  the (inverse) temperature. For  historical reasons the
-     * solute  field acting on  solvent sites  is defined  having this
-     * factor.
-     */
-    real factor = damp_LJ * BHD->PD->beta;
-    assert (factor >= 0.0);
-
-    /*
-     * Fill LJ-interaction of  H and O sites with  the solute into the
-     * respective arrays.
-     *
-     * FIXME: LJ-parameters,  (eH, sH) and (eO,  sO), for H  and O are
-     * #defined at some obscure place:
-     *
-     * We  supply ljc()  as a  callback function  that is  supposed to
-     * compute the interaction  of a charged LJ solvent  site with the
-     * solute.
-     *
-     * At  this place  the (short  range) Coulomb  interaction  of the
-     * solvent  site  with  the  solute was  deliberately  omitted  by
-     * specifying zero charge of the solvent site:
-     */
-    field (BHD->da, BHD->PD, S, nsites, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
-    field (BHD->da, BHD->PD, S, nsites, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
-
-    /*
-     * Compute  the  charge  density  of  the  solute.   The  callback
-     * function rho()  sums charge  distribution for each  solute site
-     * and  does not use  (epsilon, sigma,  charge) parameters  of the
-     * solvent site,  so that we  provide -1.0 for them.   The overall
-     * factor is 1.0 (idependent of the solvent charge):
-     */
-
-    Vec rho_solute; /* Vector for solute charge density */
-
-    DACreateGlobalVector (BHD->da, &rho_solute);
-
-    field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
-
-    /*
-     * This solves  the Poisson equation and  puts resulting potential
-     * into a pre-allocated (?) vector BHD->v[0].
-     */
-    poisson (BHD, BHD->v[0], rho_solute, 1.0 * damp);
-
-    VecDestroy (rho_solute);
-
-    VecSet (BHD->ucH, 0.0);
-    VecAXPY (BHD->ucH, qH, BHD->v[0]);
-
-    VecSet (BHD->ucO, 0.0);
-    VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
 
 /*
