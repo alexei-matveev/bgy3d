@@ -135,11 +135,7 @@ static Solute ButanoicAcid =
 static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
     /* Functions that do the real work operate on array of sites: */
-#ifndef QM
     RecomputeInitialSoluteData_II (BHD, S->sites, S->n, damp, damp_LJ);
-#else
-    RecomputeInitialSoluteData_QM (BHD, S->sites, S->n, damp, damp_LJ);
-#endif
 }
 
 void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
@@ -231,8 +227,18 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
    * compute the  interaction of  a charged LJ  solvent site  with the
    * solute.
    */
+#ifndef QM
   field (BHD->da, BHD->PD, S, nsites, eH, sH, qH, factor, ljc, BHD->gH_ini);
   field (BHD->da, BHD->PD, S, nsites, eO, sO, qO, factor, ljc, BHD->gO_ini);
+#else
+  /* At  this  place the  (short  range)  Coulomb  interaction of  the
+    solvent  site   with  the  solute  was   deliberately  omitted  by
+    specifying zero charge of the solvent site. This effectively makes
+    a point  charge (Coulomb  short + Coulomb  long) to  a distributed
+    Gaussian (Coulomb long only). */
+  field (BHD->da, BHD->PD, S, nsites, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
+  field (BHD->da, BHD->PD, S, nsites, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
+#endif
 
   /*
    * Compute the charge density  of the solute.  The callback function
