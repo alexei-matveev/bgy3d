@@ -407,7 +407,12 @@ typedef struct BGY3dH2OStruct
   Vec gH_ini, gO_ini, gHO_ini;
   real ucH_0, ucO_0, ucHO_0;
 
-  /* Parallel FFT */
+  /*
+    Parallel FFT.
+
+    g_fft appears to be used as a temporary in
+    ComputeSoluteDatafromCoulomb*() group of functions.
+   */
   //struct fft_plan_3d *fft_plan;
   fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft, *fft_scratch;
   fftw_complex *ucH_fft, *ucO_fft, *ucHO_fft;
