@@ -237,16 +237,33 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
   field (BHD->da, BHD->PD, S, nsites, eH, sH, qH, factor, ljc, BHD->gH_ini);
   field (BHD->da, BHD->PD, S, nsites, eO, sO, qO, factor, ljc, BHD->gO_ini);
 
-  /* Sum over over solute atoms */
-  VecSet(BHD->ucH, 0.0);
-  VecSet(BHD->ucO, 0.0);
-  for(int k = 0; k < nsites; k++) {
-      ComputeSoluteDatafromCoulombII (BHD, BHD->v[0], S[k].x,  qO * S[k].charge * damp);
-      VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
+  /*
+   * Compute the charge density  of the solute.  The callback function
+   * rho() sums charge distribution for  each solute site and does not
+   * use (epsilon,  sigma, charge) parameters of the  solvent site, so
+   * that  we  provide -1.0  for  them.   The  overall factor  is  1.0
+   * (idependent of the solvent charge):
+   */
 
-      ComputeSoluteDatafromCoulombII (BHD, BHD->v[0], S[k].x,  qH * S[k].charge * damp);
-      VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
-  }
+  Vec rho_solute; /* Vector for solute charge density */
+
+  DACreateGlobalVector (BHD->da, &rho_solute);
+
+  field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
+
+  /*
+   * This  solves the  Poisson equation  and puts  resulting potential
+   * into a pre-allocated (?) vector BHD->v[0].
+   */
+  ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0 * damp);
+
+  VecDestroy (rho_solute);
+
+  VecSet (BHD->ucH, 0.0);
+  VecAXPY (BHD->ucH, qH, BHD->v[0]);
+
+  VecSet (BHD->ucO, 0.0);
+  VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
 
 
@@ -346,6 +363,10 @@ static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real
     DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
     DAVecGetArray(da, uc, &v_vec);
+
+    /*                        3         2 2
+     * rho(r) = (G / sqrt(PI))   exp(- G r )
+     */
     fac = pow(G / sqrt(M_PI), 3.0);
 
     /* loop over local portion of grid */
