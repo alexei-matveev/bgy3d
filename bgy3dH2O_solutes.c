@@ -634,14 +634,14 @@ static real rho (real x, real y, real z,
   potential by inverse FFT.
 
   Vec uc is intent(out).
-  Vec gs is intent(in).
+  Vec rho is intent(in).
   real q is the overall factor.
 */
-void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q)
+void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
-    real h[3], interval[2], k, fac, L, h3; /* , sign; */
-    fftw_complex *fft_gs, *fft_uc;
+    real h[3], interval[2], k2, fac, L, h3;
+    fftw_complex *fft_rho, *fft_uc;
 
     interval[0] = BHD->PD->interval[0];
     interval[1] = BHD->PD->interval[1];
@@ -651,35 +651,53 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q)
     FOR_DIM
         N[dim] = BHD->PD->N[dim];
     h3 = h[0] * h[1] * h[2];
-    fft_gs = BHD->g_fft;
+
+    /* FIXME: are we using these as a scratch storage? Do we overwrite
+       something important? */
+    fft_rho = BHD->g_fft;
     fft_uc = BHD->gfg2_fft;
-    VecSet(uc, 0.0);
+
     /* Get local portion of the grid */
     DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-    /* Get fft of gs
-      gs(i, j, k) => fft_gs(ki, kj, kk)*/
-    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, gs, fft_gs, BHD->fft_scratch, x, n, 0);
 
-    /* Solving Poisson Equation(SI) with FFT and IFFT:
-      -1.0 * LAPLACIAN(V(x, y, z)) = 1/epsilon0 * rho(x, y, z)
-    because: x = i * h, y = i * h, z = k * h, h = L / n
-    =>-1.0 * n^2/L^2 * LAPLACIAN(uc(i, j, k)) = 1/epsilon0 * gs(i, j, k)
-    FFT(see FFTW manual "What FFTW Really Computes"):
-    => 4*pi^2 * n^2/L^2 * (kx^2 + ky^2 + kz^2)/n^2 * fft_uc(kx, ky, kz) = 1/epsilon0 * fft_gs(kx, ky, kz)
-    => fft_uc(kx, ky, kz) = 1 / [(4 * pi * epsilon0) * pi * (kx^2 + ky^2 + kz^2)/L^2] * fft_gs(kx, ky, kz)
-    IFFT(see FFTW manual "What FFTW Really Computes"):
-    because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
-    => uc(i, j, k) = h^3/L^3 * IFFT(fft_uc(kx, ky, kz)) */
+    /* Get FFT of rho: rho(i, j, k) -> fft_rho(kx, ky, kz) */
+    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_rho, BHD->fft_scratch, x, n, 0);
+
+    /*
+      Solving Poisson Equation (SI units) with FFT and IFFT:
+
+          - LAPLACIAN U (x, y, z) = (1 / epsilon0) rho(x, y, z)
+                       c
+
+      because of x = i h, y = j  h, and z = k h, with grid spacing h =
+      L / n:
+
+             2   2
+          - n / L  LAPLACIAN uc(i, j, k) = (1 / epsilon0) rho(i, j, k)
+
+      FFT (see FFTW manual "What FFTW Really Computes"):
+
+                                    2          2    2
+      fft_uc(kx, ky, kz) = 1 / [4 pi epsilon0 k  / L ] fft_rho(kx, ky, kz)
+
+      with
+
+           2    2    2    2
+          k = kx + ky + kz
+
+      IFFT (see FFTW manual "What FFTW Really Computes"):
+
+      because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
+
+                     3   3
+      uc(i, j, k) = h / L  * IFFT(fft_uc(kx, ky, kz))
+    */
     index = 0;
-    for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    {
-        for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-        {
-            for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-            {
+    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+        for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+            for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++) {
 
-                FOR_DIM
-                {
+                FOR_DIM {
                     if( i[dim] <= N[dim] / 2)
                         ic[dim] = i[dim];
                     else
@@ -693,19 +711,19 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q)
                     fft_uc[index].re = 0;
                     fft_uc[index].im = 0;
                 }
-                else
-                {
-                    k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+                else {
+                    k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
                     // EPSILON0INV = 1 / 4 * pi * epsilon0
-                    fac = h3 * EPSILON0INV / M_PI / k;
+                    fac = h3 * EPSILON0INV / M_PI / k2;
                     // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-                    fft_uc[index].re = q * fac * fft_gs[index].re;
-                    fft_uc[index].im = q * fac * fft_gs[index].im;
+                    fft_uc[index].re = q * fac * fft_rho[index].re;
+                    fft_uc[index].im = q * fac * fft_rho[index].im;
                 }
                 index++;
             }
-        }
-    }
+
+    VecSet(uc, 0.0);         /* FIXME: is zeroing really necessary? */
+
     /* IFFT(fft_uc(kx, ky, kz)) / L^3 */
     ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
     VecScale(uc, 1./L/L/L);
