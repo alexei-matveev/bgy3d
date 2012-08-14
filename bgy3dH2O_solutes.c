@@ -269,14 +269,6 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
       VecSet(BHD->fHO_l[dim], 0.0); /* What is it used for? */
     }
 
-  /* FIXME: these are never references in the code below: */
-  PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
-  FOR_DIM
-    {
-      DAVecGetArray(BHD->da, BHD->fH_l[dim], &(fHl_vec[dim]));
-      DAVecGetArray(BHD->da, BHD->fO_l[dim], &(fOl_vec[dim]));
-    }
-
   /*
     Calculate FF potential for all solvent sites.
 
