@@ -22,10 +22,10 @@ typedef struct Solute {
 } Solute;
 
 #if 0
-static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
+static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
 #endif
-static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
-static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
+static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
+static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
@@ -241,17 +241,17 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
   VecSet(BHD->ucH, 0.0);
   VecSet(BHD->ucO, 0.0);
   for(int k = 0; k < nsites; k++) {
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S[k].x,  qO * S[k].charge, damp);
+      ComputeSoluteDatafromCoulombII (BHD, BHD->v[0], S[k].x,  qO * S[k].charge * damp);
       VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
 
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S[k].x,  qH * S[k].charge, damp);
+      ComputeSoluteDatafromCoulombII (BHD, BHD->v[0], S[k].x,  qH * S[k].charge * damp);
       VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
   }
 }
 
 
 #if 0
-static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
+static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
 {
     DA da;
     PData PD;
@@ -291,6 +291,8 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
                     }
 
                     if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
+                        /* No  point  to  scale   zeros  with  q2  *  fac,
+                           obviousely: */
                         fft_data[index].re = 0;
                         fft_data[index].im = 0;
                     }
@@ -302,7 +304,7 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
                             * cos(fac2 * ic[2] * (x0[2] - L2));
                         // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
                         /* potential */
-                        fft_data[index].re = damp * q2 * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
+                        fft_data[index].re = q2 * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
                         fft_data[index].im = 0;
 
                     }
@@ -318,7 +320,7 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
 #endif
 
 
-static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp)
+static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
 {
     DA da;
     PData PD;
@@ -381,6 +383,8 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
                 }
 
                 if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
+                    /* No  point  to  scale   zeros  with  q2  *  fac,
+                       obviousely: */
                     dg_fft[index].re = 0;
                     dg_fft[index].im = 0;
                 }
@@ -390,8 +394,8 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
                     fac = h3 * EPSILON0INV / M_PI / k;
                     sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
-                    dg_fft[index].re = damp * q2 * fac * fft_data[index].re;
-                    dg_fft[index].im = damp * q2 * fac * fft_data[index].im;
+                    dg_fft[index].re = q2 * fac * fft_data[index].re;
+                    dg_fft[index].im = q2 * fac * fft_data[index].im;
                 }
                 index++;
             }
@@ -453,7 +457,7 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int 
      * This solves  the Poisson equation and  puts resulting potential
      * into a pre-allocated (?) vector BHD->v[0].
      */
-    ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0, damp);
+    ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0 * damp);
 
     VecDestroy (rho_solute);
 
@@ -625,8 +629,15 @@ static real rho (real x, real y, real z,
     return field;
 }
 
-// Solve Poisson Equation in Fourier space and get elestrostatic potential by inverse FFT
-void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp)
+/*
+  Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
+  potential by inverse FFT.
+
+  Vec uc is intent(out).
+  Vec gs is intent(in).
+  real q is the overall factor.
+*/
+void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k, fac, L, h3; /* , sign; */
@@ -677,6 +688,8 @@ void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, r
 
                 if(ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
                 {
+                    /* No  point   to  scale  zeros  with   q  *  fac,
+                       obviousely: */
                     fft_uc[index].re = 0;
                     fft_uc[index].im = 0;
                 }
@@ -686,8 +699,8 @@ void ComputeSoluteDatafromCoulomb_QM(BGY3dH2OData BHD, Vec uc, Vec gs, real q, r
                     // EPSILON0INV = 1 / 4 * pi * epsilon0
                     fac = h3 * EPSILON0INV / M_PI / k;
                     // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-                    fft_uc[index].re = damp * q * fac * fft_gs[index].re;
-                    fft_uc[index].im = damp * q * fac * fft_gs[index].im;
+                    fft_uc[index].re = q * fac * fft_gs[index].re;
+                    fft_uc[index].im = q * fac * fft_gs[index].im;
                 }
                 index++;
             }
