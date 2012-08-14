@@ -63,13 +63,6 @@ static Solute Water =
     3
   };
 
-
-void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
-  RecomputeInitialSoluteData_II(BHD, &Water, damp, damp_LJ);
-}
-
 /*********************************/
 /* CS2 */
 /*********************************/
@@ -86,12 +79,6 @@ static Solute CarbonDisulfide =
     3
   };
 
-void RecomputeInitialSoluteData_CS2(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
-  RecomputeInitialSoluteData_II(BHD, &CarbonDisulfide, damp, damp_LJ);
-}
-
 /*********************************/
 /* HCl */
 /*********************************/
@@ -106,16 +93,6 @@ static Solute HydrogenChloride =
     {0.2, -0.2},
     2
   };
-
-void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
-#ifndef QM
-  RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ);
-#else
-  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ);
-#endif
-}
 
 /*********************************/
 /* Methanol */
@@ -135,12 +112,6 @@ static Solute Methanol =
     {0.145, 0.0400, 0.0400, 0.0400, -0.683, 0.418 },
     6
   };
-
-void RecomputeInitialSoluteData_Methanol(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
-  RecomputeInitialSoluteData_II(BHD, &Methanol, damp, damp_LJ);
-}
 
 /*********************************/
 /* Hexane */
@@ -174,12 +145,6 @@ static Solute Hexane =
     20
   };
 
-void RecomputeInitialSoluteData_Hexane(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
-  RecomputeInitialSoluteData_II(BHD, &Hexane, damp, damp_LJ);
-}
-
 /* BUTANOIC ACID */
 /* H1 sigma and epsilon adopted */
 static Solute ButanoicAcid =
@@ -206,12 +171,45 @@ static Solute ButanoicAcid =
     14
   };
 
+void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+{
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
+  RecomputeInitialSoluteData_II(BHD, &Water, damp, damp_LJ);
+}
+
+void RecomputeInitialSoluteData_CS2(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+{
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
+  RecomputeInitialSoluteData_II(BHD, &CarbonDisulfide, damp, damp_LJ);
+}
+
+void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+{
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
+#ifndef QM
+  RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ);
+#else
+  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ);
+#endif
+}
+
+void RecomputeInitialSoluteData_Methanol(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+{
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
+  RecomputeInitialSoluteData_II(BHD, &Methanol, damp, damp_LJ);
+}
+
+void RecomputeInitialSoluteData_Hexane(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+{
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
+  RecomputeInitialSoluteData_II(BHD, &Hexane, damp, damp_LJ);
+}
+
 void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Butanoic Acid.\n");
   RecomputeInitialSoluteData_II(BHD, &ButanoicAcid, damp, damp_LJ);
 }
-
 
 /*
  * Create initial solute data.
