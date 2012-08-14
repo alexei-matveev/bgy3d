@@ -323,34 +323,6 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int 
     VecAXPY (BHD->ucO, qO, BHD->v[0]);
 }
 
-#if 0
-/*
- * For debug purposes:
- */
-static void dump (BGY3dH2OData BHD)
-{
-    PetscViewer viewer;
-
-    /* print  to check */
-    PetscPrintf(PETSC_COMM_WORLD, "Writing binarys \n");
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJH.bin", FILE_MODE_WRITE, &viewer);
-    VecView(BHD->gH_ini, viewer);
-    PetscViewerDestroy(viewer);
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "LJO.bin", FILE_MODE_WRITE, &viewer);
-    VecView(BHD->gO_ini, viewer);
-    PetscViewerDestroy(viewer);
-    /* PetscViewerBinaryOpen(PETSC_COMM_WORLD, "gs.bin", FILE_MODE_WRITE, &viewer); */
-    /* VecView(sumgs, viewer); */
-    PetscViewerDestroy(viewer);
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucH.bin", FILE_MODE_WRITE, &viewer);
-    VecView(BHD->ucH, viewer);
-    PetscViewerDestroy(viewer);
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, "ucO.bin", FILE_MODE_WRITE, &viewer);
-    VecView(BHD->ucO, viewer);
-    PetscViewerDestroy(viewer);
-}
-#endif
-
 /*
  * Calculate a  real field "f"  for the solvent site  characterized by
  * (epsilon, sigma)  in the presence of  the solute S  with an overall
