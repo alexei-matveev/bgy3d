@@ -26,8 +26,8 @@ static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x
 #endif
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2, real damp);
 static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q, real damp);
-static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
-static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ);
+static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
+static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -36,19 +36,19 @@ static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Solute *S, re
  * return a  real number such as  an interaction energy  or the charge
  * density:
  */
-static real ljc (real x, real y, real z, real epsilon, real sigma, real charge, const Solute *S);
-static real rho (real x, real y, real z, real epsilon, real sigma, real charge, const Solute *S);
+static real ljc (real x, real y, real z, real epsilon, real sigma, real charge, const Site S[], int nsites);
+static real rho (real x, real y, real z, real epsilon, real sigma, real charge, const Site S[], int nsites);
 
 /*
  * This function expects a callback obeying the above interface as one
  * of the arguments:
  */
 static void field (DA da, const ProblemData *PD,
-                   const Solute *S,
+                   const Site S[], int nsites,
                    real epsilon, real sigma, real charge, real fact,
                    double (*f)(real x, real y, real z,
                                real eps, real sig, real chg,
-                               const Solute *S),
+                               const Site S[], int nsites),
                    Vec v);
 
 // FIXME: maybe #include "solutes.h" instead?
@@ -136,44 +136,50 @@ static Solute ButanoicAcid =
         {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
         {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
 
+static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
+{
+    /* Functions that do the real work operate on array of sites: */
+#ifndef QM
+    RecomputeInitialSoluteData_II (BHD, S->sites, S->n, damp, damp_LJ);
+#else
+    RecomputeInitialSoluteData_QM (BHD, S->sites, S->n, damp, damp_LJ);
+#endif
+}
+
 void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
-  RecomputeInitialSoluteData_II(BHD, &Water, damp, damp_LJ);
+  recompute_initial_data (BHD, &Water, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_CS2(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
-  RecomputeInitialSoluteData_II(BHD, &CarbonDisulfide, damp, damp_LJ);
+  recompute_initial_data (BHD, &CarbonDisulfide, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
-#ifndef QM
-  RecomputeInitialSoluteData_II(BHD, &HydrogenChloride, damp, damp_LJ);
-#else
-  RecomputeInitialSoluteData_QM(BHD, &HydrogenChloride, damp, damp_LJ);
-#endif
+  recompute_initial_data (BHD, &HydrogenChloride, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_Methanol(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
-  RecomputeInitialSoluteData_II(BHD, &Methanol, damp, damp_LJ);
+  recompute_initial_data (BHD, &Methanol, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_Hexane(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
-  RecomputeInitialSoluteData_II(BHD, &Hexane, damp, damp_LJ);
+  recompute_initial_data (BHD, &Hexane, damp, damp_LJ);
 }
 
 void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Butanoic Acid.\n");
-  RecomputeInitialSoluteData_II(BHD, &ButanoicAcid, damp, damp_LJ);
+  recompute_initial_data (BHD, &ButanoicAcid, damp, damp_LJ);
 }
 
 /*
@@ -183,7 +189,8 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  *      BHD->gO_ini (beta *  (VM_LJ + VM_coulomb_short)) and BHD->ucH,
  *      BHD->ucO (beta * VM_coulomb_long), but is beta missing here?
  */
-static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
+
+static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -227,17 +234,17 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Solute *S, rea
    * compute the  interaction of  a charged LJ  solvent site  with the
    * solute.
    */
-  field (BHD->da, BHD->PD, S, eH, sH, qH, factor, ljc, BHD->gH_ini);
-  field (BHD->da, BHD->PD, S, eO, sO, qO, factor, ljc, BHD->gO_ini);
+  field (BHD->da, BHD->PD, S, nsites, eH, sH, qH, factor, ljc, BHD->gH_ini);
+  field (BHD->da, BHD->PD, S, nsites, eO, sO, qO, factor, ljc, BHD->gO_ini);
 
   /* Sum over over solute atoms */
   VecSet(BHD->ucH, 0.0);
   VecSet(BHD->ucO, 0.0);
-  for(int k = 0; k < S->n; k++) {
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->sites[k].x,  qO * S->sites[k].charge, damp);
+  for(int k = 0; k < nsites; k++) {
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S[k].x,  qO * S[k].charge, damp);
       VecAXPY(BHD->ucO, 1.0, BHD->v[0]);
 
-      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S->sites[k].x,  qH * S->sites[k].charge, damp);
+      ComputeSoluteDatafromCoulombII(BHD, BHD->v[0], S[k].x,  qH * S[k].charge, damp);
       VecAXPY(BHD->ucH, 1.0, BHD->v[0]);
   }
 }
@@ -447,7 +454,7 @@ static void ComputeSoluteDatafromCoulombII(BGY3dH2OData BHD, Vec uc, const real 
 
 }
 
-static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
+static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
     PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute(QM) data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -476,8 +483,8 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
      * solvent  site  with  the  solute was  deliberately  omitted  by
      * specifying zero charge of the solvent site:
      */
-    field (BHD->da, BHD->PD, S, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
-    field (BHD->da, BHD->PD, S, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
+    field (BHD->da, BHD->PD, S, nsites, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
+    field (BHD->da, BHD->PD, S, nsites, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
 
     /*
      * Compute  the  charge  density  of  the  solute.   The  callback
@@ -491,7 +498,7 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Solute *S, rea
 
     DACreateGlobalVector (BHD->da, &rho_solute);
 
-    field (BHD->da, BHD->PD, S, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
+    field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
 
     /*
      * This solves  the Poisson equation and  puts resulting potential
@@ -547,11 +554,11 @@ static void dump (BGY3dH2OData BHD)
  * Vector "v" is the intent(out) argument.
  */
 static void field (DA da, const ProblemData *PD,
-                   const Solute *S,
+                   const Site S[], int nsites,
                    real epsilon, real sigma, real charge, real fact,
                    real (*f)(real x, real y, real z,
                              real eps, real sig, real chg,
-                             const Solute *S),
+                             const Site S[], int nsites),
                    Vec v)
 {
     PetscScalar ***vec;
@@ -592,7 +599,7 @@ static void field (DA da, const ProblemData *PD,
                  * by summing (LJ) contributions from all solute sites
                  * at that grid point:
                  */
-                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, charge, S);
+                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, charge, S, nsites);
             }
         }
     }
@@ -605,21 +612,21 @@ static void field (DA da, const ProblemData *PD,
  */
 static real ljc (real x, real y, real z,
                  real epsilon, real sigma, real charge,
-                 const Solute *S)
+                 const Site S[], int nsites)
 {
     /* Sum force field contribution from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < S->n; site++) {
+    for (int site = 0; site < nsites; site++) {
 
         /* Interaction parameters for a pair of LJ sites: */
-        real e2 = sqrt (epsilon * S->sites[site].epsilon);
-        real s2 = 0.5 * (sigma + S->sites[site].sigma);
+        real e2 = sqrt (epsilon * S[site].epsilon);
+        real s2 = 0.5 * (sigma + S[site].sigma);
 
         /* Distance from a grid point to this site: */
-        real r_s = sqrt (SQR(x - S->sites[site].x[0]) +
-                         SQR(y - S->sites[site].x[1]) +
-                         SQR(z - S->sites[site].x[2]));
+        real r_s = sqrt (SQR(x - S[site].x[0]) +
+                         SQR(y - S[site].x[1]) +
+                         SQR(z - S[site].x[2]));
 
         /* 1. Lennard-Jones */
         field += Lennard_Jones (r_s, e2, s2);
@@ -627,7 +634,7 @@ static real ljc (real x, real y, real z,
         /* 2. Coulomb,  short range part.  For  historical reasons the
            overall scaling factor, the  product of solvent- and solute
            site charges, is handled by the function itself: */
-        field += Coulomb_short (r_s, charge * S->sites[site].charge);
+        field += Coulomb_short (r_s, charge * S[site].charge);
     }
 
     return field;
@@ -644,7 +651,7 @@ static real ljc (real x, real y, real z,
  */
 static real rho (real x, real y, real z,
                  real epsilon, real sigma, real charge, /* all three unused */
-                 const Solute *S)
+                 const Site S[], int nsites)
 {
     /* G  is predefind  in bgy3d_SolventParameters.h  FIXME:  make the
        gaussian width a property of  the (solute) site in the same way
@@ -654,16 +661,16 @@ static real rho (real x, real y, real z,
     /* Sum Gaussian contributions from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < S->n; site++) {
+    for (int site = 0; site < nsites; site++) {
 
         /* Square of the distance from a grid point to this site: */
-        real r2 = (SQR(x - S->sites[site].x[0]) +
-                   SQR(y - S->sites[site].x[1]) +
-                   SQR(z - S->sites[site].x[2]));
+        real r2 = (SQR(x - S[site].x[0]) +
+                   SQR(y - S[site].x[1]) +
+                   SQR(z - S[site].x[2]));
 
         /* Gaussian  distribution, note  that G  is not  a  width, but
            rather an inverse of it: */
-        field += prefac * S->sites[site].charge * exp(- G * G * r2);
+        field += prefac * S[site].charge * exp(- G * G * r2);
     }
 
     return field;
