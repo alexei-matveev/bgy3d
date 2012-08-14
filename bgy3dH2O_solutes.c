@@ -242,25 +242,34 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
    * (idependent of the solvent charge):
    */
 
-  Vec rho_solute; /* Vector for solute charge density */
+  Vec v; /* Vector for solute charge density and its Coulomb field */
 
-  DACreateGlobalVector (BHD->da, &rho_solute);
+  /* MEMORY:  huge array  here!  FIXME:  make re-use  of pre-allocated
+     vectors more transparent and get rid of this: */
+  DACreateGlobalVector (BHD->da, &v);
 
-  field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, rho_solute);
+  /* 1. Put the solute density into Vec v: */
+  field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, v);
 
   /*
-   * This  solves the  Poisson equation  and puts  resulting potential
-   * into a pre-allocated (?) vector BHD->v[0].
+   * 2. Solve  the Poisson equation "in-place" by  specifying the same
+   * Vec v as  input and output.  (Original version  was ouputting the
+   * Coulomb potential into a pre-allocated vector BHD->v[0]).
    */
-  poisson (BHD, BHD->v[0], rho_solute, 1.0 * damp);
+  poisson (BHD, v, v, 1.0 * damp); /* WARNING: argument aliasing here! */
 
-  VecDestroy (rho_solute);
-
+  /*
+   * 3. Copy  the electrostatic potential  scaled by the  solvent site
+   * charges into predefined locations:
+   */
   VecSet (BHD->ucH, 0.0);
-  VecAXPY (BHD->ucH, qH, BHD->v[0]);
+  VecAXPY (BHD->ucH, qH, v);
 
   VecSet (BHD->ucO, 0.0);
-  VecAXPY (BHD->ucO, qO, BHD->v[0]);
+  VecAXPY (BHD->ucO, qO, v);
+
+  /* MEMORY: deallocate huge array here! */
+  VecDestroy (v);
 }
 
 static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
@@ -465,9 +474,12 @@ static real rho (real x, real y, real z,
   Vec rho is intent(in).
   real q is the overall factor.
 
-  Side effects:
+  Side effects (do not rely on them):
 
-  Appears to use BHD->g_fft and BHD->fft_scratch as working storage.
+  Appears to  use BHD->g_fft and BHD->fft_scratch  as working storage.
+  As a  matter of  fact, it  appears that one  could provide  the same
+  factual parameter  for rho and  uc to effectively solve  the Poisson
+  equation "in place".
 */
 void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
 {
