@@ -636,12 +636,16 @@ static real rho (real x, real y, real z,
   Vec uc is intent(out).
   Vec rho is intent(in).
   real q is the overall factor.
+
+  Side effects:
+
+  Appears to use BHD->g_fft and BHD->fft_scratch as working storage.
 */
 void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k2, fac, L, h3;
-    fftw_complex *fft_rho, *fft_uc;
+    fftw_complex *fft_work;
 
     interval[0] = BHD->PD->interval[0];
     interval[1] = BHD->PD->interval[1];
@@ -652,16 +656,16 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
         N[dim] = BHD->PD->N[dim];
     h3 = h[0] * h[1] * h[2];
 
-    /* FIXME: are we using these as a scratch storage? Do we overwrite
+    /* FIXME: are we using this  as a scratch storage? Do we overwrite
        something important? */
-    fft_rho = BHD->g_fft;
-    fft_uc = BHD->gfg2_fft;
+    fft_work = BHD->g_fft;
 
     /* Get local portion of the grid */
     DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
-    /* Get FFT of rho: rho(i, j, k) -> fft_rho(kx, ky, kz) */
-    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_rho, BHD->fft_scratch, x, n, 0);
+    /* Get FFT of rho: rho(i, j, k) -> fft_rho(kx, ky, kz) placed into
+       fft_work(kx, ky, kz): */
+    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_work, BHD->fft_scratch, x, n, 0);
 
     /*
       Solving Poisson Equation (SI units) with FFT and IFFT:
@@ -708,24 +712,26 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
                         ic[dim] = i[dim] - N[dim];
                 }
 
-                if(ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-                {
+                if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
                     /* No point to scale zeros, obviousely: */
-                    fft_uc[index].re = 0;
-                    fft_uc[index].im = 0;
+                    fft_work[index].re = 0;
+                    fft_work[index].im = 0;
                 }
                 else {
                     k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
                     // EPSILON0INV = 1 / 4 * pi * epsilon0
                     fac = scale / k2;
                     // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-                    fft_uc[index].re = fac * fft_rho[index].re;
-                    fft_uc[index].im = fac * fft_rho[index].im;
+
+                    /* Here  we compute  in place:  uc(kx, ky,  kz) :=
+                       scale * rho(kx, ky, kz) / k^2 */
+                    fft_work[index].re = fac * fft_work[index].re;
+                    fft_work[index].im = fac * fft_work[index].im;
                 }
                 index++;
             }
     // NOT NEEDED: VecSet(uc, 00.0);
 
-    /* uc := IFFT(fft_uc(kx, ky, kz)) */
-    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
+    /* uc := IFFT(uc(kx, ky, kz)) */
+    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_work, BHD->fft_scratch, x, n, 0);
 }
