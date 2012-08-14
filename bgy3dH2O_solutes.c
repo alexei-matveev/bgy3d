@@ -41,9 +41,9 @@ static real rho (real x, real y, real z, real epsilon, real sigma, real charge, 
 static void field (DA da, const ProblemData *PD,
                    const Site S[], int nsites,
                    real epsilon, real sigma, real charge, real fact,
-                   double (*f)(real x, real y, real z,
-                               real eps, real sig, real chg,
-                               const Site S[], int nsites),
+                   real (*f)(real x, real y, real z,
+                             real eps, real sig, real chg,
+                             const Site S[], int nsites),
                    Vec v);
 
 // FIXME: maybe #include "solutes.h" instead?
