@@ -692,6 +692,10 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
                      3   3
       uc(i, j, k) = h / L  * IFFT(fft_uc(kx, ky, kz))
     */
+
+    // EPSILON0INV = 1 / 4 * pi * epsilon0:
+    real scale = q * EPSILON0INV / M_PI * h3 / (L * L * L);
+
     index = 0;
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
         for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -706,25 +710,22 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
 
                 if(ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
                 {
-                    /* No  point   to  scale  zeros  with   q  *  fac,
-                       obviousely: */
+                    /* No point to scale zeros, obviousely: */
                     fft_uc[index].re = 0;
                     fft_uc[index].im = 0;
                 }
                 else {
                     k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
                     // EPSILON0INV = 1 / 4 * pi * epsilon0
-                    fac = h3 * EPSILON0INV / M_PI / k2;
+                    fac = scale / k2;
                     // sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-                    fft_uc[index].re = q * fac * fft_rho[index].re;
-                    fft_uc[index].im = q * fac * fft_rho[index].im;
+                    fft_uc[index].re = fac * fft_rho[index].re;
+                    fft_uc[index].im = fac * fft_rho[index].im;
                 }
                 index++;
             }
-
     // NOT NEEDED: VecSet(uc, 00.0);
 
-    /* uc := IFFT(fft_uc(kx, ky, kz)) / L^3 */
+    /* uc := IFFT(fft_uc(kx, ky, kz)) */
     ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
-    VecScale(uc, 1./L/L/L);
 }
