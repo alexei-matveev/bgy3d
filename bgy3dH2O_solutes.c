@@ -256,7 +256,7 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
     DA da;
     PData PD;
     int x[3], n[3], i[3], ic[3], N[3], index;
-    real r[3], r_s, h[3], interval[2], k, fac, L, sign, fac2, L2;
+    real h[3], interval[2], k, fac, L, sign, fac2, L2;
     fftw_complex *fft_data;
 
     PD = BHD->PD;
@@ -275,18 +275,13 @@ static void ComputeSoluteDatafromCoulomb(BGY3dH2OData BHD, Vec uc, const real x0
     /* Get local portion of the grid */
     DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
+    /* Loop over local portion of the k-grid */
     index = 0;
-    /* loop over local portion of grid */
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
         for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
             for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
                 {
                     /* set force vectors */
-
-                    FOR_DIM
-                        r[dim] = i[dim]*h[dim]+interval[0];
-
-                    r_s = sqrt(SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
 
                     FOR_DIM {
                         if (i[dim] <= N[dim] / 2)
