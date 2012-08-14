@@ -25,7 +25,7 @@ typedef struct Solute {
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
 #endif
 static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
-static void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec gs, real q);
+static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
@@ -255,7 +255,7 @@ static void RecomputeInitialSoluteData_II(BGY3dH2OData BHD, const Site S[], int 
    * This  solves the  Poisson equation  and puts  resulting potential
    * into a pre-allocated (?) vector BHD->v[0].
    */
-  ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0 * damp);
+  poisson (BHD, BHD->v[0], rho_solute, 1.0 * damp);
 
   VecDestroy (rho_solute);
 
@@ -477,7 +477,7 @@ static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int 
      * This solves  the Poisson equation and  puts resulting potential
      * into a pre-allocated (?) vector BHD->v[0].
      */
-    ComputeSoluteDatafromCoulomb_QM (BHD, BHD->v[0], rho_solute, 1.0 * damp);
+    poisson (BHD, BHD->v[0], rho_solute, 1.0 * damp);
 
     VecDestroy (rho_solute);
 
@@ -661,7 +661,7 @@ static real rho (real x, real y, real z,
 
   Appears to use BHD->g_fft and BHD->fft_scratch as working storage.
 */
-void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
+void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k2, fac, L, h3;
