@@ -24,7 +24,6 @@ typedef struct Solute {
 #if 0
 static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
 #endif
-static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2);
 static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
 static void RecomputeInitialSoluteData_QM (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
 static void RecomputeInitialSoluteData_II (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
@@ -335,97 +334,6 @@ static void ComputeSoluteDatafromCoulomb (BGY3dH2OData BHD, Vec uc, const real x
     VecScale(uc, 1./L/L/L);
 }
 #endif
-
-
-static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real x0[3], real q2)
-{
-    DA da;
-    ProblemData *PD;
-    int x[3], n[3], i[3], ic[3], N[3], index;
-    real r[3], h[3], interval[2], k, fac, L, h3;
-    fftw_complex *fft_data, *dg_fft;
-    PetscScalar ***v_vec;
-
-    PD = BHD->PD;
-    da = BHD->da;
-    fft_data = BHD->g_fft;
-    dg_fft = BHD->gfg2_fft;
-    FOR_DIM
-        h[dim] = PD->h[dim];
-    FOR_DIM
-        N[dim] = PD->N[dim];
-    h3 = h[0] * h[1] * h[2];
-
-    interval[0] = PD->interval[0];
-    L = PD->interval[1] - PD->interval[0];
-
-    /* Get local portion of the grid */
-    DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-    DAVecGetArray(da, uc, &v_vec);
-
-    /*                        3         2 2
-     * rho(r) = (G / sqrt(PI))   exp(- G r )
-     */
-    fac = pow(G / sqrt(M_PI), 3.0);
-
-    /* loop over local portion of grid */
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-        for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-            for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++) {
-                /* set force vectors */
-
-                FOR_DIM
-                    r[dim] = i[dim] * h[dim] + interval[0] - x0[dim];
-
-                // XXX:  Gaussian distribution
-                real r_s = sqrt(SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
-
-                v_vec[i[2]][i[1]][i[0]] = fac * exp(-SQR(r_s * G));
-            }
-    DAVecRestoreArray(da, uc, &v_vec);
-
-    // XXX:  convert to fft_complex
-    ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, uc, fft_data,
-                           BHD->fft_scratch, x, n, 0);
-
-    /* Loop over local portion of the k-grid: */
-    index = 0;
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-        for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-            for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++) {
-                /* set force vectors */
-
-                FOR_DIM {
-                    if (i[dim] <= N[dim] / 2)
-                        ic[dim] = i[dim];
-                    else
-                        ic[dim] = i[dim] - N[dim];
-                }
-
-                if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
-                    /* No  point  to  scale   zeros  with  q2  *  fac,
-                       obviousely: */
-                    dg_fft[index].re = 0;
-                    dg_fft[index].im = 0;
-                }
-                else {
-                    // XXX:  Fourier component of V_coulomb_long ??
-                    k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-                    fac = h3 * EPSILON0INV / M_PI / k;
-
-                    dg_fft[index].re = q2 * fac * fft_data[index].re;
-                    dg_fft[index].im = q2 * fac * fft_data[index].im;
-                }
-                index++;
-            }
-
-    /* FFT, fft_complex to Vec */
-    ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, uc, dg_fft,
-                           BHD->fft_scratch, x, n, 0);
-
-    VecScale(uc, 1./L/L/L);
-}
 
 static void RecomputeInitialSoluteData_QM(BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
