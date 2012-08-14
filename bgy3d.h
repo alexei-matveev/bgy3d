@@ -70,11 +70,6 @@ typedef struct ProblemData
  */
 typedef struct ProblemData *PData; /* DEPRECATED! */
 
-/* typedef struct BGY3dField */
-/* { */
-/*   PetscScalar d[3]; */
-/* }Field; */
-
 #ifdef MATPRECOND
 typedef struct MatPrecondStruct
 {
@@ -86,21 +81,20 @@ typedef struct MatPrecondStruct
 
 typedef struct BGY3dParameterStruct
 {
-  int vec_dim;        /* Dimension of equation */
+  int vec_dim;                  /* Dimension of equation */
   DA da;
-  Vec x;             /* grid in real space */
-  Vec force;         /* force from all molecule atoms */
-  Vec force_single;  /* simple force between 2 atoms */
-  Vec Ftimesg2 ;      /* force*g2 */
+  Vec x;                        /* grid in real space */
+  Vec force;                    /* force from all molecule atoms */
+  Vec force_single;             /* simple force between 2 atoms */
+  Vec Ftimesg2 ;                /* force*g2 */
   FFT_DATA *Ftimesg2_fft;
 
-  Mat M;               /* Matrix for FD-Approximation */
-  Vec boundary;        /* Vector for right boundary: g=1 */
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];    /* sigma and epsilon, seems we don't need charge here;*/
+  Mat M;                        /* Matrix for FD-Approximation */
+  Vec boundary;                 /* Vector for right boundary: g=1 */
+  real LJ_params[2]; /* sigma and epsilon, seems we don't need charge here */
 
 
-  Vec v1,v2, v3;        /* Vectors for intermediate results */
+  Vec v1,v2, v3;                /* Vectors for intermediate results */
   Vec pre;
 #ifdef MATPRECOND
   MatPrecond MP;
@@ -110,7 +104,7 @@ typedef struct BGY3dParameterStruct
   struct fft_plan_3d *fft_plan;
 
 
-  PData PD;            /* pointer to ProblemData */
+  PData PD;                     /* pointer to ProblemData */
 
 } *BGY3dParameter;
 BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim);
@@ -132,8 +126,7 @@ typedef struct HNC3dDataStruct
   DA da;
   Vec pot;
   Vec h_ini;
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];   /* sigma and epsilon  */
+  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   /* Parallel FFT */
@@ -145,7 +138,7 @@ typedef struct HNC3dDataStruct
 
 
 
-  PData PD;            /* pointer to ProblemData */
+  PData PD;                     /* pointer to ProblemData */
 } *HNC3dData;
 
 HNC3dData HNC3dData_malloc(PData PD);
@@ -161,8 +154,7 @@ typedef struct HNC3dNewtonStruct
 {
   DA da, da1;
   Vec pot;
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];   /* sigma and epsilon  */
+  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
   Vec pre;
 
@@ -170,7 +162,7 @@ typedef struct HNC3dNewtonStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
 
-  PData PD;            /* pointer to ProblemData */
+  PData PD;                     /* pointer to ProblemData */
 } *HNC3dNewtonData;
 
 HNC3dNewtonData HNC3dNewtonData_malloc(PData PD);
@@ -178,7 +170,6 @@ void HNC3dNewtonData_free(HNC3dNewtonData HD);
 
 
 /* functions */
-// real Lennard_Jones(real r, void *LJ_params);
 real Lennard_Jones(real r, real epsilon, real sigma);
 void PData_CreateParallel(PData PD);
 real** Load_Molecule(int *N);
@@ -243,8 +234,7 @@ typedef struct BGY3dDivStruct
   Mat M;
   Mat FD[3];
 
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];   /* sigma and epsilon  */
+  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini, g_SA;
@@ -292,8 +282,7 @@ typedef struct BGY3dFourierStruct
   Vec f[3];
   Vec v[3];
 
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];   /* sigma and epsilon  */
+  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini;
@@ -331,8 +320,7 @@ typedef struct BGY3dDiatomicStruct
   Vec f[3];
   Vec v[3];
 
-  // void *LJ_params;   /* sigma and epsilon  */
-  real LJ_params[2];   /* sigma and epsilon  */
+  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   Vec g_ini;
@@ -359,8 +347,7 @@ typedef struct BGY3dDiatomicABStruct
   Vec fa[3],fb[3],fab[3];
   Vec v[3];
 
-  // void *LJ_paramsa, *LJ_paramsb,*LJ_paramsab ;   /* sigma and epsilon  */
-  real LJ_paramsa[2], LJ_paramsb[2], LJ_paramsab[2] ;   /* sigma and epsilon  */
+  real LJ_paramsa[2], LJ_paramsb[2], LJ_paramsab[2] ; /* sigma and epsilon  */
   real beta, rho;
 
   real norm_const, c_ab, c_aab;
@@ -413,9 +400,7 @@ typedef struct BGY3dH2OStruct
 
   Vec cH, cHO, cO;
 
-
-  // void *LJ_paramsH, *LJ_paramsO,*LJ_paramsHO ;   /* sigma and epsilon  */
-  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ;   /* sigma, epsilon and charge(product)  */
+  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ; /* sigma, epsilon and charge(product)  */
   real beta, rho;
   real rho_H, rho_O;
 
@@ -483,23 +468,16 @@ void BGY3dH2OData_free(BGY3dH2OData BHD);
 Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim);
 Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim);
 Vec BGY3d_solve_4site(PData PD, Vec g_ini, int vdim);
-// Replaced void pointer as real number in Coulomb_short() and Coulomb_short_grad()
-// real Coulomb_short( real r, void *params);
+
 real Coulomb_short( real r, real SQRq);
-// real Coulomb_short_grad( real r, real rx, void *params);
 real Coulomb_short_grad( real r, real rx, real SQRq);
-// real Coulomb_long( real r, void *params);
-// real Coulomb_long_grad( real r, real rx, void *params);
-// real Coulomb( real r, void *params);
-// real Coulomb_grad( real r, real rx, void *params);
+
 real Coulomb_long( real r, real q2);
 real Coulomb_long_grad( real r, real rx, real q2);
+
 real Coulomb( real r, real q2);
 real Coulomb_grad( real r, real rx, real q2);
-/* void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
-void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], fftw_complex *fft_data, void *LJ_params, real damp);
-void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, void *LJ_params,
-			real damp, real zpad); */
+
 void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, real q2, real damp);
 void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], fftw_complex *fft_data, real q2, real damp);
 void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, real q2,
