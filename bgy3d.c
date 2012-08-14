@@ -10,6 +10,7 @@
 /*===============================================*/
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 static char helptext[] = "Solving BGY3d equation.\n";
 
@@ -25,7 +26,6 @@ int main(int argc, char **argv)
   real mpi_start, mpi_stop;
   int np;
   Vec g, g_ini;
-  PetscTruth flg;
   Solver *s=NULL;
   PetscViewer viewer;
 
@@ -42,25 +42,23 @@ int main(int argc, char **argv)
   MPI_Barrier( PETSC_COMM_WORLD);
   mpi_start = MPI_Wtime();
 
-  /* Read the command line options */
+  /* Read the command  line options. Petsc insists on  keys having the
+     leading dash, so keep them for the moment. */
 
   /* Grid points in 1 dimension */
-  ierr = PetscOptionsGetInt(PETSC_NULL,"-N",&N, PETSC_NULL);CHKERRQ(ierr);
-
+  bgy3d_getopt_int ("-N", &N);
 
   /* inverse temperature */
-  ierr = PetscOptionsGetReal(PETSC_NULL,"-beta",&beta,
-			     PETSC_NULL);CHKERRQ(ierr);
-  /* Density */
-  ierr = PetscOptionsGetReal(PETSC_NULL,"-rho",&rho,
-			     PETSC_NULL);CHKERRQ(ierr);
-  /* set verbosity */
-  ierr = PetscOptionsGetInt(PETSC_NULL,"-v",&verbosity,
-			     PETSC_NULL);CHKERRQ(ierr);
- /* mesh width */
-  ierr = PetscOptionsGetReal(PETSC_NULL,"-mesh",&h,
-			     PETSC_NULL);CHKERRQ(ierr);
+  bgy3d_getopt_real ("-beta", &beta);
 
+  /* Density */
+  bgy3d_getopt_real ("-rho", &rho);
+
+  /* set verbosity */
+  bgy3d_getopt_int ("-v", &verbosity);
+
+  /* mesh width */
+  bgy3d_getopt_real ("-mesh", &h);
 
   /*=================================*/
   /* set Problem Data */
@@ -101,65 +99,64 @@ int main(int argc, char **argv)
 
 
   /* Read method to solve from command line */
-  ierr = PetscOptionsHasName(PETSC_NULL,"-simple",&flg);CHKERRQ(ierr);
-  if (flg)
+  if (bgy3d_getopt_test ("-simple"))
     s = BGY3d_solve;
-  /* ierr = PetscOptionsHasName(PETSC_NULL,"-full",&flg);CHKERRQ(ierr); */
-/*   if (flg)  */
-/*     s = BGY3d_vec_solve; */
-  ierr = PetscOptionsHasName(PETSC_NULL,"-HNC",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  /* if (bgy3d_getopt_test ("-full")) */
+  /*     s = BGY3d_vec_solve; */
+
+  if (bgy3d_getopt_test ("-HNC"))
     s = HNC3d_Solve_h;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-HNCNewton",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-HNCNewton"))
     s = HNC3dNewton2_solve;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-DIV",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-DIV"))
     s = BGY3dDiv_solve2;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-DIV2",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-DIV2"))
     s = BGY3dDiv_solve;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYTEST",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYTEST"))
     s = BGY3dDiv_test;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYFOURIER",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYFOURIER"))
     s =  BGY3dDiv_solve_Fourier;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYFOURIERTEST",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYFOURIERTEST"))
     s =  BGY3dDiv_solve_FourierTest;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYCONVOLUTIONTEST",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYCONVOLUTIONTEST"))
     s =  BGY3d_Convolution_Test;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYDIATOMIC",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYDIATOMIC"))
     s =  BGY3d_solve_DiatomicAB;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGY2Site",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGY2Site"))
     s =  BGY3d_solve_2site;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGY3Site",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGY3Site"))
     s =  BGY3d_solve_3site;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYM2Site",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYM2Site"))
     s =  BGY3dM_solve_H2O_2site;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYM3Site",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYM3Site"))
     s =  BGY3dM_solve_H2O_3site;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYH2ONEWTON",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYH2ONEWTON"))
     s = BGY3d_SolveNewton_H2O;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYH2OSNEWTON",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYH2OSNEWTON"))
     s = BGY3d_SolveNewton_H2OS;
-  ierr = PetscOptionsHasName(PETSC_NULL,"-BGYH2OSFNEWTON",&flg);CHKERRQ(ierr);
-  if (flg)
+
+  if (bgy3d_getopt_test ("-BGYH2OSFNEWTON"))
     s = BGY3d_SolveNewton_H2OSF;
+
   if(s)
     {
       /* load initial configuration from file ??? */
-      PetscOptionsHasName(PETSC_NULL,"-load",&flg);
-      if(flg)
+      if (bgy3d_getopt_test ("-load"))
 	{
 	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
 				FILE_MODE_READ,&viewer);
@@ -191,8 +188,7 @@ int main(int argc, char **argv)
 	  PetscViewerDestroy(viewer);
 
 	  /* save g to binary file */
-	  PetscOptionsHasName(PETSC_NULL,"-save",&flg);
-	  if(flg)
+	  if (bgy3d_getopt_test ("-save"))
 	    {
 	      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
 				    FILE_MODE_WRITE,&viewer);
@@ -776,7 +772,6 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
   PetscErrorCode ierr;
   Vec g, F;
   Mat J;
-  PetscTruth flg;
 
   params = BGY3dParameter_malloc(PD, vec_dim);
 
@@ -802,9 +797,7 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
    * function returns a Vec.
    */
 
-  ierr = PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg); // CHKERRQ(ierr);
-  assert (!ierr);
-  if (flg) { /* user-defined precond */
+  if (bgy3d_getopt_test ("-user_precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
     ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
     assert (!ierr);
@@ -815,10 +808,9 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
+
 #ifdef MATPRECOND
-  ierr = PetscOptionsHasName(PETSC_NULL,"-mat_precond",&flg); // CHKERRQ(ierr);
-  assert (!ierr);
-  if (flg) { /* user-defined precond */
+  if (bgy3d_getopt_test ("-mat_precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
     ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
     assert (!ierr);
@@ -858,9 +850,7 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
 
 
   /* set Function */
-  ierr = PetscOptionsHasName(PETSC_NULL,"-kirkwood",&flg); // CHKERRQ(ierr);
-  assert (!ierr);
-  if (flg)
+  if (bgy3d_getopt_test ("-kirkwood"))
     {
       SNESSetFunction(snes, F, Compute_F_Kirkwood, params);
     }
