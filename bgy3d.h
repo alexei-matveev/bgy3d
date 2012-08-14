@@ -103,11 +103,9 @@ typedef struct BGY3dParameterStruct
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
 
-
-  PData PD;                     /* pointer to ProblemData */
-
+  ProblemData *PD;
 } *BGY3dParameter;
-BGY3dParameter BGY3dParameter_malloc(PData PD, int vdim);
+BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim);
 void BGY3dParameter_free(BGY3dParameter params);
 
 typedef struct BGY3dVecStruct
@@ -116,7 +114,7 @@ typedef struct BGY3dVecStruct
   Vec fl[3];
 
 } *BGY3dParameterVec;
-BGY3dParameterVec BGY3dParameterVec_malloc(PData PD);
+BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD);
 void BGY3dParameterVec_free(BGY3dParameterVec par_vec);
 
 
@@ -136,12 +134,10 @@ typedef struct HNC3dDataStruct
   Vec c, v;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
 
-
-
-  PData PD;                     /* pointer to ProblemData */
+  ProblemData *PD;
 } *HNC3dData;
 
-HNC3dData HNC3dData_malloc(PData PD);
+HNC3dData HNC3dData_malloc(ProblemData *PD);
 void HNC3dData_free(HNC3dData HD);
 
 typedef struct HNC3dField
@@ -162,20 +158,20 @@ typedef struct HNC3dNewtonStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
 
-  PData PD;                     /* pointer to ProblemData */
+  ProblemData *PD;
 } *HNC3dNewtonData;
 
-HNC3dNewtonData HNC3dNewtonData_malloc(PData PD);
+HNC3dNewtonData HNC3dNewtonData_malloc(ProblemData *PD);
 void HNC3dNewtonData_free(HNC3dNewtonData HD);
 
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
-void PData_CreateParallel(PData PD);
+void PData_CreateParallel(ProblemData *PD);
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
-void ComputeMatrixStencil(PData PD, DA da, Mat M, int vdim);
-Vec BGY3d_solve(PData PD, Vec g_ini, int vec_dim);
+void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
+Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim);
 void CreateInitialGuess(BGY3dParameter params, Vec g);
 void CreateInitialGuessFromg2(BGY3dParameter params, Vec g);
 int start_debugger(void );
@@ -198,7 +194,7 @@ void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 #endif
 
 /* Vec */
-Vec BGY3d_vec_solve(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim);
 void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g);
 PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
 
@@ -206,17 +202,17 @@ PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
 void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
 		   ,int  n[3], real h[3]);
 void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
-Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim);
+Vec HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim);
 void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c);
-Vec HNC3dNewton_solve(PData PD, Vec g_ini, int vdim);
+Vec HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim);
 PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa);
 PetscErrorCode ComputeHNC_Preconditioner(void *pa,Vec x,Vec y);
 void VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc);
 void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc);
 PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
-Vec HNC3dNewton2_solve(PData PD, Vec g_ini, int vdim);
+Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini, int vdim);
 PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa);
-Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim);
+Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini, int vdim);
 
 
 
@@ -243,20 +239,17 @@ typedef struct BGY3dDivStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
-
-
-  PData PD;
-
-}*BGY3dDivData;
-BGY3dDivData BGY3dDivData_malloc(PData PD, PetscTruth flg);
-BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg);
+  ProblemData *PD;
+} *BGY3dDivData;
+BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg);
+BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg);
 void BGY3dDivData_free(BGY3dDivData BDD);
 
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M);
 // real Lennard_Jones_grad(real r, real xr, void *LJ_params);
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
-Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim);
-Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim);
+Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini, int vdim);
 void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim);
 void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f);
 void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f);
@@ -270,7 +263,7 @@ void ShiftVec(DA da, Vec g, Vec scratch, int N[3]);
 void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM);
 
 /* bgy3dtest */
-Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim);
+Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini, int vdim);
 void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K);
 void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 		    real sigma_K);
@@ -291,19 +284,16 @@ typedef struct BGY3dFourierStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
-
-
-  PData PD;
-
-}*BGY3dFourierData;
-BGY3dFourierData BGY3dFourierData_malloc(PData PD);
-BGY3dFourierData BGY3dFourierData_kirk_malloc(PData PD);
+  ProblemData *PD;
+} *BGY3dFourierData;
+BGY3dFourierData BGY3dFourierData_malloc(ProblemData *PD);
+BGY3dFourierData BGY3dFourierData_kirk_malloc(ProblemData *PD);
 void BGY3dFourierData_free(BGY3dFourierData BDD);
 void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N);
 void ExtractAxis(BGY3dFourierData BDD, Vec g, int axis);
-Vec BGY3dDiv_solve_Fourier(PData PD, Vec g_ini, int vdim);
-Vec BGY3dDiv_solve_FourierTest(PData PD, Vec g_ini, int vdim);
-Vec BGY3d_Convolution_Test(PData PD, Vec g_ini, int vdim);
+Vec BGY3dDiv_solve_Fourier(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3d_Convolution_Test(ProblemData *PD, Vec g_ini, int vdim);
 
 
 /*******************************************/
@@ -329,16 +319,13 @@ typedef struct BGY3dDiatomicStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
-
-
-  PData PD;
-
-}*BGY3dDiatomicData;
-BGY3dDiatomicData BGY3dDiatomicData_Pair_malloc(PData PD);
+  ProblemData *PD;
+} *BGY3dDiatomicData;
+BGY3dDiatomicData BGY3dDiatomicData_Pair_malloc(ProblemData *PD);
 void BGY3dDiatomicData_free(BGY3dDiatomicData BDD);
 void ComputeDiatomic_g(BGY3dDiatomicData BDD, Vec g, Vec g0, Vec dg);
 void Compute_dg_Pair(BGY3dDiatomicData BDD, Vec g, Vec dg);
-Vec BGY3d_solve_Diatomic(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_solve_Diatomic(ProblemData *PD, Vec g_ini, int vdim);
 
 
 typedef struct BGY3dDiatomicABStruct
@@ -361,11 +348,9 @@ typedef struct BGY3dDiatomicABStruct
 
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
 
-
-  PData PD;
-
-}*BGY3dDiatomicABData;
-BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD);
+  ProblemData *PD;
+} *BGY3dDiatomicABData;
+BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD);
 void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD);
 void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD, Vec f1[3], real sign1,
 			   Vec g1a, Vec g1b,
@@ -375,7 +360,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 			   Vec dg, Vec dg_help);
 void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 				   Vec dg, Vec dg_help);
-Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim);
 void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg);
 fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				fftw_complex *g_fft, fftw_complex *work,
@@ -421,7 +406,7 @@ typedef struct BGY3dH2OStruct
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
   int p_id, p_index;
 
-  PData PD;
+  ProblemData *PD;
 
   /* BGY3dM stuff */
   fftw_complex *(fg2OO_fft[3]), *(fg2HH_fft[3]), *(fg2HO_fft[3]);
@@ -468,11 +453,11 @@ typedef struct H2OSdgFStruct
 
 void Smooth_Function(BGY3dH2OData BHD, Vec g, real RL, real RR, real shift);
 void Zeropad_Function(BGY3dH2OData BHD, Vec g, real ZP, real shift);
-BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD);
+BGY3dH2OData BGY3dH2OData_Pair_malloc(ProblemData *PD);
 void BGY3dH2OData_free(BGY3dH2OData BHD);
-Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim);
-Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim);
-Vec BGY3d_solve_4site(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3d_solve_4site(ProblemData *PD, Vec g_ini, int vdim);
 
 real Coulomb_short( real r, real SQRq);
 real Coulomb_short_grad( real r, real rx, real SQRq);
@@ -503,8 +488,8 @@ void Solve_NormalizationH2O_small(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec 
 				  Vec dg, Vec dg_help, real zpad);
 void Solve_NormalizationH2O_smallII(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad);
-Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim);
-Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim);
 void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ);
 void VecSetRandom_H2O(Vec g, real mag);
 void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
@@ -520,8 +505,8 @@ void WriteH2ONewtonPlain(BGY3dH2OData BHD, Vec u);
 void WriteH2ONewtonSolution(BGY3dH2OData BHD, Vec u);
 /* BGY3dM */
 void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2);
-Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim);
-Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim);
+Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim);
+Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim);
 void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ);
 void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad);
 real ComputeCharge(BGY3dH2OData BHD, Vec g1, Vec g2);
@@ -531,7 +516,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
 void WriteH2OSNewtonSolution(BGY3dH2OData BHD, Vec u);
 void WriteH2OSNewtonPlain(BGY3dH2OData BHD, Vec u);
 void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, Vec gH);
-Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim);
+Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini, int vdim);
 #ifdef L_BOUNDARY
 void InitializeLaplaceMatrix(BGY3dH2OData BHD, real zpad);
 void InitializeKSPSolver(BGY3dH2OData BHD);
