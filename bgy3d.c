@@ -157,39 +157,39 @@ int main(int argc, char **argv)
     {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("-load"))
-	{
-	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
-				FILE_MODE_READ,&viewer);
-	  VecLoad(viewer,VECMPI, &g_ini);
-	  PetscViewerDestroy(viewer);
-	  PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
+        {
+          PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
+                                FILE_MODE_READ,&viewer);
+          VecLoad(viewer,VECMPI, &g_ini);
+          PetscViewerDestroy(viewer);
+          PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
 
-	  g= (*s)(&PD, g_ini, 0);
+          g= (*s)(&PD, g_ini, 0);
 
 
-	}
+        }
       else
-	g= (*s)(&PD, PETSC_NULL, 0);
+        g= (*s)(&PD, PETSC_NULL, 0);
 
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);
       mpi_stop = MPI_Wtime();
       PetscPrintf(PETSC_COMM_WORLD,"Total computation time: %.4f s\n",
-		  mpi_stop-mpi_start);
+                  mpi_stop-mpi_start);
 
 
 
       /* Output result */
       if( g != PETSC_NULL)
-	{
-	  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vec.m",&viewer);
-	  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-	  VecView(g,viewer);
-	  PetscViewerDestroy(viewer);
+        {
+          PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vec.m",&viewer);
+          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
+          VecView(g,viewer);
+          PetscViewerDestroy(viewer);
 
-	  /* save g to binary file */
-	  if (bgy3d_getopt_test ("-save"))
-	    {
+          /* save g to binary file */
+          if (bgy3d_getopt_test ("-save"))
+            {
 	      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
 				    FILE_MODE_WRITE,&viewer);
 	      VecView(g,viewer);
