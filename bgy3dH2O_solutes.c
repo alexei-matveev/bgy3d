@@ -722,9 +722,9 @@ void ComputeSoluteDatafromCoulomb_QM (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
                 index++;
             }
 
-    VecSet(uc, 0.0);         /* FIXME: is zeroing really necessary? */
+    // NOT NEEDED: VecSet(uc, 00.0);
 
-    /* IFFT(fft_uc(kx, ky, kz)) / L^3 */
+    /* uc := IFFT(fft_uc(kx, ky, kz)) / L^3 */
     ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_uc, BHD->fft_scratch, x, n, 0);
     VecScale(uc, 1./L/L/L);
 }
