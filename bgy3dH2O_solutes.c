@@ -325,7 +325,7 @@ static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real
     DA da;
     ProblemData *PD;
     int x[3], n[3], i[3], ic[3], N[3], index;
-    real r[3], h[3], interval[2], k, fac, L, sign, h3;
+    real r[3], h[3], interval[2], k, fac, L, h3;
     fftw_complex *fft_data, *dg_fft;
     PetscScalar ***v_vec;
 
@@ -392,7 +392,6 @@ static void ComputeSoluteDatafromCoulombII (BGY3dH2OData BHD, Vec uc, const real
                     // XXX:  Fourier component of V_coulomb_long ??
                     k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
                     fac = h3 * EPSILON0INV / M_PI / k;
-                    sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
                     dg_fft[index].re = q2 * fac * fft_data[index].re;
                     dg_fft[index].im = q2 * fac * fft_data[index].im;
