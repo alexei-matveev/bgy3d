@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 
@@ -78,7 +79,7 @@ BGY3dFourierData BGY3dFourierData_malloc(PData PD)
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
 
-  PetscOptionsHasName(PETSC_NULL,"-g2load3d",&g2_flg);
+  g2_flg = bgy3d_getopt_test ("-g2load3d");
   if(g2_flg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading 3d g2 vector.\n");
@@ -797,7 +798,7 @@ Vec BGY3dDiv_solve_Fourier(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation with Fourier ansatz...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-kirkwood",&kflg);
+  kflg = bgy3d_getopt_test ("-kirkwood");
   if(kflg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"(Kirkwood)\n");
@@ -817,7 +818,7 @@ Vec BGY3dDiv_solve_Fourier(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
@@ -825,9 +826,9 @@ Vec BGY3dDiv_solve_Fourier(PData PD, Vec g_ini, int vdim)
     }
 
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   /*********************************/
 
