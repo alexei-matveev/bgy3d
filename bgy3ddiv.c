@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 
@@ -1645,15 +1646,13 @@ Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-seq",&flg);
-  if(flg)
-    BDD = BGY3dDivData_malloc(PD,flg);
-  else
-    BDD = BGY3dDivData_malloc(PD,flg);
+  flg = bgy3d_getopt_test ("-seq");
+
+  BDD = BGY3dDivData_malloc(PD, flg);
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
@@ -1661,9 +1660,9 @@ Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim)
     }
 
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   /*********************************/
   if(flg)
@@ -1803,8 +1802,8 @@ Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation with product ansatz...");
 
-  PetscOptionsHasName(PETSC_NULL,"-seq",&flg);
-  PetscOptionsHasName(PETSC_NULL,"-kirkwood",&kflg);
+  flg = bgy3d_getopt_test ("-seq");
+  kflg = bgy3d_getopt_test ("-kirkwood");
   if(kflg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"(Kirkwood)\n");
@@ -1824,7 +1823,7 @@ Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
@@ -1832,9 +1831,9 @@ Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
     }
 
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   /*********************************/
   if(flg)
