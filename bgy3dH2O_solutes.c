@@ -31,24 +31,17 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
  * return a  real number such as  an interaction energy  or the charge
  * density:
  */
-static real ljc (real x, real y, real z,
-                 real epsilon, real sigma, real charge,
-                 const Site S[], int nsites);
-
-static real rho (real x, real y, real z,
-                 real epsilon, real sigma, real charge,
-                 const Site S[], int nsites);
+static real ljc (const Site *A, const Site S[], int nsites);
+static real rho (const Site *A, const Site S[], int nsites);
 
 /*
  * This function expects a callback obeying the above interface as one
  * of the arguments:
  */
 static void field (DA da, const ProblemData *PD,
-                   const Site S[], int nsites,
-                   real epsilon, real sigma, real charge, real fact,
-                   real (*f)(real x, real y, real z,
-                             real eps, real sig, real chg,
-                             const Site S[], int nsites),
+                   Site A, const Site S[], int nsites,
+                   real fact,
+                   real (*f)(const Site *A, const Site S[], int nsites),
                    Vec v);
 
 // FIXME: maybe #include "solutes.h" instead?
@@ -135,6 +128,14 @@ static const Solute ButanoicAcid =
         {"H6", {-2.439, -1.178, 0.89}, 2.5, 0.03, 0.06},
         {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
         {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
+
+/* These are  the two  solvent sites.  Coordinates  will not  be used.
+   Respective parameters are #defined  elsewhere. Also do not take the
+   names  of  the sites  literally.  The  same  structure is  used  to
+   represent all (2-site?) solvents, such as HCl:  */
+static const Site solvent[] =
+  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH},
+   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}};
 
 static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
@@ -232,16 +233,24 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
    * solute.
    */
 #ifndef QM
-  field (BHD->da, BHD->PD, S, nsites, eH, sH, qH, factor, ljc, BHD->gH_ini);
-  field (BHD->da, BHD->PD, S, nsites, eO, sO, qO, factor, ljc, BHD->gO_ini);
+  field (BHD->da, BHD->PD, solvent[0], S, nsites, factor, ljc, BHD->gH_ini);
+  field (BHD->da, BHD->PD, solvent[1], S, nsites, factor, ljc, BHD->gO_ini);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
     specifying zero charge of the solvent site. This effectively makes
     a point  charge (Coulomb  short + Coulomb  long) to  a distributed
     Gaussian (Coulomb long only). */
-  field (BHD->da, BHD->PD, S, nsites, eH, sH, 0.0, factor, ljc, BHD->gH_ini);
-  field (BHD->da, BHD->PD, S, nsites, eO, sO, 0.0, factor, ljc, BHD->gO_ini);
+
+  Site neutral[2];              /* dont modify the global variable */
+
+  for (int i = 0; i < 2; i++) {
+    neutral[i] = solvent[i];
+    neutral[i].charge = 0.0;    /* modify a copy */
+  }
+
+  field (BHD->da, BHD->PD, neutral[0], S, nsites, factor, ljc, BHD->gH_ini);
+  field (BHD->da, BHD->PD, neutral[1], S, nsites, factor, ljc, BHD->gO_ini);
 #endif
 
   /*
@@ -252,14 +261,16 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
    * (idependent of the solvent charge):
    */
 
+  Site point = {"x", {0.0, 0.0, 0.0}, -1.0, -1.0, -1.0};
+
   Vec v; /* Vector for solute charge density and its Coulomb field */
 
   /* MEMORY:  huge array  here!  FIXME:  make re-use  of pre-allocated
      vectors more transparent and get rid of this: */
   DACreateGlobalVector (BHD->da, &v);
 
-  /* 1. Put the solute density into Vec v: */
-  field (BHD->da, BHD->PD, S, nsites, -1.0, -1.0, -1.0, 1.0, rho, v);
+  /* 1. Put the solute density into Vec v. Due to the inter */
+  field (BHD->da, BHD->PD, point, S, nsites, 1.0, rho, v);
 
   /*
    * 2. Solve  the Poisson equation "in-place" by  specifying the same
@@ -284,20 +295,24 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
 
 /*
  * Calculate a  real field "f"  for the solvent site  characterized by
- * (epsilon, sigma)  in the presence of  the solute S  with an overall
- * factor "fact" at every point (x, y, z) of the local grid.
+ * (epsilon, sigma,  charge) in the presence  of the solute  S with an
+ * overall factor "fact" at every point (x, y, z) of the local grid.
  *
  * The function f(x, y, z, eps, sig,  chg, S) can be ljc() or rho() as
  * two examples.
  *
+ * Site  A  is intent(in)  but  has to  be  passed  by value  (copying
+ * involved) at the  moment.  We are modifying coordinates  of a local
+ * copy  and pass a  reference to  that copy  further to  the callback
+ * function *f.  The coordinates of a site as passed to this functions
+ * are ignored.
+ *
  * Vector "v" is the intent(out) argument.
  */
 static void field (DA da, const ProblemData *PD,
-                   const Site S[], int nsites,
-                   real epsilon, real sigma, real charge, real fact,
-                   real (*f)(real x, real y, real z,
-                             real eps, real sig, real chg,
-                             const Site S[], int nsites),
+                   Site A, const Site S[], int nsites,
+                   real fact,
+                   real (*f)(const Site *A, const Site S[], int nsites),
                    Vec v)
 {
     PetscScalar ***vec;
@@ -323,22 +338,22 @@ static void field (DA da, const ProblemData *PD,
     /* loop over local portion of grid */
     for (int k = k0; k < k0 + nk; k++) {
 
-        real z = k * h[2] + offset;
+        A.x[2] = k * h[2] + offset;
 
         for (int j = j0; j < j0 + nj; j++) {
 
-            real y = j * h[1] + offset;
+            A.x[1] = j * h[1] + offset;
 
             for (int i = i0; i < i0 + ni; i++) {
 
-                real x = i * h[0] + offset;
+                A.x[0] = i * h[0] + offset;
 
                 /*
                  * Compute the field f at (x, y, z) <-> (i, j, k) e.g.
                  * by summing (LJ) contributions from all solute sites
                  * at that grid point:
                  */
-                vec[k][j][i] = fact * f (x, y, z, epsilon, sigma, charge, S, nsites);
+                vec[k][j][i] = fact * f (&A, S, nsites);
             }
         }
     }
@@ -349,9 +364,7 @@ static void field (DA da, const ProblemData *PD,
  * Interaction of a charged LJ site (epsilon, sigma, charge) at (x, y,
  * z) with the solute S:
  */
-static real ljc (real x, real y, real z,
-                 real epsilon, real sigma, real charge,
-                 const Site S[], int nsites)
+static real ljc (const Site *A, const Site S[], int nsites)
 {
     /* Sum force field contribution from all solute sites: */
     real field = 0.0;
@@ -359,13 +372,13 @@ static real ljc (real x, real y, real z,
     for (int site = 0; site < nsites; site++) {
 
         /* Interaction parameters for a pair of LJ sites: */
-        real e2 = sqrt (epsilon * S[site].epsilon);
-        real s2 = 0.5 * (sigma + S[site].sigma);
+        real e2 = sqrt (A->epsilon * S[site].epsilon);
+        real s2 = 0.5 * (A->sigma + S[site].sigma);
 
         /* Distance from a grid point to this site: */
-        real r_s = sqrt (SQR(x - S[site].x[0]) +
-                         SQR(y - S[site].x[1]) +
-                         SQR(z - S[site].x[2]));
+        real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
+                         SQR(A->x[1] - S[site].x[1]) +
+                         SQR(A->x[2] - S[site].x[2]));
 
         /* 1. Lennard-Jones */
         field += Lennard_Jones (r_s, e2, s2);
@@ -373,7 +386,7 @@ static real ljc (real x, real y, real z,
         /* 2. Coulomb,  short range part.  For  historical reasons the
            overall scaling factor, the  product of solvent- and solute
            site charges, is handled by the function itself: */
-        field += Coulomb_short (r_s, charge * S[site].charge);
+        field += Coulomb_short (r_s, A->charge * S[site].charge);
     }
 
     return field;
@@ -381,16 +394,14 @@ static real ljc (real x, real y, real z,
 
 /*
  * Charge  density  of  the solute  S  at  (x,  y, z).   Solvent  site
- * parameters (epsilon, sigma, charge)  are here to keep the interface
- * of rho() the same as that of ljc().
+ * parameters (epsilon, sigma, charge) unused only the location of the
+ * solvent site A->x is used here.
  *
  * Each gaussian is evaluated as:
  *
  *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
  */
-static real rho (real x, real y, real z,
-                 real epsilon, real sigma, real charge, /* all three unused */
-                 const Site S[], int nsites)
+static real rho (const Site *A, const Site S[], int nsites)
 {
     /* G  is predefind  in bgy3d_SolventParameters.h  FIXME:  make the
        gaussian width a property of  the (solute) site in the same way
@@ -403,9 +414,9 @@ static real rho (real x, real y, real z,
     for (int site = 0; site < nsites; site++) {
 
         /* Square of the distance from a grid point to this site: */
-        real r2 = (SQR(x - S[site].x[0]) +
-                   SQR(y - S[site].x[1]) +
-                   SQR(z - S[site].x[2]));
+        real r2 = (SQR(A->x[0] - S[site].x[0]) +
+                   SQR(A->x[1] - S[site].x[1]) +
+                   SQR(A->x[2] - S[site].x[2]));
 
         /* Gaussian  distribution, note  that G  is not  a  width, but
            rather an inverse of it: */
