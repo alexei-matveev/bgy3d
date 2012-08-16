@@ -57,7 +57,7 @@ static void field (DA da, const ProblemData *PD,
 /* Water */
 /*********************************/
 
-static Solute Water =
+static const Solute Water =
   {3, {{"O", {-0.2929, 0.0, 0.0}, 3.1506, 0.1521, -0.834},
        {"OH", {0.2929, 0.757, 0.0}, 0.4, 0.046, 0.417},
        {"OH", {0.2929, -0.757, 0.0}, 0.4, 0.046, 0.417}}};
@@ -66,7 +66,7 @@ static Solute Water =
 /* CS2 */
 /*********************************/
 
-static Solute CarbonDisulfide =
+static const Solute CarbonDisulfide =
   {3, {{"C", {0.0, 0.0, 0.0}, 3.2, 0.10128, -0.308},
        {"S1", {-1.56, 0.0, 0.0}, 3.52, 0.395, 0.154},
        {"S2", {1.56, 0.0, 0.0}, 3.52, 0.395, 0.154}}};
@@ -75,7 +75,7 @@ static Solute CarbonDisulfide =
 /* HCl */
 /*********************************/
 
-static Solute HydrogenChloride =
+static const Solute HydrogenChloride =
   {2, {{"H", {0.6285, 0.0, 0.0}, 2.735, 0.03971, 0.2},
        {"Cl", {-0.6285, 0.0, 0.0}, 3.353, 0.51434, -0.2}}};
 
@@ -83,7 +83,7 @@ static Solute HydrogenChloride =
 /* Methanol */
 /*********************************/
 
-static Solute Methanol =
+static const Solute Methanol =
   {6, {{"C", {-0.748, -0.015, 0.024}, 3.5, 0.066, 0.145},
        {"HC1", {-1.293, -0.202, -0.901}, 2.5, 0.03, 0.04},
        {"HC2", {-1.263, 0.754, 0.6}, 2.5, 0.03, 0.04},
@@ -95,7 +95,7 @@ static Solute Methanol =
 /* Hexane */
 /*********************************/
 
-static Solute Hexane =
+static const Solute Hexane =
   {20, {{"C", {1.709, -2.812, 0.0}, 3.5, 0.066, -0.18},
         {"C", {1.684, -1.278, 0.0}, 3.5, 0.066, -0.12},
         {"C", {0.245, -0.753, 0.0}, 3.5, 0.066, -0.12},
@@ -120,7 +120,7 @@ static Solute Hexane =
 /* BUTANOIC ACID */
 /* H1 sigma and epsilon adopted */
 
-static Solute ButanoicAcid =
+static const Solute ButanoicAcid =
   {14, {{"C1", {1.422, -0.017, 0.0}, 3.75, 0.105, 0.52},
         {"O1", {1.422, 1.353, 0.0}, 2.96, 0.21, -0.44},
         {"O2", {2.643, -0.722, 0.0}, 3.0, 0.17, -0.53},
