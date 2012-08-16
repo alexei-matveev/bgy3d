@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 
@@ -212,16 +213,16 @@ Vec HNC3d_Solve(PData PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.\n");
 
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&lambda, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &lambda);
   if(lambda>1 || lambda<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
       exit(1);
     }
   /* Number of iterations with lambda */
-  PetscOptionsGetInt(PETSC_NULL,"-slow_iter",&slow_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-slow_iter", &slow_iter);
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
 
   HD = HNC3dData_malloc(PD);
 
@@ -819,7 +820,7 @@ Vec HNC3dNewton_solve(PData PD, Vec g_ini, int vdim)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);
+  flg = bgy3d_getopt_test ("-user_precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
@@ -1104,17 +1105,17 @@ Vec HNC3d_Solve_h(PData PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.Fixed c.\n");
 
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&lambda, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &lambda);
   if(lambda>1 || lambda<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
       exit(1);
     }
   /* Number of iterations with lambda */
-  PetscOptionsGetInt(PETSC_NULL,"-slow_iter",&slow_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-slow_iter", &slow_iter);
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   HD = HNC3dData_malloc(PD);
   rho = HD->rho;
