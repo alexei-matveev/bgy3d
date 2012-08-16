@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 #define NMAX 128
@@ -164,7 +165,7 @@ Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Testing BGY3dDiv model...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-seq",&flg);
+  flg = bgy3d_getopt_test ("-seq");
   BDD = BGY3dDivData_malloc(PD,flg);
   if(flg)
     DAGetMatrix( BDD->da, MATSEQAIJ, &SM);
@@ -178,8 +179,8 @@ Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_g",&sigma_g, PETSC_NULL);
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_K",&sigma_K, PETSC_NULL);
+  bgy3d_getopt_real ("-sigma_g", &sigma_g);
+  bgy3d_getopt_real ("-sigma_K", &sigma_K);
 
 
   InitializeTestData(BDD, g, sigma_g, sigma_K);
@@ -236,8 +237,8 @@ Vec BGY3dDivFourier_test(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_g",&sigma_g, PETSC_NULL);
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_K",&sigma_K, PETSC_NULL);
+  bgy3d_getopt_real ("-sigma_g", &sigma_g);
+  bgy3d_getopt_real ("-sigma_K", &sigma_K);
 
 
   InitializeTestData(BDD, g, sigma_g, sigma_K);
@@ -563,8 +564,8 @@ Vec BGY3d_Convolution_Test(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_g1",&sigma_g1, PETSC_NULL);
-  PetscOptionsGetReal(PETSC_NULL,"-sigma_g2",&sigma_g2, PETSC_NULL);
+  bgy3d_getopt_real ("-sigma_g1", &sigma_g1);
+  bgy3d_getopt_real ("-sigma_g2", &sigma_g2);
   PetscPrintf(PETSC_COMM_WORLD,"sigma_g1= %f\n", sigma_g1);
   PetscPrintf(PETSC_COMM_WORLD,"sigma_g2= %f\n", sigma_g2);
 
