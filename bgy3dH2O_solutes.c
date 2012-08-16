@@ -31,8 +31,13 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
  * return a  real number such as  an interaction energy  or the charge
  * density:
  */
-static real ljc (real x, real y, real z, real epsilon, real sigma, real charge, const Site S[], int nsites);
-static real rho (real x, real y, real z, real epsilon, real sigma, real charge, const Site S[], int nsites);
+static real ljc (real x, real y, real z,
+                 real epsilon, real sigma, real charge,
+                 const Site S[], int nsites);
+
+static real rho (real x, real y, real z,
+                 real epsilon, real sigma, real charge,
+                 const Site S[], int nsites);
 
 /*
  * This function expects a callback obeying the above interface as one
