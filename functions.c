@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 
@@ -35,7 +36,7 @@ Vec BGY3d_vec_solve(PData PD, Vec g_ini, int vdim)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);
+  flg = bgy3d_getopt_test ("-user_precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
