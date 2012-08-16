@@ -4,6 +4,7 @@
 
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 #define rab 1.0
@@ -1136,7 +1137,7 @@ Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving Molecular BGY3d equation with Fourier ansatz...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-pair",&kflg);
+  kflg = bgy3d_getopt_test ("-pair");
   if(kflg)
     {
 
@@ -1151,7 +1152,7 @@ Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
@@ -1159,9 +1160,9 @@ Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
     }
 
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   /*********************************/
 
