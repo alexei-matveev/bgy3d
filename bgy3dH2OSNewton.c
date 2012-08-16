@@ -3,6 +3,7 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 
@@ -1099,9 +1100,9 @@ Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
   BHD = BGY3dH2OData_Newton_malloc(PD);
 
   /* Get damp_start from command line*/
-  PetscOptionsGetReal(PETSC_NULL,"-damp_start",&damp_start, PETSC_NULL);
+  bgy3d_getopt_real ("-damp_start", &damp_start);
   /* Zeropad */
-  PetscOptionsGetReal(PETSC_NULL,"-zpad",&zpad, PETSC_NULL);
+  bgy3d_getopt_real ("-zpad", &zpad);
   BHD->zpad = zpad;
   PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
 
@@ -1130,7 +1131,7 @@ Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);
+  flg = bgy3d_getopt_test ("-user_precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
@@ -1215,9 +1216,9 @@ Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim)
   BHD = BGY3dH2OData_Newton_malloc(PD);
 
   /* Get damp_start from command line*/
-  PetscOptionsGetReal(PETSC_NULL,"-damp_start",&damp_start, PETSC_NULL);
+  bgy3d_getopt_real ("-damp_start", &damp_start);
   /* Zeropad */
-  PetscOptionsGetReal(PETSC_NULL,"-zpad",&zpad, PETSC_NULL);
+  bgy3d_getopt_real ("-zpad", &zpad);
   BHD->zpad = zpad;
   PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
 
@@ -1244,7 +1245,7 @@ Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  PetscOptionsHasName(PETSC_NULL,"-user_precond",&flg);
+  flg = bgy3d_getopt_test ("-user_precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
