@@ -24,7 +24,7 @@ if [ ! -x $bgyexe ] ; then
 fi
 
 # Directory containing standard outputs
-STDOUT=$dir/out
+ref=$dir/out
 
 # Create links to the solvents g2 binary files if not exist
 function solute_init(){
@@ -62,7 +62,7 @@ function main(){
 
     # Set file name for computing moments and standard output
     resmoments=$dir/$cmd\_moments.out
-    stdmoments=$STDOUT/$cmd\_moments.out
+    stdmoments=$ref/$cmd\_moments.out
 
     case "$cmd" in
 
