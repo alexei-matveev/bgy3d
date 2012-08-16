@@ -3,6 +3,7 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"
 
 
 #include "bgy3d_SolventParameters.h"
@@ -79,14 +80,14 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
   /* reset standard parameters */
   /*****************************/
   maxL=12.0;
-  PetscOptionsGetReal(PETSC_NULL,"-L",&maxL, PETSC_NULL);
+  bgy3d_getopt_real ("-L", &maxL);
   PD->interval[0] = -maxL;//-25.0;
   PD->interval[1] = maxL;//25.0;
   FOR_DIM
     PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim];
   PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
   beta= 1.6889;
-  PetscOptionsGetReal(PETSC_NULL,"-beta",&beta, PETSC_NULL);
+  bgy3d_getopt_real ("-beta", &beta);
   PD->beta = beta;//1.6889;
   PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
@@ -3610,7 +3611,7 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-pair",&kflg);
+  kflg = bgy3d_getopt_test ("-pair");
   if(kflg)
     {
 
@@ -3629,20 +3630,20 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3d specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a0, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a0);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
       exit(1);
     }
    /* Get damp_start from command line*/
-  PetscOptionsGetReal(PETSC_NULL,"-damp_start",&damp_start, PETSC_NULL);
+  bgy3d_getopt_real ("-damp_start", &damp_start);
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
   /* Zeropad */
-  PetscOptionsGetReal(PETSC_NULL,"-zpad",&zpad, PETSC_NULL);
+  bgy3d_getopt_real ("-zpad", &zpad);
   /*********************************/
 
   PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
@@ -3692,7 +3693,7 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 
 
   /* load initial configuration from file ??? */
-  PetscOptionsHasName(PETSC_NULL,"-loadH2O",&load_flag);
+  load_flag = bgy3d_getopt_test ("-loadH2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
@@ -4209,7 +4210,7 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
   /* save g to binary file */
-  PetscOptionsHasName(PETSC_NULL,"-saveH2O",&load_flag);
+  load_flag = bgy3d_getopt_test ("-saveH2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
@@ -4304,7 +4305,7 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  PetscOptionsHasName(PETSC_NULL,"-pair",&kflg);
+  kflg = bgy3d_getopt_test ("-pair");
   if(kflg)
     {
 
@@ -4325,20 +4326,20 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 
   /* read BGY3d specific things from command line */
   /* Mixing parameter */
-  PetscOptionsGetReal(PETSC_NULL,"-lambda",&a0, PETSC_NULL);
+  bgy3d_getopt_real ("-lambda", &a0);
   if(a>1 || a<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
       exit(1);
     }
    /* Get damp_start from command line*/
-  PetscOptionsGetReal(PETSC_NULL,"-damp_start",&damp_start, PETSC_NULL);
+  bgy3d_getopt_real ("-damp_start", &damp_start);
   /* Number of total iterations */
-  PetscOptionsGetInt(PETSC_NULL,"-max_iter",&max_iter, PETSC_NULL);
+  bgy3d_getopt_int ("-max_iter", &max_iter);
   /* norm_tol for convergence test */
-  PetscOptionsGetReal(PETSC_NULL,"-norm_tol",&norm_tol, PETSC_NULL);
+  bgy3d_getopt_real ("-norm_tol", &norm_tol);
   /* Zeropad */
-  PetscOptionsGetReal(PETSC_NULL,"-zpad",&zpad, PETSC_NULL);
+  bgy3d_getopt_real ("-zpad", &zpad);
   /*********************************/
 
   PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
@@ -4388,7 +4389,7 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 
 
   /* load initial configuration from file ??? */
-  PetscOptionsHasName(PETSC_NULL,"-loadH2O",&load_flag);
+  load_flag = bgy3d_getopt_test ("-loadH2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
@@ -5020,7 +5021,7 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
   /* save g to binary file */
-  PetscOptionsHasName(PETSC_NULL,"-saveH2O",&load_flag);
+  load_flag = bgy3d_getopt_test ("-saveH2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
