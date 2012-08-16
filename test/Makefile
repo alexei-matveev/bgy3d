@@ -25,7 +25,47 @@ CMDFLAG = \
 #
 EXE ?= ../bgy3d
 
-all: BGY2site
+#
+# These  are  phony  targets,  they   are  not  created  as  files  to
+# re-evaluate the diffs every time Make is executed:
+#
+diffs = \
+	HCl_moments.diff \
+	HClM_moments.diff
+
+#
+# By default "make" all the diffs:
+#
+all: $(diffs)
+
+#
+# Prerequisites for a  diff are the two files, keep  them in the order
+# old, new:
+#
+%.diff: out/%.out %.out
+	diff $(^)
+
+#
+# Dont delete *.out files  rebuilt as intermediate targets.  Running a
+# test takes some time:
+#
+.PRECIOUS: %_moments.out
+
+#
+# Nothing to  be done for  reference outputs.  Without this  rule Make
+# will try to  re-build the reference outputs too  when the executable
+# gets changed:
+#
+out/%_moments.out:
+	 # nothing to be done, is there a better way to say that?
+
+#
+# To produce an XYZ_moments.out  file execute ./runqm.sh XYZ. Updating
+# the executable  should lead to re-running  the test, so add  it as a
+# pre-requisite:
+#
+%_moments.out: $(EXE)
+	./runtest.sh $(*)
 
 BGY2site:
 	(cd ${WORK_DIR}; ${EXE} -BGY2site ${CMDFLAG})

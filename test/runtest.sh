@@ -26,23 +26,6 @@ fi
 # Directory containing standard outputs
 STDOUT=$dir/out
 
-# Comparing two files
-function diff_out(){
-    local target std
-    old=$1
-    new=$2
-    if [ -f $old -o -f $new ]; then
-        if (diff $old $new) then
-            echo "No differences!"
-        else
-            echo -e "Possible problems with $new, see diffs above."
-        fi
-    else
-        echo -e "Cannot find $old/$new."
-        exit 1
-    fi
-}
-
 # Create links to the solvents g2 binary files if not exist
 function solute_init(){
     local svtdir curdir
@@ -78,7 +61,7 @@ function main(){
 
 
     # Set file name for computing moments and standard output
-    resmoments=$workdir/$cmd\_moments.out
+    resmoments=$dir/$cmd\_moments.out
     stdmoments=$STDOUT/$cmd\_moments.out
 
     case "$cmd" in
@@ -143,13 +126,6 @@ function main(){
             ;;
 
     esac
-
-    # Check differences
-    echo -e "\nComparing with verified outputs:"
-    diff_out $stdmoments $resmoments
 }
 
 main $*
-
-
-
