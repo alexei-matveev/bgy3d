@@ -895,9 +895,9 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 {
   DA da;
   ProblemData *PD;
-  int x[3], i[3], n[3], N_M, k, N[3];
+  int x[3], i[3], n[3], N_M, k;
   PetscScalar ***g_vec, r[3], r_s;
-  real **x_M, h[3], beta, interval[2], L;
+  real **x_M, h[3], beta, interval[2];
   real epsilon, sigma;
 
   epsilon = params->LJ_params[0];
@@ -908,12 +908,10 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 
   FOR_DIM
     h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
+
   beta = PD->beta;
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
-  L = interval[1]-interval[0];
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
@@ -960,9 +958,9 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 {
   DA da;
   ProblemData *PD;
-  int x[3], i[3], n[3], N_M, k, N_g2, index, N[3];
+  int x[3], i[3], n[3], N_M, k, N_g2, index;
   PetscScalar ***g_vec, *g2_vec, r[3], r_s;
-  real **x_M, h[3], beta, h_g2, L, interval[2];
+  real **x_M, h[3], h_g2, L, interval[2];
   PetscViewer pview;
   Vec g2;
 
@@ -972,9 +970,7 @@ void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 
   FOR_DIM
     h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
-  beta = PD->beta;
+
   L = PD->interval[1]-PD->interval[0];
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
