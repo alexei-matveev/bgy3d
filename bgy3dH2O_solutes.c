@@ -198,7 +198,8 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
   /* FIXME: an alternative version (QM) did not set them, nevertheless
-     the HCl case appeared to work. Are these really necessary? */
+     the HCl case  appeared to work. Are these  really necessary? Also
+     this maybe specific to the 2-site model. */
   VecSet(BHD->gHO_ini, 0.0);    /* What is it used for? */
   VecSet(BHD->ucHO, 0.0);
   FOR_DIM {
