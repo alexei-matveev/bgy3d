@@ -28,7 +28,6 @@ int main(int argc, char **argv)
   int np;
   Vec g, g_ini;
   Solver *s=NULL;
-  PetscViewer viewer;
 
   verbosity=0;
 
@@ -175,12 +174,8 @@ int main(int argc, char **argv)
 
 
       /* Output result */
-      if( g != PETSC_NULL)
-        {
-          PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vec.m",&viewer);
-          PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-          VecView(g,viewer);
-          PetscViewerDestroy(viewer);
+      if( g != PETSC_NULL) {
+          bgy3d_save_vec_ascii ("vec.m", g);
 
           /* save g to binary file */
           if (bgy3d_getopt_test ("-save")) {
@@ -189,7 +184,7 @@ int main(int argc, char **argv)
           }
 
 	  VecDestroy(g);
-	}
+      }
 
     }
   else
