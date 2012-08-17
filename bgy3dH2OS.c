@@ -76,13 +76,13 @@ static State initialize_state (/* not const */ ProblemData *PD)
 
   /* Initialize parallel stuff: fftw + petsc */
   BHD.fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_FORWARD, FFTW_ESTIMATE);
+                                            PD->N[2], PD->N[1], PD->N[0],
+                                            FFTW_FORWARD, FFTW_ESTIMATE);
   BHD.fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_BACKWARD, FFTW_ESTIMATE);
+                                            PD->N[2], PD->N[1], PD->N[0],
+                                            FFTW_BACKWARD, FFTW_ESTIMATE);
   fftwnd_mpi_local_sizes(BHD.fft_plan_fw, &local_nx, &local_x_start,
-			 &local_ny, &local_y_start, &total_local_size);
+                         &local_ny, &local_y_start, &total_local_size);
   /* Get number of processes */
   MPI_Comm_size(PETSC_COMM_WORLD, &np);
 
@@ -95,11 +95,11 @@ static State initialize_state (/* not const */ ProblemData *PD)
 
 #ifdef L_BOUNDARY
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,1,
-	     lx, ly, lz,
-	     &(BHD.da));
+             PD->N[0], PD->N[1], PD->N[2],
+             1, 1, np,
+             1,1,
+             lx, ly, lz,
+             &(BHD.da));
   da = BHD.da;
    /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
@@ -110,11 +110,11 @@ static State initialize_state (/* not const */ ProblemData *PD)
 #endif
 #ifdef L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,1,
-	     lx, ly, lz,
-	     &(BHD.da));
+             PD->N[0], PD->N[1], PD->N[2],
+             1, 1, np,
+             1,1,
+             lx, ly, lz,
+             &(BHD.da));
   da = BHD.da;
 
   for(dim=0; dim<np; dim++)
@@ -122,21 +122,21 @@ static State initialize_state (/* not const */ ProblemData *PD)
   lx[0]/=2;
   ly[0]/=2;
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0]/2, PD->N[1]/2, PD->N[2]/2,
-	     1, 1, np,
-	     1,1,
-	     lx, ly, lz,
-	     &(BHD.da_dmmg));
+             PD->N[0]/2, PD->N[1]/2, PD->N[2]/2,
+             1, 1, np,
+             1,1,
+             lx, ly, lz,
+             &(BHD.da_dmmg));
 #endif
 
 #ifndef  L_BOUNDARY
 #ifndef  L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,0,
-	     lx, ly, lz,
-	     &(BHD.da));
+             PD->N[0], PD->N[1], PD->N[2],
+             1, 1, np,
+             1,0,
+             lx, ly, lz,
+             &(BHD.da));
 
 
   da = BHD.da;
@@ -149,8 +149,8 @@ static State initialize_state (/* not const */ ProblemData *PD)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
       PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\tfft: %d %d\n",
-			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
-			      local_nx, local_x_start);
+                              PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
+                              local_nx, local_x_start);
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
   assert( n[0]*n[1]*n[2] == total_local_size);
@@ -214,7 +214,7 @@ static State initialize_state (/* not const */ ProblemData *PD)
   if(BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-		  PD->id);
+                  PD->id);
       exit(1);
     }
 
@@ -371,50 +371,50 @@ void InitializeLaplaceMatrix(State *BHD, real zpad)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  FOR_DIM
-	    {
-	      col[dim].i=i[0];
-	      col[dim].j=i[1];
-	      col[dim].k=i[2];
-	      row.i=i[0];
-	      row.j=i[1];
-	      row.k=i[2];
-	    }
+        {
+          FOR_DIM
+            {
+              col[dim].i=i[0];
+              col[dim].j=i[1];
+              col[dim].k=i[2];
+              row.i=i[0];
+              row.j=i[1];
+              row.k=i[2];
+            }
 
-	  /* Boundary */
-	  if( i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
-	    MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
-	  else if( i[0]>=N[0]-1-border || i[1]>=N[1]-1-border || i[2]>=N[2]-1-border)
-	    MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
-	  else
-	    {
-	      FOR_DIM
-		{
-		  /* position in matrix */
-		  switch(dim)
-		    {
-		    case 0: col[0].i -= 1; col[2].i += 1;break;
-		    case 1: col[0].j -= 1; col[2].j += 1;break;
-		    case 2: col[0].k -= 1; col[2].k += 1;break;
-		    }
-		  /* values to enter */
-		  v[0]=1.0/SQR(h[dim]);
-		  v[1]=-2.0/SQR(h[dim]);
-		  v[2]=+1.0/SQR(h[dim]);
+          /* Boundary */
+          if( i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
+            MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
+          else if( i[0]>=N[0]-1-border || i[1]>=N[1]-1-border || i[2]>=N[2]-1-border)
+            MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
+          else
+            {
+              FOR_DIM
+                {
+                  /* position in matrix */
+                  switch(dim)
+                    {
+                    case 0: col[0].i -= 1; col[2].i += 1;break;
+                    case 1: col[0].j -= 1; col[2].j += 1;break;
+                    case 2: col[0].k -= 1; col[2].k += 1;break;
+                    }
+                  /* values to enter */
+                  v[0]=1.0/SQR(h[dim]);
+                  v[1]=-2.0/SQR(h[dim]);
+                  v[2]=+1.0/SQR(h[dim]);
 
 
-		  MatSetValuesStencil(M,1,&row,3,col,v,ADD_VALUES);
-		  switch(dim)
-		    {
-		    case 0: col[0].i += 1; col[2].i -= 1;break;
-		    case 1: col[0].j += 1; col[2].j -= 1;break;
-		    case 2: col[0].k += 1; col[2].k -= 1;break;
-		    }
+                  MatSetValuesStencil(M,1,&row,3,col,v,ADD_VALUES);
+                  switch(dim)
+                    {
+                    case 0: col[0].i += 1; col[2].i -= 1;break;
+                    case 1: col[0].j += 1; col[2].j -= 1;break;
+                    case 2: col[0].k += 1; col[2].k -= 1;break;
+                    }
 
-		}
-	    }
-	}
+                }
+            }
+        }
 
 
   MatAssemblyBegin(M,MAT_FINAL_ASSEMBLY);
@@ -477,26 +477,26 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
 /*       ic[2]=(dim+2)%3; */
 /*       i[ic[0]] = 0; */
 /*       if( x[ic[0]] == 0 )  */
-/* 	for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
-/* 	  for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
-/* 	    gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
+/*      for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
+/*        for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
+/*          gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
 /*       i[ic[0]] = N[ic[0]]-1; */
 /*       if( x[ic[0]]+n[ic[0]] == N[ic[0]] )  */
-/* 	for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
-/* 	  for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
-/* 	    gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
+/*      for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
+/*        for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
+/*          gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
 /*     } */
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  if( ( i[0]<=border+1 || i[0]>=N[0]-1-border) ||
-	      ( i[1]<=border+1 || i[1]>=N[1]-1-border) ||
-	      ( i[2]<=border+1 || i[2]>=N[2]-1-border) )
-	    gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]];
-	}
+        {
+          if( ( i[0]<=border+1 || i[0]>=N[0]-1-border) ||
+              ( i[1]<=border+1 || i[1]>=N[1]-1-border) ||
+              ( i[2]<=border+1 || i[2]>=N[2]-1-border) )
+            gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]];
+        }
 
 
   DAVecRestoreArray(da, gfrom, &gfrom_vec);
@@ -580,7 +580,7 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
     }
   index--;
   PetscPrintf(PETSC_COMM_WORLD,"Read %d lines from file %s, x=[%f,%f]\n", index+1, filename,
-	      xg[0], xg[index]);
+              xg[0], xg[index]);
   fclose(fp);
 
 
@@ -595,25 +595,25 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  FOR_DIM
-	    r[dim] = i[dim]*h[dim]+interval[0];
-	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
+        {
+          FOR_DIM
+            r[dim] = i[dim]*h[dim]+interval[0];
+          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
-	  /* find x in array */
-	  for(k=0; k<=index; k++)
-	    if(r_s<xg[k])
-	      break;
-	  if(k==0)
-	    g2_vec[i[2]][i[1]][i[0]] = 0;
-	  else if(k>=index)
-	    g2_vec[i[2]][i[1]][i[0]] = 1.0;
-	  else
-	    g2_vec[i[2]][i[1]][i[0]] = g[k] + (r_s-xg[k])*(g[k+1]-g[k])/(xg[k+1]-xg[k]);
-	  if(g2_vec[i[2]][i[1]][i[0]]<0)
-	    g2_vec[i[2]][i[1]][i[0]]=0;
+          /* find x in array */
+          for(k=0; k<=index; k++)
+            if(r_s<xg[k])
+              break;
+          if(k==0)
+            g2_vec[i[2]][i[1]][i[0]] = 0;
+          else if(k>=index)
+            g2_vec[i[2]][i[1]][i[0]] = 1.0;
+          else
+            g2_vec[i[2]][i[1]][i[0]] = g[k] + (r_s-xg[k])*(g[k+1]-g[k])/(xg[k+1]-xg[k]);
+          if(g2_vec[i[2]][i[1]][i[0]]<0)
+            g2_vec[i[2]][i[1]][i[0]]=0;
 
-	}
+        }
   DAVecRestoreArray(da, g2, &g2_vec);
 
   free(xg);
@@ -718,76 +718,76 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* set force vectors */
+        {
+          /* set force vectors */
 
-	  FOR_DIM
-	    r[dim] = i[dim]*h[dim]+interval[0];
-
-
-	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-	    /* Lennard-Jones */
-/* 	  gH_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsH)); */
-/* 	  gO_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsO)); */
-/* 	  gHO_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsHO)); */
+          FOR_DIM
+            r[dim] = i[dim]*h[dim]+interval[0];
 
 
-	  /* omega_HH + omega_HO */
-/* 	  wHO_vec[i[2]][i[1]][i[0]] = wconst_HO * exp(-SQR(wG)*SQR(r_s-r_HO)); */
-/* 	  wHH_vec[i[2]][i[1]][i[0]] = wconst_HH * exp(-SQR(wG)*SQR(r_s-r_HH)); */
-/* 	  wHO_vec[i[2]][i[1]][i[0]] = damp * Coulomb_long( r_s, BHD->LJ_paramsO); */
+          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
-	   FOR_DIM
-	    {
-	      /* Lennard-Jones */
-	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
-	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
-	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
+            /* Lennard-Jones */
+/*        gH_vec[i[2]][i[1]][i[0]] +=  */
+/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsH)); */
+/*        gO_vec[i[2]][i[1]][i[0]] +=  */
+/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsO)); */
+/*        gHO_vec[i[2]][i[1]][i[0]] +=  */
+/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsHO)); */
 
 
+          /* omega_HH + omega_HO */
+/*        wHO_vec[i[2]][i[1]][i[0]] = wconst_HO * exp(-SQR(wG)*SQR(r_s-r_HO)); */
+/*        wHH_vec[i[2]][i[1]][i[0]] = wconst_HH * exp(-SQR(wG)*SQR(r_s-r_HH)); */
+/*        wHO_vec[i[2]][i[1]][i[0]] = damp * Coulomb_long( r_s, BHD->LJ_paramsO); */
 
- 	      /* Coulomb short */
-	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], q2H);
-	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], q2O);
-	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		damp * Coulomb_short_grad( r_s, r[dim], q2HO);
-
-	      /* Coulomb long */
-/*  	      fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/* 	      fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/* 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-	      /* Coulomb long */
- /*  	      fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/* 	      fOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/* 	      fHOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-	      /* Coulomb */
-/* 	      fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/* 	      fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/* 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+           FOR_DIM
+            {
+              /* Lennard-Jones */
+              fH_vec[dim][i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
+              fO_vec[dim][i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
+              fHO_vec[dim][i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
 
 
-	    }
-	}
+
+              /* Coulomb short */
+              fH_vec[dim][i[2]][i[1]][i[0]] +=
+                damp * Coulomb_short_grad( r_s, r[dim], q2H);
+              fO_vec[dim][i[2]][i[1]][i[0]] +=
+                damp * Coulomb_short_grad( r_s, r[dim], q2O);
+              fHO_vec[dim][i[2]][i[1]][i[0]] +=
+                damp * Coulomb_short_grad( r_s, r[dim], q2HO);
+
+              /* Coulomb long */
+/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
+/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
+/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+
+              /* Coulomb long */
+ /*           fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
+/*            fOl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
+/*            fHOl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+
+              /* Coulomb */
+/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
+/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
+/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+
+
+            }
+        }
 
   FOR_DIM
     {
@@ -819,7 +819,7 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
       //VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
       // XXX: FFT((F_LJ + F_coulomb_short) * g2) 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
       /* Coulomb long */
       // XXX: F_coulomb_long * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
@@ -827,27 +827,27 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
       VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
       // XXX: FFT(F_coulomb_long * g2 - F_coulomb_long)
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
       /* HH */
       VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HH_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
       /* Coulomb long */
       VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH_l[dim]);
       VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HHl_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
       /* HO */
       VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HO_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
       /* Coulomb long */
       VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO_l[dim]);
       VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HOl_fft[dim],
-			     BHD->fft_scratch, x, n, 0);
+                             BHD->fft_scratch, x, n, 0);
 
 
     }
@@ -933,13 +933,13 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* set force vectors */
-	  FOR_DIM
-	    r[dim] = i[dim]*h[dim]+interval[0];
+        {
+          /* set force vectors */
+          FOR_DIM
+            r[dim] = i[dim]*h[dim]+interval[0];
 
 
-	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
+          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
           /*
            * FIXME: it  looks very  strange that gOini_vec  is defined
@@ -947,43 +947,43 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
            * defined using epsilonH, sigmaH, and q2H. Is this a bug?
            */
 
-	  /* Lennard-Jones */
-	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    damp_LJ * beta* Lennard_Jones( r_s, epsilonH, sigmaH);
-	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    damp_LJ * beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
+          /* Lennard-Jones */
+          gHini_vec[i[2]][i[1]][i[0]] +=
+            damp_LJ * beta* Lennard_Jones( r_s, epsilonH, sigmaH);
+          gOini_vec[i[2]][i[1]][i[0]] +=
+            damp_LJ * beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
 
-	  /* Coulomb short */
-	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    damp*beta* Coulomb_short( r_s, q2H);
-	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    damp*beta* Coulomb_short( r_s, q2HO);
-
-
-	  /* Coulomb long */
-/* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
-/* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
-/* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
-
-	   /* Coulomb */
-/* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsH); */
-/* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsO); */
-/* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb( r_s, BHD->LJ_paramsHO); */
-
-/* 	  ucH_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
-/* 	  ucO_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
+          /* Coulomb short */
+          gHini_vec[i[2]][i[1]][i[0]] +=
+            damp*beta* Coulomb_short( r_s, q2H);
+          gOini_vec[i[2]][i[1]][i[0]] +=
+            damp*beta* Coulomb_short( r_s, q2HO);
 
 
+          /* Coulomb long */
+/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
+/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
+/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
 
-	}
+           /* Coulomb */
+/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsH); */
+/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsO); */
+/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsHO); */
+
+/*        ucH_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
+/*        ucO_vec[i[2]][i[1]][i[0]] +=  */
+/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
+
+
+
+        }
 
   DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
@@ -1013,8 +1013,8 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
 
 
 void Compute_H2O_interS(State *BHD,
-			fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
-			fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help)
+                        fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
+                        fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -1050,7 +1050,7 @@ void Compute_H2O_interS(State *BHD,
   /* fft(g) */
 
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch,
-			 x, n, 0);
+                         x, n, 0);
 
 
   index=0;
@@ -1058,93 +1058,93 @@ void Compute_H2O_interS(State *BHD,
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+        {
+          dg_fft[index].re= 0;
+          dg_fft[index].im= 0;
 
-	  FOR_DIM
-	    {
-	      if( i[dim] <= N[dim]/2)
-		ic[dim] = i[dim];
-	      else
-		ic[dim] = i[dim] - N[dim];
-	    }
+          FOR_DIM
+            {
+              if( i[dim] <= N[dim]/2)
+                ic[dim] = i[dim];
+              else
+                ic[dim] = i[dim] - N[dim];
+            }
 
-	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
-	    {
-	      dg_fft[index].re = 0;
-	      dg_fft[index].im = 0;
-	    }
-	  else
-	    {
-	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-	      k_fac = h*h*fac/k;
-	      /* phase shift factor for x=x+L/2 */
-	      sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
-
-
-	      FOR_DIM
-		dg_fft[index].re += ic[dim] * k_fac * sign *
-		(fg2_fft[dim][index].re * g_fft[index].im
-		 + fg2_fft[dim][index].im * g_fft[index].re) ;
+          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+            {
+              dg_fft[index].re = 0;
+              dg_fft[index].im = 0;
+            }
+          else
+            {
+              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
+              k_fac = h*h*fac/k;
+              /* phase shift factor for x=x+L/2 */
+              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
 
-	      FOR_DIM
-		dg_fft[index].im += ic[dim] * k_fac * sign *
-		(-fg2_fft[dim][index].re * g_fft[index].re
-		 + fg2_fft[dim][index].im * g_fft[index].im);
+              FOR_DIM
+                dg_fft[index].re += ic[dim] * k_fac * sign *
+                (fg2_fft[dim][index].re * g_fft[index].im
+                 + fg2_fft[dim][index].im * g_fft[index].re) ;
+
+
+              FOR_DIM
+                dg_fft[index].im += ic[dim] * k_fac * sign *
+                (-fg2_fft[dim][index].re * g_fft[index].re
+                 + fg2_fft[dim][index].im * g_fft[index].im);
 
 
 
 
-	      /* right one: */
-	      /*****************************/
-	      /* long range Coulomb part */
-/* 	      dg_fft[index].re += h*sign* */
-/* 		(coul_fft[index].re*(g_fft[index].re + 0*con*sign/(h*rho)) */
-/* 		 - coul_fft[index].im*g_fft[index].im); */
+              /* right one: */
+              /*****************************/
+              /* long range Coulomb part */
+/*            dg_fft[index].re += h*sign* */
+/*              (coul_fft[index].re*(g_fft[index].re + 0*con*sign/(h*rho)) */
+/*               - coul_fft[index].im*g_fft[index].im); */
 
-/* 	      dg_fft[index].im += h*sign* */
-/* 		(coul_fft[index].re*g_fft[index].im */
-/* 		 + coul_fft[index].im*(g_fft[index].re + 0*con*sign/(h*rho))); */
-	      /******************************/
+/*            dg_fft[index].im += h*sign* */
+/*              (coul_fft[index].re*g_fft[index].im */
+/*               + coul_fft[index].im*(g_fft[index].re + 0*con*sign/(h*rho))); */
+              /******************************/
 
-	      /*****************************/
-	      /* long range Coulomb part */
-/* 	      FOR_DIM */
-/* 		dg_fft[index].re += ic[dim] * k_fac *  */
-/* 		( fs_fft[dim][index].im * con/(h*rho)) ; */
+              /*****************************/
+              /* long range Coulomb part */
+/*            FOR_DIM */
+/*              dg_fft[index].re += ic[dim] * k_fac *  */
+/*              ( fs_fft[dim][index].im * con/(h*rho)) ; */
 
-/* 	      FOR_DIM  */
-/* 		dg_fft[index].im += ic[dim] * k_fac *  */
-/* 		(-fs_fft[dim][index].re * con/(h*rho)); */
-	      /******************************/
+/*            FOR_DIM  */
+/*              dg_fft[index].im += ic[dim] * k_fac *  */
+/*              (-fs_fft[dim][index].re * con/(h*rho)); */
+              /******************************/
 
 
-	      /*****************************/
-	      /* long range Coulomb part */
-/* 	      dg_fft[index].re += h*sign* */
-/* 		(coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
-/* 		- coul_fft[index].im*g_fft[index].im); */
+              /*****************************/
+              /* long range Coulomb part */
+/*            dg_fft[index].re += h*sign* */
+/*              (coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
+/*              - coul_fft[index].im*g_fft[index].im); */
 
-/* 	      dg_fft[index].im += h*sign* */
-/* 		(coul_fft[index].re*g_fft[index].im */
-/* 		 + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
-	      /******************************/
+/*            dg_fft[index].im += h*sign* */
+/*              (coul_fft[index].re*g_fft[index].im */
+/*               + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
+              /******************************/
 
-	      //dg_fft[index].re = sign*exp(-k*confac);
+              //dg_fft[index].re = sign*exp(-k*confac);
 
-/* 	      if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
-/* 		{ */
-/* 		  dg_fft[index].re= 0; */
-/* 		  dg_fft[index].im= 0; */
-/* 		} */
-	    }
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
-	}
+/*            if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
+/*              { */
+/*                dg_fft[index].re= 0; */
+/*                dg_fft[index].im= 0; */
+/*              } */
+            }
+          //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
+          index++;
+        }
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft,
-			 scratch, x, n, 0.0);
+                         scratch, x, n, 0.0);
 
   VecScale(dg_help, rho*PD->beta/L/L/L);
 
@@ -1157,8 +1157,8 @@ void Compute_H2O_interS(State *BHD,
 }
 
 static void Compute_H2O_interS_C(State *BHD,
-			  fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
-			  fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
+                          fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
+                          fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
 {
   ProblemData *PD;
   DA da;
@@ -1195,7 +1195,7 @@ static void Compute_H2O_interS_C(State *BHD,
   /* fft(g) */
 
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch,
-			 x, n, 0);
+                         x, n, 0);
 
 
   index=0;
@@ -1203,93 +1203,93 @@ static void Compute_H2O_interS_C(State *BHD,
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+        {
+          dg_fft[index].re= 0;
+          dg_fft[index].im= 0;
 
-	  FOR_DIM
-	    {
-	      if( i[dim] <= N[dim]/2)
-		ic[dim] = i[dim];
-	      else
-		ic[dim] = i[dim] - N[dim];
-	    }
+          FOR_DIM
+            {
+              if( i[dim] <= N[dim]/2)
+                ic[dim] = i[dim];
+              else
+                ic[dim] = i[dim] - N[dim];
+            }
 
-	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
-	    {
-	      dg_fft[index].re = 0;
-	      dg_fft[index].im = 0;
-	    }
-	  else
-	    {
-	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-	      k_fac = h*h*fac/k;
-	      /* phase shift factor for x=x+L/2 */
-	      sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
-
-
-	      FOR_DIM
-		dg_fft[index].re += ic[dim] * k_fac * sign *
-		(fg2_fft[dim][index].re * g_fft[index].im
-		 + fg2_fft[dim][index].im * g_fft[index].re) ;
+          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+            {
+              dg_fft[index].re = 0;
+              dg_fft[index].im = 0;
+            }
+          else
+            {
+              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
+              k_fac = h*h*fac/k;
+              /* phase shift factor for x=x+L/2 */
+              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
 
-	      FOR_DIM
-		dg_fft[index].im += ic[dim] * k_fac * sign *
-		(-fg2_fft[dim][index].re * g_fft[index].re
-		 + fg2_fft[dim][index].im * g_fft[index].im);
+              FOR_DIM
+                dg_fft[index].re += ic[dim] * k_fac * sign *
+                (fg2_fft[dim][index].re * g_fft[index].im
+                 + fg2_fft[dim][index].im * g_fft[index].re) ;
+
+
+              FOR_DIM
+                dg_fft[index].im += ic[dim] * k_fac * sign *
+                (-fg2_fft[dim][index].re * g_fft[index].re
+                 + fg2_fft[dim][index].im * g_fft[index].im);
 
 
 
 
-	      /* right one: */
-	      /*****************************/
-	      /* long range Coulomb part */
-	      dg_fft[index].re += h*sign*
-		(coul_fft[index].re*g_fft[index].re
-		 - coul_fft[index].im*g_fft[index].im);
+              /* right one: */
+              /*****************************/
+              /* long range Coulomb part */
+              dg_fft[index].re += h*sign*
+                (coul_fft[index].re*g_fft[index].re
+                 - coul_fft[index].im*g_fft[index].im);
 
-	      dg_fft[index].im += h*sign*
-		(coul_fft[index].re*g_fft[index].im
-		 + coul_fft[index].im*g_fft[index].re );
-	      /******************************/
+              dg_fft[index].im += h*sign*
+                (coul_fft[index].re*g_fft[index].im
+                 + coul_fft[index].im*g_fft[index].re );
+              /******************************/
 
-	      /*****************************/
-	      /* long range Coulomb part */
-/* 	      FOR_DIM */
-/* 		dg_fft[index].re += ic[dim] * k_fac *  */
-/* 		( fs_fft[dim][index].im * con/(h*rho)) ; */
+              /*****************************/
+              /* long range Coulomb part */
+/*            FOR_DIM */
+/*              dg_fft[index].re += ic[dim] * k_fac *  */
+/*              ( fs_fft[dim][index].im * con/(h*rho)) ; */
 
-/* 	      FOR_DIM  */
-/* 		dg_fft[index].im += ic[dim] * k_fac *  */
-/* 		(-fs_fft[dim][index].re * con/(h*rho)); */
-	      /******************************/
+/*            FOR_DIM  */
+/*              dg_fft[index].im += ic[dim] * k_fac *  */
+/*              (-fs_fft[dim][index].re * con/(h*rho)); */
+              /******************************/
 
 
-	      /*****************************/
-	      /* long range Coulomb part */
-/* 	      dg_fft[index].re += h*sign* */
-/* 		(coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
-/* 		- coul_fft[index].im*g_fft[index].im); */
+              /*****************************/
+              /* long range Coulomb part */
+/*            dg_fft[index].re += h*sign* */
+/*              (coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
+/*              - coul_fft[index].im*g_fft[index].im); */
 
-/* 	      dg_fft[index].im += h*sign* */
-/* 		(coul_fft[index].re*g_fft[index].im */
-/* 		 + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
-	      /******************************/
+/*            dg_fft[index].im += h*sign* */
+/*              (coul_fft[index].re*g_fft[index].im */
+/*               + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
+              /******************************/
 
-	      //dg_fft[index].re = sign*exp(-k*confac);
+              //dg_fft[index].re = sign*exp(-k*confac);
 
-/* 	      if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
-/* 		{ */
-/* 		  dg_fft[index].re= 0; */
-/* 		  dg_fft[index].im= 0; */
-/* 		} */
-	    }
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
-	}
+/*            if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
+/*              { */
+/*                dg_fft[index].re= 0; */
+/*                dg_fft[index].im= 0; */
+/*              } */
+            }
+          //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
+          index++;
+        }
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft,
-			 scratch, x, n, 0.0);
+                         scratch, x, n, 0.0);
 
   VecScale(dg_help, dampfac*rho*PD->beta/L/L/L);
 
@@ -1422,7 +1422,7 @@ static void ComputedgFromg (Vec dg, Vec g0, Vec g)
     {
       k = g_vec[i];
       if(k<1.0e-8)
-	k=1.0e-8;
+        k=1.0e-8;
       dg_vec[i] = -g0_vec[i] - log(k);
 
     }
@@ -1548,7 +1548,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       /* FIXME: I  guess the  logic with damping  factors can  be made
          more straightforward:  */
       if (damp > 0)
-	  count += 1.0;
+          count += 1.0;
 
       damp_LJ = (damp >= 0 ? 1.0 : 0.0); /* yes, >=, so the
                                             original */
@@ -1590,231 +1590,231 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       a=a0;
       a1=a0;
       for(iter=0; iter<max_iter; iter++)
-	{
+        {
 
-	  if( !(iter%10) && iter>0 )
-	    a=a1;
-	  else
-	    a=a0;
+          if( !(iter%10) && iter>0 )
+            a=a1;
+          else
+            a=a0;
 
-/* 	  if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
-/* 	    NORM_REG/=2.; */
+/*        if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
+/*          NORM_REG/=2.; */
 
-	  PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
-
-
-	  /* H */
-	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-			     1.0, BHD.rho_O, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-			     0.0, BHD.rho_H, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  VecScale(dg_new,damp_LJ);
-
-	  /* Coulomb long */
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-			       1.0, BHD.rho_O, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-			       0.0, BHD.rho_H, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
+          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
 
 
-	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
-	  VecAXPY(dg_new, 1.0, dg_new2);
+          /* H */
+          VecSet(dg_new,0.0);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+                             1.0, BHD.rho_O, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+                             0.0, BHD.rho_H, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          VecScale(dg_new,damp_LJ);
 
-/*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*  	  exit(1);    */
-
-	  //dgH_norm = ComputeCharge(&BHD, gH, gO);
-	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
-/* 	  if(dgH_norm<1.0) */
-/* 	    VecScale(dg_new, 1.2); */
-/* 	  else if(dgH_norm >1.0) */
-/* 	    VecScale(dg_new, 0.8); */
-
-
-	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
-	  VecAXPY(dg_new, 1.0, BHD.uc[0]);
-/* 	  dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
-	  //VecShift(dg_new, -dgH_norm);
-	  //ImposeBoundaryCondition( &BHD, dg_new);
-
-	  ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, NULL);
-	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
+          /* Coulomb long */
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+                               1.0, BHD.rho_O, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+                               0.0, BHD.rho_H, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
 
 
+          Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+          //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
+          VecAXPY(dg_new, 1.0, dg_new2);
+
+/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
+/*        exit(1);    */
+
+          //dgH_norm = ComputeCharge(&BHD, gH, gO);
+          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
+/*        if(dgH_norm<1.0) */
+/*          VecScale(dg_new, 1.2); */
+/*        else if(dgH_norm >1.0) */
+/*          VecScale(dg_new, 0.8); */
 
 
-	  VecCopy(dg_new, dg_newH);
+          //VecShift(dg_new, -0.01);
+          //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
+          VecAXPY(dg_new, 1.0, BHD.uc[0]);
+/*        dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
+/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
+          //VecShift(dg_new, -dgH_norm);
+          //ImposeBoundaryCondition( &BHD, dg_new);
 
-/* 	  VecCopy(dgH, f); */
-/* 	  VecAXPBY(dgH, a, (1-a), dg_new); */
-/* 	  VecAXPY(f, -1.0, dgH); */
-/* 	  VecNorm(f, NORM_INFINITY, &dgH_norm); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
-	  //ComputeH2O_g( gH, g0H, dgH);
-
-
-	  /* O */
-	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-			     1.0, BHD.rho_O, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-			     0.0, BHD.rho_H, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  VecScale(dg_new,damp_LJ);
-
-	  /* Coulomb long */
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-			       1.0, BHD.rho_O, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-			       0.0, BHD.rho_H, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
+          ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, NULL);
+          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
 
 
-	  Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
-	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
-	  VecAXPY(dg_new, 1.0, dg_new2);
 
-/*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*  	  exit(1);    */
+          VecCopy(dg_new, dg_newH);
 
-
-	  //dgO_norm = ComputeCharge(&BHD, gH, gO);
-	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
-/* 	  if(dgO_norm<1.0) */
-/* 	    VecScale(dg_new, 0.9); */
-/* 	  else if(dgO_norm >1.0) */
-/* 	    VecScale(dg_new, 1.1); */
+/*        VecCopy(dgH, f); */
+/*        VecAXPBY(dgH, a, (1-a), dg_new); */
+/*        VecAXPY(f, -1.0, dgH); */
+/*        VecNorm(f, NORM_INFINITY, &dgH_norm); */
+/*        PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
+          //ComputeH2O_g( gH, g0H, dgH);
 
 
-	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
-	  VecAXPY(dg_new, 1, BHD.uc[1]);
-/* 	  dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
-	  //VecShift(dg_new, -dgO_norm);
-	  //ImposeBoundaryCondition( &BHD, dg_new);
-	  ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, NULL);
-	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
+          /* O */
+          VecSet(dg_new,0.0);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+                             1.0, BHD.rho_O, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+                             0.0, BHD.rho_H, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          VecScale(dg_new,damp_LJ);
 
-/* 	  VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);  */
-/* 	  exit(1);  */
-
-	  VecCopy(dg_new, dg_newO);
-
-
-/* 	  VecCopy(dgO, f); */
-/* 	  VecAXPBY(dgO, a, (1-a), dg_new); */
-/* 	  VecAXPY(f, -1.0,  dgO); */
-/* 	  VecNorm(f, NORM_INFINITY, &dgO_norm); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
-	  //ComputeH2O_g( gO, g0O, dgO);
-
-/* 	  if(iter<=10) */
-/* 	    a=0.01; */
-/* 	  else */
-/* 	    a=0.05; */
-/* 	  if( iter==0) */
-/* 	    { */
-/* 	      VecScale(dg_newO, a); */
-/* 	      VecScale(dg_newH, a); */
-/* 	      EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
-/* 	      a=1.0; */
-/* 	    } */
-
-	  /* Move dgH */
-	  VecCopy(dgH, f);
-/* 	  VecAXPY(dg_histH, 1.0, dg_newH); */
-/* 	  norm = (iter)%50 + 1; */
-
- 	  VecAXPBY(dgH, a, (1-a), dg_newH);
- 	  VecAXPY(f, -1.0, dgH);
- 	  VecNorm(f, NORM_INFINITY, &dgH_norm);
-
- 	  PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
-
-	  /* Move dgO */
-	  if(0&& iter>10)
-	    {
-	      aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
-	      //if(aO<0) aO = a;
-	      VecCopy(dgO, f);
-	      VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
-	      //VecCopy(dg_newO, dgO);
-	      //VecScale(dgO, aO);
-
-	      VecAXPY(f, -1.0,  dgO);
-	      VecNorm(f, NORM_INFINITY, &dgO_norm);
-	      PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
-	    }
-	  else
-	    {
-	      VecCopy(dgO, f);
-/* 	      VecAXPY(dg_histO, 1.0, dg_newO); */
-/* 	      norm = (iter)%20 + 1; */
-	      VecAXPBY(dgO, a, (1-a), dg_newO);
-	      VecAXPY(f, -1.0,  dgO);
-	      VecNorm(f, NORM_INFINITY, &dgO_norm);
-	      PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
-	    }
-	  //a=a+0.002;
-/* 	  if( !((iter+1)%50) && iter>0) */
-/* 	    { */
-/* 	      a=0.01; */
-/* 	      PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
-/* 	      VecAXPY(dgO, -2.0, dg_histO); */
-/* 	      VecAXPY(dgH, -2.0, dg_histH); */
-/* 	      VecSet(dg_histO, 0.0); */
-/* 	      VecSet(dg_histH, 0.0); */
-/* 	    } */
-	  ComputeH2O_g( gH, g0H, dgH);
-	  ComputeH2O_g( gO, g0O, dgO);
-	  norm = ComputeCharge(&BHD, gH, gO);
-	  PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
-	  //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
+          /* Coulomb long */
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+                               1.0, BHD.rho_O, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+                               0.0, BHD.rho_H, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
 
 
-/* 	  if( !(iter%10) &&iter>0  ) */
-/* 	    { */
-/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 
-/* 	    } */
+          Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
+          Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
+          VecAXPY(dg_new, 1.0, dg_new2);
 
-/* 	  if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
-/* 	    { */
-/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
-/* 	      a0=0.1; */
-/* 	    } */
+/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
+/*        exit(1);    */
 
-/* 	  if( fabs(norm-1.0) > 0.05 ) */
-/* 	    a=0.005; */
-/* 	  else  */
-/* 	    a=0.01; */
-	   /* (fancy) step size control */
+
+          //dgO_norm = ComputeCharge(&BHD, gH, gO);
+          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
+/*        if(dgO_norm<1.0) */
+/*          VecScale(dg_new, 0.9); */
+/*        else if(dgO_norm >1.0) */
+/*          VecScale(dg_new, 1.1); */
+
+
+          //VecShift(dg_new, 0.01);
+          //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
+          VecAXPY(dg_new, 1, BHD.uc[1]);
+/*        dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
+/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
+          //VecShift(dg_new, -dgO_norm);
+          //ImposeBoundaryCondition( &BHD, dg_new);
+          ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, NULL);
+          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
+
+/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);  */
+/*        exit(1);  */
+
+          VecCopy(dg_new, dg_newO);
+
+
+/*        VecCopy(dgO, f); */
+/*        VecAXPBY(dgO, a, (1-a), dg_new); */
+/*        VecAXPY(f, -1.0,  dgO); */
+/*        VecNorm(f, NORM_INFINITY, &dgO_norm); */
+/*        PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
+          //ComputeH2O_g( gO, g0O, dgO);
+
+/*        if(iter<=10) */
+/*          a=0.01; */
+/*        else */
+/*          a=0.05; */
+/*        if( iter==0) */
+/*          { */
+/*            VecScale(dg_newO, a); */
+/*            VecScale(dg_newH, a); */
+/*            EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
+/*            a=1.0; */
+/*          } */
+
+          /* Move dgH */
+          VecCopy(dgH, f);
+/*        VecAXPY(dg_histH, 1.0, dg_newH); */
+/*        norm = (iter)%50 + 1; */
+
+          VecAXPBY(dgH, a, (1-a), dg_newH);
+          VecAXPY(f, -1.0, dgH);
+          VecNorm(f, NORM_INFINITY, &dgH_norm);
+
+          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
+
+          /* Move dgO */
+          if(0&& iter>10)
+            {
+              aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
+              //if(aO<0) aO = a;
+              VecCopy(dgO, f);
+              VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
+              //VecCopy(dg_newO, dgO);
+              //VecScale(dgO, aO);
+
+              VecAXPY(f, -1.0,  dgO);
+              VecNorm(f, NORM_INFINITY, &dgO_norm);
+              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
+            }
+          else
+            {
+              VecCopy(dgO, f);
+/*            VecAXPY(dg_histO, 1.0, dg_newO); */
+/*            norm = (iter)%20 + 1; */
+              VecAXPBY(dgO, a, (1-a), dg_newO);
+              VecAXPY(f, -1.0,  dgO);
+              VecNorm(f, NORM_INFINITY, &dgO_norm);
+              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
+            }
+          //a=a+0.002;
+/*        if( !((iter+1)%50) && iter>0) */
+/*          { */
+/*            a=0.01; */
+/*            PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
+/*            VecAXPY(dgO, -2.0, dg_histO); */
+/*            VecAXPY(dgH, -2.0, dg_histH); */
+/*            VecSet(dg_histO, 0.0); */
+/*            VecSet(dg_histH, 0.0); */
+/*          } */
+          ComputeH2O_g( gH, g0H, dgH);
+          ComputeH2O_g( gO, g0O, dgO);
+          norm = ComputeCharge(&BHD, gH, gO);
+          PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
+          //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
+
+
+/*        if( !(iter%10) &&iter>0  ) */
+/*          { */
+/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
+
+/*          } */
+
+/*        if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
+/*          { */
+/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
+/*            a0=0.1; */
+/*          } */
+
+/*        if( fabs(norm-1.0) > 0.05 ) */
+/*          a=0.005; */
+/*        else  */
+/*          a=0.01; */
+           /* (fancy) step size control */
 
           /*
            * FIXME: weired  logic.  The  code below appears  to modify
@@ -1827,23 +1827,23 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
            * here. At the moment I  am not able to confirm/reject that
            * claim.
            */
-	  mycount++;
+          mycount++;
 
-	  if (((iter - 1) % 10) &&
+          if (((iter - 1) % 10) &&
              (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
-	    {
-	      upwards = 1;
-	    }
-	  else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-		  (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
-	    {
-	      a1 /= 2.;
-	      if(a1 < a0)
-		a1 = a0;
-	      mycount = 0;
-	    }
-	  else
-	    upwards = 0;
+            {
+              upwards = 1;
+            }
+          else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
+                  (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
+            {
+              a1 /= 2.;
+              if(a1 < a0)
+                a1 = a0;
+              mycount = 0;
+            }
+          else
+            upwards = 0;
 
           if (mycount > 20) {
             /*
@@ -1851,25 +1851,25 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
              * sure it is not above 1.0. Reset mycount.
              */
             if (a1 <= 0.5) {
-	      a1 *= 2.0;
-	    }
+              a1 *= 2.0;
+            }
             else {
-	      a1 = 1.0;
-	    }
+              a1 = 1.0;
+            }
             mycount = 0;
           }
-	  PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-	  dgH_old = dgH_norm / a;
-	  dgO_old = dgO_norm / a;
+          PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
+          dgH_old = dgH_norm / a;
+          dgO_old = dgO_norm / a;
 
-	  /*********************************/
+          /*********************************/
 
-	  PetscPrintf(PETSC_COMM_WORLD,"\n");
+          PetscPrintf(PETSC_COMM_WORLD,"\n");
 
-	  if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol ) //&& NORM_REG<5.0e-2)
-	    break;
+          if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol ) //&& NORM_REG<5.0e-2)
+            break;
 
-	}
+        }
       /*************************************/
       /* output */
       namecount++;
@@ -1884,10 +1884,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       /* save g to binary file */
       if (bgy3d_getopt_test ("-saveH2O")) {
-	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
+          PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
           bgy3d_save_vec ("dgO.bin", dgO); /* dgO */
-	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+          PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
 
@@ -2030,41 +2030,41 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   for( damp=damp_start; damp <=1; damp+=0.1)
     {
       if(damp==-0.01)
-	{
-	  damp_LJ=0;
-	  //a0=0.4;
-	  RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
+        {
+          damp_LJ=0;
+          //a0=0.4;
+          RecomputeInitialFFTs(&BHD, 0.0, 1.0);
+          //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
+          //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
+          //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
+          RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
+          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+        }
       else if(damp==0.0)
-	{
-	  damp_LJ=1.0;
-	  //a0=0.5;
-	  RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
+        {
+          damp_LJ=1.0;
+          //a0=0.5;
+          RecomputeInitialFFTs(&BHD, 0.0, 1.0);
+          //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
+          //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
+          //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
+          RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
+          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+        }
       else
-	{
-	  damp_LJ=1.0;
-	  //a0=0.0002/damp;
-	  count+=1.0;
-	  //a0 = 0.1/4./(count);
-	  a0 = 0.1/(count+5.0);
-	  RecomputeInitialFFTs(&BHD, (damp), 1.0);
-	  //RecomputeInitialSoluteData_Water(&BHD, (damp), 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(&BHD, (damp), 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(&BHD, (damp), 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, (damp), 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
+        {
+          damp_LJ=1.0;
+          //a0=0.0002/damp;
+          count+=1.0;
+          //a0 = 0.1/4./(count);
+          a0 = 0.1/(count+5.0);
+          RecomputeInitialFFTs(&BHD, (damp), 1.0);
+          //RecomputeInitialSoluteData_Water(&BHD, (damp), 1.0, zpad);
+          //RecomputeInitialSoluteData_Hexane(&BHD, (damp), 1.0, zpad);
+          //RecomputeInitialSoluteData_Methanol(&BHD, (damp), 1.0, zpad);
+          RecomputeInitialSoluteData_ButanoicAcid(&BHD, (damp), 1.0, zpad);
+          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+        }
 
       //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
@@ -2085,282 +2085,282 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
       a=a0;
       a1=a0;
       for(iter=0; iter<max_iter; iter++)
-	{
+        {
 
-	  if( !(iter%10) && iter>0 )
-	    a=a1;
-	  else
-	    a=a0;
+          if( !(iter%10) && iter>0 )
+            a=a1;
+          else
+            a=a0;
 
-/* 	  if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
-/* 	    NORM_REG/=2.; */
+/*        if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
+/*          NORM_REG/=2.; */
 
-	  PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
-
-
-	  /* H */
-	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-			     1.0, BHD.rho_O, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-			     0.0, BHD.rho_H, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  VecScale(dg_new,damp_LJ);
-
-	  /* Coulomb long */
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-			       1.0, BHD.rho_O, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-			       0.0, BHD.rho_H, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-
-	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HH, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HH, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2, f);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-
-/*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*  	  exit(1);    */
-
-	  //dgH_norm = ComputeCharge(&BHD, gH, gO);
-	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
-/* 	  if(dgH_norm<1.0) */
-/* 	    VecScale(dg_new, 1.2); */
-/* 	  else if(dgH_norm >1.0) */
-/* 	    VecScale(dg_new, 0.8); */
+          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
 
 
-	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
-	  VecAXPY(dg_new, 1.0, BHD.uc[0]);
-/* 	  dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
-	  //VecShift(dg_new, -dgH_norm);
-	  //ImposeBoundaryCondition( &BHD, dg_new);
+          /* H */
+          VecSet(dg_new,0.0);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+                             1.0, BHD.rho_O, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+                             0.0, BHD.rho_H, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          VecScale(dg_new,damp_LJ);
 
-	  ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, &iteri);
-	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
+          /* Coulomb long */
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+                               1.0, BHD.rho_O, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+                               0.0, BHD.rho_H, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
 
-	  PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
+          Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
+          //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HH, dg_new2, f);
+          //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HH, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2, f);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+          //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
+          VecAXPY(dg_new, 1.0, dg_new2);
+
+/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
+/*        exit(1);    */
+
+          //dgH_norm = ComputeCharge(&BHD, gH, gO);
+          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
+/*        if(dgH_norm<1.0) */
+/*          VecScale(dg_new, 1.2); */
+/*        else if(dgH_norm >1.0) */
+/*          VecScale(dg_new, 0.8); */
 
 
+          //VecShift(dg_new, -0.01);
+          //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
+          VecAXPY(dg_new, 1.0, BHD.uc[0]);
+/*        dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
+/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
+          //VecShift(dg_new, -dgH_norm);
+          //ImposeBoundaryCondition( &BHD, dg_new);
 
-	  VecCopy(dg_new, dg_newH);
+          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, &iteri);
+          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
-/* 	  VecCopy(dgH, f); */
-/* 	  VecAXPBY(dgH, a, (1-a), dg_new); */
-/* 	  VecAXPY(f, -1.0, dgH); */
-/* 	  VecNorm(f, NORM_INFINITY, &dgH_norm); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
-	  //ComputeH2O_g( gH, g0H, dgH);
-
-
-	  /* O */
-	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-			     1.0, BHD.rho_O, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(&BHD,
-			     BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-			     0.0, BHD.rho_H, dg_new2);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  VecScale(dg_new,damp_LJ);
-
-	  /* Coulomb long */
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-			       1.0, BHD.rho_O, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(&BHD,
-			       BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-			       0.0, BHD.rho_H, dg_new2, damp);
-	  VecAXPY(dg_new, 1.0, dg_new2);
+          PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
 
 
-	  Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
-	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
-	  VecAXPY(dg_new, 2.0, dg_new2);
+          VecCopy(dg_new, dg_newH);
 
-/*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*  	  exit(1);    */
-
-
-	  //dgO_norm = ComputeCharge(&BHD, gH, gO);
-	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
-/* 	  if(dgO_norm<1.0) */
-/* 	    VecScale(dg_new, 0.9); */
-/* 	  else if(dgO_norm >1.0) */
-/* 	    VecScale(dg_new, 1.1); */
+/*        VecCopy(dgH, f); */
+/*        VecAXPBY(dgH, a, (1-a), dg_new); */
+/*        VecAXPY(f, -1.0, dgH); */
+/*        VecNorm(f, NORM_INFINITY, &dgH_norm); */
+/*        PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
+          //ComputeH2O_g( gH, g0H, dgH);
 
 
-	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
-	  VecAXPY(dg_new, 1, BHD.uc[1]);
-/* 	  dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
-	  //VecShift(dg_new, -dgO_norm);
-	  //ImposeBoundaryCondition( &BHD, dg_new);
+          /* O */
+          VecSet(dg_new,0.0);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+                             1.0, BHD.rho_O, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS(&BHD,
+                             BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+                             0.0, BHD.rho_H, dg_new2);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          VecScale(dg_new,damp_LJ);
 
-	  //ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, tO, zpad, &iteri);
-
-	  ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, &iteri);
-	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
-	  PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
-
-/* 	  if(iter==51) */
-/* 	    { */
-/* 	      VecView(tO,PETSC_VIEWER_STDERR_WORLD);  */
-/* 	      exit(1); */
-/* 	    }  */
-
-	  VecCopy(dg_new, dg_newO);
-
-
-/* 	  VecCopy(dgO, f); */
-/* 	  VecAXPBY(dgO, a, (1-a), dg_new); */
-/* 	  VecAXPY(f, -1.0,  dgO); */
-/* 	  VecNorm(f, NORM_INFINITY, &dgO_norm); */
-/* 	  PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
-	  //ComputeH2O_g( gO, g0O, dgO);
-
-/* 	  if(iter<=10) */
-/* 	    a=0.01; */
-/* 	  else */
-/* 	    a=0.05; */
-/* 	  if( iter==0) */
-/* 	    { */
-/* 	      VecScale(dg_newO, a); */
-/* 	      VecScale(dg_newH, a); */
-/* 	      EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
-/* 	      a=1.0; */
-/* 	    } */
-
-	  /* Move dgH */
-	  VecCopy(dgH, f);
-/* 	  VecAXPY(dg_histH, 1.0, dg_newH); */
-/* 	  norm = (iter)%50 + 1; */
-
- 	  VecAXPBY(dgH, a, (1-a), dg_newH);
- 	  VecAXPY(f, -1.0, dgH);
- 	  VecNorm(f, NORM_INFINITY, &dgH_norm);
-
- 	  PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
-
-	  /* Move dgO */
-	  if(0&& iter>10)
-	    {
-	      aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
-	      //if(aO<0) aO = a;
-	      VecCopy(dgO, f);
-	      VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
-	      //VecCopy(dg_newO, dgO);
-	      //VecScale(dgO, aO);
-
-	      VecAXPY(f, -1.0,  dgO);
-	      VecNorm(f, NORM_INFINITY, &dgO_norm);
-	      PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
-	    }
-	  else
-	    {
-	      VecCopy(dgO, f);
-/* 	      VecAXPY(dg_histO, 1.0, dg_newO); */
-/* 	      norm = (iter)%20 + 1; */
-	      VecAXPBY(dgO, a, (1-a), dg_newO);
-	      VecAXPY(f, -1.0,  dgO);
-	      VecNorm(f, NORM_INFINITY, &dgO_norm);
-	      PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
-	    }
-	  //a=a+0.002;
-/* 	  if( !((iter+1)%50) && iter>0) */
-/* 	    { */
-/* 	      a=0.01; */
-/* 	      PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
-/* 	      VecAXPY(dgO, -2.0, dg_histO); */
-/* 	      VecAXPY(dgH, -2.0, dg_histH); */
-/* 	      VecSet(dg_histO, 0.0); */
-/* 	      VecSet(dg_histH, 0.0); */
-/* 	    } */
-	  ComputeH2O_g( gH, g0H, dgH);
-	  ComputeH2O_g( gO, g0O, dgO);
-	  norm = ComputeCharge(&BHD, gH, gO);
-	  PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
-	  //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
+          /* Coulomb long */
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+                               1.0, BHD.rho_O, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_H2O_interS_C(&BHD,
+                               BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+                               0.0, BHD.rho_H, dg_new2, damp);
+          VecAXPY(dg_new, 1.0, dg_new2);
 
 
-/* 	  if( !(iter%10) &&iter>0  ) */
-/* 	    { */
-/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 
-/* 	    } */
+          Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
+          Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
+          //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
+          VecAXPY(dg_new, 2.0, dg_new2);
 
-/* 	  if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
-/* 	    { */
-/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
-/* 	      a0=0.1; */
-/* 	    } */
+/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
+/*        exit(1);    */
 
-/* 	  if( fabs(norm-1.0) > 0.05 ) */
-/* 	    a=0.005; */
-/* 	  else  */
-/* 	    a=0.01; */
-	   /* (fancy) step size control */
-	  mycount++;
-	  if( ((iter-1)%10) &&
-	      (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
-	    {
-	      upwards=1;
-	    }
-	  else if(iter>20 && !((iter-1)%10) && upwards==0 &&
-		  (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
-	    {
-	      a1 /=2.;
-	      if(a1<a0)
-		a1=a0;
-	      mycount=0;
-	    }
-	  else
-	    upwards=0;
 
-	  if(mycount>20 && a1<=0.5)
-	    {
-	      a1*=2.;
-	      mycount=0;
-	    }
-	  else if(mycount>20 && a1>0.5)
-	    {
-	      a1=1.0;
-	      mycount=0;
-	    }
-	  PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-	  dgH_old = dgH_norm/a;
-	  dgO_old = dgO_norm/a;
+          //dgO_norm = ComputeCharge(&BHD, gH, gO);
+          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
+/*        if(dgO_norm<1.0) */
+/*          VecScale(dg_new, 0.9); */
+/*        else if(dgO_norm >1.0) */
+/*          VecScale(dg_new, 1.1); */
 
-	  /*********************************/
 
-	  PetscPrintf(PETSC_COMM_WORLD,"\n");
+          //VecShift(dg_new, 0.01);
+          //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
+          VecAXPY(dg_new, 1, BHD.uc[1]);
+/*        dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
+/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
+          //VecShift(dg_new, -dgO_norm);
+          //ImposeBoundaryCondition( &BHD, dg_new);
 
-	  if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol) //&& NORM_REG<5.0e-2)
-	    break;
+          //ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, tO, zpad, &iteri);
 
-	}
+          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, &iteri);
+          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
+          PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
+
+/*        if(iter==51) */
+/*          { */
+/*            VecView(tO,PETSC_VIEWER_STDERR_WORLD);  */
+/*            exit(1); */
+/*          }  */
+
+          VecCopy(dg_new, dg_newO);
+
+
+/*        VecCopy(dgO, f); */
+/*        VecAXPBY(dgO, a, (1-a), dg_new); */
+/*        VecAXPY(f, -1.0,  dgO); */
+/*        VecNorm(f, NORM_INFINITY, &dgO_norm); */
+/*        PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
+          //ComputeH2O_g( gO, g0O, dgO);
+
+/*        if(iter<=10) */
+/*          a=0.01; */
+/*        else */
+/*          a=0.05; */
+/*        if( iter==0) */
+/*          { */
+/*            VecScale(dg_newO, a); */
+/*            VecScale(dg_newH, a); */
+/*            EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
+/*            a=1.0; */
+/*          } */
+
+          /* Move dgH */
+          VecCopy(dgH, f);
+/*        VecAXPY(dg_histH, 1.0, dg_newH); */
+/*        norm = (iter)%50 + 1; */
+
+          VecAXPBY(dgH, a, (1-a), dg_newH);
+          VecAXPY(f, -1.0, dgH);
+          VecNorm(f, NORM_INFINITY, &dgH_norm);
+
+          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
+
+          /* Move dgO */
+          if(0&& iter>10)
+            {
+              aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
+              //if(aO<0) aO = a;
+              VecCopy(dgO, f);
+              VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
+              //VecCopy(dg_newO, dgO);
+              //VecScale(dgO, aO);
+
+              VecAXPY(f, -1.0,  dgO);
+              VecNorm(f, NORM_INFINITY, &dgO_norm);
+              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
+            }
+          else
+            {
+              VecCopy(dgO, f);
+/*            VecAXPY(dg_histO, 1.0, dg_newO); */
+/*            norm = (iter)%20 + 1; */
+              VecAXPBY(dgO, a, (1-a), dg_newO);
+              VecAXPY(f, -1.0,  dgO);
+              VecNorm(f, NORM_INFINITY, &dgO_norm);
+              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
+            }
+          //a=a+0.002;
+/*        if( !((iter+1)%50) && iter>0) */
+/*          { */
+/*            a=0.01; */
+/*            PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
+/*            VecAXPY(dgO, -2.0, dg_histO); */
+/*            VecAXPY(dgH, -2.0, dg_histH); */
+/*            VecSet(dg_histO, 0.0); */
+/*            VecSet(dg_histH, 0.0); */
+/*          } */
+          ComputeH2O_g( gH, g0H, dgH);
+          ComputeH2O_g( gO, g0O, dgO);
+          norm = ComputeCharge(&BHD, gH, gO);
+          PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
+          //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
+
+
+/*        if( !(iter%10) &&iter>0  ) */
+/*          { */
+/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
+
+/*          } */
+
+/*        if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
+/*          { */
+/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
+/*            a0=0.1; */
+/*          } */
+
+/*        if( fabs(norm-1.0) > 0.05 ) */
+/*          a=0.005; */
+/*        else  */
+/*          a=0.01; */
+           /* (fancy) step size control */
+          mycount++;
+          if( ((iter-1)%10) &&
+              (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
+            {
+              upwards=1;
+            }
+          else if(iter>20 && !((iter-1)%10) && upwards==0 &&
+                  (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
+            {
+              a1 /=2.;
+              if(a1<a0)
+                a1=a0;
+              mycount=0;
+            }
+          else
+            upwards=0;
+
+          if(mycount>20 && a1<=0.5)
+            {
+              a1*=2.;
+              mycount=0;
+            }
+          else if(mycount>20 && a1>0.5)
+            {
+              a1=1.0;
+              mycount=0;
+            }
+          PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
+          dgH_old = dgH_norm/a;
+          dgO_old = dgO_norm/a;
+
+          /*********************************/
+
+          PetscPrintf(PETSC_COMM_WORLD,"\n");
+
+          if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol) //&& NORM_REG<5.0e-2)
+            break;
+
+        }
       /*************************************/
       /* output */
       namecount++;
@@ -2376,10 +2376,10 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
       /* save g to binary file */
       if (bgy3d_getopt_test ("-saveH2O")) {
-	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
+          PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
           bgy3d_save_vec ("dgO.bin", dgH); /* dgO */
-	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+          PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
 
