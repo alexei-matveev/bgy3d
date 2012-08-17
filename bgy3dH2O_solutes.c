@@ -129,13 +129,18 @@ static const Solute ButanoicAcid =
         {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
         {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
 
-/* These are  the two  solvent sites.  Coordinates  will not  be used.
-   Respective parameters are #defined  elsewhere. Also do not take the
-   names  of  the sites  literally.  The  same  structure is  used  to
-   represent all (2-site?) solvents, such as HCl:  */
+/*
+ * These are  the two  solvent sites.  Coordinates  will not  be used.
+ * Respective parameters are #defined  elsewhere. Also do not take the
+ * names  of the  sites  literally.   The same  structure  is used  to
+ * represent all (2-site) solvents, such as HCl.
+ *
+ * FIXME:  in solute_field()  function below  it is  assumed  that the
+ * number of solvent sites is exactly two:
+ */
 static const Site solvent[] =
-  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH},
-   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}};
+  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
+   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
 static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
 {
@@ -184,7 +189,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  *
  * XXX: See (5.106) and (5.08) in the thesis. Return BHD->g_ini[0] and
  *      BHD->g_ini[1], for  H and  O in that  order, (beta *  (VM_LJ +
- *      VM_coulomb_short))   and  BHD->uc[0],   BHD->uc[1]    (beta  *
+ *      VM_coulomb_short))   and   BHD->uc[0],   BHD->uc[1]  (beta   *
  *      VM_coulomb_long), but is beta missing here?
  */
 
@@ -283,11 +288,10 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
    * 3. Copy  the electrostatic potential  scaled by the  solvent site
    * charges into predefined locations:
    */
-  VecSet (BHD->uc[0], 0.0);
-  VecAXPY (BHD->uc[0], qH, v);
-
-  VecSet (BHD->uc[1], 0.0);
-  VecAXPY (BHD->uc[1], qO, v);
+  for (int vsite = 0; vsite < 2; vsite++) {
+      VecSet (BHD->uc[vsite], 0.0);
+      VecAXPY (BHD->uc[vsite], solvent[vsite].charge, v);
+  }
 
   /* MEMORY: deallocate huge array here! */
   VecDestroy (v);
