@@ -180,8 +180,8 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
   DACreateGlobalVector(da, &(BHD->g_ini[0]));
   DACreateGlobalVector(da, &(BHD->g_ini[1]));
   DACreateGlobalVector(da, &(BHD->gHO_ini));
-  DACreateGlobalVector(da, &(BHD->ucH));
-  DACreateGlobalVector(da, &(BHD->ucO));
+  DACreateGlobalVector(da, &(BHD->uc[0]));
+  DACreateGlobalVector(da, &(BHD->uc[1]));
   DACreateGlobalVector(da, &(BHD->ucHO));
   DACreateGlobalVector(da, &(BHD->cH));
   DACreateGlobalVector(da, &(BHD->cO));
@@ -270,8 +270,8 @@ void BGY3dH2OData_free(BGY3dH2OData BHD)
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->ucH);
-  VecDestroy(BHD->ucO);
+  VecDestroy(BHD->uc[0]);
+  VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
   VecDestroy(BHD->cH);
   VecDestroy(BHD->cO);
@@ -1334,13 +1334,13 @@ void ComputeInitialGuess(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec dgHO, real damp
   VecSet(dgO,0.0);
   VecSet(dgHO,0.0);
 
-/*   VecShift(BHD->ucH, BHD->ucH_0); */
-/*   VecShift(BHD->ucO, BHD->ucO_0); */
+/*   VecShift(BHD->uc[0], BHD->ucH_0); */
+/*   VecShift(BHD->uc[1], BHD->ucO_0); */
 /*   VecShift(BHD->ucHO, BHD->ucHO_0); */
 
-/*   VecCopy(BHD->ucH, dgH); */
+/*   VecCopy(BHD->uc[0], dgH); */
 /*   VecScale(dgH, -damp*beta); */
-/*   VecCopy(BHD->ucO, dgO); */
+/*   VecCopy(BHD->uc[1], dgO); */
 /*   VecScale(dgO, -damp*beta); */
 /*   VecView(BHD->ucHO,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
@@ -1420,15 +1420,15 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
   /********************************************/
   //  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
   //			BHD->LJ_paramsHO, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft,
   //			BHD->LJ_paramsH, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft,
   //			BHD->LJ_paramsO, damp);
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
 			q2HO, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft,
 			q2H, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft,
 			q2O, damp);
 
   FOR_DIM
@@ -1607,8 +1607,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
 
 
 
-/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->ucH); */
-/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->ucO); */
+/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->uc[0]); */
+/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->uc[1]); */
 
 /*   VecView(BHD->fHO[0],PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
@@ -4023,7 +4023,7 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 /*   	  exit(1);   */
 
 
-	  VecAXPY(dg_new, PD->beta, BHD->ucH);
+	  VecAXPY(dg_new, PD->beta, BHD->uc[0]);
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
 
@@ -4091,7 +4091,7 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
 /* 	  VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
 /* 	  exit(1);  */
 
-	  VecAXPY(dg_new, PD->beta, BHD->ucO);
+	  VecAXPY(dg_new, PD->beta, BHD->uc[1]);
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 	  if(iter>=0)
 	    {
@@ -4762,7 +4762,7 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 /*   	  exit(1);   */
 
 
-	  VecAXPY(dg_new, PD->beta, BHD->ucH);
+	  VecAXPY(dg_new, PD->beta, BHD->uc[0]);
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
 
@@ -4834,7 +4834,7 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
 /* 	  VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
 /* 	  exit(1);  */
 
-	  VecAXPY(dg_new, PD->beta, BHD->ucO);
+	  VecAXPY(dg_new, PD->beta, BHD->uc[1]);
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 	  if(iter>=0)
 	    {

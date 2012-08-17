@@ -192,9 +192,9 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucH)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->uc[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->uc[1])); // CHKERRQ(ierr);
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
   assert (!ierr);
@@ -347,8 +347,8 @@ void BGY3dH2OData_free2(BGY3dH2OData BHD)
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->ucH);
-  VecDestroy(BHD->ucO);
+  VecDestroy(BHD->uc[0]);
+  VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
   VecDestroy(BHD->g2H);
   VecDestroy(BHD->g2O);
@@ -725,8 +725,8 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 /*   ComputeFFTfromCoulombII(BHD, BHD->fO, BHD->fO_l, BHD->ucO_fft, BHD->LJ_paramsO, damp); */
 /*   ComputeFFTfromCoulombII(BHD, BHD->fH, BHD->fH_l, BHD->ucH_fft, BHD->LJ_paramsH, damp); */
 /*   ComputeFFTfromCoulombII(BHD, BHD->fHO, BHD->fHO_l, BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
-  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft, q2O, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft, q2H, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft, q2O, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft, q2H, damp0);
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft, q2HO, damp0);
 /*   FOR_DIM */
 /*     { */
@@ -956,8 +956,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   VecSet(BHD->g_ini[0], 0.0);
   VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
-  VecSet(BHD->ucH, 0.0);
-  VecSet(BHD->ucO, 0.0);
+  VecSet(BHD->uc[0], 0.0);
+  VecSet(BHD->uc[1], 0.0);
   VecSet(BHD->ucHO, 0.0);
   FOR_DIM
     {
@@ -970,8 +970,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
 
-/*   DAVecGetArray(da, BHD->ucH, &ucH_vec); */
-/*   DAVecGetArray(da, BHD->ucO, &ucO_vec); */
+/*   DAVecGetArray(da, BHD->uc[0], &ucH_vec); */
+/*   DAVecGetArray(da, BHD->uc[1], &ucO_vec); */
   FOR_DIM
     {
       DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
@@ -1037,24 +1037,24 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
   DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
-/*   DAVecRestoreArray(da, BHD->ucH, &ucH_vec); */
-/*   DAVecRestoreArray(da, BHD->ucO, &ucO_vec); */
+/*   DAVecRestoreArray(da, BHD->uc[0], &ucH_vec); */
+/*   DAVecRestoreArray(da, BHD->uc[1], &ucO_vec); */
 
-  VecCopy( BHD->ucHO, BHD->ucO);
+  VecCopy( BHD->ucHO, BHD->uc[1]);
 
-/*   ComputeFFTSoluteII(BHD, BHD->ucH , BHD->ucHO, BHD->LJ_paramsHO, damp, zpad); */
-/*   VecScale(BHD->ucH, beta); */
+/*   ComputeFFTSoluteII(BHD, BHD->uc[0] , BHD->ucHO, BHD->LJ_paramsHO, damp, zpad); */
+/*   VecScale(BHD->uc[0], beta); */
 /*   VecAXPY( BHD->g_ini[0], beta, BHD->ucHO); */
 
-/*   ComputeFFTSoluteII(BHD, BHD->ucO , BHD->ucHO, BHD->LJ_paramsO,  damp, zpad); */
+/*   ComputeFFTSoluteII(BHD, BHD->uc[1] , BHD->ucHO, BHD->LJ_paramsO,  damp, zpad); */
 /*   VecAXPY( BHD->g_ini[1], beta, BHD->ucHO); */
-/*   VecScale(BHD->ucO, beta); */
+/*   VecScale(BHD->uc[1], beta); */
 
   /* Shift uc's */
-/*   VecSum(BHD->ucH, &fac); */
-/*   VecShift(BHD->ucH, -fac/N[0]/N[1]/N[2]); */
-/*   VecSum(BHD->ucO, &fac); */
-/*   VecShift(BHD->ucO, -fac/N[0]/N[1]/N[2]); */
+/*   VecSum(BHD->uc[0], &fac); */
+/*   VecShift(BHD->uc[0], -fac/N[0]/N[1]/N[2]); */
+/*   VecSum(BHD->uc[1], &fac); */
+/*   VecShift(BHD->uc[1], -fac/N[0]/N[1]/N[2]); */
 
 /*   VecView(BHD->g_ini[0],PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
@@ -1619,7 +1619,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
           // XXX: return BHD->g_ini[0], BHD->g_ini[1] (see definition above)
-          // XXX: and BHD->ucH, BHD->ucO, which are VM_Coulomb_long, but should they multiply by beta?
+          // XXX: and BHD->uc[0], BHD->uc[1], which are VM_Coulomb_long, but should they multiply by beta?
 	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
           // Change solute as HCl for standard test
           RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
@@ -1730,8 +1730,8 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD->ucH);
-	  VecAXPY(dg_new, 1.0, BHD->ucH);
+	  //VecAXPY(dg_new, dgH_norm,  BHD->uc[0]);
+	  VecAXPY(dg_new, 1.0, BHD->uc[0]);
 /* 	  dgH_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
 	  //VecShift(dg_new, -dgH_norm);
@@ -1797,8 +1797,8 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD->ucO);
-	  VecAXPY(dg_new, 1, BHD->ucO);
+	  //VecAXPY(dg_new, dgO_norm, BHD->uc[1]);
+	  VecAXPY(dg_new, 1, BHD->uc[1]);
 /* 	  dgO_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
 	  //VecShift(dg_new, -dgO_norm);
@@ -2024,7 +2024,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
   BGY3dH2OData_free2(BHD);
 
 
-  //VecView(BHD->ucO,PETSC_VIEWER_STDERR_WORLD);
+  //VecView(BHD->uc[1],PETSC_VIEWER_STDERR_WORLD);
    //exit(1);
 
   return PETSC_NULL;
@@ -2272,8 +2272,8 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD->ucH);
-	  VecAXPY(dg_new, 1.0, BHD->ucH);
+	  //VecAXPY(dg_new, dgH_norm,  BHD->uc[0]);
+	  VecAXPY(dg_new, 1.0, BHD->uc[0]);
 /* 	  dgH_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
 	  //VecShift(dg_new, -dgH_norm);
@@ -2340,8 +2340,8 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD->ucO);
-	  VecAXPY(dg_new, 1, BHD->ucO);
+	  //VecAXPY(dg_new, dgO_norm, BHD->uc[1]);
+	  VecAXPY(dg_new, 1, BHD->uc[1]);
 /* 	  dgO_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
 	  //VecShift(dg_new, -dgO_norm);
@@ -2558,7 +2558,7 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
   BGY3dH2OData_free2(BHD);
 
 
-  //VecView(BHD->ucO,PETSC_VIEWER_STDERR_WORLD);
+  //VecView(BHD->uc[1],PETSC_VIEWER_STDERR_WORLD);
    //exit(1);
 
   return PETSC_NULL;

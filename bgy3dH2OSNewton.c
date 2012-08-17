@@ -205,9 +205,9 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucH)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->uc[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->uc[1])); // CHKERRQ(ierr);
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
   assert (!ierr);
@@ -336,8 +336,8 @@ void BGY3dH2OData_Newton_free2(BGY3dH2OData BHD)
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->ucH);
-  VecDestroy(BHD->ucO);
+  VecDestroy(BHD->uc[0]);
+  VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
   VecDestroy(BHD->g2H);
   VecDestroy(BHD->g2O);
@@ -481,7 +481,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 		     0.0, BHD->rho_H, help2);
   VecAXPY(dgH, 1.0, help2);
 
-  VecAXPY(dgH, 1.0, BHD->ucH);
+  VecAXPY(dgH, 1.0, BHD->uc[0]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/
@@ -519,7 +519,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 		     0.0, BHD->rho_H, help2);
   VecAXPY(dgO, 1.0, help2);
 
-  VecAXPY(dgO, 1.0, BHD->ucO);
+  VecAXPY(dgO, 1.0, BHD->uc[1]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/

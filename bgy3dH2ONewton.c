@@ -202,8 +202,8 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   DACreateGlobalVector(da, &(BHD->dgH));
   DACreateGlobalVector(da, &(BHD->dgO));
   DACreateGlobalVector(da, &(BHD->dgHO));
-  DACreateGlobalVector(da, &(BHD->ucH));
-  DACreateGlobalVector(da, &(BHD->ucO));
+  DACreateGlobalVector(da, &(BHD->uc[0]));
+  DACreateGlobalVector(da, &(BHD->uc[1]));
   DACreateGlobalVector(da, &(BHD->ucHO));
   DACreateGlobalVector(da, &(BHD->f));
   DACreateGlobalVector(da, &(BHD->f2));
@@ -409,15 +409,15 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
   /* Compute fft from Coulomb potential (long) */
   /* ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
 			BHD->LJ_paramsHO, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft,
 			BHD->LJ_paramsH, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft,
 			BHD->LJ_paramsO, 1.0); */
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft,
 			q2HO, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucH, BHD->fH_l, BHD->ucH_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft,
 			q2H, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucO, BHD->fO_l, BHD->ucO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft,
 			q2O, 1.0);
 
   FOR_DIM
@@ -463,8 +463,8 @@ void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
   VecDestroy(BHD->dgH);
   VecDestroy(BHD->dgO);
   VecDestroy(BHD->dgHO);
-  VecDestroy(BHD->ucH);
-  VecDestroy(BHD->ucO);
+  VecDestroy(BHD->uc[0]);
+  VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
   VecDestroy(BHD->f);
   VecDestroy(BHD->f2);
@@ -612,7 +612,7 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 		       BHD->fH, BHD->fH_l, gH, gH,
 		       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
 		       dgH, BHD->f);
-  VecAXPY(dgH, BHD->PD->beta, BHD->ucH);
+  VecAXPY(dgH, BHD->PD->beta, BHD->uc[0]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/
@@ -666,7 +666,7 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 		       BHD->fO, BHD->fO_l, gO, gO,
 		       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
 		       dgO, BHD->f);
-  VecAXPY(dgO, BHD->PD->beta, BHD->ucO);
+  VecAXPY(dgO, BHD->PD->beta, BHD->uc[1]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/

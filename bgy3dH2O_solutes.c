@@ -184,7 +184,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  *
  * XXX: See (5.106) and (5.08) in the thesis. Return BHD->g_ini[0] and
  *      BHD->g_ini[1], for  H and  O in that  order, (beta *  (VM_LJ +
- *      VM_coulomb_short))    and   BHD->ucH,    BHD->ucO    (beta   *
+ *      VM_coulomb_short))   and  BHD->uc[0],   BHD->uc[1]    (beta  *
  *      VM_coulomb_long), but is beta missing here?
  */
 
@@ -283,11 +283,11 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
    * 3. Copy  the electrostatic potential  scaled by the  solvent site
    * charges into predefined locations:
    */
-  VecSet (BHD->ucH, 0.0);
-  VecAXPY (BHD->ucH, qH, v);
+  VecSet (BHD->uc[0], 0.0);
+  VecAXPY (BHD->uc[0], qH, v);
 
-  VecSet (BHD->ucO, 0.0);
-  VecAXPY (BHD->ucO, qO, v);
+  VecSet (BHD->uc[1], 0.0);
+  VecAXPY (BHD->uc[1], qO, v);
 
   /* MEMORY: deallocate huge array here! */
   VecDestroy (v);

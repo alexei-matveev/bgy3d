@@ -379,7 +379,6 @@ typedef struct BGY3dH2OStruct
   DA da;
   Vec fH[3],fO[3],fHO[3];
   Vec fH_l[3], fO_l[3], fHO_l[3];
-  Vec ucH, ucHO, ucO;
   Vec v[3];
   Vec g2H, g2O, g2HO;
 
@@ -398,11 +397,18 @@ typedef struct BGY3dH2OStruct
    * O, though the actual sites may be different.  Let us stick to the
    * convention that data for H is  stored in first- and data for O is
    * stored  in second  position of  an  array. Here  in g_ini[0]  and
-   * g_ini[1], respectively.
+   * g_ini[1] or uc[0] and uc[1], respectively.
    */
-  Vec g_ini[2];                 /* H, O in that order */
+  Vec g_ini[2];                 /* Short-range  force   field  of  the
+                                   solute   for  H   and  O   in  that
+                                   order. */
+
+  Vec uc[2];                    /* Long-range Coulomb  field for H and
+                                   O in that order. */
 
   Vec gHO_ini;
+  Vec ucHO;
+
   real ucH_0, ucO_0, ucHO_0;
 
   /*
