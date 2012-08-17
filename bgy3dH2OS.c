@@ -1411,7 +1411,7 @@ static real GetOptimalStepSize(State *BHD, Vec dg_newO, Vec dgO, Vec dgH)
   return step;
 }
 
-static void ComputedgFromg(State *BHD, Vec dg, Vec g0, Vec g)
+static void ComputedgFromg (Vec dg, Vec g0, Vec g)
 {
   int local_size, i;
   PetscScalar *dg_vec, *g_vec, *g0_vec;
@@ -1536,8 +1536,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
-      ComputedgFromg(BHD, dgH, g0H, BHD->g2HO);
-      ComputedgFromg(BHD, dgO, g0O, BHD->g2O);
+      ComputedgFromg (dgH, g0H, BHD->g2HO);
+      ComputedgFromg (dgO, g0O, BHD->g2O);
   }
 
   /* load initial configuration from file ??? */
@@ -2021,8 +2021,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
-      ComputedgFromg(BHD, dgH, g0H, BHD->g2HO);
-      ComputedgFromg(BHD, dgO, g0O, BHD->g2O);
+      ComputedgFromg (dgH, g0H, BHD->g2HO);
+      ComputedgFromg (dgO, g0O, BHD->g2O);
   }
 
   /* load initial configuration from file ??? */
