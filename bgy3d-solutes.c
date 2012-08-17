@@ -15,6 +15,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d_SolventParameters.h"
+#include "bgy3d-solutes.h"
 
 typedef struct Site {
     char name[5];            /* atom types. What are they used for? */
