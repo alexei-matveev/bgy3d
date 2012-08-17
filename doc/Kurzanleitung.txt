@@ -25,7 +25,7 @@ Die entsprechenden  Funktionen finden  sich dann in:  bgy3dH2O.c (ohne
 Solute) und bgy3dH2OS.c (mit Solute). (Da war ich noch guter Hoffnung,
 dass  es  auch  einfach  mit  H2O  als  Solvent  funktionieren  wird.)
 Parameter  zu den  jeweiligen  Solventen und  Soluten  finden sich  in
-bgy3d_SolventParameters.h und bgy3dH2O_solutes.c.
+bgy3d_SolventParameters.h und bgy3d-solutes.c.
 
 Generell    ist   der    Ablauf   folgender:    Man    berechnet   die
 Paarverteilungsfunktionen für den  reinen Solventen mit -BGY2Site oder
