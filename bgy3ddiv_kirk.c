@@ -5,7 +5,7 @@
 
 #include "bgy3d.h"
 
-BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg)
+BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 {
   BGY3dDivData BDD;
   DA da;
@@ -250,7 +250,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg)
   
 void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], dim, k, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
