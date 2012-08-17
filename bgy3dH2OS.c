@@ -13,7 +13,7 @@
 
 extern real NORM_REG;
 
-static BGY3dH2OData BGY3dH2OData_malloc(PData PD)
+static BGY3dH2OData BGY3dH2OData_malloc(ProblemData *PD)
 {
   BGY3dH2OData BHD;
   DA da;
@@ -355,7 +355,7 @@ static void BGY3dH2OData_free2(BGY3dH2OData BHD)
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix(BGY3dH2OData BHD, real zpad)
 {
-  PData PD;
+  ProblemData *PD;
   Mat M;
   DA da;
   int x[3], n[3], i[3], N[3], border;
@@ -464,7 +464,7 @@ void InitializeKSPSolver(BGY3dH2OData BHD)
 
 static void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3], border; // ic[3], k;
   PetscScalar ***gfrom_vec, ***gto_vec;
@@ -560,7 +560,7 @@ real ImposeLaplaceBoundary(BGY3dH2OData BHD, Vec g, Vec b, Vec x, real zpad, int
 
 void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   FILE *fp;
   real *xg, *g;
@@ -639,7 +639,7 @@ void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2)
 void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
@@ -879,7 +879,7 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   PetscScalar ***gHini_vec, ***gOini_vec;
   // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
@@ -1031,7 +1031,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
 			fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
@@ -1175,7 +1175,7 @@ static void Compute_H2O_interS_C(BGY3dH2OData BHD,
 			  fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			  fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
@@ -1320,7 +1320,7 @@ static void Compute_H2O_interS_C(BGY3dH2OData BHD,
 
 real ComputeCharge(BGY3dH2OData BHD, Vec g1, Vec g2)
 {
-  PData PD;
+  ProblemData *PD;
   real g1_sum, g2_sum, c;
   Vec help;
 
@@ -1352,7 +1352,7 @@ static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
   real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;
   BGY3dH2OData BHD;
-  PData PD;
+  ProblemData *PD;
   Vec gO, gH, dgO2;
 
   SD = (StepData) data;
@@ -1448,8 +1448,12 @@ static void ComputedgFromg(BGY3dH2OData BHD, Vec dg, Vec g0, Vec g)
 }
 
 
-
-Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
+/*
+ * This function is the main entry point for the BGY3dM equation for a
+ * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
+ * a historical baggage.
+ */
+Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dH2OData BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
@@ -1988,7 +1992,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 
 
 
-Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
+Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dH2OData BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
