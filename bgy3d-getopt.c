@@ -43,3 +43,11 @@ void bgy3d_load_vec (const char file[], Vec *vec) {
     VecLoad(viewer, VECMPI, vec);
     PetscViewerDestroy(viewer);
 }
+
+void bgy3d_save_vec (const char file[], const Vec vec) {
+    PetscViewer viewer;
+
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
+    VecView(vec, viewer);
+    PetscViewerDestroy(viewer);
+}
