@@ -1553,16 +1553,15 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       if(damp==-0.01)
 	{
 	  damp_LJ=0;
-	  //a0=0.4;
-          // XXX: return F * g2, not the calculation of F is divided due to long range Coulomb interation
-          // XXX: see comments in the function
-          // XXX: here F is force within solvents particles
+          /* XXX: Return F * g2.  Note the calculation of F is divided
+                  due to long  range Coulomb interation.  See comments
+                  in the  function.  Here  F is force  within solvents
+                  particles. */
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-          // XXX: return BHD->g_ini[0], BHD->g_ini[1] (see definition above)
-          // XXX: and BHD->uc[0], BHD->uc[1], which are VM_Coulomb_long, but should they multiply by beta?
-	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
+          /* XXX: Return BHD->g_ini[0],  BHD->g_ini[1] (see definition
+                  above)   and  BHD->uc[0],   BHD->uc[1],   which  are
+                  VM_Coulomb_long,   but  should   they   multiply  by
+                  beta? */
           // Change solute as HCl for standard test
           RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1570,11 +1569,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       else if(damp==0.0)
 	{
 	  damp_LJ=1.0;
-	  //a0=0.5;
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
           // Change solute as HCl for standard test
           RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1582,13 +1577,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       else
 	{
 	  damp_LJ=1.0;
-	  //a0=0.0002/damp;
 	  count+=1.0;
-	  //a0 = 0.1/4./(count);
 	  RecomputeInitialFFTs(BHD, (damp), 1.0);
-	  //RecomputeInitialSoluteData(BHD, (damp), 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, (damp), 1.0, zpad);
-	  // RecomputeInitialSoluteData_Hexane(BHD, (damp), 1.0, zpad);
           // Change solute as HCl for standard test
           RecomputeInitialSoluteData_HCl(BHD, (damp), 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1597,13 +1587,13 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
 
-      // XXX: p116-177 in thesis: Boundary Conditions
-      // XXX: (5.107) -(5.110)
-      // XXX: first impose boundary condistion
-      // XXX: then solve laplacian equation and substrate from g0
+      /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
+             (5.110):  first  impose  boundary condistion  then  solve
+             laplacian equation and substrate from g0. */
       ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
       ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
-      // XXX: then correct g0 with boundary condition again
+
+      /* XXX: then correct g0 with boundary condition again */
       Zeropad_Function(BHD, g0O, zpad, 0.0);
       Zeropad_Function(BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
