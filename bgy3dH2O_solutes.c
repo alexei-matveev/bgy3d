@@ -183,9 +183,9 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  * Create initial solute data.
  *
  * XXX: See (5.106) and (5.08) in the thesis. Return BHD->g_ini[0] and
- * BHD->g_ini[1],  for  H and  O  in  that  order,  (beta *  (VM_LJ  +
- * VM_coulomb_short)) and BHD->ucH, BHD->ucO (beta * VM_coulomb_long),
- * but is beta missing here?
+ *      BHD->g_ini[1], for  H and  O in that  order, (beta *  (VM_LJ +
+ *      VM_coulomb_short))    and   BHD->ucH,    BHD->ucO    (beta   *
+ *      VM_coulomb_long), but is beta missing here?
  */
 
 static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
@@ -223,19 +223,18 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
   assert (factor >= 0.0);
 
   /*
-   * Fill ff-interaction  of H  and O sites  with the solute  into the
-   * respective arrays.
-   *
-   * FIXME: Force field parameters, (eH, sH, qH) and (eO, sO, qO), for
-   * H and O are #defined at some obscure place:
+   * Fill the force field interaction of H and O (or other) sites with
+   * the solute into the respective arrays.
    *
    * We  supply ljc()  as  a  callback function  that  is supposed  to
    * compute the  interaction of  a charged LJ  solvent site  with the
    * solute.
    */
 #ifndef QM
-  field (BHD->da, BHD->PD, solvent[0], S, nsites, factor, ljc, BHD->g_ini[0]);
-  field (BHD->da, BHD->PD, solvent[1], S, nsites, factor, ljc, BHD->g_ini[1]);
+  for (int vsite = 0; vsite < 2; vsite++)
+      field (BHD->da, BHD->PD,
+             solvent[vsite], S, nsites, factor, ljc,
+             BHD->g_ini[vsite]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -243,15 +242,15 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
     a point  charge (Coulomb  short + Coulomb  long) to  a distributed
     Gaussian (Coulomb long only). */
 
-  Site neutral[2];              /* dont modify the global variable */
+  for (int vsite = 0; vsite < 2; vsite++) {
 
-  for (int i = 0; i < 2; i++) {
-    neutral[i] = solvent[i];
-    neutral[i].charge = 0.0;    /* modify a copy */
+    Site neutral = solvent[vsite]; /* dont modify the global variable */
+    neutral.charge = 0.0;          /* modify a copy */
+
+    field (BHD->da, BHD->PD,
+           neutral, S, nsites, factor, ljc,
+           BHD->g_ini[vsite]);
   }
-
-  field (BHD->da, BHD->PD, neutral[0], S, nsites, factor, ljc, BHD->g_ini[0]);
-  field (BHD->da, BHD->PD, neutral[1], S, nsites, factor, ljc, BHD->g_ini[1]);
 #endif
 
   /*
