@@ -4,7 +4,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
+#include "bgy3dH2OS.h"
 
 /*===================================================*/
 /* Parametrisierung TIP3P :  */

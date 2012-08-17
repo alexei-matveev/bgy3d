@@ -3,13 +3,9 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-#include "bgy3d-getopt.h"
-
-
 #include "bgy3d_SolventParameters.h"
-
-
-
+#include "bgy3d-getopt.h"
+#include "bgy3dH2OS.h"
 
 #define R_r  9
 #define R_l  7

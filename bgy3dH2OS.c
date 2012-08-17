@@ -7,12 +7,13 @@
 #include "bgy3d_SolventParameters.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"
+#include "bgy3dH2OS.h"
 
 #define damp0 0.001
 
 extern real NORM_REG;
 
-BGY3dH2OData BGY3dH2OData_malloc(PData PD)
+static BGY3dH2OData BGY3dH2OData_malloc(PData PD)
 {
   BGY3dH2OData BHD;
   DA da;
@@ -290,7 +291,7 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
 
 
 
-void BGY3dH2OData_free2(BGY3dH2OData BHD)
+static void BGY3dH2OData_free2(BGY3dH2OData BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -461,7 +462,7 @@ void InitializeKSPSolver(BGY3dH2OData BHD)
 
 }
 
-void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
+static void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
 {
   PData PD;
   DA da;
@@ -1170,7 +1171,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
 
 }
 
-void Compute_H2O_interS_C(BGY3dH2OData BHD,
+static void Compute_H2O_interS_C(BGY3dH2OData BHD,
 			  fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			  fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
 {
@@ -1345,7 +1346,7 @@ typedef struct StepDataStruct
   Vec dg_newO, dgO, dgH;
 }*StepData;
 
-PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
+static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 {
   StepData SD;
   real con, sumO, sumH; // res
@@ -1386,7 +1387,7 @@ PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 }
 
 
-real GetOptimalStepSize(BGY3dH2OData BHD, Vec dg_newO, Vec dgO, Vec dgH)
+static real GetOptimalStepSize(BGY3dH2OData BHD, Vec dg_newO, Vec dgO, Vec dgH)
 {
   SNES snes;
   Vec s, f;
@@ -1421,7 +1422,7 @@ real GetOptimalStepSize(BGY3dH2OData BHD, Vec dg_newO, Vec dgO, Vec dgH)
   return step;
 }
 
-void ComputedgFromg(BGY3dH2OData BHD, Vec dg, Vec g0, Vec g)
+static void ComputedgFromg(BGY3dH2OData BHD, Vec dg, Vec g0, Vec g)
 {
   int local_size, i;
   PetscScalar *dg_vec, *g_vec, *g0_vec;
