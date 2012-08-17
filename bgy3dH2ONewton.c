@@ -41,7 +41,7 @@
 
 
 
-BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
+BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 {
   BGY3dH2OData BHD;
   DA da;
@@ -941,7 +941,7 @@ PetscErrorCode MatMult_MFFD(Mat mat,Vec a,Vec y);
 PetscErrorCode PETSCSNES_DLLEXPORT MatCreate_MFFD(Mat A);
 */
 
-Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim)
 {
   SNES snes;
   KSP ksp;
@@ -1083,7 +1083,7 @@ Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim)
 
 #define NMIN 32
 
-Vec BGY3d_SolveNewton_H2O_MG(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2O_MG(ProblemData *PD, Vec g_ini, int vdim)
 {
   int nmax; // n;
 
