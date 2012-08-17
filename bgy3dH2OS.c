@@ -13,9 +13,9 @@
 
 extern real NORM_REG;
 
-static BGY3dH2OData BGY3dH2OData_malloc(ProblemData *PD)
+static State *BGY3dH2OData_malloc(ProblemData *PD)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   DA da;
   real beta, maxL;
   int x[3], n[3];
@@ -280,7 +280,7 @@ static BGY3dH2OData BGY3dH2OData_malloc(ProblemData *PD)
 
 
 
-static void BGY3dH2OData_free2(BGY3dH2OData BHD)
+static void BGY3dH2OData_free2(State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -342,7 +342,7 @@ static void BGY3dH2OData_free2(BGY3dH2OData BHD)
 
 #ifdef L_BOUNDARY
 /* Initialize M-Matrix with appropriate stencil */
-void InitializeLaplaceMatrix(BGY3dH2OData BHD, real zpad)
+void InitializeLaplaceMatrix(State *BHD, real zpad)
 {
   ProblemData *PD;
   Mat M;
@@ -427,7 +427,7 @@ void InitializeLaplaceMatrix(BGY3dH2OData BHD, real zpad)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 }
 
-void InitializeKSPSolver(BGY3dH2OData BHD)
+void InitializeKSPSolver(State *BHD)
 {
   PC pc;
 
@@ -451,7 +451,7 @@ void InitializeKSPSolver(BGY3dH2OData BHD)
 
 }
 
-static void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
+static void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
 {
   ProblemData *PD;
   DA da;
@@ -507,7 +507,7 @@ static void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
   DAVecRestoreArray(da, gto, &gto_vec);
 }
 
-real ImposeLaplaceBoundary(BGY3dH2OData BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
   real mpi_start, mpi_stop;
   static int count=0;
@@ -547,7 +547,7 @@ real ImposeLaplaceBoundary(BGY3dH2OData BHD, Vec g, Vec b, Vec x, real zpad, int
 
 #endif
 
-void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2)
+void ReadPairDistribution(State *BHD, char *filename, Vec g2)
 {
   ProblemData *PD;
   DA da;
@@ -625,7 +625,7 @@ void ReadPairDistribution(BGY3dH2OData BHD, char *filename, Vec g2)
 
 }
 
-void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
+void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 {
   DA da;
   ProblemData *PD;
@@ -865,7 +865,7 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
 
 }
 
-void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
 {
   DA da;
   ProblemData *PD;
@@ -1016,7 +1016,7 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 }
 
 
-void Compute_H2O_interS(BGY3dH2OData BHD,
+void Compute_H2O_interS(State *BHD,
 			fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help)
 {
@@ -1160,7 +1160,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
 
 }
 
-static void Compute_H2O_interS_C(BGY3dH2OData BHD,
+static void Compute_H2O_interS_C(State *BHD,
 			  fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
 			  fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
 {
@@ -1307,7 +1307,7 @@ static void Compute_H2O_interS_C(BGY3dH2OData BHD,
 
 
 
-real ComputeCharge(BGY3dH2OData BHD, Vec g1, Vec g2)
+real ComputeCharge(State *BHD, Vec g1, Vec g2)
 {
   ProblemData *PD;
   real g1_sum, g2_sum, c;
@@ -1331,7 +1331,7 @@ real ComputeCharge(BGY3dH2OData BHD, Vec g1, Vec g2)
 
 typedef struct StepDataStruct
 {
-  BGY3dH2OData BHD ;
+  State *BHD ;
   Vec dg_newO, dgO, dgH;
 }*StepData;
 
@@ -1340,7 +1340,7 @@ static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
   StepData SD;
   real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;
-  BGY3dH2OData BHD;
+  State *BHD;
   ProblemData *PD;
   Vec gO, gH, dgO2;
 
@@ -1376,7 +1376,7 @@ static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 }
 
 
-static real GetOptimalStepSize(BGY3dH2OData BHD, Vec dg_newO, Vec dgO, Vec dgH)
+static real GetOptimalStepSize(State *BHD, Vec dg_newO, Vec dgO, Vec dgH)
 {
   SNES snes;
   Vec s, f;
@@ -1411,7 +1411,7 @@ static real GetOptimalStepSize(BGY3dH2OData BHD, Vec dg_newO, Vec dgO, Vec dgH)
   return step;
 }
 
-static void ComputedgFromg(BGY3dH2OData BHD, Vec dg, Vec g0, Vec g)
+static void ComputedgFromg(State *BHD, Vec dg, Vec g0, Vec g)
 {
   int local_size, i;
   PetscScalar *dg_vec, *g_vec, *g0_vec;
@@ -1444,7 +1444,7 @@ static void ComputedgFromg(BGY3dH2OData BHD, Vec dg, Vec g0, Vec g)
  */
 Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;
   int max_iter=100, iter;
@@ -1927,7 +1927,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;
   int max_iter=100, iter;
