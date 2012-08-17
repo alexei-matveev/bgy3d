@@ -1451,7 +1451,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
-  PetscViewer viewer;
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
   char nameH[20], nameO[20];
@@ -1904,42 +1903,18 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       namecount++;
       sprintf(nameH, "vecH-%d.m", namecount-1);
       sprintf(nameO, "vecO-%d.m", namecount-1);
+
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
-      /* g_H */
-      PetscViewerASCIIOpen(PETSC_COMM_WORLD,nameH,&viewer);
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecH.m",FILE_MODE_WRITE,&viewer);
-      PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-      VecView(gH,viewer);
-      PetscViewerDestroy(viewer);
-      /* g_b */
-      PetscViewerASCIIOpen(PETSC_COMM_WORLD,nameO,&viewer);
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-      PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-      VecView(gO,viewer);
-      PetscViewerDestroy(viewer);
-
-/*       PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vechist.m",&viewer); */
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-/*       PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB); */
-/*       VecView(dg_histO,viewer); */
-/*       PetscViewerDestroy(viewer); */
-
+      bgy3d_save_vec_ascii (nameH, gH); /* g_H */
+      bgy3d_save_vec_ascii (nameO, gO); /* g_O */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       /************************************/
 
       /* save g to binary file */
       if (bgy3d_getopt_test ("-saveH2O")) {
 	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-	  /* dgH */
-	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
-				FILE_MODE_WRITE,&viewer);
-	  VecView(dgH,viewer);
-	  PetscViewerDestroy(viewer);
-	  /* dgO */
-	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgO.bin",
-				FILE_MODE_WRITE,&viewer);
-	  VecView(dgO,viewer);
-	  PetscViewerDestroy(viewer);
+          bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
+          bgy3d_save_vec ("dgO.bin", dgO); /* dgO */
 	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
@@ -1982,7 +1957,6 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
-  PetscViewer viewer;
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
   char nameH[20], nameO[20];
@@ -2421,42 +2395,19 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
       namecount++;
       sprintf(nameH, "vecH-%d.m", namecount-1);
       sprintf(nameO, "vecO-%d.m", namecount-1);
+
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
-      /* g_H */
-      PetscViewerASCIIOpen(PETSC_COMM_WORLD,nameH,&viewer);
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecH.m",FILE_MODE_WRITE,&viewer);
-      PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-      VecView(gH,viewer);
-      PetscViewerDestroy(viewer);
-      /* g_b */
-      PetscViewerASCIIOpen(PETSC_COMM_WORLD,nameO,&viewer);
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-      PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-      VecView(gO,viewer);
-      PetscViewerDestroy(viewer);
-
-/*       PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vechist.m",&viewer); */
-      //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-/*       PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB); */
-/*       VecView(dg_histO,viewer); */
-/*       PetscViewerDestroy(viewer); */
-
+      bgy3d_save_vec_ascii (nameH, gH); /* g_H */
+      bgy3d_save_vec_ascii (nameO, gO); /* g_O */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+
       /************************************/
 
       /* save g to binary file */
       if (bgy3d_getopt_test ("-saveH2O")) {
 	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-	  /* dgH */
-	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
-				FILE_MODE_WRITE,&viewer);
-	  VecView(dgH,viewer);
-	  PetscViewerDestroy(viewer);
-	  /* dgO */
-	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgO.bin",
-				FILE_MODE_WRITE,&viewer);
-	  VecView(dgO,viewer);
-	  PetscViewerDestroy(viewer);
+          bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
+          bgy3d_save_vec ("dgO.bin", dgH); /* dgO */
 	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
