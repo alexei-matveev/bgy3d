@@ -51,3 +51,12 @@ void bgy3d_save_vec (const char file[], const Vec vec) {
     VecView(vec, viewer);
     PetscViewerDestroy(viewer);
 }
+
+void bgy3d_save_vec_ascii (const char file[], const Vec vec) {
+    PetscViewer viewer;
+
+    PetscViewerASCIIOpen(PETSC_COMM_WORLD, file, &viewer);
+    PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+    VecView(vec, viewer);
+    PetscViewerDestroy(viewer);
+}
