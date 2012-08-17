@@ -241,7 +241,6 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg);
 void BGY3dDivData_free(BGY3dDivData BDD);
 
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M);
-// real Lennard_Jones_grad(real r, real xr, void *LJ_params);
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim);
 Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini, int vdim);
@@ -528,7 +527,7 @@ void EnforceNormalizationCondition (State *BHD, Vec dgO, Vec dgH, Vec gO, Vec gH
 Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini, int vdim);
 #ifdef L_BOUNDARY_MG
 void InitializeDMMGSolver (State *BHD);
-real  ImposeLaplaceBoundary (State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
+real ImposeLaplaceBoundary (State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
 #endif
 #endif
 
