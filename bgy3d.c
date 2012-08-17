@@ -157,18 +157,12 @@ int main(int argc, char **argv)
   if(s)
     {
       /* load initial configuration from file ??? */
-      if (bgy3d_getopt_test ("-load"))
-        {
-          PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
-                                FILE_MODE_READ,&viewer);
-          VecLoad(viewer,VECMPI, &g_ini);
-          PetscViewerDestroy(viewer);
+      if (bgy3d_getopt_test ("-load")) {
+          bgy3d_load_vec ("g.bin", &g_ini);
           PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
 
           g= (*s)(&PD, g_ini, 0);
-
-
-        }
+      }
       else
         g= (*s)(&PD, PETSC_NULL, 0);
 
@@ -189,14 +183,10 @@ int main(int argc, char **argv)
           PetscViewerDestroy(viewer);
 
           /* save g to binary file */
-          if (bgy3d_getopt_test ("-save"))
-            {
-	      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g.bin",
-				    FILE_MODE_WRITE,&viewer);
-	      VecView(g,viewer);
-	      PetscViewerDestroy(viewer);
+          if (bgy3d_getopt_test ("-save")) {
+              bgy3d_save_vec ("g.bin", g);
 	      PetscPrintf(PETSC_COMM_WORLD,"Result written to file \"g.bin\".\n");
-	    }
+          }
 
 	  VecDestroy(g);
 	}
