@@ -16,7 +16,7 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
 {
   BGY3dH2OData BHD;
   DA da;
-  real interval[2], h[3], N[3], L, beta, maxL;
+  real beta, maxL;
   int x[3], n[3];
   int np;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
@@ -75,15 +75,6 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
   BHD->rho  = PD->rho;
   BHD->rho_H = PD->rho;
   BHD->rho_O = PD->rho;
-
-
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
-  L=interval[1]-interval[0];
-  FOR_DIM
-    h[dim]=PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
 
   /* Initialize parallel stuff: fftw + petsc */
   BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
@@ -652,7 +643,7 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
   PetscScalar ***wHO_vec, ***wHH_vec;
-  real r[3], r_s, h[3], interval[2], beta, L, wconst_HO, wconst_HH, wG;
+  real r[3], r_s, h[3], interval[2], wconst_HO, wconst_HH, wG;
   int x[3], n[3], i[3];
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
@@ -681,8 +672,6 @@ void RecomputeInitialFFTs(BGY3dH2OData BHD, real damp, real damp_LJ)
     h[dim] = PD->h[dim];
 
   interval[0] = PD->interval[0];
-  L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
 
   wG = 1./h[0];
   wconst_HO  =
@@ -893,8 +882,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   PetscScalar ***gHini_vec, ***gOini_vec;
   // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
-  real r[3], r_s, h[3], interval[2], beta, L; // fac;
-  int x[3], n[3], i[3], N[3];
+  real r[3], r_s, h[3], interval[2], beta;
+  int x[3], n[3], i[3];
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
   real q2H, q2O, q2HO;
@@ -920,11 +909,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
   FOR_DIM
     h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
 
   interval[0] = PD->interval[0];
-  L = PD->interval[1]-PD->interval[0];
   beta = PD->beta;
 
   /* Get local portion of the grid */
@@ -1043,7 +1029,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, confac;
+  real fac, k_fac, L, k, h, sign; // confac;
 
   PD=BHD->PD;
 
@@ -1059,7 +1045,7 @@ void Compute_H2O_interS(BGY3dH2OData BHD,
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
 
-  confac = SQR(M_PI/L/2.);
+  /* confac = SQR(M_PI/L/2.); */
 
 
   /* Get local portion of the grid */
@@ -1187,7 +1173,7 @@ void Compute_H2O_interS_C(BGY3dH2OData BHD,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, confac, dampfac;
+  real fac, k_fac, L, k, h, sign, dampfac; // confac;
 
   PD=BHD->PD;
 
@@ -1203,7 +1189,7 @@ void Compute_H2O_interS_C(BGY3dH2OData BHD,
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
 
-  confac = SQR(M_PI/L/2.);
+  /* confac = SQR(M_PI/L/2.); */
 
   dampfac = damp/damp0;
 
