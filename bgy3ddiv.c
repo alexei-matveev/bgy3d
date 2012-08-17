@@ -36,7 +36,7 @@ real Lennard_Jones_ddU(real r, real xr, real epsilon, real sigma)
 }
 
 
-BGY3dDivData BGY3dDivData_malloc(PData PD, PetscTruth flg)
+BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
 {
   BGY3dDivData BDD;
   DA da;
@@ -321,7 +321,7 @@ BGY3dDivData BGY3dDivData_malloc(PData PD, PetscTruth flg)
 }
 
 
-BGY3dDivData BGY3dDivData_kirk_malloc(PData PD, PetscTruth flg)
+BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 {
   BGY3dDivData BDD;
   DA da;
@@ -609,7 +609,7 @@ void BGY3dDivData_free(BGY3dDivData BDD)
 
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M)
 {
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   MatStencil col[7],row;
   PetscScalar v[3], ***ddU_vec, ***(f_vec[3]);
@@ -719,7 +719,7 @@ void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M)
 
 void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim)
 {
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[3],row;
@@ -798,7 +798,7 @@ void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim)
 
 void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], k, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
@@ -859,7 +859,7 @@ void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f)
 
 void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], k, max_k;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
@@ -953,7 +953,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col,row;
@@ -1005,7 +1005,7 @@ void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f)
 void AssembleSystemMatrix2(BGY3dDivData BDD, Mat SM)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[2],row;
@@ -1108,7 +1108,7 @@ void AssembleSystemMatrix2(BGY3dDivData BDD, Mat SM)
 void AssembleSystemMatrix_part2(BGY3dDivData BDD, Mat SM)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[3],row;
@@ -1198,7 +1198,7 @@ void AssembleSystemMatrix_part2(BGY3dDivData BDD, Mat SM)
 void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3];
   real h[3];
   MatStencil col[2],row;
@@ -1307,7 +1307,7 @@ void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f)
 void ComputeRHS2(BGY3dDivData BDD, Vec b)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
@@ -1366,7 +1366,7 @@ void ComputeRHS2(BGY3dDivData BDD, Vec b)
 void ComputeRHS_laplace(BGY3dDivData BDD, Vec b)
 {
   DA da;
-  PData PD;
+  ProblemData *PD;
   int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
@@ -1629,7 +1629,7 @@ void ComputeBGY3d_F(BGY3dDivData BDD, Vec g0, Vec dg, Vec g,
 }
 
 
-Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;
@@ -1786,7 +1786,7 @@ Vec BGY3dDiv_solve(PData PD, Vec g_ini, int vdim)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3dDiv_solve2(PData PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;
