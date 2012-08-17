@@ -1548,41 +1548,28 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
-  for( damp=damp_start; damp <=1; damp+=0.1)
-    {
-      if(damp==-0.01)
-	{
-	  damp_LJ=0;
-          /* XXX: Return F * g2.  Note the calculation of F is divided
-                  due to long  range Coulomb interation.  See comments
-                  in the  function.  Here  F is force  within solvents
-                  particles. */
-	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-          /* XXX: Return BHD->g_ini[0],  BHD->g_ini[1] (see definition
-                  above)   and  BHD->uc[0],   BHD->uc[1],   which  are
-                  VM_Coulomb_long,   but  should   they   multiply  by
-                  beta? */
-          // Change solute as HCl for standard test
-          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
-      else if(damp==0.0)
-	{
-	  damp_LJ=1.0;
-	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-          // Change solute as HCl for standard test
-          RecomputeInitialSoluteData_HCl(BHD, 0.0, 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
-      else
-	{
-	  damp_LJ=1.0;
-	  count+=1.0;
-	  RecomputeInitialFFTs(BHD, (damp), 1.0);
-          // Change solute as HCl for standard test
-          RecomputeInitialSoluteData_HCl(BHD, (damp), 1.0, zpad);
-	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
-	}
+  for (damp = damp_start; damp <= 1; damp += 0.1) {
+
+      /* FIXME: I  guess the  logic with damping  factors can  be made
+         more straightforward:  */
+      if (damp > 0)
+	  count += 1.0;
+
+      damp_LJ = (damp >= 0 ? 1.0 : 0.0); /* yes, >=, so the
+                                            original */
+
+      /* XXX: Return F * g2.  Note the calculation of F is divided due
+              to long  range Coulomb interation.  See  comments in the
+              function.  Here F is force within solvents particles. */
+      RecomputeInitialFFTs(BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+
+      /* XXX: Return  BHD->g_ini[0],   BHD->g_ini[1]  (see  definition
+              above)    and   BHD->uc[0],   BHD->uc[1],    which   are
+              VM_Coulomb_long,  but  should  they  multiply  by  beta?
+              Solute is hardcoded as HCl for standard test */
+      RecomputeInitialSoluteData_HCl(BHD, (damp > 0.0 ? damp : 0.0), 1.0, zpad);
+
+      PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
       //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
