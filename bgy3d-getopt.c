@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "petscsys.h"
+#include "petscda.h" // Vec
 #include "bgy3d-getopt.h"
 
 int bgy3d_getopt_test (const char key[])
@@ -32,4 +33,13 @@ int bgy3d_getopt_real (const char key[], double *val)
   assert (!ierr);
 
   return (int) test;
+}
+
+
+void bgy3d_load_vec (const char file[], Vec *vec) {
+    PetscViewer viewer;
+
+    PetscViewerBinaryOpen(PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+    VecLoad(viewer, VECMPI, vec);
+    PetscViewerDestroy(viewer);
 }
