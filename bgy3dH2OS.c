@@ -23,7 +23,6 @@ static BGY3dH2OData BGY3dH2OData_malloc(ProblemData *PD)
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
   PetscInt lx[1], ly[1], *lz;
   PetscErrorCode ierr;
-  PetscViewer viewer;
 
   BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
 
@@ -258,19 +257,9 @@ static BGY3dH2OData BGY3dH2OData_malloc(ProblemData *PD)
   ReadPairDistribution(BHD, "g2S", BHD->g2H);
   ReadPairDistribution(BHD, "g2CS", BHD->g2HO);
 #else
-
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2H.bin",
-			FILE_MODE_READ,&viewer);
-  VecLoad(viewer, VECMPI, &(BHD->g2H));
-  PetscViewerDestroy(viewer);
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2O.bin",
-			FILE_MODE_READ,&viewer);
-  VecLoad(viewer, VECMPI, &(BHD->g2O));
-  PetscViewerDestroy(viewer);
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2HO.bin",
-			FILE_MODE_READ,&viewer);
-  VecLoad(viewer, VECMPI, &(BHD->g2HO));
-  PetscViewerDestroy(viewer);
+  bgy3d_load_vec ("g2H.bin", &(BHD->g2H));
+  bgy3d_load_vec ("g2O.bin", &(BHD->g2O));
+  bgy3d_load_vec ("g2HO.bin", &(BHD->g2HO));
 #endif
 
 
@@ -1555,16 +1544,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("-loadH2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      /* dgH */
-      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
-			    FILE_MODE_READ,&viewer);
-      VecLoad(viewer,VECMPI, &dgH);
-      PetscViewerDestroy(viewer);
-      /* dgO */
-      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgO.bin",
-			    FILE_MODE_READ,&viewer);
-      VecLoad(viewer,VECMPI, &dgO);
-      PetscViewerDestroy(viewer);
+      bgy3d_load_vec ("dgH.bin", &dgH); /* dgH */
+      bgy3d_load_vec ("dgO.bin", &dgO); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
@@ -2096,16 +2077,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("-loadH2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      /* dgH */
-      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
-			    FILE_MODE_READ,&viewer);
-      VecLoad(viewer,VECMPI, &dgH);
-      PetscViewerDestroy(viewer);
-      /* dgO */
-      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgO.bin",
-			    FILE_MODE_READ,&viewer);
-      VecLoad(viewer,VECMPI, &dgO);
-      PetscViewerDestroy(viewer);
+      bgy3d_load_vec ("dgH.bin", &dgH); /* dgH */
+      bgy3d_load_vec ("dgO.bin", &dgO); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
