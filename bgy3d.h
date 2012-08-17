@@ -62,13 +62,8 @@ typedef struct ProblemData
 
 /*
  * FIXME: "Never _ever_ make the  "pointerness" part of the type", (by
- * Linus Torvalds).  Use of  PData in type declaration is discouraged.
- * Consider  converting  "PData  PD"  to "ProblemData  *PD".   From  a
- * practical point of  view "const PData PD" does  not help protecting
- * the fields of the struct in the body of the function whereas "const
- * ProblemData *PD" does.
+ * Linus Torvalds).  Consider converting "PType x" to "Type *x".
  */
-typedef struct ProblemData *PData; /* DEPRECATED! */
 
 #ifdef MATPRECOND
 typedef struct MatPrecondStruct
