@@ -39,7 +39,7 @@
 
 
 
-BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
+BGY3dH2OData BGY3dH2OData_Newton_malloc(ProblemData *PD)
 {
   BGY3dH2OData BHD;
   DA da;
@@ -591,7 +591,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 {
   BGY3dH2OData BHD;
-  PData PD;
+  ProblemData *PD;
   DA da;
   H2OSdgF ***dg_struct;
   int i[3], x[3], n[3], index, N3;
@@ -788,7 +788,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 void WriteH2OSNewtonSolutionF(BGY3dH2OData BHD, Vec u)
 {
   H2OSdgF ***dg_struct;
-  PData PD;
+  ProblemData *PD;
   fftw_complex *uH_fft, *uO_fft;
   int i[3], x[3], n[3], N3, index;
   Vec dgH, dgO, gH, gO;
@@ -995,7 +995,7 @@ void WriteH2OSNewtonPlain(BGY3dH2OData BHD, Vec u)
 
 void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, Vec gH)
 {
-  PData PD;
+  ProblemData *PD;
   Vec gradO, gradH;
   int iter=0; // i
   real fu, fu_h, cO=1.0, cH=1.0, c, dcO, dcH;
@@ -1080,7 +1080,7 @@ PetscErrorCode ComputePreconditioner_H2OS(void *data, Vec x, Vec y)
 
 #include "petscmat.h"
 
-Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim)
 {
   SNES snes;
   KSP ksp;
@@ -1196,7 +1196,7 @@ Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
 
 
 
-Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini, int vdim)
 {
   SNES snes;
   KSP ksp;
