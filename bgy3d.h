@@ -369,7 +369,7 @@ void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 /*******************************************/
 /* Water  */
 /*******************************************/
-typedef struct BGY3dH2OStruct
+typedef struct State
 {
   DA da;
   Vec fH[3],fO[3],fHO[3];
@@ -447,7 +447,11 @@ typedef struct BGY3dH2OStruct
   Vec pre;
   real zpad;
 
-}*BGY3dH2OData;
+} State;
+
+typedef State *BGY3dH2OData;    /* DEPRECATED!    Consider   replacing
+                                   "BGY3dH2OData   BHD"   with  "State
+                                   *BHD" */
 
 typedef struct H2OdgStruct
 {
