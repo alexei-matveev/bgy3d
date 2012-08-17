@@ -8,7 +8,7 @@
 
 
 
-Vec BGY3d_vec_solve(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim)
 {
   Vec F, g;
   BGY3dParameterVec par_vec;
@@ -76,7 +76,7 @@ Vec BGY3d_vec_solve(PData PD, Vec g_ini, int vdim)
 
 }
 
-BGY3dParameterVec BGY3dParameterVec_malloc(PData PD)
+BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD)
 {
   BGY3dParameterVec par_vec;
 
