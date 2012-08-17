@@ -9,7 +9,7 @@
 
 #define NMAX 128
 
-Vec BGY3dDiv_solve_FourierTest(PData PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim)
 {
   Vec g[5];
   BGY3dFourierData BDD[5];
@@ -151,7 +151,7 @@ void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFouri
 }
 
 
-Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dDivData BDD;
   Vec g,  f, rhs;
@@ -215,7 +215,7 @@ Vec BGY3dDiv_test(PData PD, Vec g_ini, int vdim)
 
 }
 
-Vec BGY3dDivFourier_test(PData PD, Vec g_ini, int vdim)
+Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dDivData BDD;
   Vec g,  f, rhs;
@@ -273,7 +273,7 @@ Vec BGY3dDivFourier_test(PData PD, Vec g_ini, int vdim)
 
 void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***(k_vec[3]);
@@ -340,7 +340,7 @@ void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K)
 void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 		    real sigma_K)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
@@ -398,7 +398,7 @@ void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 			   real sigma_K)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
@@ -455,7 +455,7 @@ void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g2,
 			       Vec gg, Vec sol)
 {
-  PData PD;
+  ProblemData *PD;
   Vec g1, g2;
   DA da;
   int x[3], n[3], i[3], N[3], k;
@@ -545,7 +545,7 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
 }
 
 
-Vec BGY3d_Convolution_Test(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_Convolution_Test(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dFourierData BDD;
   Vec sol,  f, gg;
