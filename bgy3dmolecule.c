@@ -11,7 +11,7 @@
 
 
 
-BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(PData PD)
+BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
 {
   BGY3dDiatomicABData BDD;
   DA da;
@@ -399,7 +399,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 			   Vec f2[3], real sign2, Vec g2a, Vec g2b,
 			   Vec dg, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
@@ -595,7 +595,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 			   Vec dg, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
@@ -714,7 +714,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 /* Compute intramolecular part */
 void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
@@ -813,7 +813,7 @@ void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg,
 void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 					 Vec dg, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
@@ -905,7 +905,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 				   Vec dg, Vec dg_help)
 {
-  PData PD;
+  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
@@ -1119,7 +1119,7 @@ void Compute_dg_Pair_normcorrection(BGY3dDiatomicABData BDD, Vec dg, Vec g)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_DiatomicAB(PData PD, Vec g_ini, int vdim)
+Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim)
 {
   BGY3dDiatomicABData BDD;
   Vec g0a, g0b, g0ab, dga, dgb, dgab, dg_new, dg_new2, f, ga, gb, gab;
