@@ -451,7 +451,7 @@ void InitializeKSPSolver(State *BHD)
 
 }
 
-static void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
+static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
 {
   ProblemData *PD;
   DA da;
@@ -507,7 +507,7 @@ static void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
   DAVecRestoreArray(da, gto, &gto_vec);
 }
 
-real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+real ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
   real mpi_start, mpi_stop;
   static int count=0;
@@ -547,7 +547,7 @@ real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter
 
 #endif
 
-void ReadPairDistribution(State *BHD, char *filename, Vec g2)
+void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 {
   ProblemData *PD;
   DA da;

@@ -1,4 +1,4 @@
-void ReadPairDistribution (State *BHD, char *filename, Vec g2);
+void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
 Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim);
 Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim);
 void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ);
@@ -10,6 +10,6 @@ void Compute_H2O_interS (State *BHD,
 #ifdef L_BOUNDARY
 void InitializeLaplaceMatrix (State *BHD, real zpad);
 void InitializeKSPSolver (State *BHD);
-real  ImposeLaplaceBoundary (State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
+real  ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
 #endif
 
