@@ -1459,7 +1459,6 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
   PetscViewer viewer;
-  PetscTruth load_flag;
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
   char nameH[20], nameO[20];
@@ -1544,17 +1543,13 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
   VecSet(dgO,0);
   VecSet(dg_new,0.0);
 
-  load_flag = bgy3d_getopt_test ("-fromg2");
-  if( load_flag )
-    {
+  if (bgy3d_getopt_test ("-fromg2")) {
       ComputedgFromg(BHD, dgH, g0H, BHD->g2HO);
       ComputedgFromg(BHD, dgO, g0O, BHD->g2O);
-    }
-   load_flag = PETSC_FALSE;
+  }
+
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("-loadH2O");
-  if(load_flag)
-    {
+  if (bgy3d_getopt_test ("-loadH2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       /* dgH */
       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
@@ -1567,9 +1562,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
       VecLoad(viewer,VECMPI, &dgO);
       PetscViewerDestroy(viewer);
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-    }
-
-
+  }
 
   for( damp=damp_start; damp <=1; damp+=0.1)
     {
@@ -1950,9 +1943,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
       /************************************/
 
       /* save g to binary file */
-      load_flag = bgy3d_getopt_test ("-saveH2O");
-      if(load_flag)
-	{
+      if (bgy3d_getopt_test ("-saveH2O")) {
 	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
 	  /* dgH */
 	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
@@ -1965,7 +1956,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  VecView(dgO,viewer);
 	  PetscViewerDestroy(viewer);
 	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-	}
+      }
     }
 
 
@@ -2007,7 +1998,6 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
   PetscViewer viewer;
-  PetscTruth load_flag;
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
   char nameH[20], nameO[20];
@@ -2094,17 +2084,13 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
   VecSet(dgO,0);
   VecSet(dg_new,0.0);
 
-  load_flag = bgy3d_getopt_test ("-fromg2");
-  if( load_flag )
-    {
+  if (bgy3d_getopt_test ("-fromg2")) {
       ComputedgFromg(BHD, dgH, g0H, BHD->g2HO);
       ComputedgFromg(BHD, dgO, g0O, BHD->g2O);
-    }
-   load_flag = PETSC_FALSE;
+  }
+
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("-loadH2O");
-  if(load_flag)
-    {
+  if (bgy3d_getopt_test ("-loadH2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       /* dgH */
       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
@@ -2117,9 +2103,7 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
       VecLoad(viewer,VECMPI, &dgO);
       PetscViewerDestroy(viewer);
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-    }
-
-
+  }
 
   for( damp=damp_start; damp <=1; damp+=0.1)
     {
@@ -2484,9 +2468,7 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
       /************************************/
 
       /* save g to binary file */
-      load_flag = bgy3d_getopt_test ("-saveH2O");
-      if(load_flag)
-	{
+      if (bgy3d_getopt_test ("-saveH2O")) {
 	  PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
 	  /* dgH */
 	  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"dgH.bin",
@@ -2499,7 +2481,7 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
 	  VecView(dgO,viewer);
 	  PetscViewerDestroy(viewer);
 	  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-	}
+      }
     }
 
 
