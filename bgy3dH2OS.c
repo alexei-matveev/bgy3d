@@ -13,9 +13,9 @@
 
 extern real NORM_REG;
 
-static State *BGY3dH2OData_malloc(ProblemData *PD)
+static State initialize_state (/* not const */ ProblemData *PD)
 {
-  State *BHD;
+  State BHD;
   DA da;
   real beta, maxL;
   int x[3], n[3];
@@ -24,32 +24,30 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
   PetscInt lx[1], ly[1], *lz;
   PetscErrorCode ierr;
 
-  BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
-
   /****************************************************/
   /* set Lennard-Jones and Coulomb parameters */
   /****************************************************/
 
   /* water hydrogen */
-  BHD->LJ_paramsH[0] = eH;  /* epsilon  */
-  BHD->LJ_paramsH[1] = sH;  /* sigma    */
-  BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
+  BHD.LJ_paramsH[0] = eH;  /* epsilon  */
+  BHD.LJ_paramsH[1] = sH;  /* sigma    */
+  BHD.LJ_paramsH[2] = SQR(qH); /* charge product */
 
   /* water oxygen */
-  BHD->LJ_paramsO[0] = eO;  /* epsilon  */
-  BHD->LJ_paramsO[1] = sO;  /* sigma    */
-  BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
+  BHD.LJ_paramsO[0] = eO;  /* epsilon  */
+  BHD.LJ_paramsO[1] = sO;  /* sigma    */
+  BHD.LJ_paramsO[2] = SQR(qO); /* charge product */
 
   /* water O-H mixed parameters */
-  BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
-  BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
-  BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
+  BHD.LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
+  BHD.LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
+  BHD.LJ_paramsHO[2] = qH*qO; /* charge product */
 
   /****************************************************/
 
 
 
-  BHD->PD = PD;
+  BHD.PD = PD;
   /*****************************/
   /* reset standard parameters */
   /*****************************/
@@ -71,19 +69,19 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
   /******************************/
-  BHD->beta = PD->beta;
-  BHD->rho  = PD->rho;
-  BHD->rho_H = PD->rho;
-  BHD->rho_O = PD->rho;
+  BHD.beta = PD->beta;
+  BHD.rho  = PD->rho;
+  BHD.rho_H = PD->rho;
+  BHD.rho_O = PD->rho;
 
   /* Initialize parallel stuff: fftw + petsc */
-  BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
+  BHD.fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
 					    PD->N[2], PD->N[1], PD->N[0],
 					    FFTW_FORWARD, FFTW_ESTIMATE);
-  BHD->fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
+  BHD.fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
 					    PD->N[2], PD->N[1], PD->N[0],
 					    FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftwnd_mpi_local_sizes(BHD->fft_plan_fw, &local_nx, &local_x_start,
+  fftwnd_mpi_local_sizes(BHD.fft_plan_fw, &local_nx, &local_x_start,
 			 &local_ny, &local_y_start, &total_local_size);
   /* Get number of processes */
   MPI_Comm_size(PETSC_COMM_WORLD, &np);
@@ -101,14 +99,14 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 	     1, 1, np,
 	     1,1,
 	     lx, ly, lz,
-	     &(BHD->da));
-  da = BHD->da;
+	     &(BHD.da));
+  da = BHD.da;
    /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-  DACreateGlobalVector(da, &(BHD->xH));
-  DACreateGlobalVector(da, &(BHD->xO));
-  VecSet(BHD->xH, 0.0);
-  VecSet(BHD->xO, 0.0);
+  DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
+  DACreateGlobalVector(da, &(BHD.xH));
+  DACreateGlobalVector(da, &(BHD.xO));
+  VecSet(BHD.xH, 0.0);
+  VecSet(BHD.xO, 0.0);
 #endif
 #ifdef L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
@@ -116,8 +114,8 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 	     1, 1, np,
 	     1,1,
 	     lx, ly, lz,
-	     &(BHD->da));
-  da = BHD->da;
+	     &(BHD.da));
+  da = BHD.da;
 
   for(dim=0; dim<np; dim++)
     lz[dim]/=2;
@@ -128,7 +126,7 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 	     1, 1, np,
 	     1,1,
 	     lx, ly, lz,
-	     &(BHD->da_dmmg));
+	     &(BHD.da_dmmg));
 #endif
 
 #ifndef  L_BOUNDARY
@@ -138,10 +136,10 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 	     1, 1, np,
 	     1,0,
 	     lx, ly, lz,
-	     &(BHD->da));
+	     &(BHD.da));
 
 
-  da = BHD->da;
+  da = BHD.da;
 #endif
 #endif
 
@@ -165,55 +163,55 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
    */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD->g_ini[0])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g_ini[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g_ini[1])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g_ini[1])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->uc[0])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.uc[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->uc[1])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.uc[1])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.ucHO)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2H)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2H)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2O)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2O)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2HO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2HO)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->pre)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.pre)); // CHKERRQ(ierr);
   assert (!ierr);
 
   FOR_DIM
     {
 
-      ierr = DACreateGlobalVector(da, &(BHD->fH[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fH[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fO[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fHO[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fH_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fH_l[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fO_l[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fHO_l[dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->v[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.v[dim])); // CHKERRQ(ierr);
       assert (!ierr);
     }
 
 
-  VecSet(BHD->pre,0.0);
+  VecSet(BHD.pre,0.0);
 
-/*   VecView(BHD->gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
+/*   VecView(BHD.gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
 
 
 
-  if(BHD->fft_plan_fw == NULL || BHD->fft_plan_bw == NULL)
+  if(BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
 		  PD->id);
@@ -224,42 +222,42 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD->fg2HH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2OO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2HO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2HHl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2OOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2HOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2HH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2OO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2HO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2HHl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2OOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2HOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
-      BHD->fO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
     }
 
-  BHD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->wHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->wHH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.ucH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.ucO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.ucHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.wHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.wHH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
 
 
   /* Read g^2  from file */
-/*   ReadPairDistribution(BHD, "g2_OO", BHD->g2O); */
-/*   ReadPairDistribution(BHD, "g2_HH", BHD->g2H); */
-/*   ReadPairDistribution(BHD, "g2_HO", BHD->g2HO); */
+/*   ReadPairDistribution(&BHD, "g2_OO", BHD.g2O); */
+/*   ReadPairDistribution(&BHD, "g2_HH", BHD.g2H); */
+/*   ReadPairDistribution(&BHD, "g2_HO", BHD.g2HO); */
 
 #ifdef CS2
-  ReadPairDistribution(BHD, "g2C", BHD->g2O);
-  ReadPairDistribution(BHD, "g2S", BHD->g2H);
-  ReadPairDistribution(BHD, "g2CS", BHD->g2HO);
+  ReadPairDistribution(&BHD, "g2C", BHD.g2O);
+  ReadPairDistribution(&BHD, "g2S", BHD.g2H);
+  ReadPairDistribution(&BHD, "g2CS", BHD.g2HO);
 #else
-  bgy3d_load_vec ("g2H.bin", &(BHD->g2H));
-  bgy3d_load_vec ("g2O.bin", &(BHD->g2O));
-  bgy3d_load_vec ("g2HO.bin", &(BHD->g2HO));
+  bgy3d_load_vec ("g2H.bin", &(BHD.g2H));
+  bgy3d_load_vec ("g2O.bin", &(BHD.g2O));
+  bgy3d_load_vec ("g2HO.bin", &(BHD.g2HO));
 #endif
 
 
@@ -268,10 +266,10 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 
 
   /* Compute initial data */
-  //RecomputeInitialFFTs(BHD, 1.0, 1.0);
+  //RecomputeInitialFFTs(&BHD, 1.0, 1.0);
 
   /* Compute Solute dependent initial data */
-  //RecomputeInitialSoluteData(BHD, 1.0, 1.0);
+  //RecomputeInitialSoluteData(&BHD, 1.0, 1.0);
 
   free(lz);
 
@@ -280,7 +278,7 @@ static State *BGY3dH2OData_malloc(ProblemData *PD)
 
 
 
-static void BGY3dH2OData_free2(State *BHD)
+static void finalize_state (State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -336,8 +334,6 @@ static void BGY3dH2OData_free2(State *BHD)
 
   fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
   fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
-
-  free(BHD);
 }
 
 #ifdef L_BOUNDARY
@@ -1444,7 +1440,6 @@ static void ComputedgFromg (Vec dg, Vec g0, Vec g)
  */
 Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  State *BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;
   int max_iter=100, iter;
@@ -1461,7 +1456,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
-  BHD = BGY3dH2OData_malloc(PD);
+  State BHD = initialize_state (PD);
   if( r_HH >0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
@@ -1490,44 +1485,44 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
   PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
 
-  ImposeBoundaryCondition_Initialize( BHD, zpad);
+  ImposeBoundaryCondition_Initialize( &BHD, zpad);
 #ifdef L_BOUNDARY
-  BHD->zpad=zpad;
+  BHD.zpad=zpad;
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix(&BHD, zpad);
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver(&BHD);
 #endif
 #ifdef L_BOUNDARY_MG
-  BHD->zpad=zpad;
+  BHD.zpad=zpad;
 
-  InitializeDMMGSolver(BHD);
+  InitializeDMMGSolver(&BHD);
 #endif
-  DACreateGlobalVector(BHD->da, &gH);
-  DACreateGlobalVector(BHD->da, &gO);
-  DACreateGlobalVector(BHD->da, &dgH);
-  DACreateGlobalVector(BHD->da, &dgO);
-  DACreateGlobalVector(BHD->da, &dg_new);
-  DACreateGlobalVector(BHD->da, &dg_new2);
-  DACreateGlobalVector(BHD->da, &f);
+  DACreateGlobalVector(BHD.da, &gH);
+  DACreateGlobalVector(BHD.da, &gO);
+  DACreateGlobalVector(BHD.da, &dgH);
+  DACreateGlobalVector(BHD.da, &dgO);
+  DACreateGlobalVector(BHD.da, &dg_new);
+  DACreateGlobalVector(BHD.da, &dg_new2);
+  DACreateGlobalVector(BHD.da, &f);
 
-  DACreateGlobalVector(BHD->da, &tH);
-  DACreateGlobalVector(BHD->da, &tO);
+  DACreateGlobalVector(BHD.da, &tH);
+  DACreateGlobalVector(BHD.da, &tO);
 
-  DACreateGlobalVector(BHD->da, &dg_newH);
-  DACreateGlobalVector(BHD->da, &dg_newO);
+  DACreateGlobalVector(BHD.da, &dg_newH);
+  DACreateGlobalVector(BHD.da, &dg_newO);
 
-  DACreateGlobalVector(BHD->da, &dg_histO);
-  DACreateGlobalVector(BHD->da, &dg_histH);
+  DACreateGlobalVector(BHD.da, &dg_histO);
+  DACreateGlobalVector(BHD.da, &dg_histH);
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
 // XXX: here g0 = beta * (VM_LJ + VM_coulomb_short) actually
 // XXX: see: (5.106) and (5.108) in Jager's thesis
-  g0H=BHD->g_ini[0];
-  g0O=BHD->g_ini[1];
+  g0H=BHD.g_ini[0];
+  g0O=BHD.g_ini[1];
 
-/*   VecView(BHD->fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
+/*   VecView(BHD.fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
 
   /* set initial guess*/
@@ -1536,8 +1531,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
-      ComputedgFromg (dgH, g0H, BHD->g2HO);
-      ComputedgFromg (dgO, g0O, BHD->g2O);
+      ComputedgFromg (dgH, g0H, BHD.g2HO);
+      ComputedgFromg (dgO, g0O, BHD.g2O);
   }
 
   /* load initial configuration from file ??? */
@@ -1561,36 +1556,36 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       /* XXX: Return F * g2.  Note the calculation of F is divided due
               to long  range Coulomb interation.  See  comments in the
               function.  Here F is force within solvents particles. */
-      RecomputeInitialFFTs(BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* XXX: Return  BHD->g_ini[0],   BHD->g_ini[1]  (see  definition
-              above)    and   BHD->uc[0],   BHD->uc[1],    which   are
+      /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
+              above)    and   BHD.uc[0],   BHD.uc[1],    which   are
               VM_Coulomb_long,  but  should  they  multiply  by  beta?
               Solute is hardcoded as HCl for standard test */
-      RecomputeInitialSoluteData_HCl(BHD, (damp > 0.0 ? damp : 0.0), 1.0, zpad);
+      RecomputeInitialSoluteData_HCl(&BHD, (damp > 0.0 ? damp : 0.0), 1.0, zpad);
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
-      //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
-      //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
 
       /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
              (5.110):  first  impose  boundary condistion  then  solve
              laplacian equation and substrate from g0. */
-      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
-      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
+      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.xH, zpad, NULL);
+      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.xO, zpad, NULL);
 
       /* XXX: then correct g0 with boundary condition again */
-      Zeropad_Function(BHD, g0O, zpad, 0.0);
-      Zeropad_Function(BHD, g0H, zpad, 0.0);
+      Zeropad_Function(&BHD, g0O, zpad, 0.0);
+      Zeropad_Function(&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
 
       ComputeH2O_g( gH, g0H, dgH);
       ComputeH2O_g( gO, g0O, dgO);
 
 
-  /*     VecCopy(BHD->g2HO, gH);  */
-/*       VecCopy(BHD->g2O, gO);  */
+  /*     VecCopy(BHD.g2HO, gH);  */
+/*       VecCopy(BHD.g2O, gO);  */
 
       a=a0;
       a1=a0;
@@ -1610,37 +1605,37 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  /* H */
 	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HO_fft, gO, BHD->ucHO_fft, BHD->fH_fft,
-			     1.0, BHD->rho_O, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+			     1.0, BHD.rho_O, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HH_fft, gH, BHD->ucH_fft, BHD->fH_fft,
-			     0.0, BHD->rho_H, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+			     0.0, BHD.rho_H, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 	  VecScale(dg_new,damp_LJ);
 
 	  /* Coulomb long */
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HOl_fft, gO, BHD->ucHO_fft, BHD->fH_fft,
-			       1.0, BHD->rho_O, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+			       1.0, BHD.rho_O, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HHl_fft, gH, BHD->ucH_fft, BHD->fH_fft,
-			       0.0, BHD->rho_H, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+			       0.0, BHD.rho_H, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 
-	  Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(BHD, gO, tO, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(BHD, gO, tO, r_HO, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, dg_new2, f);
+	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+	  //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
+	  Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 /*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
 /*  	  exit(1);    */
 
-	  //dgH_norm = ComputeCharge(BHD, gH, gO);
+	  //dgH_norm = ComputeCharge(&BHD, gH, gO);
 	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
 /* 	  if(dgH_norm<1.0) */
 /* 	    VecScale(dg_new, 1.2); */
@@ -1649,16 +1644,16 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD->uc[0]);
-	  VecAXPY(dg_new, 1.0, BHD->uc[0]);
-/* 	  dgH_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
+	  //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
+	  VecAXPY(dg_new, 1.0, BHD.uc[0]);
+/* 	  dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
 	  //VecShift(dg_new, -dgH_norm);
-	  //ImposeBoundaryCondition( BHD, dg_new);
+	  //ImposeBoundaryCondition( &BHD, dg_new);
 
-	  ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xH, zpad, NULL);
-	  Zeropad_Function(BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(BHD, dg_new, zpad-1, zpad, 0.0);
+	  ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, NULL);
+	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
 
 
@@ -1675,39 +1670,39 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  /* O */
 	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2OO_fft, gO, BHD->ucO_fft, BHD->fO_fft,
-			     1.0, BHD->rho_O, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+			     1.0, BHD.rho_O, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HO_fft, gH, BHD->ucHO_fft, BHD->fO_fft,
-			     0.0, BHD->rho_H, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+			     0.0, BHD.rho_H, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 	  VecScale(dg_new,damp_LJ);
 
 	  /* Coulomb long */
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2OOl_fft, gO, BHD->ucO_fft, BHD->fO_fft,
-			       1.0, BHD->rho_O, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+			       1.0, BHD.rho_O, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HOl_fft, gH, BHD->ucHO_fft, BHD->fO_fft,
-			       0.0, BHD->rho_H, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+			       0.0, BHD.rho_H, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 
 
-	  Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
-	  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(BHD, gH, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnIII(BHD, gH, tH, r_HO, dg_new2, f);
+	  Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
+	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 /*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
 /*  	  exit(1);    */
 
 
-	  //dgO_norm = ComputeCharge(BHD, gH, gO);
+	  //dgO_norm = ComputeCharge(&BHD, gH, gO);
 	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
 /* 	  if(dgO_norm<1.0) */
 /* 	    VecScale(dg_new, 0.9); */
@@ -1716,15 +1711,15 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD->uc[1]);
-	  VecAXPY(dg_new, 1, BHD->uc[1]);
-/* 	  dgO_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
+	  //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
+	  VecAXPY(dg_new, 1, BHD.uc[1]);
+/* 	  dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
 	  //VecShift(dg_new, -dgO_norm);
-	  //ImposeBoundaryCondition( BHD, dg_new);
-	  ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xO, zpad, NULL);
-	  Zeropad_Function(BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(BHD, dg_new, zpad-1, zpad, 0.0);
+	  //ImposeBoundaryCondition( &BHD, dg_new);
+	  ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, NULL);
+	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
 /* 	  VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);  */
 /* 	  exit(1);  */
@@ -1747,7 +1742,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 /* 	    { */
 /* 	      VecScale(dg_newO, a); */
 /* 	      VecScale(dg_newH, a); */
-/* 	      EnforceNormalizationCondition(BHD, dg_newO, dg_newH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
 /* 	      a=1.0; */
 /* 	    } */
 
@@ -1765,7 +1760,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* Move dgO */
 	  if(0&& iter>10)
 	    {
-	      aO = GetOptimalStepSize(BHD, dg_newO, dgO, dgH);
+	      aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
 	      //if(aO<0) aO = a;
 	      VecCopy(dgO, f);
 	      VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
@@ -1798,20 +1793,20 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 /* 	    } */
 	  ComputeH2O_g( gH, g0H, dgH);
 	  ComputeH2O_g( gO, g0O, dgO);
-	  norm = ComputeCharge(BHD, gH, gO);
+	  norm = ComputeCharge(&BHD, gH, gO);
 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
-	  //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
+	  //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
 
 
 /* 	  if( !(iter%10) &&iter>0  ) */
 /* 	    { */
-/* 	      EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 
 /* 	    } */
 
 /* 	  if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
 /* 	    { */
-/* 	      EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 /* 	      a0=0.1; */
 /* 	    } */
 
@@ -1914,10 +1909,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(dg_histH);
   VecDestroy(dg_histO);
 
-  BGY3dH2OData_free2(BHD);
+  finalize_state (&BHD);
 
 
-  //VecView(BHD->uc[1],PETSC_VIEWER_STDERR_WORLD);
+  //VecView(BHD.uc[1],PETSC_VIEWER_STDERR_WORLD);
    //exit(1);
 
   return PETSC_NULL;
@@ -1927,7 +1922,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  State *BHD;
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;
   int max_iter=100, iter;
@@ -1945,8 +1939,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (3-site) equation ...\n");
 
-  BHD = BGY3dH2OData_malloc(PD);
-  BHD->rho_H = 2.*BHD->rho_H;
+  State BHD = initialize_state (PD);
+  BHD.rho_H = 2.*BHD.rho_H;
   if( r_HH <0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
@@ -1976,43 +1970,43 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
   PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
 
-  ImposeBoundaryCondition_Initialize( BHD, zpad);
+  ImposeBoundaryCondition_Initialize( &BHD, zpad);
 #ifdef L_BOUNDARY
-  BHD->zpad = zpad;
+  BHD.zpad = zpad;
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix(&BHD, zpad);
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver(&BHD);
 #endif
 #ifdef L_BOUNDARY_MG
-  BHD->zpad = zpad;
+  BHD.zpad = zpad;
   /* Create KSP environment */
-  InitializeDMMGSolver(BHD);
+  InitializeDMMGSolver(&BHD);
 #endif
 
-  DACreateGlobalVector(BHD->da, &gH);
-  DACreateGlobalVector(BHD->da, &gO);
-  DACreateGlobalVector(BHD->da, &dgH);
-  DACreateGlobalVector(BHD->da, &dgO);
-  DACreateGlobalVector(BHD->da, &dg_new);
-  DACreateGlobalVector(BHD->da, &dg_new2);
-  DACreateGlobalVector(BHD->da, &f);
+  DACreateGlobalVector(BHD.da, &gH);
+  DACreateGlobalVector(BHD.da, &gO);
+  DACreateGlobalVector(BHD.da, &dgH);
+  DACreateGlobalVector(BHD.da, &dgO);
+  DACreateGlobalVector(BHD.da, &dg_new);
+  DACreateGlobalVector(BHD.da, &dg_new2);
+  DACreateGlobalVector(BHD.da, &f);
 
-  DACreateGlobalVector(BHD->da, &tH);
-  DACreateGlobalVector(BHD->da, &tO);
+  DACreateGlobalVector(BHD.da, &tH);
+  DACreateGlobalVector(BHD.da, &tO);
 
-  DACreateGlobalVector(BHD->da, &dg_newH);
-  DACreateGlobalVector(BHD->da, &dg_newO);
+  DACreateGlobalVector(BHD.da, &dg_newH);
+  DACreateGlobalVector(BHD.da, &dg_newO);
 
-  DACreateGlobalVector(BHD->da, &dg_histO);
-  DACreateGlobalVector(BHD->da, &dg_histH);
+  DACreateGlobalVector(BHD.da, &dg_histO);
+  DACreateGlobalVector(BHD.da, &dg_histH);
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
-  g0H=BHD->g_ini[0];
-  g0O=BHD->g_ini[1];
+  g0H=BHD.g_ini[0];
+  g0O=BHD.g_ini[1];
 
-/*   VecView(BHD->fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
+/*   VecView(BHD.fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
 
   /* set initial guess*/
@@ -2021,8 +2015,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
-      ComputedgFromg (dgH, g0H, BHD->g2HO);
-      ComputedgFromg (dgO, g0O, BHD->g2O);
+      ComputedgFromg (dgH, g0H, BHD.g2HO);
+      ComputedgFromg (dgO, g0O, BHD.g2O);
   }
 
   /* load initial configuration from file ??? */
@@ -2039,22 +2033,22 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 	{
 	  damp_LJ=0;
 	  //a0=0.4;
-	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData_Water(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(BHD, 0.0, 1.0, zpad);
+	  RecomputeInitialFFTs(&BHD, 0.0, 1.0);
+	  //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
+	  //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
+	  //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
+	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
       else if(damp==0.0)
 	{
 	  damp_LJ=1.0;
 	  //a0=0.5;
-	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
-	  //RecomputeInitialSoluteData_Water(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(BHD, 0.0, 1.0, zpad);
+	  RecomputeInitialFFTs(&BHD, 0.0, 1.0);
+	  //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
+	  //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
+	  //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
+	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
       else
@@ -2064,29 +2058,29 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  count+=1.0;
 	  //a0 = 0.1/4./(count);
 	  a0 = 0.1/(count+5.0);
-	  RecomputeInitialFFTs(BHD, (damp), 1.0);
-	  //RecomputeInitialSoluteData_Water(BHD, (damp), 1.0, zpad);
-	  //RecomputeInitialSoluteData_Hexane(BHD, (damp), 1.0, zpad);
-	  //RecomputeInitialSoluteData_Methanol(BHD, (damp), 1.0, zpad);
-	  RecomputeInitialSoluteData_ButanoicAcid(BHD, (damp), 1.0, zpad);
+	  RecomputeInitialFFTs(&BHD, (damp), 1.0);
+	  //RecomputeInitialSoluteData_Water(&BHD, (damp), 1.0, zpad);
+	  //RecomputeInitialSoluteData_Hexane(&BHD, (damp), 1.0, zpad);
+	  //RecomputeInitialSoluteData_Methanol(&BHD, (damp), 1.0, zpad);
+	  RecomputeInitialSoluteData_ButanoicAcid(&BHD, (damp), 1.0, zpad);
 	  PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 	}
 
-      //Smooth_Function(BHD, g0O, zpad-1, zpad, 0.0);
-      //Smooth_Function(BHD, g0H, zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
 
-      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
-      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
-      Zeropad_Function(BHD, g0O, zpad, 0.0);
-      Zeropad_Function(BHD, g0H, zpad, 0.0);
+      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.xH, zpad, NULL);
+      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.xO, zpad, NULL);
+      Zeropad_Function(&BHD, g0O, zpad, 0.0);
+      Zeropad_Function(&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
 
       ComputeH2O_g( gH, g0H, dgH);
       ComputeH2O_g( gO, g0O, dgO);
 
 
-  /*     VecCopy(BHD->g2HO, gH);  */
-/*       VecCopy(BHD->g2O, gO);  */
+  /*     VecCopy(BHD.g2HO, gH);  */
+/*       VecCopy(BHD.g2O, gO);  */
 
       a=a0;
       a1=a0;
@@ -2106,41 +2100,41 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  /* H */
 	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HO_fft, gO, BHD->ucHO_fft, BHD->fH_fft,
-			     1.0, BHD->rho_O, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HO_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+			     1.0, BHD.rho_O, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HH_fft, gH, BHD->ucH_fft, BHD->fH_fft,
-			     0.0, BHD->rho_H, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HH_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+			     0.0, BHD.rho_H, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 	  VecScale(dg_new,damp_LJ);
 
 	  /* Coulomb long */
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HOl_fft, gO, BHD->ucHO_fft, BHD->fH_fft,
-			       1.0, BHD->rho_O, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
+			       1.0, BHD.rho_O, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HHl_fft, gH, BHD->ucH_fft, BHD->fH_fft,
-			       0.0, BHD->rho_H, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
+			       0.0, BHD.rho_H, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
-	  Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(BHD, gH, tH, r_HH, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(BHD, gH, tH, r_HH, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, dg_new2, f);
+	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
+	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HH, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HH, dg_new2, f);
+	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2, f);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
-	  //Compute_dg_H2O_intra_lnIII(BHD, gO, tO, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(BHD, gO, tO, r_HO, dg_new2, f);
-	  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, dg_new2, f);
+	  Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+	  //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
+	  Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 /*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
 /*  	  exit(1);    */
 
-	  //dgH_norm = ComputeCharge(BHD, gH, gO);
+	  //dgH_norm = ComputeCharge(&BHD, gH, gO);
 	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
 /* 	  if(dgH_norm<1.0) */
 /* 	    VecScale(dg_new, 1.2); */
@@ -2149,16 +2143,16 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, -0.01);
-	  //VecAXPY(dg_new, dgH_norm,  BHD->uc[0]);
-	  VecAXPY(dg_new, 1.0, BHD->uc[0]);
-/* 	  dgH_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
+	  //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
+	  VecAXPY(dg_new, 1.0, BHD.uc[0]);
+/* 	  dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
 	  //VecShift(dg_new, -dgH_norm);
-	  //ImposeBoundaryCondition( BHD, dg_new);
+	  //ImposeBoundaryCondition( &BHD, dg_new);
 
-	  ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xH, zpad, &iteri);
-	  Zeropad_Function(BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(BHD, dg_new, zpad-1, zpad, 0.0);
+	  ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, &iteri);
+	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
 	  PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
@@ -2176,39 +2170,39 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  /* O */
 	  VecSet(dg_new,0.0);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2OO_fft, gO, BHD->ucO_fft, BHD->fO_fft,
-			     1.0, BHD->rho_O, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2OO_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+			     1.0, BHD.rho_O, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS(BHD,
-			     BHD->fg2HO_fft, gH, BHD->ucHO_fft, BHD->fO_fft,
-			     0.0, BHD->rho_H, dg_new2);
+	  Compute_H2O_interS(&BHD,
+			     BHD.fg2HO_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+			     0.0, BHD.rho_H, dg_new2);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 	  VecScale(dg_new,damp_LJ);
 
 	  /* Coulomb long */
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2OOl_fft, gO, BHD->ucO_fft, BHD->fO_fft,
-			       1.0, BHD->rho_O, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
+			       1.0, BHD.rho_O, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
-	  Compute_H2O_interS_C(BHD,
-			       BHD->fg2HOl_fft, gH, BHD->ucHO_fft, BHD->fO_fft,
-			       0.0, BHD->rho_H, dg_new2, damp);
+	  Compute_H2O_interS_C(&BHD,
+			       BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
+			       0.0, BHD.rho_H, dg_new2, damp);
 	  VecAXPY(dg_new, 1.0, dg_new2);
 
 
 
-	  Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
-	  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnII(BHD, gH, tH, r_HO, dg_new2, f);
-	  //Compute_dg_H2O_intra_lnIII(BHD, gH, tH, r_HO, dg_new2, f);
+	  Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
+	  Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
+	  //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
 	  VecAXPY(dg_new, 2.0, dg_new2);
 
 /*  	  VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
 /*  	  exit(1);    */
 
 
-	  //dgO_norm = ComputeCharge(BHD, gH, gO);
+	  //dgO_norm = ComputeCharge(&BHD, gH, gO);
 	  //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
 /* 	  if(dgO_norm<1.0) */
 /* 	    VecScale(dg_new, 0.9); */
@@ -2217,18 +2211,18 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 
 	  //VecShift(dg_new, 0.01);
-	  //VecAXPY(dg_new, dgO_norm, BHD->uc[1]);
-	  VecAXPY(dg_new, 1, BHD->uc[1]);
-/* 	  dgO_norm = ImposeBoundaryConditionII(BHD, dg_new, zpad); */
+	  //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
+	  VecAXPY(dg_new, 1, BHD.uc[1]);
+/* 	  dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /* 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
 	  //VecShift(dg_new, -dgO_norm);
-	  //ImposeBoundaryCondition( BHD, dg_new);
+	  //ImposeBoundaryCondition( &BHD, dg_new);
 
-	  //ti=ImposeLaplaceBoundary(BHD, dg_new, tH, tO, zpad, &iteri);
+	  //ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, tO, zpad, &iteri);
 
-	  ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xO, zpad, &iteri);
-	  Zeropad_Function(BHD, dg_new, zpad, 0.0);
-	  //Smooth_Function(BHD, dg_new, zpad-1, zpad, 0.0);
+	  ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, &iteri);
+	  Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+	  //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 	  PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
 /* 	  if(iter==51) */
@@ -2255,7 +2249,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 /* 	    { */
 /* 	      VecScale(dg_newO, a); */
 /* 	      VecScale(dg_newH, a); */
-/* 	      EnforceNormalizationCondition(BHD, dg_newO, dg_newH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
 /* 	      a=1.0; */
 /* 	    } */
 
@@ -2273,7 +2267,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* Move dgO */
 	  if(0&& iter>10)
 	    {
-	      aO = GetOptimalStepSize(BHD, dg_newO, dgO, dgH);
+	      aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
 	      //if(aO<0) aO = a;
 	      VecCopy(dgO, f);
 	      VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
@@ -2306,20 +2300,20 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 /* 	    } */
 	  ComputeH2O_g( gH, g0H, dgH);
 	  ComputeH2O_g( gO, g0O, dgO);
-	  norm = ComputeCharge(BHD, gH, gO);
+	  norm = ComputeCharge(&BHD, gH, gO);
 	  PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
-	  //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
+	  //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
 
 
 /* 	  if( !(iter%10) &&iter>0  ) */
 /* 	    { */
-/* 	      EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 
 /* 	    } */
 
 /* 	  if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
 /* 	    { */
-/* 	      EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH); */
+/* 	      EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
 /* 	      a0=0.1; */
 /* 	    } */
 
@@ -2407,10 +2401,10 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(dg_histH);
   VecDestroy(dg_histO);
 
-  BGY3dH2OData_free2(BHD);
+  finalize_state (&BHD);
 
 
-  //VecView(BHD->uc[1],PETSC_VIEWER_STDERR_WORLD);
+  //VecView(BHD.uc[1],PETSC_VIEWER_STDERR_WORLD);
    //exit(1);
 
   return PETSC_NULL;
