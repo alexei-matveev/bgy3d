@@ -889,15 +889,15 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
   real q2H, q2O, q2HO;
 
   epsilonH = BHD->LJ_paramsH[0];
-  epsilonO = BHD->LJ_paramsO[0];
+  epsilonO = BHD->LJ_paramsO[0]; /* FIXME: how comes it is unused? */
   epsilonHO = BHD->LJ_paramsHO[0];
 
   sigmaH = BHD->LJ_paramsH[1];
-  sigmaO = BHD->LJ_paramsO[1];
+  sigmaO = BHD->LJ_paramsO[1];  /* FIXME: how comes it is unused? */
   sigmaHO = BHD->LJ_paramsHO[1];
 
   q2H = BHD->LJ_paramsH[2];
-  q2O = BHD->LJ_paramsO[2];
+  q2O = BHD->LJ_paramsO[2];     /* FIXME: how comes it is unused? */
   q2HO = BHD->LJ_paramsHO[2];
 
 
@@ -955,6 +955,11 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
+          /*
+           * FIXME: it  looks very  strange that gOini_vec  is defined
+           * using epsilonHO,  sigmaHO, and q2HO  whereas gHini_vec is
+           * defined using epsilonH, sigmaH, and q2H. Is this a bug?
+           */
 
 	  /* Lennard-Jones */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
