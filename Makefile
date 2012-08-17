@@ -58,7 +58,7 @@ OBJECTS = \
 	bgy3dH2OS.o \
 	bgy3dH2ONewton.o \
 	bgy3dH2OSNewton.o \
-	bgy3dH2O_solutes.o \
+	bgy3d-solutes.o \
 	bgy3d-getopt.o \
 	fft/fft_3d.o \
 	fft/fft_3d_f.o \

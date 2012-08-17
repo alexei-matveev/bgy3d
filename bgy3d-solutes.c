@@ -2,6 +2,17 @@
 /*  $Id: bgy3dH2O_solutes.c,v 1.3 2007-08-03 15:59:50 jager Exp $ */
 /*==========================================================*/
 
+/*
+ * This file  was initially named bgy3dH2O_solutes.c, as  you may have
+ * guessed from  the Id  string above. There  is not much  specific to
+ * water in  this file.  Rather it is  general for all  2-site solvent
+ * model. So it was later renamed.
+ *
+ * The  funciton solute_field()  initiates the  computation  of (short
+ * range) force field  and long range Coulomb for  the (currently) two
+ * solvent sites.
+ */
+
 #include "bgy3d.h"
 #include "bgy3d_SolventParameters.h"
 
