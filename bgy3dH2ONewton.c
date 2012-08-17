@@ -193,8 +193,8 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
     }
   assert( n[0]*n[1]*n[2] == total_local_size);
   /* Create global vectors */
-  DACreateGlobalVector(da, &(BHD->gH_ini));
-  DACreateGlobalVector(da, &(BHD->gO_ini));
+  DACreateGlobalVector(da, &(BHD->g_ini[0]));
+  DACreateGlobalVector(da, &(BHD->g_ini[1]));
   DACreateGlobalVector(da, &(BHD->gHO_ini));
   DACreateGlobalVector(da, &(BHD->gH));
   DACreateGlobalVector(da, &(BHD->gO));
@@ -232,15 +232,15 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
       VecSet(BHD->fO_l[dim],0.0);
       VecSet(BHD->fHO_l[dim],0.0);
     }
-  VecSet(BHD->gH_ini, 0.0);
-  VecSet(BHD->gO_ini, 0.0);
+  VecSet(BHD->g_ini[0], 0.0);
+  VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
 
 
 
 
-  DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
   FOR_DIM
     {
@@ -363,8 +363,8 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(PData PD)
 
 
 
-  DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecRestoreArray(da, BHD->gHO_ini, &gHOini_vec);
   /* Preconditioner */
   DAVecRestoreArray(BHD->da_newton, BHD->pre, (void*) &pre_vec);
@@ -454,8 +454,8 @@ void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
   free(BHD->ucO_fft);
   free(BHD->ucHO_fft);
 
-  VecDestroy(BHD->gH_ini);
-  VecDestroy(BHD->gO_ini);
+  VecDestroy(BHD->g_ini[0]);
+  VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
   VecDestroy(BHD->gH);
   VecDestroy(BHD->gO);
@@ -545,8 +545,8 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   Zeropad_Function(BHD, dgH, zpad, 0.0);
   Zeropad_Function(BHD, dgHO, zpad, 0.0);
   ComputeH2O_g( gHO, BHD->gHO_ini, dgHO);
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
 
   /* Compute right hand side */
@@ -799,8 +799,8 @@ void WriteH2ONewtonSolution(BGY3dH2OData BHD, Vec u)
 
   /* Copmute g's from dg's */
   ComputeH2O_g( gHO, BHD->gHO_ini, dgHO);
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */
@@ -1039,17 +1039,17 @@ Vec BGY3d_SolveNewton_H2O(PData PD, Vec g_ini, int vdim)
 
       RecomputeInitialData(BHD, (damp), 1.0);
 /*       Smooth_Function(BHD, BHD->gHO_ini, SL, SR, 0.0); */
-/*       Smooth_Function(BHD, BHD->gH_ini, SL, SR, 0.0); */
-/*       Smooth_Function(BHD, BHD->gO_ini, SL, SR, 0.0); */
+/*       Smooth_Function(BHD, BHD->g_ini[0], SL, SR, 0.0); */
+/*       Smooth_Function(BHD, BHD->g_ini[1], SL, SR, 0.0); */
 /*       Zeropad_Function(BHD, BHD->gHO_ini, zpad, 0.0); */
-/*       Zeropad_Function(BHD, BHD->gH_ini, zpad, 0.0); */
-/*       Zeropad_Function(BHD, BHD->gO_ini, zpad, 0.0); */
-      ImposeLaplaceBoundary(BHD, BHD->gH_ini, BHD->v[0], BHD->v[1], zpad, NULL);
-      ImposeLaplaceBoundary(BHD, BHD->gO_ini, BHD->v[0], BHD->v[1], zpad, NULL);
+/*       Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0); */
+/*       Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0); */
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad, NULL);
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad, NULL);
       ImposeLaplaceBoundary(BHD, BHD->gHO_ini,BHD->v[0], BHD->v[1], zpad, NULL);
       Zeropad_Function(BHD, BHD->gHO_ini, zpad, 0.0);
-      Zeropad_Function(BHD, BHD->gH_ini, zpad, 0.0);
-      Zeropad_Function(BHD, BHD->gO_ini, zpad, 0.0);
+      Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
+      Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
       /* solve problem */
       SNESSolve(snes, PETSC_NULL, u);
 

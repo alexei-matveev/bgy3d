@@ -199,9 +199,9 @@ BGY3dH2OData BGY3dH2OData_Newton_malloc(PData PD)
    */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD->gH_ini)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g_ini[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->gO_ini)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g_ini[1])); // CHKERRQ(ierr);
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
@@ -333,8 +333,8 @@ void BGY3dH2OData_Newton_free2(BGY3dH2OData BHD)
   free(BHD->wHO_fft);
   free(BHD->wHH_fft);
 
-  VecDestroy(BHD->gH_ini);
-  VecDestroy(BHD->gO_ini);
+  VecDestroy(BHD->g_ini[0]);
+  VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
   VecDestroy(BHD->ucH);
   VecDestroy(BHD->ucO);
@@ -380,8 +380,8 @@ void InitializePreconditioner(BGY3dH2OData BHD)
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   DAVecGetArray(BHD->da_newton, BHD->pre, (void*) &pre_vec);
-  DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
 
    /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -401,8 +401,8 @@ void InitializePreconditioner(BGY3dH2OData BHD)
 
 	}
   DAVecRestoreArray(BHD->da_newton, BHD->pre, (void*) &pre_vec);
-  DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
 
 }
 
@@ -457,8 +457,8 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /* Compute g's from dg's */
   Zeropad_Function(BHD, dgO, zpad, 0.0);
   Zeropad_Function(BHD, dgH, zpad, 0.0);
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
 
@@ -495,7 +495,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /***********************************************************/
   //gH_end:
 
-/*   ComputeH2O_g( ff,  BHD->gH_ini , dgH); */
+/*   ComputeH2O_g( ff,  BHD->g_ini[0] , dgH); */
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
@@ -503,7 +503,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   Zeropad_Function(BHD, dgH, zpad, 0.0);
 
   VecAYPX(dgH, -1.0, help);
-  //VecPointwiseMult( dgH, dgH, BHD->gH_ini);
+  //VecPointwiseMult( dgH, dgH, BHD->g_ini[0]);
 
   /***********************************************************/
   /* gO */
@@ -529,7 +529,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
-/*   ComputeH2O_g( ff,  BHD->gO_ini , dgO); */
+/*   ComputeH2O_g( ff,  BHD->g_ini[1] , dgO); */
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
@@ -537,7 +537,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   Zeropad_Function(BHD, dgO, zpad, 0.0);
 
   VecAYPX(dgO, -1.0, help);
-  //VecPointwiseMult( dgO, dgO, BHD->gO_ini);
+  //VecPointwiseMult( dgO, dgO, BHD->g_ini[1]);
 
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, " done.\n");
@@ -653,8 +653,8 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 
   Zeropad_Function(BHD, dgO, zpad, 0.0);
   Zeropad_Function(BHD, dgH, zpad, 0.0);
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
 
 /*   norm = ComputeCharge(BHD, gH, gO); */
@@ -690,7 +690,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   /***********************************************************/
   //gH_end:
 
-/*   ComputeH2O_g( ff,  BHD->gH_ini , dgH); */
+/*   ComputeH2O_g( ff,  BHD->g_ini[0] , dgH); */
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
@@ -698,7 +698,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   Zeropad_Function(BHD, dgH, zpad, 0.0);
 
   VecAYPX(dgH, -1.0, help);
-  //VecPointwiseMult( dgH, dgH, BHD->gH_ini);
+  //VecPointwiseMult( dgH, dgH, BHD->g_ini[0]);
 
   /***********************************************************/
   /* gO */
@@ -722,7 +722,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
-/*   ComputeH2O_g( ff,  BHD->gO_ini , dgO); */
+/*   ComputeH2O_g( ff,  BHD->g_ini[1] , dgO); */
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
@@ -730,7 +730,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   Zeropad_Function(BHD, dgO, zpad, 0.0);
 
   VecAYPX(dgO, -1.0, help);
-  //VecPointwiseMult( dgO, dgO, BHD->gO_ini);
+  //VecPointwiseMult( dgO, dgO, BHD->g_ini[1]);
 
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, " done.\n");
@@ -836,8 +836,8 @@ void WriteH2OSNewtonSolutionF(BGY3dH2OData BHD, Vec u)
 
 
   /* Copmute g's from dg's */
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */
@@ -905,8 +905,8 @@ void WriteH2OSNewtonSolution(BGY3dH2OData BHD, Vec u)
   DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
 
   /* Copmute g's from dg's */
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */
@@ -1010,8 +1010,8 @@ void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, V
   gradO = BHD->v[0];
   gradH = BHD->v[1];
 
-  ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-  ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
   fu_h = ComputeCharge(BHD, gH, gO)-1.0;
   fu = SQR(fu_h);
@@ -1021,8 +1021,8 @@ void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, V
       iter ++;
       VecCopy(dgO, gradO);
       VecCopy(dgH, gradH);
-/*       VecAXPY(gradO, 1.0, BHD->gO_ini); */
-/*       VecAXPY(gradH, 1.0, BHD->gH_ini); */
+/*       VecAXPY(gradO, 1.0, BHD->g_ini[1]); */
+/*       VecAXPY(gradH, 1.0, BHD->g_ini[0]); */
 
       VecPointwiseMult(gradO, gradO, gO);
       VecPointwiseMult(gradH, gradH, gH);
@@ -1041,11 +1041,11 @@ void EnforceNormalizationCondition(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec gO, V
 /*       VecAXPY(dgH, -0.1*dcH, dgH); */
       VecScale(dgO, 1.0-0.1*dcO);
       VecScale(dgH, 1.0-0.1*dcH);
-/*       VecAXPY(BHD->gO_ini, -0.1*dcO, BHD->gO_ini); */
-/*       VecAXPY(BHD->gH_ini, -0.1*dcH, BHD->gH_ini); */
+/*       VecAXPY(BHD->g_ini[1], -0.1*dcO, BHD->g_ini[1]); */
+/*       VecAXPY(BHD->g_ini[0], -0.1*dcH, BHD->g_ini[0]); */
 
-      ComputeH2O_g( gH,  BHD->gH_ini , dgH);
-      ComputeH2O_g( gO,  BHD->gO_ini , dgO);
+      ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
+      ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
       fu_h = ComputeCharge(BHD, gH, gO)-1.0;
       fu = SQR(fu_h);
@@ -1159,10 +1159,10 @@ Vec BGY3d_SolveNewton_H2OS(PData PD, Vec g_ini, int vdim)
 
       RecomputeInitialFFTs(BHD, (damp), 1.0);
       RecomputeInitialSoluteData(BHD, (damp), 1.0, zpad);
-      ImposeLaplaceBoundary(BHD, BHD->gH_ini, BHD->v[0], BHD->v[1], zpad, NULL);
-      ImposeLaplaceBoundary(BHD, BHD->gO_ini, BHD->v[0], BHD->v[1], zpad, NULL);
-      Zeropad_Function(BHD, BHD->gH_ini, zpad, 0.0);
-      Zeropad_Function(BHD, BHD->gO_ini, zpad, 0.0);
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad, NULL);
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad, NULL);
+      Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
+      Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
       InitializePreconditioner( BHD);
 
       /* solve problem */
@@ -1273,10 +1273,10 @@ Vec BGY3d_SolveNewton_H2OSF(PData PD, Vec g_ini, int vdim)
 
       RecomputeInitialFFTs(BHD, SQR(damp), 1.0);
       RecomputeInitialSoluteData(BHD, SQR(damp), 1.0, zpad);
-      ImposeLaplaceBoundary(BHD, BHD->gH_ini, BHD->v[0], BHD->v[1], zpad, NULL);
-      ImposeLaplaceBoundary(BHD, BHD->gO_ini, BHD->v[0], BHD->v[1], zpad, NULL);
-      Zeropad_Function(BHD, BHD->gH_ini, zpad, 0.0);
-      Zeropad_Function(BHD, BHD->gO_ini, zpad, 0.0);
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad, NULL);
+      ImposeLaplaceBoundary(BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad, NULL);
+      Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
+      Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
       InitializePreconditioner( BHD);
 
       /* solve problem */

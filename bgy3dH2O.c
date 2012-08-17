@@ -177,8 +177,8 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
     }
   assert( n[0]*n[1]*n[2] == total_local_size);
   /* Create global vectors */
-  DACreateGlobalVector(da, &(BHD->gH_ini));
-  DACreateGlobalVector(da, &(BHD->gO_ini));
+  DACreateGlobalVector(da, &(BHD->g_ini[0]));
+  DACreateGlobalVector(da, &(BHD->g_ini[1]));
   DACreateGlobalVector(da, &(BHD->gHO_ini));
   DACreateGlobalVector(da, &(BHD->ucH));
   DACreateGlobalVector(da, &(BHD->ucO));
@@ -188,13 +188,13 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(PData PD)
   DACreateGlobalVector(da, &(BHD->cHO));
   FOR_DIM
     {
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fH[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fO[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fHO[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fH_l[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fO_l[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->fHO_l[dim])); */
-/*       VecDuplicate(BHD->gH_ini, &(BHD->v[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fH[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fO[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fHO[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fH_l[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fO_l[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->fHO_l[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &(BHD->v[dim])); */
 
       DACreateGlobalVector(da, &(BHD->fH[dim]));
       DACreateGlobalVector(da, &(BHD->fO[dim]));
@@ -267,8 +267,8 @@ void BGY3dH2OData_free(BGY3dH2OData BHD)
   free(BHD->ucHO_fft);
   free(BHD->wHO_fft);
 
-  VecDestroy(BHD->gH_ini);
-  VecDestroy(BHD->gO_ini);
+  VecDestroy(BHD->g_ini[0]);
+  VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
   VecDestroy(BHD->ucH);
   VecDestroy(BHD->ucO);
@@ -1411,8 +1411,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
       VecSet(BHD->fO_l[dim],0.0);
       VecSet(BHD->fHO_l[dim],0.0);
     }
-  VecSet(BHD->gH_ini, 0.0);
-  VecSet(BHD->gO_ini, 0.0);
+  VecSet(BHD->g_ini[0], 0.0);
+  VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
 
   /*********************************************/
@@ -1440,8 +1440,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
 
   /**********************************************/
 
-  DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
   DAVecGetArray(da, BHD->cH, &cH_vec);
   DAVecGetArray(da, BHD->cO, &cO_vec);
@@ -1587,8 +1587,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
 	    }
 	}
 
-  DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecRestoreArray(da, BHD->gHO_ini, &gHOini_vec);
   DAVecRestoreArray(da, BHD->cH, &cH_vec);
   DAVecRestoreArray(da, BHD->cO, &cO_vec);
@@ -1607,8 +1607,8 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
 
 
 
-/*   VecAXPY(BHD->gH_ini, damp*beta , BHD->ucH); */
-/*   VecAXPY(BHD->gO_ini, damp*beta , BHD->ucO); */
+/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->ucH); */
+/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->ucO); */
 
 /*   VecView(BHD->fHO[0],PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
@@ -3676,8 +3676,8 @@ Vec BGY3d_solve_2site(PData PD, Vec g_ini, int vdim)
   InitializeKSPSolver(BHD);
 #endif
 
-  g0H=BHD->gH_ini;
-  g0O=BHD->gO_ini;
+  g0H=BHD->g_ini[0];
+  g0O=BHD->g_ini[1];
   g0HO=BHD->gHO_ini;
 
   /* set initial guess*/
@@ -4372,8 +4372,8 @@ Vec BGY3d_solve_3site(PData PD, Vec g_ini, int vdim)
   InitializeKSPSolver(BHD);
 #endif
 
-  g0H=BHD->gH_ini;
-  g0O=BHD->gO_ini;
+  g0H=BHD->g_ini[0];
+  g0O=BHD->g_ini[1];
   g0HO=BHD->gHO_ini;
 
   /* set initial guess*/

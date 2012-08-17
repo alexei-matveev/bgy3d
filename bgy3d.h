@@ -389,7 +389,20 @@ typedef struct BGY3dH2OStruct
   real beta, rho;
   real rho_H, rho_O;
 
-  Vec gH_ini, gO_ini, gHO_ini;
+  /*
+   * The solute  field for  each of the  two solvent sites  (scaled by
+   * inverse  temperature beta)  is initially  put into  the following
+   * array.
+   *
+   * In much of the code one refers  to the two sites by literal H and
+   * O, though the actual sites may be different.  Let us stick to the
+   * convention that data for H is  stored in first- and data for O is
+   * stored  in second  position of  an  array. Here  in g_ini[0]  and
+   * g_ini[1], respectively.
+   */
+  Vec g_ini[2];                 /* H, O in that order */
+
+  Vec gHO_ini;
   real ucH_0, ucO_0, ucHO_0;
 
   /*

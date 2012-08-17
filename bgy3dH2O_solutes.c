@@ -182,9 +182,10 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
 /*
  * Create initial solute data.
  *
- * XXX: See (5.106) and (5.08)  in the thesis.  Return BHD->gH_ini and
- *      BHD->gO_ini (beta *  (VM_LJ + VM_coulomb_short)) and BHD->ucH,
- *      BHD->ucO (beta * VM_coulomb_long), but is beta missing here?
+ * XXX: See (5.106) and (5.08) in the thesis. Return BHD->g_ini[0] and
+ * BHD->g_ini[1],  for  H and  O  in  that  order,  (beta *  (VM_LJ  +
+ * VM_coulomb_short)) and BHD->ucH, BHD->ucO (beta * VM_coulomb_long),
+ * but is beta missing here?
  */
 
 static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
@@ -233,8 +234,8 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
    * solute.
    */
 #ifndef QM
-  field (BHD->da, BHD->PD, solvent[0], S, nsites, factor, ljc, BHD->gH_ini);
-  field (BHD->da, BHD->PD, solvent[1], S, nsites, factor, ljc, BHD->gO_ini);
+  field (BHD->da, BHD->PD, solvent[0], S, nsites, factor, ljc, BHD->g_ini[0]);
+  field (BHD->da, BHD->PD, solvent[1], S, nsites, factor, ljc, BHD->g_ini[1]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -249,8 +250,8 @@ static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real dam
     neutral[i].charge = 0.0;    /* modify a copy */
   }
 
-  field (BHD->da, BHD->PD, neutral[0], S, nsites, factor, ljc, BHD->gH_ini);
-  field (BHD->da, BHD->PD, neutral[1], S, nsites, factor, ljc, BHD->gO_ini);
+  field (BHD->da, BHD->PD, neutral[0], S, nsites, factor, ljc, BHD->g_ini[0]);
+  field (BHD->da, BHD->PD, neutral[1], S, nsites, factor, ljc, BHD->g_ini[1]);
 #endif
 
   /*

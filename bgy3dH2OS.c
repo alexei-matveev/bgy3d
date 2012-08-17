@@ -186,9 +186,9 @@ BGY3dH2OData BGY3dH2OData_malloc(PData PD)
    */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD->gH_ini)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g_ini[0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->gO_ini)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g_ini[1])); // CHKERRQ(ierr);
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
@@ -344,8 +344,8 @@ void BGY3dH2OData_free2(BGY3dH2OData BHD)
   free(BHD->wHO_fft);
   free(BHD->wHH_fft);
 
-  VecDestroy(BHD->gH_ini);
-  VecDestroy(BHD->gO_ini);
+  VecDestroy(BHD->g_ini[0]);
+  VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
   VecDestroy(BHD->ucH);
   VecDestroy(BHD->ucO);
@@ -953,8 +953,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
 
 
-  VecSet(BHD->gH_ini, 0.0);
-  VecSet(BHD->gO_ini, 0.0);
+  VecSet(BHD->g_ini[0], 0.0);
+  VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
   VecSet(BHD->ucH, 0.0);
   VecSet(BHD->ucO, 0.0);
@@ -967,8 +967,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
     }
 
 
-  DAVecGetArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecGetArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
 
 /*   DAVecGetArray(da, BHD->ucH, &ucH_vec); */
 /*   DAVecGetArray(da, BHD->ucO, &ucO_vec); */
@@ -1035,8 +1035,8 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
 	}
 
-  DAVecRestoreArray(da, BHD->gH_ini, &gHini_vec);
-  DAVecRestoreArray(da, BHD->gO_ini, &gOini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
+  DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
 /*   DAVecRestoreArray(da, BHD->ucH, &ucH_vec); */
 /*   DAVecRestoreArray(da, BHD->ucO, &ucO_vec); */
 
@@ -1044,10 +1044,10 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 
 /*   ComputeFFTSoluteII(BHD, BHD->ucH , BHD->ucHO, BHD->LJ_paramsHO, damp, zpad); */
 /*   VecScale(BHD->ucH, beta); */
-/*   VecAXPY( BHD->gH_ini, beta, BHD->ucHO); */
+/*   VecAXPY( BHD->g_ini[0], beta, BHD->ucHO); */
 
 /*   ComputeFFTSoluteII(BHD, BHD->ucO , BHD->ucHO, BHD->LJ_paramsO,  damp, zpad); */
-/*   VecAXPY( BHD->gO_ini, beta, BHD->ucHO); */
+/*   VecAXPY( BHD->g_ini[1], beta, BHD->ucHO); */
 /*   VecScale(BHD->ucO, beta); */
 
   /* Shift uc's */
@@ -1056,7 +1056,7 @@ void RecomputeInitialSoluteData(BGY3dH2OData BHD, real damp, real damp_LJ, real 
 /*   VecSum(BHD->ucO, &fac); */
 /*   VecShift(BHD->ucO, -fac/N[0]/N[1]/N[2]); */
 
-/*   VecView(BHD->gH_ini,PETSC_VIEWER_STDERR_WORLD); */
+/*   VecView(BHD->g_ini[0],PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */
 
 }
@@ -1408,8 +1408,8 @@ PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
   //VecScale(dgO2, x_vec[0]);
   VecRestoreArray(x, &x_vec);
 
-  ComputeH2O_g( gH, BHD->gH_ini, SD->dgH);
-  ComputeH2O_g( gO, BHD->gO_ini, dgO2);
+  ComputeH2O_g( gH, BHD->g_ini[0], SD->dgH);
+  ComputeH2O_g( gO, BHD->g_ini[1], dgO2);
 
   VecSum(gH, &sumH);
   VecSum(gO, &sumO);
@@ -1568,8 +1568,8 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 
 // XXX: here g0 = beta * (VM_LJ + VM_coulomb_short) actually
 // XXX: see: (5.106) and (5.108) in Jager's thesis
-  g0H=BHD->gH_ini;
-  g0O=BHD->gO_ini;
+  g0H=BHD->g_ini[0];
+  g0O=BHD->g_ini[1];
 
 /*   VecView(BHD->fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
@@ -1618,7 +1618,7 @@ Vec BGY3dM_solve_H2O_2site(PData PD, Vec g_ini, int vdim)
 	  RecomputeInitialFFTs(BHD, 0.0, 1.0);
 	  //RecomputeInitialSoluteData(BHD, 0.0, 1.0, zpad);
 	  //RecomputeInitialSoluteData_Methanol(BHD, 0.0, 1.0, zpad);
-          // XXX: return BHD->gH_ini, BHD->gO_ini (see definition above)
+          // XXX: return BHD->g_ini[0], BHD->g_ini[1] (see definition above)
           // XXX: and BHD->ucH, BHD->ucO, which are VM_Coulomb_long, but should they multiply by beta?
 	  // RecomputeInitialSoluteData_Hexane(BHD, 0.0, 1.0, zpad);
           // Change solute as HCl for standard test
@@ -2118,8 +2118,8 @@ Vec BGY3dM_solve_H2O_3site(PData PD, Vec g_ini, int vdim)
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
-  g0H=BHD->gH_ini;
-  g0O=BHD->gO_ini;
+  g0H=BHD->g_ini[0];
+  g0O=BHD->g_ini[1];
 
 /*   VecView(BHD->fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
