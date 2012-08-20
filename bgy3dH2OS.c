@@ -1450,8 +1450,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   int namecount = 0;
   char nameH[20], nameO[20];
 
-  Vec dg_histO, dg_histH;
-
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
   State BHD = initialize_state (PD);
