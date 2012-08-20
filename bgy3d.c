@@ -13,6 +13,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"          /* BGY3d_solve_H2O_2site */
 #include "bgy3dH2O.h"           /* BGY3d_solve_2site */
+#include "bgy3dmolecule.h"      /* BGY3d_solve_DiatomicAB */
 
 static char helptext[] = "Solving BGY3d equation.\n";
 

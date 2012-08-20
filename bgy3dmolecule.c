@@ -5,13 +5,13 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
+#include "bgy3dmolecule.h"
 
 #define rab 1.0
 
 
 
-BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
+static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
 {
   BGY3dDiatomicABData BDD;
   DA da;
@@ -266,7 +266,7 @@ BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
 
 
 
-void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
+static void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -296,7 +296,7 @@ void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
 }
 
 
-void ComputeDiatomicAB_g_old(BGY3dDiatomicABData BDD, Vec g, Vec g0, Vec dg)
+static void ComputeDiatomicAB_g_old(BGY3dDiatomicABData BDD, Vec g, Vec g0, Vec dg)
 {
   DA da;
   int x[3], n[3], i[3];
@@ -712,7 +712,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 
 
 /* Compute intramolecular part */
-void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg, Vec dg_help)
+static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -999,7 +999,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 }
 
 
-void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec gab, Vec gba,
+static void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec gab, Vec gba,
 			 Vec ta, Vec tb, Vec tab, Vec tba, Vec dg, Vec dg_help,
 			 real norm_tol)
 {
@@ -1083,7 +1083,7 @@ void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec gab, V
 }
 
 
-void Solve_Normalization(BGY3dDiatomicABData BDD, Vec gc, Vec g, Vec t, Vec dg,
+static void Solve_Normalization(BGY3dDiatomicABData BDD, Vec gc, Vec g, Vec t, Vec dg,
 			     Vec dg_help)
 {
 

@@ -9,6 +9,7 @@
 #include "bgy3d-solutes.h"
 #include "bgy3dH2O.h"
 #include "bgy3dH2OS.h"
+#include "bgy3dmolecule.h"
 
 #define damp0 0.001
 

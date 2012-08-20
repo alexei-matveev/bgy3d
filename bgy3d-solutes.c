@@ -17,6 +17,8 @@
 #include "bgy3d_SolventParameters.h"
 #include "bgy3d-solutes.h"
 #include "bgy3dH2O.h"           /* Coulomb_short() */
+#include "bgy3dmolecule.h"      /* ComputeFFTfromVec_fftw(),
+                                   ComputeVecfromFFT_fftw() */
 
 typedef struct Site {
     char name[5];            /* atom types. What are they used for? */
