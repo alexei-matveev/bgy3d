@@ -1515,11 +1515,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   DACreateGlobalVector(BHD.da, &dg_newH);
   DACreateGlobalVector(BHD.da, &dg_newO);
 
-  DACreateGlobalVector(BHD.da, &dg_histO);
-  DACreateGlobalVector(BHD.da, &dg_histH);
-  VecSet(dg_histH, 0.0);
-  VecSet(dg_histO, 0.0);
-
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. */
   g0H=BHD.g_ini[0];
@@ -1781,8 +1776,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(tO);
   VecDestroy(dg_newH);
   VecDestroy(dg_newO);
-  VecDestroy(dg_histH);
-  VecDestroy(dg_histO);
 
   finalize_state (&BHD);
 
