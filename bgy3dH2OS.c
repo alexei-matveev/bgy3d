@@ -1483,7 +1483,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real norm;
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
-  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
+  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, g[2];
   Vec dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
   int namecount = 0;
@@ -1539,8 +1539,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   InitializeDMMGSolver(&BHD);
 #endif
-  DACreateGlobalVector(BHD.da, &gH);
-  DACreateGlobalVector(BHD.da, &gO);
+  DACreateGlobalVector(BHD.da, &(g[0]));
+  DACreateGlobalVector(BHD.da, &(g[1]));
   DACreateGlobalVector(BHD.da, &dgH);
   DACreateGlobalVector(BHD.da, &dgO);
   DACreateGlobalVector(BHD.da, &dg_new);
@@ -1612,8 +1612,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       Zeropad_Function (&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
 
-      ComputeH2O_g (gH, g0H, dgH);
-      ComputeH2O_g (gO, g0O, dgO);
+      ComputeH2O_g (g[0], g0H, dgH);
+      ComputeH2O_g (g[1], g0O, dgO);
 
       real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
                                             value is right.  */
@@ -1657,20 +1657,20 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           /* H */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, gO, BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, g[1], BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fg2HH_fft, gH, BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fg2HH_fft, g[0], BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gO, BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[1], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, gH, BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, g[0], BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
-          Solve_NormalizationH2O_smallII (&BHD, gH, r_HO, gO, t_vec , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], t_vec , dg_new2, f, zpad);
 
           /* Vec t_vec is intent(in) here: */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
@@ -1686,20 +1686,20 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           /* O */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fg2OO_fft, gO, BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fg2OO_fft, g[1], BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, gH, BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, g[0], BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, gO, BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, g[1], BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gH, BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[0], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
-          Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, t_vec , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], t_vec , dg_new2, f, zpad);
 
           /* Vec t_vec is intent(in) here: */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
@@ -1725,9 +1725,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm, a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm, a);
 
-          ComputeH2O_g (gH, g0H, dgH);
-          ComputeH2O_g (gO, g0O, dgO);
-          norm = ComputeCharge(&BHD, gH, gO);
+          ComputeH2O_g (g[0], g0H, dgH);
+          ComputeH2O_g (g[1], g0O, dgO);
+          norm = ComputeCharge(&BHD, g[0], g[1]);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
 
           /*
@@ -1795,8 +1795,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       sprintf(nameO, "vecO-%d.m", namecount-1);
 
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
-      bgy3d_save_vec_ascii (nameH, gH); /* g_H */
-      bgy3d_save_vec_ascii (nameO, gO); /* g_O */
+      bgy3d_save_vec_ascii (nameH, g[0]); /* g_H */
+      bgy3d_save_vec_ascii (nameO, g[1]); /* g_O */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       /************************************/
 
@@ -1809,8 +1809,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       }
   } /* damp loop */
 
-  VecDestroy(gH);
-  VecDestroy(gO);
+  VecDestroy(g[0]);
+  VecDestroy(g[1]);
   VecDestroy(dgH);
   VecDestroy(dgO);
   VecDestroy(dg_new);
