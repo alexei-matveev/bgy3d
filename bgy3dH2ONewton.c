@@ -41,9 +41,9 @@
 
 
 
-BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
+State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   DA da;
   real interval[2], h[3], N[3], L, r[3], r_s, beta;
   int i[3], x[3], n[3];
@@ -432,7 +432,7 @@ BGY3dH2OData BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   return BHD;
 }
 
-void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
+void BGY3dH2OData_Newton_free(State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -491,7 +491,7 @@ void BGY3dH2OData_Newton_free(BGY3dH2OData BHD)
 
 PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
   int i[3], x[3], n[3];
@@ -746,7 +746,7 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 int MatH2OMult(Mat M, Vec x, Vec y)
 {
   void *ctx;
-  BGY3dH2OData BHD;
+  State *BHD;
 
   MatShellGetContext(M, ctx);
 
@@ -755,7 +755,7 @@ int MatH2OMult(Mat M, Vec x, Vec y)
   return 0;
 }
 
-void WriteH2ONewtonSolution(BGY3dH2OData BHD, Vec u)
+void WriteH2ONewtonSolution(State *BHD, Vec u)
 {
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
@@ -847,7 +847,7 @@ void WriteH2ONewtonSolution(BGY3dH2OData BHD, Vec u)
 
 }
 
-void WriteH2ONewtonPlain(BGY3dH2OData BHD, Vec u)
+void WriteH2ONewtonPlain(State *BHD, Vec u)
 {
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
@@ -920,7 +920,7 @@ void WriteH2ONewtonPlain(BGY3dH2OData BHD, Vec u)
 /* apply preconditioner matrix: diagonal scaling */
 PetscErrorCode ComputePreconditioner_H2O(void *data, Vec x, Vec y)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   PetscErrorCode ierr;
 
   BHD = (BGY3dH2OData) data;
@@ -946,7 +946,7 @@ Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim)
   SNES snes;
   KSP ksp;
   PC  pc;
-  BGY3dH2OData BHD;
+  State *BHD;
   PetscTruth kflg, flg;
   Vec u, f, b, v1, v2;
   real damp, damp_start=0.0, zpad=100.0;
