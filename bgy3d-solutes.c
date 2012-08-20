@@ -33,8 +33,8 @@ typedef struct Solute {
     Site sites[];               /* site descriptions */
 } Solute;
 
-static void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q);
-static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ);
+static void poisson (State *BHD, Vec uc, Vec rho, real q);
+static void solute_field (State *BHD, const Site S[], int nsites, real damp, real damp_LJ);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -154,43 +154,43 @@ static const Site solvent[] =
   {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
    {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
-static void recompute_initial_data (BGY3dH2OData BHD, const Solute *S, real damp, real damp_LJ)
+static void recompute_initial_data (State *BHD, const Solute *S, real damp, real damp_LJ)
 {
     /* Functions that do the real work operate on array of sites: */
     solute_field (BHD, S->sites, S->n, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_Water(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_Water(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
   recompute_initial_data (BHD, &Water, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_CS2(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_CS2(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
   recompute_initial_data (BHD, &CarbonDisulfide, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_HCl(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_HCl(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
   recompute_initial_data (BHD, &HydrogenChloride, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_Methanol(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_Methanol(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
   recompute_initial_data (BHD, &Methanol, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_Hexane(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_Hexane(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
   recompute_initial_data (BHD, &Hexane, damp, damp_LJ);
 }
 
-void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real damp_LJ, real zpad)
+void RecomputeInitialSoluteData_ButanoicAcid(State *BHD, real damp, real damp_LJ, real zpad)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Solute is Butanoic Acid.\n");
   recompute_initial_data (BHD, &ButanoicAcid, damp, damp_LJ);
@@ -205,7 +205,7 @@ void RecomputeInitialSoluteData_ButanoicAcid(BGY3dH2OData BHD, real damp, real d
  *      VM_coulomb_long), but is beta missing here?
  */
 
-static void solute_field (BGY3dH2OData BHD, const Site S[], int nsites, real damp, real damp_LJ)
+static void solute_field (State *BHD, const Site S[], int nsites, real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -458,7 +458,7 @@ static real rho (const Site *A, const Site S[], int nsites)
   factual parameter  for rho and  uc to effectively solve  the Poisson
   equation "in place".
 */
-void poisson (BGY3dH2OData BHD, Vec uc, Vec rho, real q)
+void poisson (State *BHD, Vec uc, Vec rho, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k2, fac, L, h3;
