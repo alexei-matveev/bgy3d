@@ -1459,20 +1459,26 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
     }
 
-  /* read BGY3d specific things from command line */
-  /* Mixing parameter */
+  /*
+   * Read BGY3d specific things from command line:
+   *
+   * Mixing parameter:
+   */
   bgy3d_getopt_real ("-lambda", &a0);
-  if(a0>1 || a0<0)
-    {
+  if (a0 > 1 || a0 < 0) {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a0);
       exit(1);
-    }
-   /* Get damp_start from command line*/
+  }
+
+  /* Get damp_start from command line*/
   bgy3d_getopt_real ("-damp_start", &damp_start);
+
   /* Number of total iterations */
   bgy3d_getopt_int ("-max_iter", &max_iter);
+
   /* norm_tol for convergence test */
   bgy3d_getopt_real ("-norm_tol", &norm_tol);
+
   /* Zeropad */
   bgy3d_getopt_real ("-zpad", &zpad);
   /*********************************/
@@ -1514,13 +1520,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
-// XXX: here g0 = beta * (VM_LJ + VM_coulomb_short) actually
-// XXX: see: (5.106) and (5.108) in Jager's thesis
+  /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
+          (5.106) and (5.108) in Jager's thesis. */
   g0H=BHD.g_ini[0];
   g0O=BHD.g_ini[1];
-
-/*   VecView(BHD.fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);   */
 
   /* set initial guess*/
   VecSet(dgH,0);
@@ -1592,11 +1595,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                                    11-19, etc.  "a0" remains unchanged
                                    during the loop. */
 
-/*        if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
-/*          NORM_REG/=2.; */
-
           PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter + 1, NORM_REG);
-
 
           /* H */
           VecSet(dg_new,0.0);
@@ -1622,46 +1621,16 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
-          //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
+
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*        exit(1);    */
-
-          //dgH_norm = ComputeCharge(&BHD, gH, gO);
-          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
-/*        if(dgH_norm<1.0) */
-/*          VecScale(dg_new, 1.2); */
-/*        else if(dgH_norm >1.0) */
-/*          VecScale(dg_new, 0.8); */
-
-
-          //VecShift(dg_new, -0.01);
-          //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
           VecAXPY(dg_new, 1.0, BHD.uc[0]);
-/*        dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
-          //VecShift(dg_new, -dgH_norm);
-          //ImposeBoundaryCondition( &BHD, dg_new);
 
           ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, NULL);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
-
-
-
 
           VecCopy(dg_new, dg_newH);
-
-/*        VecCopy(dgH, f); */
-/*        VecAXPBY(dgH, a, (1-a), dg_new); */
-/*        VecAXPY(f, -1.0, dgH); */
-/*        VecNorm(f, NORM_INFINITY, &dgH_norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
-          //ComputeH2O_g( gH, g0H, dgH);
-
 
           /* O */
           VecSet(dg_new,0.0);
@@ -1689,62 +1658,18 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
+
           VecAXPY(dg_new, 1.0, dg_new2);
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*        exit(1);    */
-
-
-          //dgO_norm = ComputeCharge(&BHD, gH, gO);
-          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
-/*        if(dgO_norm<1.0) */
-/*          VecScale(dg_new, 0.9); */
-/*        else if(dgO_norm >1.0) */
-/*          VecScale(dg_new, 1.1); */
-
-
-          //VecShift(dg_new, 0.01);
-          //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
           VecAXPY(dg_new, 1, BHD.uc[1]);
-/*        dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
-          //VecShift(dg_new, -dgO_norm);
-          //ImposeBoundaryCondition( &BHD, dg_new);
+
           ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, NULL);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
-
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);  */
-/*        exit(1);  */
 
           VecCopy(dg_new, dg_newO);
 
-
-/*        VecCopy(dgO, f); */
-/*        VecAXPBY(dgO, a, (1-a), dg_new); */
-/*        VecAXPY(f, -1.0,  dgO); */
-/*        VecNorm(f, NORM_INFINITY, &dgO_norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
-          //ComputeH2O_g( gO, g0O, dgO);
-
-/*        if(iter<=10) */
-/*          a=0.01; */
-/*        else */
-/*          a=0.05; */
-/*        if( iter==0) */
-/*          { */
-/*            VecScale(dg_newO, a); */
-/*            VecScale(dg_newH, a); */
-/*            EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, gO, gH); */
-/*            a=1.0; */
-/*          } */
-
           /* Move dgH */
           VecCopy(dgH, f);
-/*        VecAXPY(dg_histH, 1.0, dg_newH); */
-/*        norm = (iter)%50 + 1; */
 
           VecAXPBY(dgH, a, (1-a), dg_newH);
           VecAXPY(f, -1.0, dgH);
@@ -1756,11 +1681,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           if(0&& iter>10)
             {
               aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
-              //if(aO<0) aO = a;
+
               VecCopy(dgO, f);
               VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
-              //VecCopy(dg_newO, dgO);
-              //VecScale(dgO, aO);
 
               VecAXPY(f, -1.0,  dgO);
               VecNorm(f, NORM_INFINITY, &dgO_norm);
@@ -1769,49 +1692,19 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           else
             {
               VecCopy(dgO, f);
-/*            VecAXPY(dg_histO, 1.0, dg_newO); */
-/*            norm = (iter)%20 + 1; */
               VecAXPBY(dgO, a, (1-a), dg_newO);
               VecAXPY(f, -1.0,  dgO);
               VecNorm(f, NORM_INFINITY, &dgO_norm);
               PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
             }
-          //a=a+0.002;
-/*        if( !((iter+1)%50) && iter>0) */
-/*          { */
-/*            a=0.01; */
-/*            PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
-/*            VecAXPY(dgO, -2.0, dg_histO); */
-/*            VecAXPY(dgH, -2.0, dg_histH); */
-/*            VecSet(dg_histO, 0.0); */
-/*            VecSet(dg_histH, 0.0); */
-/*          } */
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
           norm = ComputeCharge(&BHD, gH, gO);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
-          //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
-
-
-/*        if( !(iter%10) &&iter>0  ) */
-/*          { */
-/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
-
-/*          } */
-
-/*        if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
-/*          { */
-/*            EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH); */
-/*            a0=0.1; */
-/*          } */
-
-/*        if( fabs(norm-1.0) > 0.05 ) */
-/*          a=0.005; */
-/*        else  */
-/*          a=0.01; */
-           /* (fancy) step size control */
 
           /*
+           * Fancy step size control.
+           *
            * FIXME: weired  logic.  The  code below appears  to modify
            * "upwards",  "a1", and  "mycount" by  eventually resetting
            * the latter to  zero. The goal might be  to tweak the real
@@ -1888,9 +1781,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       }
     }
 
-
-
-
   VecDestroy(gH);
   VecDestroy(gO);
   VecDestroy(dgH);
@@ -1907,10 +1797,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(dg_histO);
 
   finalize_state (&BHD);
-
-
-  //VecView(BHD.uc[1],PETSC_VIEWER_STDERR_WORLD);
-   //exit(1);
 
   return PETSC_NULL;
 }
