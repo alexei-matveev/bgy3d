@@ -108,8 +108,8 @@ State *BGY3dH2OData_Newton_malloc(ProblemData *PD)
   /******************************/
   BHD->beta = PD->beta;
   BHD->rho  = PD->rho;
-  BHD->rho_H = 2.*PD->rho;
-  BHD->rho_O = PD->rho;
+  BHD->rhos[0] = 2.*PD->rho;
+  BHD->rhos[1] = PD->rho;
   beta = PD->beta;
 
 
@@ -474,9 +474,9 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gO, BHD->rho_O, dgH);
+		     BHD->fg2HO_fft, gO, BHD->rhos[1], dgH);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HH_fft, gH, BHD->rho_H, help2);
+		     BHD->fg2HH_fft, gH, BHD->rhos[0], help2);
   VecAXPY(dgH, 1.0, help2);
 
   VecAXPY(dgH, 1.0, BHD->uc[0]);
@@ -510,9 +510,9 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2OO_fft, gO, BHD->rho_O, dgO);
+		     BHD->fg2OO_fft, gO, BHD->rhos[1], dgO);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gH, BHD->rho_H, help2);
+		     BHD->fg2HO_fft, gH, BHD->rhos[0], help2);
   VecAXPY(dgO, 1.0, help2);
 
   VecAXPY(dgO, 1.0, BHD->uc[1]);
@@ -665,9 +665,9 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gO, BHD->rho_O, dgH);
+		     BHD->fg2HO_fft, gO, BHD->rhos[1], dgH);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HH_fft, gH, BHD->rho_H, help2);
+		     BHD->fg2HH_fft, gH, BHD->rhos[0], help2);
   VecAXPY(dgH, 1.0, help2);
 
 
@@ -701,9 +701,9 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2OO_fft, gO, BHD->rho_O, dgO);
+		     BHD->fg2OO_fft, gO, BHD->rhos[1], dgO);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gH, BHD->rho_H, help2);
+		     BHD->fg2HO_fft, gH, BHD->rhos[0], help2);
   VecAXPY(dgO, 1.0, help2);
   /************************************************************/
   /* intra molecular part */

@@ -122,8 +122,8 @@ State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   /******************************/
   BHD->beta = PD->beta;
   BHD->rho  = PD->rho;
-  BHD->rho_H = 2.*PD->rho;
-  BHD->rho_O = PD->rho;
+  BHD->rhos[0] = 2.*PD->rho;
+  BHD->rhos[1] = PD->rho;
   beta = PD->beta;
 
   interval[0] = PD->interval[0];
@@ -559,9 +559,9 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgHO, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->fO, BHD->fO_l, gO, gHO,
-		       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+		       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 		       BHD->fHO, BHD->fHO_l, gHO, gH,
-		       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+		       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 		       dgHO, BHD->f);
   VecAXPY(dgHO, BHD->PD->beta, BHD->ucHO);
   /************************************************************/
@@ -609,9 +609,9 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgH, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->fHO, BHD->fHO_l, gHO, gHO,
-		       BHD->ucHO_fft, BHD->rho_O, BHD->ucHO_0,
+		       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
 		       BHD->fH, BHD->fH_l, gH, gH,
-		       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
+		       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 		       dgH, BHD->f);
   VecAXPY(dgH, BHD->PD->beta, BHD->uc[0]);
   /************************************************************/
@@ -663,9 +663,9 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgO, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->fHO, BHD->fHO_l, gHO, gHO,
-		       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+		       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 		       BHD->fO, BHD->fO_l, gO, gO,
-		       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+		       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 		       dgO, BHD->f);
   VecAXPY(dgO, BHD->PD->beta, BHD->uc[1]);
   /************************************************************/

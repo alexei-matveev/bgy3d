@@ -380,7 +380,6 @@ typedef struct State
 
   real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ; /* sigma, epsilon and charge(product)  */
   real beta, rho;
-  real rho_H, rho_O;
 
   /*
    * The solute  field for  each of the  two solvent sites  (scaled by
@@ -399,6 +398,11 @@ typedef struct State
 
   Vec uc[2];                    /* Long-range Coulomb  field for H and
                                    O in that order. */
+
+  real rhos[2];                 /* Site specific density.  Computed as
+                                   a solvent  density rho times number
+                                   of   sites  of   that  type   in  a
+                                   solvent. */
 
   Vec gHO_ini;
   Vec ucHO;

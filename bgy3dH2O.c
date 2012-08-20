@@ -102,8 +102,8 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 
   BHD->beta = PD->beta;
   BHD->rho  = PD->rho;
-  BHD->rho_H = PD->rho; //2.*PD->rho;
-  BHD->rho_O = PD->rho;
+  BHD->rhos[0] = PD->rho; //2.*PD->rho;
+  BHD->rhos[1] = PD->rho;
   beta = PD->beta;
 
   interval[0] = PD->interval[0];
@@ -3803,9 +3803,9 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_HO */
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gH,
-			       BHD->ucHO_fft, BHD->rho_O, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
 			       BHD->fH, BHD->fH_l, gH, gHO,
-			       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
+			       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  //VecSet(dg_new,0.0);
@@ -3870,9 +3870,9 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_OH */
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fO, BHD->fO_l, gO, gHO,
-			       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+			       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 			       BHD->fHO, BHD->fHO_l, gHO, gH,
-			       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  VecPointwiseMult(dg_new, dg_new, BHD->cHO);
@@ -3952,9 +3952,9 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_H */
   	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gHO,
-			       BHD->ucHO_fft, BHD->rho_O, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
 			       BHD->fH, BHD->fH_l, gH, gH,
-			       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
+			       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  //VecScale(dg_new, 0.5);
@@ -4025,9 +4025,9 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  //goto ende;
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gHO,
-			       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 			       BHD->fO, BHD->fO_l, gO, gO,
-			       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+			       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  VecPointwiseMult(dg_new, dg_new, BHD->cO);
@@ -4283,7 +4283,7 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
     {
 
       BHD = BGY3dH2OData_Pair_malloc(PD);
-      BHD->rho_H = 2.*BHD->rho_H;
+      BHD->rhos[0] = 2.*BHD->rhos[0];
       if( r_HH <0)
 	{
 	  PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
@@ -4453,14 +4453,14 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 /*       Compute_dg_H2O_inter(BHD,  */
 /* 			   BHD->fHO, BHD->fHO_l, gHO, gHO,  */
-/* 			   BHD->ucHO_fft, BHD->rho_H,  */
+/* 			   BHD->ucHO_fft, BHD->rhos[0],  */
 /* 			   BHD->fO, BHD->fO_l, gO, gO,  */
-/* 			   BHD->ucO_fft, BHD->rho_O,  */
+/* 			   BHD->ucO_fft, BHD->rhos[1],  */
 /* 			   dg_new, f); */
 /*       Compute_dg_H2O_inter(BHD, BHD->fH, BHD->fH_l, gH, gHO,  */
-/* 			   BHD->ucH_fft, BHD->rho_H,  */
+/* 			   BHD->ucH_fft, BHD->rhos[0],  */
 /* 			   BHD->fHO, BHD->fHO_l, gHO, gO,  */
-/* 			   BHD->ucHO_fft, BHD->rho_O,  */
+/* 			   BHD->ucHO_fft, BHD->rhos[1],  */
 /* 			   dg_new, f); */
 
       if( !(iter%10) && iter>0 )
@@ -4513,9 +4513,9 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_HO */
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gH,
-			       BHD->ucHO_fft, BHD->rho_O, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
 			       BHD->fH, BHD->fH_l, gH, gHO,
-			       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
+			       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  //VecSet(dg_new,0.0);
@@ -4584,9 +4584,9 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_OH */
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fO, BHD->fO_l, gO, gHO,
-			       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+			       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 			       BHD->fHO, BHD->fHO_l, gHO, gH,
-			       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 
@@ -4675,9 +4675,9 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  /* g_H */
   	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gHO,
-			       BHD->ucHO_fft, BHD->rho_O, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
 			       BHD->fH, BHD->fH_l, gH, gH,
-			       BHD->ucH_fft, BHD->rho_H, BHD->ucH_0,
+			       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 	  //VecScale(dg_new, 0.5);
@@ -4763,9 +4763,9 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  //goto ende;
 	  Compute_dg_H2O_inter(BHD,
 			       BHD->fHO, BHD->fHO_l, gHO, gHO,
-			       BHD->ucHO_fft, BHD->rho_H, BHD->ucHO_0,
+			       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 			       BHD->fO, BHD->fO_l, gO, gO,
-			       BHD->ucO_fft, BHD->rho_O, BHD->ucO_0,
+			       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 			       dg_new, f);
 	  VecScale(dg_new,damp_LJ);
 
