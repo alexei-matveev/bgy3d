@@ -820,36 +820,30 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
       // XXX: FFT((F_LJ + F_coulomb_short) * g2) 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch, 0);
       /* Coulomb long */
       // XXX: F_coulomb_long * g2 
       VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
       // XXX: F_coulomb_long * g2 - F_coulomb_long
       VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
       // XXX: FFT(F_coulomb_long * g2 - F_coulomb_long)
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim], BHD->fft_scratch, 0);
       /* HH */
       VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HH_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch, 0);
       /* Coulomb long */
       VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH_l[dim]);
       VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HHl_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch, 0);
       /* HO */
       VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO[dim]);
       //VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HO_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch, 0);
       /* Coulomb long */
       VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO_l[dim]);
       VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HOl_fft[dim],
-                             BHD->fft_scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HOl_fft[dim], BHD->fft_scratch, 0);
 
 
     }
@@ -1055,8 +1049,7 @@ void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arr
 
   /* fft(g) */
 
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch,
-                         x, n, 0);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch, 0);
 
 
   index=0;
@@ -1203,8 +1196,7 @@ static void Compute_H2O_interS_C(const State *BHD,
 
   /* fft(g) */
 
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch,
-                         x, n, 0);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch, 0);
 
 
   index=0;

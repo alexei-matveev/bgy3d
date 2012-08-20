@@ -437,15 +437,13 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g1a, f1[dim]);
       if(sign1 != 1.0)
 	VecScale(BDD->v[dim], sign1);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim],
-			     scratch, x, n, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
     }
 
   /* fft(g-1) */
   //VecCopy(g1b, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1b, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1b, g_fft, scratch, 0);
 
 /*   PetscPrintf(PETSC_COMM_WORLD, "1: int g= %e\tint fg= %e\n",  */
 /* 	      g_fft[0].re*BDD->norm_const,  */
@@ -514,15 +512,13 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g2a, f2[dim]);
       if(sign2 != 1.0)
 	VecScale(BDD->v[dim], sign2);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch,
-			     x, n, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
     }
 
   /* fft(g-1) */
   //VecCopy(g2b, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2b, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2b, g_fft, scratch, 0);
 
 /*   PetscPrintf(PETSC_COMM_WORLD, "2: int g= %e\tint fg= %e\n",  */
 /* 	      g_fft[0].re*BDD->norm_const,  */
@@ -631,15 +627,13 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   FOR_DIM
     {
       VecPointwiseMult(BDD->v[dim], g1, f[dim]);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch,
-			     x, n, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
     }
 
   /* fft(g) */
   //VecCopy(g2, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, g_fft, scratch, 0);
 
   index=0;
   /* loop over local portion of grid */
@@ -744,8 +738,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   /************************************************/
 
 
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch, 0);
 
   index=0;
   /* loop over local portion of grid */
@@ -840,8 +833,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 
 
   /* fft(g/t) */
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch, 0);
 
 
 
@@ -935,11 +927,9 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   /* fft(g) */
   //VecCopy(g2, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1, g_fft, scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1, g_fft, scratch, 0);
 
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, fg2_fft[0], scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, fg2_fft[0], scratch, 0);
 
   index=0;
   /* loop over local portion of grid */
@@ -1468,10 +1458,14 @@ Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim)
 
 fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				fftw_complex *g_fft, fftw_complex *scratch,
-				int x[3], int n[3], real c)
+				real c)
 {
-  int index=0, i[3];
+  int index, i[3];
+  int x[3], n[3];
   PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   if(g_fft==NULL)
     g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(*g_fft));
@@ -1479,7 +1473,7 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
   DAVecGetArray(da, g, &g_vec);
   /* loop over local portion of grid */
   /* Attention: order of indices is not variable */
-  index=0;
+  index = 0;
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)

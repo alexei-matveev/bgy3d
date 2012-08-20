@@ -736,10 +736,8 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 /*   Zeropad_Function(BHD, dgO, zpad, 0.0); */
 /*   Zeropad_Function(BHD, dgH, zpad, 0.0); */
 
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgH, uH_fft, BHD->fft_scratch,
-			 x, n, 0);
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgO, uO_fft, BHD->fft_scratch,
-			 x, n, 0);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgH, uH_fft, BHD->fft_scratch, 0);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgO, uO_fft, BHD->fft_scratch, 0);
 
 
   /* Get arrays from PETSC Vectors */
