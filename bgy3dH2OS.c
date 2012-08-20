@@ -1482,8 +1482,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
   real norm;
   int max_iter = 100;
+  Vec t_vec;                    /* used for all sites */
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
-  Vec tH, tO, dg_newH, dg_newO;
+  Vec dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1546,8 +1547,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   DACreateGlobalVector(BHD.da, &dg_new2);
   DACreateGlobalVector(BHD.da, &f);
 
-  DACreateGlobalVector(BHD.da, &tH);
-  DACreateGlobalVector(BHD.da, &tO);
+  DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
 
   DACreateGlobalVector(BHD.da, &dg_newH);
   DACreateGlobalVector(BHD.da, &dg_newO);
@@ -1601,11 +1601,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
              (5.110):  first  impose  boundary condistion  then  solve
              laplacian equation  and substrate from g0.   State BHD is
-             not modified by  these calls. Note that tH  appears to be
-             intent(out) in  these calls,  the value is  ignored which
-             may explain H/O assymmetry. */
-      ImposeLaplaceBoundary (&BHD, g0H, tH, BHD.xH, zpad, NULL);
-      ImposeLaplaceBoundary (&BHD, g0O, tH, BHD.xO, zpad, NULL);
+             not modified  by these calls. Note that  t_vec appears to
+             be intent(out) in these calls, the value is ignored. */
+      ImposeLaplaceBoundary (&BHD, g0H, t_vec, BHD.xH, zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0O, t_vec, BHD.xO, zpad, NULL);
 
       /* XXX: then correct g0 with boundary condition again. State BHD
               is not modified by these calls: */
@@ -1670,17 +1669,17 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, gH, BHD.ucH_fft, (damp / damp0) * BHD.rho_H, dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          /* Vec tO is intent(out) here: */
-          Solve_NormalizationH2O_smallII (&BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+          /* Vec t_vec is intent(out) here: */
+          Solve_NormalizationH2O_smallII (&BHD, gH, r_HO, gO, t_vec , dg_new2, f, zpad);
 
-          /* Vec tO is intent(in) here: */
-          Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
+          /* Vec t_vec is intent(in) here: */
+          Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
           VecAXPY(dg_new, 1.0, dg_new2);
           VecAXPY(dg_new, 1.0, BHD.uc[0]);
 
-          /* Vec tH is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, NULL);
+          /* Vec t_vec is intent(out) here: */
+          ImposeLaplaceBoundary(&BHD, dg_new, t_vec, BHD.xH, zpad, NULL);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
 
           VecCopy(dg_new, dg_newH);
@@ -1699,17 +1698,17 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gH, BHD.ucHO_fft, (damp / damp0) * BHD.rho_H, dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          /* Vec tH is intent(out) here: */
-          Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
+          /* Vec t_vec is intent(out) here: */
+          Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, t_vec , dg_new2, f, zpad);
 
-          /* Vec tH is intent(in) here: */
-          Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+          /* Vec t_vec is intent(in) here: */
+          Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
           VecAXPY(dg_new, 1.0, dg_new2);
           VecAXPY(dg_new, 1, BHD.uc[1]);
 
-          /* Vec tH is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, NULL);
+          /* Vec t_vec is intent(out) here: */
+          ImposeLaplaceBoundary(&BHD, dg_new, t_vec, BHD.xO, zpad, NULL);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
 
           VecCopy(dg_new, dg_newO);
@@ -1818,8 +1817,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(dg_new2);
   VecDestroy(f);
 
-  VecDestroy(tH);
-  VecDestroy(tO);
+  VecDestroy(t_vec);
+
   VecDestroy(dg_newH);
   VecDestroy(dg_newO);
 
