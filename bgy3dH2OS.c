@@ -1569,17 +1569,19 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
              (5.110):  first  impose  boundary condistion  then  solve
-             laplacian equation and substrate from g0. */
-      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.xH, zpad, NULL);
-      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.xO, zpad, NULL);
+             laplacian equation  and substrate from g0.   State BHD is
+             not modified by these calls: */
+      ImposeLaplaceBoundary (&BHD, g0H, tH, BHD.xH, zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0O, tH, BHD.xO, zpad, NULL); /* FIXME: tH and tO, really? */
 
-      /* XXX: then correct g0 with boundary condition again */
-      Zeropad_Function(&BHD, g0O, zpad, 0.0);
-      Zeropad_Function(&BHD, g0H, zpad, 0.0);
+      /* XXX: then correct g0 with boundary condition again. State BHD
+              is not modified by these calls: */
+      Zeropad_Function (&BHD, g0O, zpad, 0.0);
+      Zeropad_Function (&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
 
-      ComputeH2O_g( gH, g0H, dgH);
-      ComputeH2O_g( gO, g0O, dgO);
+      ComputeH2O_g (gH, g0H, dgH);
+      ComputeH2O_g (gO, g0O, dgO);
 
       real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
                                             value is right.  */
@@ -1603,10 +1605,23 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
              re-define  any  of  the  Vec(tors)  except  those  passed
              explicitly.
 
+             Same    holds    for    Solve_NormalizationH2O_smallII(),
+             ImposeLaplaceBoundary()  and  Zeropad_Function()  to  the
+             best of my (limited) knowledge.
+
              The    factor   (damp/    damp0)   in    the    call   to
              Compute_H2O_interS_C()  looks  odd,  but  note  that  the
              Coulomb  field was  defined  having the  factor damp0  in
-             RecomputeInitialFFTs(). FIXME: avoid this ugliness. */
+             RecomputeInitialFFTs(). FIXME: avoid this ugliness.
+
+             I assume  BHD.uc[] was not  modified since it was  set in
+             the  solute   specific  RecomputeInitialSoluteData()  and
+             before it first use  in VecAXPY() below.  Note that uc[0]
+             and  uc[1] differ from  the true  Coulomb potential  by a
+             factor equal  to the charge of the  respective site.  Why
+             do  we   keep  two  versions  of   essentially  the  same
+             potential?  Why not adapt the factor here instead? */
+
 
           /* H */
           VecSet(dg_new,0.0);
@@ -1623,7 +1638,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecAXPY(dg_new, 1.0, dg_new2);
 
 
-          Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII (&BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
 
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
@@ -1680,8 +1695,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecNorm(f, NORM_INFINITY, &dgO_norm);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
 
-          ComputeH2O_g( gH, g0H, dgH);
-          ComputeH2O_g( gO, g0O, dgO);
+          ComputeH2O_g (gH, g0H, dgH);
+          ComputeH2O_g (gO, g0O, dgO);
           norm = ComputeCharge(&BHD, gH, gO);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
 
@@ -1742,7 +1757,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol ) //&& NORM_REG<5.0e-2)
             break;
 
-        }
+      } /* iter loop */
       /*************************************/
       /* output */
       namecount++;
@@ -1762,7 +1777,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           bgy3d_save_vec ("dgO.bin", dgO); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
-    }
+  } /* damp loop */
 
   VecDestroy(gH);
   VecDestroy(gO);
