@@ -448,10 +448,6 @@ typedef struct State
 
 } State;
 
-typedef State *BGY3dH2OData;    /* DEPRECATED!    Consider   replacing
-                                   "BGY3dH2OData   BHD"   with  "State
-                                   *BHD" */
-
 typedef struct H2OdgStruct
 {
   PetscScalar dgH, dgO, dgHO;
