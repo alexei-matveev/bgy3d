@@ -1440,6 +1440,37 @@ static void ComputedgFromg (Vec dg, Vec g0, Vec g)
   VecRestoreArray(g, &g_vec);
 }
 
+/*
+ * Does the mixing:
+ *
+ *     dg := a * dg_new + (1 - a) * dg
+ *
+ * Returns the norm of the difference |dg_new - dg|.
+ */
+static real mix (Vec dg, Vec dg_new, real a, Vec work)
+{
+    real norm;
+
+    /* Move dg */
+    VecCopy(dg, work);
+
+    /* dg' = a * dg_new + (1 - a) * dg */
+    VecAXPBY(dg, a, (1-a), dg_new);
+
+    /* work = dg - dg' = a * (dg - dg_new)
+
+       That is why the divison by "a" below */
+    VecAXPY(work, -1.0, dg);
+
+    /* Norm of the change: */
+    VecNorm(work, NORM_INFINITY, &norm);
+
+    /* FIXME: why not computing |dg_new - dg| directly? Would be valid
+       also for a == 0: */
+    return norm / a;
+}
+
+
 
 /*
  * This function is the main entry point for the BGY3dM equation for a
@@ -1683,22 +1714,17 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           VecCopy(dg_new, dg_newO);
 
-          /* Move dgH */
-          VecCopy(dgH, f);
+          /*
+           * Mix  dg and dg_new with a fixed ration "a":
+           *
+           *     dg' = a * dg_new + (1 - a) * dg
+           *     norm = |dg_new - dg|
+           */
+          dgH_norm = mix (dgH, dg_newH, a, f); /* last arg is a work Vec */
+          dgO_norm = mix (dgO, dg_newO, a, f); /* last arg is a work Vec */
 
-          VecAXPBY(dgH, a, (1-a), dg_newH);
-          VecAXPY(f, -1.0, dgH);
-          VecNorm(f, NORM_INFINITY, &dgH_norm);
-
-          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
-
-          /* Move dgO */
-          VecCopy(dgO, f);
-
-          VecAXPBY(dgO, a, (1-a), dg_newO);
-          VecAXPY(f, -1.0,  dgO);
-          VecNorm(f, NORM_INFINITY, &dgO_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
+          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm, a);
+          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm, a);
 
           ComputeH2O_g (gH, g0H, dgH);
           ComputeH2O_g (gO, g0O, dgO);
@@ -1721,12 +1747,12 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           mycount++;
 
           if (((iter - 1) % 10) &&
-             (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
+             (dgH_old < dgH_norm || dgO_old < dgO_norm))
             {
               upwards = 1;
             }
           else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-                  (dgH_old < dgH_norm / a || dgO_old < dgO_norm / a))
+                  (dgH_old < dgH_norm || dgO_old < dgO_norm))
             {
               a1 /= 2.;
               if(a1 < a0)
@@ -1752,14 +1778,14 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           /* otherwise leave "a1" and "mycount" unchanged */
 
           PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-          dgH_old = dgH_norm / a;
-          dgO_old = dgO_norm / a;
+          dgH_old = dgH_norm;
+          dgO_old = dgO_norm;
 
           /*********************************/
 
           PetscPrintf(PETSC_COMM_WORLD,"\n");
 
-          if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol ) //&& NORM_REG<5.0e-2)
+          if (dgH_norm <= norm_tol &&  dgO_norm <= norm_tol) //&& NORM_REG<5.0e-2)
             break;
 
       } /* iter loop */
