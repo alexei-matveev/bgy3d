@@ -23,9 +23,9 @@
 real  NORM_REG=1.0e-1;
 real  NORM_REG2=1.0e-2;
 
-BGY3dH2OData BGY3dH2OData_Pair_malloc(ProblemData *PD)
+State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   DA da;
   real interval[2], h[3], N[3], L, beta, maxL;
   int x[3], n[3];
@@ -240,7 +240,7 @@ BGY3dH2OData BGY3dH2OData_Pair_malloc(ProblemData *PD)
 
 
 
-void BGY3dH2OData_free(BGY3dH2OData BHD)
+void BGY3dH2OData_free(State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -615,7 +615,7 @@ void VecSetRandom_H2O(Vec g, real mag)
   VecRestoreArray(g, &g_vec);
 }
 
-void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad)
+void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
 {
   DA da;
   ProblemData *PD;
@@ -655,7 +655,7 @@ void ImposeBoundaryCondition_Initialize( BGY3dH2OData BHD, real zpad)
 }
 
 
-void ImposeBoundaryCondition( BGY3dH2OData BHD, Vec g)
+void ImposeBoundaryCondition( State *BHD, Vec g)
 {
   DA da;
   ProblemData *PD;
@@ -686,7 +686,7 @@ void ImposeBoundaryCondition( BGY3dH2OData BHD, Vec g)
 }
 
 
-real ImposeBoundaryConditionII( BGY3dH2OData BHD, Vec g, real zpad)
+real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 {
   DA da;
   ProblemData *PD;
@@ -737,7 +737,7 @@ real ImposeBoundaryConditionII( BGY3dH2OData BHD, Vec g, real zpad)
 }
 
 
-void ComputeH2O_Renormalization( BGY3dH2OData BHD, Vec g)
+void ComputeH2O_Renormalization( State *BHD, Vec g)
 {
   ProblemData *PD;
   real vsum, h3, *h;
@@ -758,7 +758,7 @@ void ComputeH2O_Renormalization( BGY3dH2OData BHD, Vec g)
 /*   VecRestoreArray(g, &g_vec); */
 }
 
-void Smooth_Function(BGY3dH2OData BHD, Vec g, real RL, real RR, real shift)
+void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 {
   DA da;
   ProblemData *PD;
@@ -811,7 +811,7 @@ void Smooth_Function(BGY3dH2OData BHD, Vec g, real RL, real RR, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-void Zeropad_Function(BGY3dH2OData BHD, Vec g, real ZP, real shift)
+void Zeropad_Function(State *BHD, Vec g, real ZP, real shift)
 {
   DA da;
   ProblemData *PD;
@@ -861,10 +861,10 @@ void Zeropad_Function(BGY3dH2OData BHD, Vec g, real ZP, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-// void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3],
+// void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 // 			   fftw_complex *fft_data,
 // 			   void *LJ_params, real damp)
-void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3],
+void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 			   fftw_complex *fft_data,
 			   real q2, real damp)
 {
@@ -1015,10 +1015,10 @@ void ComputeFFTfromCoulomb(BGY3dH2OData BHD, Vec uc, Vec f_l[3],
 #define SPHERE_G 2.0
 #define SPHERE_R 1.0
 #define C_G 1.8
-// void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3] , Vec f_l[3],
+// void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 // 			     fftw_complex *fft_data,
 // 			     void *LJ_params, real damp)
-void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3] , Vec f_l[3],
+void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 			     fftw_complex *fft_data,
 			     real q2, real damp)
 {
@@ -1148,9 +1148,9 @@ void ComputeFFTfromCoulombII(BGY3dH2OData BHD, Vec f[3] , Vec f_l[3],
 
 }
 
-// void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, void *LJ_params,
+// void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, void *LJ_params,
 // 			real damp, real zpad)
-void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, real q2,
+void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 			real damp, real zpad)
 {
   DA da;
@@ -1256,7 +1256,7 @@ void ComputeFFTSoluteII(BGY3dH2OData BHD, Vec ucl , Vec ucs, real q2,
 
 }
 
-void ComputeInitialGuess(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
+void ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
 {
   DA da;
   ProblemData *PD;
@@ -1343,7 +1343,7 @@ void ComputeInitialGuess(BGY3dH2OData BHD, Vec dgO, Vec dgH, Vec dgHO, real damp
 }
 
 
-void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
+void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 {
   DA da;
   ProblemData *PD;
@@ -1611,7 +1611,7 @@ void RecomputeInitialData(BGY3dH2OData BHD, real damp, real damp_LJ)
 
 }
 
-void Compute_dg_H2O_inter(BGY3dH2OData BHD,
+void Compute_dg_H2O_inter(State *BHD,
 			  Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
 			  fftw_complex *coul1_fft, real rho1, real shift1,
 			  Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
@@ -1869,7 +1869,7 @@ void Compute_dg_H2O_inter(BGY3dH2OData BHD,
 
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
+void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 			  fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2005,7 +2005,7 @@ void Compute_dg_H2O_intra(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2
 
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2258,7 +2258,7 @@ void Compute_dg_H2O_intraII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intraIII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2591,7 +2591,7 @@ void Compute_dg_H2O_intraIII(BGY3dH2OData BHD, Vec f[3], Vec f_l[3], Vec g1, Vec
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra_ln(BGY3dH2OData BHD, Vec g, real rab, Vec dg, Vec dg_help)
+void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -2710,7 +2710,7 @@ void Compute_dg_H2O_intra_ln(BGY3dH2OData BHD, Vec g, real rab, Vec dg, Vec dg_h
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra_lnII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -2905,7 +2905,7 @@ void Compute_dg_H2O_intra_lnII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg,
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra_lnIII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -3156,7 +3156,7 @@ void Compute_dg_H2O_intra_lnIII(BGY3dH2OData BHD, Vec g, Vec t, real rab, Vec dg
 }
 
 
-void Compute_Zero_Correction(BGY3dH2OData BHD, Vec dg)
+void Compute_Zero_Correction(State *BHD, Vec dg)
 {
   ProblemData *PD;
   DA da;
@@ -3191,7 +3191,7 @@ void Compute_Zero_Correction(BGY3dH2OData BHD, Vec dg)
 }
 
 /* Compute normalization condition */
-void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab,
+void Compute_dg_H2O_normalization_intra(State *BHD, Vec g, real rab,
 					Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -3307,7 +3307,7 @@ void Compute_dg_H2O_normalization_intra(BGY3dH2OData BHD, Vec g, real rab,
 }
 
 /* Compute normalization condition */
-void Compute_dg_H2O_normalization_inter(BGY3dH2OData BHD, Vec g1, Vec g2,
+void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
 					Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -3424,7 +3424,7 @@ void Compute_dg_H2O_normalization_inter(BGY3dH2OData BHD, Vec g1, Vec g2,
 }
 
 #define APP_NORM 1.0e-2
-void Solve_NormalizationH2O(BGY3dH2OData BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
+void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
 			 Vec tH, Vec tO, Vec tHO, Vec tOH, Vec dg, Vec dg_help)
 {
   real normH, normO, normHO;
@@ -3470,7 +3470,7 @@ void Solve_NormalizationH2O(BGY3dH2OData BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
   return ;
 }
 
-void Solve_NormalizationH2O_small_old(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
 
@@ -3487,7 +3487,7 @@ void Solve_NormalizationH2O_small_old(BGY3dH2OData BHD, Vec gc, real rc, Vec g, 
 }
 
 #define MAXENTRY 5.0e+1
-void Solve_NormalizationH2O_small(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_small(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
   int local_size, i;
@@ -3534,7 +3534,7 @@ void Solve_NormalizationH2O_small(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec 
 }
 
 
-void Solve_NormalizationH2O_smallII(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_smallII(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
   int local_size, i;
@@ -3587,7 +3587,7 @@ void Solve_NormalizationH2O_smallII(BGY3dH2OData BHD, Vec gc, real rc, Vec g, Ve
 /* solve */
 Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
@@ -4282,7 +4282,7 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 /* solve with product ansatz g=g0*dg */
 Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
