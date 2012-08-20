@@ -1440,17 +1440,14 @@ static void ComputedgFromg (Vec dg, Vec g0, Vec g)
  */
 Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
-  real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
-  real count=0.0, norm, aO;
-  int max_iter=100, iter;
+  real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
+  real norm, aO;
+  int max_iter = 100;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
-  real dgH_old, dgO_old;
-  int mycount=0, upwards, namecount=0;
+  int namecount = 0;
   char nameH[20], nameO[20];
-
-
 
   Vec dg_histO, dg_histH;
 
@@ -1543,15 +1540,12 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
-  for (damp = damp_start; damp <= 1; damp += 0.1) {
+  for (real damp = damp_start; damp <= 1; damp += 0.1) {
 
       /* FIXME: I  guess the  logic with damping  factors can  be made
          more straightforward:  */
-      if (damp > 0)
-          count += 1.0;
-
-      damp_LJ = (damp >= 0 ? 1.0 : 0.0); /* yes, >=, so the
-                                            original */
+      real damp_LJ = (damp >= 0 ? 1.0 : 0.0); /* yes, >=, so the
+                                                 original */
 
       /* XXX: Return F * g2.  Note the calculation of F is divided due
               to long  range Coulomb interation.  See  comments in the
@@ -1583,24 +1577,25 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       ComputeH2O_g( gH, g0H, dgH);
       ComputeH2O_g( gO, g0O, dgO);
 
+      real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
+                                            value is right.  */
+      real a1 = a0;             /* loop-local variable */
+      for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++) {
 
-  /*     VecCopy(BHD.g2HO, gH);  */
-/*       VecCopy(BHD.g2O, gO);  */
-
-      a=a0;
-      a1=a0;
-      for(iter=0; iter<max_iter; iter++)
-        {
-
-          if( !(iter%10) && iter>0 )
-            a=a1;
+          real a;               /* Used only inside the loop. */
+          if (!(iter % 10) && iter > 0)
+            a = a1;             /* This is taken  in iteration 10, 20,
+                                   etc.  "a1" is  modified  during the
+                                   loop. */
           else
-            a=a0;
+            a = a0;             /* This  is taken  in  iterations 0-9,
+                                   11-19, etc.  "a0" remains unchanged
+                                   during the loop. */
 
 /*        if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
 /*          NORM_REG/=2.; */
 
-          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
+          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter + 1, NORM_REG);
 
 
           /* H */
@@ -1858,6 +1853,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
             }
             mycount = 0;
           }
+          /* otherwise leave "a1" and "mycount" unchanged */
+
           PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
           dgH_old = dgH_norm / a;
           dgO_old = dgO_norm / a;
