@@ -1483,7 +1483,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real norm;
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
-  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, g[2];
+  Vec g0H, g0O, dgH, dgO,  dg_acc, dg_new2, f, g[2];
   Vec dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
   int namecount = 0;
@@ -1543,7 +1543,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   DACreateGlobalVector(BHD.da, &(g[1]));
   DACreateGlobalVector(BHD.da, &dgH);
   DACreateGlobalVector(BHD.da, &dgO);
-  DACreateGlobalVector(BHD.da, &dg_new);
+  DACreateGlobalVector(BHD.da, &dg_acc);
   DACreateGlobalVector(BHD.da, &dg_new2);
   DACreateGlobalVector(BHD.da, &f);
 
@@ -1560,7 +1560,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   /* set initial guess*/
   VecSet(dgH,0);
   VecSet(dgO,0);
-  VecSet(dg_new,0.0);
+  VecSet(dg_acc,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
       ComputedgFromg (dgH, g0H, BHD.g2HO);
@@ -1656,18 +1656,18 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 
           /* H */
-          VecSet(dg_new,0.0);
+          VecSet(dg_acc,0.0);
           Compute_H2O_interS(&BHD, BHD.fg2HO_fft, g[1], BHD.rhos[1], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
           Compute_H2O_interS(&BHD, BHD.fg2HH_fft, g[0], BHD.rhos[0], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
-          VecScale(dg_new,damp_LJ);
+          VecAXPY(dg_acc, 1.0, dg_new2);
+          VecScale(dg_acc,damp_LJ);
 
           /* Coulomb long */
           Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[1], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
           Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, g[0], BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
           Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], t_vec , dg_new2, f, zpad);
@@ -1675,28 +1675,28 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           /* Vec t_vec is intent(in) here: */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
-          VecAXPY(dg_new, 1.0, dg_new2);
-          VecAXPY(dg_new, 1.0, BHD.uc[0]);
+          VecAXPY(dg_acc, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, BHD.uc[0]);
 
           /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_new, t_vec, BHD.xH, zpad, NULL);
-          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xH, zpad, NULL);
+          Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-          VecCopy(dg_new, dg_newH);
+          VecCopy(dg_acc, dg_newH);
 
           /* O */
-          VecSet(dg_new,0.0);
+          VecSet(dg_acc,0.0);
           Compute_H2O_interS(&BHD, BHD.fg2OO_fft, g[1], BHD.rhos[1], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
           Compute_H2O_interS(&BHD, BHD.fg2HO_fft, g[0], BHD.rhos[0], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
-          VecScale(dg_new,damp_LJ);
+          VecAXPY(dg_acc, 1.0, dg_new2);
+          VecScale(dg_acc,damp_LJ);
 
           /* Coulomb long */
           Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, g[1], BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
           Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[0], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
-          VecAXPY(dg_new, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
           Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], t_vec , dg_new2, f, zpad);
@@ -1704,20 +1704,20 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           /* Vec t_vec is intent(in) here: */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
-          VecAXPY(dg_new, 1.0, dg_new2);
-          VecAXPY(dg_new, 1, BHD.uc[1]);
+          VecAXPY(dg_acc, 1.0, dg_new2);
+          VecAXPY(dg_acc, 1, BHD.uc[1]);
 
           /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_new, t_vec, BHD.xO, zpad, NULL);
-          Zeropad_Function(&BHD, dg_new, zpad, 0.0);
+          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xO, zpad, NULL);
+          Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-          VecCopy(dg_new, dg_newO);
+          VecCopy(dg_acc, dg_newO);
 
           /*
-           * Mix  dg and dg_new with a fixed ration "a":
+           * Mix  dg and dg_acc with a fixed ration "a":
            *
-           *     dg' = a * dg_new + (1 - a) * dg
-           *     norm = |dg_new - dg|
+           *     dg' = a * dg_acc + (1 - a) * dg
+           *     norm = |dg_acc - dg|
            */
           dgH_norm = mix (dgH, dg_newH, a, f); /* last arg is a work Vec */
           dgO_norm = mix (dgO, dg_newO, a, f); /* last arg is a work Vec */
@@ -1813,7 +1813,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecDestroy(g[1]);
   VecDestroy(dgH);
   VecDestroy(dgO);
-  VecDestroy(dg_new);
+  VecDestroy(dg_acc);
   VecDestroy(dg_new2);
   VecDestroy(f);
 
