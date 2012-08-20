@@ -50,7 +50,7 @@ State *BGY3dH2OData_Newton_malloc(ProblemData *PD)
   PetscInt lx[1], ly[1], *lz;
   PetscErrorCode ierr;
 
-  BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
+  BHD = (State*) malloc(sizeof(*BHD));
 
   /****************************************************/
   /* set Lennard-Jones and Coulomb parameters */
@@ -194,7 +194,7 @@ State *BGY3dH2OData_Newton_malloc(ProblemData *PD)
    * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
    * statement  in  the if-block.   It  is  not  suitable for  use  in
    * functions  returning  anything   that  but  PetscErrorCode.  This
-   * function returns BGY3dH2OData.
+   * function returns State*.
    */
 
   /* Create global vectors */
@@ -420,7 +420,7 @@ PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, "--- Function evaluation starts...\n");
 
-  BHD = (BGY3dH2OData) data;
+  BHD = (State*) data;
   gH= BHD->gH;
   gO= BHD->gO;
   dgH= BHD->dgH;
@@ -604,7 +604,7 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, "--- Function evaluation starts...\n");
 
-  BHD = (BGY3dH2OData) data;
+  BHD = (State*) data;
   PD = BHD->PD;
   da = BHD->da;
   gH= BHD->gH;
@@ -1065,7 +1065,7 @@ PetscErrorCode ComputePreconditioner_H2OS(void *data, Vec x, Vec y)
   State *BHD;
   PetscErrorCode ierr;
 
-  BHD = (BGY3dH2OData) data;
+  BHD = (State*) data;
   //ierr=VecPointwiseMult(y,BHD->pre,x);
 
   VecAbs(BHD->pre);
