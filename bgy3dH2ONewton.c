@@ -5,6 +5,7 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
+#include "bgy3dH2O.h"
 
 /*===================================================*/
 /* Parametrisierung TIP3P :  */

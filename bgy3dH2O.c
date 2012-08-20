@@ -6,6 +6,7 @@
 #include "bgy3d_SolventParameters.h"
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
+#include "bgy3dH2O.h"
 
 #define R_r  9
 #define R_l  7
@@ -23,7 +24,7 @@
 real  NORM_REG=1.0e-1;
 real  NORM_REG2=1.0e-2;
 
-State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
+static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 {
   State *BHD;
   DA da;
@@ -240,7 +241,7 @@ State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 
 
 
-void BGY3dH2OData_free(State *BHD)
+static void BGY3dH2OData_free(State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -291,8 +292,7 @@ void BGY3dH2OData_free(State *BHD)
   free(BHD);
 }
 
-// real LJ_repulsive(real r, void *LJ_params)
-real LJ_repulsive(real r, real epsilon, real sigma)
+static real LJ_repulsive(real r, real epsilon, real sigma)
 {
   // real epsilon, sigma, sr6, sr, re;
   real sr6, sr, re;
@@ -339,8 +339,6 @@ real Coulomb_short (real r, real q2)
         return re;
 }
 
-// Alternate void pointer as real number
-// real Coulomb_short_grad( real r, real rx, void *params)
 real Coulomb_short_grad( real r, real rx, real q2 )
 {
   // real q2, re;
@@ -362,13 +360,9 @@ real Coulomb_short_grad( real r, real rx, real q2 )
     return re;
 }
 
-// real Coulomb_long( real r, void *params)
 real Coulomb_long( real r, real q2)
 {
-  // real q2, re;
   real re;
-
-  // q2 = ((double*)params)[2];
 
    if(r==0)
      {
@@ -410,14 +404,10 @@ real Coulomb_long_grad( real r, real rx, real q2)
     return re;
 }
 
-// real Coulomb_long_spline( real r, void *params)
-real Coulomb_long_spline( real r, real q2)
+static real Coulomb_long_spline( real r, real q2)
 {
-  // real q2, re;
   real re;
   real r_rl_2, rr_rl_2r, rr_rl_3, s;
-
-  // q2 = ((double*)params)[2];
 
   if(r==0)
     {
@@ -452,15 +442,10 @@ real Coulomb_long_spline( real r, real q2)
     return re;
 }
 
-// real Coulomb_long_spline_grad( real r, real rx, void *params)
-real Coulomb_long_spline_grad( real r, real rx, real q2)
+static real Coulomb_long_spline_grad( real r, real rx, real q2)
 {
-  // real q2, re;
   real re;
   real r_rl, rr_rl_2r, rr_rl_3, s, ss;
-
-
-  // q2 = ((double*)params)[2];
 
   if(r==0)
     return 0;
@@ -493,13 +478,9 @@ real Coulomb_long_spline_grad( real r, real rx, real q2)
 }
 
 
-// real Coulomb( real r, void *params)
 real Coulomb( real r, real q2)
 {
-  // real q2, re;
   real  re;
-
-  // q2 = ((double*)params)[2];
 
    if(r==0)
      {
@@ -520,13 +501,9 @@ real Coulomb( real r, real q2)
     return re;
 }
 
-// real Coulomb_grad( real r, real rx, void *params)
 real Coulomb_grad( real r, real rx, real q2)
 {
-  // real q2, re;
   real re;
-
-  // q2 = ((double*)params)[2];
 
   if( rx==0 )
     return 0;
@@ -574,7 +551,7 @@ void ComputeH2O_g(Vec g, Vec g0, Vec dg)
 /*   exit(1);  */
 }
 
-void CheckMax( Vec g, char name[5], real max)
+static void CheckMax( Vec g, char name[5], real max)
 {
   PetscScalar *g_vec;
   real k;
@@ -737,7 +714,7 @@ real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 }
 
 
-void ComputeH2O_Renormalization( State *BHD, Vec g)
+static void ComputeH2O_Renormalization( State *BHD, Vec g)
 {
   ProblemData *PD;
   real vsum, h3, *h;
@@ -811,7 +788,7 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-void Zeropad_Function(State *BHD, Vec g, real ZP, real shift)
+void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
 {
   DA da;
   ProblemData *PD;
@@ -861,9 +838,6 @@ void Zeropad_Function(State *BHD, Vec g, real ZP, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-// void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
-// 			   fftw_complex *fft_data,
-// 			   void *LJ_params, real damp)
 void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 			   fftw_complex *fft_data,
 			   real q2, real damp)
@@ -1015,9 +989,6 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 #define SPHERE_G 2.0
 #define SPHERE_R 1.0
 #define C_G 1.8
-// void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
-// 			     fftw_complex *fft_data,
-// 			     void *LJ_params, real damp)
 void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 			     fftw_complex *fft_data,
 			     real q2, real damp)
@@ -1148,8 +1119,6 @@ void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 
 }
 
-// void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, void *LJ_params,
-// 			real damp, real zpad)
 void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 			real damp, real zpad)
 {
@@ -1256,7 +1225,7 @@ void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 
 }
 
-void ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
+static void ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
 {
   DA da;
   ProblemData *PD;
@@ -3156,7 +3125,7 @@ void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec 
 }
 
 
-void Compute_Zero_Correction(State *BHD, Vec dg)
+static void Compute_Zero_Correction(State *BHD, Vec dg)
 {
   ProblemData *PD;
   DA da;
@@ -3307,7 +3276,7 @@ void Compute_dg_H2O_normalization_intra(State *BHD, Vec g, real rab,
 }
 
 /* Compute normalization condition */
-void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
+static void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
 					Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -3424,7 +3393,7 @@ void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
 }
 
 #define APP_NORM 1.0e-2
-void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
+static void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
 			 Vec tH, Vec tO, Vec tHO, Vec tOH, Vec dg, Vec dg_help)
 {
   real normH, normO, normHO;
@@ -3470,7 +3439,7 @@ void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
   return ;
 }
 
-void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
+static void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
 

@@ -7,6 +7,7 @@
 #include "bgy3d_SolventParameters.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"
+#include "bgy3dH2O.h"
 #include "bgy3dH2OS.h"
 
 #define damp0 0.001
