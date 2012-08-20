@@ -9,7 +9,7 @@
 /* Initialize M-Matrix with appropriate stencil */
 PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   PData PD;
   DA da;
   int x[3], n[3], i[3], N[3], dim, border;
@@ -98,7 +98,7 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
   return 0;
 }
 
-void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
+void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
 {
   PData PD;
   DA da;
@@ -156,7 +156,7 @@ void CopyBoundary(BGY3dH2OData BHD, Vec gfrom, Vec gto, real zpad)
 
 PetscErrorCode ComputeRHSDMMG(DMMG dmmg,Vec b)
 {
-  BGY3dH2OData BHD;
+  State *BHD;
   
   BHD = (BGY3dH2OData) dmmg->user;
 
@@ -164,7 +164,7 @@ PetscErrorCode ComputeRHSDMMG(DMMG dmmg,Vec b)
   return 0;
 } 
 
-void InitializeDMMGSolver(BGY3dH2OData BHD)
+void InitializeDMMGSolver(State *BHD)
 {
   PC pc;
   DMMG *dmmg;
@@ -185,7 +185,7 @@ void InitializeDMMGSolver(BGY3dH2OData BHD)
 }
 
 
-real ImposeLaplaceBoundary(BGY3dH2OData BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
   real mpi_start, mpi_stop;
   Vec sol;
