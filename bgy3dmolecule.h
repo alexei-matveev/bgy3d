@@ -9,8 +9,6 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim);
 void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg);
 fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
-				fftw_complex *g_fft, fftw_complex *work,
-				real c);
+				fftw_complex *g_fft, fftw_complex *work);
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
-			    fftw_complex *g_fft, fftw_complex *work,
-			    real c);
+			    fftw_complex *g_fft, fftw_complex *work);

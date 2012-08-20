@@ -641,8 +641,8 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
 
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch, 0.0);
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
@@ -734,8 +734,8 @@ PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 /*   Zeropad_Function(BHD, dgO, zpad, 0.0); */
 /*   Zeropad_Function(BHD, dgH, zpad, 0.0); */
 
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgH, uH_fft, BHD->fft_scratch, 0);
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgO, uO_fft, BHD->fft_scratch, 0);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgH, uH_fft, BHD->fft_scratch);
+  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgO, uO_fft, BHD->fft_scratch);
 
 
   /* Get arrays from PETSC Vectors */
@@ -816,8 +816,8 @@ void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
 
-  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch, 0.0);
-  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch, 0.0);
+  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 

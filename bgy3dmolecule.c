@@ -437,13 +437,13 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g1a, f1[dim]);
       if(sign1 != 1.0)
 	VecScale(BDD->v[dim], sign1);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch);
     }
 
   /* fft(g-1) */
   //VecCopy(g1b, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1b, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1b, g_fft, scratch);
 
 /*   PetscPrintf(PETSC_COMM_WORLD, "1: int g= %e\tint fg= %e\n",  */
 /* 	      g_fft[0].re*BDD->norm_const,  */
@@ -491,7 +491,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	  //fprintf(stderr,"%e\n",dg_fft[index].re);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -511,13 +511,13 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g2a, f2[dim]);
       if(sign2 != 1.0)
 	VecScale(BDD->v[dim], sign2);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch);
     }
 
   /* fft(g-1) */
   //VecCopy(g2b, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2b, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2b, g_fft, scratch);
 
 /*   PetscPrintf(PETSC_COMM_WORLD, "2: int g= %e\tint fg= %e\n",  */
 /* 	      g_fft[0].re*BDD->norm_const,  */
@@ -567,7 +567,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	}
 
 
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -625,13 +625,13 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   FOR_DIM
     {
       VecPointwiseMult(BDD->v[dim], g1, f[dim]);
-      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch, 0);
+      ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, BDD->v[dim], fg2_fft[dim], scratch);
     }
 
   /* fft(g) */
   //VecCopy(g2, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, g_fft, scratch);
 
   index=0;
   /* loop over local portion of grid */
@@ -685,7 +685,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, 1./L/L/L);
 
@@ -735,7 +735,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   /************************************************/
 
 
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch);
 
   index=0;
   /* loop over local portion of grid */
@@ -772,7 +772,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, 1./L/L/L);
 
@@ -829,7 +829,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 
 
   /* fft(g/t) */
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g, g_fft, scratch);
 
 
 
@@ -873,7 +873,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
 
   VecScale(dg_help, 1./L/L/L);
@@ -922,9 +922,9 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   /* fft(g) */
   //VecCopy(g2, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1, g_fft, scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g1, g_fft, scratch);
 
-  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, fg2_fft[0], scratch, 0);
+  ComputeFFTfromVec_fftw(da, BDD->fft_plan_fw, g2, fg2_fft[0], scratch);
 
   index=0;
   /* loop over local portion of grid */
@@ -968,7 +968,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, 1./L/L/L/L/L/L);
 
@@ -1451,8 +1451,7 @@ Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim)
 }
 
 fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
-				fftw_complex *g_fft, fftw_complex *scratch,
-				real c)
+				fftw_complex *g_fft, fftw_complex *scratch)
 {
   int index, i[3];
   int x[3], n[3];
@@ -1472,8 +1471,7 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  //g_fft[index].re = g_vec[i[2]][i[1]][i[0]]/2.+c;
-	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]]+c;
+	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]];
 	  g_fft[index].im = 0;
 	  index++;
 	}
@@ -1487,8 +1485,7 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 
 
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
-			    fftw_complex *g_fft, fftw_complex *scratch,
-			    real c)
+			    fftw_complex *g_fft, fftw_complex *scratch)
 {
   int index, i[3];
   int x[3], n[3];
@@ -1514,8 +1511,7 @@ void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  //g_vec[i[2]][i[1]][i[0]] = g_fft[index].re*2.+c; // Factor 2!!!
-	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re+c;
+	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re;
 	  index++;
 	}
   DAVecRestoreArray(da, g, &g_vec);
