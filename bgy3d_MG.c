@@ -19,7 +19,7 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
   
   PetscPrintf(PETSC_COMM_WORLD,"Assembling Matrix...");
 
-  BHD = (BGY3dH2OData) dmmg->user;
+  BHD = (State*) dmmg->user;
 
   da =  (DA)dmmg->dm;
   PD = BHD->PD;
@@ -158,7 +158,7 @@ PetscErrorCode ComputeRHSDMMG(DMMG dmmg,Vec b)
 {
   State *BHD;
   
-  BHD = (BGY3dH2OData) dmmg->user;
+  BHD = (State*) dmmg->user;
 
   VecCopy(BHD->pre, b);
   return 0;
