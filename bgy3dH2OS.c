@@ -1484,7 +1484,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
   Vec g0H, g0O, dgH, dgO,  dg_acc, dg_new2, f, g[2];
-  Vec dg_newH, dg_newO;
+  Vec dg_new[2];
   PetscScalar dgH_norm, dgO_norm;
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1549,8 +1549,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
 
-  DACreateGlobalVector(BHD.da, &dg_newH);
-  DACreateGlobalVector(BHD.da, &dg_newO);
+  DACreateGlobalVector(BHD.da, &(dg_new[0]));
+  DACreateGlobalVector(BHD.da, &(dg_new[1]));
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. */
@@ -1682,7 +1682,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xH, zpad, NULL);
           Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-          VecCopy(dg_acc, dg_newH);
+          VecCopy(dg_acc, dg_new[0]);
 
           /* O */
           VecSet(dg_acc,0.0);
@@ -1711,7 +1711,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xO, zpad, NULL);
           Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-          VecCopy(dg_acc, dg_newO);
+          VecCopy(dg_acc, dg_new[1]);
 
           /*
            * Mix  dg and dg_acc with a fixed ration "a":
@@ -1719,8 +1719,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
            *     dg' = a * dg_acc + (1 - a) * dg
            *     norm = |dg_acc - dg|
            */
-          dgH_norm = mix (dgH, dg_newH, a, f); /* last arg is a work Vec */
-          dgO_norm = mix (dgO, dg_newO, a, f); /* last arg is a work Vec */
+          dgH_norm = mix (dgH, dg_new[0], a, f); /* last arg is a work Vec */
+          dgO_norm = mix (dgO, dg_new[1], a, f); /* last arg is a work Vec */
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm, a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm, a);
@@ -1819,8 +1819,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   VecDestroy(t_vec);
 
-  VecDestroy(dg_newH);
-  VecDestroy(dg_newO);
+  VecDestroy(dg_new[0]);
+  VecDestroy(dg_new[1]);
 
   finalize_state (&BHD);
 
