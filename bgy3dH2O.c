@@ -3159,8 +3159,14 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
   VecScale(dg, h/L/L/L);
 }
 
-/* Compute normalization condition */
-void Compute_dg_H2O_normalization_intra(State *BHD, Vec g, real rab,
+/*
+ * Compute normalization condition.
+ *
+ * Side effects:
+ *
+ *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ */
+void Compute_dg_H2O_normalization_intra(const State *BHD, Vec g, real rab,
 					Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -3456,7 +3462,7 @@ static void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g,
 }
 
 #define MAXENTRY 5.0e+1
-void Solve_NormalizationH2O_small(State *BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
   int local_size, i;
@@ -3502,8 +3508,10 @@ void Solve_NormalizationH2O_small(State *BHD, Vec gc, real rc, Vec g, Vec t,
 /*   exit(1);  */
 }
 
-
-void Solve_NormalizationH2O_smallII(State *BHD, Vec gc, real rc, Vec g, Vec t,
+/*
+ * Vec t is intent(out).
+ */
+void Solve_NormalizationH2O_smallII(const State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
   int local_size, i;

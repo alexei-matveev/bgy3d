@@ -34,12 +34,12 @@ void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg, Vec dg_help);
 
-void Compute_dg_H2O_normalization_intra (State *BHD, Vec g, real rab,
+void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
                                          Vec dg, Vec dg_help);
 
-void Solve_NormalizationH2O_small (State *BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g, Vec t,
                                    Vec dg, Vec dg_help, real zpad);
-void Solve_NormalizationH2O_smallII (State *BHD, Vec gc, real rc, Vec g, Vec t,
+void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g, Vec t,
                                      Vec dg, Vec dg_help, real zpad);
 
 Vec BGY3d_solve_2site (ProblemData *PD, Vec g_ini, int vdim);
