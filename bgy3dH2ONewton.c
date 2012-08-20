@@ -58,7 +58,7 @@ State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   real sigmaH, sigmaO, sigmaHO;
   real q2H, q2O, q2HO;
 
-  BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
+  BHD = (State*) malloc(sizeof(*BHD));
 
   /****************************************************/
   /* set Lennard-Jones and Coulomb parameters */
@@ -502,7 +502,7 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, "--- Function evaluation starts...\n");
 
-  BHD = (BGY3dH2OData) data;
+  BHD = (State*) data;
   gH= BHD->gH;
   gO= BHD->gO;
   gHO= BHD->gHO;
@@ -750,7 +750,7 @@ int MatH2OMult(Mat M, Vec x, Vec y)
 
   MatShellGetContext(M, ctx);
 
-  BHD = (BGY3dH2OData) ctx;
+  BHD = (State*) ctx;
 
   return 0;
 }
@@ -923,7 +923,7 @@ PetscErrorCode ComputePreconditioner_H2O(void *data, Vec x, Vec y)
   State *BHD;
   PetscErrorCode ierr;
 
-  BHD = (BGY3dH2OData) data;
+  BHD = (State*) data;
   ierr=VecPointwiseMult(y,BHD->pre,x);
 
 
