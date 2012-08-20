@@ -159,7 +159,7 @@ static State initialize_state (/* not const */ ProblemData *PD)
    * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
    * statement  in  the if-block.   It  is  not  suitable for  use  in
    * functions  returning  anything   that  but  PetscErrorCode.  This
-   * function returns BGY3dH2OData.
+   * function returns State*.
    */
 
   /* Create global vectors */
