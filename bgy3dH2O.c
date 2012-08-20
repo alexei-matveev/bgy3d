@@ -577,7 +577,7 @@ static void CheckMax( Vec g, char name[5], real max)
 }
 
 
-void VecSetRandom_H2O(Vec g, real mag)
+static void VecSetRandom_H2O(Vec g, real mag)
 {
   int local_size, i;
   PetscScalar *g_vec;
@@ -632,7 +632,7 @@ void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
 }
 
 
-void ImposeBoundaryCondition( State *BHD, Vec g)
+static void ImposeBoundaryCondition( State *BHD, Vec g)
 {
   DA da;
   ProblemData *PD;
@@ -663,7 +663,7 @@ void ImposeBoundaryCondition( State *BHD, Vec g)
 }
 
 
-real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
+static real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 {
   DA da;
   ProblemData *PD;
@@ -989,7 +989,7 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 #define SPHERE_G 2.0
 #define SPHERE_R 1.0
 #define C_G 1.8
-void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
+static void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 			     fftw_complex *fft_data,
 			     real q2, real damp)
 {
@@ -1119,7 +1119,7 @@ void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 
 }
 
-void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
+static void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 			real damp, real zpad)
 {
   DA da;
@@ -1974,7 +1974,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+static void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2679,7 +2679,7 @@ void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+static void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -2874,7 +2874,7 @@ void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec d
 }
 
 /* Compute intramolecular part */
-void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+static void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
