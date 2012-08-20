@@ -1161,9 +1161,14 @@ void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arr
 
 }
 
-static void Compute_H2O_interS_C(State *BHD,
+/*
+ * Side effects:
+ *
+ *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ */
+static void Compute_H2O_interS_C(const State *BHD,
                           fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
-                          fftw_complex *(fs_fft[3]), real con, real rho, Vec dg_help, real damp)
+                          real rho, Vec dg_help, real damp)
 {
   ProblemData *PD;
   DA da;
@@ -1604,13 +1609,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-                               1.0, BHD.rho_O, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.rho_O, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-                               0.0, BHD.rho_H, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.rho_H, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
 
 
@@ -1635,13 +1636,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-                               1.0, BHD.rho_O, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.rho_O, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-                               0.0, BHD.rho_H, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.rho_H, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
 
 
@@ -1966,13 +1963,9 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.fH_fft,
-                               1.0, BHD.rho_O, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gO, BHD.ucHO_fft, BHD.rho_O, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.fH_fft,
-                               0.0, BHD.rho_H, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, gH, BHD.ucH_fft, BHD.rho_H, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
@@ -2032,13 +2025,9 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.fO_fft,
-                               1.0, BHD.rho_O, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, gO, BHD.ucO_fft, BHD.rho_O, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD,
-                               BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.fO_fft,
-                               0.0, BHD.rho_H, dg_new2, damp);
+          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, gH, BHD.ucHO_fft, BHD.rho_H, dg_new2, damp);
           VecAXPY(dg_new, 1.0, dg_new2);
 
 
