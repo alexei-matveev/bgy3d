@@ -1441,7 +1441,7 @@ static void ComputedgFromg (Vec dg, Vec g0, Vec g)
 Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 {
   real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
-  real norm, aO;
+  real norm;
   int max_iter = 100;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
@@ -1678,25 +1678,13 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
 
           /* Move dgO */
-          if(0&& iter>10)
-            {
-              aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
+          VecCopy(dgO, f);
 
-              VecCopy(dgO, f);
-              VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
+          VecAXPBY(dgO, a, (1-a), dg_newO);
+          VecAXPY(f, -1.0,  dgO);
+          VecNorm(f, NORM_INFINITY, &dgO_norm);
+          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
 
-              VecAXPY(f, -1.0,  dgO);
-              VecNorm(f, NORM_INFINITY, &dgO_norm);
-              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
-            }
-          else
-            {
-              VecCopy(dgO, f);
-              VecAXPBY(dgO, a, (1-a), dg_newO);
-              VecAXPY(f, -1.0,  dgO);
-              VecNorm(f, NORM_INFINITY, &dgO_norm);
-              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
-            }
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
           norm = ComputeCharge(&BHD, gH, gO);
