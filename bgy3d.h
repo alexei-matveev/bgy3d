@@ -135,10 +135,10 @@ typedef struct HNC3dDataStruct
 HNC3dData HNC3dData_malloc(ProblemData *PD);
 void HNC3dData_free(HNC3dData HD);
 
-typedef struct HNC3dField
+typedef struct HNCField
 {
   PetscScalar h, c;
-}HNCField;
+} HNCField;
 
 
 typedef struct HNC3dNewtonStruct
@@ -448,17 +448,17 @@ typedef struct State
 
 } State;
 
-typedef struct H2OdgStruct
+typedef struct H2Odg
 {
   PetscScalar dgH, dgO, dgHO;
 } H2Odg;
 
-typedef struct H2OSdgStruct
+typedef struct H2OSdg
 {
   PetscScalar dgH, dgO;
 } H2OSdg;
 
-typedef struct H2OSdgFStruct
+typedef struct H2OSdgF
 {
   PetscScalar dgHre, dgHim, dgOre, dgOim;
 
