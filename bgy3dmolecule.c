@@ -491,8 +491,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	  //fprintf(stderr,"%e\n",dg_fft[index].re);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft,
-			 scratch, x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -568,8 +567,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	}
 
 
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch,
-		    x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -687,8 +685,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch,
-		    x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, 1./L/L/L);
 
@@ -775,8 +772,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch,
-		    x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, 1./L/L/L);
 
@@ -877,8 +873,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch,
-		    x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
 
   VecScale(dg_help, 1./L/L/L);
@@ -973,8 +968,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch,
-		    x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BDD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, 1./L/L/L/L/L/L);
 
@@ -1494,10 +1488,14 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 			    fftw_complex *g_fft, fftw_complex *scratch,
-			    int x[3], int n[3], real c)
+			    real c)
 {
-  int index=0, i[3];
+  int index, i[3];
+  int x[3], n[3];
   PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   if(g_fft==NULL)
     {
@@ -1511,7 +1509,7 @@ void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
   DAVecGetArray(da, g, &g_vec);
   /* loop over local portion of grid */
   /* Attention: order of indices is not variable */
-  index=0;
+  index = 0;
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)

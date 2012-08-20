@@ -552,5 +552,5 @@ void poisson (State *BHD, Vec uc, Vec rho, real q)
     // NOT NEEDED: VecSet(uc, 00.0);
 
     /* uc := IFFT(uc(kx, ky, kz)) */
-    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_work, BHD->fft_scratch, x, n, 0);
+    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_work, BHD->fft_scratch, 0);
 }

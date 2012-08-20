@@ -1142,8 +1142,7 @@ void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arr
           //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft,
-                         scratch, x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, rho*PD->beta/L/L/L);
 
@@ -1289,8 +1288,7 @@ static void Compute_H2O_interS_C(const State *BHD,
           //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft,
-                         scratch, x, n, 0.0);
+  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch, 0.0);
 
   VecScale(dg_help, rho * PD->beta / L / L / L);
 

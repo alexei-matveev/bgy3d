@@ -13,4 +13,4 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				real c);
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 			    fftw_complex *g_fft, fftw_complex *work,
-			    int x[3], int n[3], real c);
+			    real c);
