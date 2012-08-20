@@ -35,7 +35,7 @@ State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   PetscInt lx[1], ly[1], *lz;
 
 
-  BHD = (BGY3dH2OData) malloc(sizeof(*BHD));
+  BHD = (State*) malloc(sizeof(*BHD));
 
   /****************************************************/
   /* set Lennard-Jones and Coulomb parameters */
