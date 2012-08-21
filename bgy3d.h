@@ -175,9 +175,9 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
 PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa);
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
-			    FFT_DATA *g_fft, int x[3], int n[3], real c);
+			    FFT_DATA *g_fft);
 void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
-		       FFT_DATA *g_fft, int x[3], int n[3], real c);
+		       FFT_DATA *g_fft);
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 void ConvolutionTest(BGY3dParameter params);
 

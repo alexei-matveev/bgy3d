@@ -493,7 +493,7 @@ BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim)
   params->Ftimesg2_fft = NULL;
   params->Ftimesg2_fft = ComputeFFTfromVec(da, params->fft_plan,
   					   params->Ftimesg2,
-  					   params->Ftimesg2_fft, x, n, 0);
+  					   params->Ftimesg2_fft);
 
   params->PD=PD;
 
@@ -1046,8 +1046,7 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 
   /* g = fft(g) */
   fft_data = NULL;
-  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data,
-				    x, n, 0.0);
+  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data);
 
   /* fft_data = fft_data * Ftimesg2_fft */
   for(i=0; i<max_i; i++)
@@ -1060,8 +1059,7 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2,
-				    x, n, 0.0);
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2);
 
 /*   VecView(f,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1); */
@@ -1160,8 +1158,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 
   /* g = fft(g) */
   fft_data = NULL;
-  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data,
-				    x, n, -1.0);
+  fft_data = ComputeFFTfromVec(da, params->fft_plan, g, fft_data);
 
   /* fft_data = fft_data * Ftimesg2_fft */
   for(k=0; k<max_i; k++)
@@ -1174,8 +1171,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2,
-				    x, n, 0.0);
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_gFg2);
 
 
 
@@ -1298,13 +1294,11 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 
   /* g = fft(g) */
   fft_g = NULL;
-  fft_g = ComputeFFTfromVec(da, params->fft_plan, g, fft_g,
-				    x, n, 0.0);
+  fft_g = ComputeFFTfromVec(da, params->fft_plan, g, fft_g);
   /* f*g = fft(f*g) */
   VecPointwiseMult(v1, g, params->force_single);
   fft_fg = NULL;
-  fft_fg = ComputeFFTfromVec(da, params->fft_plan, v1, fft_fg,
-				    x, n, 0.0);
+  fft_fg = ComputeFFTfromVec(da, params->fft_plan, v1, fft_fg);
 
   /* fft(g) * fft(f*g) */
   for(i=0; i<max_i; i++)
@@ -1317,8 +1311,7 @@ PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
     }
 
   /* f=fft^-1(fft(g)*fft(F*g2)) */
-  ComputeVecfromFFT(da, params->fft_plan, f, fft_fgg,
-				    x, n, 0.0);
+  ComputeVecfromFFT(da, params->fft_plan, f, fft_fgg);
 
 
   /****************************************/
@@ -1420,10 +1413,15 @@ PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 
 
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
-			    FFT_DATA *g_fft, int x[3], int n[3], real c)
+			    FFT_DATA *g_fft)
+
 {
   int index=0, i[3];
+  int x[3], n[3];
   PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   if(g_fft==NULL)
     g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*g_fft));
@@ -1437,7 +1435,7 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  //g_fft[index].re = g_vec[i[2]][i[1]][i[0]]/2.+c;
-	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]]+c;
+	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]];
 	  g_fft[index].im = 0;
 	  index++;
 	}
@@ -1451,10 +1449,15 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 
 
 void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
-			    FFT_DATA *g_fft, int x[3], int n[3], real c)
+			    FFT_DATA *g_fft)
+
 {
   int index=0, i[3];
+  int x[3], n[3];
   PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
   if(g_fft==NULL)
     {
@@ -1474,7 +1477,7 @@ void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  //g_vec[i[2]][i[1]][i[0]] = g_fft[index].re*2.+c; // Factor 2!!!
-	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re+c;
+	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re;
 	  index++;
 	}
   DAVecRestoreArray(da, g, &g_vec);
@@ -1560,10 +1563,8 @@ void ConvolutionTest(BGY3dParameter params)
 
   fft_a=NULL;
   fft_b=NULL;
-  fft_a =  ComputeFFTfromVec(da, params->fft_plan, a, fft_a,
-				    x, n, 0.0);
-  fft_b =  ComputeFFTfromVec(da, params->fft_plan, b, fft_b,
-			      x, n, 0.0);
+  fft_a =  ComputeFFTfromVec(da, params->fft_plan, a, fft_a);
+  fft_b =  ComputeFFTfromVec(da, params->fft_plan, b, fft_b);
   fft_c = (FFT_DATA*) calloc(max_i, sizeof(*fft_c));
 
   for(index=0; index<max_i; index++)
@@ -1575,8 +1576,7 @@ void ConvolutionTest(BGY3dParameter params)
 
     }
 
-  ComputeVecfromFFT(da, params->fft_plan, c, fft_c,
-		    x, n, 0.0);
+  ComputeVecfromFFT(da, params->fft_plan, c, fft_c);
   VecScale(c,  PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
   VecView(a,PETSC_VIEWER_STDERR_WORLD);

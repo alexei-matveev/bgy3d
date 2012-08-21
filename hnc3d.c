@@ -166,8 +166,7 @@ HNC3dData HNC3dData_malloc(ProblemData *PD)
     }
 
   HD->c_fft = NULL;
-  HD->c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, HD->c, HD->c_fft,
-				x, n, 0);
+  HD->c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, HD->c, HD->c_fft);
   HD->h_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
   HD->ch_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
 
@@ -259,12 +258,12 @@ Vec HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim)
       /* simple mixing: c = lambda*c+(1-lambda)*c_old */
       VecAXPBY(c, (1-lambda), lambda, c_old);
 
-      c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft, x, n, 0);
+      c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft);
 
 
       Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
 
-      ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft, x, n, 0);
+      ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft);
 
       VecScale(g, iL3);
 /*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
@@ -950,7 +949,7 @@ PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   VecSet(HD->v, 0.0);
 
   /* fft(h) */
-  ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft, x, n, 0);
+  ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft);
 
   c_fft = HD->c_fft;
   h_fft = HD->h_fft;
@@ -973,7 +972,7 @@ PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 	}
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft, x, n, 0);
+  ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft);
 
   VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
@@ -1028,7 +1027,7 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
   VecSet(HD->v, 0.0);
 
   /* fft(h) */
-  ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft, x, n, 0);
+  ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft);
 
   c_fft = HD->c_fft;
   h_fft = HD->h_fft;
@@ -1051,7 +1050,7 @@ PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 	}
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft, x, n, 0);
+  ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft);
 
   VecScale(HD->v, rho*PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
@@ -1162,7 +1161,7 @@ Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini, int vdim)
       /* new */
       //VecShift(h,-1);
       /* fft(h) */
-      ComputeFFTfromVec(HD->da, HD->fft_plan, h, h_fft, x, n, 0);
+      ComputeFFTfromVec(HD->da, HD->fft_plan, h, h_fft);
 
       /* fft(h)*fft(c) */
       index=0;
@@ -1181,7 +1180,7 @@ Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini, int vdim)
 	    }
 
       /* v=fft^-1(fft(h)*fft(c)) */
-      ComputeVecfromFFT(HD->da, HD->fft_plan, v, ch_fft, x, n, 0);
+      ComputeVecfromFFT(HD->da, HD->fft_plan, v, ch_fft);
 
       VecScale(v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 

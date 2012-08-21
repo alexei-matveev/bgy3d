@@ -311,7 +311,7 @@ BGY3dFourierData BGY3dFourierData_malloc(ProblemData *PD)
       BDD->fg2_fft[dim] = NULL;
       BDD->fg2_fft[dim] = ComputeFFTfromVec(da, BDD->fft_plan,
 					    BDD->v[dim],
-					    BDD->fg2_fft[dim], x, n, 0);
+					    BDD->fg2_fft[dim]);
     }
   BDD->g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
   BDD->gfg2_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
@@ -618,13 +618,13 @@ void Compute_dg_kirk(BGY3dFourierData BDD, Vec g, Vec dg)
   FOR_DIM
     {
       VecPointwiseMult(BDD->v[dim], dg, BDD->f[dim]);
-      ComputeFFTfromVec(da, BDD->fft_plan, BDD->v[dim], fg2_fft[dim], x, n, 0);
+      ComputeFFTfromVec(da, BDD->fft_plan, BDD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g-1) */
   VecCopy(g, dg);
   VecShift(dg, -1.0);
-  ComputeFFTfromVec(da, BDD->fft_plan, dg, g_fft, x, n, 0);
+  ComputeFFTfromVec(da, BDD->fft_plan, dg, g_fft);
 
 
   index=0;
@@ -671,8 +671,7 @@ void Compute_dg_kirk(BGY3dFourierData BDD, Vec g, Vec dg)
 /*     fprintf(stderr,"%e\n", SQR(g_fft[i[0]].re)+SQR(g_fft[i[0]].im)); */
 /*   exit(1); */
 
-  ComputeVecfromFFT(da, BDD->fft_plan, dg, dg_fft,
-		    x, n, 0.0);
+  ComputeVecfromFFT(da, BDD->fft_plan, dg, dg_fft);
 
   fac = -(PD->interval[1]-PD->interval[0])/(2.*M_PI);
   VecScale(dg, PD->h[0]*PD->h[1]*PD->h[2]*
@@ -712,7 +711,7 @@ void Compute_dg(BGY3dFourierData BDD, Vec g, Vec dg)
   /* fft(g-1) */
   VecCopy(g, dg);
   VecShift(dg, -1.0);
-  ComputeFFTfromVec(da, BDD->fft_plan, dg, g_fft, x, n, 0);
+  ComputeFFTfromVec(da, BDD->fft_plan, dg, g_fft);
 
 
   index=0;
@@ -759,8 +758,7 @@ void Compute_dg(BGY3dFourierData BDD, Vec g, Vec dg)
 /*     fprintf(stderr,"%e\n", SQR(g_fft[i[0]].re)+SQR(g_fft[i[0]].im)); */
 /*   exit(1); */
 
-  ComputeVecfromFFT(da, BDD->fft_plan, dg, dg_fft,
-		    x, n, 0.0);
+  ComputeVecfromFFT(da, BDD->fft_plan, dg, dg_fft);
 
   fac = -(PD->interval[1]-PD->interval[0])/(2.*M_PI);
   VecScale(dg, PD->h[0]*PD->h[1]*PD->h[2]*

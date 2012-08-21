@@ -331,7 +331,7 @@ void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K)
   FOR_DIM
     BDD->fg2_fft[dim] = ComputeFFTfromVec(da, BDD->fft_plan,
 					  BDD->v[dim],
-					  BDD->fg2_fft[dim], x, n, 0);
+					  BDD->fg2_fft[dim]);
 
 
 }
@@ -524,8 +524,8 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
 
 
   /* Compute convolution */
-  ComputeFFTfromVec(da, BDD->fft_plan, g1, fg2_fft[0], x, n, 0);
-  ComputeFFTfromVec(da, BDD->fft_plan, g2, fg2_fft[1], x, n, 0);
+  ComputeFFTfromVec(da, BDD->fft_plan, g1, fg2_fft[0]);
+  ComputeFFTfromVec(da, BDD->fft_plan, g2, fg2_fft[1]);
 
   max_k=n[0]*n[1]*n[2];
   for(k=0; k<max_k; k++)
@@ -537,7 +537,7 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
 	       + fg2_fft[0][k].im*fg2_fft[1][k].re;
     }
 
-  ComputeVecfromFFT(da, BDD->fft_plan, gg, g_fft, x, n, 0.0);
+  ComputeVecfromFFT(da, BDD->fft_plan, gg, g_fft);
 
   VecScale(gg, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 

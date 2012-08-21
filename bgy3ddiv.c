@@ -276,7 +276,7 @@ BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
       BDD->fg2_fft[dim] = NULL;
       BDD->fg2_fft[dim] = ComputeFFTfromVec(da, BDD->fft_plan,
 					    BDD->v2[dim],
-					    BDD->fg2_fft[dim], x, n, 0);
+					    BDD->fg2_fft[dim]);
     }
   BDD->g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
   BDD->gfg2_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
@@ -818,7 +818,7 @@ void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f)
   max_k=n[0]*n[1]*n[2];
 
   /* fft(g) */
-  ComputeFFTfromVec(da, BDD->fft_plan, g, BDD->g_fft, x, n, 0);
+  ComputeFFTfromVec(da, BDD->fft_plan, g, BDD->g_fft);
 
   /* fft(g)*fft(fg2[dim]) */
   FOR_DIM
@@ -832,8 +832,7 @@ void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f)
 	}
 
       /* i[dim]=fft^-1(fft(g)*fft(fg2)) */
-      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft,
-			x, n, 0.0);
+      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft);
 
       VecScale(BDD->i[dim], PD->h[0]*PD->h[1]*PD->h[2]*
 	       PD->rho*PD->beta
@@ -888,13 +887,13 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
   FOR_DIM
     {
       VecPointwiseMult(BDD->v[dim], f, BDD->f[dim]);
-      ComputeFFTfromVec(da, BDD->fft_plan, BDD->v[dim], fg2_fft[dim], x, n, 0);
+      ComputeFFTfromVec(da, BDD->fft_plan, BDD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g) */
   VecCopy(g, f);
   VecShift(f, -1.0);
-  ComputeFFTfromVec(da, BDD->fft_plan, f, g_fft, x, n, 0);
+  ComputeFFTfromVec(da, BDD->fft_plan, f, g_fft);
 /*   for(k=0; k<max_k; k++) */
 /*     fprintf(stderr,"%e\n",g_fft[k].re); */
 /*   ComputeVecfromFFT(da, BDD->fft_plan, f, g_fft,  */
@@ -920,8 +919,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 	}
 
       /* i[dim]=fft^-1(fft(g)*fft(fg2)) */
-      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft,
-			x, n, 0.0);
+      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft);
 
       VecScale(BDD->i[dim], PD->h[0]*PD->h[1]*PD->h[2]*
 	       PD->rho*PD->beta/PD->g_xm
