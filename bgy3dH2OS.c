@@ -1120,10 +1120,10 @@ static void Compute_H2O_interS_C (const State *BHD,
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
-  const real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+  const real L3 = L * L * L;
 
   /* Avoid separate VecScale at the end: */
-  const real scale = rho * PD->beta / L / L / L;
+  const real scale = rho * PD->beta;
 
   g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
@@ -1141,6 +1141,10 @@ static void Compute_H2O_interS_C (const State *BHD,
 
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
 
+  /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
+     iterations.   Here  we   put   the  fft   of   the  kernel   into
+     BHD->fft_scratch: */
+  kernel (BHD->da, BHD->PD, fg2_fft, scratch);
 
   index=0;
   /* loop over local portion of grid */
@@ -1163,39 +1167,17 @@ static void Compute_H2O_interS_C (const State *BHD,
             }
           else
             {
-              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              real k_fac = h3 * h3 * fac / k2;
-
-              /* phase shift factor for x=x+L/2 */
-              real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-
               /*
-               * Compute the (Fourier  transform of) of the divergence
-               * of the "weighted force" vector div (F g) which serves
-               * as a convolution kernel in BGY3dM equations. Note the
-               * the derivative in momentum space involves a factor -i
-               * so that  real- and imaginary parts  of divergence are
-               * proportional to
-               *
-               *     Re = + dot(k, Im(F g))
-               *     Im = - dot(k, Re(F g))
-               *
-               * The additional factor -k^(-2) effectively included in
-               * k_fac   recovers  the   Fourier   transform  of   the
-               * corresponding Poisson solution.
-               *
-               * FIXME: This  quantity, dfg, as a scalar  field on the
-               * k-grid is independent  of solvent distribution around
-               * the  solute (in BGY3dM  approximation) and  should be
-               * pre-computed once.
+               * Retrive  the precomuted Fourier  transform of  of the
+               * divergence of  the "weighted force" vector  div (F g)
+               * which  serves  as  a  convolution  kernel  in  BGY3dM
+               * equations.  The additional factor -k^(-2) effectively
+               * included in the kernel recovers the Fourier transform
+               * of  the corresponding  Poisson solution.   The factor
+               * scale =  βρ is not  included, on the other  hand. See
+               * kernel() for details:
                */
-              fftw_complex dfg = {0.0, 0.0};
-
-              FOR_DIM
-                  dfg.re += k_fac * sign * ic[dim] * fg2_fft[dim][index].im;
-
-              FOR_DIM
-                  dfg.im -= k_fac * sign * ic[dim] * fg2_fft[dim][index].re;
+              fftw_complex dfg = scratch[index];
 
               /*
                * FIXME: Origin of  this occasional addition needs some
@@ -1210,8 +1192,11 @@ static void Compute_H2O_interS_C (const State *BHD,
                * Long range Coulomb part (right one):
                */
               if (coul_fft) {
-                  dfg.re += h3 * sign * coul_fft[index].re;
-                  dfg.im += h3 * sign * coul_fft[index].im;
+                  /* phase shift factor for x=x+L/2 */
+                  real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+
+                  dfg.re += (h3 / L3) * sign * coul_fft[index].re;
+                  dfg.im += (h3 / L3) * sign * coul_fft[index].im;
               }
 
               dg_fft[index].re = scale * (dfg.re * g_fft[index].re -
