@@ -1058,9 +1058,6 @@ static void Compute_H2O_interS_C (const State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
-
           FOR_DIM
             {
               if( i[dim] <= N[dim]/2)
@@ -1082,20 +1079,38 @@ static void Compute_H2O_interS_C (const State *BHD,
               /* phase shift factor for x=x+L/2 */
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
+              /*
+               * Compute the (Fourier  transform of) of the divergence
+               * of the "weighted force" vector div (F g) which serves
+               * as a convolution kernel in BGY3dM equations. Note the
+               * the derivative in momentum space involves a factor -i
+               * so that  real- and imaginary parts  of divergence are
+               * proportional to
+               *
+               *     Re = + dot(k, Im(F g))
+               *     Im = - dot(k, Re(F g))
+               *
+               * The additional factor -k^(-2) effectively included in
+               * k_fac   recovers  the   Fourier   transform  of   the
+               * corresponding Poisson solution.
+               *
+               * FIXME: This  quantity, dfg, as a scalar  field on the
+               * k-grid is independent  of solvent distribution around
+               * the  solute (in BGY3dM  approximation) and  should be
+               * pre-computed once.
+               */
+              fftw_complex dfg = {0.0, 0.0};
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * sign *
-                (fg2_fft[dim][index].re * g_fft[index].im
-                 + fg2_fft[dim][index].im * g_fft[index].re) ;
-
+                  dfg.re += k_fac * sign * ic[dim] * fg2_fft[dim][index].im;
 
               FOR_DIM
-                dg_fft[index].im += ic[dim] * k_fac * sign *
-                (-fg2_fft[dim][index].re * g_fft[index].re
-                 + fg2_fft[dim][index].im * g_fft[index].im);
-
+                  dfg.im -= k_fac * sign * ic[dim] * fg2_fft[dim][index].re;
 
               /*
+               * FIXME: Origin of  this occasional addition needs some
+               * explanation.
+               *
                * The  difference  between  Compute_H2O_interS_C()  and
                * Compute_H2O_interS() of the  original code reduces to
                * this addendum. Supply a  NULL pointer for coul_fft in
@@ -1105,14 +1120,12 @@ static void Compute_H2O_interS_C (const State *BHD,
                * Long range Coulomb part (right one):
                */
               if (coul_fft) {
-                  dg_fft[index].re += h * sign *
-                      (coul_fft[index].re * g_fft[index].re
-                       - coul_fft[index].im * g_fft[index].im);
-
-                  dg_fft[index].im += h * sign *
-                      (coul_fft[index].re * g_fft[index].im
-                       + coul_fft[index].im * g_fft[index].re );
+                  dfg.re += h * sign * coul_fft[index].re;
+                  dfg.im += h * sign * coul_fft[index].im;
               }
+
+              dg_fft[index].re = dfg.re * g_fft[index].re - dfg.im * g_fft[index].im;
+              dg_fft[index].im = dfg.re * g_fft[index].im + dfg.im * g_fft[index].re;
             }
           index++;
         }
