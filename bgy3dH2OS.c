@@ -1476,7 +1476,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   Vec t_vec;                    /* used for all sites */
   Vec g0[2], dg[2], dg_acc, dg_new2, f, g[2];
   Vec dg_new[2];
-  PetscScalar dgH_norm, dgO_norm;
+  PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
 
@@ -1710,11 +1710,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
            *     dg' = a * dg_acc + (1 - a) * dg
            *     norm = |dg_acc - dg|
            */
-          dgH_norm = mix (dg[0], dg_new[0], a, f); /* last arg is a work Vec */
-          dgO_norm = mix (dg[1], dg_new[1], a, f); /* last arg is a work Vec */
+          dg_norm[0] = mix (dg[0], dg_new[0], a, f); /* last arg is a work Vec */
+          dg_norm[1] = mix (dg[1], dg_new[1], a, f); /* last arg is a work Vec */
 
-          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm, a);
-          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm, a);
+          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
+          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dg_norm[1], a);
 
           ComputeH2O_g (g[0], g0[0], dg[0]);
           ComputeH2O_g (g[1], g0[1], dg[1]);
@@ -1737,12 +1737,12 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           mycount++;
 
           if (((iter - 1) % 10) &&
-             (dgH_old < dgH_norm || dgO_old < dgO_norm))
+             (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
             {
               upwards = 1;
             }
           else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-                  (dgH_old < dgH_norm || dgO_old < dgO_norm))
+                  (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
             {
               a1 /= 2.;
               if(a1 < a0)
@@ -1768,14 +1768,14 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           /* otherwise leave "a1" and "mycount" unchanged */
 
           PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-          dgH_old = dgH_norm;
-          dgO_old = dgO_norm;
+          dgH_old = dg_norm[0];
+          dgO_old = dg_norm[1];
 
           /*********************************/
 
           PetscPrintf(PETSC_COMM_WORLD,"\n");
 
-          if (dgH_norm <= norm_tol &&  dgO_norm <= norm_tol) //&& NORM_REG<5.0e-2)
+          if (dg_norm[0] <= norm_tol &&  dg_norm[1] <= norm_tol) //&& NORM_REG<5.0e-2)
             break;
 
       } /* iter loop */
