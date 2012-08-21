@@ -1106,9 +1106,10 @@ void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arr
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
  */
-static void Compute_H2O_interS_C(const State *BHD,
-                          fftw_complex *(fg2_fft[3]), Vec g, fftw_complex *coul_fft,
-                          real rho, Vec dg_help)
+static void Compute_H2O_interS_C (const State *BHD,
+                                  fftw_complex *(fg2_fft[3]), Vec g,
+                                  const fftw_complex *coul_fft,
+                                  real rho, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -1187,20 +1188,24 @@ static void Compute_H2O_interS_C(const State *BHD,
                  + fg2_fft[dim][index].im * g_fft[index].im);
 
 
+              /*
+               * The  difference  between  Compute_H2O_interS_C()  and
+               * Compute_H2O_interS() of the  original code reduces to
+               * this addendum. Supply a  NULL pointer for coul_fft in
+               * Compute_H2O_interS_C()   to  get  the   behaviour  of
+               * Compute_H2O_interS().
+               *
+               * Long range Coulomb part (right one):
+               */
+              if (coul_fft) {
+                  dg_fft[index].re += h * sign *
+                      (coul_fft[index].re * g_fft[index].re
+                       - coul_fft[index].im * g_fft[index].im);
 
-
-              /* right one: */
-              /*****************************/
-              /* long range Coulomb part */
-              dg_fft[index].re += h*sign*
-                (coul_fft[index].re*g_fft[index].re
-                 - coul_fft[index].im*g_fft[index].im);
-
-              dg_fft[index].im += h*sign*
-                (coul_fft[index].re*g_fft[index].im
-                 + coul_fft[index].im*g_fft[index].re );
-              /******************************/
-
+                  dg_fft[index].im += h * sign *
+                      (coul_fft[index].re * g_fft[index].im
+                       + coul_fft[index].im * g_fft[index].re );
+              }
             }
           index++;
         }
