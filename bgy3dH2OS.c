@@ -1705,10 +1705,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecCopy(dg_acc, dg_new[1]);
 
           /*
-           * Mix  dg and dg_acc with a fixed ration "a":
+           * Mix dg and dg_new with a fixed ration "a":
            *
-           *     dg' = a * dg_acc + (1 - a) * dg
-           *     norm = |dg_acc - dg|
+           *     dg' = a * dg_new + (1 - a) * dg
+           *     norm = |dg_new - dg|
            */
           dg_norm[0] = mix (dg[0], dg_new[0], a, f); /* last arg is a work Vec */
           dg_norm[1] = mix (dg[1], dg_new[1], a, f); /* last arg is a work Vec */
