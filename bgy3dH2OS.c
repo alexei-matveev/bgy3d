@@ -1028,17 +1028,16 @@ static void Compute_H2O_interS_C (const State *BHD,
   FOR_DIM
     N[dim] = PD->N[dim];
 
-  real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
+  const real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+
+  /* Avoid separate VecScale at the end: */
+  const real scale = rho * PD->beta / L / L / L;
 
   g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
-
-  real L = PD->interval[1] - PD->interval[0];
-  real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
-
-  /* Avoid separate VecScale at the end: */
-  real scale = rho * PD->beta / L / L / L;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
