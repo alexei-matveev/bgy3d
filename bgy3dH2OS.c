@@ -1008,6 +1008,96 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
 }
 
 /*
+ * This is supposed to compute the k-grid representation of the BGY3dM
+ * equation:
+ *
+ *     Δu = - β ρ div((F g2) * g)
+ *
+ * with "*" being  the convolution that in Fourier  rep degenerates to
+ * pointwise  product,  g2 and  g  being  the (fixed)  solvent-solvent
+ * site-site  distribution  function and  (the  unknown) solvent  site
+ * distribution around the solute.
+ *
+ * The kernel dfg(kx,  ky, kz) includes the Poisson factor  1 / k2 but
+ * does not include the facotor (rho * beta):
+ *
+ *     u(kx, ky, kz) = β ρ dfg(kx, ky, kz) g(kx, ky, kz)
+ *
+ * The three fg arrays are intent(in). The dfg array is intent(out).
+ *
+ * No known side effects.
+ */
+static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
+                    fftw_complex dfg[])
+{
+  int x[3], n[3], i[3], N[3], ic[3];
+
+  FOR_DIM
+    N[dim] = PD->N[dim];
+
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
+  const real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+  const real scale = fac / L / L / L;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  /* Loop over local portion of grid: */
+  int ijk = 0;
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+        {
+          FOR_DIM
+            {
+              if( i[dim] <= N[dim]/2)
+                ic[dim] = i[dim];
+              else
+                ic[dim] = i[dim] - N[dim];
+            }
+
+          /* phase shift factor for x=x+L/2 */
+          real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+
+          real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+
+          real k_fac;
+          if (k2 > 0)
+              k_fac = sign * h3 * h3 * scale / k2;
+          else
+              k_fac = 0.0;
+
+          /*
+           * Compute the  (Fourier transform of) of  the divergence of
+           * the "weighted force"  vector div (F g) which  serves as a
+           * convolution  kernel  in BGY3dM  equations.  Note the  the
+           * derivative in momentum space involves a factor -i so that
+           * real- and imaginary  parts of divergence are proportional
+           * to
+           *
+           *     Re = + dot(k, Im(F g))
+           *     Im = - dot(k, Re(F g))
+           *
+           * The  additional factor  -k^(-2)  effectively included  in
+           * k_fac recovers the Fourier transform of the corresponding
+           * Poisson solution.
+           */
+
+          real re = 0.0;
+          real im = 0.0;
+          for (int p = 0; p < 3; p++) {
+              re += ic[p] * fg[p][ijk].im;
+              im -= ic[p] * fg[p][ijk].re;
+          }
+          dfg[ijk].re = k_fac * re;
+          dfg[ijk].im = k_fac * im;
+
+          ijk++;
+        }
+}
+
+/*
  * Side effects:
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
