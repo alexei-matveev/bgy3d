@@ -1093,65 +1093,12 @@ void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arr
                 (-fg2_fft[dim][index].re * g_fft[index].re
                  + fg2_fft[dim][index].im * g_fft[index].im);
 
-
-
-
-              /* right one: */
-              /*****************************/
-              /* long range Coulomb part */
-/*            dg_fft[index].re += h*sign* */
-/*              (coul_fft[index].re*(g_fft[index].re + 0*con*sign/(h*rho)) */
-/*               - coul_fft[index].im*g_fft[index].im); */
-
-/*            dg_fft[index].im += h*sign* */
-/*              (coul_fft[index].re*g_fft[index].im */
-/*               + coul_fft[index].im*(g_fft[index].re + 0*con*sign/(h*rho))); */
-              /******************************/
-
-              /*****************************/
-              /* long range Coulomb part */
-/*            FOR_DIM */
-/*              dg_fft[index].re += ic[dim] * k_fac *  */
-/*              ( fs_fft[dim][index].im * con/(h*rho)) ; */
-
-/*            FOR_DIM  */
-/*              dg_fft[index].im += ic[dim] * k_fac *  */
-/*              (-fs_fft[dim][index].re * con/(h*rho)); */
-              /******************************/
-
-
-              /*****************************/
-              /* long range Coulomb part */
-/*            dg_fft[index].re += h*sign* */
-/*              (coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
-/*              - coul_fft[index].im*g_fft[index].im); */
-
-/*            dg_fft[index].im += h*sign* */
-/*              (coul_fft[index].re*g_fft[index].im */
-/*               + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
-              /******************************/
-
-              //dg_fft[index].re = sign*exp(-k*confac);
-
-/*            if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
-/*              { */
-/*                dg_fft[index].re= 0; */
-/*                dg_fft[index].im= 0; */
-/*              } */
             }
-          //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
           index++;
         }
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
 
-  VecScale(dg_help, rho*PD->beta/L/L/L);
-
-
-
-/*   ImposeLaplaceBoundary(BHD, dg_help, BHD->v[0], BHD->v[1], 8.0); */
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);   */
-/*    exit(1);      */
-
+  VecScale(dg_help, rho * PD->beta / L / L / L);
 }
 
 /*
@@ -1254,52 +1201,13 @@ static void Compute_H2O_interS_C(const State *BHD,
                  + coul_fft[index].im*g_fft[index].re );
               /******************************/
 
-              /*****************************/
-              /* long range Coulomb part */
-/*            FOR_DIM */
-/*              dg_fft[index].re += ic[dim] * k_fac *  */
-/*              ( fs_fft[dim][index].im * con/(h*rho)) ; */
-
-/*            FOR_DIM  */
-/*              dg_fft[index].im += ic[dim] * k_fac *  */
-/*              (-fs_fft[dim][index].re * con/(h*rho)); */
-              /******************************/
-
-
-              /*****************************/
-              /* long range Coulomb part */
-/*            dg_fft[index].re += h*sign* */
-/*              (coul_fft[index].re*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac)) */
-/*              - coul_fft[index].im*g_fft[index].im); */
-
-/*            dg_fft[index].im += h*sign* */
-/*              (coul_fft[index].re*g_fft[index].im */
-/*               + coul_fft[index].im*(g_fft[index].re + con*sign/(h*rho)*exp(-k*confac))); */
-              /******************************/
-
-              //dg_fft[index].re = sign*exp(-k*confac);
-
-/*            if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
-/*              { */
-/*                dg_fft[index].re= 0; */
-/*                dg_fft[index].im= 0; */
-/*              } */
             }
-          //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
           index++;
         }
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
 
   VecScale(dg_help, rho * PD->beta / L / L / L);
-
-
-
-/*   ImposeLaplaceBoundary(BHD, dg_help, BHD->v[0], BHD->v[1], 8.0); */
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);   */
-/*    exit(1);      */
-
 }
-
 
 
 real ComputeCharge(State *BHD, Vec g1, Vec g2)
