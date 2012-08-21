@@ -1021,7 +1021,7 @@ static void Compute_H2O_interS_C (const State *BHD,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign; // confac;
+  real fac, k_fac, L, h, sign;
 
   PD=BHD->PD;
 
@@ -1076,8 +1076,9 @@ static void Compute_H2O_interS_C (const State *BHD,
             }
           else
             {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-              k_fac = h*h*fac/k;
+              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+              k_fac = h * h * fac / k2;
+
               /* phase shift factor for x=x+L/2 */
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
