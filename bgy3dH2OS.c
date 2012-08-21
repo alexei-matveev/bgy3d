@@ -1474,7 +1474,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real norm;
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
-  Vec g0H, g0O, dgH, dgO,  dg_acc, dg_new2, f, g[2];
+  Vec g0[2], dgH, dgO,  dg_acc, dg_new2, f, g[2];
   Vec dg_new[2];
   PetscScalar dgH_norm, dgO_norm;
   int namecount = 0;
@@ -1545,8 +1545,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. */
-  g0H=BHD.g_ini[0];
-  g0O=BHD.g_ini[1];
+  g0[0]=BHD.g_ini[0];
+  g0[1]=BHD.g_ini[1];
 
   /* set initial guess*/
   VecSet(dgH,0);
@@ -1554,8 +1554,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   VecSet(dg_acc,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
-      ComputedgFromg (dgH, g0H, BHD.g2HO);
-      ComputedgFromg (dgO, g0O, BHD.g2O);
+      ComputedgFromg (dgH, g0[0], BHD.g2HO);
+      ComputedgFromg (dgO, g0[1], BHD.g2O);
   }
 
   /* load initial configuration from file ??? */
@@ -1586,25 +1586,25 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
-      //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
-      //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
+      //Smooth_Function(&BHD, g0[0], zpad-1, zpad, 0.0);
 
       /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
              (5.110):  first  impose  boundary condistion  then  solve
              laplacian equation  and substrate from g0.   State BHD is
              not modified  by these calls. Note that  t_vec appears to
              be intent(out) in these calls, the value is ignored. */
-      ImposeLaplaceBoundary (&BHD, g0H, t_vec, BHD.xH, zpad, NULL);
-      ImposeLaplaceBoundary (&BHD, g0O, t_vec, BHD.xO, zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.xH, zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.xO, zpad, NULL);
 
       /* XXX: then correct g0 with boundary condition again. State BHD
               is not modified by these calls: */
-      Zeropad_Function (&BHD, g0O, zpad, 0.0);
-      Zeropad_Function (&BHD, g0H, zpad, 0.0);
+      Zeropad_Function (&BHD, g0[1], zpad, 0.0);
+      Zeropad_Function (&BHD, g0[0], zpad, 0.0);
       /* g=g0*exp(-dg) */
 
-      ComputeH2O_g (g[0], g0H, dgH);
-      ComputeH2O_g (g[1], g0O, dgO);
+      ComputeH2O_g (g[0], g0[0], dgH);
+      ComputeH2O_g (g[1], g0[1], dgO);
 
       real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
                                             value is right.  */
@@ -1716,8 +1716,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm, a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm, a);
 
-          ComputeH2O_g (g[0], g0H, dgH);
-          ComputeH2O_g (g[1], g0O, dgO);
+          ComputeH2O_g (g[0], g0[0], dgH);
+          ComputeH2O_g (g[1], g0[1], dgO);
           norm = ComputeCharge(&BHD, g[0], g[1]);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
 
