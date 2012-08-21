@@ -4,6 +4,9 @@
 #
 WORK_DIR ?= .
 
+# Shell
+SHELL = /bin/sh
+
 #
 # Flags for bgy3d executable:
 #
@@ -65,7 +68,7 @@ out/%_moments.out:
 # pre-requisite:
 #
 %_moments.out: $(EXE)
-	./runtest.sh $(*)
+	$(SHELL) runtest.sh $(*)
 
 BGY2site:
 	(cd ${WORK_DIR}; ${EXE} -BGY2site ${CMDFLAG})
