@@ -1012,100 +1012,6 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
  */
-void Compute_H2O_interS(const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
-                        fftw_complex *(fg2_fft[3]), Vec g,
-                        real rho, Vec dg_help)
-{
-  ProblemData *PD;
-  DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign; // confac;
-
-  PD=BHD->PD;
-
-  da = BHD->da;
-  FOR_DIM
-    N[dim] = PD->N[dim];
-
-
-  h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BHD->g_fft;
-  dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
-  L = PD->interval[1]-PD->interval[0];
-  fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
-
-  /* confac = SQR(M_PI/L/2.); */
-
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  /************************************************/
-  /* rho*F*g^2 g*/
-  /************************************************/
-
-
-  /* fft(g) */
-
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
-
-
-  index=0;
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
-
-          FOR_DIM
-            {
-              if( i[dim] <= N[dim]/2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
-
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
-            {
-              dg_fft[index].re = 0;
-              dg_fft[index].im = 0;
-            }
-          else
-            {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-              k_fac = h*h*fac/k;
-              /* phase shift factor for x=x+L/2 */
-              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
-
-
-              FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * sign *
-                (fg2_fft[dim][index].re * g_fft[index].im
-                 + fg2_fft[dim][index].im * g_fft[index].re) ;
-
-
-              FOR_DIM
-                dg_fft[index].im += ic[dim] * k_fac * sign *
-                (-fg2_fft[dim][index].re * g_fft[index].re
-                 + fg2_fft[dim][index].im * g_fft[index].im);
-
-            }
-          index++;
-        }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
-
-  VecScale(dg_help, rho * PD->beta / L / L / L);
-}
-
-/*
- * Side effects:
- *
- *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
- */
 static void Compute_H2O_interS_C (const State *BHD,
                                   fftw_complex *(fg2_fft[3]), Vec g,
                                   const fftw_complex *coul_fft,
@@ -1214,6 +1120,17 @@ static void Compute_H2O_interS_C (const State *BHD,
   VecScale(dg_help, rho * PD->beta / L / L / L);
 }
 
+/*
+ * Side effects:
+ *
+ *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ */
+void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
+                         fftw_complex *(fg2_fft[3]), Vec g,
+                         real rho, Vec dg_help)
+{
+    Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
+}
 
 real ComputeCharge(State *BHD, Vec g1, Vec g2)
 {
