@@ -1021,23 +1021,24 @@ static void Compute_H2O_interS_C (const State *BHD,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, h, sign;
 
-  PD=BHD->PD;
-
+  PD = BHD->PD;
   da = BHD->da;
+
   FOR_DIM
     N[dim] = PD->N[dim];
 
+  real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
-  L = PD->interval[1]-PD->interval[0];
-  fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
 
-  /* confac = SQR(M_PI/L/2.); */
+  real L = PD->interval[1] - PD->interval[0];
+  real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+
+  /* Avoid separate VecScale at the end: */
+  real scale = rho * PD->beta / L / L / L;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1074,10 +1075,10 @@ static void Compute_H2O_interS_C (const State *BHD,
           else
             {
               real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              k_fac = h * h * fac / k2;
+              real k_fac = h3 * h3 * fac / k2;
 
               /* phase shift factor for x=x+L/2 */
-              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
+              real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /*
                * Compute the (Fourier  transform of) of the divergence
@@ -1120,18 +1121,18 @@ static void Compute_H2O_interS_C (const State *BHD,
                * Long range Coulomb part (right one):
                */
               if (coul_fft) {
-                  dfg.re += h * sign * coul_fft[index].re;
-                  dfg.im += h * sign * coul_fft[index].im;
+                  dfg.re += h3 * sign * coul_fft[index].re;
+                  dfg.im += h3 * sign * coul_fft[index].im;
               }
 
-              dg_fft[index].re = dfg.re * g_fft[index].re - dfg.im * g_fft[index].im;
-              dg_fft[index].im = dfg.re * g_fft[index].im + dfg.im * g_fft[index].re;
+              dg_fft[index].re = scale * (dfg.re * g_fft[index].re -
+                                          dfg.im * g_fft[index].im);
+              dg_fft[index].im = scale * (dfg.re * g_fft[index].im +
+                                          dfg.im * g_fft[index].re);
             }
           index++;
         }
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
-
-  VecScale(dg_help, rho * PD->beta / L / L / L);
 }
 
 /*
