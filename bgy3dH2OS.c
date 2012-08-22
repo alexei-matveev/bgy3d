@@ -1602,12 +1602,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       kernel (BHD.da, BHD.PD, BHD.fg2OOl_fft, BHD.ucO_fft,  ker_fft_L[1][1]);
 
       /* FIXME: what is  the point to split the  kernel in two pieces?
-         Redefine (S, L) := (S + L, 0) */
+         Redefine S := S + L and forget about L */
       for (int i = 0; i < 2; i++)
           for (int j = 0; j <= i; j++) {
-              /* S = (damp / damp0) * L + damp_LJ * S */
+              /* S := (damp / damp0) * L + damp_LJ * S */
               bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
-              bgy3d_fft_axpby (BHD.da, ker_fft_L[i][j], 0.0, 0.0, ker_fft_S[i][j]);
           }
 
       /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
