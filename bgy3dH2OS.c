@@ -1030,6 +1030,7 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
  * No known side effects.
  */
 static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
+                    const fftw_complex *coul,
                     fftw_complex dfg[])
 {
   int x[3], n[3], i[3], N[3], ic[3];
@@ -1039,8 +1040,9 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = L * L * L;
   const real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
-  const real scale = fac / L / L / L;
+  const real scale = fac / L3;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1095,6 +1097,22 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
           dfg[ijk].re = k_fac * re;
           dfg[ijk].im = k_fac * im;
 
+          /*
+           * FIXME: Origin of  this occasional addition needs some
+           * explanation.
+           *
+           * The   difference   between   Compute_H2O_interS_C()   and
+           * Compute_H2O_interS() of the original code reduces to this
+           * addendum.   Supply   a   NULL   pointer   for   coul   in
+           * Compute_H2O_interS_C()   to    get   the   behaviour   of
+           * Compute_H2O_interS().
+           *
+           * Long range Coulomb part (right one):
+           */
+          if (coul) {
+              dfg[ijk].re += (h3 / L3) * sign * coul[ijk].re;
+              dfg[ijk].im += (h3 / L3) * sign * coul[ijk].im;
+          }
           ijk++;
         }
 }
@@ -1234,7 +1252,7 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
      iterations.   Here  we   put   the  fft   of   the  kernel   into
      BHD->fft_scratch: */
-  kernel (BHD->da, BHD->PD, fg2_fft,
+  kernel (BHD->da, BHD->PD, fg2_fft, NULL,
           BHD->fft_scratch);    /* result */
 
   /* Apply the  kernel, eventually with the strange  addition (in case
@@ -1626,20 +1644,22 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
          iterations. Only a scalr kernel is needed: */
-      kernel (BHD.da, BHD.PD, BHD.fg2HH_fft, ker_fft_S[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.fg2HO_fft, ker_fft_S[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fg2OO_fft, ker_fft_S[1][1]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HH_fft, NULL, ker_fft_S[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HO_fft, NULL, ker_fft_S[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.fg2OO_fft, NULL, ker_fft_S[1][1]);
 
-      kernel (BHD.da, BHD.PD, BHD.fg2HHl_fft, ker_fft_L[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.fg2HOl_fft, ker_fft_L[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fg2OOl_fft, ker_fft_L[1][1]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HHl_fft, BHD.ucH_fft,  ker_fft_L[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HOl_fft, BHD.ucHO_fft, ker_fft_L[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.fg2OOl_fft, BHD.ucO_fft,  ker_fft_L[1][1]);
 
-      /* These are convenience pointers  having the same 2x2 structure
-         as the kernel for consistent addressing: */
-      const fftw_complex *(ker_fft_C[2][2]) = {{BHD.ucH_fft, /* misnomer, HH? */
-                                                BHD.ucHO_fft},
-                                               {BHD.ucHO_fft,
-                                                BHD.ucO_fft}}; /* misnomer, OO? */
+      /* FIXME: what is  the point to split the  kernel in two pieces?
+         Redefine (S, L) := (S + L, 0) */
+      for (int i = 0; i < 2; i++)
+          for (int j = 0; j <= i; j++) {
+              /* S = (damp / damp0) * L + damp_LJ * S */
+              bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
+              bgy3d_fft_axpby (BHD.da, ker_fft_L[i][j], 0.0, 0.0, ker_fft_S[i][j]);
+          }
 
       /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
               above)    and   BHD.uc[0],   BHD.uc[1],    which   are
@@ -1718,20 +1738,15 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           /* for H, O in that order ... */
           for (int i = 0; i < 2; i++) {
 
-              /* ... sum over H, O in that order: */
+              /* ... sum over H, O  in that order. LJ, short- and long
+                 range Coulomb,  and a  so called strange  addition is
+                 accounted for in the kernel: */
               VecSet(dg_acc, 0.0);
 
               for (int j = 0; j < 2; j++) {
                   apply1 (&BHD, ker_fft_S[i][j], g_fft[j], NULL, BHD.rhos[j], dg_new2);
 
-                  VecAXPY(dg_acc, damp_LJ, dg_new2);
-              }
-
-              /* Coulomb long, sum over H, O */
-              for (int j = 0; j < 2; j++) {
-                  apply1 (&BHD, ker_fft_L[i][j], g_fft[j], ker_fft_C[i][j], BHD.rhos[j], dg_new2);
-
-                  VecAXPY(dg_acc, damp / damp0, dg_new2);
+                  VecAXPY(dg_acc, 1.0, dg_new2);
               }
 
               /* FIXME:   ugly  branch.    Very  specific   to  2-site
