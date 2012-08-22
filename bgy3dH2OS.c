@@ -1636,6 +1636,13 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       kernel (BHD.da, BHD.PD, BHD.fg2HOl_fft, ker_fft_L[0][1]); /* == [1][0] */
       kernel (BHD.da, BHD.PD, BHD.fg2OOl_fft, ker_fft_L[1][1]);
 
+      /* These are convenience pointers  having the same 2x2 structure
+         as the kernel for consistent addressing: */
+      const fftw_complex *(ker_fft_C[2][2]) = {{BHD.ucH_fft, /* misnomer, HH? */
+                                                BHD.ucHO_fft},
+                                               {BHD.ucHO_fft,
+                                                BHD.ucO_fft}}; /* misnomer, OO? */
+
       /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
               above)    and   BHD.uc[0],   BHD.uc[1],    which   are
               VM_Coulomb_long,  but  should  they  multiply  by  beta?
@@ -1724,11 +1731,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_acc, damp_LJ);
 
           /* Coulomb long */
-          apply1 (&BHD, ker_fft_L[0][1], g_fft[1], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          apply1 (&BHD, ker_fft_L[0][1], g_fft[1], ker_fft_C[0][1], (damp / damp0) * BHD.rhos[1], dg_new2);
 
           VecAXPY(dg_acc, 1.0, dg_new2);
 
-          apply1 (&BHD, ker_fft_L[0][0], g_fft[0], BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          apply1 (&BHD, ker_fft_L[0][0], g_fft[0], ker_fft_C[0][0], (damp / damp0) * BHD.rhos[0], dg_new2);
 
           VecAXPY(dg_acc, 1.0, dg_new2);
 
@@ -1763,11 +1770,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecScale(dg_acc,damp_LJ);
 
           /* Coulomb long */
-          apply1 (&BHD, ker_fft_L[1][1], g_fft[1], BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          apply1 (&BHD, ker_fft_L[1][1], g_fft[1], ker_fft_C[1][1], (damp / damp0) * BHD.rhos[1], dg_new2);
 
           VecAXPY(dg_acc, 1.0, dg_new2);
 
-          apply1 (&BHD, ker_fft_L[1][0], g_fft[0], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          apply1 (&BHD, ker_fft_L[1][0], g_fft[0], ker_fft_C[1][0], (damp / damp0) * BHD.rhos[0], dg_new2);
 
           VecAXPY(dg_acc, 1.0, dg_new2);
 
