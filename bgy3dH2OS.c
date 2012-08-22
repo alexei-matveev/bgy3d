@@ -1185,6 +1185,29 @@ static void apply (const DA da,
         }
 }
 
+static void apply1 (const State *BHD,
+                    const fftw_complex *kernel,
+                    const fftw_complex *g_fft,
+                    const fftw_complex *coul_fft,
+                    real rho, Vec dg)
+{
+  /* Avoid separate VecScale at the end: */
+  const real scale = rho * BHD->PD->beta;
+
+  /* Apply the  kernel, eventually with the strange  addition (in case
+     coul_fft != NULL). Put result into BHD->gfg2_fft */
+  apply (BHD->da, BHD->PD, kernel, coul_fft, g_fft,
+         scale,
+         BHD->gfg2_fft);        /* result */
+
+  /* ifft(dg) */
+  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw,
+                          dg, /* result */
+                          BHD->gfg2_fft,
+                          BHD->fft_scratch);
+}
+
+
 /*
  * Side effects:
  *
@@ -1467,18 +1490,38 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   InitializeDMMGSolver(&BHD);
 #endif
-  DACreateGlobalVector(BHD.da, &(g[0]));
-  DACreateGlobalVector(BHD.da, &(g[1]));
-  DACreateGlobalVector(BHD.da, &(dg[0]));
-  DACreateGlobalVector(BHD.da, &(dg[1]));
+
+  /* These will hold  FFT of the current g. Allocate  enough to hold a
+     local portion of the grid and free after the loop. */
+  fftw_complex *(g_fft[2]);
+
+  for (int i = 0; i < 2; i++) {
+      g_fft[i] = bgy3d_fft_malloc (BHD.da);
+
+      DACreateGlobalVector (BHD.da, &(g[i]));
+      DACreateGlobalVector (BHD.da, &(dg[i]));
+      DACreateGlobalVector (BHD.da, &(dg_new[i]));
+  }
+
+  /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
+     OH. */
+  fftw_complex *(ker_fft_S[2][2]);
+  fftw_complex *(ker_fft_L[2][2]);
+
+  for (int i = 0; i < 2; i++)
+      for (int j = 0; j <= i; j++) {
+          ker_fft_S[i][j] = bgy3d_fft_malloc (BHD.da);
+          ker_fft_S[j][i] = ker_fft_S[i][j];
+
+          ker_fft_L[i][j] = bgy3d_fft_malloc (BHD.da);
+          ker_fft_L[j][i] = ker_fft_L[i][j];
+      }
+
   DACreateGlobalVector(BHD.da, &dg_acc);
   DACreateGlobalVector(BHD.da, &dg_new2);
   DACreateGlobalVector(BHD.da, &f);
 
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
-
-  DACreateGlobalVector(BHD.da, &(dg_new[0]));
-  DACreateGlobalVector(BHD.da, &(dg_new[1]));
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. */
@@ -1583,6 +1626,16 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
+      /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
+         iterations. Only a scalr kernel is needed: */
+      kernel (BHD.da, BHD.PD, BHD.fg2HH_fft, ker_fft_S[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HO_fft, ker_fft_S[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.fg2OO_fft, ker_fft_S[1][1]);
+
+      kernel (BHD.da, BHD.PD, BHD.fg2HHl_fft, ker_fft_L[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fg2HOl_fft, ker_fft_L[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.fg2OOl_fft, ker_fft_L[1][1]);
+
       /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
               above)    and   BHD.uc[0],   BHD.uc[1],    which   are
               VM_Coulomb_long,  but  should  they  multiply  by  beta?
@@ -1650,19 +1703,33 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
              do  we   keep  two  versions  of   essentially  the  same
              potential?  Why not adapt the factor here instead? */
 
+          /* Compute FFT of g[] for all sites: */
+          for (int i = 0; i < 2; i++)
+              g_fft[i] =
+                  ComputeFFTfromVec_fftw (BHD.da, BHD.fft_plan_fw,
+                                          g[i], g_fft[i],
+                                          BHD.fft_scratch); /* work array */
 
           /* H */
-          VecSet(dg_acc,0.0);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HO_fft, g[1], NULL, BHD.rhos[1], dg_new2);
+          VecSet(dg_acc, 0.0);
+
+          apply1 (&BHD, ker_fft_S[0][1], g_fft[1], NULL, BHD.rhos[1], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HH_fft, g[0], NULL, BHD.rhos[0], dg_new2);
+
+          apply1 (&BHD, ker_fft_S[0][0], g_fft[0], NULL, BHD.rhos[0], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
-          VecScale(dg_acc,damp_LJ);
+
+          VecScale(dg_acc, damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[1], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          apply1 (&BHD, ker_fft_L[0][1], g_fft[1], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HHl_fft, g[0], BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+
+          apply1 (&BHD, ker_fft_L[0][0], g_fft[0], BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
@@ -1684,16 +1751,24 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           /* O */
           VecSet(dg_acc,0.0);
-          Compute_H2O_interS_C(&BHD, BHD.fg2OO_fft, g[1], NULL, BHD.rhos[1], dg_new2);
+
+          apply1 (&BHD, ker_fft_S[1][1], g_fft[1], NULL, BHD.rhos[1], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HO_fft, g[0], NULL, BHD.rhos[0], dg_new2);
+
+          apply1 (&BHD, ker_fft_S[1][0], g_fft[0], NULL, BHD.rhos[0], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
+
           VecScale(dg_acc,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fg2OOl_fft, g[1], BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          apply1 (&BHD, ker_fft_L[1][1], g_fft[1], BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fg2HOl_fft, g[0], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+
+          apply1 (&BHD, ker_fft_L[1][0], g_fft[0], BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+
           VecAXPY(dg_acc, 1.0, dg_new2);
 
           /* Vec t_vec is intent(out) here: */
@@ -1809,18 +1884,25 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       }
   } /* damp loop */
 
-  VecDestroy(g[0]);
-  VecDestroy(g[1]);
-  VecDestroy(dg[0]);
-  VecDestroy(dg[1]);
+  for (int i = 0; i < 2; i++)
+      for (int j = 0; j <= i; j++) {
+          bgy3d_fft_free (ker_fft_S[i][j]);
+          bgy3d_fft_free (ker_fft_L[i][j]);
+      }
+
+  for (int i = 0; i < 2; i++) {
+      bgy3d_fft_free (g_fft[i]);
+
+      VecDestroy (g[i]);
+      VecDestroy (dg[i]);
+      VecDestroy (dg_new[i]);
+  }
+
   VecDestroy(dg_acc);
   VecDestroy(dg_new2);
   VecDestroy(f);
 
   VecDestroy(t_vec);
-
-  VecDestroy(dg_new[0]);
-  VecDestroy(dg_new[1]);
 
   finalize_state (&BHD);
 
