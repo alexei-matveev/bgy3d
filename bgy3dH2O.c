@@ -144,11 +144,11 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   da = BHD->da;
   /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-  DACreateGlobalVector(da, &(BHD->xH));
-  DACreateGlobalVector(da, &(BHD->xO));
+  DACreateGlobalVector(da, &(BHD->x_lapl[0]));
+  DACreateGlobalVector(da, &(BHD->x_lapl[1]));
   DACreateGlobalVector(da, &(BHD->xHO));
-  VecSet(BHD->xH, 0.0);
-  VecSet(BHD->xO, 0.0);
+  VecSet(BHD->x_lapl[0], 0.0);
+  VecSet(BHD->x_lapl[1], 0.0);
   VecSet(BHD->xHO, 0.0);
 #else
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
@@ -278,9 +278,9 @@ static void BGY3dH2OData_free(State *BHD)
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
   KSPDestroy(BHD->ksp);
-  VecDestroy(BHD->xH);
+  VecDestroy(BHD->x_lapl[0]);
   VecDestroy(BHD->xHO);
-  VecDestroy(BHD->xO);
+  VecDestroy(BHD->x_lapl[1]);
 #endif
   // No need to do this anymore
   // free(BHD->LJ_paramsH);
@@ -3690,8 +3690,8 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 /*       Zeropad_Function(BHD, g0HO, zpad, 0.0); */
 /*       Zeropad_Function(BHD, g0O, zpad, 0.0); */
 /*       Zeropad_Function(BHD, g0H, zpad, 0.0); */
-      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
-      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
+      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->x_lapl[0], zpad, NULL);
+      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->x_lapl[1], zpad, NULL);
       ImposeLaplaceBoundary(BHD, g0HO, tH, BHD->xHO, zpad, NULL);
       Zeropad_Function(BHD, g0HO, zpad, 0.0);
       Zeropad_Function(BHD, g0O, zpad, 0.0);
@@ -3958,7 +3958,7 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  if(iter>=0)
 	    {
-	      ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xH, zpad, &iteri);
+	      ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->x_lapl[0], zpad, &iteri);
 	      Zeropad_Function(BHD, dg_new, zpad, 0.0);
 	      //PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 	    }
@@ -4024,7 +4024,7 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 	  if(iter>=0)
 	    {
-	      ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xO, zpad, &iteri);
+	      ti=ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->x_lapl[1], zpad, &iteri);
 	      Zeropad_Function(BHD, dg_new, zpad, 0.0);
 	      //PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 	    }
@@ -4386,8 +4386,8 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 /*       Zeropad_Function(BHD, g0HO, zpad, 0.0); */
 /*       Zeropad_Function(BHD, g0O, zpad, 0.0); */
 /*       Zeropad_Function(BHD, g0H, zpad, 0.0); */
-      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->xH, zpad, NULL);
-      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->xO, zpad, NULL);
+      ImposeLaplaceBoundary(BHD, g0H, tH, BHD->x_lapl[0], zpad, NULL);
+      ImposeLaplaceBoundary(BHD, g0O, tH, BHD->x_lapl[1], zpad, NULL);
       ImposeLaplaceBoundary(BHD, g0HO, tH, BHD->xHO, zpad, NULL);
       Zeropad_Function(BHD, g0HO, zpad, 0.0);
       Zeropad_Function(BHD, g0O, zpad, 0.0);
@@ -4697,7 +4697,7 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 	  if(iter>=0)
 	    {
-	      ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xH, zpad, NULL);
+	      ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->x_lapl[0], zpad, NULL);
 	      Zeropad_Function(BHD, dg_new, zpad, 0.0);
 	    }
 	  VecCopy(dgH, f);
@@ -4767,7 +4767,7 @@ Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
 	  //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 	  if(iter>=0)
 	    {
-	      ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->xO, zpad, NULL);
+	      ImposeLaplaceBoundary(BHD, dg_new, tH, BHD->x_lapl[1], zpad, NULL);
 	      Zeropad_Function(BHD, dg_new, zpad, 0.0);
 	    }
 	  VecCopy(dgO, f);

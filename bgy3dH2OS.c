@@ -105,10 +105,10 @@ static State initialize_state (/* not const */ ProblemData *PD)
   da = BHD.da;
    /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
-  DACreateGlobalVector(da, &(BHD.xH));
-  DACreateGlobalVector(da, &(BHD.xO));
-  VecSet(BHD.xH, 0.0);
-  VecSet(BHD.xO, 0.0);
+  DACreateGlobalVector(da, &(BHD.x_lapl[0]));
+  DACreateGlobalVector(da, &(BHD.x_lapl[1]));
+  VecSet(BHD.x_lapl[0], 0.0);
+  VecSet(BHD.x_lapl[1], 0.0);
 #endif
 #ifdef L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
@@ -326,8 +326,8 @@ static void finalize_state (State *BHD)
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
   KSPDestroy(BHD->ksp);
-  VecDestroy(BHD->xO);
-  VecDestroy(BHD->xH);
+  VecDestroy(BHD->x_lapl[1]);
+  VecDestroy(BHD->x_lapl[0]);
 #endif
 #ifdef L_BOUNDARY_MG
   DMMGDestroy(BHD->dmmg);
@@ -1652,8 +1652,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
              laplacian equation  and substrate from g0.   State BHD is
              not modified  by these calls. Note that  t_vec appears to
              be intent(out) in these calls, the value is ignored. */
-      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.xH, zpad, NULL);
-      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.xO, zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.x_lapl[0], zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.x_lapl[1], zpad, NULL);
 
       /* XXX: then correct g0 with boundary condition again. State BHD
               is not modified by these calls: */
@@ -1744,7 +1744,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecAXPY(dg_acc, 1.0, BHD.uc[0]);
 
           /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xH, zpad, NULL);
+          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[0], zpad, NULL);
           Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
           VecCopy(dg_acc, dg_new[0]);
@@ -1783,7 +1783,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           VecAXPY(dg_acc, 1, BHD.uc[1]);
 
           /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.xO, zpad, NULL);
+          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[1], zpad, NULL);
           Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
           VecCopy(dg_acc, dg_new[1]);
@@ -2060,8 +2060,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
       //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
 
-      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.xH, zpad, NULL);
-      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.xO, zpad, NULL);
+      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.x_lapl[0], zpad, NULL);
+      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.x_lapl[1], zpad, NULL);
       Zeropad_Function(&BHD, g0O, zpad, 0.0);
       Zeropad_Function(&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
@@ -2133,7 +2133,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           //VecShift(dg_new, -dgH_norm);
           //ImposeBoundaryCondition( &BHD, dg_new);
 
-          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xH, zpad, &iteri);
+          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[0], zpad, &iteri);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
           //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
@@ -2195,7 +2195,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
           //ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, tO, zpad, &iteri);
 
-          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.xO, zpad, &iteri);
+          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[1], zpad, &iteri);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
           //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
           PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
