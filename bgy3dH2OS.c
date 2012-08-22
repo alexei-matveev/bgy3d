@@ -1193,16 +1193,7 @@ static void Compute_H2O_interS_C (const State *BHD,
                                   const fftw_complex *coul_fft,
                                   real rho, Vec dg_help)
 {
-  ProblemData *PD;
-  DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *g_fft, *dg_fft, *scratch;
-
-  PD = BHD->PD;
-  da = BHD->da;
-
-  FOR_DIM
-    N[dim] = PD->N[dim];
+  const ProblemData *PD = BHD->PD;
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
@@ -1211,88 +1202,25 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* Avoid separate VecScale at the end: */
   const real scale = rho * PD->beta;
 
-  g_fft = BHD->g_fft;
-  dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
   /************************************************/
   /* rho*F*g^2 g*/
   /************************************************/
 
 
   /* fft(g) */
-
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
+  ComputeFFTfromVec_fftw (BHD->da, BHD->fft_plan_fw, g, BHD->g_fft, BHD->fft_scratch);
 
   /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
      iterations.   Here  we   put   the  fft   of   the  kernel   into
      BHD->fft_scratch: */
-  kernel (BHD->da, BHD->PD, fg2_fft, scratch);
+  kernel (BHD->da, BHD->PD, fg2_fft, BHD->fft_scratch);
 
-  index=0;
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-          FOR_DIM
-            {
-              if( i[dim] <= N[dim]/2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
+  /* Apply the  kernel, eventually with the strange  addition (in case
+     coul_fft != NULL). Put result into BHD->gfg2_fft */
+  apply (BHD->da, BHD->PD, BHD->fft_scratch, coul_fft, BHD->g_fft, scale, BHD->gfg2_fft);
 
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
-            {
-              dg_fft[index].re = 0;
-              dg_fft[index].im = 0;
-            }
-          else
-            {
-              /*
-               * Retrive  the precomuted Fourier  transform of  of the
-               * divergence of  the "weighted force" vector  div (F g)
-               * which  serves  as  a  convolution  kernel  in  BGY3dM
-               * equations.  The additional factor -k^(-2) effectively
-               * included in the kernel recovers the Fourier transform
-               * of  the corresponding  Poisson solution.   The factor
-               * scale =  βρ is not  included, on the other  hand. See
-               * kernel() for details:
-               */
-              fftw_complex dfg = scratch[index];
-
-              /*
-               * FIXME: Origin of  this occasional addition needs some
-               * explanation.
-               *
-               * The  difference  between  Compute_H2O_interS_C()  and
-               * Compute_H2O_interS() of the  original code reduces to
-               * this addendum. Supply a  NULL pointer for coul_fft in
-               * Compute_H2O_interS_C()   to  get  the   behaviour  of
-               * Compute_H2O_interS().
-               *
-               * Long range Coulomb part (right one):
-               */
-              if (coul_fft) {
-                  /* phase shift factor for x=x+L/2 */
-                  real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-
-                  dfg.re += (h3 / L3) * sign * coul_fft[index].re;
-                  dfg.im += (h3 / L3) * sign * coul_fft[index].im;
-              }
-
-              dg_fft[index].re = scale * (dfg.re * g_fft[index].re -
-                                          dfg.im * g_fft[index].im);
-              dg_fft[index].im = scale * (dfg.re * g_fft[index].im +
-                                          dfg.im * g_fft[index].re);
-            }
-          index++;
-        }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  /* ifft(dg) */
+  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw, dg_help, BHD->gfg2_fft, BHD->fft_scratch);
 }
 
 /*
