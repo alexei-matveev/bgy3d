@@ -1208,19 +1208,27 @@ static void Compute_H2O_interS_C (const State *BHD,
 
 
   /* fft(g) */
-  ComputeFFTfromVec_fftw (BHD->da, BHD->fft_plan_fw, g, BHD->g_fft, BHD->fft_scratch);
+  ComputeFFTfromVec_fftw (BHD->da, BHD->fft_plan_fw, g,
+                          BHD->g_fft,        /* result */
+                          BHD->fft_scratch); /* work array */
 
   /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
      iterations.   Here  we   put   the  fft   of   the  kernel   into
      BHD->fft_scratch: */
-  kernel (BHD->da, BHD->PD, fg2_fft, BHD->fft_scratch);
+  kernel (BHD->da, BHD->PD, fg2_fft,
+          BHD->fft_scratch);    /* result */
 
   /* Apply the  kernel, eventually with the strange  addition (in case
      coul_fft != NULL). Put result into BHD->gfg2_fft */
-  apply (BHD->da, BHD->PD, BHD->fft_scratch, coul_fft, BHD->g_fft, scale, BHD->gfg2_fft);
+  apply (BHD->da, BHD->PD, BHD->fft_scratch, coul_fft, BHD->g_fft,
+         scale,
+         BHD->gfg2_fft);        /* result */
 
   /* ifft(dg) */
-  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw, dg_help, BHD->gfg2_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw,
+                          dg_help, /* result */
+                          BHD->gfg2_fft,
+                          BHD->fft_scratch);
 }
 
 /*
