@@ -1758,22 +1758,24 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
               VecCopy(dg_acc, dg_new[i]);
-          } /* over sites i */
 
-          /*
-           * Mix dg and dg_new with a fixed ration "a":
-           *
-           *     dg' = a * dg_new + (1 - a) * dg
-           *     norm = |dg_new - dg|
-           */
-          dg_norm[0] = mix (dg[0], dg_new[0], a, f); /* last arg is a work Vec */
-          dg_norm[1] = mix (dg[1], dg_new[1], a, f); /* last arg is a work Vec */
+              /*
+               * Mix dg and dg_new with a fixed ration "a":
+               *
+               *     dg' = a * dg_new + (1 - a) * dg
+               *     norm = |dg_new - dg|
+               */
+              dg_norm[i] = mix (dg[i], dg_new[i], a, f); /* last arg is a work Vec */
+          } /* over sites i */
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dg_norm[1], a);
 
+          /* Now  that dg[]  has bee  computed one  can  safely update
+             g[]: */
           ComputeH2O_g (g[0], g0[0], dg[0]);
           ComputeH2O_g (g[1], g0[1], dg[1]);
+
           norm = ComputeCharge(&BHD, g[0], g[1]);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
 
