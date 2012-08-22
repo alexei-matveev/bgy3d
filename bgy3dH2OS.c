@@ -1747,7 +1747,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               /* dg_new2 get updated here */
               Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
-              /* sum BHD.uc[i] to solution dg_new2 */
+              /* Add Coulomb field BHD.uc[i] to: */
               VecAXPY(dg_acc, 1.0, dg_new2);
               VecAXPY(dg_acc, 1.0, BHD.uc[i]);
 
@@ -1769,9 +1769,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
           /* Now  that dg[]  has bee  computed one  can  safely update
              g[]: */
-          ComputeH2O_g (g[0], g0[0], dg[0]);
-          ComputeH2O_g (g[1], g0[1], dg[1]);
+          for (int i = 0; i < 2; i++)
+              ComputeH2O_g (g[i], g0[i], dg[i]);
 
+          /* Again a  strange case of  literal constants 0 and  1. Why
+             not 1, 0? */
           norm = ComputeCharge(&BHD, g[0], g[1]);
           PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
 
