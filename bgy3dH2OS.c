@@ -687,6 +687,8 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 /*   ComputeFFTfromCoulombII(BHD, BHD->fO, BHD->fO_l, BHD->ucO_fft, BHD->LJ_paramsO, damp); */
 /*   ComputeFFTfromCoulombII(BHD, BHD->fH, BHD->fH_l, BHD->ucH_fft, BHD->LJ_paramsH, damp); */
 /*   ComputeFFTfromCoulombII(BHD, BHD->fHO, BHD->fHO_l, BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
+/* XXX: uc[1] and uc[0] will be updated by RecomputeInitialSoluteData_XXX(),
+ *      ucHO is not used at all */
   ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft, q2O, damp0);
   ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft, q2H, damp0);
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft, q2HO, damp0);
@@ -1516,7 +1518,68 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       /* XXX: Return F * g2.  Note the calculation of F is divided due
               to long  range Coulomb interation.  See  comments in the
-              function.  Here F is force within solvents particles. */
+              function.  Here F is force within solvents particles.
+
+              In RecomputeInitialFFTs(), BHD.uc[0], BHD.uc[1] and
+              BHD.ucHO also get updated by ComputeFFTfromCoulomb(),
+              but BHD.uc[0] and BHD.uc[1] are re-calculated by
+              RecomputeInitialSoluteData_XXX again and BHD.ucHO are not used
+
+              According to Page. 115 - 116:
+
+                        0
+                g(x) = g (x) exp[-u(x)]
+
+            with
+                 0                 LJ       Cs       Cl
+                g (x) = exp[-beta (V  (x) + V  (x) + V  (x)]
+
+            then g(x) rewritten as:
+                       ~ 0               Cl
+                g(x) = g  (x) exp[-beta V  (x) - u(x)]
+
+            with
+                ~ 0                  LJ       Cs
+                g  (x) = exp[-beta (V  (x) + V  (x))]
+
+            then BGY equation written as:
+
+                          ~                          Cl
+                LAPLACIAN u = K(g) + beta LAPLACIAN V
+
+            with
+                       ~ 0               Cl              ~ 0         ~
+                g(x) = g  (x) exp[-beta V  (x) - u(x)] = g  (x) exp[-u(x)]
+
+                            ~
+            the solution of u can be repsented by a difference of two functions:
+
+                ~   -    *
+                u = u - u
+
+            while:
+
+                          -                          Cl           -
+                LAPLACIAN u = K(g) + beta LAPLACIAN V   in Omega, u(@Omega) = f,
+
+                           *               *
+                LAPLACIAN u = 0 in Omega, u (@Omega) = f,
+
+            so after solving:
+
+                LAPLACIAN u = K(g)
+
+            we get:
+
+                -             Cl
+                u = u + beta V
+
+             Cl         Cl
+            V      and V      are needed to calculated beforehand
+             (A, M)     (B, M)
+            and sum to the solution by the end of each iteration for solvent site A and B,
+            in the code hereafter, they are stored as BHD.uc[0] and BHD.uc[1] */
+
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
@@ -1605,8 +1668,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], t_vec , dg_new2, f, zpad);
 
           /* Vec t_vec is intent(in) here: */
+          /* dg_new2 get updated here */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
+          /* sum BHD.uc[0] to solution dg_new2 */
           VecAXPY(dg_acc, 1.0, dg_new2);
           VecAXPY(dg_acc, 1.0, BHD.uc[0]);
 
@@ -1634,8 +1699,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], t_vec , dg_new2, f, zpad);
 
           /* Vec t_vec is intent(in) here: */
+          /* dg_new2 get updated here */
           Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
+          /* sum BHD.uc[1] to solution dg_new2 */
           VecAXPY(dg_acc, 1.0, dg_new2);
           VecAXPY(dg_acc, 1, BHD.uc[1]);
 
