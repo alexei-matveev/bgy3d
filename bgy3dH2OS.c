@@ -1098,6 +1098,92 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
 }
 
 /*
+ * This applies the kernel compured by  kernel() to FFT of g to obtain
+ * "dg". The latter probably needs a better name.
+ */
+static void apply (const DA da,
+                   const ProblemData *PD,
+                   const fftw_complex dfg[], /* kernel */
+                   const fftw_complex coul[], /* may be NULL */
+                   const fftw_complex g[], /* current g */
+                   const real scale,          /* overall scale */
+                   fftw_complex dg[])         /* intent(out) */
+{
+  int x[3], n[3], i[3], ijk, N[3], ic[3];
+
+  FOR_DIM
+    N[dim] = PD->N[dim];
+
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = L * L * L;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  ijk = 0;
+  /* loop over local portion of grid */
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+        {
+          FOR_DIM
+            {
+              if( i[dim] <= N[dim]/2)
+                ic[dim] = i[dim];
+              else
+                ic[dim] = i[dim] - N[dim];
+            }
+
+          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+            {
+              dg[ijk].re = 0;
+              dg[ijk].im = 0;
+            }
+          else
+            {
+              /*
+               * Retrive  the precomuted Fourier  transform of  of the
+               * divergence of  the "weighted force" vector  div (F g)
+               * which  serves  as  a  convolution  kernel  in  BGY3dM
+               * equations.  The additional factor -k^(-2) effectively
+               * included in the kernel recovers the Fourier transform
+               * of  the corresponding  Poisson solution.   The factor
+               * scale =  βρ is not  included, on the other  hand. See
+               * kernel() for details:
+               */
+              fftw_complex ker = dfg[ijk];
+
+              /*
+               * FIXME: Origin of  this occasional addition needs some
+               * explanation.
+               *
+               * The  difference  between  Compute_H2O_interS_C()  and
+               * Compute_H2O_interS() of the  original code reduces to
+               * this addendum. Supply a  NULL pointer for coul_fft in
+               * Compute_H2O_interS_C()   to  get  the   behaviour  of
+               * Compute_H2O_interS().
+               *
+               * Long range Coulomb part (right one):
+               */
+              if (coul) {
+                  /* phase shift factor for x=x+L/2 */
+                  real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+
+                  ker.re += (h3 / L3) * sign * coul[ijk].re;
+                  ker.im += (h3 / L3) * sign * coul[ijk].im;
+              }
+
+              dg[ijk].re = scale * (ker.re * g[ijk].re -
+                                    ker.im * g[ijk].im);
+              dg[ijk].im = scale * (ker.re * g[ijk].im +
+                                    ker.im * g[ijk].re);
+            }
+          ijk++;
+        }
+}
+
+/*
  * Side effects:
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
