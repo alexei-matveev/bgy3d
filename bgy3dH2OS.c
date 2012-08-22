@@ -1195,14 +1195,8 @@ static void Compute_H2O_interS_C (const State *BHD,
                                   const fftw_complex *coul_fft,
                                   real rho, Vec dg_help)
 {
-  const ProblemData *PD = BHD->PD;
-
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-  const real L3 = L * L * L;
-
   /* Avoid separate VecScale at the end: */
-  const real scale = rho * PD->beta;
+  const real scale = rho * BHD->PD->beta;
 
   /************************************************/
   /* rho*F*g^2 g*/
