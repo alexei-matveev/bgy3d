@@ -3117,14 +3117,15 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
 }
 
 /*
- * Compute normalization condition.
+ * Compute normalization condition. Vec dg is intent(out).
  *
  * Side effects:
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
  */
 void Compute_dg_H2O_normalization_intra(const State *BHD, Vec g, real rab,
-					Vec dg, Vec dg_help)
+                                        Vec dg, /* intent(out) */
+                                        Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -3462,6 +3463,8 @@ void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec 
 
 /*
  * Vec t is intent(out).
+ *
+ * Vec dg is intent(out).
  */
 void Solve_NormalizationH2O_smallII(const State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
@@ -3474,6 +3477,7 @@ void Solve_NormalizationH2O_smallII(const State *BHD, Vec gc, real rc, Vec g, Ve
 /*   return; */
 
 
+  /* Vec dg is intent(out) here: */
   Compute_dg_H2O_normalization_intra( BHD, gc, rc, dg, dg_help);
   //Smooth_Function(BHD, dg, zpad-1, zpad, 1.0);
 
