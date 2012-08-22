@@ -1122,7 +1122,7 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
  * "dg". The latter probably needs a better name.
  */
 static void apply (const DA da,
-                   const fftw_complex *restrict dfg,  /* kernel */
+                   const fftw_complex *restrict ker,  /* kernel */
                    const fftw_complex *restrict g,    /* current g */
                    const real scale,          /* overall scale */
                    fftw_complex *restrict dg) /* intent(out) */
@@ -1146,12 +1146,10 @@ static void apply (const DA da,
        * scale =  βρ is not  included, on the other  hand. See
        * kernel() for details:
        */
-      fftw_complex ker = dfg[ijk];
-
-      dg[ijk].re = scale * (ker.re * g[ijk].re -
-                            ker.im * g[ijk].im);
-      dg[ijk].im = scale * (ker.re * g[ijk].im +
-                            ker.im * g[ijk].re);
+      dg[ijk].re = scale * (ker[ijk].re * g[ijk].re -
+                            ker[ijk].im * g[ijk].im);
+      dg[ijk].im = scale * (ker[ijk].re * g[ijk].im +
+                            ker[ijk].im * g[ijk].re);
   }
 }
 
