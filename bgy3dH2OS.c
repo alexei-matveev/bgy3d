@@ -1717,83 +1717,48 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                                           g[i], g_fft[i],
                                           BHD.fft_scratch); /* work array */
 
-          /* H */
-          VecSet(dg_acc, 0.0);
+          /* for H, O in that order ... */
+          for (int i = 0; i < 2; i++) {
 
-          apply1 (&BHD, ker_fft_S[0][1], g_fft[1], NULL, BHD.rhos[1], dg_new2);
+              /* ... sum over H, O in that order: */
+              VecSet(dg_acc, 0.0);
 
-          VecAXPY(dg_acc, 1.0, dg_new2);
+              for (int j = 0; j < 2; j++) {
+                  apply1 (&BHD, ker_fft_S[i][j], g_fft[j], NULL, BHD.rhos[j], dg_new2);
 
-          apply1 (&BHD, ker_fft_S[0][0], g_fft[0], NULL, BHD.rhos[0], dg_new2);
+                  VecAXPY(dg_acc, damp_LJ, dg_new2);
+              }
 
-          VecAXPY(dg_acc, 1.0, dg_new2);
+              /* Coulomb long, sum over H, O */
+              for (int j = 0; j < 2; j++) {
+                  apply1 (&BHD, ker_fft_L[i][j], g_fft[j], ker_fft_C[i][j], BHD.rhos[j], dg_new2);
 
-          VecScale(dg_acc, damp_LJ);
+                  VecAXPY(dg_acc, damp / damp0, dg_new2);
+              }
 
-          /* Coulomb long */
-          apply1 (&BHD, ker_fft_L[0][1], g_fft[1], ker_fft_C[0][1], (damp / damp0) * BHD.rhos[1], dg_new2);
+              /* FIXME:   ugly  branch.    Very  specific   to  2-site
+                 models. Literal constants 0 and 1, how comes? */
+              if (i == 0)
+                  /* Vec t_vec is intent(out) here: */
+                  Solve_NormalizationH2O_smallII (&BHD, g[i], r_HO, g[1], t_vec , dg_new2, f, zpad);
+              else
+                  /* Vec t_vec is intent(out) here: */
+                  Solve_NormalizationH2O_smallII (&BHD, g[i], r_HO, g[0], t_vec , dg_new2, f, zpad);
 
-          VecAXPY(dg_acc, 1.0, dg_new2);
+              /* Vec t_vec is intent(in) here: */
+              /* dg_new2 get updated here */
+              Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
 
-          apply1 (&BHD, ker_fft_L[0][0], g_fft[0], ker_fft_C[0][0], (damp / damp0) * BHD.rhos[0], dg_new2);
+              /* sum BHD.uc[i] to solution dg_new2 */
+              VecAXPY(dg_acc, 1.0, dg_new2);
+              VecAXPY(dg_acc, 1.0, BHD.uc[i]);
 
-          VecAXPY(dg_acc, 1.0, dg_new2);
+              /* Vec t_vec is intent(out) here: */
+              ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad, NULL);
+              Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-          /* Vec t_vec is intent(out) here: */
-          Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], t_vec , dg_new2, f, zpad);
-
-          /* Vec t_vec is intent(in) here: */
-          /* dg_new2 get updated here */
-          Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
-
-          /* sum BHD.uc[0] to solution dg_new2 */
-          VecAXPY(dg_acc, 1.0, dg_new2);
-          VecAXPY(dg_acc, 1.0, BHD.uc[0]);
-
-          /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[0], zpad, NULL);
-          Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
-
-          VecCopy(dg_acc, dg_new[0]);
-
-          /* O */
-          VecSet(dg_acc,0.0);
-
-          apply1 (&BHD, ker_fft_S[1][1], g_fft[1], NULL, BHD.rhos[1], dg_new2);
-
-          VecAXPY(dg_acc, 1.0, dg_new2);
-
-          apply1 (&BHD, ker_fft_S[1][0], g_fft[0], NULL, BHD.rhos[0], dg_new2);
-
-          VecAXPY(dg_acc, 1.0, dg_new2);
-
-          VecScale(dg_acc,damp_LJ);
-
-          /* Coulomb long */
-          apply1 (&BHD, ker_fft_L[1][1], g_fft[1], ker_fft_C[1][1], (damp / damp0) * BHD.rhos[1], dg_new2);
-
-          VecAXPY(dg_acc, 1.0, dg_new2);
-
-          apply1 (&BHD, ker_fft_L[1][0], g_fft[0], ker_fft_C[1][0], (damp / damp0) * BHD.rhos[0], dg_new2);
-
-          VecAXPY(dg_acc, 1.0, dg_new2);
-
-          /* Vec t_vec is intent(out) here: */
-          Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], t_vec , dg_new2, f, zpad);
-
-          /* Vec t_vec is intent(in) here: */
-          /* dg_new2 get updated here */
-          Compute_dg_H2O_intra_ln(&BHD, t_vec, r_HO, dg_new2, f);
-
-          /* sum BHD.uc[1] to solution dg_new2 */
-          VecAXPY(dg_acc, 1.0, dg_new2);
-          VecAXPY(dg_acc, 1, BHD.uc[1]);
-
-          /* Vec t_vec is intent(out) here: */
-          ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[1], zpad, NULL);
-          Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
-
-          VecCopy(dg_acc, dg_new[1]);
+              VecCopy(dg_acc, dg_new[i]);
+          } /* over sites i */
 
           /*
            * Mix dg and dg_new with a fixed ration "a":
