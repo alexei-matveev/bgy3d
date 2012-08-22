@@ -1435,7 +1435,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
   Vec g0[2], dg[2], dg_acc, dg_new2, f, g[2];
-  Vec dg_new[2];
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1500,7 +1499,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       DACreateGlobalVector (BHD.da, &(g[i]));
       DACreateGlobalVector (BHD.da, &(dg[i]));
-      DACreateGlobalVector (BHD.da, &(dg_new[i]));
   }
 
   /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
@@ -1757,15 +1755,13 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad, NULL);
               Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
-              VecCopy(dg_acc, dg_new[i]);
-
               /*
                * Mix dg and dg_new with a fixed ration "a":
                *
                *     dg' = a * dg_new + (1 - a) * dg
                *     norm = |dg_new - dg|
                */
-              dg_norm[i] = mix (dg[i], dg_new[i], a, f); /* last arg is a work Vec */
+              dg_norm[i] = mix (dg[i], dg_acc, a, f); /* last arg is a work Vec */
           } /* over sites i */
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
@@ -1869,7 +1865,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       VecDestroy (g[i]);
       VecDestroy (dg[i]);
-      VecDestroy (dg_new[i]);
   }
 
   VecDestroy(dg_acc);
