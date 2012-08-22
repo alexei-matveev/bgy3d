@@ -1520,65 +1520,72 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               to long  range Coulomb interation.  See  comments in the
               function.  Here F is force within solvents particles.
 
-              In RecomputeInitialFFTs(), BHD.uc[0], BHD.uc[1] and
-              BHD.ucHO also get updated by ComputeFFTfromCoulomb(),
-              but BHD.uc[0] and BHD.uc[1] are re-calculated by
-              RecomputeInitialSoluteData_XXX again and BHD.ucHO are not used
+              In  RecomputeInitialFFTs(),   BHD.uc[0],  BHD.uc[1]  and
+              BHD.ucHO  also get  updated  by ComputeFFTfromCoulomb(),
+              but  BHD.uc[0]   and  BHD.uc[1]  are   re-calculated  by
+              RecomputeInitialSoluteData_XXX  again  and BHD.ucHO  are
+              not used
 
               According to Page. 115 - 116:
 
                         0
                 g(x) = g (x) exp[-u(x)]
 
-            with
-                 0                 LJ       Cs       Cl
-                g (x) = exp[-beta (V  (x) + V  (x) + V  (x)]
+              with
 
-            then g(x) rewritten as:
-                       ~ 0               Cl
-                g(x) = g  (x) exp[-beta V  (x) - u(x)]
+                 0               LJ       Cs       Cl
+                g (x) = exp[-β (V  (x) + V  (x) + V  (x)]
 
-            with
-                ~ 0                  LJ       Cs
-                g  (x) = exp[-beta (V  (x) + V  (x))]
+              then g(x) rewritten as:
 
-            then BGY equation written as:
+                       ~ 0            Cl
+                g(x) = g  (x) exp[-β V  (x) - u(x)]
 
-                          ~                          Cl
-                LAPLACIAN u = K(g) + beta LAPLACIAN V
+              with
 
-            with
-                       ~ 0               Cl              ~ 0         ~
-                g(x) = g  (x) exp[-beta V  (x) - u(x)] = g  (x) exp[-u(x)]
+                ~ 0               LJ       Cs
+                g  (x) = exp[-β (V  (x) + V  (x))]
 
-                            ~
-            the solution of u can be repsented by a difference of two functions:
+              then BGY equation written as:
+
+                 ~              Cl
+                Δu = K(g) + β ΔV
+
+              with
+                       ~ 0            Cl              ~ 0         ~
+                g(x) = g  (x) exp[-β V  (x) - u(x)] = g  (x) exp[-u(x)]
+
+                               ~
+              the solution  of u can  be repsented by a  difference of
+              two functions:
 
                 ~   -    *
                 u = u - u
 
-            while:
+              while:
 
-                          -                          Cl           -
-                LAPLACIAN u = K(g) + beta LAPLACIAN V   in Omega, u(@Omega) = f,
+                 -              Cl       -
+                Δu = K(g) + β ΔV   in Ω, u(@Ω) = f,
 
-                           *               *
-                LAPLACIAN u = 0 in Omega, u (@Omega) = f,
+                  *           *
+                Δu = 0 in Ω, u (@Ω) = f,
 
-            so after solving:
+              so after solving:
 
-                LAPLACIAN u = K(g)
+                Δu = K(g)
 
-            we get:
+              we get:
 
-                -             Cl
-                u = u + beta V
+                -          Cl
+                u = u + β V
 
-             Cl         Cl
-            V      and V      are needed to calculated beforehand
-             (A, M)     (B, M)
-            and sum to the solution by the end of each iteration for solvent site A and B,
-            in the code hereafter, they are stored as BHD.uc[0] and BHD.uc[1] */
+               Cl         Cl
+              V      and V      are needed to calculated beforehand
+               (A, M)     (B, M)
+
+              and sum to the solution by the end of each iteration for
+              solvent site  A and B,  in the code hereafter,  they are
+              stored as BHD.uc[0] and BHD.uc[1] */
 
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
