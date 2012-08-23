@@ -3386,6 +3386,33 @@ void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec 
 /*   exit(1);  */
 }
 
+/* w := x / y, essentially: */
+static void safe_pointvise_divide (Vec w, /* intent(out) */
+                                   Vec x, /* intent(in) */
+                                   Vec y) /* intent(in) */
+{
+  int local_size;
+  PetscScalar *w_vec, *x_vec, *y_vec;
+
+  VecGetLocalSize (w, &local_size);
+
+  VecGetArray (w, &w_vec);
+  VecGetArray (x, &x_vec);
+  VecGetArray (y, &y_vec);
+
+  for (int i = 0; i < local_size; i++) {
+      real y_i = y_vec[i];
+      if (y_i < NORM_REG2)
+	  w_vec[i] = x_vec[i] / NORM_REG2;
+      else
+          w_vec[i] = x_vec[i] / y_i;
+  }
+
+  VecRestoreArray (w, &w_vec);
+  VecRestoreArray (x, &x_vec);   /* required? */
+  VecRestoreArray (y, &y_vec);   /* required? */
+}
+
 /*
  * Vec t is intent(out).
  *
@@ -3398,29 +3425,13 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
                                      Vec dg_help, /* intent(out) */
                                      real zpad)
 {
-  int local_size;
-  PetscScalar *t_vec, *g_vec, *dg_vec;
-
   /* Vec dg,  dg_help are intent(out) here, moreover  both contain the
      same data: */
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
 
-  VecGetLocalSize(t, &local_size);
-  VecGetArray(t, &t_vec);
-  VecGetArray(g, &g_vec);
-  VecGetArray(dg, &dg_vec);
-
-  for (int i = 0; i < local_size; i++) {
-      real k = dg_vec[i];
-      if (k < NORM_REG2)
-	  t_vec[i] = g_vec[i] / NORM_REG2;
-      else
-          t_vec[i] = g_vec[i] / k;
-  }
-
-  VecRestoreArray(t, &t_vec);
-  VecRestoreArray(g, &g_vec);
-  VecRestoreArray(dg, &dg_vec);
+  /* t =  g / dg, avoiding  small denominators. Some  of the commented
+     code used VecPointwiseDivide(t, g, dg). */
+  safe_pointvise_divide (t, g, dg);
 
   Zeropad_Function(BHD, dg, zpad, 1.0);
 }
