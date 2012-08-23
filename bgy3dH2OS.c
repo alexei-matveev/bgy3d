@@ -1502,7 +1502,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   /* set initial guess*/
   VecSet(dg[0],0);
   VecSet(dg[1],0);
-  VecSet(dg_acc,0.0);
 
   if (bgy3d_getopt_test ("-fromg2")) {
       ComputedgFromg (dg[0], g0[0], BHD.g2HO);
@@ -1694,10 +1693,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
               /* ... sum over H, O  in that order. LJ, short- and long
                  range Coulomb,  and a  so called strange  addition is
-                 accounted for in the kernel: */
-              VecSet(dg_acc, 0.0);
-
-              /* Clear accumulator: */
+                 accounted   for   in    the   kernel.   First   clear
+                 accumulator: */
               bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
 
               for (int j = 0; j < 2; j++) {
@@ -1705,7 +1702,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                   apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
               }
 
-              /* Compute IFFT of dg_acc_fft for the current site: */
+              /* Compute   IFFT   of   dg_acc_fft  for   the   current
+                 site. Other contributions are added to the real space
+                 dg_acc below: */
               ComputeVecfromFFT_fftw (BHD.da, BHD.fft_plan_bw,
                                       dg_acc, /* result */
                                       dg_acc_fft,
