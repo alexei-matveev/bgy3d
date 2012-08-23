@@ -2486,7 +2486,12 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
 }
 
-/* Compute intramolecular part */
+/* Compute  intramolecular   part.   The   first  thing  it   does  is
+   transforming g(x)  -> g(k). The  real space representation  g(x) is
+   not otherwise used.
+
+   Both Vec  dg and  Vec dg_help appear  to be  intent(out).  Moreover
+   they will contain the same data.  */
 void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2593,12 +2598,7 @@ void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
 
 
   //VecAXPY(dg, 1.0, dg_help);
-  VecCopy(dg_help,dg);
-
-
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
+  VecCopy(dg_help, dg);
 }
 
 /* Compute intramolecular part */
@@ -3063,8 +3063,14 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
 }
 
 /*
- * Compute  normalization  condition. Vec  dg  is intent(out).  FIXME:
- * Appears to be the same as the also intent(out) Vec dg_help.
+ * Compute  normalization  condition. This  function  appears to  take
+ * g(x), FFT it into g(k) and operate with the latter exclusively. The
+ * result is manipulated in  the real-space rep, unfortunately. Though
+ * this manipulation  is plain screening  of the too  small (negative)
+ * values.
+ *
+ * Vec dg is  intent(out).  FIXME: Appears to be the  same as the also
+ * intent(out) Vec dg_help.
  *
  * Side effects:
  *
@@ -3383,12 +3389,14 @@ void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec 
 /*
  * Vec t is intent(out).
  *
- * Vec dg is intent(out).
+ * Vec dg and  Vec dg_help, are intent(out). Morover  both contain the
+ * sama data.
  */
 void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
-                                     Vec t, /* intent(out) */
-                                     Vec dg, /* intent(out) */
-                                     Vec dg_help, real zpad)
+                                     Vec t,       /* intent(out) */
+                                     Vec dg,      /* intent(out) */
+                                     Vec dg_help, /* intent(out) */
+                                     real zpad)
 {
   int local_size, i;
   PetscScalar *t_vec, *g_vec, *dg_vec;
