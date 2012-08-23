@@ -11,6 +11,10 @@
 #include "bgy3dH2OS.h"
 #include "bgy3dmolecule.h"
 
+#ifdef WITH_COMPLEX
+#include <complex.h>
+#endif
+
 #define damp0 0.001
 
 extern real NORM_REG;
@@ -1117,6 +1121,15 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
         }
 }
 
+#ifdef WITH_COMPLEX
+static void mul (int n, const complex *restrict a, const complex *restrict b,
+                 const double alpha, complex *restrict c)
+{
+  for (int i = 0; i < n; i++)
+      c[i] = alpha * a[i] * b[i];
+}
+#endif
+
 /*
  * This applies the kernel compured by  kernel() to FFT of g to obtain
  * "dg". The latter probably needs a better name.
@@ -1134,6 +1147,9 @@ static void apply (const DA da,
 
   int n3 = n[0] * n[1] * n[2];
 
+#ifdef WITH_COMPLEX
+  mul (n3, (complex*) ker, (complex*) g, scale, (complex*) dg);
+#else
   /* loop over local portion of grid */
   for (int ijk = 0; ijk < n3; ijk++) {
       /*
@@ -1151,6 +1167,7 @@ static void apply (const DA da,
       dg[ijk].im = scale * (ker[ijk].re * g[ijk].im +
                             ker[ijk].im * g[ijk].re);
   }
+#endif
 }
 
 static void apply1 (const State *BHD,
