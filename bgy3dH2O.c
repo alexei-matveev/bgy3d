@@ -3276,6 +3276,34 @@ static void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
 
 }
 
+/* w := x / max(y, thresh), essentially: */
+static void safe_pointvise_divide (Vec w, /* intent(out) */
+                                   Vec x, /* intent(in) */
+                                   Vec y, /* intent(in) */
+                                   real thresh)
+{
+  int local_size;
+  PetscScalar *w_vec, *x_vec, *y_vec;
+
+  VecGetLocalSize (w, &local_size);
+
+  VecGetArray (w, &w_vec);
+  VecGetArray (x, &x_vec);
+  VecGetArray (y, &y_vec);
+
+  for (int i = 0; i < local_size; i++) {
+      real y_i = y_vec[i];
+      if (y_i < thresh)
+	  w_vec[i] = x_vec[i] / thresh;
+      else
+          w_vec[i] = x_vec[i] / y_i;
+  }
+
+  VecRestoreArray (w, &w_vec);
+  VecRestoreArray (x, &x_vec);   /* required? */
+  VecRestoreArray (y, &y_vec);   /* required? */
+}
+
 #define APP_NORM 1.0e-2
 static void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
 			 Vec tH, Vec tO, Vec tHO, Vec tOH, Vec dg, Vec dg_help)
@@ -3291,126 +3319,43 @@ static void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
   do
     {
       count++;
-      Compute_dg_H2O_normalization_intra( BHD, tO, r_HO, dg, dg_help);
+      Compute_dg_H2O_normalization_intra (BHD, tO, r_HO, dg, dg_help);
       VecCopy(tHO, tOH);
       VecPointwiseDivide(tHO, gHO, dg);
       VecAXPY(tOH, -1.0, tHO);
       VecNorm(tOH, NORM_INFINITY, &normHO);
-      //PetscPrintf(PETSC_COMM_WORLD,"%e ", normHO);
 
-/*       VecView(tHO,PETSC_VIEWER_STDERR_WORLD); */
-/*       exit(1);  */
-
-      Compute_dg_H2O_normalization_intra( BHD, tHO, r_HO, dg, dg_help);
+      Compute_dg_H2O_normalization_intra (BHD, tHO, r_HO, dg, dg_help);
       VecCopy(tO, tOH);
       VecPointwiseDivide(tO, gO, dg);
       VecAXPY(tOH, -1.0, tO);
       VecNorm(tOH, NORM_INFINITY, &normO);
-      //PetscPrintf(PETSC_COMM_WORLD,"%e ", normO);
 
-      Compute_dg_H2O_normalization_intra( BHD, tH, r_HH, dg, dg_help);
+      Compute_dg_H2O_normalization_intra (BHD, tH, r_HH, dg, dg_help);
       VecCopy(tH, tOH);
       VecPointwiseDivide(tH, gH, dg);
       VecAXPY(tOH, -1.0, tH);
       VecNorm(tOH, NORM_INFINITY, &normH);
-      //PetscPrintf(PETSC_COMM_WORLD,"%e \n", normH);
 
-    }while(count<50 &&  (normH>APP_NORM || normO>APP_NORM ||normHO>APP_NORM));
-
-
-
-
-  return ;
+    } while(count < 50 && (normH > APP_NORM || normO > APP_NORM ||normHO > APP_NORM));
 }
 
 static void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
-
-/*   VecCopy(g,t); */
-/*   return; */
-
-  Compute_dg_H2O_normalization_intra( BHD, gc, rc, dg, dg_help);
-  //Smooth_Function(BHD, dg, zpad-1, zpad, 1.0);
+  Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
 
   VecPointwiseDivide(t, g, dg);
+
   Zeropad_Function(BHD, dg, zpad, 1.0);
-/*   VecView(g,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
 }
 
-#define MAXENTRY 5.0e+1
 void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
-  int local_size, i;
-  PetscScalar *t_vec, *g_vec, *dg_vec;
-  real k;
+  Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
 
-/*   VecCopy(g, t); */
-/*   return; */
-
-  Compute_dg_H2O_normalization_intra( BHD, gc, rc, dg, dg_help);
-  //Smooth_Function(BHD, dg, zpad-1, zpad, 1.0);
-
-
-
-  //VecPointwiseDivide(t, g, dg);
-
-  VecGetLocalSize(t, &local_size);
-  VecGetArray(t, &t_vec);
-  VecGetArray(g, &g_vec);
-  VecGetArray(dg, &dg_vec);
-
-    for(i=0; i<local_size; i++)
-    {
-      k = dg_vec[i];
-      if(k<NORM_REG)
-	{
-/* 	  if( g_vec[i]<0.1) */
-/* 	    t_vec[i]=0; */
-/* 	  else */
-	    t_vec[i] = g_vec[i]/NORM_REG;
-	}
-      else
-	t_vec[i] = g_vec[i]/k;
-
-    }
-    VecRestoreArray(t, &t_vec);
-    VecRestoreArray(g, &g_vec);
-    VecRestoreArray(dg, &dg_vec);
-
-
-  //Zeropad_Function(BHD, dg, zpad, 1.0);
-/*   VecView(g,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-}
-
-/* w := x / y, essentially: */
-static void safe_pointvise_divide (Vec w, /* intent(out) */
-                                   Vec x, /* intent(in) */
-                                   Vec y) /* intent(in) */
-{
-  int local_size;
-  PetscScalar *w_vec, *x_vec, *y_vec;
-
-  VecGetLocalSize (w, &local_size);
-
-  VecGetArray (w, &w_vec);
-  VecGetArray (x, &x_vec);
-  VecGetArray (y, &y_vec);
-
-  for (int i = 0; i < local_size; i++) {
-      real y_i = y_vec[i];
-      if (y_i < NORM_REG2)
-	  w_vec[i] = x_vec[i] / NORM_REG2;
-      else
-          w_vec[i] = x_vec[i] / y_i;
-  }
-
-  VecRestoreArray (w, &w_vec);
-  VecRestoreArray (x, &x_vec);   /* required? */
-  VecRestoreArray (y, &y_vec);   /* required? */
+  safe_pointvise_divide (t, g, dg, NORM_REG);
 }
 
 /*
@@ -3431,7 +3376,7 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
 
   /* t =  g / dg, avoiding  small denominators. Some  of the commented
      code used VecPointwiseDivide(t, g, dg). */
-  safe_pointvise_divide (t, g, dg);
+  safe_pointvise_divide (t, g, dg, NORM_REG2);
 
   Zeropad_Function(BHD, dg, zpad, 1.0);
 }
