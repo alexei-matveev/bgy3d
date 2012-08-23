@@ -1580,7 +1580,7 @@ fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, real alpha)
 
     for (int i = 0; i < N; i++) {
         y[i].re = alpha;
-        y[i].im = alpha;
+        y[i].im = 0.0;
     }
 
     return y;
