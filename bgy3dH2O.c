@@ -3398,52 +3398,31 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
                                      Vec dg_help, /* intent(out) */
                                      real zpad)
 {
-  int local_size, i;
+  int local_size;
   PetscScalar *t_vec, *g_vec, *dg_vec;
-  real k;
-
-/*   VecCopy(g, t); */
-/*   return; */
-
 
   /* Vec dg,  dg_help are intent(out) here, moreover  both contain the
      same data: */
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
-  //Smooth_Function(BHD, dg, zpad-1, zpad, 1.0);
-
-
-  //VecPointwiseDivide(t, g, dg);
 
   VecGetLocalSize(t, &local_size);
   VecGetArray(t, &t_vec);
   VecGetArray(g, &g_vec);
   VecGetArray(dg, &dg_vec);
 
-  for(i=0; i<local_size; i++)
-    {
-      k = dg_vec[i];
-      if(k<NORM_REG2)
-	{
-/* 	  if( g_vec[i]<0.1) */
-/* 	    t_vec[i]=0; */
-/* 	  else */
-	  t_vec[i] = g_vec[i]/NORM_REG2;
-
-/* 	    if( t_vec[i] >MAXENTRY) */
-/* 	      t_vec[i] = MAXENTRY; */
-
-	}
+  for (int i = 0; i < local_size; i++) {
+      real k = dg_vec[i];
+      if (k < NORM_REG2)
+	  t_vec[i] = g_vec[i] / NORM_REG2;
       else
-	t_vec[i] = g_vec[i]/k;
+          t_vec[i] = g_vec[i] / k;
+  }
 
-    }
   VecRestoreArray(t, &t_vec);
   VecRestoreArray(g, &g_vec);
   VecRestoreArray(dg, &dg_vec);
 
   Zeropad_Function(BHD, dg, zpad, 1.0);
-  /*   VecView(g,PETSC_VIEWER_STDERR_WORLD);  */
-  /*   exit(1);  */
 }
 
 #define DAMPO 1.0
