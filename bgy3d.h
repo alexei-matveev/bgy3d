@@ -450,12 +450,6 @@ typedef struct H2OSdgF
 
 Vec BGY3d_solve_4site(ProblemData *PD, Vec g_ini, int vdim);
 
-Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim);
-/* BGY3dM */
-void WriteH2OSNewtonSolution (State *BHD, Vec u);
-void WriteH2OSNewtonPlain (State *BHD, Vec u);
-void EnforceNormalizationCondition (State *BHD, Vec dgO, Vec dgH, Vec gO, Vec gH);
-Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini, int vdim);
 #ifdef L_BOUNDARY_MG
 void InitializeDMMGSolver (State *BHD);
 real ImposeLaplaceBoundary (State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);

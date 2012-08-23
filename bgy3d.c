@@ -15,6 +15,7 @@
 #include "bgy3dH2O.h"           /* BGY3d_solve_2site */
 #include "bgy3dmolecule.h"      /* BGY3d_solve_DiatomicAB */
 #include "bgy3dH2ONewton.h"
+#include "bgy3dH2OSNewton.h"
 
 static char helptext[] = "Solving BGY3d equation.\n";
 
