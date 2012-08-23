@@ -491,6 +491,8 @@ static void BGY3dH2OData_Newton_free(State *BHD)
 
 
 
+// FIXME: warning of snes cannot be eliminated becaused this would be passed
+//      to SNESSetFunction()
 static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 {
   State *BHD;

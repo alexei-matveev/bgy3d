@@ -409,6 +409,8 @@ static void InitializePreconditioner(State *BHD)
 }
 
 
+// FIXME: warning of snes cannot be eliminated becaused this would be passed
+//      to SNESSetFunction()
 static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 {
   State *BHD;
@@ -587,6 +589,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 
 }
 
+// FIXME: warning of snes cannot be eliminated becaused this would be passed
+//      to SNESSetFunction()
 static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 {
   State *BHD;
