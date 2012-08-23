@@ -1126,19 +1126,22 @@ static void mul (int n, const complex *restrict a, const complex *restrict b,
                  const double alpha, complex *restrict c)
 {
   for (int i = 0; i < n; i++)
-      c[i] = alpha * a[i] * b[i];
+      c[i] += alpha * a[i] * b[i];
 }
 #endif
 
 /*
  * This applies the kernel compured by  kernel() to FFT of g to obtain
- * "dg". The latter probably needs a better name.
+ * an increment to "dg". The latter probably needs a better name. Dont
+ * forget to clear "dg" early enough.
+ *
+ * Complex array dg is intent(inout).
  */
 static void apply (const DA da,
                    const fftw_complex *restrict ker,  /* kernel */
                    const fftw_complex *restrict g,    /* current g */
                    const real scale,          /* overall scale */
-                   fftw_complex *restrict dg) /* intent(out) */
+                   fftw_complex *restrict dg) /* intent(inout) */
 {
   int x[3], n[3];
 
@@ -1162,34 +1165,13 @@ static void apply (const DA da,
        * scale =  βρ is not  included, on the other  hand. See
        * kernel() for details:
        */
-      dg[ijk].re = scale * (ker[ijk].re * g[ijk].re -
-                            ker[ijk].im * g[ijk].im);
-      dg[ijk].im = scale * (ker[ijk].re * g[ijk].im +
-                            ker[ijk].im * g[ijk].re);
+      dg[ijk].re += scale * (ker[ijk].re * g[ijk].re -
+                             ker[ijk].im * g[ijk].im);
+      dg[ijk].im += scale * (ker[ijk].re * g[ijk].im +
+                             ker[ijk].im * g[ijk].re);
   }
 #endif
 }
-
-static void apply1 (const State *BHD,
-                    const fftw_complex *kernel,
-                    const fftw_complex *g_fft,
-                    real rho, Vec dg)
-{
-  /* Avoid separate VecScale at the end: */
-  const real scale = rho * BHD->PD->beta;
-
-  /* Apply the  kernel, eventually with the strange  addition (in case
-     coul_fft != NULL). Put result into BHD->gfg2_fft */
-  apply (BHD->da, kernel, g_fft, scale,
-         BHD->gfg2_fft);        /* result */
-
-  /* ifft(dg) */
-  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw,
-                          dg, /* result */
-                          BHD->gfg2_fft,
-                          BHD->fft_scratch);
-}
-
 
 /*
  * Side effects:
@@ -1220,10 +1202,11 @@ static void Compute_H2O_interS_C (const State *BHD,
   kernel (BHD->da, BHD->PD, fg2_fft, coul_fft,
           BHD->fft_scratch);    /* result */
 
-  /* Apply the  kernel, eventually with the strange  addition (in case
-     coul_fft != NULL). Put result into BHD->gfg2_fft */
+  /* Apply the kernel, Put result into BHD->gfg2_fft */
+  bgy3d_fft_set (BHD->da, BHD->gfg2_fft, 0.0);
+
   apply (BHD->da, BHD->fft_scratch, BHD->g_fft, scale,
-         BHD->gfg2_fft);        /* result */
+         BHD->gfg2_fft);        /* will be incremented */
 
   /* ifft(dg) */
   ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw,
@@ -1453,6 +1436,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   bgy3d_getopt_real ("-zpad", &zpad);
   /*********************************/
 
+  /* At this point the problem  parameters must have been set. This is
+     inverse temperature: */
+  const real beta = PD->beta;
+
   PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a0);
   PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
   PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
@@ -1496,6 +1483,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           ker_fft_L[i][j] = bgy3d_fft_malloc (BHD.da);
           ker_fft_L[j][i] = ker_fft_L[i][j];
       }
+
+  /* There is no point to  transform each contribution computed in the
+     momentum scpace back, accumulate them on the k-grid here: */
+  fftw_complex *dg_acc_fft = bgy3d_fft_malloc (BHD.da);
 
   DACreateGlobalVector(BHD.da, &dg_acc);
   DACreateGlobalVector(BHD.da, &dg_new2);
@@ -1706,11 +1697,19 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                  accounted for in the kernel: */
               VecSet(dg_acc, 0.0);
 
-              for (int j = 0; j < 2; j++) {
-                  apply1 (&BHD, ker_fft_S[i][j], g_fft[j], BHD.rhos[j], dg_new2);
+              /* Clear accumulator: */
+              bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
 
-                  VecAXPY(dg_acc, 1.0, dg_new2);
+              for (int j = 0; j < 2; j++) {
+                  /* This increments the accumulator: */
+                  apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
               }
+
+              /* Compute IFFT of dg_acc_fft for the current site: */
+              ComputeVecfromFFT_fftw (BHD.da, BHD.fft_plan_bw,
+                                      dg_acc, /* result */
+                                      dg_acc_fft,
+                                      BHD.fft_scratch);
 
               /* FIXME:   ugly  branch.    Very  specific   to  2-site
                  models. Literal constants 0 and 1, how comes? */
@@ -1833,6 +1832,8 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
   } /* damp loop */
+
+  bgy3d_fft_free (dg_acc_fft);
 
   for (int i = 0; i < 2; i++) {
       VecDestroy (g[i]);
