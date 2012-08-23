@@ -29,7 +29,7 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 {
   State *BHD;
   DA da;
-  real interval[2], h[3], N[3], L, beta, maxL;
+  real beta, maxL;
   int x[3], n[3];
 
   int np;
@@ -44,28 +44,16 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   /****************************************************/
 
   /* water hydrogen */
-  // BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
-  // ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
-  // ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
   BHD->LJ_paramsH[0] = eH;  /* epsilon  */
   BHD->LJ_paramsH[1] = sH;  /* sigma    */
   BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
 
   /* water oxygen */
-  // BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
-  // ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
-  // ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
   BHD->LJ_paramsO[0] = eO;  /* epsilon  */
   BHD->LJ_paramsO[1] = sO;  /* sigma    */
   BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
 
   /* water O-H mixed parameters */
-  // BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
-  // ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
-  // ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
   BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
   BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
   BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
@@ -106,14 +94,6 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   BHD->rhos[0] = PD->rho; //2.*PD->rho;
   BHD->rhos[1] = PD->rho;
   beta = PD->beta;
-
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
-  L=interval[1]-interval[0];
-  FOR_DIM
-    h[dim]=PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
 
   /* Initialize parallel stuff: fftw + petsc */
   BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
@@ -795,17 +775,12 @@ void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
   ProblemData *PD;
   int x[3], n[3], i[3], border, N[3];
   PetscScalar ***g_vec;
-  real h[3], interval[2]; //r[3], r_s, s, r_rl_2, rr_rl_2r, rr_rl_3;
 
   PD = BHD->PD;
   da = BHD->da;
 
   FOR_DIM
-    h[dim] = PD->h[dim];
-  FOR_DIM
     N[dim] = PD->N[dim];
-
-  interval[0] = PD->interval[0];
 
   border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*ZP))/PD->h[0]/2. );
 
@@ -847,8 +822,7 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
   ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
   PetscScalar ***v_vec;
-  // real r[3], r_s, h[3], interval[2], k, fac, L, q2, sign, h3;
-  real r[3], r_s, h[3], interval[2], k, fac, L, sign, h3;
+  real r[3], r_s, h[3], interval[2], k, fac, L, sign;
   fftw_complex *tmp_fft, *(fg_fft[3]);
 
   PD = BHD->PD;
@@ -863,9 +837,6 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 
   interval[0] = PD->interval[0];
   L = PD->interval[1]-PD->interval[0];
-  h3 = h[0]*h[1]*h[2];
-
-  // q2 = ((double*)LJ_params)[2];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -995,8 +966,7 @@ static void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
   DA da;
   ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
-  // real h[3], interval[2], k, fac, L, q2, sign, h3;
-  real h[3], interval[2], k, fac, L, sign, h3;
+  real k, fac, L, sign;
   fftw_complex *(fs_fft[3]),*(fl_fft[3]);
   real fac1, fac2, fac3, fft_s, fft_l;
 
@@ -1008,16 +978,11 @@ static void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
     fs_fft[dim] = BHD->fO_fft[dim];
   FOR_DIM
     fl_fft[dim] = BHD->fH_fft[dim];
-  FOR_DIM
-    h[dim] = PD->h[dim];
+
   FOR_DIM
     N[dim] = PD->N[dim];
 
-  interval[0] = PD->interval[0];
   L = PD->interval[1]-PD->interval[0];
-  h3 = h[0]*h[1]*h[2];
-
-  // q2 = ((double*)LJ_params)[2];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1122,8 +1087,7 @@ static void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
   DA da;
   ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
-  // real h[3], interval[2], k, fac, L, q2, sign, h3;
-  real h[3], interval[2], k, fac, L, sign, h3;
+  real k, fac, L, sign;
   fftw_complex  *fs_fft,*fl_fft;
   real fac1, fac2, fac3, fft_s, fft_l;
 
@@ -1134,15 +1098,9 @@ static void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
   fl_fft = BHD->gfg2_fft;
 
   FOR_DIM
-    h[dim] = PD->h[dim];
-  FOR_DIM
     N[dim] = PD->N[dim];
 
-  interval[0] = PD->interval[0];
   L = PD->interval[1]-PD->interval[0];
-  h3 = h[0]*h[1]*h[2];
-
-  // q2 = ((double*)LJ_params)[2];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1586,7 +1544,7 @@ void Compute_dg_H2O_inter(State *BHD,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, confac;
+  real fac, k_fac, L, k, h, sign; // confac;
 
   PD=BHD->PD;
 
@@ -1602,7 +1560,7 @@ void Compute_dg_H2O_inter(State *BHD,
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
-  confac = SQR(M_PI/L/2.);
+  /* confac = SQR(M_PI/L/2.); */
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1833,8 +1791,8 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
   ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, beta;
+  fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
+  real fac, k_fac, L, k, h;
 
 
 
@@ -1848,11 +1806,9 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
     fg2_fft[dim] = BHD->fg2_fft[dim];
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
   fac = L/(2.*M_PI); /* siehe oben ... */
 
 
@@ -1967,8 +1923,8 @@ static void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec
   ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3]; //, local_size;
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, beta;
+  fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
+  real fac, k_fac, L, k, h;
   // PetscScalar *v_vec, *tg_vec;
 
 
@@ -1981,11 +1937,9 @@ static void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec
     fg2_fft[dim] = BHD->fg2_fft[dim];
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
   fac = L/(2.*M_PI); /* siehe oben ... */
 
   //PetscPrintf(PETSC_COMM_WORLD, "ACHTUNG!!: Reiner Coulomb part ist falsch!\n");
@@ -2215,8 +2169,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, beta;
+  fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
+  real fac, k_fac, L, k, h;
   PetscScalar *v_vec, *tg_vec;
 
 
@@ -2229,11 +2183,9 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
     fg2_fft[dim] = BHD->fg2_fft[dim];
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
   fac = L/(2.*M_PI); /* siehe oben ... */
 
 
@@ -2541,7 +2493,7 @@ void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, L, k, h, beta;
+  real L, k, h;
   PetscScalar *g_vec;
 
 
@@ -2556,8 +2508,6 @@ void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  fac = L/(2.*M_PI); /* siehe oben ... */
-  beta = PD->beta;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -2658,7 +2608,7 @@ static void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]);
-  real fac, L, k, h, beta, k_fac;
+  real fac, L, k, h, k_fac;
   PetscScalar *g_vec; //, *v_vec;
 
 
@@ -2678,7 +2628,6 @@ static void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);
-  beta = PD->beta;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -2847,7 +2796,7 @@ static void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec d
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]), *n_fft;
-  real fac, L, k, h, beta, k_fac;
+  real fac, L, k, h, k_fac;
   PetscScalar *g_vec; //, *v_vec;
 
 
@@ -2866,7 +2815,6 @@ static void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec d
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);
-  beta = PD->beta;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -3088,7 +3036,7 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
 {
   ProblemData *PD;
   DA da;
-  int x[3], n[3], N[3];
+  int x[3], n[3];
   fftw_complex *g_fft, *scratch;
   real L, h;
 
@@ -3096,8 +3044,6 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
   PD=BHD->PD;
 
   da = BHD->da;
-  FOR_DIM
-    N[dim] = PD->N[dim];
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BHD->g_fft;
@@ -3220,7 +3166,7 @@ static void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g1_fft, *g2_fft, *dg_fft, *scratch;
-  real fac, L, h, beta, sign; // k
+  real L, h, sign; // k
   // PetscScalar *g_vec;
   // int local_size;
   PD=BHD->PD;
@@ -3236,8 +3182,6 @@ static void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
-  fac = L/(2.*M_PI); /* siehe oben ... */
 
 
   /* Get local portion of the grid */
