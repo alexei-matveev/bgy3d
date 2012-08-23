@@ -385,7 +385,7 @@ real Coulomb_long_grad( real r, real rx, real q2)
     return re;
 }
 
-static real Coulomb_long_spline( real r, real q2)
+static real UNUSED_Coulomb_long_spline( real r, real q2)
 {
   real re;
   real r_rl_2, rr_rl_2r, rr_rl_3, s;
@@ -423,7 +423,7 @@ static real Coulomb_long_spline( real r, real q2)
     return re;
 }
 
-static real Coulomb_long_spline_grad( real r, real rx, real q2)
+static real UNUSED_Coulomb_long_spline_grad( real r, real rx, real q2)
 {
   real re;
   real r_rl, rr_rl_2r, rr_rl_3, s, ss;
@@ -532,7 +532,7 @@ void ComputeH2O_g(Vec g, Vec g0, Vec dg)
 /*   exit(1);  */
 }
 
-static void CheckMax( Vec g, char name[5], real max)
+static void UNUSED_CheckMax( Vec g, char name[5], real max)
 {
   PetscScalar *g_vec;
   real k;
@@ -558,7 +558,7 @@ static void CheckMax( Vec g, char name[5], real max)
 }
 
 
-static void VecSetRandom_H2O(Vec g, real mag)
+static void UNUSED_VecSetRandom_H2O(Vec g, real mag)
 {
   int local_size, i;
   PetscScalar *g_vec;
@@ -613,7 +613,7 @@ void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
 }
 
 
-static void ImposeBoundaryCondition( State *BHD, Vec g)
+static void UNUSED_ImposeBoundaryCondition( State *BHD, Vec g)
 {
   DA da;
   ProblemData *PD;
@@ -644,7 +644,7 @@ static void ImposeBoundaryCondition( State *BHD, Vec g)
 }
 
 
-static real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
+static real UNUSED_ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 {
   DA da;
   ProblemData *PD;
@@ -695,7 +695,7 @@ static real ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 }
 
 
-static void ComputeH2O_Renormalization( State *BHD, Vec g)
+static void UNUSED_ComputeH2O_Renormalization( State *BHD, Vec g)
 {
   ProblemData *PD;
   real vsum, h3, *h;
@@ -959,7 +959,7 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 #define SPHERE_G 2.0
 #define SPHERE_R 1.0
 #define C_G 1.8
-static void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
+static void UNUSED_ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 			     fftw_complex *fft_data,
 			     real q2, real damp)
 {
@@ -1081,7 +1081,7 @@ static void ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
 
 }
 
-static void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
+static void UNUSED_ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 			real damp, real zpad)
 {
   DA da;
@@ -1178,7 +1178,7 @@ static void ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 
 }
 
-static void ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
+static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
 {
   DA da;
   ProblemData *PD;
@@ -1917,7 +1917,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
 
 /* Compute intramolecular part */
-static void Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+static void UNUSED_Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 			    fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -2602,7 +2602,7 @@ void Compute_dg_H2O_intra_ln(State *BHD, Vec g, real rab, Vec dg, Vec dg_help)
 }
 
 /* Compute intramolecular part */
-static void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+static void UNUSED_Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -2790,7 +2790,7 @@ static void Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg
 }
 
 /* Compute intramolecular part */
-static void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
+static void UNUSED_Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
   ProblemData *PD;
   DA da;
@@ -3032,7 +3032,7 @@ static void Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec d
 }
 
 
-static void Compute_Zero_Correction(State *BHD, Vec dg)
+static void UNUSED_Compute_Zero_Correction(State *BHD, Vec dg)
 {
   ProblemData *PD;
   DA da;
@@ -3165,7 +3165,7 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
 }
 
 /* Compute normalization condition */
-static void Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
+static void UNUSED_Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
 					Vec dg, Vec dg_help)
 {
   ProblemData *PD;
@@ -3305,7 +3305,7 @@ static void safe_pointvise_divide (Vec w, /* intent(out) */
 }
 
 #define APP_NORM 1.0e-2
-static void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
+static void UNUSED_Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
 			 Vec tH, Vec tO, Vec tHO, Vec tOH, Vec dg, Vec dg_help)
 {
   real normH, normO, normHO;
@@ -3340,7 +3340,7 @@ static void Solve_NormalizationH2O(State *BHD, Vec gH, Vec gO, Vec gHO, Vec gOH,
     } while(count < 50 && (normH > APP_NORM || normO > APP_NORM ||normHO > APP_NORM));
 }
 
-static void Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
+static void UNUSED_Solve_NormalizationH2O_small_old(State *BHD, Vec gc, real rc, Vec g, Vec t,
 				  Vec dg, Vec dg_help, real zpad)
 {
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
