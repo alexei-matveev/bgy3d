@@ -1582,10 +1582,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               while:
 
                  -              Cl       -
-                Δu = K(g) + β ΔV   in Ω, u(@Ω) = f,
+                Δu = K(g) + β ΔV   in Ω, u(∂Ω) = f,
 
                   *           *
-                Δu = 0 in Ω, u (@Ω) = f,
+                Δu = 0 in Ω, u (∂Ω) = f,
 
               so after solving:
 
