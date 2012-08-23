@@ -3117,47 +3117,41 @@ static void Compute_Zero_Correction(State *BHD, Vec dg)
 }
 
 /*
- * Compute normalization condition. Vec dg is intent(out).
+ * Compute  normalization  condition. Vec  dg  is intent(out).  FIXME:
+ * Appears to be the same as the also intent(out) Vec dg_help.
  *
  * Side effects:
  *
  *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
  */
-void Compute_dg_H2O_normalization_intra(const State *BHD, Vec g, real rab,
-                                        Vec dg, /* intent(out) */
-                                        Vec dg_help)
+void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
+                                         Vec dg, /* intent(out) */
+                                         Vec dg_help) /* intent(out) */
 {
-  ProblemData *PD;
-  DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
-  real fac, L, k, h, beta;
+  real k;
   PetscScalar *g_vec;
   int local_size;
-  PD=BHD->PD;
 
-  da = BHD->da;
+  const ProblemData *PD = BHD->PD;
+  const DA da = BHD->da;
+
   FOR_DIM
     N[dim] = PD->N[dim];
 
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
 
-  h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
-  L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
-  fac = L/(2.*M_PI); /* siehe oben ... */
-
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
-
   /* fft(g/t) */
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
-
-
 
   index=0;
   /* loop over local portion of grid */
@@ -3178,32 +3172,19 @@ void Compute_dg_H2O_normalization_intra(const State *BHD, Vec g, real rab,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-
-	      dg_fft[index].re = h*g_fft[0].re;
+	      dg_fft[index].re = h3 * g_fft[0].re;
 	      dg_fft[index].im = 0;
 	    }
 	  else
 	    {
 	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-	      //k_fac = beta*fac/k;
-	      k = 2.0*M_PI*sqrt(k)*rab/L;
 
-
+	      k = 2.0 * M_PI * sqrt(k) * rab / L;
 
 	      /* + hier richtig !! */
-	      dg_fft[index].re += h*g_fft[index].re*sin(k)/k;
-
-	      dg_fft[index].im += h*g_fft[index].im*sin(k)/k;
-
-/* 	      if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5))  */
-/*  		{  */
-/* 		  dg_fft[index].re= 0; */
-/* 		  dg_fft[index].im= 0; */
-/* 		} */
-
-
+	      dg_fft[index].re += h3 * g_fft[index].re * sin(k) / k;
+	      dg_fft[index].im += h3 * g_fft[index].im * sin(k) / k;
 	    }
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
 	  index++;
 	}
   ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
@@ -3228,13 +3209,7 @@ void Compute_dg_H2O_normalization_intra(const State *BHD, Vec g, real rab,
   VecRestoreArray(dg_help, &g_vec);
   /******************************/
 
-  //VecAXPY(dg, 1.0, dg_help);
-  VecCopy(dg_help,dg);
-
-
-  //VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-
+  VecCopy(dg_help, dg);
 }
 
 /* Compute normalization condition */
@@ -3466,8 +3441,10 @@ void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec 
  *
  * Vec dg is intent(out).
  */
-void Solve_NormalizationH2O_smallII(const State *BHD, Vec gc, real rc, Vec g, Vec t,
-				  Vec dg, Vec dg_help, real zpad)
+void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
+                                     Vec t, /* intent(out) */
+                                     Vec dg, /* intent(out) */
+                                     Vec dg_help, real zpad)
 {
   int local_size, i;
   PetscScalar *t_vec, *g_vec, *dg_vec;
@@ -3477,8 +3454,9 @@ void Solve_NormalizationH2O_smallII(const State *BHD, Vec gc, real rc, Vec g, Ve
 /*   return; */
 
 
-  /* Vec dg is intent(out) here: */
-  Compute_dg_H2O_normalization_intra( BHD, gc, rc, dg, dg_help);
+  /* Vec dg,  dg_help are intent(out) here, moreover  both contain the
+     same data: */
+  Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
   //Smooth_Function(BHD, dg, zpad-1, zpad, 1.0);
 
 
