@@ -1834,17 +1834,16 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       }
   } /* damp loop */
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; i++) {
+      VecDestroy (g[i]);
+      VecDestroy (dg[i]);
+
+      bgy3d_fft_free (g_fft[i]);
+
       for (int j = 0; j <= i; j++) {
           bgy3d_fft_free (ker_fft_S[i][j]);
           bgy3d_fft_free (ker_fft_L[i][j]);
       }
-
-  for (int i = 0; i < 2; i++) {
-      bgy3d_fft_free (g_fft[i]);
-
-      VecDestroy (g[i]);
-      VecDestroy (dg[i]);
   }
 
   VecDestroy(dg_acc);
@@ -1857,7 +1856,6 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   return PETSC_NULL;
 }
-
 
 
 Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
