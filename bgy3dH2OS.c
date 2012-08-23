@@ -1399,7 +1399,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real norm;
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
-  Vec g0[2], dg[2], dg_acc, dg_new2, f, g[2];
+  Vec dg[2], dg_acc, dg_new2, f, g[2];
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1495,9 +1495,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
-          (5.106) and (5.108) in Jager's thesis. */
-  g0[0]=BHD.g_ini[0];
-  g0[1]=BHD.g_ini[1];
+          (5.106) and (5.108) in Jager's thesis. It is not filled with
+          data yet, I assume. */
+  const Vec *g0 = BHD.g_ini;    /* just an alias */
 
   /* set initial guess*/
   VecSet(dg[0],0);
