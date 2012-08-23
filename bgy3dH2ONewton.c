@@ -6,6 +6,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
 #include "bgy3dH2O.h"
+#include "bgy3dH2ONewton.h"
 
 /*===================================================*/
 /* Parametrisierung TIP3P :  */
@@ -42,7 +43,7 @@
 
 
 
-State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
+static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 {
   State *BHD;
   DA da;
@@ -433,7 +434,7 @@ State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   return BHD;
 }
 
-void BGY3dH2OData_Newton_free(State *BHD)
+static void BGY3dH2OData_Newton_free(State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -490,7 +491,7 @@ void BGY3dH2OData_Newton_free(State *BHD)
 
 
 
-PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
+static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 {
   State *BHD;
   H2Odg ***dg_struct;
@@ -744,7 +745,7 @@ PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 
 }
 
-int MatH2OMult(Mat M, Vec x, Vec y)
+static int MatH2OMult(Mat M, Vec x, Vec y)
 {
   void *ctx;
   State *BHD;
@@ -756,7 +757,7 @@ int MatH2OMult(Mat M, Vec x, Vec y)
   return 0;
 }
 
-void WriteH2ONewtonSolution(State *BHD, Vec u)
+static void WriteH2ONewtonSolution(State *BHD, Vec u)
 {
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
@@ -848,7 +849,7 @@ void WriteH2ONewtonSolution(State *BHD, Vec u)
 
 }
 
-void WriteH2ONewtonPlain(State *BHD, Vec u)
+static void WriteH2ONewtonPlain(State *BHD, Vec u)
 {
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
@@ -919,7 +920,7 @@ void WriteH2ONewtonPlain(State *BHD, Vec u)
 
 
 /* apply preconditioner matrix: diagonal scaling */
-PetscErrorCode ComputePreconditioner_H2O(void *data, Vec x, Vec y)
+static PetscErrorCode ComputePreconditioner_H2O(void *data, Vec x, Vec y)
 {
   State *BHD;
   PetscErrorCode ierr;
@@ -1084,7 +1085,7 @@ Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim)
 
 #define NMIN 32
 
-Vec BGY3d_SolveNewton_H2O_MG(ProblemData *PD, Vec g_ini, int vdim)
+static Vec BGY3d_SolveNewton_H2O_MG(ProblemData *PD, Vec g_ini, int vdim)
 {
   int nmax; // n;
 

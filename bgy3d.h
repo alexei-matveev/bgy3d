@@ -450,10 +450,7 @@ typedef struct H2OSdgF
 
 Vec BGY3d_solve_4site(ProblemData *PD, Vec g_ini, int vdim);
 
-Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim);
 Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim);
-void WriteH2ONewtonPlain (State *BHD, Vec u);
-void WriteH2ONewtonSolution (State *BHD, Vec u);
 /* BGY3dM */
 void WriteH2OSNewtonSolution (State *BHD, Vec u);
 void WriteH2OSNewtonPlain (State *BHD, Vec u);
