@@ -20,6 +20,9 @@ fftw_complex *bgy3d_fft_axpby (DA da, fftw_complex *restrict y,
                                real alpha, real beta,
                                const fftw_complex *x);
 
+fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, real alpha);
+
+
 fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				fftw_complex *g_fft, fftw_complex *work);
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,

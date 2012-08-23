@@ -1567,3 +1567,21 @@ fftw_complex *bgy3d_fft_axpby (DA da, fftw_complex *restrict y,
 
     return y;
 }
+
+/* FIXME: constant is real so far: */
+fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, real alpha)
+{
+    int z[3], n[3], N;
+
+    /* Get local portion of the grid */
+    DAGetCorners(da, &(z[0]), &(z[1]), &(z[2]), &(n[0]), &(n[1]), &(n[2]));
+
+    N = n[0] * n[1] * n[2];
+
+    for (int i = 0; i < N; i++) {
+        y[i].re = alpha;
+        y[i].im = alpha;
+    }
+
+    return y;
+}
