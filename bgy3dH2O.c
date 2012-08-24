@@ -7,7 +7,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
 #include "bgy3dH2O.h"
-#include "bgy3dmolecule.h"
+#include "bgy3d-fft.h"
 
 #define R_r  9
 #define R_l  7

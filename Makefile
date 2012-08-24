@@ -60,6 +60,7 @@ OBJECTS = \
 	bgy3dH2OSNewton.o \
 	bgy3d-solutes.o \
 	bgy3d-getopt.o \
+	bgy3d-fft.o \
 	fft/fft_3d.o \
 	fft/fft_3d_f.o \
 	fft/pack_3d.o \
