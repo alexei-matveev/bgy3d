@@ -17,6 +17,7 @@
 #include "bgy3dH2ONewton.h"
 #include "bgy3dH2OSNewton.h"
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
+#include "hnc3d.h"
 
 static char helptext[] = "Solving BGY3d equation.\n";
 
