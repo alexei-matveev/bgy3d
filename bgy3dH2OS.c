@@ -107,12 +107,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
              lx, ly, lz,
              &(BHD.da));
   da = BHD.da;
-   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
-  DACreateGlobalVector(da, &(BHD.x_lapl[0]));
-  DACreateGlobalVector(da, &(BHD.x_lapl[1]));
-  VecSet(BHD.x_lapl[0], 0.0);
-  VecSet(BHD.x_lapl[1], 0.0);
 #endif
 #ifdef L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
@@ -212,10 +206,14 @@ static State initialize_state (/* not const */ ProblemData *PD)
 
   VecSet(BHD.pre,0.0);
 
-/*   VecView(BHD.gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
-
+#ifdef L_BOUNDARY
+   /* Create Matrix with appropriate non-zero structure */
+  DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
+  DACreateGlobalVector(da, &(BHD.x_lapl[0]));
+  DACreateGlobalVector(da, &(BHD.x_lapl[1]));
+  VecSet(BHD.x_lapl[0], 0.0);
+  VecSet(BHD.x_lapl[1], 0.0);
+#endif
 
   if(BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL)
     {
