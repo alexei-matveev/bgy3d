@@ -190,26 +190,26 @@ static State initialize_state (/* not const */ ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD.fg2HH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2OO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2HO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2HHl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2OOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2HOl_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fg2HH_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2OO_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2HO_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2HHl_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2OOl_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2HOl_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fg2_fft[dim] = bgy3d_fft_malloc (da);
 
-      BHD.fO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD.fH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD.fO_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.fH_fft[dim] = bgy3d_fft_malloc (da);
     }
 
-  BHD.g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.ucH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.ucO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.ucHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.wHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD.wHH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD.g_fft = bgy3d_fft_malloc (da);
+  BHD.gfg2_fft = bgy3d_fft_malloc (da);
+  BHD.fft_scratch = bgy3d_fft_malloc (da);
+  BHD.ucH_fft = bgy3d_fft_malloc (da);
+  BHD.ucO_fft = bgy3d_fft_malloc (da);
+  BHD.ucHO_fft = bgy3d_fft_malloc (da);
+  BHD.wHO_fft = bgy3d_fft_malloc (da);
+  BHD.wHH_fft = bgy3d_fft_malloc (da);
 
 
 
@@ -259,25 +259,25 @@ static void finalize_state (State *BHD)
       VecDestroy(BHD->fO_l[dim]);
       VecDestroy(BHD->fHO_l[dim]);
       VecDestroy(BHD->v[dim]);
-      free(BHD->fg2HH_fft[dim]);
-      free(BHD->fg2OO_fft[dim]);
-      free(BHD->fg2HO_fft[dim]);
-      free(BHD->fg2HHl_fft[dim]);
-      free(BHD->fg2OOl_fft[dim]);
-      free(BHD->fg2HOl_fft[dim]);
-      free(BHD->fg2_fft[dim]);
+      bgy3d_fft_free (BHD->fg2HH_fft[dim]);
+      bgy3d_fft_free (BHD->fg2OO_fft[dim]);
+      bgy3d_fft_free (BHD->fg2HO_fft[dim]);
+      bgy3d_fft_free (BHD->fg2HHl_fft[dim]);
+      bgy3d_fft_free (BHD->fg2OOl_fft[dim]);
+      bgy3d_fft_free (BHD->fg2HOl_fft[dim]);
+      bgy3d_fft_free (BHD->fg2_fft[dim]);
 
-      free(BHD->fO_fft[dim]);
-      free(BHD->fH_fft[dim]);
+      bgy3d_fft_free (BHD->fO_fft[dim]);
+      bgy3d_fft_free (BHD->fH_fft[dim]);
     }
-  free(BHD->g_fft);
-  free(BHD->gfg2_fft);
-  free(BHD->fft_scratch);
-  free(BHD->ucH_fft);
-  free(BHD->ucO_fft);
-  free(BHD->ucHO_fft);
-  free(BHD->wHO_fft);
-  free(BHD->wHH_fft);
+  bgy3d_fft_free (BHD->g_fft);
+  bgy3d_fft_free (BHD->gfg2_fft);
+  bgy3d_fft_free (BHD->fft_scratch);
+  bgy3d_fft_free (BHD->ucH_fft);
+  bgy3d_fft_free (BHD->ucO_fft);
+  bgy3d_fft_free (BHD->ucHO_fft);
+  bgy3d_fft_free (BHD->wHO_fft);
+  bgy3d_fft_free (BHD->wHH_fft);
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
