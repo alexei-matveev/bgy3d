@@ -1711,14 +1711,15 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                                       BHD.fft_scratch);
 
               /* FIXME:   ugly  branch.    Very  specific   to  2-site
-                 models. Literal  constants 0  and 1, how  comes?  Vec
-                 t_vec, dg_new2,  and f  are all intent(out)  here and
-                 contain the same data: */
+                 models. Literal  constants 0  and 1, how  comes?
+
+                 Vec  t_vec,  is intent(out)  here.   Pass the  g_fft.
+                 Earlier   version,  Solve_NormalizationH2O_smallII(),
+                 did FFT itself wasting one FFT per site: */
               if (i == 0)
-                  Solve_NormalizationH2O_smallII (&BHD, g[i], r_HO, g[1], t_vec , dg_new2, f, zpad);
+                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[1], t_vec);
               else
-                  /* Vec t_vec is intent(out) here: */
-                  Solve_NormalizationH2O_smallII (&BHD, g[i], r_HO, g[0], t_vec , dg_new2, f, zpad);
+                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
 
               /* Vec t_vec is intent(in)  here. Here dg_new2 and f are
                  intent(out) and both contain the same data: */
