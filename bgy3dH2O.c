@@ -202,16 +202,16 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD->fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD->fg2_fft[dim] = bgy3d_fft_malloc (da);
     }
 
-  BHD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->ucHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->wHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  BHD->g_fft = bgy3d_fft_malloc (da);
+  BHD->gfg2_fft = bgy3d_fft_malloc (da);
+  BHD->fft_scratch = bgy3d_fft_malloc (da);
+  BHD->ucH_fft = bgy3d_fft_malloc (da);
+  BHD->ucO_fft = bgy3d_fft_malloc (da);
+  BHD->ucHO_fft = bgy3d_fft_malloc (da);
+  BHD->wHO_fft = bgy3d_fft_malloc (da);
    /* Compute initial data */
   RecomputeInitialData(BHD, 1.0, 1.0);
 
@@ -235,15 +235,15 @@ static void BGY3dH2OData_free(State *BHD)
       VecDestroy(BHD->fO_l[dim]);
       VecDestroy(BHD->fHO_l[dim]);
       VecDestroy(BHD->v[dim]);
-      free(BHD->fg2_fft[dim]);
+      bgy3d_fft_free (BHD->fg2_fft[dim]);
     }
-  free(BHD->g_fft);
-  free(BHD->gfg2_fft);
-  free(BHD->fft_scratch);
-  free(BHD->ucH_fft);
-  free(BHD->ucO_fft);
-  free(BHD->ucHO_fft);
-  free(BHD->wHO_fft);
+  bgy3d_fft_free (BHD->g_fft);
+  bgy3d_fft_free (BHD->gfg2_fft);
+  bgy3d_fft_free (BHD->fft_scratch);
+  bgy3d_fft_free (BHD->ucH_fft);
+  bgy3d_fft_free (BHD->ucO_fft);
+  bgy3d_fft_free (BHD->ucHO_fft);
+  bgy3d_fft_free (BHD->wHO_fft);
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
@@ -262,10 +262,6 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->xHO);
   VecDestroy(BHD->x_lapl[1]);
 #endif
-  // No need to do this anymore
-  // free(BHD->LJ_paramsH);
-  // free(BHD->LJ_paramsO);
-  // free(BHD->LJ_paramsHO);
 
   fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
   fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
