@@ -25,51 +25,51 @@ void bgy3d_fft_free (fftw_complex *ptr)
 
 static void unpack (DA da, Vec g, fftw_complex *g_fft)
 {
-  int index, i[3];
-  int x[3], n[3];
-  PetscScalar ***g_vec;
+    int index, i0, j0, k0, ni, nj, nk;
+    PetscScalar ***g_vec;
 
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    /* Get local portion of the grid */
+    DAGetCorners(da, &(i0), &(j0), &(k0), &(ni), &(nj), &(nk));
 
-  DAVecGetArray(da, g, &g_vec);
-  /* loop over local portion of grid */
-  /* Attention: order of indices is not variable */
-  index = 0;
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]];
-	  g_fft[index].im = 0;  /* Vec g is real */
-	  index++;
-	}
-  DAVecRestoreArray(da, g, &g_vec);
+    DAVecGetArray(da, g, &g_vec);
+
+    /* loop over local portion of grid */
+    /* Attention: order of indices is not variable */
+    index = 0;
+    for (int k = k0; k < k0 + nk; k++)
+        for (int j = j0; j < j0 + nj; j++)
+            for (int i = i0; i < i0 + ni; i++)
+                {
+                    g_fft[index].re = g_vec[k][j][i];
+                    g_fft[index].im = 0;  /* Vec g is real */
+                    index++;
+                }
+    DAVecRestoreArray(da, g, &g_vec);
 }
 
 static void pack (DA da, Vec g, const fftw_complex *g_fft)
 {
-  int index, i[3];
-  int x[3], n[3];
-  PetscScalar ***g_vec;
+    int index, i0, j0, k0, ni, nj, nk;
+    PetscScalar ***g_vec;
 
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    /* Get local portion of the grid */
+    DAGetCorners(da, &(i0), &(j0), &(k0), &(ni), &(nj), &(nk));
 
-  DAVecGetArray(da, g, &g_vec);
-  /* loop over local portion of grid */
-  /* Attention: order of indices is not variable */
-  index = 0;
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-            /* FIXME: this  is subtle,  we are packing  complex vector
-               into a real array. Imaginary part gets ignored: */
-	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re;
-	  index++;
-	}
-  DAVecRestoreArray(da, g, &g_vec);
+    DAVecGetArray(da, g, &g_vec);
+
+    /* loop over local portion of grid */
+    /* Attention: order of indices is not variable */
+    index = 0;
+    for (int k = k0; k < k0 + nk; k++)
+        for (int j = j0; j < j0 + nj; j++)
+            for (int i = i0; i < i0 + ni; i++)
+                {
+                    /* FIXME: this  is subtle,  we are packing  complex vector
+                       into a real array. Imaginary part gets ignored: */
+                    g_vec[k][j][i] = g_fft[index].re;
+                    index++;
+                }
+    DAVecRestoreArray(da, g, &g_vec);
 }
 
 /*
