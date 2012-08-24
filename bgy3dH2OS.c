@@ -105,44 +105,32 @@ static State initialize_state (/* not const */ ProblemData *PD)
   ly[0]=PD->N[1];
   lx[0]=PD->N[2];
 
-#ifdef L_BOUNDARY
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-             PD->N[0], PD->N[1], PD->N[2],
-             1, 1, np,
-             1,1,
-             lx, ly, lz,
-             &(BHD.da));
+#if defined(L_BOUNDARY) || defined(L_BOUNDARY_MG)
+    const PetscInt stencil_width = 1;
+#else
+    const PetscInt stencil_width = 0;
 #endif
-#ifdef L_BOUNDARY_MG
+
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
              PD->N[0], PD->N[1], PD->N[2],
              1, 1, np,
-             1,1,
+             1, stencil_width,
              lx, ly, lz,
              &(BHD.da));
 
-  for(dim=0; dim<np; dim++)
-    lz[dim]/=2;
-  lx[0]/=2;
-  ly[0]/=2;
+#ifdef L_BOUNDARY_MG
+  for(int p = 0; p < np; p++)
+      lz[p] /= 2;
+  lx[0] /= 2;
+  ly[0] /= 2;
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
              PD->N[0]/2, PD->N[1]/2, PD->N[2]/2,
              1, 1, np,
-             1,1,
+             1, stencil_width,
              lx, ly, lz,
              &(BHD.da_dmmg));
 #endif
 
-#ifndef  L_BOUNDARY
-#ifndef  L_BOUNDARY_MG
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-             PD->N[0], PD->N[1], PD->N[2],
-             1, 1, np,
-             1,0,
-             lx, ly, lz,
-             &(BHD.da));
-#endif
-#endif
   const DA da = BHD.da;         /* shorter alias */
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
