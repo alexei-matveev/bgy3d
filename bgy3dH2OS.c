@@ -87,6 +87,13 @@ static State initialize_state (/* not const */ ProblemData *PD)
   BHD.fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
                                             PD->N[2], PD->N[1], PD->N[0],
                                             FFTW_BACKWARD, FFTW_ESTIMATE);
+
+  if (BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL) {
+      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
+                  PD->id);
+      exit(1);
+  }
+
   fftwnd_mpi_local_sizes(BHD.fft_plan_fw, &local_nx, &local_x_start,
                          &local_ny, &local_y_start, &total_local_size);
   /* Get number of processes */
@@ -214,14 +221,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
   VecSet(BHD.x_lapl[0], 0.0);
   VecSet(BHD.x_lapl[1], 0.0);
 #endif
-
-  if(BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-                  PD->id);
-      exit(1);
-    }
-
 
   /* Allocate memory for fft */
   FOR_DIM
