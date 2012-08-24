@@ -111,7 +111,7 @@ static State initialize_state (/* not const */ ProblemData *PD)
     const PetscInt stencil_width = 0;
 #endif
 
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
+  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
              PD->N[0], PD->N[1], PD->N[2],
              1, 1, np,
              1, stencil_width,
@@ -123,7 +123,7 @@ static State initialize_state (/* not const */ ProblemData *PD)
       lz[p] /= 2;
   lx[0] /= 2;
   ly[0] /= 2;
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
+  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
              PD->N[0]/2, PD->N[1]/2, PD->N[2]/2,
              1, 1, np,
              1, stencil_width,
