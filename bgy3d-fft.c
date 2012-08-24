@@ -23,7 +23,7 @@ void bgy3d_fft_free (fftw_complex *ptr)
     free(ptr);
 }
 
-static void unpack (DA da, Vec g, fftw_complex *g_fft)
+static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
 {
     int index, i0, j0, k0, ni, nj, nk;
     PetscScalar ***g_vec;
@@ -47,7 +47,7 @@ static void unpack (DA da, Vec g, fftw_complex *g_fft)
     DAVecRestoreArray(da, g, &g_vec);
 }
 
-static void pack (DA da, Vec g, const fftw_complex *g_fft)
+static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
 {
     int index, i0, j0, k0, ni, nj, nk;
     PetscScalar ***g_vec;
