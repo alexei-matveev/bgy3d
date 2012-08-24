@@ -122,14 +122,6 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
              lx, ly, lz,
              &(BHD->da));
   da = BHD->da;
-  /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-  DACreateGlobalVector(da, &(BHD->x_lapl[0]));
-  DACreateGlobalVector(da, &(BHD->x_lapl[1]));
-  DACreateGlobalVector(da, &(BHD->xHO));
-  VecSet(BHD->x_lapl[0], 0.0);
-  VecSet(BHD->x_lapl[1], 0.0);
-  VecSet(BHD->xHO, 0.0);
 #else
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
              PD->N[0], PD->N[1], PD->N[2],
@@ -183,13 +175,16 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
       DACreateGlobalVector(da, &(BHD->v[dim]));
     }
 
-
-
-
-/*   VecView(BHD->gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
-
+#ifdef L_BOUNDARY
+  /* Create Matrix with appropriate non-zero structure */
+  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
+  DACreateGlobalVector(da, &(BHD->x_lapl[0]));
+  DACreateGlobalVector(da, &(BHD->x_lapl[1]));
+  DACreateGlobalVector(da, &(BHD->xHO));
+  VecSet(BHD->x_lapl[0], 0.0);
+  VecSet(BHD->x_lapl[1], 0.0);
+  VecSet(BHD->xHO, 0.0);
+#endif
 
   if(BHD->fft_plan_fw == NULL || BHD->fft_plan_bw == NULL)
     {
