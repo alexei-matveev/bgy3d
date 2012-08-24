@@ -3,7 +3,8 @@
 /*==========================================================*/
 
 #include <fftw_mpi.h>
-#include "petscda.h" // DA, Vec
+#include "fft_3d.h"             /* FFT_DATA */
+#include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fft.h"
 
 fftw_complex *bgy3d_fft_malloc (DA da)
@@ -138,4 +139,78 @@ fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha)
     }
 
     return y;
+}
+
+
+FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
+			    FFT_DATA *g_fft)
+
+{
+  int index=0, i[3];
+  int x[3], n[3];
+  PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  if(g_fft==NULL)
+    g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*g_fft));
+
+  DAVecGetArray(da, g, &g_vec);
+  /* loop over local portion of grid */
+  /* Attention: order of indices is not variable */
+  index=0;
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+	{
+	  //g_fft[index].re = g_vec[i[2]][i[1]][i[0]]/2.+c;
+	  g_fft[index].re = g_vec[i[2]][i[1]][i[0]];
+	  g_fft[index].im = 0;
+	  index++;
+	}
+  DAVecRestoreArray(da, g, &g_vec);
+  /* forward fft */
+  fft_3d(g_fft, g_fft, 1, fft_plan);
+
+  return g_fft;
+
+}
+
+
+void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
+			    FFT_DATA *g_fft)
+
+{
+  int index=0, i[3];
+  int x[3], n[3];
+  PetscScalar ***g_vec;
+
+  /* Get local portion of the grid */
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  if(g_fft==NULL)
+    {
+      PetscPrintf(PETSC_COMM_WORLD,"Error: g_fft==NULL!\n");
+      exit(1);
+    }
+
+  /* backward fft */
+  fft_3d(g_fft, g_fft, -1, fft_plan);
+
+  DAVecGetArray(da, g, &g_vec);
+  /* loop over local portion of grid */
+  /* Attention: order of indices is not variable */
+  index=0;
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+	{
+	  //g_vec[i[2]][i[1]][i[0]] = g_fft[index].re*2.+c; // Factor 2!!!
+	  g_vec[i[2]][i[1]][i[0]] = g_fft[index].re;
+	  index++;
+	}
+  DAVecRestoreArray(da, g, &g_vec);
+
+
 }

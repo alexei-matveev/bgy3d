@@ -5,7 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
+#include "bgy3d-fft.h"
 
 
 BGY3dFourierData BGY3dFourierData_malloc(ProblemData *PD)

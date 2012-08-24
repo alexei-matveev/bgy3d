@@ -12,3 +12,9 @@ fftw_complex *ComputeFFTfromVec_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				fftw_complex *g_fft, fftw_complex *work);
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 			    fftw_complex *g_fft, fftw_complex *work);
+
+FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
+			    FFT_DATA *g_fft);
+void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
+		       FFT_DATA *g_fft);
+

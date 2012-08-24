@@ -2,11 +2,9 @@
 /*  $Id: hnc3d.c,v 1.13 2006-12-14 17:35:38 jager Exp $ */
 /*==========================================================*/
 
-
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
-
+#include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 
 HNC3dData HNC3dData_malloc(ProblemData *PD)
 {

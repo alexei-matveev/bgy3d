@@ -5,7 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
+#include "bgy3d-fft.h"
 
 #define NMAX 128
 
