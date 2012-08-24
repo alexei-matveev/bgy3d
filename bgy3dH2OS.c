@@ -23,10 +23,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
 {
   State BHD;
   real beta, maxL;
-  int x[3], n[3];
-  int np;
-  int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
-  PetscInt lx[1], ly[1], *lz;
   PetscErrorCode ierr;
 
   /****************************************************/
@@ -79,78 +75,17 @@ static State initialize_state (/* not const */ ProblemData *PD)
   BHD.rhos[0] = PD->rho;
   BHD.rhos[1] = PD->rho;
 
-  /* Initialize parallel stuff: fftw + petsc */
-  BHD.fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-                                            PD->N[2], PD->N[1], PD->N[0],
-                                            FFTW_FORWARD, FFTW_ESTIMATE);
-  BHD.fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-                                            PD->N[2], PD->N[1], PD->N[0],
-                                            FFTW_BACKWARD, FFTW_ESTIMATE);
-
-  if (BHD.fft_plan_fw == NULL || BHD.fft_plan_bw == NULL) {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-                  PD->id);
-      exit(1);
-  }
-
-  fftwnd_mpi_local_sizes(BHD.fft_plan_fw, &local_nx, &local_x_start,
-                         &local_ny, &local_y_start, &total_local_size);
-  /* Get number of processes */
-  MPI_Comm_size(PETSC_COMM_WORLD, &np);
-
-  /* Create Petsc Distributed Array according to fftw data distribution*/
-  lz = (PetscInt*) malloc(np*sizeof(*lz));
-
-  MPI_Allgather( &local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
-  ly[0]=PD->N[1];
-  lx[0]=PD->N[2];
-
-#if defined(L_BOUNDARY) || defined(L_BOUNDARY_MG)
-    const PetscInt stencil_width = 1;
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+#ifndef L_BOUNDARY_MG
+  bgy3d_fft_init_da (PD->N, &(BHD.fft_plan_fw), &(BHD.fft_plan_bw), &(BHD.da), NULL);
 #else
-    const PetscInt stencil_width = 0;
-#endif
-
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
-             PD->N[0], PD->N[1], PD->N[2],
-             1, 1, np,
-             1, stencil_width,
-             lx, ly, lz,
-             &(BHD.da));
-
-#ifdef L_BOUNDARY_MG
-  for(int p = 0; p < np; p++)
-      lz[p] /= 2;
-  lx[0] /= 2;
-  ly[0] /= 2;
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
-             PD->N[0]/2, PD->N[1]/2, PD->N[2]/2,
-             1, 1, np,
-             1, stencil_width,
-             lx, ly, lz,
-             &(BHD.da_dmmg));
+  /* multigrid, apparently needs two descriptors: */
+  bgy3d_fft_init_da (PD->N, &(BHD.fft_plan_fw), &(BHD.fft_plan_bw), &(BHD.da), &(BHD.da_dmmg));
 #endif
 
   const DA da = BHD.da;         /* shorter alias */
-
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  if( verbosity >2)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\tfft: %d %d\n",
-                              PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
-                              local_nx, local_x_start);
-      PetscSynchronizedFlush(PETSC_COMM_WORLD);
-    }
-  assert( n[0]*n[1]*n[2] == total_local_size);
-
-  /*
-   * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
-   * statement  in  the if-block.   It  is  not  suitable for  use  in
-   * functions  returning  anything   that  but  PetscErrorCode.  This
-   * function returns State*.
-   */
 
   /* Create global vectors */
   ierr = DACreateGlobalVector(da, &(BHD.g_ini[0])); assert (!ierr);
@@ -227,19 +162,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
   bgy3d_load_vec ("g2O.bin", &(BHD.g2O));
   bgy3d_load_vec ("g2HO.bin", &(BHD.g2HO));
 #endif
-
-
-
-
-
-
-  /* Compute initial data */
-  //RecomputeInitialFFTs(&BHD, 1.0, 1.0);
-
-  /* Compute Solute dependent initial data */
-  //RecomputeInitialSoluteData(&BHD, 1.0, 1.0);
-
-  free(lz);
 
   return BHD;
 }

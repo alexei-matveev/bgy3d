@@ -1,3 +1,7 @@
+void bgy3d_fft_init_da (int N[3],
+                        fftwnd_mpi_plan *fw, fftwnd_mpi_plan *bw,
+                        DA *da, DA *da_mg);
+
 fftw_complex *bgy3d_fft_malloc (DA da);
 void bgy3d_fft_free (fftw_complex *ptr);
 
