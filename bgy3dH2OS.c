@@ -1399,7 +1399,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   real norm;
   int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
-  Vec dg[2], dg_acc, dg_new2, f, g[2];
+  Vec  g[2], dg[2], dg_acc, work;
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1489,9 +1489,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   fftw_complex *dg_acc_fft = bgy3d_fft_malloc (BHD.da);
 
   DACreateGlobalVector(BHD.da, &dg_acc);
-  DACreateGlobalVector(BHD.da, &dg_new2);
-  DACreateGlobalVector(BHD.da, &f);
-
+  DACreateGlobalVector(BHD.da, &work);
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
@@ -1721,11 +1719,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               else
                   bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
 
-              /* Vec    t_vec   is    intent(in)   and    dg_new2   is
-                 intent(out): */
-              Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, dg_new2);
+              /* Vec t_vec is intent(in) and work is intent(out): */
+              Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
 
-              VecAXPY(dg_acc, 1.0, dg_new2);
+              VecAXPY(dg_acc, 1.0, work);
 
               /* Add Coulomb field BHD.uc[i] to: */
               VecAXPY(dg_acc, 1.0, BHD.uc[i]);
@@ -1740,7 +1737,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
                *     dg' = a * dg_new + (1 - a) * dg
                *     norm = |dg_new - dg|
                */
-              dg_norm[i] = mix (dg[i], dg_acc, a, f); /* last arg is a work Vec */
+              dg_norm[i] = mix (dg[i], dg_acc, a, work); /* last arg is a temp */
           } /* over sites i */
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
@@ -1850,9 +1847,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
   }
 
   VecDestroy(dg_acc);
-  VecDestroy(dg_new2);
-  VecDestroy(f);
-
+  VecDestroy(work);
   VecDestroy(t_vec);
 
   finalize_state (&BHD);
