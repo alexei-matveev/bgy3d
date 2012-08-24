@@ -1721,9 +1721,9 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               else
                   bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
 
-              /* Vec t_vec is intent(in)  here. Here dg_new2 and f are
-                 intent(out) and both contain the same data: */
-              Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, dg_new2, f);
+              /* Vec    t_vec   is    intent(in)   and    dg_new2   is
+                 intent(out): */
+              Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, dg_new2);
 
               VecAXPY(dg_acc, 1.0, dg_new2);
 
@@ -2056,12 +2056,14 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
           //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HH, dg_new2, f);
           //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HH, dg_new2, f);
-          Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2);
+          VecCopy (dg_new2, f); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HO, gO, tO , dg_new2, f, zpad);
           //Compute_dg_H2O_intra_lnIII(&BHD, gO, tO, r_HO, dg_new2, f);
           //Compute_dg_H2O_intra_lnII(&BHD, gO, tO, r_HO, dg_new2, f);
-          Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2);
+          VecCopy (dg_new2, f); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
 
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
@@ -2118,7 +2120,8 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
 
 
           Solve_NormalizationH2O_smallII( &BHD, gO, r_HO, gH, tH , dg_new2, f, zpad);
-          Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2, f);
+          Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2);
+          VecCopy (dg_new2, f); /* FIXME: need that? */
           //Compute_dg_H2O_intra_lnII(&BHD, gH, tH, r_HO, dg_new2, f);
           //Compute_dg_H2O_intra_lnIII(&BHD, gH, tH, r_HO, dg_new2, f);
           VecAXPY(dg_new, 2.0, dg_new2);

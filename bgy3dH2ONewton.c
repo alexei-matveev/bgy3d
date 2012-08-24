@@ -572,7 +572,8 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   /************************************************************/
   //goto gHO_end;
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gH, tH , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2, BHD->f);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2);
+  VecCopy (help2, BHD->f); /* FIXME: need that? */
   VecAXPY(dgHO, 2.0, help2);
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tHO , help2, BHD->f, zpad);
@@ -622,10 +623,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   /************************************************************/
   //goto gH_end;
   Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tH , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2, BHD->f);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2);
+  VecCopy (help2, BHD->f); /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
   Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, help2, BHD->f);
+  Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, help2);
+  VecCopy (help2, BHD->f); /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
 
 #ifdef INTRA1
@@ -676,7 +679,8 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   /************************************************************/
   //goto gO_end;
   Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, help2, BHD->f);
+  Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, help2);
+  VecCopy (help2, BHD->f); /* FIXME: need that? */
   VecAXPY(dgO, 2.0, help2);
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gHO, tHO , help2, BHD->f, zpad);

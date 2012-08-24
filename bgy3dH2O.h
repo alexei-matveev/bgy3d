@@ -32,7 +32,7 @@ void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                              fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
 
-void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg, Vec dg_help);
+void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
 
 void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
                                          Vec dg, Vec dg_help);

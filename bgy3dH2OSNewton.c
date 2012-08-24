@@ -489,10 +489,12 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /************************************************************/
   //goto gH_end;
   Solve_NormalizationH2O_small( BHD, gH, r_HH, gH, tH , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
   Solve_NormalizationH2O_small( BHD, gH, r_HO, gO, tO , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
   /***********************************************************/
   //gH_end:
@@ -525,7 +527,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /************************************************************/
   //goto gO_end;
   Solve_NormalizationH2O_small( BHD, gO, r_HO, gH, tH , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
@@ -680,10 +683,12 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /************************************************************/
   //goto gH_end;
   Solve_NormalizationH2O_small( BHD, gH, r_HH, gH, tH , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
   Solve_NormalizationH2O_small( BHD, gH, r_HO, gO, tO , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
   /***********************************************************/
   //gH_end:
@@ -714,7 +719,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /************************************************************/
   //goto gO_end;
   Solve_NormalizationH2O_small( BHD, gO, r_HO, gH, tH , help2, ff, zpad);
-  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2, ff);
+  Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2);
+  VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
