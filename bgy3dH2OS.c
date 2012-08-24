@@ -22,7 +22,6 @@ extern real NORM_REG;
 static State initialize_state (/* not const */ ProblemData *PD)
 {
   State BHD;
-  DA da;
   real beta, maxL;
   int x[3], n[3];
   int np;
@@ -113,7 +112,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
              1,1,
              lx, ly, lz,
              &(BHD.da));
-  da = BHD.da;
 #endif
 #ifdef L_BOUNDARY_MG
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
@@ -122,7 +120,6 @@ static State initialize_state (/* not const */ ProblemData *PD)
              1,1,
              lx, ly, lz,
              &(BHD.da));
-  da = BHD.da;
 
   for(dim=0; dim<np; dim++)
     lz[dim]/=2;
@@ -144,11 +141,9 @@ static State initialize_state (/* not const */ ProblemData *PD)
              1,0,
              lx, ly, lz,
              &(BHD.da));
-
-
-  da = BHD.da;
 #endif
 #endif
+  const DA da = BHD.da;         /* shorter alias */
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
