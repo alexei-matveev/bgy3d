@@ -7,6 +7,10 @@
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 #include "hnc3d.h"
 
+static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
+static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3], int  n[3], real h[3]);
+static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
+
 HNC3dData HNC3dData_malloc(ProblemData *PD)
 {
   HNC3dData HD;
