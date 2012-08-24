@@ -3062,26 +3062,26 @@ static void UNUSED_Compute_Zero_Correction(State *BHD, Vec dg)
   VecScale(dg, h/L/L/L);
 }
 
+
 /*
- * Compute  normalization  condition. This  function  appears to  take
- * g(x), FFT it into g(k) and operate with the latter exclusively. The
- * result is manipulated in  the real-space rep, unfortunately. Though
- * this manipulation  is plain screening  of the too  small (negative)
- * values.
+ * Compute  normalization condition.  This takes  into g(k)  as input.
+ * The    result    is   manipulated    in    the   real-space    rep,
+ * unfortunately. Though  this manipulation is plain  screening of the
+ * too small (negative) values.
  *
- * Vec dg is  intent(out).  FIXME: Appears to be the  same as the also
- * intent(out) Vec dg_help.
+ * Vec dg is  intent(out).
  *
  * Side effects:
  *
- *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ *     Uses BHD->{gfg2_fft, fft_scratch} as work arrays.
  */
-void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
-                                         Vec dg, /* intent(out) */
-                                         Vec dg_help) /* intent(out) */
+static void normalization_intra (const State *BHD,
+                                 const fftw_complex *g_fft,
+                                 real rab,
+                                 Vec dg) /* intent(out) */
 {
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *g_fft, *dg_fft, *scratch;
+  fftw_complex  *dg_fft, *scratch;
   real k;
   PetscScalar *g_vec;
   int local_size;
@@ -3095,15 +3095,11 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
-  g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
   scratch = BHD->fft_scratch;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  /* fft(g/t) */
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
 
   index=0;
   /* loop over local portion of grid */
@@ -3139,14 +3135,14 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
 	    }
 	  index++;
 	}
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg, dg_fft, scratch);
 
 
-  VecScale(dg_help, 1./L/L/L);
+  VecScale(dg, 1./L/L/L);
 
   /* g>=0 ?? */
-  VecGetArray( dg_help, &g_vec);
-  VecGetLocalSize(dg_help, &local_size);
+  VecGetArray(dg, &g_vec);
+  VecGetLocalSize(dg, &local_size);
 
   for(index=0; index<local_size; index++)
     {
@@ -3158,10 +3154,38 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
       g_vec[index] = k;
 
     }
-  VecRestoreArray(dg_help, &g_vec);
-  /******************************/
+  VecRestoreArray(dg, &g_vec);
+}
 
-  VecCopy(dg_help, dg);
+/*
+ * FIXME: consider using normalization_intra() instead.
+ *
+ * Compute  normalization  condition. This  function  appears to  take
+ * g(x), FFT it into g(k) and operate with the latter exclusively. The
+ * result is manipulated in  the real-space rep, unfortunately. Though
+ * this manipulation  is plain screening  of the too  small (negative)
+ * values.
+ *
+ * Vec dg is  intent(out).  FIXME: Appears to be the  same as the also
+ * intent(out) Vec dg_help.
+ *
+ * Side effects:
+ *
+ *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ */
+void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
+                                         Vec dg, /* intent(out) */
+                                         Vec dg_help) /* intent(out) */
+{
+  /* fft(g/t) */
+  ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, g, BHD->g_fft, BHD->fft_scratch);
+
+  /* FIXME: Uses BHD->gfg2_fft,  BHD->fft_scratch as work arrays, huge
+     potential for confusion: */
+  normalization_intra (BHD, BHD->g_fft, rab, dg); /* dg is intent(out) */
+
+  /* Original functions did that. FIXME: does anyone rely on that? */
+  VecCopy(dg, dg_help);
 }
 
 /* Compute normalization condition */
