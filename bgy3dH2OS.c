@@ -1612,11 +1612,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
           }
 
-      /* XXX: Return  BHD.g_ini[0],   BHD.g_ini[1]  (see  definition
-              above)    and   BHD.uc[0],   BHD.uc[1],    which   are
-              VM_Coulomb_long,  but  should  they  multiply  by  beta?
-              Solute is hardcoded as HCl for standard test */
-      RecomputeInitialSoluteData_HCl(&BHD, (damp > 0.0 ? damp : 0.0), 1.0, zpad);
+      /* XXX: Return BHD.g_ini[0], BHD.g_ini[1] (see definition above)
+              and BHD.uc[0], BHD.uc[1], which are VM_Coulomb_long, but
+              should they  multiply by  beta?  Solute is  hardcoded as
+              HCl (==0) for standard test */
+      bgy3d_solute_field (&BHD, 0, (damp > 0.0 ? damp : 0.0), 1.0);
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
@@ -1970,10 +1970,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           damp_LJ=0;
           //a0=0.4;
           RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
-          //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
-          //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
-          RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
+          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
@@ -1981,10 +1978,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           damp_LJ=1.0;
           //a0=0.5;
           RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          //RecomputeInitialSoluteData_Water(&BHD, 0.0, 1.0, zpad);
-          //RecomputeInitialSoluteData_Hexane(&BHD, 0.0, 1.0, zpad);
-          //RecomputeInitialSoluteData_Methanol(&BHD, 0.0, 1.0, zpad);
-          RecomputeInitialSoluteData_ButanoicAcid(&BHD, 0.0, 1.0, zpad);
+          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
@@ -1995,10 +1989,7 @@ Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
           //a0 = 0.1/4./(count);
           a0 = 0.1/(count+5.0);
           RecomputeInitialFFTs(&BHD, (damp), 1.0);
-          //RecomputeInitialSoluteData_Water(&BHD, (damp), 1.0, zpad);
-          //RecomputeInitialSoluteData_Hexane(&BHD, (damp), 1.0, zpad);
-          //RecomputeInitialSoluteData_Methanol(&BHD, (damp), 1.0, zpad);
-          RecomputeInitialSoluteData_ButanoicAcid(&BHD, (damp), 1.0, zpad);
+          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
 

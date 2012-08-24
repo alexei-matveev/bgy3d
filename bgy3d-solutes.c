@@ -171,46 +171,17 @@ static const Site solvent[] =
   {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
    {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
-static void recompute_initial_data (State *BHD, const Solute *S, real damp, real damp_LJ)
+void bgy3d_solute_field (State *BHD, int index, real damp, real damp_LJ)
 {
+    assert (index >= 0 && index <= 5);
+
+    const Solute *S = solutes[index];
+
+    /* "Side effect" here: */
+    PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", S->name);
+
     /* Functions that do the real work operate on array of sites: */
     solute_field (BHD, S->sites, S->n, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_Water(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Water.\n");
-  recompute_initial_data (BHD, &Water, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_CS2(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is CarbonDisulfide.\n");
-  recompute_initial_data (BHD, &CarbonDisulfide, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_HCl(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is HCl.\n");
-  recompute_initial_data (BHD, &HydrogenChloride, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_Methanol(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Methanol.\n");
-  recompute_initial_data (BHD, &Methanol, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_Hexane(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Hexane.\n");
-  recompute_initial_data (BHD, &Hexane, damp, damp_LJ);
-}
-
-void RecomputeInitialSoluteData_ButanoicAcid(State *BHD, real damp, real damp_LJ, real zpad)
-{
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is Butanoic Acid.\n");
-  recompute_initial_data (BHD, &ButanoicAcid, damp, damp_LJ);
 }
 
 /*
