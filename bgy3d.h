@@ -132,8 +132,6 @@ typedef struct HNC3dDataStruct
   ProblemData *PD;
 } *HNC3dData;
 
-HNC3dData HNC3dData_malloc(ProblemData *PD);
-void HNC3dData_free(HNC3dData HD);
 
 typedef struct HNCField
 {
@@ -156,8 +154,6 @@ typedef struct HNC3dNewtonStruct
   ProblemData *PD;
 } *HNC3dNewtonData;
 
-HNC3dNewtonData HNC3dNewtonData_malloc(ProblemData *PD);
-void HNC3dNewtonData_free(HNC3dNewtonData HD);
 
 
 /* functions */
@@ -190,21 +186,6 @@ Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim);
 void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g);
 PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
 
-/* HNC3d functions */
-void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
-		   ,int  n[3], real h[3]);
-void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
-Vec HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim);
-void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c);
-Vec HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim);
-PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa);
-PetscErrorCode ComputeHNC_Preconditioner(void *pa,Vec x,Vec y);
-void VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc);
-void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc);
-PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
-Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini, int vdim);
-PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa);
-Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini, int vdim);
 
 
 
