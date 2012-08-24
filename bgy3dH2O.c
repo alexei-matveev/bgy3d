@@ -3296,7 +3296,7 @@ static void UNUSED_Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2
 }
 
 /* w := x / max(y, thresh), essentially: */
-static void safe_pointvise_divide (Vec w, /* intent(out) */
+static void safe_pointwise_divide (Vec w, /* intent(out) */
                                    Vec x, /* intent(in) */
                                    Vec y, /* intent(in) */
                                    real thresh)
@@ -3374,7 +3374,7 @@ void Solve_NormalizationH2O_small(const State *BHD, Vec gc, real rc, Vec g, Vec 
 {
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
 
-  safe_pointvise_divide (t, g, dg, NORM_REG);
+  safe_pointwise_divide (t, g, dg, NORM_REG);
 }
 
 /*
@@ -3395,7 +3395,7 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
 
   /* t =  g / dg, avoiding  small denominators. Some  of the commented
      code used VecPointwiseDivide(t, g, dg). */
-  safe_pointvise_divide (t, g, dg, NORM_REG2);
+  safe_pointwise_divide (t, g, dg, NORM_REG2);
 
   Zeropad_Function(BHD, dg, zpad, 1.0);
 }
@@ -3414,7 +3414,7 @@ void bgy3d_solve_normalization (const State *BHD,
     /* t  = g  / dg  (or rather  t  = g  / t  with argument  aliasing)
        avoiding small  denominators. Some  of the commented  code used
        VecPointwiseDivide(t, g, dg). */
-    safe_pointvise_divide (t, g, dg, NORM_REG2); /* argument aliasing */
+    safe_pointwise_divide (t, g, dg, NORM_REG2); /* argument aliasing */
 }
 
 
