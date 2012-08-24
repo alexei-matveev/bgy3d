@@ -153,44 +153,26 @@ static State initialize_state (/* not const */ ProblemData *PD)
    */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD.g_ini[0])); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g_ini[1])); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.gHO_ini)); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.uc[0])); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.uc[1])); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.ucHO)); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2H)); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2O)); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2HO)); // CHKERRQ(ierr);
-  assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.pre)); // CHKERRQ(ierr);
-  assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g_ini[0])); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g_ini[1])); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.gHO_ini)); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.uc[0])); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.uc[1])); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.ucHO)); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2H)); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2O)); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.g2HO)); assert (!ierr);
+  ierr = DACreateGlobalVector(da, &(BHD.pre)); assert (!ierr);
 
   FOR_DIM
     {
-
-      ierr = DACreateGlobalVector(da, &(BHD.fH[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fO[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fHO[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fH_l[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fO_l[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fHO_l[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.v[dim])); // CHKERRQ(ierr);
-      assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fH[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fO[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fHO[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fH_l[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fO_l[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.fHO_l[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector(da, &(BHD.v[dim])); assert (!ierr);
     }
 
 
