@@ -1434,7 +1434,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
   /* Zeropad */
   bgy3d_getopt_real ("-zpad", &zpad);
-  /*********************************/
+
+  /* Get the solutes index */
+  int solute = 0;               /* HCl by default */
+  bgy3d_getopt_int ("-solute", &solute);
 
   /* At this point the problem  parameters must have been set. This is
      inverse temperature: */
@@ -1616,7 +1619,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
               and BHD.uc[0], BHD.uc[1], which are VM_Coulomb_long, but
               should they  multiply by  beta?  Solute is  hardcoded as
               HCl (==0) for standard test */
-      bgy3d_solute_field (&BHD, 0, (damp > 0.0 ? damp : 0.0), 1.0);
+      bgy3d_solute_field (&BHD, solute, (damp > 0.0 ? damp : 0.0), 1.0);
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
