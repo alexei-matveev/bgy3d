@@ -434,60 +434,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   return BHD;
 }
 
-static void BGY3dH2OData_Newton_free(State *BHD)
-{
-  MPI_Barrier( PETSC_COMM_WORLD);
-
-  FOR_DIM
-    {
-      VecDestroy(BHD->fH[dim]);
-      VecDestroy(BHD->fO[dim]);
-      VecDestroy(BHD->fHO[dim]);
-      VecDestroy(BHD->fH_l[dim]);
-      VecDestroy(BHD->fO_l[dim]);
-      VecDestroy(BHD->fHO_l[dim]);
-      VecDestroy(BHD->v[dim]);
-      free(BHD->fg2_fft[dim]);
-    }
-  free(BHD->g_fft);
-  free(BHD->gfg2_fft);
-  free(BHD->fft_scratch);
-  free(BHD->ucH_fft);
-  free(BHD->ucO_fft);
-  free(BHD->ucHO_fft);
-
-  VecDestroy(BHD->g_ini[0]);
-  VecDestroy(BHD->g_ini[1]);
-  VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->gH);
-  VecDestroy(BHD->gO);
-  VecDestroy(BHD->gHO);
-  VecDestroy(BHD->dgH);
-  VecDestroy(BHD->dgO);
-  VecDestroy(BHD->dgHO);
-  VecDestroy(BHD->uc[0]);
-  VecDestroy(BHD->uc[1]);
-  VecDestroy(BHD->ucHO);
-  VecDestroy(BHD->f);
-  VecDestroy(BHD->f2);
-  VecDestroy(BHD->f3);
-  VecDestroy(BHD->f4);
-  VecDestroy(BHD->pre);
-  DADestroy(BHD->da);
-  DADestroy(BHD->da_newton);
-#ifdef L_BOUNDARY
-  MatDestroy(BHD->M);
-  KSPDestroy(BHD->ksp);
-#endif
-  // free(BHD->LJ_paramsH);
-  // free(BHD->LJ_paramsO);
-  // free(BHD->LJ_paramsHO);
-
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
-
-  free(BHD);
-}
 
 
 
@@ -751,17 +697,6 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 
 }
 
-static int MatH2OMult(Mat M, Vec x, Vec y)
-{
-  void *ctx;
-  State *BHD;
-
-  MatShellGetContext(M, ctx);
-
-  BHD = (State*) ctx;
-
-  return 0;
-}
 
 static void WriteH2ONewtonSolution(State *BHD, Vec u)
 {
@@ -855,74 +790,6 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
 
 }
 
-static void WriteH2ONewtonPlain(State *BHD, Vec u)
-{
-  H2Odg ***dg_struct;
-  PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
-  int i[3], x[3], n[3];
-  Vec dgH, dgHO, dgO, gH, gHO, gO;
-  PetscViewer viewer;
-
-  PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
-
-  gH= BHD->gH;
-  gO= BHD->gO;
-  gHO= BHD->gHO;
-  dgH= BHD->dgH;
-  dgO= BHD->dgO;
-  dgHO= BHD->dgHO;
-
-
-  /* Get arrays from PETSC Vectors */
-  DAVecGetArray(BHD->da, dgH, &dgH_vec);
-  DAVecGetArray(BHD->da, dgHO, &dgHO_vec);
-  DAVecGetArray(BHD->da, dgO, &dgO_vec);
-  DAVecGetArray(BHD->da_newton, u, (void*) &dg_struct);
-
-  DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* Copy from u to single Vectors */
-	  dgHO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgHO;
-	  dgH_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgH;
-	  dgO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgO;
-	}
-  /* Restore arrays from PETSC Vectors */
-  DAVecRestoreArray(BHD->da, dgH, &dgH_vec);
-  DAVecRestoreArray(BHD->da, dgHO, &dgHO_vec);
-  DAVecRestoreArray(BHD->da, dgO, &dgO_vec);
-  DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
-
-
-  /*************************************/
-  /* output */
-  /* g_H */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecH.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecH.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(dgH,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_b */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecO.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(dgO,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_HO */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecHO.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(dgHO,viewer);
-  PetscViewerDestroy(viewer);
-  PetscPrintf(PETSC_COMM_WORLD,"done\n");
-  /************************************/
-
-
-}
 
 
 /* apply preconditioner matrix: diagonal scaling */
@@ -1089,42 +956,3 @@ Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim)
 
 
 
-#define NMIN 32
-
-static Vec BGY3d_SolveNewton_H2O_MG(ProblemData *PD, Vec g_ini, int vdim)
-{
-  int nmax; // n;
-
-
-
-  /*****************************/
-  /* reset standard parameters */
-  /*****************************/
-  PD->interval[0] = -20;//12.03125;
-  PD->interval[1] = 20;//12.03125;
-
-  PD->beta = 1.6889;
-  PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
-  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
-  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
-  /******************************/
-
-  nmax = PD->N[0];
-
-/*   for(n=NMIN; n<=nmax; n*=2) */
-/*     { */
-/*       FOR_DIM */
-/* 	PD->N[dim] = n; */
-/*       FOR_DIM */
-/* 	PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim]; */
-/*       PD->N3 = PD->N[0]*PD->N[1]*PD->N[2]; */
-/*       PetscPrintf(PETSC_COMM_WORLD, "================================\n"); */
-/*       PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n",PD->N[0], PD->N[1], PD->N[2]); */
-/*       PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n",PD->N3); */
-
-/*       u_new = BGY3d_SolveNewton_H2O(PD, u); */
-
-/*     } */
-  return PETSC_NULL;
-}
