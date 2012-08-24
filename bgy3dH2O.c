@@ -3405,6 +3405,24 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
   Zeropad_Function(BHD, dg, zpad, 1.0);
 }
 
+void bgy3d_solve_normalization (const State *BHD,
+                                const fftw_complex *gc_fft,
+                                real rc,
+                                Vec g,     /* intent(in) */
+                                Vec t)     /* intent(out) */
+{
+    Vec dg = t;                 /* alias, uses the same storage */
+
+    /* Vec dg is intent(out) here: */
+    normalization_intra (BHD, gc_fft, rc, dg); /* use t storage */
+
+    /* t  = g  / dg  (or rather  t  = g  / t  with argument  aliasing)
+       avoiding small  denominators. Some  of the commented  code used
+       VecPointwiseDivide(t, g, dg). */
+    safe_pointvise_divide (t, g, dg, NORM_REG2); /* argument aliasing */
+}
+
+
 #define DAMPO 1.0
 /* solve */
 Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)

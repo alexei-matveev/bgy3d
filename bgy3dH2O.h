@@ -42,5 +42,11 @@ void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g, Vec
 void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g, Vec t,
                                      Vec dg, Vec dg_help, real zpad);
 
+void bgy3d_solve_normalization (const State *BHD,
+                                const fftw_complex *gc_fft,
+                                real rc,
+                                Vec g,     /* intent(in) */
+                                Vec t);    /* intent(out) */
+
 Vec BGY3d_solve_2site (ProblemData *PD, Vec g_ini, int vdim);
 Vec BGY3d_solve_3site (ProblemData *PD, Vec g_ini, int vdim);
