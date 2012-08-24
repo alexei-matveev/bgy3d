@@ -28,14 +28,7 @@ real  NORM_REG2=1.0e-2;
 static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 {
   State *BHD;
-  DA da;
   real beta, maxL;
-  int x[3], n[3];
-
-  int np;
-  int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
-  PetscInt lx[1], ly[1], *lz;
-
 
   BHD = (State*) malloc(sizeof(*BHD));
 
@@ -95,57 +88,15 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   BHD->rhos[1] = PD->rho;
   beta = PD->beta;
 
-  /* Initialize parallel stuff: fftw + petsc */
-  BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-                                            PD->N[2], PD->N[1], PD->N[0],
-                                            FFTW_FORWARD, FFTW_ESTIMATE);
-  BHD->fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-                                            PD->N[2], PD->N[1], PD->N[0],
-                                            FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftwnd_mpi_local_sizes(BHD->fft_plan_fw, &local_nx, &local_x_start,
-                         &local_ny, &local_y_start, &total_local_size);
-  /* Get number of processes */
-  MPI_Comm_size(PETSC_COMM_WORLD, &np);
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+  bgy3d_fft_init_da (PD->N, &(BHD->fft_plan_fw), &(BHD->fft_plan_bw), &(BHD->da), NULL);
 
-  /* Create Petsc Distributed Array according to fftw data distribution*/
-  lz = (PetscInt*) malloc(np*sizeof(*lz));
+  /* multigrid case apparently not considered here */
 
-  MPI_Allgather( &local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
-  ly[0]=PD->N[1];
-  lx[0]=PD->N[2];
+  const DA da = BHD->da;         /* shorter alias */
 
-#ifdef L_BOUNDARY
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-             PD->N[0], PD->N[1], PD->N[2],
-             1, 1, np,
-             1,1,
-             lx, ly, lz,
-             &(BHD->da));
-  da = BHD->da;
-#else
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-             PD->N[0], PD->N[1], PD->N[2],
-             1, 1, np,
-             1,0,
-             lx, ly, lz,
-             &(BHD->da));
-
-
-  da = BHD->da;
-#endif
-
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-
-  if( verbosity >2)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\tfft: %d %d\n",
-                              PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
-                              local_nx, local_x_start);
-      PetscSynchronizedFlush(PETSC_COMM_WORLD);
-    }
-  assert( n[0]*n[1]*n[2] == total_local_size);
   /* Create global vectors */
   DACreateGlobalVector(da, &(BHD->g_ini[0]));
   DACreateGlobalVector(da, &(BHD->g_ini[1]));
@@ -186,14 +137,6 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   VecSet(BHD->xHO, 0.0);
 #endif
 
-  if(BHD->fft_plan_fw == NULL || BHD->fft_plan_bw == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-                  PD->id);
-      exit(1);
-    }
-
-
   /* Allocate memory for fft */
   FOR_DIM
     {
@@ -209,8 +152,6 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   BHD->wHO_fft = bgy3d_fft_malloc (da);
    /* Compute initial data */
   RecomputeInitialData(BHD, 1.0, 1.0);
-
-  free(lz);
 
   return BHD;
 }
