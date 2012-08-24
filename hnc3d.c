@@ -202,7 +202,7 @@ static void HNC3dData_free(HNC3dData HD)
 
 
 /* Solve h and c of HNC equation simultaneously, fixpoint iteration */
-static Vec HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim)
+static Vec UNUSED_HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim)
 {
   HNC3dData HD;
   Vec c, c_old, g, g_old, gg;
@@ -379,7 +379,7 @@ static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x
 }
 
 
-static void SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3], real c)
+static void UNUSED_SetBoundaryValue(HNC3dNewtonData HD, Vec g, int x[3], int  n[3])//, real c)
 {
   HNCField ***g_vec;
   int i[3], ic[3], k[3], j[3];
@@ -731,7 +731,7 @@ static Vec Compute_gfromhc(HNC3dNewtonData HD, Vec hc)
   return g;
 }
 
-static void VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc)
+static void UNUSED_VecOutput_hc(HNC3dNewtonData HD, Vec hc, int horc)
 {
   PetscScalar ***g_vec;
   HNCField ***hc_vec;
@@ -791,7 +791,7 @@ static void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc)
 }
 
 /* solving for h and c of HNC equation with Newton */
-static Vec HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim)
+static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim)
 {
   Vec F, hc, g;
   HNC3dNewtonData HD;
@@ -1013,7 +1013,7 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 /* F for solving HNC equation with Newton */
 /* c appears as an input here */
 /* different F than above */
-static PetscErrorCode ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
+static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 {
   ProblemData *PD;
   FFT_DATA *h_fft, *c_fft, *ch_fft;
