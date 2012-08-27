@@ -68,34 +68,35 @@ main(){
 
         # 2-site bgy3d, HCl as solvent
         HCl)
-            echo -e "Run $workname:"
             mkdir -p $workdir
             # FIXME: maybe passing command line parameters from here rather than setting in makefile?
             make -f Makefile BGY2site WORK_DIR=$workdir EXE=$bgyexe  2>&1 | tee $testout
 
             # Get moments information for each particle pair
-            echo "Caculating moments of distribution functions:"
-            echo -e "\nMoments for H-H:" | tee  $resmoments
+            echo | tee  $resmoments
+            echo "Moments for H-H:" | tee  -a $resmoments
             python $PYDIR/testmoments.py  $workdir/g2H.bin 2>&1 | tee -a $resmoments
-            echo -e "\nMoments for Cl-Cl:" | tee -a $resmoments
+            echo | tee  $resmoments
+            echo "Moments for Cl-Cl:" | tee -a $resmoments
             python $PYDIR/testmoments.py  $workdir/g2O.bin 2>&1 | tee -a $resmoments
-            echo -e "\nMoments for H-Cl:" | tee -a $resmoments
+            echo | tee -a $resmoments
+            echo "Moments for H-Cl:" | tee -a $resmoments
             python $PYDIR/testmoments.py  $workdir/g2HO.bin 2>&1 | tee -a $resmoments
             ;;
 
         # 2-site bgy3dM, HCl as both solvent and solute
         HClM)
-            echo -e "Run $workname:"
             mkdir -p $workdir
             # Check g2 function data first
             solute_init $dir/test_HCl $workdir
             make -f Makefile BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
 
             # Get moments information for each particle pair
-            echo "Caculating moments of distribution functions:"
-            echo -e "\nMoments for H-HCl:" | tee $resmoments
+            echo | tee $resmoments
+            echo "Moments for H-HCl:" | tee -a $resmoments
             python ${PYDIR}/testmoments.py $workdir/vecH-0.m 2>&1 | tee -a $resmoments
-            echo -e "\nMoments for Cl-HCl:" | tee -a $resmoments
+            echo | tee -a $resmoments
+            echo "Moments for Cl-HCl:" | tee -a $resmoments
             python ${PYDIR}/testmoments.py $workdir/vecO-0.m 2>&1 | tee -a $resmoments
             # mv temp files
             rm -f ./vec*.dat
