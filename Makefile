@@ -10,6 +10,7 @@
 all: bgy3d
 
 include ${PETSC_DIR}/bmake/common/base
+# include ${PETSC_DIR}/conf/base # on Ubuntu 12.04 LTS
 
 # Shell
 SHELL = /bin/sh
