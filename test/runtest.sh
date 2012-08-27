@@ -27,7 +27,7 @@ fi
 ref=$dir/out
 
 # Create links to the solvents g2 binary files if not exist
-function solute_init(){
+solute_init(){
     local svtdir curdir
     svtdir=$1
     curdir=$2
@@ -45,7 +45,7 @@ function solute_init(){
 
 
 
-function main(){
+main(){
 
     local cmd
     cmd=$1
@@ -103,8 +103,8 @@ function main(){
 
         clean)
             if [[ -n `ls | grep test_` ]]; then
-                workdir=(`ls -d test_* | awk -F" " '{print $1}'`)
-                for((i=0;i<${#workdir[@]};i++));do
+                workdir=$(ls -d test_* | awk -F" " '{print $1}')
+                for i in $(seq ${#workdir[@]}); do
                     make -f Makefile clean WORK_DIR=${workdir[$i]}
                 done
             else
