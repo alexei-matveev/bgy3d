@@ -1710,7 +1710,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       /************************************/
 
-      /* save g to binary file */
+      /* Save dg to binary file. FIXME: Why dg and not g? */
       if (bgy3d_getopt_test ("-saveH2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dgH.bin", dg[0]); /* dgH */
@@ -1719,6 +1719,11 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
       }
   } /* damp loop */
 
+  /* Save final distribution, use binary format: */
+  bgy3d_save_vec ("g0.bin", g[0]); /* gH */
+  bgy3d_save_vec ("g1.bin", g[1]); /* gO */
+
+  /* Clean up and exit ... */
   bgy3d_fft_free (dg_acc_fft);
 
   for (int i = 0; i < 2; i++) {

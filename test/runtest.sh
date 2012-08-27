@@ -94,10 +94,10 @@ main(){
             # Get moments information for each particle pair
             echo | tee $resmoments
             echo "Moments for H-HCl:" | tee -a $resmoments
-            python ${PYDIR}/testmoments.py $workdir/vecH-0.m 2>&1 | tee -a $resmoments
+            python ${PYDIR}/testmoments.py $workdir/g0.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for Cl-HCl:" | tee -a $resmoments
-            python ${PYDIR}/testmoments.py $workdir/vecO-0.m 2>&1 | tee -a $resmoments
+            python ${PYDIR}/testmoments.py $workdir/g1.bin 2>&1 | tee -a $resmoments
             # mv temp files
             rm -f ./vec*.dat
             ;;
