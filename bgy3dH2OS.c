@@ -1699,7 +1699,10 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 
       } /* iter loop */
       /*************************************/
-      /* output */
+
+      /* FIXME:  Debug  output  from  every iteration  with  different
+         overall  scale  factors  damp/damp_LJ.  Remove when  no  more
+         needed. */
       namecount++;
       sprintf(nameH, "vecH-%d.m", namecount-1);
       sprintf(nameO, "vecO-%d.m", namecount-1);
