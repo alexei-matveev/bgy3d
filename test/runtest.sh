@@ -73,10 +73,10 @@ main(){
             make -f Makefile BGY2site WORK_DIR=$workdir EXE=$bgyexe  2>&1 | tee $testout
 
             # Get moments information for each particle pair
-            echo | tee  $resmoments
-            echo "Moments for H-H:" | tee  -a $resmoments
-            python $PYDIR/testmoments.py  $workdir/g2H.bin 2>&1 | tee -a $resmoments
-            echo | tee  $resmoments
+            echo | tee $resmoments
+            echo "Moments for H-H:" | tee -a $resmoments
+            python $PYDIR/testmoments.py $workdir/g2H.bin 2>&1 | tee -a $resmoments
+            echo | tee -a $resmoments
             echo "Moments for Cl-Cl:" | tee -a $resmoments
             python $PYDIR/testmoments.py  $workdir/g2O.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
