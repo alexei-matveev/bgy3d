@@ -33,7 +33,7 @@ int main(int argc, char **argv)
   real mpi_start, mpi_stop;
   int np;
   Vec g, g_ini;
-  Solver *s=NULL;
+  Solver *solver = NULL;
 
   verbosity=0;
 
@@ -106,60 +106,60 @@ int main(int argc, char **argv)
 
   /* Read method to solve from command line */
   if (bgy3d_getopt_test ("-simple"))
-    s = BGY3d_solve;
+    solver = BGY3d_solve;
 
   /* if (bgy3d_getopt_test ("-full")) */
-  /*     s = BGY3d_vec_solve; */
+  /*     solver = BGY3d_vec_solve; */
 
   if (bgy3d_getopt_test ("-HNC"))
-    s = HNC3d_Solve_h;
+    solver = HNC3d_Solve_h;
 
   if (bgy3d_getopt_test ("-HNCNewton"))
-    s = HNC3dNewton2_solve;
+    solver = HNC3dNewton2_solve;
 
   if (bgy3d_getopt_test ("-DIV"))
-    s = BGY3dDiv_solve2;
+    solver = BGY3dDiv_solve2;
 
   if (bgy3d_getopt_test ("-DIV2"))
-    s = BGY3dDiv_solve;
+    solver = BGY3dDiv_solve;
 
   if (bgy3d_getopt_test ("-BGYTEST"))
-    s = BGY3dDiv_test;
+    solver = BGY3dDiv_test;
 
   if (bgy3d_getopt_test ("-BGYFOURIER"))
-    s =  BGY3dDiv_solve_Fourier;
+    solver =  BGY3dDiv_solve_Fourier;
 
   if (bgy3d_getopt_test ("-BGYFOURIERTEST"))
-    s =  BGY3dDiv_solve_FourierTest;
+    solver =  BGY3dDiv_solve_FourierTest;
 
   if (bgy3d_getopt_test ("-BGYCONVOLUTIONTEST"))
-    s =  BGY3d_Convolution_Test;
+    solver =  BGY3d_Convolution_Test;
 
   if (bgy3d_getopt_test ("-BGYDIATOMIC"))
-    s =  BGY3d_solve_DiatomicAB;
+    solver =  BGY3d_solve_DiatomicAB;
 
   if (bgy3d_getopt_test ("-BGY2Site"))
-    s =  BGY3d_solve_2site;
+    solver =  BGY3d_solve_2site;
 
   if (bgy3d_getopt_test ("-BGY3Site"))
-    s =  BGY3d_solve_3site;
+    solver =  BGY3d_solve_3site;
 
   if (bgy3d_getopt_test ("-BGYM2Site"))
-    s =  BGY3dM_solve_H2O_2site;
+    solver =  BGY3dM_solve_H2O_2site;
 
   if (bgy3d_getopt_test ("-BGYM3Site"))
-    s =  BGY3dM_solve_H2O_3site;
+    solver =  BGY3dM_solve_H2O_3site;
 
   if (bgy3d_getopt_test ("-BGYH2ONEWTON"))
-    s = BGY3d_SolveNewton_H2O;
+    solver = BGY3d_SolveNewton_H2O;
 
   if (bgy3d_getopt_test ("-BGYH2OSNEWTON"))
-    s = BGY3d_SolveNewton_H2OS;
+    solver = BGY3d_SolveNewton_H2OS;
 
   if (bgy3d_getopt_test ("-BGYH2OSFNEWTON"))
-    s = BGY3d_SolveNewton_H2OSF;
+    solver = BGY3d_SolveNewton_H2OSF;
 
-  if(s) {
+  if(solver) {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("-load")) {
           bgy3d_load_vec ("g.bin", &g_ini);
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
       else
           g_ini = PETSC_NULL;
 
-      g = s (&PD, g_ini, 0);
+      g = solver (&PD, g_ini, 0);
 
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);
