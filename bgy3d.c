@@ -19,6 +19,16 @@
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 #include "hnc3d.h"
 
+static void PData_CreateParallel(ProblemData *PD);
+static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
+static Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim);
+static void CreateInitialGuessFromg2(BGY3dParameter params, Vec g);
+static int start_debugger(void );
+static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
+static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
+			 void *pa);
+static void ConvolutionTest(BGY3dParameter params);
+
 static char helptext[] = "Solving BGY3d equation.\n";
 
 int verbosity=0;
@@ -248,7 +258,7 @@ real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma)
     return re;
 }
 
-void PData_CreateParallel(ProblemData *PD)
+static void PData_CreateParallel(ProblemData *PD)
 {
 
   MPI_Comm_size(PETSC_COMM_WORLD, &(PD->np));
@@ -521,7 +531,7 @@ void BGY3dParameter_free(BGY3dParameter params)
 }
 
 #ifdef MATPRECOND
-MatPrecond MatPrecond_malloc(BGY3dParameter params)
+static MatPrecond MatPrecond_malloc(BGY3dParameter params)
 {
   MatPrecond MP;
   ProblemData *PD;
@@ -586,7 +596,7 @@ MatPrecond MatPrecond_malloc(BGY3dParameter params)
   return MP;
 }
 
-void MatPrecond_free( MatPrecond MP)
+static void MatPrecond_free( MatPrecond MP)
 {
   MatDestroy(MP->P);
   KSPDestroy(MP->ksp);
@@ -645,7 +655,7 @@ void Molecule_free( real **x_M, int N_M)
 
 
 /* Initialize M-Matrix with appropriate stencil */
-void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
+static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
 {
   int x[3], n[3], i[3], N[3];
   MatStencil col[2],row;
@@ -734,7 +744,7 @@ void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
 
 }
 
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
+static Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
 {
   SNES snes;
   KSP ksp;
@@ -924,7 +934,7 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 }
 
 
-void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
+static void CreateInitialGuessFromg2(BGY3dParameter params, Vec g)
 {
   DA da;
   ProblemData *PD;
@@ -1101,7 +1111,7 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 }
 
 
-PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
+static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa)
 {
   ProblemData *PD;
@@ -1247,7 +1257,7 @@ PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 }
 
 
-PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
+static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 {
   ProblemData *PD;
   DA da;
@@ -1371,7 +1381,7 @@ PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y)
 }
 
 #ifdef MATPRECOND
-PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
+static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 {
   BGY3dParameter params;
   MatPrecond MP;
@@ -1395,7 +1405,7 @@ PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 
 
   /* starts the gdb debugger for each process */
-int start_debugger(void )
+static int start_debugger(void )
 {
   pid_t pid;
   char s[100];
@@ -1408,7 +1418,7 @@ int start_debugger(void )
 }
 
 
-void ConvolutionTest(BGY3dParameter params)
+static void ConvolutionTest(BGY3dParameter params)
 {
   ProblemData *PD;
   DA da;
@@ -1504,7 +1514,7 @@ void ConvolutionTest(BGY3dParameter params)
 
 
 #ifdef MATPRECOND
-void TestPreconditioner(MatPrecond MP, Vec x, Vec y)
+static void TestPreconditioner(MatPrecond MP, Vec x, Vec y)
 {
   Mat P;
 

@@ -158,21 +158,12 @@ typedef struct HNC3dNewtonStruct
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
-void PData_CreateParallel(ProblemData *PD);
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
-void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim);
 void CreateInitialGuess(BGY3dParameter params, Vec g);
-void CreateInitialGuessFromg2(BGY3dParameter params, Vec g);
-int start_debugger(void );
 PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
-PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
-PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
-			 void *pa);
 
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
-void ConvolutionTest(BGY3dParameter params);
 
 #ifdef MATPRECOND
 MatPrecond MatPrecond_malloc(BGY3dParameter params);
