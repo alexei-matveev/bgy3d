@@ -29,10 +29,24 @@ def from_file(path):
     """
 
     viewer = PETSc.Viewer()
-    viewer.createBinary(path, "r")
+
+    #
+    # Python wrappers change from version to version, try to guess:
+    #
+    try:
+        READ_MODE = PETSc.Viewer.Mode.READ
+    except:
+        READ_MODE = "r"
+
+    viewer.createBinary(path, READ_MODE)
+
+    try:
+        vec = PETSc.Vec().load(viewer)
+    except:
+        vec = PETSc.Vec.Load(viewer)
 
     # convert to an array immediately (FIXME: copy here):
-    vec = array(PETSc.Vec.Load(viewer))
+    vec = array(vec)
 
     # reshape it:
     n = root3(size(vec))
