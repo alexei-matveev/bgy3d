@@ -206,17 +206,11 @@ int main(int argc, char **argv)
 }
 
 
-
-// real Lennard_Jones(real r, void *LJ_params)
 real Lennard_Jones(real r, real epsilon, real sigma)
 {
-  // real epsilon, sigma, sr6, sr, re;
   real sr6, sr, re;
 
   r=r+SHIFT;
-
-  // epsilon = ((double*)LJ_params)[0];
-  // sigma   = ((double*)LJ_params)[1];
 
   sr = sigma/r;
   sr6 = SQR(sr)*SQR(sr)*SQR(sr);
@@ -229,16 +223,11 @@ real Lennard_Jones(real r, real epsilon, real sigma)
     return re;
 }
 
-// real Lennard_Jones_grad(real r, real xr, void *LJ_params)
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma)
 {
-  // real epsilon, sigma, sr6, sr, re;
   real sr6, sr, re;
 
   r=r+SHIFT;
-
-  // epsilon = ((double*)LJ_params)[0];
-  // sigma   = ((double*)LJ_params)[1];
 
   if(xr==0)
     return 0;
@@ -286,9 +275,6 @@ BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim)
   params = (BGY3dParameter) malloc(sizeof(*params));
 
   params->vec_dim = vdim;
-  // params->LJ_params = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(params->LJ_params))[0] = 1.0;   /* espilon */
-  // ((real*)(params->LJ_params))[1] = 1.0;   /* sigma   */
   params->LJ_params[0] = 1.0;
   params->LJ_params[1] = 1.0;
   epsilon = params->LJ_params[0];
@@ -385,7 +371,6 @@ BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim)
 
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	      force_vec[i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 		Lennard_Jones_grad( r_s, r[vdim], epsilon, sigma);
 	    }
 
@@ -401,19 +386,16 @@ BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim)
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
 	  force_single_vec[i[2]][i[1]][i[0]] =
-	    // Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 	    Lennard_Jones_grad( r_s, r[vdim], epsilon, sigma);
 
 	  index =(int) floor(r_s/h_g2);
 	  /* g2=1 if r_s>l */
 	  if(index >= N_g2-1)
 	    Ftimesg2_vec[i[2]][i[1]][i[0]] =
-	      // Lennard_Jones_grad( r_s, r[vdim], params->LJ_params);
 	      Lennard_Jones_grad( r_s, r[vdim], epsilon, sigma);
 	  else
 	    {
 	      Ftimesg2_vec[i[2]][i[1]][i[0]] =
-		// Lennard_Jones_grad( r_s, r[vdim], params->LJ_params)*
 		Lennard_Jones_grad( r_s, r[vdim], epsilon, sigma)*
 		(g2_vec[index]+ (g2_vec[index+1]-g2_vec[index])/h_g2*
 		 (r_s-index*h_g2));
@@ -535,8 +517,6 @@ void BGY3dParameter_free(BGY3dParameter params)
 #ifdef MATPRECOND
   MatPrecond_free(params->MP);
 #endif
-
-  // free(params->LJ_params);
 
   free(params);
 }
@@ -933,7 +913,6 @@ void CreateInitialGuess(BGY3dParameter params, Vec g)
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
 	      g_vec[i[2]][i[1]][i[0]] *=
-		// exp(-beta* Lennard_Jones( r_s, params->LJ_params));
 		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 	    }
 	}
