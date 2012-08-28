@@ -159,17 +159,16 @@ int main(int argc, char **argv)
   if (bgy3d_getopt_test ("-BGYH2OSFNEWTON"))
     s = BGY3d_SolveNewton_H2OSF;
 
-  if(s)
-    {
+  if(s) {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("-load")) {
           bgy3d_load_vec ("g.bin", &g_ini);
           PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
-
-          g= (*s)(&PD, g_ini, 0);
       }
       else
-        g= (*s)(&PD, PETSC_NULL, 0);
+          g_ini = PETSC_NULL;
+
+      g = s (&PD, g_ini, 0);
 
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);
@@ -192,7 +191,7 @@ int main(int argc, char **argv)
 	  VecDestroy(g);
       }
 
-    }
+  }
   else
     PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGYFOURIER, -BGYTEST, -BGYDIATOMIC, -HNC or -HNCNewton !\n");
 
