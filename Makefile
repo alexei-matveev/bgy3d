@@ -114,4 +114,7 @@ include $(OBJECTS:.o=.d)
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
 	[ -s $@ ] || rm -f $@
 
+TAGS: $(OBJECTS:.o=.c)
+	etags $(OBJECTS:.o=.c)
+
 #---End of Makefile---
