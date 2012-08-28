@@ -417,8 +417,6 @@ typedef struct H2OSdgF
 
 } H2OSdgF;
 
-Vec BGY3d_solve_4site(ProblemData *PD, Vec g_ini, int vdim);
-
 #ifdef L_BOUNDARY_MG
 void InitializeDMMGSolver (State *BHD);
 real ImposeLaplaceBoundary (State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
