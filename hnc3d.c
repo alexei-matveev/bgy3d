@@ -7,6 +7,44 @@
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 #include "hnc3d.h"
 
+typedef struct HNC3dDataStruct
+{
+  DA da;
+  Vec pot;
+  Vec h_ini;
+  real LJ_params[2];            /* sigma and epsilon  */
+  real beta, rho;
+
+  /* Parallel FFT */
+  struct fft_plan_3d *fft_plan;
+
+  /* things for arbitrary molecule shape */
+  Vec c, v;
+  FFT_DATA *c_fft, *h_fft, *ch_fft;
+
+  ProblemData *PD;
+} *HNC3dData;
+
+typedef struct HNCField
+{
+  PetscScalar h, c;
+} HNCField;
+
+typedef struct HNC3dNewtonStruct
+{
+  DA da, da1;
+  Vec pot;
+  real LJ_params[2];            /* sigma and epsilon  */
+  real beta, rho;
+  Vec pre;
+
+  /* Parallel FFT */
+  struct fft_plan_3d *fft_plan;
+  FFT_DATA *c_fft, *h_fft, *ch_fft;
+
+  ProblemData *PD;
+} *HNC3dNewtonData;
+
 static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
 static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3], int  n[3], real h[3]);
 static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);

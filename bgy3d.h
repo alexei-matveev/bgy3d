@@ -110,49 +110,6 @@ typedef struct BGY3dVecStruct
 
 } *BGY3dParameterVec;
 
-
-typedef struct HNC3dDataStruct
-{
-  DA da;
-  Vec pot;
-  Vec h_ini;
-  real LJ_params[2];            /* sigma and epsilon  */
-  real beta, rho;
-
-  /* Parallel FFT */
-  struct fft_plan_3d *fft_plan;
-
-  /* things for arbitrary molecule shape */
-  Vec c, v;
-  FFT_DATA *c_fft, *h_fft, *ch_fft;
-
-  ProblemData *PD;
-} *HNC3dData;
-
-
-typedef struct HNCField
-{
-  PetscScalar h, c;
-} HNCField;
-
-
-typedef struct HNC3dNewtonStruct
-{
-  DA da, da1;
-  Vec pot;
-  real LJ_params[2];            /* sigma and epsilon  */
-  real beta, rho;
-  Vec pre;
-
-  /* Parallel FFT */
-  struct fft_plan_3d *fft_plan;
-  FFT_DATA *c_fft, *h_fft, *ch_fft;
-
-  ProblemData *PD;
-} *HNC3dNewtonData;
-
-
-
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
