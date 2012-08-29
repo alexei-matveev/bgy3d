@@ -284,12 +284,6 @@ typedef struct BGY3dDiatomicStruct
 
   ProblemData *PD;
 } *BGY3dDiatomicData;
-BGY3dDiatomicData BGY3dDiatomicData_Pair_malloc(ProblemData *PD);
-void BGY3dDiatomicData_free(BGY3dDiatomicData BDD);
-void ComputeDiatomic_g(BGY3dDiatomicData BDD, Vec g, Vec g0, Vec dg);
-void Compute_dg_Pair(BGY3dDiatomicData BDD, Vec g, Vec dg);
-Vec BGY3d_solve_Diatomic(ProblemData *PD, Vec g_ini, int vdim);
-
 
 typedef struct BGY3dDiatomicABStruct
 {
