@@ -6,10 +6,32 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fft.h"
+#include "bgy3dmolecule.h"
 
 #define rab 1.0
 
+typedef struct BGY3dDiatomicABStruct
+{
+  DA da;
+  Vec fa[3],fb[3],fab[3];
+  Vec v[3];
 
+  real LJ_paramsa[2], LJ_paramsb[2], LJ_paramsab[2] ; /* sigma and epsilon  */
+  real beta, rho;
+
+  real norm_const, c_ab, c_aab;
+
+  Vec ga_ini, gb_ini, gab_ini;
+
+
+  /* Parallel FFT */
+  //struct fft_plan_3d *fft_plan;
+  fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft, *fft_scratch;
+
+  fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
+
+  ProblemData *PD;
+} *BGY3dDiatomicABData;
 
 static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
 {
