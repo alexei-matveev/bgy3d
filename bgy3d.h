@@ -173,28 +173,6 @@ void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 
 /*******************************************/
 
-typedef struct BGY3dDivStruct
-{
-  DA da;
-  Vec f[3];
-  Vec ddU;
-  Vec boundary;
-  Vec v[3], i[3], v2[3];
-  Mat M;
-  Mat FD[3];
-
-  real LJ_params[2];            /* sigma and epsilon  */
-  real beta, rho;
-
-  Vec g_ini, g_SA;
-
-  /* Parallel FFT */
-  struct fft_plan_3d *fft_plan;
-  FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
-
-  ProblemData *PD;
-} *BGY3dDivData;
-
 /*******************************************/
 /* Molecule  */
 /*******************************************/
