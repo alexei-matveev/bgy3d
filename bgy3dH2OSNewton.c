@@ -9,6 +9,17 @@
 #include "bgy3d-fft.h"
 #include "bgy3dH2OSNewton.h"
 
+typedef struct H2OSdg
+{
+  PetscScalar dgH, dgO;
+} H2OSdg;
+
+typedef struct H2OSdgF
+{
+  PetscScalar dgHre, dgHim, dgOre, dgOim;
+
+} H2OSdgF;
+
 /*===================================================*/
 /* Parametrisierung TIP3P :  */
 /* sigma_H = 0.400   epsilon_H = 0.046  q_H = 0.417*/

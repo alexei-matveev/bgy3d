@@ -8,6 +8,11 @@
 #include "bgy3dH2O.h"
 #include "bgy3dH2ONewton.h"
 
+typedef struct H2Odg
+{
+  PetscScalar dgH, dgO, dgHO;
+} H2Odg;
+
 /*===================================================*/
 /* Parametrisierung TIP3P :  */
 /* sigma_H = 0.400   epsilon_H = 0.046  q_H = 0.417*/

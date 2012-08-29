@@ -327,21 +327,5 @@ typedef struct State
 
 } State;
 
-typedef struct H2Odg
-{
-  PetscScalar dgH, dgO, dgHO;
-} H2Odg;
-
-typedef struct H2OSdg
-{
-  PetscScalar dgH, dgO;
-} H2OSdg;
-
-typedef struct H2OSdgF
-{
-  PetscScalar dgHre, dgHim, dgOre, dgOim;
-
-} H2OSdgF;
-
 #endif  /* ifndef BGY3d_H */
 
