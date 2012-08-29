@@ -8,20 +8,14 @@
 #include "bgy3d-fft.h"
 #include "bgy3ddiv.h"
 
-
-// real Lennard_Jones_ddU(real r, real xr, void *LJ_params)
 real Lennard_Jones_ddU(real r, real xr, real epsilon, real sigma)
 {
-  // real epsilon, sigma, sr6, r2, sr, re;
   real sr6, r2, sr, re;
 
   r += SHIFT;
 
   if(r==0)
     return +CUTOFF;
-
-  // epsilon = ((double*)LJ_params)[0];
-  // sigma   = ((double*)LJ_params)[1];
 
   r2 = 1./r/r;
   sr = sigma/r;
@@ -52,10 +46,6 @@ BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
 
   BDD = (BGY3dDivData) malloc(sizeof(*BDD));
 
-
-  // BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
-  // ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
   BDD->LJ_params[0] = 1.0;
   BDD->LJ_params[1] = 1.0;
   epsilon = BDD->LJ_params[0];
@@ -160,15 +150,11 @@ BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
 
 	      FOR_DIM
 		  f_vec[dim][i[2]][i[1]][i[0]] +=
-		    // Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
 		    Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
 
 	      /* falsch !!! */
 	      ddU_vec[i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_ddU( r_s, r[0], BDD->LJ_params)+
-		// Lennard_Jones_ddU( r_s, r[1], BDD->LJ_params)+
-		// Lennard_Jones_ddU( r_s, r[2], BDD->LJ_params);
 		Lennard_Jones_ddU( r_s, r[0], epsilon, sigma)+
 		Lennard_Jones_ddU( r_s, r[1], epsilon, sigma)+
 		Lennard_Jones_ddU( r_s, r[2], epsilon, sigma);
@@ -337,10 +323,6 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 
   BDD = (BGY3dDivData) malloc(sizeof(*BDD));
 
-
-  // BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
-  // ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
   BDD->LJ_params[0] = 1.0;
   BDD->LJ_params[1] = 1.0;
 
@@ -466,8 +448,6 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 
 	  FOR_DIM
 	    f_vec[dim][i[2]][i[1]][i[0]] +=
-	    //Lennard_Jones_grad( r_s, r_s, BDD->LJ_params);
-	    // Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
 	    Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
 
@@ -599,7 +579,6 @@ void BGY3dDivData_free(BGY3dDivData BDD)
   VecDestroy(BDD->g_SA);
   MatDestroy(BDD->M);
   DADestroy(BDD->da);
-  // free(BDD->LJ_params);
 
   fft_3d_destroy_plan(BDD->fft_plan);
 
