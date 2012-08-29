@@ -18,6 +18,9 @@
 #include "bgy3dH2OSNewton.h"
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 #include "hnc3d.h"
+#include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
+#include "bgy3dtest.h"          /* BGY3dDiv_test */
+#include "bgy3dfourier.h"       /* BGY3dDiv_solve_Fourier */
 
 static void PData_CreateParallel(ProblemData *PD);
 static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);

@@ -109,9 +109,6 @@ typedef struct BGY3dVecStruct
   Vec fl[3];
 
 } *BGY3dParameterVec;
-BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD);
-void BGY3dParameterVec_free(BGY3dParameterVec par_vec);
-
 
 
 typedef struct HNC3dDataStruct
@@ -172,16 +169,6 @@ PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
 void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 #endif
 
-/* Vec */
-Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim);
-void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g);
-PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
-
-
-
-
-
-
 /*******************************************/
 
 typedef struct BGY3dDivStruct
@@ -205,31 +192,8 @@ typedef struct BGY3dDivStruct
 
   ProblemData *PD;
 } *BGY3dDivData;
-BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg);
-BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg);
-void BGY3dDivData_free(BGY3dDivData BDD);
 
-void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M);
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
-Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim);
-Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini, int vdim);
-void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim);
-void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f);
-void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f);
-void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f);
-void AssembleSystemMatrix_part2(BGY3dDivData BDD, Mat SM);
-void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f);
-void ComputeBGY3dDiv_F(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
-		       Vec b, Vec f);
-void ComputeRHS2(BGY3dDivData BDD, Vec b);
-void ShiftVec(DA da, Vec g, Vec scratch, int N[3]);
-void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM);
-
-/* bgy3dtest */
-Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini, int vdim);
-void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K);
-void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
-		    real sigma_K);
 
 /* bgy3dfourier */
 typedef struct BGY3dFourierStruct
@@ -249,15 +213,6 @@ typedef struct BGY3dFourierStruct
 
   ProblemData *PD;
 } *BGY3dFourierData;
-BGY3dFourierData BGY3dFourierData_malloc(ProblemData *PD);
-BGY3dFourierData BGY3dFourierData_kirk_malloc(ProblemData *PD);
-void BGY3dFourierData_free(BGY3dFourierData BDD);
-void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N);
-void ExtractAxis(BGY3dFourierData BDD, Vec g, int axis);
-Vec BGY3dDiv_solve_Fourier(ProblemData *PD, Vec g_ini, int vdim);
-Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim);
-Vec BGY3d_Convolution_Test(ProblemData *PD, Vec g_ini, int vdim);
-
 
 /*******************************************/
 /* Molecule  */

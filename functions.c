@@ -5,8 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-
-
+#include "functions.h"
 
 Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim)
 {
