@@ -1,0 +1,1 @@
+void InitializeDMMGSolver (State *BHD);

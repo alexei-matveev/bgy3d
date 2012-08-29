@@ -411,8 +411,5 @@ typedef struct H2OSdgF
 
 } H2OSdgF;
 
-#ifdef L_BOUNDARY_MG
-void InitializeDMMGSolver (State *BHD);
-#endif
 #endif  /* ifndef BGY3d_H */
 

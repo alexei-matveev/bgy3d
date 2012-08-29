@@ -11,6 +11,10 @@
 #include "bgy3dH2OS.h"
 #include "bgy3d-fft.h"
 
+#ifndef L_BOUNDARY_MG
+#include "bgy3d_MG.h"           /* InitializeDMMGSolver */
+#endif
+
 #ifdef WITH_COMPLEX
 #include <complex.h>
 #endif
