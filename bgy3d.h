@@ -155,6 +155,8 @@ typedef struct HNC3dNewtonStruct
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
+real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
+
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
 void CreateInitialGuess(BGY3dParameter params, Vec g);
@@ -192,8 +194,6 @@ typedef struct BGY3dDivStruct
 
   ProblemData *PD;
 } *BGY3dDivData;
-
-real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 
 /* bgy3dfourier */
 typedef struct BGY3dFourierStruct
