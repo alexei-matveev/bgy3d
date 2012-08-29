@@ -10,6 +10,8 @@
 #include "bgy3dtest.h"
 #include "bgy3dfourier.h"
 
+static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N);
+
 #define NMAX 128
 
 Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim)
@@ -69,7 +71,7 @@ Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim)
 }
 
 
-void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N)
+static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N)
 {
   DA damax, da;
   Vec dgint, gint;
