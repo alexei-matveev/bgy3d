@@ -7,6 +7,8 @@
 #include "bgy3d-getopt.h"
 #include "functions.h"
 
+static PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
+
 typedef struct BGY3dVecStruct
 {
   BGY3dParameter params[3];
@@ -128,7 +130,7 @@ static void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g)
 
 
 
-PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa)
+static PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa)
 {
   BGY3dParameterVec par_vec;
 
