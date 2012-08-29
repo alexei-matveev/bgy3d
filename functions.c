@@ -7,6 +7,17 @@
 #include "bgy3d-getopt.h"
 #include "functions.h"
 
+typedef struct BGY3dVecStruct
+{
+  BGY3dParameter params[3];
+  Vec fl[3];
+
+} *BGY3dParameterVec;
+
+static BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD);
+static void BGY3dParameterVec_free(BGY3dParameterVec par_vec);
+static void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g);
+
 Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim)
 {
   Vec F, g;
@@ -75,7 +86,7 @@ Vec BGY3d_vec_solve(ProblemData *PD, Vec g_ini, int vdim)
 
 }
 
-BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD)
+static BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD)
 {
   BGY3dParameterVec par_vec;
 
@@ -94,7 +105,7 @@ BGY3dParameterVec BGY3dParameterVec_malloc(ProblemData *PD)
 }
 
 
-void BGY3dParameterVec_free(BGY3dParameterVec par_vec)
+static void BGY3dParameterVec_free(BGY3dParameterVec par_vec)
 {
   FOR_DIM
     {
@@ -106,7 +117,7 @@ void BGY3dParameterVec_free(BGY3dParameterVec par_vec)
 }
 
 
-void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g)
+static void CreateInitialGuess_vec(BGY3dParameterVec par_vec, Vec g)
 {
 
   CreateInitialGuess(par_vec->params[0], g);

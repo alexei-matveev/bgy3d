@@ -103,13 +103,6 @@ typedef struct BGY3dParameterStruct
 BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim);
 void BGY3dParameter_free(BGY3dParameter params);
 
-typedef struct BGY3dVecStruct
-{
-  BGY3dParameter params[3];
-  Vec fl[3];
-
-} *BGY3dParameterVec;
-
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
 real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
