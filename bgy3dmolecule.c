@@ -10,6 +10,8 @@
 
 #define rab 1.0
 
+static void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg);
+
 typedef struct BGY3dDiatomicABStruct
 {
   DA da;
@@ -358,7 +360,7 @@ static void ComputeDiatomicAB_g_old(BGY3dDiatomicABData BDD, Vec g, Vec g0, Vec 
 /*   VecView(g,PETSC_VIEWER_STDERR_WORLD); */
 }
 
-void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg)
+static void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg)
 {
   int local_size, i;
   PetscScalar *g_vec, *dg_vec;
