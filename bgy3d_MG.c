@@ -16,7 +16,7 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
   MatStencil col[3],row;
   PetscScalar v[3], vb=1.0;
   real h[3], L, zpad;
-  
+
   PetscPrintf(PETSC_COMM_WORLD,"Assembling Matrix...");
 
   BHD = (State*) dmmg->user;
@@ -31,15 +31,15 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
   PetscPrintf(PETSC_COMM_WORLD,"%d %d %d \n", N[0], N[1], N[2]);
   FOR_DIM
     h[dim] = L/N[dim];
- 
+
   border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*zpad))/h[0]/2. );
 
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
-  
-  
+
+
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -55,7 +55,7 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
 	      row.j=i[1];
 	      row.k=i[2];
 	    }
-	  
+
 	  /* Boundary */
 	  if( i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
 	    MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
@@ -76,8 +76,8 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
 		  v[0]=1.0/SQR(h[dim]);
 		  v[1]=-2.0/SQR(h[dim]);
 		  v[2]=+1.0/SQR(h[dim]);
-		  
-		  
+
+
 		  MatSetValuesStencil(M,1,&row,3,col,v,ADD_VALUES);
 		  switch(dim)
 		    {
@@ -85,7 +85,7 @@ PetscErrorCode  InitializeLaplaceMatrix(DMMG dmmg,Mat J,Mat M)
 		    case 1: col[0].j += 1; col[2].j -= 1;break;
 		    case 2: col[0].k += 1; col[2].k -= 1;break;
 		    }
-		  
+
 		}
 	    }
 	}
@@ -109,7 +109,7 @@ void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
   da = BHD->da;
   FOR_DIM
     N[dim] = PD->N[dim];
-  
+
   VecSet(gto, 0.0);
 
   border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*zpad))/PD->h[0]/2. );
@@ -157,29 +157,29 @@ void CopyBoundary(State *BHD, Vec gfrom, Vec gto, real zpad)
 PetscErrorCode ComputeRHSDMMG(DMMG dmmg,Vec b)
 {
   State *BHD;
-  
+
   BHD = (State*) dmmg->user;
 
   VecCopy(BHD->pre, b);
   return 0;
-} 
+}
 
 void InitializeDMMGSolver(State *BHD)
 {
   PC pc;
   DMMG *dmmg;
   int l;
-  
+
   DMMGCreate(PETSC_COMM_WORLD,2,PETSC_NULL,&dmmg);
   DMMGSetDM(dmmg,(DM)BHD->da_dmmg);
   DADestroy(BHD->da_dmmg);
-  for (l = 0; l < DMMGGetLevels(dmmg); l++) 
+  for (l = 0; l < DMMGGetLevels(dmmg); l++)
     {
       DMMGSetUser(dmmg,l,(void*) BHD);
     }
 
   DMMGSetKSP(dmmg,ComputeRHSDMMG,InitializeLaplaceMatrix);
-  
+
 
   BHD->dmmg = dmmg;
 }
@@ -193,7 +193,7 @@ real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter
   /* computation time measurement start point */
   MPI_Barrier( PETSC_COMM_WORLD);
   mpi_start = MPI_Wtime();
-  
+
   /* Get boundary of g */
   CopyBoundary(BHD, g, BHD->pre, zpad);
   VecSet(x, 0.0);
@@ -204,21 +204,21 @@ real ImposeLaplaceBoundary(State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter
   sol = DMMGGetx(BHD->dmmg);
   VecCopy(sol, x);
 
-      
+
 
   /* subtract solution from g */
   VecAXPY(g, -1.0, x);
-  
+
   /* computation time measurement stop point */
   MPI_Barrier( PETSC_COMM_WORLD);
   mpi_stop = MPI_Wtime();
 
   return mpi_stop-mpi_start;
- 
+
   /*  VecView(b,PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);  */
 
 }
-  
+
 
 #endif
