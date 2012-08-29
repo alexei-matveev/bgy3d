@@ -18,12 +18,12 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
   int bufsize;
 
   BDD = (BGY3dDivData) malloc(sizeof(*BDD));
- 
+
 
   BDD->LJ_params = (void* ) malloc(sizeof(real)*2);
   ((real*)(BDD->LJ_params))[0] = 1.0;   /* espilon */
   ((real*)(BDD->LJ_params))[1] = 1.0;   /* sigma   */
-  
+
   BDD->beta = PD->beta;
   BDD->rho  = PD->rho;
   beta = PD->beta;
@@ -40,12 +40,12 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 
   /* Create distributed array */
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2], 
+	     PD->N[0], PD->N[1], PD->N[2],
 	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
 	     1,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(BDD->da));
 
   da = BDD->da;
-  
+
   /* Create global vectors */
   DACreateGlobalVector(da, &(BDD->ddU));
   DACreateGlobalVector(da, &(BDD->boundary));
@@ -58,14 +58,14 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
       VecDuplicate(BDD->ddU, &(BDD->v[dim]));
       VecDuplicate(BDD->ddU, &(BDD->i[dim]));
     }
-  
+
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  
+
   if( verbosity >2)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n", 
+      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n",
 			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2]);
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
@@ -73,7 +73,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
-  
+
   /* Load g2 from file, sequential only */
   /* g2 has to be on a grid [0,L] with L=interval[1]-interval[0] */
   PetscViewerBinaryOpen(PETSC_COMM_SELF,"g2file.bin" , PETSC_FILE_RDONLY,
@@ -88,7 +88,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
   FOR_DIM
     VecSet(BDD->f[dim],0.0);
   VecSet(BDD->boundary, 0.0);
-  
+
   VecSet(BDD->g_ini, 1.0);
   VecSet(BDD->g_SA, 1.0);
 
@@ -108,47 +108,47 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  /* set force vectors */
-	  
-	 
+
+
 	  FOR_DIM
 	    {
 	      r[dim] = i[dim]*h[dim];
 	      if( i[dim]>=N[dim]/2)
 		r[dim] -= L;
 	    }
-	  
+
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	  
+
 	  FOR_DIM
-	    f_vec[dim][i[2]][i[1]][i[0]] += 
+	    f_vec[dim][i[2]][i[1]][i[0]] +=
 	    Lennard_Jones_grad( r_s, r[dim], BDD->LJ_params);
 
-		  
-	  
-	  ddU_vec[i[2]][i[1]][i[0]] += 
+
+
+	  ddU_vec[i[2]][i[1]][i[0]] +=
 	    Lennard_Jones_ddU( r_s, r[0], BDD->LJ_params)+
 	    Lennard_Jones_ddU( r_s, r[1], BDD->LJ_params)+
 	    Lennard_Jones_ddU( r_s, r[2], BDD->LJ_params);
 
-	  gini_vec[i[2]][i[1]][i[0]] *= 
+	  gini_vec[i[2]][i[1]][i[0]] *=
 	    exp(-beta* Lennard_Jones( r_s, BDD->LJ_params));
-	      
-	  
+
+
 	  index =(int) floor(r_s/h_g2);
-	  if(index >= N_g2-1) 
+	  if(index >= N_g2-1)
 	    gSA_vec[i[2]][i[1]][i[0]] *= 1.0;
 	  else
 	    gSA_vec[i[2]][i[1]][i[0]] *=
 	      g2_vec[index]+ (g2_vec[index+1]-g2_vec[index])/h_g2*
 	      (r_s-index*h_g2);
-	  
-	      
 
-	 
-	  
+
+
+
+
 	}
-  
-  
+
+
   VecRestoreArray(g2, &g2_vec);
   DAVecRestoreArray(da, BDD->ddU, &ddU_vec);
   DAVecRestoreArray(da, BDD->boundary, &boundary_vec);
@@ -159,10 +159,10 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
       DAVecRestoreArray(da, BDD->f[dim], &(f_vec[dim]));
       DAVecRestoreArray(da, BDD->v2[dim], &(v2_vec[dim]));
     }
-  
 
- 
-  
+
+
+
 /*   VecView(BDD->v2[0],PETSC_VIEWER_STDERR_WORLD);    */
 /*   exit(1);  */
 
@@ -178,7 +178,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
       DAGetMatrix( da, MATMPIAIJ, &(BDD->FD[dim]));
       AssembleFDMatrix(BDD, da, BDD->FD[dim], dim);
     }
-  
+
 
   /* Create plan for 3d fft */
   BDD->fft_plan = fft_3d_create_plan(PETSC_COMM_WORLD,
@@ -192,24 +192,24 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 				     0,
 				     0,
 				     &bufsize);
-  if(BDD->fft_plan == NULL) 
+  if(BDD->fft_plan == NULL)
     {
       PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
 		  PD->id);
       exit(1);
     }
-  
-  
+
+
   /* Compute fft for f*g2 */
   FOR_DIM
     {
-      BDD->fg2_fft[dim] = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));     
+      BDD->fg2_fft[dim] = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
     }
-  
+
   BDD->g_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
   BDD->gfg2_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(FFT_DATA));
 
-  
+
   /* set boundary vector for g0 in v2:*/
   FOR_DIM
     {
@@ -226,7 +226,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 	  i[ic1] = 0;
 	  for(i[ic2]= x[ic2]; i[ic2]<x[ic2]+n[ic2]; i[ic2]++)
 	    for(i[ic3]=x[ic3] ; i[ic3]<x[ic3]+n[ic3]; i[ic3]++)
-	      v2_vec[dim][i[2]][i[1]][i[0]] += 
+	      v2_vec[dim][i[2]][i[1]][i[0]] +=
 		-0.5/h[dim];
 	}
       if( x[ic1]+n[ic1] == PD->N[ic1])
@@ -234,7 +234,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 	  i[ic1] = PD->N[ic1]-1;
 	  for(i[ic2]= x[ic2]; i[ic2]<x[ic2]+n[ic2]; i[ic2]++)
 	    for(i[ic3]=x[ic3] ; i[ic3]<x[ic3]+n[ic3]; i[ic3]++)
-	      v2_vec[dim][i[2]][i[1]][i[0]] += 
+	      v2_vec[dim][i[2]][i[1]][i[0]] +=
 		0.5/h[dim];
 	}
     }
@@ -247,7 +247,7 @@ BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
 
   return BDD;
 }
-  
+
 void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 {
   ProblemData *PD;
@@ -263,7 +263,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
     fg2_fft[dim] = BDD->fg2_fft[dim];
   g_fft = BDD->g_fft;
   gfg2_fft = BDD->gfg2_fft;
-  
+
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -287,18 +287,18 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 	  gfg2_fft[k].re = fg2_fft[dim][k].re*g_fft[k].re
 	    - fg2_fft[dim][k].im*g_fft[k].im;
 	  gfg2_fft[k].im = fg2_fft[dim][k].re*g_fft[k].im
-	    + fg2_fft[dim][k].im*g_fft[k].re;  
+	    + fg2_fft[dim][k].im*g_fft[k].re;
 	}
-      
+
       /* i[dim]=fft^-1(fft(g)*fft(fg2)) */
-      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft, 
+      ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft,
 			x, n, 0.0);
 
       VecScale(BDD->i[dim], PD->h[0]*PD->h[1]*PD->h[2]*
 	       PD->rho*PD->beta/PD->g_xm
 	       /PD->N[0]/PD->N[1]/PD->N[2]);
     }
-  
+
   FOR_DIM
     {
       /* v= grad(Integral) */
