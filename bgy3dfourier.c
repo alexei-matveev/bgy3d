@@ -767,7 +767,7 @@ void Compute_dg(BGY3dFourierData BDD, Vec g, Vec dg)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3dDiv_solve_Fourier(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve_Fourier(ProblemData *PD, Vec g_ini)
 {
   BGY3dFourierData BDD;
   Vec g0, dg, dg_new, f, g;

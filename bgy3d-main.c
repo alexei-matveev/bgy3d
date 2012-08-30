@@ -29,7 +29,7 @@ static char helptext[] = "Solving BGY3d equation.\n";
 
 int verbosity = 0;
 
-typedef Vec Solver (ProblemData *PD, Vec g_ini, int vdim);
+typedef Vec Solver (ProblemData *PD, Vec g_ini);
 
 int main (int argc, char **argv)
 {
@@ -170,7 +170,7 @@ int main (int argc, char **argv)
       else
           g_ini = PETSC_NULL;
 
-      g = solver (&PD, g_ini, 0);
+      g = solver (&PD, g_ini);
 
       /* computation time measurement end point*/
       MPI_Barrier( PETSC_COMM_WORLD);

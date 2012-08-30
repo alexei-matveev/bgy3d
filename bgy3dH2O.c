@@ -3352,7 +3352,7 @@ void bgy3d_solve_normalization (const State *BHD,
 
 #define DAMPO 1.0
 /* solve */
-Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini)
 {
   State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
@@ -4051,7 +4051,7 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini, int vdim)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini)
 {
   State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;

@@ -1606,7 +1606,7 @@ void ComputeBGY3d_F(BGY3dDivData BDD, Vec g0, Vec dg, Vec g,
 }
 
 
-Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;
@@ -1763,7 +1763,7 @@ Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini, int vdim)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;

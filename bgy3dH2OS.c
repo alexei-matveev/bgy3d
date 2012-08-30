@@ -1281,7 +1281,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
  * a historical baggage.
  */
-Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini)
 {
   real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
   real norm;
@@ -1755,7 +1755,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini, int vdim)
 }
 
 
-Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini)
 {
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;

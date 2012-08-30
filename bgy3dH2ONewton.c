@@ -821,7 +821,7 @@ PetscErrorCode MatMult_MFFD(Mat mat,Vec a,Vec y);
 PetscErrorCode PETSCSNES_DLLEXPORT MatCreate_MFFD(Mat A);
 */
 
-Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;

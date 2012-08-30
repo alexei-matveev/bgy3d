@@ -900,7 +900,7 @@ static PetscErrorCode ComputePreconditioner_H2OS(void *data, Vec x, Vec y)
 
 #include "petscmat.h"
 
-Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;
@@ -1016,7 +1016,7 @@ Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini, int vdim)
 
 
 
-Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;

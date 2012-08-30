@@ -17,7 +17,7 @@ static void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 
 #define NMAX 128
 
-Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini)
 {
   Vec g[5];
   BGY3dFourierData BDD[5];
@@ -40,7 +40,7 @@ Vec BGY3dDiv_solve_FourierTest(ProblemData *PD, Vec g_ini, int vdim)
       PetscPrintf(PETSC_COMM_WORLD, "===============================\n");
       PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
       PetscPrintf(PETSC_COMM_WORLD, "N = %d\n", PD->N[0]);
-      g[index]=BGY3dDiv_solve_Fourier(PD, PETSC_NULL, 0);
+      g[index]=BGY3dDiv_solve_Fourier(PD, PETSC_NULL);
       BDD[index++] = BGY3dFourierData_kirk_malloc(PD);
     }
   FOR_DIM
@@ -159,7 +159,7 @@ static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY
 }
 
 
-Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g,  f, rhs;
@@ -223,7 +223,7 @@ Vec BGY3dDiv_test(ProblemData *PD, Vec g_ini, int vdim)
 
 }
 
-Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g,  f, rhs;
@@ -553,7 +553,7 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
 }
 
 
-Vec BGY3d_Convolution_Test(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_Convolution_Test(ProblemData *PD, Vec g_ini)
 {
   BGY3dFourierData BDD;
   Vec sol,  f, gg;

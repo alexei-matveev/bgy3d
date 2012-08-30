@@ -1127,7 +1127,7 @@ void Compute_dg_Pair_normcorrection(BGY3dDiatomicABData BDD, Vec dg, Vec g)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini, int vdim)
+Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini)
 {
   BGY3dDiatomicABData BDD;
   Vec g0a, g0b, g0ab, dga, dgb, dgab, dg_new, dg_new2, f, ga, gb, gab;

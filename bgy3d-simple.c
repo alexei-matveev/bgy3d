@@ -54,7 +54,6 @@ static void BGY3dParameter_free(BGY3dParameter *params);
 static void CreateInitialGuess(BGY3dParameter *params, Vec g);
 
 static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim);
 static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g);
 static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
 static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
@@ -499,7 +498,7 @@ static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
 
 }
 
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
+Vec BGY3d_solve(ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;
@@ -508,6 +507,10 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
   PetscErrorCode ierr;
   Vec g, F;
   Mat J;
+
+  /* This was a  parameter, but 0 was always  passed. Al other solvers
+     dont have it: */
+  const int vec_dim = 0;
 
   params = BGY3dParameter_malloc(PD, vec_dim);
 

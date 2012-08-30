@@ -240,7 +240,7 @@ static void HNC3dData_free(HNC3dData HD)
 
 
 /* Solve h and c of HNC equation simultaneously, fixpoint iteration */
-static Vec UNUSED_HNC3d_Solve(ProblemData *PD, Vec g_ini, int vdim)
+static Vec UNUSED_HNC3d_Solve(ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec c, c_old, g, g_old, gg;
@@ -829,7 +829,7 @@ static void CreateInitialGuess_HNC(HNC3dNewtonData HD, Vec hc)
 }
 
 /* solving for h and c of HNC equation with Newton */
-static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim)
+static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini)
 {
   Vec F, hc, g;
   HNC3dNewtonData HD;
@@ -903,7 +903,7 @@ static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini, int vdim)
 
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
-Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini, int vdim)
+Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini)
 {
   Vec F, h;
   HNC3dData HD;
@@ -1131,7 +1131,7 @@ static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 
 /* Solving for h of HNC eqauation with fixpoint iteration */
 /* c is input */
-Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini, int vdim)
+Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec c, h, h_old, gg, v;
