@@ -128,9 +128,6 @@ int main(int argc, char **argv)
   if (bgy3d_getopt_test ("-simple"))
     solver = BGY3d_solve;
 
-  /* if (bgy3d_getopt_test ("-full")) */
-  /*     solver = BGY3d_vec_solve; */
-
   if (bgy3d_getopt_test ("-HNC"))
     solver = HNC3d_Solve_h;
 
