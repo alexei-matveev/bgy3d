@@ -13,6 +13,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"          /* BGY3d_solve_H2O_2site */
 #include "bgy3dH2O.h"           /* BGY3d_solve_2site */
+#ifdef WITH_EXTRA_SOLVERS
 #include "bgy3dmolecule.h"      /* BGY3d_solve_DiatomicAB */
 #include "bgy3dH2ONewton.h"
 #include "bgy3dH2OSNewton.h"
@@ -21,6 +22,7 @@
 #include "bgy3dtest.h"          /* BGY3dDiv_test */
 #include "bgy3dfourier.h"       /* BGY3dDiv_solve_Fourier */
 #include "bgy3d-simple.h"       /* BGY3d_solve */
+#endif
 
 static void PData_CreateParallel (ProblemData *PD);
 static int start_debugger (void);
@@ -110,6 +112,7 @@ int main (int argc, char **argv)
 
 
   /* Read method to solve from command line */
+#ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("-simple"))
     solver = BGY3d_solve;
 
@@ -139,6 +142,7 @@ int main (int argc, char **argv)
 
   if (bgy3d_getopt_test ("-BGYDIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
+#endif
 
   if (bgy3d_getopt_test ("-BGY2Site"))
     solver =  BGY3d_solve_2site;
@@ -152,6 +156,7 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("-BGYM3Site"))
     solver =  BGY3dM_solve_H2O_3site;
 
+#ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("-BGYH2ONEWTON"))
     solver = BGY3d_SolveNewton_H2O;
 
@@ -160,6 +165,7 @@ int main (int argc, char **argv)
 
   if (bgy3d_getopt_test ("-BGYH2OSFNEWTON"))
     solver = BGY3d_SolveNewton_H2OSF;
+#endif
 
   if(solver) {
       /* load initial configuration from file ??? */
