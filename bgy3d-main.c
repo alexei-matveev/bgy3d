@@ -195,7 +195,7 @@ int main (int argc, char **argv)
 
   }
   else
-    PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGYFOURIER, -BGYTEST, -BGYDIATOMIC, -HNC or -HNCNewton !\n");
+    PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGY2site or -BGYM2site!\n");
 
   ierr = PetscFinalize();CHKERRQ(ierr);
 
