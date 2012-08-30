@@ -65,44 +65,6 @@ typedef struct ProblemData
  * Linus Torvalds).  Consider converting "PType x" to "Type *x".
  */
 
-#ifdef MATPRECOND
-typedef struct MatPrecondStruct
-{
-  Mat P;
-  KSP ksp;
-  PC  pc;
-} *MatPrecond;
-#endif
-
-typedef struct BGY3dParameter
-{
-  int vec_dim;                  /* Dimension of equation */
-  DA da;
-  Vec x;                        /* grid in real space */
-  Vec force;                    /* force from all molecule atoms */
-  Vec force_single;             /* simple force between 2 atoms */
-  Vec Ftimesg2 ;                /* force*g2 */
-  FFT_DATA *Ftimesg2_fft;
-
-  Mat M;                        /* Matrix for FD-Approximation */
-  Vec boundary;                 /* Vector for right boundary: g=1 */
-  real LJ_params[2]; /* sigma and epsilon, seems we don't need charge here */
-
-
-  Vec v1,v2, v3;                /* Vectors for intermediate results */
-  Vec pre;
-#ifdef MATPRECOND
-  MatPrecond MP;
-#endif
-
-  /* Parallel FFT */
-  struct fft_plan_3d *fft_plan;
-
-  ProblemData *PD;
-} BGY3dParameter;
-
-BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim);
-void BGY3dParameter_free(BGY3dParameter *params);
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
@@ -110,7 +72,6 @@ real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
-void CreateInitialGuess(BGY3dParameter *params, Vec g);
 PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
 
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);

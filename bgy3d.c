@@ -22,6 +22,46 @@
 #include "bgy3dtest.h"          /* BGY3dDiv_test */
 #include "bgy3dfourier.h"       /* BGY3dDiv_solve_Fourier */
 
+#ifdef MATPRECOND
+typedef struct MatPrecondStruct
+{
+  Mat P;
+  KSP ksp;
+  PC  pc;
+} *MatPrecond;
+#endif
+
+typedef struct BGY3dParameter
+{
+  int vec_dim;                  /* Dimension of equation */
+  DA da;
+  Vec x;                        /* grid in real space */
+  Vec force;                    /* force from all molecule atoms */
+  Vec force_single;             /* simple force between 2 atoms */
+  Vec Ftimesg2 ;                /* force*g2 */
+  FFT_DATA *Ftimesg2_fft;
+
+  Mat M;                        /* Matrix for FD-Approximation */
+  Vec boundary;                 /* Vector for right boundary: g=1 */
+  real LJ_params[2]; /* sigma and epsilon, seems we don't need charge here */
+
+
+  Vec v1,v2, v3;                /* Vectors for intermediate results */
+  Vec pre;
+#ifdef MATPRECOND
+  MatPrecond MP;
+#endif
+
+  /* Parallel FFT */
+  struct fft_plan_3d *fft_plan;
+
+  ProblemData *PD;
+} BGY3dParameter;
+
+static BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim);
+static void BGY3dParameter_free(BGY3dParameter *params);
+static void CreateInitialGuess(BGY3dParameter *params, Vec g);
+
 static void PData_CreateParallel(ProblemData *PD);
 static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
 static Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim);
@@ -273,7 +313,7 @@ static void PData_CreateParallel(ProblemData *PD)
 }
 
 
-BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim)
+static BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim)
 {
   BGY3dParameter *params;
   DA da;
@@ -514,7 +554,7 @@ BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim)
 }
 
 /* Destroy BGY3dParameter struct */
-void BGY3dParameter_free(BGY3dParameter *params)
+static void BGY3dParameter_free(BGY3dParameter *params)
 {
   DADestroy(params->da);
   MatDestroy(params->M);
@@ -879,7 +919,7 @@ static Vec BGY3d_solve(ProblemData *PD, Vec g_ini, int vec_dim)
 }
 
 
-void CreateInitialGuess(BGY3dParameter *params, Vec g)
+static void CreateInitialGuess(BGY3dParameter *params, Vec g)
 {
   DA da;
   ProblemData *PD;
