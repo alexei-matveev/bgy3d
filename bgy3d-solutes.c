@@ -561,8 +561,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
     int *electron; /* electrons of each atom */
     real *zero; /* = 0.0 as in ase.io.cube.write_cube, don't konw the meaning */
     real *x, *y, *z;
-    real h[3], d3;
-    int i, j, k, dim;
+    real h[3];
     FILE *fp;
     int i0, j0, k0;
     int ni, nj, nk;
@@ -576,7 +575,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
 
     PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
     /* Skip the first two lines */
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
 	fgets(line_buffer, sizeof(line_buffer), fp);
     }
 
@@ -601,7 +600,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
     z = malloc(3 * sizeof(float));
 
 
-    for (i = 0; i < AtomNum; i++){
+    for (int i = 0; i < AtomNum; i++){
 	fscanf(fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
 	x[i] *= Bohr;
 	y[i] *= Bohr;
@@ -629,9 +628,9 @@ static void read_charge_density (DA da, const ProblemData *PD,
 
     /* electron density scaled by Bohr^3 in python script */
     real invB3 = 1. / Bohr / Bohr / Bohr;
-    for (i = i0; i < i0 + ni; i++) {
-	for (j = j0; j < j0 + nj; j++) {
-	    for (k = k0; k < k0 + nk; k++) {
+    for (int i = i0; i < i0 + ni; i++) {
+	for (int j = j0; j < j0 + nj; j++) {
+	    for (int k = k0; k < k0 + nk; k++) {
 		fscanf(fp, "%lf", &vec[i][j][k]);
 		vec[i][j][k] *= fact * invB3;
 	    }
