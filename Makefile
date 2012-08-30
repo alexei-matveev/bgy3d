@@ -50,6 +50,7 @@ LIBS    = -lm -lfftw -lfftw_mpi  ${PETSC_LIB}
 OBJECTS = \
 	bgy3d-main.o \
 	bgy3d-simple.o \
+	bgy3d.o \
 	hnc3d.o \
 	bgy3ddiv.o \
 	bgy3dtest.o \
