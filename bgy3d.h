@@ -115,13 +115,6 @@ PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
 
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 
-#ifdef MATPRECOND
-MatPrecond MatPrecond_malloc(BGY3dParameter *params);
-void MatPrecond_free(MatPrecond MP);
-PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
-void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
-#endif
-
 /*******************************************/
 /* Water  */
 /*******************************************/

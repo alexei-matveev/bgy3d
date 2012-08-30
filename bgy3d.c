@@ -32,6 +32,13 @@ static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *
 			 void *pa);
 static void ConvolutionTest(BGY3dParameter *params);
 
+#ifdef MATPRECOND
+static MatPrecond MatPrecond_malloc(BGY3dParameter *params);
+static void MatPrecond_free(MatPrecond MP);
+static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
+static void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
+#endif
+
 static char helptext[] = "Solving BGY3d equation.\n";
 
 int verbosity=0;
