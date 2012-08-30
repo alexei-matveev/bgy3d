@@ -74,7 +74,7 @@ typedef struct MatPrecondStruct
 } *MatPrecond;
 #endif
 
-typedef struct BGY3dParameterStruct
+typedef struct BGY3dParameter
 {
   int vec_dim;                  /* Dimension of equation */
   DA da;
@@ -99,9 +99,10 @@ typedef struct BGY3dParameterStruct
   struct fft_plan_3d *fft_plan;
 
   ProblemData *PD;
-} *BGY3dParameter;
-BGY3dParameter BGY3dParameter_malloc(ProblemData *PD, int vdim);
-void BGY3dParameter_free(BGY3dParameter params);
+} BGY3dParameter;
+
+BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim);
+void BGY3dParameter_free(BGY3dParameter *params);
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
@@ -109,13 +110,13 @@ real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
-void CreateInitialGuess(BGY3dParameter params, Vec g);
+void CreateInitialGuess(BGY3dParameter *params, Vec g);
 PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
 
 PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 
 #ifdef MATPRECOND
-MatPrecond MatPrecond_malloc(BGY3dParameter params);
+MatPrecond MatPrecond_malloc(BGY3dParameter *params);
 void MatPrecond_free(MatPrecond MP);
 PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
 void TestPreconditioner(MatPrecond MP, Vec x, Vec y);

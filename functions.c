@@ -11,7 +11,7 @@ static PetscErrorCode ComputeVec_F(SNES snes, Vec g, Vec f, void *pa);
 
 typedef struct BGY3dVecStruct
 {
-  BGY3dParameter params[3];
+  BGY3dParameter *params[3];
   Vec fl[3];
 
 } *BGY3dParameterVec;
