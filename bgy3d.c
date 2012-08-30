@@ -1390,7 +1390,7 @@ static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
   MatPrecond MP;
   PetscErrorCode ierr;
 
-  params = (BGY3dParameter) pa;
+  params = (BGY3dParameter*) pa;
   MP = params->MP;
 
 /*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
