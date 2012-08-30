@@ -16,7 +16,6 @@
 #include "bgy3dmolecule.h"      /* BGY3d_solve_DiatomicAB */
 #include "bgy3dH2ONewton.h"
 #include "bgy3dH2OSNewton.h"
-#include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
 #include "hnc3d.h"
 #include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
 #include "bgy3dtest.h"          /* BGY3dDiv_test */
