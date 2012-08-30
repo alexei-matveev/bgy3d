@@ -68,6 +68,9 @@ static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
 static void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 #endif
 
+static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
+static PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
+
 real Lennard_Jones(real r, real epsilon, real sigma)
 {
   real sr6, sr, re;
@@ -856,7 +859,7 @@ static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g)
 
 
 
-PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
+static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 {
   ProblemData *PD;
   DA da;
@@ -1210,7 +1213,7 @@ static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 
 
 
-PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y)
+static PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y)
 {
   BGY3dParameter *params;
   PetscErrorCode ierr;

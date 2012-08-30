@@ -72,9 +72,6 @@ real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
 
 real** Load_Molecule(int *N);
 void Molecule_free( real **x_M, int N);
-PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
-
-PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 
 /*******************************************/
 /* Water  */
