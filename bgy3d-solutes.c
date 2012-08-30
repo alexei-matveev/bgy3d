@@ -637,6 +637,12 @@ static void read_charge_density (DA da, const ProblemData *PD,
 	}
     }
 
+    fclose(fp);
+    free(electron);
+    free(zero);
+    free(x);
+    free(y);
+    free(z);
     DAVecRestoreArray(da, v, &vec);
 
 }
