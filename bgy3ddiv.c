@@ -902,8 +902,7 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
       ComputeVecfromFFT(da, BDD->fft_plan, BDD->i[dim], gfg2_fft);
 
       VecScale(BDD->i[dim], PD->h[0]*PD->h[1]*PD->h[2]*
-	       PD->rho*PD->beta/PD->g_xm
-	       /PD->N[0]/PD->N[1]/PD->N[2]);
+	       PD->rho * PD->beta / PD->N[0] / PD->N[1] / PD->N[2]);
     }
 
   FOR_DIM

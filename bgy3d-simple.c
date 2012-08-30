@@ -816,7 +816,7 @@ static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 #ifndef MATPRECOND
   /*Preconditioner: pre=beta*rho*h/g^M(x_M)*integral */
 /*     VecAXPY(pre,PD->h[0]*PD->h[1]*PD->h[2]* */
-/* 	    PD->beta*PD->rho*PD->h[vdim]/PD->g_xm/PD->N[0]/PD->N[1]/PD->N[2] */
+/* 	    PD->beta*PD->rho*PD->h[vdim]/PD->N[0]/PD->N[1]/PD->N[2] */
 /* 	    , f); */
   VecSet(pre, 0.0);
   /* Preconditioner: pre=pre+beta*h*force */
@@ -835,8 +835,8 @@ static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 
   /* f=f*h^3/N^3*h[dim]*beta*rho/g^M(x_M) */
   VecScale(f, PD->h[0]*PD->h[1]*PD->h[2]*
-	   PD->h[vdim]*PD->rho*PD->beta/PD->g_xm
-	   /PD->N[0]/PD->N[1]/PD->N[2]);
+	   PD->h[vdim] * PD->rho * PD->beta /
+	   PD->N[0] / PD->N[1] / PD->N[2]);
 
 /*   VecView(f,PETSC_VIEWER_STDERR_WORLD);  */
 
@@ -924,7 +924,7 @@ static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *
 
   /* f*=beta*rho*h/g^M(x_M)*/
   VecScale(f,PD->h[0]*PD->h[1]*PD->h[2]*
-	  PD->beta*PD->rho*PD->h[vdim]/PD->g_xm/PD->N[0]/PD->N[1]/PD->N[2]);
+	  PD->beta * PD->rho * PD->h[vdim] / PD->N[0] / PD->N[1] / PD->N[2]);
   /* f=f+beta*h*force */
   VecAXPY(f,PD->beta*PD->h[vdim], params->force);
 

@@ -51,8 +51,6 @@ typedef struct ProblemData
   real rho;                     /* density */
   int N[3], N3;                 /* global Grid size */
 
-  real g_xm;                    /* g^(N_M)(x_M) */
-
   /* Parallel stuff */
   int id;                        /* id of this process */
   int np;                        /* number of processes */

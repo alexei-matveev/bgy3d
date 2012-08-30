@@ -89,7 +89,6 @@ int main (int argc, char **argv)
   PD.interval[1] = interval[1];
   PD.beta = beta;
   PD.rho  = rho;
-  PD.g_xm = 1.0; /* deprecated */
 
   PData_CreateParallel(&PD);
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD,PETSC_VIEWER_ASCII_MATLAB);
