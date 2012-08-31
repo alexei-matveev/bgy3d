@@ -36,5 +36,5 @@ void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f);
 void ComputeBGY3dDiv_F(BGY3dDivData BDD, Mat SM, Vec g0, Vec dg, Vec g,
 		       Vec b, Vec f);
 void ComputeRHS2(BGY3dDivData BDD, Vec b);
-void ShiftVec(DA da, Vec g, Vec scratch, int N[3]);
+void ShiftVec(DA da, Vec g, Vec scratch, const int N[3]);
 void AssembleSystemMatrix_part2b(BGY3dDivData BDD, Mat SM);
