@@ -623,7 +623,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
 	PetscPrintf(PETSC_COMM_WORLD, "Grid size not match!\n");
 	exit(1);
     }
-    else if ( abs(dx[0] - h[0]) >= 0.001 || abs(dy[1] - h[1]) >= 0.001 || abs(dz[2] - h[2]) >= 0.001) {
+    else if ( fabs(dx[0] - h[0]) >= 0.001 || fabs(dy[1] - h[1]) >= 0.001 || fabs(dz[2] - h[2]) >= 0.001) {
 	PetscPrintf(PETSC_COMM_WORLD, "Grid space not match!\n");
 	exit(1);
     }
