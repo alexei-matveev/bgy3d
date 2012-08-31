@@ -279,9 +279,10 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
   DACreateGlobalVector (BHD->da, &v);
 
   /* electron density file */
-  char filename[PETSC_MAX_PATH_LEN];
+  size_t MAX_LEN = 260;
+  char filename[MAX_LEN];
 
-  if (bgy3d_getopt_string("-loadcharge", &filename)){
+  if (bgy3d_getopt_string("-loadcharge", &filename, MAX_LEN)){
       read_charge_density(BHD->da, BHD->PD, &filename, 1.0, v);
   }
   else {

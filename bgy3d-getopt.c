@@ -35,11 +35,11 @@ int bgy3d_getopt_real (const char key[], double *val)
   return (int) test;
 }
 
-int bgy3d_getopt_string (const char key[], char *val)
+int bgy3d_getopt_string (const char key[], char *val, size_t len)
 {
     PetscTruth test;
 
-    PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULL, key, val, PETSC_MAX_PATH_LEN, &test);
+    PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULL, key, val, len, &test);
     assert (!ierr);
 
     return (int) test;
