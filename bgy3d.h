@@ -131,7 +131,7 @@ typedef struct State
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
   int p_id, p_index;
 
-  ProblemData *PD;
+  const ProblemData *PD;
 
   /* BGY3dM stuff */
   fftw_complex *(fg2OO_fft[3]), *(fg2HH_fft[3]), *(fg2HO_fft[3]);

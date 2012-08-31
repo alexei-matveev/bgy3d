@@ -23,10 +23,9 @@
 
 extern real NORM_REG;
 
-static State initialize_state (/* not const */ ProblemData *PD)
+static State initialize_state (const ProblemData *PD)
 {
   State BHD;
-  real beta, maxL;
   PetscErrorCode ierr;
 
   /****************************************************/
@@ -50,23 +49,8 @@ static State initialize_state (/* not const */ ProblemData *PD)
 
   /****************************************************/
 
-
-
   BHD.PD = PD;
-  /*****************************/
-  /* reset standard parameters */
-  /*****************************/
-  maxL=12.0;
-  bgy3d_getopt_real ("-L", &maxL);
-  PD->interval[0] = -maxL;//-25.0;
-  PD->interval[1] = maxL;//25.0;
-  FOR_DIM
-    PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim];
-  PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
-  beta = 1.6889;
-  bgy3d_getopt_real ("-beta", &beta);
-  PD->beta = beta;
-  PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
+
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
   //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
@@ -1274,7 +1258,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
  * a historical baggage.
  */
-Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini)
+Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 {
   real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
   real norm;
@@ -1748,7 +1732,7 @@ Vec BGY3dM_solve_H2O_2site(ProblemData *PD, Vec g_ini)
 }
 
 
-Vec BGY3dM_solve_H2O_3site(ProblemData *PD, Vec g_ini)
+Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
   real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
   real count=0.0, norm, aO;

@@ -18,15 +18,15 @@ typedef struct BGY3dDivStruct
   struct fft_plan_3d *fft_plan;
   FFT_DATA *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
-  ProblemData *PD;
+  const ProblemData *PD;
 } *BGY3dDivData;
 
-BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg);
-BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg);
+BGY3dDivData BGY3dDivData_malloc(const ProblemData *PD, PetscTruth flg);
+BGY3dDivData BGY3dDivData_kirk_malloc(const ProblemData *PD, PetscTruth flg);
 void BGY3dDivData_free(BGY3dDivData BDD);
 void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M);
-Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini);
-Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini);
+Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini);
+Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini);
 void AssembleFDMatrix(BGY3dDivData BDD, DA da, Mat M, int vdim);
 void ComputeIntegralPart(BGY3dDivData BDD, Vec g, Vec f);
 void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f);

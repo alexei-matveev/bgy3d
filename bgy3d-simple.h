@@ -1,1 +1,1 @@
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini);
+Vec BGY3d_solve(const ProblemData *PD, Vec g_ini);

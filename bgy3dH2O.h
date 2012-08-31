@@ -48,5 +48,5 @@ void bgy3d_solve_normalization (const State *BHD,
                                 Vec g,     /* intent(in) */
                                 Vec t);    /* intent(out) */
 
-Vec BGY3d_solve_2site (ProblemData *PD, Vec g_ini);
-Vec BGY3d_solve_3site (ProblemData *PD, Vec g_ini);
+Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini);
+Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini);

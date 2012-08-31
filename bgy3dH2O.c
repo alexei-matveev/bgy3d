@@ -25,10 +25,9 @@
 real  NORM_REG=1.0e-1;
 real  NORM_REG2=1.0e-2;
 
-static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
+static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
 {
   State *BHD;
-  real beta, maxL;
 
   BHD = (State*) malloc(sizeof(*BHD));
 
@@ -55,20 +54,7 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
 
 
   BHD->PD = PD;
-  /*****************************/
-  /* reset standard parameters */
-  /*****************************/
-  maxL=12.0;
-  bgy3d_getopt_real ("-L", &maxL);
-  PD->interval[0] = -maxL;//-25.0;
-  PD->interval[1] = maxL;//25.0;
-  FOR_DIM
-    PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim];
-  PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
-  beta= 1.6889;
-  bgy3d_getopt_real ("-beta", &beta);
-  PD->beta = beta;//1.6889;
-  PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
+
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
   //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
@@ -86,7 +72,6 @@ static State *BGY3dH2OData_Pair_malloc(ProblemData *PD)
   BHD->rho  = PD->rho;
   BHD->rhos[0] = PD->rho; //2.*PD->rho;
   BHD->rhos[1] = PD->rho;
-  beta = PD->beta;
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
@@ -3318,7 +3303,7 @@ void bgy3d_solve_normalization (const State *BHD,
 
 #define DAMPO 1.0
 /* solve */
-Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini)
+Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 {
   State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
@@ -4017,7 +4002,7 @@ Vec BGY3d_solve_2site(ProblemData *PD, Vec g_ini)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_3site(ProblemData *PD, Vec g_ini)
+Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 {
   State *BHD;
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;

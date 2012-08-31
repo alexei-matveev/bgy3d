@@ -48,7 +48,7 @@ typedef struct H2Odg
 
 
 
-static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
+static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 {
   State *BHD;
   DA da;
@@ -100,16 +100,7 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 
 
   BHD->PD = PD;
-  /*****************************/
-  /* reset standard parameters */
-  /*****************************/
-  PD->interval[0] = -12;//12.03125;
-  PD->interval[1] = 12;//12.03125;
-  FOR_DIM
-    PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim];
-  PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
-  PD->beta = 1.6889;
-  PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
+
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
@@ -793,7 +784,7 @@ PetscErrorCode MatMult_MFFD(Mat mat,Vec a,Vec y);
 PetscErrorCode PETSCSNES_DLLEXPORT MatCreate_MFFD(Mat A);
 */
 
-Vec BGY3d_SolveNewton_H2O(ProblemData *PD, Vec g_ini)
+Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;

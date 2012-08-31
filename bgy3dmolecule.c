@@ -32,10 +32,10 @@ typedef struct BGY3dDiatomicABStruct
 
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
 
-  ProblemData *PD;
+  const ProblemData *PD;
 } *BGY3dDiatomicABData;
 
-static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
+static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD)
 {
   BGY3dDiatomicABData BDD;
   DA da;
@@ -1104,7 +1104,7 @@ void Compute_dg_Pair_normcorrection(BGY3dDiatomicABData BDD, Vec dg, Vec g)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini)
+Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 {
   BGY3dDiatomicABData BDD;
   Vec g0a, g0b, g0ab, dga, dgb, dgab, dg_new, dg_new2, f, ga, gb, gab;

@@ -1,1 +1,1 @@
-Vec BGY3d_solve_DiatomicAB(ProblemData *PD, Vec g_ini);
+Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini);

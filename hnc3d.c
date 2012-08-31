@@ -22,7 +22,7 @@ typedef struct HNC3dDataStruct
   Vec c, v;
   FFT_DATA *c_fft, *h_fft, *ch_fft;
 
-  ProblemData *PD;
+  const ProblemData *PD;
 } *HNC3dData;
 
 typedef struct HNCField
@@ -49,7 +49,7 @@ static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
 static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3], int  n[3], real h[3]);
 static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
 
-HNC3dData HNC3dData_malloc(ProblemData *PD)
+HNC3dData HNC3dData_malloc(const ProblemData *PD)
 {
   HNC3dData HD;
   DA da;
@@ -903,7 +903,7 @@ static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini)
 
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
-Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini)
+Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 {
   Vec F, h;
   HNC3dData HD;
@@ -1129,7 +1129,7 @@ static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 
 /* Solving for h of HNC eqauation with fixpoint iteration */
 /* c is input */
-Vec HNC3d_Solve_h(ProblemData *PD, Vec g_ini)
+Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec c, h, h_old, gg, v;

@@ -31,7 +31,7 @@ real Lennard_Jones_ddU(real r, real xr, real epsilon, real sigma)
 }
 
 
-BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
+BGY3dDivData BGY3dDivData_malloc(const ProblemData *PD, PetscTruth flg)
 {
   BGY3dDivData BDD;
   DA da;
@@ -308,7 +308,7 @@ BGY3dDivData BGY3dDivData_malloc(ProblemData *PD, PetscTruth flg)
 }
 
 
-BGY3dDivData BGY3dDivData_kirk_malloc(ProblemData *PD, PetscTruth flg)
+BGY3dDivData BGY3dDivData_kirk_malloc(const ProblemData *PD, PetscTruth flg)
 {
   BGY3dDivData BDD;
   DA da;
@@ -1596,7 +1596,7 @@ void ComputeBGY3d_F(BGY3dDivData BDD, Vec g0, Vec dg, Vec g,
 }
 
 
-Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini)
+Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;
@@ -1753,7 +1753,7 @@ Vec BGY3dDiv_solve(ProblemData *PD, Vec g_ini)
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3dDiv_solve2(ProblemData *PD, Vec g_ini)
+Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini)
 {
   BGY3dDivData BDD;
   Vec g0, dg, dg_new, b, f, g;

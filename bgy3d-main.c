@@ -28,7 +28,7 @@ static char helptext[] = "Solving BGY3d equation.\n";
 
 int verbosity = 0;          /* Used read-only in a few other files. */
 
-typedef Vec Solver (ProblemData *PD, Vec g_ini);
+typedef Vec Solver (const ProblemData *PD, Vec g_ini);
 
 int main (int argc, char **argv)
 {

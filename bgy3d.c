@@ -11,7 +11,16 @@ ProblemData bgy3d_problem_data (void)
 {
     ProblemData PD;
     int N = 0;
-    real beta = 0.6061, rho = 0.3, h = 0.5, interval[2] = {-5.0, 5.0};
+
+    /* defaults: for older solvers: */
+    /* real maxL = 5.0; */
+    /* real beta = 0.6061; */
+
+    /* default for recent solvers: */
+    real maxL = 12.0;
+    real beta = 1.6889;
+
+    real rho = 0.3, h = 0.5;
 
     /* Grid points in 1 dimension */
     bgy3d_getopt_int ("-N", &N);
@@ -25,14 +34,27 @@ ProblemData bgy3d_problem_data (void)
     /* mesh width */
     bgy3d_getopt_real ("-mesh", &h);
 
+    /* (half of the) box size: */
+    bgy3d_getopt_real ("-L", &maxL);
+
     /*=================================*/
     /* set Problem Data */
     /*=================================*/
 
-    if (N == 0)
-        N = (int) ceil((interval[1] - interval[0]) / h);
-    else
-        h = (interval[1] - interval[0]) / N;
+    /* It appears the intervals for x, y, and z are the same: */
+    PD.interval[0] = -maxL;
+    PD.interval[1] = +maxL;
+
+    if (N == 0) {
+        assert (h > 0.0);
+        N = (int) ceil((PD.interval[1] - PD.interval[0]) / h);
+    }
+    else {
+        assert (N > 0);
+        h = (PD.interval[1] - PD.interval[0]) / N;
+    }
+    /* At  this  point  N  and   h  have  consistent  values  for  the
+       interval. */
 
     FOR_DIM
         PD.N[dim] = N;
@@ -42,12 +64,10 @@ ProblemData bgy3d_problem_data (void)
     FOR_DIM
         PD.h[dim] = h;
 
-    PD.interval[0] = interval[0];
-    PD.interval[1] = interval[1];
-
     PD.beta = beta;
     PD.rho  = rho;
 
+    /* Parallel staff: */
     MPI_Comm_size(PETSC_COMM_WORLD, &PD.np);
     MPI_Comm_rank(PETSC_COMM_WORLD, &PD.id);
 

@@ -46,14 +46,14 @@ typedef struct BGY3dParameter
   /* Parallel FFT */
   struct fft_plan_3d *fft_plan;
 
-  ProblemData *PD;
+  const ProblemData *PD;
 } BGY3dParameter;
 
-static BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim);
+static BGY3dParameter *BGY3dParameter_malloc(const ProblemData *PD, int vdim);
 static void BGY3dParameter_free(BGY3dParameter *params);
 static void CreateInitialGuess(BGY3dParameter *params, Vec g);
 
-static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim);
+static void ComputeMatrixStencil(const ProblemData *PD, DA da, Mat M, int vdim);
 static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g);
 static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa);
 static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
@@ -70,7 +70,7 @@ static void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
 static PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 
-static BGY3dParameter *BGY3dParameter_malloc(ProblemData *PD, int vdim)
+static BGY3dParameter *BGY3dParameter_malloc(const ProblemData *PD, int vdim)
 {
   BGY3dParameter *params;
   DA da;
@@ -409,7 +409,7 @@ static void MatPrecond_free( MatPrecond MP)
 #endif
 
 /* Initialize M-Matrix with appropriate stencil */
-static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
+static void ComputeMatrixStencil(const ProblemData *PD, DA da, Mat M, int vdim)
 {
   int x[3], n[3], i[3], N[3];
   MatStencil col[2],row;
@@ -498,7 +498,7 @@ static void ComputeMatrixStencil(ProblemData *PD, DA da, Mat M, int vdim)
 
 }
 
-Vec BGY3d_solve(ProblemData *PD, Vec g_ini)
+Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;

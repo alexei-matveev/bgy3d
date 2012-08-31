@@ -53,7 +53,7 @@ typedef struct H2OSdgF
 
 
 
-static State *BGY3dH2OData_Newton_malloc(ProblemData *PD)
+static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 {
   State *BHD;
   DA da;
@@ -90,16 +90,7 @@ static State *BGY3dH2OData_Newton_malloc(ProblemData *PD)
 
 
   BHD->PD = PD;
-  /*****************************/
-  /* reset standard parameters */
-  /*****************************/
-  PD->interval[0] = -15;//-25.0;
-  PD->interval[1] = 15;//25.0;
-  FOR_DIM
-    PD->h[dim] = (PD->interval[1]-PD->interval[0])/PD->N[dim];
-  PD->N3 = PD->N[0]*PD->N[1]*PD->N[2];
-  PD->beta = 1.6889;
-  PetscPrintf(PETSC_COMM_WORLD, "Corrected domain size:\n");
+
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
   //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
@@ -886,7 +877,7 @@ static PetscErrorCode ComputePreconditioner_H2OS(void *data, Vec x, Vec y)
 
 #include "petscmat.h"
 
-Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini)
+Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;
@@ -1002,7 +993,7 @@ Vec BGY3d_SolveNewton_H2OS(ProblemData *PD, Vec g_ini)
 
 
 
-Vec BGY3d_SolveNewton_H2OSF(ProblemData *PD, Vec g_ini)
+Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;
