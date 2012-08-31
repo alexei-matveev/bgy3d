@@ -975,7 +975,6 @@ Vec HNC3dNewton2_solve(ProblemData *PD, Vec g_ini)
 /* c appears as an input here */
 static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 {
-  ProblemData *PD;
   FFT_DATA *h_fft, *c_fft, *ch_fft;
   int x[3], n[3], i[3], index;
   HNC3dData HD;
@@ -983,7 +982,7 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   PetscScalar ***f_vec, ***pot_vec, ***v_vec;
 
   HD = (HNC3dData) pa;
-  PD = HD->PD;
+  const ProblemData *PD = HD->PD;
 
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
@@ -1053,7 +1052,6 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 /* different F than above */
 static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 {
-  ProblemData *PD;
   FFT_DATA *h_fft, *c_fft, *ch_fft;
   int x[3], n[3], i[3], index;
   HNC3dData HD;
@@ -1061,7 +1059,7 @@ static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
   PetscScalar ***f_vec, ***pot_vec, ***c_vec, ***h_vec;
 
   HD = (HNC3dData) pa;
-  PD = HD->PD;
+  const ProblemData *PD = HD->PD;
 
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
