@@ -633,7 +633,6 @@ Vec BGY3d_solve(ProblemData *PD, Vec g_ini)
 static void CreateInitialGuess(BGY3dParameter *params, Vec g)
 {
   DA da;
-  ProblemData *PD;
   int x[3], i[3], n[3], N_M, k;
   PetscScalar ***g_vec, r[3], r_s;
   real **x_M, h[3], beta, interval[2];
@@ -643,7 +642,7 @@ static void CreateInitialGuess(BGY3dParameter *params, Vec g)
   sigma = params->LJ_params[1];
 
   da =  params->da;
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -695,7 +694,6 @@ static void CreateInitialGuess(BGY3dParameter *params, Vec g)
 static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g)
 {
   DA da;
-  ProblemData *PD;
   int x[3], i[3], n[3], N_M, k, N_g2, index;
   PetscScalar ***g_vec, *g2_vec, r[3], r_s;
   real **x_M, h[3], h_g2, L, interval[2];
@@ -704,7 +702,7 @@ static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g)
 
 
   da =  params->da;
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -771,7 +769,6 @@ static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g)
 
 static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 {
-  ProblemData *PD;
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -782,7 +779,7 @@ static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
   params = (BGY3dParameter*) pa;
   pre = params->pre;
 
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
   da = params->da;
   vdim = params->vec_dim;
 
@@ -872,7 +869,6 @@ static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa)
 {
-  ProblemData *PD;
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -891,7 +887,7 @@ static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *
   params = (BGY3dParameter*) pa;
   f = params->v3;
 
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
   da = params->da;
   vdim = params->vec_dim;
 
@@ -1017,7 +1013,6 @@ static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *
 
 static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 {
-  ProblemData *PD;
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_fg, *fft_g, *fft_fgg;
@@ -1028,7 +1023,7 @@ static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
   params = (BGY3dParameter*) pa;
   pre = params->pre;
 
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
   da = params->da;
   vdim = params->vec_dim;
   v1 = params->v1;
@@ -1163,7 +1158,6 @@ static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
 
 static void ConvolutionTest(BGY3dParameter *params)
 {
-  ProblemData *PD;
   DA da;
   Vec a,b,c;
   FFT_DATA *fft_a, *fft_b, *fft_c;
@@ -1172,7 +1166,7 @@ static void ConvolutionTest(BGY3dParameter *params)
   PetscScalar ***a_vec, ***b_vec, L;
   int index=0;
 
-  PD = params->PD;
+  const ProblemData *PD = params->PD;
   da = params->da;
   FOR_DIM
     h[dim] = PD->h[dim];
