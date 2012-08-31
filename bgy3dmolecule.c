@@ -57,25 +57,16 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
   BDD = (BGY3dDiatomicABData) malloc(sizeof(*BDD));
 
 
-  // BDD->LJ_paramsa = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(BDD->LJ_paramsa))[0] = eps[0];   /* espilon */
-  // ((real*)(BDD->LJ_paramsa))[1] = sig[0];   /* sigma   */
   BDD->LJ_paramsa[0] = eps[0];
   BDD->LJ_paramsa[1] = sig[0];
   epsilona = BDD->LJ_paramsa[0];
   sigmaa = BDD->LJ_paramsa[1];
 
-  // BDD->LJ_paramsb = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(BDD->LJ_paramsb))[0] = eps[1];   /* espilon */
-  // ((real*)(BDD->LJ_paramsb))[1] = sig[1];   /* sigma   */
   BDD->LJ_paramsb[0] = eps[1];
   BDD->LJ_paramsb[1] = sig[1];
   epsilonb = BDD->LJ_paramsb[0];
   sigmab = BDD->LJ_paramsb[1];
 
-  // BDD->LJ_paramsab = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(BDD->LJ_paramsab))[0] = sqrt(eps[0]*eps[1]);   /* espilon */
-  // ((real*)(BDD->LJ_paramsab))[1] = 0.5*(sig[0]+sig[1]);   /* sigma   */
   BDD->LJ_paramsab[0] = sqrt(eps[0]*eps[1]);
   BDD->LJ_paramsab[1] = 0.5*(sig[0]+sig[1]);   
   epsilonab = BDD->LJ_paramsab[0];
@@ -195,26 +186,20 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(ProblemData *PD)
 
 	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	  gaini_vec[i[2]][i[1]][i[0]] *=
-	    // exp(-beta* Lennard_Jones( r_s, BDD->LJ_paramsa));
 	    exp(-beta* Lennard_Jones( r_s, epsilona, sigmaa));
 	  gbini_vec[i[2]][i[1]][i[0]] *=
-	    // exp(-beta* Lennard_Jones( r_s, BDD->LJ_paramsb));
 	    exp(-beta* Lennard_Jones( r_s, epsilonb, sigmab));
 	  gabini_vec[i[2]][i[1]][i[0]] *=
-	    // exp(-beta* Lennard_Jones( r_s, BDD->LJ_paramsab));
 	    exp(-beta* Lennard_Jones( r_s, epsilonab, sigmaab));
 
 	   FOR_DIM
 	    {
 
 	      fa_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_paramsa);
 		Lennard_Jones_grad( r_s, r[dim], epsilona, sigmaa);
 	      fb_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_paramsb);
 		Lennard_Jones_grad( r_s, r[dim], epsilonb, sigmab);
 	      fab_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BDD->LJ_paramsab);
 		Lennard_Jones_grad( r_s, r[dim], epsilonab, sigmaab);
 	    }
 
@@ -309,9 +294,6 @@ static void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
   VecDestroy(BDD->gb_ini);
   VecDestroy(BDD->gab_ini);
   DADestroy(BDD->da);
-  // free(BDD->LJ_paramsa);
-  // free(BDD->LJ_paramsb);
-  // free(BDD->LJ_paramsab);
 
   fftwnd_mpi_destroy_plan(BDD->fft_plan_fw);
   fftwnd_mpi_destroy_plan(BDD->fft_plan_bw);
