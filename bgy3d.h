@@ -56,6 +56,10 @@ typedef struct ProblemData
   int np;                        /* number of processes */
 } ProblemData;
 
+/* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
+   interface: */
+ProblemData bgy3d_problem_data (void);
+
 /*
  * FIXME: "Never _ever_ make the  "pointerness" part of the type", (by
  * Linus Torvalds).  Consider converting "PType x" to "Type *x".

@@ -24,92 +24,54 @@
 #include "bgy3d-simple.h"       /* BGY3d_solve */
 #endif
 
-static void PData_CreateParallel (ProblemData *PD);
-static int start_debugger (void);
-
 static char helptext[] = "Solving BGY3d equation.\n";
 
-int verbosity = 0;
+int verbosity = 0;          /* Used read-only in a few other files. */
 
 typedef Vec Solver (ProblemData *PD, Vec g_ini);
 
 int main (int argc, char **argv)
 {
-  ProblemData PD;
-  int ierr, N=0;
-  real beta=0.6061, rho=0.3, h=0.5, interval[2]={-5.0,5.0};
+  int ierr;
   real mpi_start, mpi_stop;
-  int np;
   Vec g, g_ini;
   Solver *solver = NULL;
 
-  verbosity=0;
+  verbosity = 0;                /* global var */
 
-  PetscInitialize( &argc, &argv, (char*)0, helptext);
-
-
-  MPI_Comm_size(PETSC_COMM_WORLD, &np);
-  PetscPrintf(PETSC_COMM_WORLD, "NP= %d\n", np);
-
-
-  /* computation time measurement start point */
-  MPI_Barrier( PETSC_COMM_WORLD);
-  mpi_start = MPI_Wtime();
+  /* Petsc  or MPI  may  choose to  rewrite  the command  line, do  it
+     early: */
+  PetscInitialize (&argc, &argv, (char*)0, helptext);
 
   /* Read the command  line options. Petsc insists on  keys having the
-     leading dash, so keep them for the moment. */
-
-  /* Grid points in 1 dimension */
-  bgy3d_getopt_int ("-N", &N);
-
-  /* inverse temperature */
-  bgy3d_getopt_real ("-beta", &beta);
-
-  /* Density */
-  bgy3d_getopt_real ("-rho", &rho);
-
-  /* set verbosity */
+     leading dash, so  keep them for the moment.  Set global verbosity
+     early enough: */
   bgy3d_getopt_int ("-v", &verbosity);
 
-  /* mesh width */
-  bgy3d_getopt_real ("-mesh", &h);
+  /* This calls bgy3d_getopt_*() a few more times: */
+  ProblemData PD = bgy3d_problem_data ();
 
-  /*=================================*/
-  /* set Problem Data */
-  /*=================================*/
+  /* computation time measurement start point */
+  MPI_Barrier (PETSC_COMM_WORLD);
+  mpi_start = MPI_Wtime();
 
-  if(N==0)
-    N= (int) ceil((interval[1]-interval[0])/h);
-  else
-    h = (interval[1]-interval[0])/N;
-  FOR_DIM
-    PD.N[dim] = N;
-  PD.N3 = PD.N[0]*PD.N[1]*PD.N[2];
-  FOR_DIM
-    PD.h[dim] = h;
-  PD.interval[0] = interval[0];
-  PD.interval[1] = interval[1];
-  PD.beta = beta;
-  PD.rho  = rho;
-
-  PData_CreateParallel(&PD);
-  PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD,PETSC_VIEWER_ASCII_MATLAB);
-  PetscViewerSetFormat(PETSC_VIEWER_STDERR_SELF,PETSC_VIEWER_ASCII_MATLAB);
+  PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD, PETSC_VIEWER_ASCII_MATLAB);
+  PetscViewerSetFormat(PETSC_VIEWER_STDERR_SELF, PETSC_VIEWER_ASCII_MATLAB);
   /*==================================*/
 
-  PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n",PD.N[0], PD.N[1], PD.N[2]);
-  PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n",PD.N3);
-  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", interval[0], interval[1]);
-  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", h);
-  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", beta);
-  PetscPrintf(PETSC_COMM_WORLD, "rho = %f\n", rho);
+  PetscPrintf(PETSC_COMM_WORLD, "NP= %d\n", PD.np);
+  PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n", PD.N[0], PD.N[1], PD.N[2]);
+  PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n", PD.N3);
+  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD.interval[0], PD.interval[1]);
+  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD.h[0]);
+  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD.beta);
+  PetscPrintf(PETSC_COMM_WORLD, "rho = %f\n", PD.rho);
 
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
 
-  //if(PD.id==1)
-/*   start_debugger(); */
-/*   sleep(5); */
-
+  /* if(PD.id==1) */
+  /*     start_debugger(); */
+  /* sleep(5); */
 
   /* Read method to solve from command line */
 #ifdef WITH_EXTRA_SOLVERS
@@ -212,13 +174,7 @@ int main (int argc, char **argv)
   return 0;
 }
 
-static void PData_CreateParallel (ProblemData *PD)
-{
-
-  MPI_Comm_size(PETSC_COMM_WORLD, &(PD->np));
-  MPI_Comm_rank(PETSC_COMM_WORLD, &(PD->id));
-}
-
+#ifdef DEBUG
 /* starts the gdb debugger for each process */
 static int start_debugger (void)
 {
@@ -231,3 +187,4 @@ static int start_debugger (void)
 
   return system(s);
 }
+#endif
