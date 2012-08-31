@@ -19,6 +19,7 @@
 #include "bgy3dH2O.h"           /* Coulomb_short() */
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec_fftw(),
                                    ComputeVecfromFFT_fftw() */
+#include "bgy3d-getopt.h"
 
 typedef struct Site {
     char name[5];            /* atom types. What are they used for? */
