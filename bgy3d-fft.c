@@ -14,7 +14,7 @@ extern int verbosity;   /* FIXME: dont want to #include bgy3d.h yet */
    consistent fashion. The data is distributed over in xy-planes (over
    subranges of z-indices).  In the scope of this code  z is the major
    axis, think of array[z][y][x]. */
-void bgy3d_fft_init_da (int N[3],
+void bgy3d_fft_init_da (const int N[3],
                         fftwnd_mpi_plan *fw, fftwnd_mpi_plan *bw,
                         DA *da, DA *da_mg)
 {
