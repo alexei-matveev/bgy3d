@@ -54,7 +54,6 @@ typedef struct ProblemData
   /* Parallel stuff */
   int id;                        /* id of this process */
   int np;                        /* number of processes */
-  int n[3];                      /* local grid size */
 } ProblemData;
 
 /*
