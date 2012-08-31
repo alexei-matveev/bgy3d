@@ -508,11 +508,9 @@ static void UNUSED_VecSetRandom_H2O(Vec g, real mag)
 void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], index, p_id, p_idr=0, *recv_count;
 
-
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   /* Get local portion of the grid */
@@ -548,12 +546,11 @@ void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
 static void UNUSED_ImposeBoundaryCondition( State *BHD, Vec g)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], index;
   real b_data;
   PetscScalar ***g_vec;
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   index = BHD->p_index;
@@ -579,12 +576,11 @@ static void UNUSED_ImposeBoundaryCondition( State *BHD, Vec g)
 static real UNUSED_ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3], index=0, index_sum;
   real b_data, r[3], r_s, h[3], interval[2], data_sum;
   PetscScalar ***g_vec;
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   interval[0]=PD->interval[0];
@@ -629,12 +625,10 @@ static real UNUSED_ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
 
 static void UNUSED_ComputeH2O_Renormalization( State *BHD, Vec g)
 {
-  ProblemData *PD;
-  real vsum, h3, *h;
-  // PetscScalar *g_vec;
+  real vsum, h3;
 
-  PD = BHD->PD;
-  h = PD->h;
+  const ProblemData *PD = BHD->PD;
+  const real *h = PD->h;
 
   h3 = h[0]*h[1]*h[2]/pow(PD->interval[1]-PD->interval[0],3);
 
@@ -651,12 +645,11 @@ static void UNUSED_ComputeH2O_Renormalization( State *BHD, Vec g)
 void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3];
   PetscScalar ***g_vec;
   real r[3], r_s, h[3], interval[2], s, r_rl_2, rr_rl_2r, rr_rl_3;
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   FOR_DIM
@@ -704,11 +697,10 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3], border, N[3];
   PetscScalar ***g_vec;
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   FOR_DIM
@@ -751,13 +743,12 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
                            real q2, real damp)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
   PetscScalar ***v_vec;
   real r[3], r_s, h[3], interval[2], k, fac, L, sign;
   fftw_complex *tmp_fft, *(fg_fft[3]);
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
   tmp_fft = BHD->g_fft;
   FOR_DIM
@@ -896,14 +887,12 @@ static void UNUSED_ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
                              real q2, real damp)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
   real k, fac, L, sign;
   fftw_complex *(fs_fft[3]),*(fl_fft[3]);
   real fac1, fac2, fac3, fft_s, fft_l;
 
-
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   FOR_DIM
@@ -1017,14 +1006,13 @@ static void UNUSED_ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
                         real damp, real zpad)
 {
   DA da;
-  ProblemData *PD;
   int x[3], n[3], i[3], ic[3], N[3], index;
   real k, fac, L, sign;
   fftw_complex  *fs_fft,*fl_fft;
   real fac1, fac2, fac3, fft_s, fft_l;
 
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
   fs_fft = BHD->g_fft;
   fl_fft = BHD->gfg2_fft;
@@ -1113,7 +1101,6 @@ static void UNUSED_ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
 static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, real damp)
 {
   DA da;
-  ProblemData *PD;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
   real r[3], r_s, h[3], interval[2], beta;
   int x[3], n[3], i[3];
@@ -1123,7 +1110,7 @@ static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, r
   q2O = BHD->LJ_paramsO[2];
   q2HO = BHD->LJ_paramsHO[2];
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
 
@@ -1200,7 +1187,6 @@ static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, r
 void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 {
   DA da;
-  ProblemData *PD;
   PetscScalar ***gHini_vec, ***gOini_vec, ***gHOini_vec;
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
@@ -1226,7 +1212,7 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   q2HO = BHD->LJ_paramsHO[2];
 
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing initial data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
@@ -1472,13 +1458,12 @@ void Compute_dg_H2O_inter(State *BHD,
                           fftw_complex *coul2_fft, real rho2, real shift2,
                           Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign; // confac;
 
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -1720,16 +1705,12 @@ void Compute_dg_H2O_inter(State *BHD,
 void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                           fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
   real fac, k_fac, L, k, h;
 
-
-
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -1852,15 +1833,12 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 static void UNUSED_Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                             fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3]; //, local_size;
   fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
   real fac, k_fac, L, k, h;
-  // PetscScalar *v_vec, *tg_vec;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -2098,15 +2076,13 @@ static void UNUSED_Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec 
 void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                             fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
   real fac, k_fac, L, k, h;
   PetscScalar *v_vec, *tg_vec;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -2425,15 +2401,13 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
    Vec dg is intent(out). */
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
   real L, k, h;
   PetscScalar *g_vec;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -2531,15 +2505,13 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 /* Compute intramolecular part */
 static void UNUSED_Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]);
   real fac, L, k, h, k_fac;
   PetscScalar *g_vec; //, *v_vec;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -2719,15 +2691,13 @@ static void UNUSED_Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab,
 /* Compute intramolecular part */
 static void UNUSED_Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *t_fft, *dg_fft, *scratch, *(f_fft[3]), *n_fft;
   real fac, L, k, h, k_fac;
   PetscScalar *g_vec; //, *v_vec;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
@@ -2961,14 +2931,12 @@ static void UNUSED_Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab
 
 static void UNUSED_Compute_Zero_Correction(State *BHD, Vec dg)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3];
   fftw_complex *g_fft, *scratch;
   real L, h;
 
-
-  PD=BHD->PD;
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
 
@@ -3119,14 +3087,12 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
 static void UNUSED_Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2,
                                         Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g1_fft, *g2_fft, *dg_fft, *scratch;
   real L, h, sign; // k
-  // PetscScalar *g_vec;
-  // int local_size;
-  PD=BHD->PD;
+
+  const ProblemData *PD = BHD->PD;
 
   da = BHD->da;
   FOR_DIM
