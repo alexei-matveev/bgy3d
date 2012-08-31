@@ -277,8 +277,11 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
      vectors more transparent and get rid of this: */
   DACreateGlobalVector (BHD->da, &v);
 
-  if (bgy3d_getopt_test("-loadcharge")){
-      read_charge_density(BHD->da, BHD->PD, "HCl_density.cube", 1.0, v);
+  /* electron density file */
+  char filename[PETSC_MAX_PATH_LEN];
+
+  if (bgy3d_getopt_string("-loadcharge", &filename)){
+      read_charge_density(BHD->da, BHD->PD, &filename, 1.0, v);
   }
   else {
       /* 1. Put the solute density into Vec v. Due to the inter */

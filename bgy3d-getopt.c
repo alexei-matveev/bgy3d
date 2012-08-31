@@ -35,6 +35,16 @@ int bgy3d_getopt_real (const char key[], double *val)
   return (int) test;
 }
 
+int bgy3d_getopt_string (const char key[], char *val)
+{
+    PetscTruth test;
+
+    PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULL, key, val, PETSC_MAX_PATH_LEN, &test);
+    assert (!ierr);
+
+    return (int) test;
+}
+
 
 void bgy3d_load_vec (const char file[], Vec *vec) {
     PetscViewer viewer;
