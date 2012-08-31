@@ -505,13 +505,12 @@ void BGY3dFourierData_free(BGY3dFourierData BDD)
 
 void ExtractAxis(BGY3dFourierData BDD, Vec g, int axis)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3], ic[3];
   PetscScalar ***g_vec;
 
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -573,13 +572,12 @@ void Compute_g(BGY3dFourierData BDD, Vec g, Vec g0, Vec dg)
 
 void Compute_dg_kirk(BGY3dFourierData BDD, Vec g, Vec dg)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   FFT_DATA *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -672,13 +670,12 @@ void Compute_dg_kirk(BGY3dFourierData BDD, Vec g, Vec dg)
 
 void Compute_dg(BGY3dFourierData BDD, Vec g, Vec dg)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   FFT_DATA *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
