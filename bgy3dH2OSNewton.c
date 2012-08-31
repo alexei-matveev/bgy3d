@@ -532,7 +532,6 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 {
   State *BHD;
-  ProblemData *PD;
   DA da;
   H2OSdgF ***dg_struct;
   int i[3], x[3], n[3], index, N3;
@@ -546,7 +545,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
     PetscPrintf(PETSC_COMM_WORLD, "--- Function evaluation starts...\n");
 
   BHD = (State*) data;
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
   gH= BHD->gH;
   gO= BHD->gO;
@@ -724,7 +723,6 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
 {
   H2OSdgF ***dg_struct;
-  ProblemData *PD;
   fftw_complex *uH_fft, *uO_fft;
   int i[3], x[3], n[3], N3, index;
   Vec dgH, dgO, gH, gO;
@@ -732,7 +730,7 @@ static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
 
   PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   gH= BHD->gH;
   gO= BHD->gO;
   dgH= BHD->dgH;
