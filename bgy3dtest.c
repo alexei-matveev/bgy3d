@@ -281,14 +281,13 @@ Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini)
 
 static void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***(k_vec[3]);
   real h[3], r[3], r_s, facg, facK, L;
 
   da = BDD->da;
-  PD = BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -348,14 +347,13 @@ static void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma
 static void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 		    real sigma_K)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
   real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
 
   da = BDD->da;
-  PD = BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -406,14 +404,13 @@ static void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 			   real sigma_K)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3];
   PetscScalar ***g_vec, ***rhs_vec;
   real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
 
   da = BDD->da;
-  PD = BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
@@ -463,7 +460,6 @@ void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g2,
 			       Vec gg, Vec sol)
 {
-  ProblemData *PD;
   Vec g1, g2;
   DA da;
   int x[3], n[3], i[3], N[3], k;
@@ -472,7 +468,7 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
   FFT_DATA *(fg2_fft[3]), *g_fft;
 
   da = BDD->da;
-  PD = BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   g1 = BDD->f[0];
   g2 = BDD->f[1];
