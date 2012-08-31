@@ -234,7 +234,6 @@ static void finalize_state (State *BHD)
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix(State *BHD, real zpad)
 {
-  ProblemData *PD;
   Mat M;
   DA da;
   int x[3], n[3], i[3], N[3], border;
@@ -245,7 +244,7 @@ void InitializeLaplaceMatrix(State *BHD, real zpad)
   PetscPrintf(PETSC_COMM_WORLD,"Assembling Matrix...");
 
   da = BHD->da;
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   M = BHD->M;
   MatZeroEntries(M);
 
@@ -343,12 +342,11 @@ void InitializeKSPSolver(State *BHD)
 
 static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], N[3], border; // ic[3], k;
   PetscScalar ***gfrom_vec, ***gto_vec;
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
   FOR_DIM
     N[dim] = PD->N[dim];
@@ -439,7 +437,6 @@ real ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, in
 
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 {
-  ProblemData *PD;
   DA da;
   FILE *fp;
   real *xg, *g;
@@ -449,7 +446,7 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
   PetscScalar ***g2_vec;
 
   da = BHD->da;
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   FOR_DIM
     h[dim] = PD->h[dim];
 
@@ -518,7 +515,6 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 {
   DA da;
-  ProblemData *PD;
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
@@ -542,7 +538,7 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
   q2HO = BHD->LJ_paramsHO[2];
 
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing FFT data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
@@ -754,7 +750,6 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
 {
   DA da;
-  ProblemData *PD;
   PetscScalar ***gHini_vec, ***gOini_vec;
   // PetscScalar ***ucH_vec, ***ucO_vec;
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]);
@@ -777,7 +772,7 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
   q2HO = BHD->LJ_paramsHO[2];
 
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   da = BHD->da;
 
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
@@ -1117,12 +1112,11 @@ void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic ar
 
 real ComputeCharge(State *BHD, Vec g1, Vec g2)
 {
-  ProblemData *PD;
   real g1_sum, g2_sum, c;
   Vec help;
 
 
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   help = BHD->v[0];
 
   VecCopy(g1, help);
@@ -1149,12 +1143,11 @@ static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
   real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;
   State *BHD;
-  ProblemData *PD;
   Vec gO, gH, dgO2;
 
   SD = (StepData) data;
   BHD = SD->BHD;
-  PD = BHD->PD;
+  const ProblemData *PD = BHD->PD;
   gO = BHD->v[0];
   gH = BHD->v[1];
   dgO2 = BHD->v[3];
