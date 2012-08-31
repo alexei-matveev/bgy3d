@@ -405,13 +405,12 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 			   Vec f2[3], real sign2, Vec g2a, Vec g2b,
 			   Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, rho, h, sign;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -595,13 +594,12 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 			   Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta; // sign;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -711,7 +709,6 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 /* Compute intramolecular part */
 static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
@@ -719,7 +716,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   PetscScalar *g_vec;
 
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -808,13 +805,12 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 					 Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, beta; // sign;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
@@ -898,13 +894,12 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 				   Vec dg, Vec dg_help)
 {
-  ProblemData *PD;
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
   real fac, k_fac, L, k, h, sign, beta;
 
-  PD=BDD->PD;
+  const ProblemData *PD = BDD->PD;
 
   da = BDD->da;
   FOR_DIM
