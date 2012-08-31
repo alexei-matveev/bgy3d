@@ -72,10 +72,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   /****************************************************/
 
   /* water hydrogen */
-  // BHD->LJ_paramsH = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsH))[0] = eH;   /* espilon */
-  // ((real*)(BHD->LJ_paramsH))[1] = sH;   /* sigma   */
-  // ((real*)(BHD->LJ_paramsH))[2] = SQR(qH);   /* q   */
   BHD->LJ_paramsH[0] = eH;  /* epsilon  */
   BHD->LJ_paramsH[1] = sH;  /* sigma    */
   BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
@@ -84,10 +80,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   q2H = BHD->LJ_paramsH[2];
 
   /* water oxygen */
-  // BHD->LJ_paramsO = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsO))[0] = eO;   /* espilon */
-  // ((real*)(BHD->LJ_paramsO))[1] = sO;   /* sigma   */
-  // ((real*)(BHD->LJ_paramsO))[2] = SQR(qO);   /* q   */
   BHD->LJ_paramsO[0] = eO;  /* epsilon  */
   BHD->LJ_paramsO[1] = sO;  /* sigma    */
   BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
@@ -96,10 +88,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
   q2O = BHD->LJ_paramsO[2];
 
   /* water O-H mixed parameters */
-  // BHD->LJ_paramsHO = (void* ) malloc(sizeof(real)*3);
-  // ((real*)(BHD->LJ_paramsHO))[0] = sqrt(eH*eO);   /* espilon */
-  // ((real*)(BHD->LJ_paramsHO))[1] = 0.5*(sH+sO);  /* sigma   */
-  // ((real*)(BHD->LJ_paramsHO))[2] = qH*qO;         /* q   */
   BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
   BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
   BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
@@ -276,26 +264,18 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 
 	  /* Lennard-Jones */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsH);
 	    beta* Lennard_Jones( r_s, epsilonH, sigmaH);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsO);
 	    beta* Lennard_Jones( r_s, epsilonO, sigmaO);
 	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    // beta* Lennard_Jones( r_s, BHD->LJ_paramsHO);
 	    beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
 
 	  /* Coulomb short */
 	  gHini_vec[i[2]][i[1]][i[0]] +=
-            // Following the form in BGY3dH2OData_Pair_malloc() 
-            // to pass member of void pointer
-	    // beta* Coulomb_short( r_s, BHD->LJ_paramsH);
 	    beta* Coulomb_short( r_s, q2H);
 	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    // beta* Coulomb_short( r_s, BHD->LJ_paramsO);
 	    beta* Coulomb_short( r_s, q2O);
 	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    // beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
 	    beta* Coulomb_short( r_s, q2HO);
 
 	  /* Coulomb long */
@@ -319,26 +299,18 @@ static State *BGY3dH2OData_Pair_Newton_malloc(ProblemData *PD)
 	    {
 	      /* Lennard-Jones */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsH);
 		Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsO);
 		Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		// Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsHO);
 		Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
 
  	      /* Coulomb short */
 	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
-                // Following the form in BGY3dH2OData_Pair_malloc() 
-                // to pass member of void pointer
 		Coulomb_short_grad( r_s, r[dim], q2H);
 	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
 		Coulomb_short_grad( r_s, r[dim], q2O);
 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		// Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
 		Coulomb_short_grad( r_s, r[dim], q2HO);
 
 	      /* Coulomb long */
