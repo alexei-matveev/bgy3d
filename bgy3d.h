@@ -55,7 +55,6 @@ typedef struct ProblemData
   int id;                        /* id of this process */
   int np;                        /* number of processes */
   int n[3];                      /* local grid size */
-  int nbr_right[3], nbr_left[3]; /* neighboring processes */
 } ProblemData;
 
 /*
