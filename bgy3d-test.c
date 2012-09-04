@@ -8,7 +8,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-fft.h"
 #include "bgy3ddiv.h"
-#include "bgy3dtest.h"
+#include "bgy3d-test.h"
 #include "bgy3dfourier.h"
 
 static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N);

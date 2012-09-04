@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 2; -*- */
-/* Used in bgy3dtest.c: */
+/* Used in bgy3d-test.c: */
 typedef struct BGY3dFourierStruct
 {
   DA da;

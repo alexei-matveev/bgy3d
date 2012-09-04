@@ -75,7 +75,7 @@ bgy3d-extra-objs = \
 	bgy3dmolecule.o \
 	bgy3ddiv.o \
 	bgy3dfourier.o \
-	bgy3dtest.o \
+	bgy3d-test.o \
 	bgy3dH2ONewton.o \
 	bgy3dH2OSNewton.o \
 	bgy3d_MG.o \
