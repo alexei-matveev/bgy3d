@@ -21,7 +21,7 @@
 #include "hnc3d.h"
 #include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
 #include "bgy3d-test.h"         /* BGY3dDiv_test */
-#include "bgy3dfourier.h"       /* BGY3dDiv_solve_Fourier */
+#include "bgy3d-fourier.h"      /* BGY3dDiv_solve_Fourier */
 #include "bgy3d-simple.h"       /* BGY3d_solve */
 #endif
 

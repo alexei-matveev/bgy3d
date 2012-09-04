@@ -9,7 +9,7 @@
 #include "bgy3d-fft.h"
 #include "bgy3ddiv.h"
 #include "bgy3d-test.h"
-#include "bgy3dfourier.h"
+#include "bgy3d-fourier.h"
 
 static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY3dFourierData BDD, int N);
 static void InitializeTestData(BGY3dDivData BDD, Vec g, real sigma_g, real sigma_K);
