@@ -790,7 +790,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   KSP ksp;
   PC  pc;
   State *BHD;
-  PetscTruth kflg, flg;
+  PetscTruth flg;
   Vec u, f, b, v1, v2;
   real damp;
   // Mat M;
@@ -800,17 +800,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Newton ...\n");
 
-  kflg = bgy3d_getopt_test ("-pair");
-  if(kflg)
-    {
-
-      BHD = BGY3dH2OData_Pair_Newton_malloc(PD);
-    }
-  else
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Not implemented yet.\n");
-      exit(1);
-    }
+  BHD = BGY3dH2OData_Pair_Newton_malloc(PD);
 
   /* Get damp_start from command line*/
   const real damp_start = PD->damp;

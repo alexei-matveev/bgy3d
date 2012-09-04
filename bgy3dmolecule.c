@@ -1115,25 +1115,13 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
   PetscScalar dga_norm, dgb_norm, dgab_norm;
 
   PetscScalar dgba_norm;
-  PetscTruth kflg; //, load_flag;
   PetscViewer viewer;
 
   assert(g_ini == PETSC_NULL);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving Molecular BGY3d equation with Fourier ansatz...\n");
 
-  kflg = bgy3d_getopt_test ("-pair");
-  if(kflg)
-    {
-
-      BDD = BGY3dDiatomicABData_Pair_malloc(PD);
-    }
-  else
-    {
-      exit(1);
-      //BDD = BGY3dFourierData_malloc(PD);
-      PetscPrintf(PETSC_COMM_WORLD,"\n");
-    }
+  BDD = BGY3dDiatomicABData_Pair_malloc(PD);
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
@@ -1238,7 +1226,7 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 			       norm_tol);
 
       /* f=integral(g) */
-      if(kflg)
+      if (1)                    /* kflg was set with -pair */
 	{
 
 
@@ -1372,7 +1360,7 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 /*   ComputeDiatomicAB_g(BDD, gab, g0ab, dgab); */
   //VecCopy(dg, g);
 /*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-  if( 0 && kflg)
+  if (0)                        /* && kflg is pointless */
     {
       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2_new.bin",
 			    FILE_MODE_WRITE,&viewer);

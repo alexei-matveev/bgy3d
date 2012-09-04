@@ -3317,30 +3317,17 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   PetscScalar dgH_old, dgHO_old, dgO_old;
   real ti;
   int iteri;
-  // PetscScalar dgOH_norm;
-  PetscTruth kflg, load_flag;
+
+  PetscTruth load_flag;
   PetscViewer viewer;
 
   assert(g_ini == PETSC_NULL);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  kflg = bgy3d_getopt_test ("-pair");
-  if(kflg)
-    {
-
-      BHD = BGY3dH2OData_Pair_malloc(PD);
-      if( r_HH >0)
-        {
-          PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
-        }
-    }
-  else
-    {
-      exit(1);
-      //BHD = BGY3dFourierData_malloc(PD);
-      PetscPrintf(PETSC_COMM_WORLD,"\n");
-    }
+  BHD = BGY3dH2OData_Pair_malloc(PD);
+  if (r_HH > 0)
+    PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -3522,7 +3509,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       /* f=integral(g) */
-      if(kflg)
+      if (1)                    /* kflg was set with -pair */
         {
 /*        Compute_dg_H2O_normalization_inter( BHD, gH, gH, tHO, f); */
 
@@ -4011,32 +3998,19 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   PetscScalar dgH_norm, dgO_norm, dgHO_norm;
   PetscScalar dgH_old, dgHO_old, dgO_old;
 
-  // PetscScalar dgOH_norm;
-  PetscTruth kflg, load_flag;
+  PetscTruth load_flag;
   PetscViewer viewer;
 
   assert(g_ini == PETSC_NULL);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  kflg = bgy3d_getopt_test ("-pair");
-  if(kflg)
-    {
-
-      BHD = BGY3dH2OData_Pair_malloc(PD);
-      BHD->rhos[0] = 2.*BHD->rhos[0];
-      if( r_HH <0)
-        {
-          PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
-          exit(1);
-        }
-    }
-  else
-    {
-      exit(1);
-      //BHD = BGY3dFourierData_malloc(PD);
-      PetscPrintf(PETSC_COMM_WORLD,"\n");
-    }
+  BHD = BGY3dH2OData_Pair_malloc(PD);
+  BHD->rhos[0] = 2.*BHD->rhos[0];
+  if (r_HH < 0) {
+    PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
+    exit(1);
+  }
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -4229,7 +4203,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
       //PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
       /* f=integral(g) */
-      if(kflg)
+      if (1)                    /* kflg was set when with -pair */
         {
 /*        Compute_dg_H2O_normalization_inter( BHD, gH, gH, tHO, f); */
 
