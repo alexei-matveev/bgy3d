@@ -14,7 +14,6 @@ CMDFLAG = \
 	-N 32 \
 	-rho 0.018 \
 	-beta 1.1989 \
-	-pair \
 	-norm_tol 1.0e-2 \
 	-max_iter 10000 \
 	-L 10.0 \
