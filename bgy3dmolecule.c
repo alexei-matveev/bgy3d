@@ -1110,9 +1110,9 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
   Vec g0a, g0b, g0ab, dga, dgb, dgab, dg_new, dg_new2, f, ga, gb, gab;
   Vec dgba, gba;
   Vec ta, tb, tab, tba;
-  real a=0.9, h;
-  int max_iter=25, iter;
-  PetscScalar dga_norm, dgb_norm, dgab_norm, norm_tol=1.0e-6;
+  real h;
+  int iter;
+  PetscScalar dga_norm, dgb_norm, dgab_norm;
 
   PetscScalar dgba_norm;
   PetscTruth kflg; //, load_flag;
@@ -1137,23 +1137,15 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a);
-  if(a>1 || a<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
-      exit(1);
-    }
+  const real a = PD->lambda;
 
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
+  const int max_iter = PD->max_iter;
+
   /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
+  const real norm_tol = PD->norm_tol;
 
   /*********************************/
-
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
 
   DACreateGlobalVector(BDD->da, &ga);
   DACreateGlobalVector(BDD->da, &gb);

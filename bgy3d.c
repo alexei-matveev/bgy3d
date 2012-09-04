@@ -67,6 +67,39 @@ ProblemData bgy3d_problem_data (void)
     PD.beta = beta;
     PD.rho  = rho;
 
+    /*
+     * Other  parameters  were traditionally  handled  by the  solvers
+     * themself each  having potentially its own set  of the defaults.
+     * Read commonly used flags from command line:
+     */
+
+    /* Mixing parameter: */
+    PD.lambda = 0.1;
+    bgy3d_getopt_real ("-lambda", &PD.lambda);
+
+    assert (PD.lambda > 0.0);
+    assert (PD.lambda <= 1.0);
+
+    /* Get damp_start from command line*/
+    PD.damp = 0.0;
+    bgy3d_getopt_real ("-damp_start", &PD.damp);
+
+    /* Number of total iterations */
+    PD.max_iter = 100;
+    bgy3d_getopt_int ("-max_iter", &PD.max_iter);
+
+    /* Norm_tol for convergence test */
+    PD.norm_tol = 1.0e-2;
+    bgy3d_getopt_real ("-norm_tol", &PD.norm_tol);
+
+    /* Zeropad */
+    PD.zpad = 1000.0;
+    bgy3d_getopt_real ("-zpad", &PD.zpad);
+
+    /* Solutes index, HCl by default: */
+    PD.solute = 0;
+    bgy3d_getopt_int ("-solute", &PD.solute);
+
     /* Parallel staff: */
     MPI_Comm_size(PETSC_COMM_WORLD, &PD.np);
     MPI_Comm_rank(PETSC_COMM_WORLD, &PD.id);

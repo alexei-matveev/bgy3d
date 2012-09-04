@@ -67,6 +67,11 @@ int main (int argc, char **argv)
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD.beta);
   PetscPrintf(PETSC_COMM_WORLD, "rho = %f\n", PD.rho);
 
+  PetscPrintf(PETSC_COMM_WORLD, "lambda = %f\n", PD.lambda);
+  PetscPrintf(PETSC_COMM_WORLD, "tolerance = %e\n", PD.norm_tol);
+  PetscPrintf(PETSC_COMM_WORLD, "zpad = %f\n", PD.zpad);
+  PetscPrintf(PETSC_COMM_WORLD, "max_iter = %d\n", PD.max_iter);
+
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
 
   /* if(PD.id==1) */

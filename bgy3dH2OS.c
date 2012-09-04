@@ -1260,9 +1260,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  */
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 {
-  real a0 = 0.1, damp_start = 0.0, norm_tol = 1.0e-2, zpad = 1000.0;
   real norm;
-  int max_iter = 100;
   Vec t_vec;                    /* used for all sites */
   Vec  g[2], dg[2], dg_acc, work;
   PetscScalar dg_norm[2];
@@ -1272,57 +1270,45 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
   State BHD = initialize_state (PD);
-  if( r_HH >0)
-    {
+
+  if (r_HH > 0.0)
       PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
-    }
 
   /*
-   * Read BGY3d specific things from command line:
-   *
-   * Mixing parameter:
+   * Extract BGY3d specific things from supplied input:
    */
-  bgy3d_getopt_real ("-lambda", &a0);
-  if (a0 > 1 || a0 < 0) {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a0);
-      exit(1);
-  }
 
-  /* Get damp_start from command line*/
-  bgy3d_getopt_real ("-damp_start", &damp_start);
+  /* Mixing parameter: */
+  const real a0 = PD->lambda;
+
+  /* Initial damping factor: */
+  const real damp_start = PD->damp;
 
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
+  const int max_iter = PD->max_iter;
 
   /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
+  const real norm_tol = PD->norm_tol;
 
   /* Zeropad */
-  bgy3d_getopt_real ("-zpad", &zpad);
+  const real zpad = PD->zpad;
 
-  /* Get the solutes index */
-  int solute = 0;               /* HCl by default */
-  bgy3d_getopt_int ("-solute", &solute);
+  /* Solutes index */
+  const int solute = PD->solute; /* HCl by default */
 
-  /* At this point the problem  parameters must have been set. This is
-     inverse temperature: */
+  /* Inverse temperature: */
   const real beta = PD->beta;
 
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a0);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
-
-  ImposeBoundaryCondition_Initialize( &BHD, zpad);
+  ImposeBoundaryCondition_Initialize (&BHD, zpad);
 #ifdef L_BOUNDARY
-  BHD.zpad=zpad;
+  BHD.zpad = zpad;
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(&BHD, zpad);
   /* Create KSP environment */
   InitializeKSPSolver(&BHD);
 #endif
 #ifdef L_BOUNDARY_MG
-  BHD.zpad=zpad;
+  BHD.zpad = zpad;
 
   InitializeDMMGSolver(&BHD);
 #endif
@@ -1734,9 +1720,9 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
-  real a0=0.1, a1, a, damp_start=0.0, norm_tol=1.0e-2, zpad=1000.0, damp, damp_LJ;
+  real a1, a, damp, damp_LJ;
   real count=0.0, norm, aO;
-  int max_iter=100, iter;
+  int iter;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
   PetscScalar dgH_norm, dgO_norm;
@@ -1746,41 +1732,36 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   real ti;
   int iteri;
 
-
   Vec dg_histO, dg_histH;
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (3-site) equation ...\n");
 
   State BHD = initialize_state (PD);
   BHD.rhos[0] = 2.*BHD.rhos[0];
-  if( r_HH <0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
-      exit(1);
-    }
 
-  /* read BGY3d specific things from command line */
-  /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a0);
-  if(a0>1 || a0<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a0);
-      exit(1);
-    }
-   /* Get damp_start from command line*/
-  bgy3d_getopt_real ("-damp_start", &damp_start);
+  if (r_HH < 0.0) {
+    PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
+    exit(1);
+  }
+
+  /*
+   * Extract BGY3d specific things from supplied input:
+   */
+
+  /* Mixing parameter: */
+  real a0 = PD->lambda;         /* not const */
+
+  /* Initial damping factor: */
+  const real damp_start = PD->damp;
+
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
-  /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
-  /* Zeropad */
-  bgy3d_getopt_real ("-zpad", &zpad);
-  /*********************************/
+  const int max_iter = PD->max_iter;
 
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a0);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
+  /* norm_tol for convergence test */
+  const real norm_tol = PD->norm_tol;
+
+  /* Zeropad */
+  const real zpad = PD->zpad;
 
   ImposeBoundaryCondition_Initialize( &BHD, zpad);
 #ifdef L_BOUNDARY

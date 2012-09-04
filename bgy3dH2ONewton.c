@@ -792,7 +792,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   State *BHD;
   PetscTruth kflg, flg;
   Vec u, f, b, v1, v2;
-  real damp, damp_start=0.0, zpad=100.0;
+  real damp;
   // Mat M;
   // int local_size;
 
@@ -811,13 +811,14 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"Not implemented yet.\n");
       exit(1);
     }
-  /* Get damp_start from command line*/
-  bgy3d_getopt_real ("-damp_start", &damp_start);
-  /* Zeropad */
-  bgy3d_getopt_real ("-zpad", &zpad);
-  BHD->zpad = zpad;
-  PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
 
+  /* Get damp_start from command line*/
+  const real damp_start = PD->damp;
+
+  /* Zeropad */
+  const real zpad = PD->zpad;
+
+  BHD->zpad = zpad;
 
   DACreateGlobalVector(BHD->da_newton, &f);
   DACreateGlobalVector(BHD->da_newton, &u);

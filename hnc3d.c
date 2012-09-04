@@ -1133,8 +1133,8 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec c, h, h_old, gg, v;
-  real lambda=0.5, g_norm, rho, beta, norm_tol=1.0e-6;
-  int slow_iter=10, max_iter=10, k, n[3], x[3], i[3], index;
+  real g_norm, rho, beta;
+  int slow_iter=10, k, n[3], x[3], i[3], index;
   FFT_DATA *c_fft, *ch_fft, *h_fft;
   PetscScalar ***pot_vec, ***h_vec, ***v_vec;
 
@@ -1142,28 +1142,21 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.Fixed c.\n");
 
-  /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &lambda);
-  if(lambda>1 || lambda<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
-      exit(1);
-    }
+  /* Mixing parameter: */
+  const real lambda = PD->lambda;
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* norm_tol for convergence test */
+  const real norm_tol = PD->norm_tol;
+
   /* Number of iterations with lambda */
   bgy3d_getopt_int ("-slow_iter", &slow_iter);
-  /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
 
   HD = HNC3dData_malloc(PD);
   rho = HD->rho;
   beta = HD->beta;
-
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",lambda);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
-
-
 
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 

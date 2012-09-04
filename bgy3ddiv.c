@@ -1603,9 +1603,8 @@ Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini)
   Mat SM;
   KSP ksp;
   PC pc;
-  real a=0.5;
-  int max_iter=25, iter, l_iter;
-  PetscScalar dg_norm, f_norm, r_norm, norm_tol=1.0e-6;
+  int iter, l_iter;
+  PetscScalar dg_norm, f_norm, r_norm;
   PetscTruth flg;
 
 
@@ -1619,25 +1618,17 @@ Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a);
-  if(a>1 || a<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
-      exit(1);
-    }
+  const real a = PD->lambda;
 
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
+  const int max_iter = PD->max_iter;
+
   /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
+  const real norm_tol = PD->norm_tol;
 
   /*********************************/
   if(flg)
     PetscPrintf(PETSC_COMM_WORLD,"Using sequential matrix format.\n");
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
-
 
   VecDuplicate(BDD->ddU, &g0);
   VecDuplicate(BDD->ddU, &b);
@@ -1760,9 +1751,8 @@ Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini)
   Mat SM;
   KSP ksp;
   PC pc;
-  real a=0.9;
-  int max_iter=25, iter, l_iter, np;
-  PetscScalar dg_norm, f_norm, r_norm, norm_tol=1.0e-6; // f2_norm
+  int iter, l_iter, np;
+  PetscScalar dg_norm, f_norm, r_norm;
   PetscTruth flg, kflg;
 
   assert(g_ini == PETSC_NULL);
@@ -1788,27 +1778,18 @@ Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
-  /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a);
-  if(a>1 || a<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
-      exit(1);
-    }
+  const real a = PD->lambda;
 
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
+  const int max_iter = PD->max_iter;
+
   /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
+  const real norm_tol = PD->norm_tol;
 
   /*********************************/
   if(flg)
     PetscPrintf(PETSC_COMM_WORLD,"Using sequential matrix format.\n");
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
-
 
   VecDuplicate(BDD->ddU, &g0);
   VecDuplicate(BDD->ddU, &b);

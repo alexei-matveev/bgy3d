@@ -3309,11 +3309,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
-  real a=0.9, damp, damp_LJ, damp_start=0.0;
-  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad; //, norm;
-  int max_iter=25, iter, mycount=0, upwards=0, namecount=0; // in_iter
+  real a=0.9, damp, damp_LJ;
+  real aH, aHO, aO, a1=0.5, count=0.0;
+  int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
-  PetscScalar dgH_norm, dgO_norm, dgHO_norm, norm_tol=1.0e-2;
+  PetscScalar dgH_norm, dgO_norm, dgHO_norm;
   PetscScalar dgH_old, dgHO_old, dgO_old;
   real ti;
   int iteri;
@@ -3342,28 +3342,24 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
-  /* read BGY3d specific things from command line */
-  /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a0);
-  if(a>1 || a<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
-      exit(1);
-    }
-   /* Get damp_start from command line*/
-  bgy3d_getopt_real ("-damp_start", &damp_start);
-  /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
-  /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
-  /* Zeropad */
-  bgy3d_getopt_real ("-zpad", &zpad);
-  /*********************************/
+  /*
+   * Extract BGY3d specific things from supplied input:
+   */
 
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
+  /* Mixing parameter: */
+  const real a0 = PD->lambda;
+
+  /* Initial damping factor: */
+  const real damp_start = PD->damp;
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* norm_tol for convergence test */
+  const real norm_tol = PD->norm_tol;
+
+  /* Zeropad */
+  const real zpad = PD->zpad;
 
   DACreateGlobalVector(BHD->da, &gH);
   DACreateGlobalVector(BHD->da, &gO);
@@ -4008,11 +4004,11 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   Vec g0H, g0O, g0HO, dgH, dgO, dgHO, dg_new, dg_new2, f, gH, gO, gHO;
   Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
-  real a=0.9, damp, damp_LJ, damp_start=0.0;
-  real aH, aHO, aO, a0=0.9, a1=0.5, count=0.0, zpad; //, norm;
-  int max_iter=25, iter, mycount=0, upwards=0, namecount=0; // in_iter
+  real a=0.9, damp, damp_LJ;
+  real aH, aHO, aO, a1=0.5, count=0.0;
+  int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
-  PetscScalar dgH_norm, dgO_norm, dgHO_norm, norm_tol=1.0e-2;
+  PetscScalar dgH_norm, dgO_norm, dgHO_norm;
   PetscScalar dgH_old, dgHO_old, dgO_old;
 
   // PetscScalar dgOH_norm;
@@ -4042,28 +4038,24 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
-  /* read BGY3d specific things from command line */
-  /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &a0);
-  if(a>1 || a<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",a);
-      exit(1);
-    }
-   /* Get damp_start from command line*/
-  bgy3d_getopt_real ("-damp_start", &damp_start);
-  /* Number of total iterations */
-  bgy3d_getopt_int ("-max_iter", &max_iter);
-  /* norm_tol for convergence test */
-  bgy3d_getopt_real ("-norm_tol", &norm_tol);
-  /* Zeropad */
-  bgy3d_getopt_real ("-zpad", &zpad);
-  /*********************************/
+  /*
+   * Extract BGY3d specific things from supplied input:
+   */
 
-  PetscPrintf(PETSC_COMM_WORLD,"lambda = %f\n",a);
-  PetscPrintf(PETSC_COMM_WORLD,"tolerance = %e\n",norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD,"zpad = %f\n",zpad);
-  PetscPrintf(PETSC_COMM_WORLD,"max_iter = %d\n",max_iter);
+  /* Mixing parameter: */
+  const real a0 = PD->lambda;
+
+  /* Initial damping factor: */
+  const real damp_start = PD->damp;
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* norm_tol for convergence test */
+  const real norm_tol = PD->norm_tol;
+
+  /* Zeropad */
+  const real zpad = PD->zpad;
 
   DACreateGlobalVector(BHD->da, &gH);
   DACreateGlobalVector(BHD->da, &gO);

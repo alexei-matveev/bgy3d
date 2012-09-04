@@ -54,6 +54,16 @@ typedef struct ProblemData
   /* Parallel stuff */
   int id;                        /* id of this process */
   int np;                        /* number of processes */
+
+  /* Other staff that was retirved  by the solvers themselves from the
+     (Petsc) environment: */
+  real lambda;                /* Mixing parameter. */
+  real damp;                  /* Scaling factor. */
+  int max_iter;               /* Maximal number of iterations. */
+  real norm_tol;              /* Convergence threshold, */
+  real zpad;                  /* FIXME: ??? */
+  int solute;                 /* Solute description, for BGY3dM
+                                 only. */
 } ProblemData;
 
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
