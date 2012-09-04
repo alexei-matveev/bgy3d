@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 2; -*- */
 #include <assert.h>
 #include "petscsys.h"
 #include "petscda.h" // Vec

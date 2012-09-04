@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 2; -*- */
 real Coulomb_short (real r, real SQRq);
 real Coulomb_short_grad (real r, real rx, real SQRq);
 
