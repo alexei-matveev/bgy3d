@@ -53,29 +53,23 @@ typedef struct ProblemData
   int N[3], N3;                 /* global Grid size */
 
   /* Parallel stuff */
-  int id;                        /* id of this process */
-  int np;                        /* number of processes */
+  int id;                       /* id of this process */
+  int np;                       /* number of processes */
 
-  /* Other staff that was retirved  by the solvers themselves from the
+  /* Other staff that was retrieved by the solvers themselves from the
      (Petsc) environment: */
-  real lambda;                /* Mixing parameter. */
-  real damp;                  /* Scaling factor. */
-  int max_iter;               /* Maximal number of iterations. */
-  real norm_tol;              /* Convergence threshold, */
-  real zpad;                  /* FIXME: ??? */
-  int solute;                 /* Solute description, for BGY3dM
-                                 only. */
+  real lambda;                  /* Mixing parameter. */
+  real damp;                    /* Scaling factor. */
+  int max_iter;                 /* Maximal number of iterations. */
+  real norm_tol;                /* Convergence threshold. */
+  real zpad;                    /* FIXME: ??? */
+  int solute;                   /* Solute description, for BGY3dM
+                                   only. */
 } ProblemData;
 
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
    interface: */
 ProblemData bgy3d_problem_data (void);
-
-/*
- * FIXME: "Never _ever_ make the  "pointerness" part of the type", (by
- * Linus Torvalds).  Consider converting "PType x" to "Type *x".
- */
-
 
 /* functions */
 real Lennard_Jones(real r, real epsilon, real sigma);
