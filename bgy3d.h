@@ -135,7 +135,7 @@ typedef struct State
     ComputeSoluteDatafromCoulomb*() group of functions.
    */
   //struct fft_plan_3d *fft_plan;
-  fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft, *fft_scratch;
+  fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
   fftw_complex *ucH_fft, *ucO_fft, *ucHO_fft;
   fftw_complex *wHO_fft, *wHH_fft;
 
@@ -144,10 +144,10 @@ typedef struct State
 
   const ProblemData *PD;
 
-  /* BGY3dM stuff */
-  fftw_complex *(fg2OO_fft[3]), *(fg2HH_fft[3]), *(fg2HO_fft[3]);
-  fftw_complex *(fg2OOl_fft[3]), *(fg2HHl_fft[3]), *(fg2HOl_fft[3]);
-  fftw_complex *(fO_fft[3]), *(fH_fft[3]);
+  /* BGY3dM stuff. The quantities indexed by the two site indices */
+  fftw_complex *fg2OO_fft[3], *fg2HH_fft[3], *fg2HO_fft[3];
+  fftw_complex *fg2OOl_fft[3], *fg2HHl_fft[3], *fg2HOl_fft[3];
+  fftw_complex *fO_fft[3], *fH_fft[3];
 
 #ifdef L_BOUNDARY
   Mat M;
