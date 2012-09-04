@@ -1316,7 +1316,7 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
   /* These will hold  FFT of the current g. Allocate  enough to hold a
      local portion of the grid and free after the loop. */
-  fftw_complex *(g_fft[2]);
+  fftw_complex *g_fft[2];
 
   for (int i = 0; i < 2; i++) {
       g_fft[i] = bgy3d_fft_malloc (BHD.da);
@@ -1327,8 +1327,8 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
   /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
      OH. */
-  fftw_complex *(ker_fft_S[2][2]);
-  fftw_complex *(ker_fft_L[2][2]);
+  fftw_complex *ker_fft_S[2][2];
+  fftw_complex *ker_fft_L[2][2];
 
   for (int i = 0; i < 2; i++)
       for (int j = 0; j <= i; j++) {
