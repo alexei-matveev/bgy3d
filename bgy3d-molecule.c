@@ -7,7 +7,7 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fft.h"
-#include "bgy3dmolecule.h"
+#include "bgy3d-molecule.h"
 
 #define rab 1.0
 

@@ -72,7 +72,7 @@ bgy3d-objs = \
 bgy3d-extra-objs = \
 	bgy3d-simple.o \
 	hnc3d.o \
-	bgy3dmolecule.o \
+	bgy3d-molecule.o \
 	bgy3ddiv.o \
 	bgy3dfourier.o \
 	bgy3d-test.o \

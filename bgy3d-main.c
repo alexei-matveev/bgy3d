@@ -15,7 +15,7 @@
 #include "bgy3dH2OS.h"          /* BGY3d_solve_H2O_2site */
 #include "bgy3dH2O.h"           /* BGY3d_solve_2site */
 #ifdef WITH_EXTRA_SOLVERS
-#include "bgy3dmolecule.h"      /* BGY3d_solve_DiatomicAB */
+#include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
 #include "bgy3dH2ONewton.h"
 #include "bgy3dH2OSNewton.h"
 #include "hnc3d.h"
