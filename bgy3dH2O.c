@@ -3319,8 +3319,6 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   real ti;
   int iteri;
 
-  PetscTruth load_flag;
-
   assert(g_ini == PETSC_NULL);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
@@ -3390,8 +3388,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("--load-H2O");
-  if(load_flag)
+  if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       bgy3d_load_vec ("dg00.bin", &dgH); /* dgH */
@@ -3880,8 +3877,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   /************************************/
 
   /* save g to binary file */
-  load_flag = bgy3d_getopt_test ("--save-H2O");
-  if(load_flag)
+  if (bgy3d_getopt_test ("--save-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
       bgy3d_save_vec ("dg00.bin", dgH);
@@ -3941,8 +3937,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm;
   PetscScalar dgH_old, dgHO_old, dgO_old;
-
-  PetscTruth load_flag;
 
   assert(g_ini == PETSC_NULL);
 
@@ -4016,8 +4010,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("--load-H2O");
-  if(load_flag)
+  if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       bgy3d_load_vec ("dg00.bin", &dgH);
@@ -4622,8 +4615,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
   /* save g to binary file */
-  load_flag = bgy3d_getopt_test ("--save-H2O");
-  if(load_flag)
+  if (bgy3d_getopt_test ("--save-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
       bgy3d_save_vec ("dg00.bin", dgH);
