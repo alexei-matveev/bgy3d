@@ -928,7 +928,7 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  flg = bgy3d_getopt_test ("-user-precond");
+  flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
@@ -1042,7 +1042,7 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  flg = bgy3d_getopt_test ("-user-precond");
+  flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);

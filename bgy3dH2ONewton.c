@@ -834,7 +834,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   SNESSetTolerances(snes, 5.0e-2, 1.0e-5, 1.0e-4 , 50, 10000);
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
-  flg = bgy3d_getopt_test ("-user-precond");
+  flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);

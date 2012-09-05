@@ -45,8 +45,9 @@ int main (int argc, char **argv)
   PetscInitialize (&argc, &argv, (char*)0, helptext);
 
   /* Read the command  line options. Petsc insists on  keys having the
-     leading dash, so  keep them for the moment.  Set global verbosity
-     early enough: */
+     leading dash, so keep them  for the moment.  Set global verbosity
+     early  enough. This is  the only  short option!  Use long-options
+     prefixed by "--" as the usual convention. */
   bgy3d_getopt_int ("-v", &verbosity);
 
   /* This calls bgy3d_getopt_*() a few more times: */
@@ -81,63 +82,63 @@ int main (int argc, char **argv)
 
   /* Read method to solve from command line */
 #ifdef WITH_EXTRA_SOLVERS
-  if (bgy3d_getopt_test ("-simple"))
+  if (bgy3d_getopt_test ("--simple"))
     solver = BGY3d_solve;
 
-  if (bgy3d_getopt_test ("-HNC"))
+  if (bgy3d_getopt_test ("--HNC"))
     solver = HNC3d_Solve_h;
 
-  if (bgy3d_getopt_test ("-HNC-Newton"))
+  if (bgy3d_getopt_test ("--HNC-Newton"))
     solver = HNC3dNewton2_solve;
 
-  if (bgy3d_getopt_test ("-DIV"))
+  if (bgy3d_getopt_test ("--DIV"))
     solver = BGY3dDiv_solve2;
 
-  if (bgy3d_getopt_test ("-DIV2"))
+  if (bgy3d_getopt_test ("--DIV2"))
     solver = BGY3dDiv_solve;
 
-  if (bgy3d_getopt_test ("-BGY-TEST"))
+  if (bgy3d_getopt_test ("--BGY-TEST"))
     solver = BGY3dDiv_test;
 
-  if (bgy3d_getopt_test ("-BGY-FOURIER"))
+  if (bgy3d_getopt_test ("--BGY-FOURIER"))
     solver =  BGY3dDiv_solve_Fourier;
 
-  if (bgy3d_getopt_test ("-BGY-FOURIER-TEST"))
+  if (bgy3d_getopt_test ("--BGY-FOURIER-TEST"))
     solver =  BGY3dDiv_solve_FourierTest;
 
-  if (bgy3d_getopt_test ("-BGY-CONVOLUTION-TEST"))
+  if (bgy3d_getopt_test ("--BGY-CONVOLUTION-TEST"))
     solver =  BGY3d_Convolution_Test;
 
-  if (bgy3d_getopt_test ("-BGY-DIATOMIC"))
+  if (bgy3d_getopt_test ("--BGY-DIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
 #endif
 
-  if (bgy3d_getopt_test ("-BGY2Site"))
+  if (bgy3d_getopt_test ("--BGY2Site"))
     solver =  BGY3d_solve_2site;
 
-  if (bgy3d_getopt_test ("-BGY3Site"))
+  if (bgy3d_getopt_test ("--BGY3Site"))
     solver =  BGY3d_solve_3site;
 
-  if (bgy3d_getopt_test ("-BGYM2Site"))
+  if (bgy3d_getopt_test ("--BGYM2Site"))
     solver =  BGY3dM_solve_H2O_2site;
 
-  if (bgy3d_getopt_test ("-BGYM3Site"))
+  if (bgy3d_getopt_test ("--BGYM3Site"))
     solver =  BGY3dM_solve_H2O_3site;
 
 #ifdef WITH_EXTRA_SOLVERS
-  if (bgy3d_getopt_test ("-BGY-H2O-NEWTON"))
+  if (bgy3d_getopt_test ("--BGY-H2O-NEWTON"))
     solver = BGY3d_SolveNewton_H2O;
 
-  if (bgy3d_getopt_test ("-BGY-H2O-SNEWTON"))
+  if (bgy3d_getopt_test ("--BGY-H2O-SNEWTON"))
     solver = BGY3d_SolveNewton_H2OS;
 
-  if (bgy3d_getopt_test ("-BGY-H2O-SFNEWTON"))
+  if (bgy3d_getopt_test ("--BGY-H2O-SFNEWTON"))
     solver = BGY3d_SolveNewton_H2OSF;
 #endif
 
   if(solver) {
       /* load initial configuration from file ??? */
-      if (bgy3d_getopt_test ("-load")) {
+      if (bgy3d_getopt_test ("--load")) {
           bgy3d_load_vec ("g.bin", &g_ini);
           PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
       }
@@ -159,7 +160,7 @@ int main (int argc, char **argv)
           bgy3d_save_vec_ascii ("vec.m", g);
 
           /* save g to binary file */
-          if (bgy3d_getopt_test ("-save")) {
+          if (bgy3d_getopt_test ("--save")) {
               bgy3d_save_vec ("g.bin", g);
 	      PetscPrintf(PETSC_COMM_WORLD,"Result written to file \"g.bin\".\n");
           }

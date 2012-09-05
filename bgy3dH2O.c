@@ -3391,7 +3391,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("-load-H2O");
+  load_flag = bgy3d_getopt_test ("--load-H2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
@@ -3912,7 +3912,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
   /* save g to binary file */
-  load_flag = bgy3d_getopt_test ("-save-H2O");
+  load_flag = bgy3d_getopt_test ("--save-H2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
@@ -4074,7 +4074,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
   /* load initial configuration from file ??? */
-  load_flag = bgy3d_getopt_test ("-load-H2O");
+  load_flag = bgy3d_getopt_test ("--load-H2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
@@ -4712,7 +4712,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
   /* save g to binary file */
-  load_flag = bgy3d_getopt_test ("-save-H2O");
+  load_flag = bgy3d_getopt_test ("--save-H2O");
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");

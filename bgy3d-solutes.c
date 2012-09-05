@@ -283,7 +283,7 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
   size_t MAX_LEN = 260;
   char filename[MAX_LEN];
 
-  if (bgy3d_getopt_string("-load-charge", filename, MAX_LEN)){
+  if (bgy3d_getopt_string("--load-charge", filename, MAX_LEN)){
       read_charge_density(BHD->da, BHD->PD, filename, 1.0, v);
   }
   else {

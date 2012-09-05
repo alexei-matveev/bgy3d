@@ -24,19 +24,19 @@ ProblemData bgy3d_problem_data (void)
     real rho = 0.3, h = 0.5;
 
     /* Grid points in 1 dimension */
-    bgy3d_getopt_int ("-N", &N);
+    bgy3d_getopt_int ("--N", &N);
 
     /* inverse temperature */
-    bgy3d_getopt_real ("-beta", &beta);
+    bgy3d_getopt_real ("--beta", &beta);
 
     /* Density */
-    bgy3d_getopt_real ("-rho", &rho);
+    bgy3d_getopt_real ("--rho", &rho);
 
     /* mesh width */
-    bgy3d_getopt_real ("-mesh", &h);
+    bgy3d_getopt_real ("--mesh", &h);
 
     /* (half of the) box size: */
-    bgy3d_getopt_real ("-L", &maxL);
+    bgy3d_getopt_real ("--L", &maxL);
 
     /*=================================*/
     /* set Problem Data */
@@ -76,30 +76,30 @@ ProblemData bgy3d_problem_data (void)
 
     /* Mixing parameter: */
     PD.lambda = 0.1;
-    bgy3d_getopt_real ("-lambda", &PD.lambda);
+    bgy3d_getopt_real ("--lambda", &PD.lambda);
 
     assert (PD.lambda > 0.0);
     assert (PD.lambda <= 1.0);
 
     /* Get damp_start from command line*/
     PD.damp = 0.0;
-    bgy3d_getopt_real ("-damp-start", &PD.damp);
+    bgy3d_getopt_real ("--damp-start", &PD.damp);
 
     /* Number of total iterations */
     PD.max_iter = 100;
-    bgy3d_getopt_int ("-max-iter", &PD.max_iter);
+    bgy3d_getopt_int ("--max-iter", &PD.max_iter);
 
     /* Norm_tol for convergence test */
     PD.norm_tol = 1.0e-2;
-    bgy3d_getopt_real ("-norm-tol", &PD.norm_tol);
+    bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
     /* Zeropad */
     PD.zpad = 1000.0;
-    bgy3d_getopt_real ("-zpad", &PD.zpad);
+    bgy3d_getopt_real ("--zpad", &PD.zpad);
 
     /* Solutes index, HCl by default: */
     PD.solute = 0;
-    bgy3d_getopt_int ("-solute", &PD.solute);
+    bgy3d_getopt_int ("--solute", &PD.solute);
 
     /* Parallel staff: */
     MPI_Comm_size(PETSC_COMM_WORLD, &PD.np);

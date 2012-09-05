@@ -1613,7 +1613,7 @@ Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation...\n");
 
-  flg = bgy3d_getopt_test ("-seq");
+  flg = bgy3d_getopt_test ("--seq");
 
   BDD = BGY3dDivData_malloc(PD, flg);
 
@@ -1760,8 +1760,8 @@ Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation with product ansatz...");
 
-  flg = bgy3d_getopt_test ("-seq");
-  kflg = bgy3d_getopt_test ("-kirkwood");
+  flg = bgy3d_getopt_test ("--seq");
+  kflg = bgy3d_getopt_test ("--kirkwood");
   if(kflg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"(Kirkwood)\n");

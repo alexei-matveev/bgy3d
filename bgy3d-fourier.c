@@ -77,7 +77,7 @@ BGY3dFourierData BGY3dFourierData_malloc(const ProblemData *PD)
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
 
-  g2_flg = bgy3d_getopt_test ("-g2-load-3d");
+  g2_flg = bgy3d_getopt_test ("--g2-load-3d");
   if(g2_flg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading 3d g2 vector.\n");
@@ -778,7 +778,7 @@ Vec BGY3dDiv_solve_Fourier(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dDiv equation with Fourier ansatz...\n");
 
-  kflg = bgy3d_getopt_test ("-kirkwood");
+  kflg = bgy3d_getopt_test ("--kirkwood");
   if(kflg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"(Kirkwood)\n");

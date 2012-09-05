@@ -1356,13 +1356,13 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   VecSet(dg[0],0);
   VecSet(dg[1],0);
 
-  if (bgy3d_getopt_test ("-from-g2")) {
+  if (bgy3d_getopt_test ("--from-g2")) {
       ComputedgFromg (dg[0], g0[0], BHD.g2HO);
       ComputedgFromg (dg[1], g0[1], BHD.g2O);
   }
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("-load-H2O")) {
+  if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       bgy3d_load_vec ("dgH.bin", &(dg[0])); /* dgH */
       bgy3d_load_vec ("dgO.bin", &(dg[1])); /* dgO */
@@ -1682,7 +1682,7 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
       /************************************/
 
       /* Save dg to binary file. FIXME: Why dg and not g? */
-      if (bgy3d_getopt_test ("-save-H2O")) {
+      if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dgH.bin", dg[0]); /* dgH */
           bgy3d_save_vec ("dgO.bin", dg[1]); /* dgO */
@@ -1808,13 +1808,13 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dgO,0);
   VecSet(dg_new,0.0);
 
-  if (bgy3d_getopt_test ("-from-g2")) {
+  if (bgy3d_getopt_test ("--from-g2")) {
       ComputedgFromg (dgH, g0H, BHD.g2HO);
       ComputedgFromg (dgO, g0O, BHD.g2O);
   }
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("-load-H2O")) {
+  if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       bgy3d_load_vec ("dgH.bin", &dgH); /* dgH */
       bgy3d_load_vec ("dgO.bin", &dgO); /* dgO */
@@ -2147,7 +2147,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       /************************************/
 
       /* save g to binary file */
-      if (bgy3d_getopt_test ("-save-H2O")) {
+      if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
           bgy3d_save_vec ("dgO.bin", dgH); /* dgO */

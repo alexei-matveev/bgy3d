@@ -537,7 +537,7 @@ Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
    * function returns a Vec.
    */
 
-  if (bgy3d_getopt_test ("-user-precond")) { /* user-defined precond */
+  if (bgy3d_getopt_test ("--user-precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
     ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
     assert (!ierr);
@@ -550,7 +550,7 @@ Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
     PCSetType( pc, PCJACOBI);
 
 #ifdef MATPRECOND
-  if (bgy3d_getopt_test ("-mat-precond")) { /* user-defined precond */
+  if (bgy3d_getopt_test ("--mat-precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
     ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
     assert (!ierr);
@@ -590,7 +590,7 @@ Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
 
 
   /* set Function */
-  if (bgy3d_getopt_test ("-kirkwood"))
+  if (bgy3d_getopt_test ("--kirkwood"))
     {
       SNESSetFunction(snes, F, Compute_F_Kirkwood, params);
     }

@@ -254,16 +254,16 @@ static Vec UNUSED_HNC3d_Solve(ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.\n");
 
   /* Mixing parameter */
-  bgy3d_getopt_real ("-lambda", &lambda);
+  bgy3d_getopt_real ("--lambda", &lambda);
   if(lambda>1 || lambda<0)
     {
       PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
       exit(1);
     }
   /* Number of iterations with lambda */
-  bgy3d_getopt_int ("-slow-iter", &slow_iter);
+  bgy3d_getopt_int ("--slow-iter", &slow_iter);
   /* Number of total iterations */
-  bgy3d_getopt_int ("-max-iter", &max_iter);
+  bgy3d_getopt_int ("--max-iter", &max_iter);
 
   HD = HNC3dData_malloc(PD);
 
@@ -861,7 +861,7 @@ static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini)
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType(snes, SNESLS);
 
-  flg = bgy3d_getopt_test ("-user-precond");
+  flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
     PCSetType(pc,PCSHELL);
@@ -1153,7 +1153,7 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   const real norm_tol = PD->norm_tol;
 
   /* Number of iterations with lambda */
-  bgy3d_getopt_int ("-slow-iter", &slow_iter);
+  bgy3d_getopt_int ("--slow-iter", &slow_iter);
 
   HD = HNC3dData_malloc(PD);
   rho = HD->rho;
