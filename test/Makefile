@@ -25,7 +25,7 @@ CMDFLAG = \
 # In case $(EXE) is not defined, assume the executable is one level up
 # in directory structure:
 #
-EXE ?= ../bgy3d
+EXE ?= $(PWD)/../bgy3d
 
 #
 # These  are  phony  targets,  they   are  not  created  as  files  to
@@ -69,10 +69,10 @@ out/%_moments.out:
 %_moments.out: $(EXE)
 	$(SHELL) runtest.sh $(*)
 
-BGY2site:
+HCl:
 	(cd ${WORK_DIR}; ${EXE} --BGY2Site ${CMDFLAG})
 
-BGYM2site:
+HClM:
 	(cd ${WORK_DIR}; ${EXE} --BGYM2Site ${CMDFLAG})
 
 clean:

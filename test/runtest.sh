@@ -15,14 +15,6 @@ if [ ! -d $PYDIR ] ; then
     exit 1
 fi
 
-# Set path for bgy3d executable
-bgyexe=$dir/../bgy3d
-
-if [ ! -x $bgyexe ] ; then
-    echo "Check the bgy3d executable."
-    exit 1
-fi
-
 # Directory containing standard outputs
 ref=$dir/out
 
@@ -56,10 +48,6 @@ main(){
     # Use absolute path
     workdir=$dir/$workname
 
-    # Set output file
-    testout=$workdir/$workname.out
-
-
     # Set file name for computing moments and standard output
     resmoments=$dir/$cmd\_moments.out
     stdmoments=$ref/$cmd\_moments.out
@@ -69,8 +57,9 @@ main(){
         # 2-site bgy3d, HCl as solvent
         HCl)
             mkdir -p $workdir
-            # FIXME: maybe passing command line parameters from here rather than setting in makefile?
-            make -f Makefile BGY2site WORK_DIR=$workdir EXE=$bgyexe  2>&1 | tee $testout
+            # FIXME: maybe passing command line parameters from here
+            # rather than setting in makefile?
+            make HCl WORK_DIR=$workdir
 
             # Get moments information for each particle pair
             echo | tee $resmoments
@@ -89,7 +78,7 @@ main(){
             mkdir -p $workdir
             # Check g2 function data first
             solute_init $dir/test_HCl $workdir
-            make -f Makefile BGYM2site WORK_DIR=$workdir EXE=$bgyexe 2>&1 | tee $testout
+            make HClM WORK_DIR=$workdir
 
             # Get moments information for each particle pair
             echo | tee $resmoments
@@ -106,7 +95,7 @@ main(){
             if [[ -n `ls | grep test_` ]]; then
                 workdir=$(ls -d test_* | awk -F" " '{print $1}')
                 for i in $(seq ${#workdir[@]}); do
-                    make -f Makefile clean WORK_DIR=${workdir[$i]}
+                    make clean WORK_DIR=${workdir[$i]}
                 done
             else
                 echo "No test directory"
