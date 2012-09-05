@@ -83,15 +83,15 @@ ProblemData bgy3d_problem_data (void)
 
     /* Get damp_start from command line*/
     PD.damp = 0.0;
-    bgy3d_getopt_real ("-damp_start", &PD.damp);
+    bgy3d_getopt_real ("-damp-start", &PD.damp);
 
     /* Number of total iterations */
     PD.max_iter = 100;
-    bgy3d_getopt_int ("-max_iter", &PD.max_iter);
+    bgy3d_getopt_int ("-max-iter", &PD.max_iter);
 
     /* Norm_tol for convergence test */
     PD.norm_tol = 1.0e-2;
-    bgy3d_getopt_real ("-norm_tol", &PD.norm_tol);
+    bgy3d_getopt_real ("-norm-tol", &PD.norm_tol);
 
     /* Zeropad */
     PD.zpad = 1000.0;

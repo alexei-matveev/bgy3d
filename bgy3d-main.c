@@ -87,7 +87,7 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("-HNC"))
     solver = HNC3d_Solve_h;
 
-  if (bgy3d_getopt_test ("-HNCNewton"))
+  if (bgy3d_getopt_test ("-HNC-Newton"))
     solver = HNC3dNewton2_solve;
 
   if (bgy3d_getopt_test ("-DIV"))
@@ -96,19 +96,19 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("-DIV2"))
     solver = BGY3dDiv_solve;
 
-  if (bgy3d_getopt_test ("-BGYTEST"))
+  if (bgy3d_getopt_test ("-BGY-TEST"))
     solver = BGY3dDiv_test;
 
-  if (bgy3d_getopt_test ("-BGYFOURIER"))
+  if (bgy3d_getopt_test ("-BGY-FOURIER"))
     solver =  BGY3dDiv_solve_Fourier;
 
-  if (bgy3d_getopt_test ("-BGYFOURIERTEST"))
+  if (bgy3d_getopt_test ("-BGY-FOURIER-TEST"))
     solver =  BGY3dDiv_solve_FourierTest;
 
-  if (bgy3d_getopt_test ("-BGYCONVOLUTIONTEST"))
+  if (bgy3d_getopt_test ("-BGY-CONVOLUTION-TEST"))
     solver =  BGY3d_Convolution_Test;
 
-  if (bgy3d_getopt_test ("-BGYDIATOMIC"))
+  if (bgy3d_getopt_test ("-BGY-DIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
 #endif
 
@@ -125,13 +125,13 @@ int main (int argc, char **argv)
     solver =  BGY3dM_solve_H2O_3site;
 
 #ifdef WITH_EXTRA_SOLVERS
-  if (bgy3d_getopt_test ("-BGYH2ONEWTON"))
+  if (bgy3d_getopt_test ("-BGY-H2O-NEWTON"))
     solver = BGY3d_SolveNewton_H2O;
 
-  if (bgy3d_getopt_test ("-BGYH2OSNEWTON"))
+  if (bgy3d_getopt_test ("-BGY-H2O-SNEWTON"))
     solver = BGY3d_SolveNewton_H2OS;
 
-  if (bgy3d_getopt_test ("-BGYH2OSFNEWTON"))
+  if (bgy3d_getopt_test ("-BGY-H2O-SFNEWTON"))
     solver = BGY3d_SolveNewton_H2OSF;
 #endif
 

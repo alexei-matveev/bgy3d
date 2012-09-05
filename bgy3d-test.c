@@ -197,8 +197,8 @@ Vec BGY3dDiv_test(const ProblemData *PD, Vec g_ini)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-sigma_g", &sigma_g);
-  bgy3d_getopt_real ("-sigma_K", &sigma_K);
+  bgy3d_getopt_real ("-sigma-g", &sigma_g);
+  bgy3d_getopt_real ("-sigma-K", &sigma_K);
 
 
   InitializeTestData(BDD, g, sigma_g, sigma_K);
@@ -255,8 +255,8 @@ Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-sigma_g", &sigma_g);
-  bgy3d_getopt_real ("-sigma_K", &sigma_K);
+  bgy3d_getopt_real ("-sigma-g", &sigma_g);
+  bgy3d_getopt_real ("-sigma-K", &sigma_K);
 
 
   InitializeTestData(BDD, g, sigma_g, sigma_K);
@@ -578,8 +578,8 @@ Vec BGY3d_Convolution_Test(const ProblemData *PD, Vec g_ini)
 
   /* read BGY3dDiv specific things from command line */
   /* Mixing parameter */
-  bgy3d_getopt_real ("-sigma_g1", &sigma_g1);
-  bgy3d_getopt_real ("-sigma_g2", &sigma_g2);
+  bgy3d_getopt_real ("-sigma-g1", &sigma_g1);
+  bgy3d_getopt_real ("-sigma-g2", &sigma_g2);
   PetscPrintf(PETSC_COMM_WORLD,"sigma_g1= %f\n", sigma_g1);
   PetscPrintf(PETSC_COMM_WORLD,"sigma_g2= %f\n", sigma_g2);
 

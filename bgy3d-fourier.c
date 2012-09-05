@@ -77,7 +77,7 @@ BGY3dFourierData BGY3dFourierData_malloc(const ProblemData *PD)
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
 
-  g2_flg = bgy3d_getopt_test ("-g2load3d");
+  g2_flg = bgy3d_getopt_test ("-g2-load-3d");
   if(g2_flg)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading 3d g2 vector.\n");
