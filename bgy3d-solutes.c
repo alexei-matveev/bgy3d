@@ -409,7 +409,7 @@ static real ljc (const Site *A, int n, const Site S[n])
  *
  *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
  */
-static real rho (const Site *A, int n, const Site S[])
+static real rho (const Site *A, int n, const Site S[n])
 {
     /* G  is predefind  in bgy3d-solvents.h  FIXME:  make the
        gaussian width a property of  the (solute) site in the same way
