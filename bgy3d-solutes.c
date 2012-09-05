@@ -564,9 +564,6 @@ static void read_charge_density (DA da, const ProblemData *PD,
     int AtomNum; /* atom numbers in the molecule */
     real corner[3], dx[3], dy[3], dz[3];
     int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
-    int *electron; /* electrons of each atom */
-    real *zero; /* = 0.0 as in ase.io.cube.write_cube, don't konw the meaning */
-    real *x, *y, *z;
     real h[3];
     FILE *fp;
     int i0, j0, k0;
@@ -599,12 +596,10 @@ static void read_charge_density (DA da, const ProblemData *PD,
     dz[2] *= Bohr;
 
     /* Allocate memory */
-    electron = (int*) malloc(AtomNum * sizeof(*electron));
-    zero = (real*) malloc(AtomNum * sizeof(*zero));
-    x = (real*) malloc(3 * sizeof(*x));
-    y = (real*) malloc(3 * sizeof(*y));
-    z = (real*) malloc(3 * sizeof(*z));
-
+    int electron[AtomNum];      /* electrons of each atom */
+    real zero[AtomNum]; /* = 0.0 as in ase.io.cube.write_cube, don't
+                           know the meaning */
+    real x[AtomNum], y[AtomNum], z[AtomNum];
 
     for (int i = 0; i < AtomNum; i++){
 	fscanf(fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
@@ -644,11 +639,6 @@ static void read_charge_density (DA da, const ProblemData *PD,
     }
 
     fclose(fp);
-    free(electron);
-    free(zero);
-    free(x);
-    free(y);
-    free(z);
     DAVecRestoreArray(da, v, &vec);
 
 }
