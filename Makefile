@@ -3,6 +3,10 @@
 #
 #   export PETSC_DIR=/usr/lib/petscdir/2.3.3
 #
+# On Ubuntu 12.04 LTS do
+#
+#   export PETSC_DIR=/usr/lib/petscdir/3.1
+#
 # Then
 #
 #   make -s
@@ -132,11 +136,11 @@ distclean:
 
 include $(OBJECTS:.o=.d)
 
-# This do-it-all rule is specific to gcc version >= 3.0,
-# and updates the object file and the dependency file at the same time.
-# The -MP also causes it to output empty targets for each header.
-# Comment out this rule if you are using a different compiler.
-#%.o %.d: %.c
+# This do-it-all rule  is specific to gcc version  >= 3.0, and updates
+# the object file  and the dependency file at the  same time.  The -MP
+# also causes it to output empty targets for each header.  Comment out
+# this rule if you are using a different compiler.
+# %.o %.d: %.c
 #	$(CC) -MT "$*.o $*.d " -MD -MP $(CFLAGS) $(LDFLAGS) $(INCDIRS) -c $<
 %.d: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -M -MF $(*).d -MP $(<)
