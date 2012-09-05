@@ -3394,9 +3394,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dgH.bin", &dgH); /* dgH */
-      bgy3d_load_vec ("dgO.bin", &dgO); /* dgO */
-      bgy3d_load_vec ("dgHO.bin", &dgHO); /* dgHO */
+      bgy3d_load_vec ("dg00.bin", &dgH); /* dgH */
+      bgy3d_load_vec ("dg11.bin", &dgO); /* dgO */
+      bgy3d_load_vec ("dg01.bin", &dgHO); /* dgHO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 
@@ -3868,9 +3868,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   /*************************************/
   /* output */
   namecount++;
-  sprintf(nameH, "vecH-%d.m", namecount-1);
-  sprintf(nameO, "vecO-%d.m", namecount-1);
-  sprintf(nameHO, "vecHO-%d.m", namecount-1);
+  sprintf(nameH, "vec00-%d.m", namecount-1);
+  sprintf(nameO, "vec11-%d.m", namecount-1);
+  sprintf(nameHO, "vec01-%d.m", namecount-1);
 
   PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
   bgy3d_save_vec_ascii (nameH, gH); /* g_H */
@@ -3884,17 +3884,17 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-      bgy3d_save_vec ("dgH.bin", dgH);
-      bgy3d_save_vec ("dgO.bin", dgO);
-      bgy3d_save_vec ("dgHO.bin", dgHO);
+      bgy3d_save_vec ("dg00.bin", dgH);
+      bgy3d_save_vec ("dg11.bin", dgO);
+      bgy3d_save_vec ("dg01.bin", dgHO);
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 
   /* save g2 to binary file */
   PetscPrintf(PETSC_COMM_WORLD,"Writing g2 files...");
-  bgy3d_save_vec ("g2H.bin", gH);
-  bgy3d_save_vec ("g2O.bin", gO);
-  bgy3d_save_vec ("g2HO.bin", gHO);
+  bgy3d_save_vec ("g00.bin", gH);
+  bgy3d_save_vec ("g11.bin", gO);
+  bgy3d_save_vec ("g01.bin", gHO);
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
     }
@@ -4020,9 +4020,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dgH.bin", &dgH);
-      bgy3d_load_vec ("dgO.bin", &dgO);
-      bgy3d_load_vec ("dgHO.bin", &dgHO);
+      bgy3d_load_vec ("dg00.bin", &dgH);
+      bgy3d_load_vec ("dg11.bin", &dgO);
+      bgy3d_load_vec ("dg01.bin", &dgHO);
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 
@@ -4611,9 +4611,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   /*************************************/
   /* output */
   namecount++;
-  sprintf(nameH, "vecH-%d.m", namecount-1);
-  sprintf(nameO, "vecO-%d.m", namecount-1);
-  sprintf(nameHO, "vecHO-%d.m", namecount-1);
+  sprintf(nameH, "vec00-%d.m", namecount-1);
+  sprintf(nameO, "vec11-%d.m", namecount-1);
+  sprintf(nameHO, "vec01-%d.m", namecount-1);
 
   PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
   bgy3d_save_vec_ascii (nameH, gH);
@@ -4626,18 +4626,18 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   if(load_flag)
     {
       PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-      bgy3d_save_vec ("dgH.bin", dgH);
-      bgy3d_save_vec ("dgO.bin", dgO);
-      bgy3d_save_vec ("dgHO.bin", dgHO);
+      bgy3d_save_vec ("dg00.bin", dgH);
+      bgy3d_save_vec ("dg11.bin", dgO);
+      bgy3d_save_vec ("dg01.bin", dgHO);
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 
   /************************************/
   /* save g2 to binary file */
   PetscPrintf(PETSC_COMM_WORLD,"Writing g2 files...");
-  bgy3d_save_vec ("g2H.bin", gH); /* g2H */
-  bgy3d_save_vec ("g2O.bin", gO); /* g2O */
-  bgy3d_save_vec ("g2HO.bin", gHO); /* g2HO */
+  bgy3d_save_vec ("g00.bin", gH); /* g2H */
+  bgy3d_save_vec ("g11.bin", gO); /* g2O */
+  bgy3d_save_vec ("g01.bin", gHO); /* g2HO */
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
     }

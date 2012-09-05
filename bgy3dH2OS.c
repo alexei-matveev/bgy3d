@@ -147,9 +147,9 @@ static State initialize_state (const ProblemData *PD)
   ReadPairDistribution(&BHD, "g2S", BHD.g2H);
   ReadPairDistribution(&BHD, "g2CS", BHD.g2HO);
 #else
-  bgy3d_load_vec ("g2H.bin", &(BHD.g2H));
-  bgy3d_load_vec ("g2O.bin", &(BHD.g2O));
-  bgy3d_load_vec ("g2HO.bin", &(BHD.g2HO));
+  bgy3d_load_vec ("g00.bin", &BHD.g2H);
+  bgy3d_load_vec ("g11.bin", &BHD.g2O);
+  bgy3d_load_vec ("g01.bin", &BHD.g2HO);
 #endif
 
   return BHD;
@@ -1364,8 +1364,8 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dgH.bin", &(dg[0])); /* dgH */
-      bgy3d_load_vec ("dgO.bin", &(dg[1])); /* dgO */
+      bgy3d_load_vec ("dg0.bin", &dg[0]); /* dgH */
+      bgy3d_load_vec ("dg1.bin", &dg[1]); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
@@ -1672,8 +1672,8 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
          overall  scale  factors  damp/damp_LJ.  Remove when  no  more
          needed. */
       namecount++;
-      sprintf(nameH, "vecH-%d.m", namecount-1);
-      sprintf(nameO, "vecO-%d.m", namecount-1);
+      sprintf(nameH, "vec0-%d.m", namecount-1);
+      sprintf(nameO, "vec1-%d.m", namecount-1);
 
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
       bgy3d_save_vec_ascii (nameH, g[0]); /* g_H */
@@ -1684,8 +1684,8 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
       /* Save dg to binary file. FIXME: Why dg and not g? */
       if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-          bgy3d_save_vec ("dgH.bin", dg[0]); /* dgH */
-          bgy3d_save_vec ("dgO.bin", dg[1]); /* dgO */
+          bgy3d_save_vec ("dg0.bin", dg[0]); /* dgH */
+          bgy3d_save_vec ("dg1.bin", dg[1]); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
   } /* damp loop */
@@ -1816,8 +1816,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dgH.bin", &dgH); /* dgH */
-      bgy3d_load_vec ("dgO.bin", &dgO); /* dgO */
+      bgy3d_load_vec ("dg0.bin", &dgH); /* dgH */
+      bgy3d_load_vec ("dg1.bin", &dgO); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
@@ -2136,8 +2136,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       /*************************************/
       /* output */
       namecount++;
-      sprintf(nameH, "vecH-%d.m", namecount-1);
-      sprintf(nameO, "vecO-%d.m", namecount-1);
+      sprintf(nameH, "vec0-%d.m", namecount-1);
+      sprintf(nameO, "vec1-%d.m", namecount-1);
 
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
       bgy3d_save_vec_ascii (nameH, gH); /* g_H */
@@ -2149,8 +2149,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       /* save g to binary file */
       if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-          bgy3d_save_vec ("dgH.bin", dgH); /* dgH */
-          bgy3d_save_vec ("dgO.bin", dgH); /* dgO */
+          bgy3d_save_vec ("dg0.bin", dgH); /* dgH */
+          bgy3d_save_vec ("dg1.bin", dgH); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }

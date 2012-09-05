@@ -673,7 +673,6 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;
   int i[3], x[3], n[3];
   Vec dgH, dgHO, dgO, gH, gHO, gO;
-  PetscViewer viewer;
 
   PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
 
@@ -716,44 +715,15 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
 
   /*************************************/
   /* output */
-  /* g_H */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecH.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecH.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(gH,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_b */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecO.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecO.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(gO,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_HO */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecHO.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(gHO,viewer);
-  PetscViewerDestroy(viewer);
-  PetscPrintf(PETSC_COMM_WORLD,"done\n");
-  /************************************/
-  /************************************/
+  bgy3d_save_vec_ascii ("vec00.m", gH);
+  bgy3d_save_vec_ascii ("vec11.m", gO);
+  bgy3d_save_vec_ascii ("vec01.m", gHO);
+
   /* save g2 to binary file */
   PetscPrintf(PETSC_COMM_WORLD,"Writing g2 files...");
-  /* g2H */
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2H.bin",
-			FILE_MODE_WRITE,&viewer);
-  VecView(gH,viewer);
-  PetscViewerDestroy(viewer);
-  /* g2O */
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2O.bin",
-			FILE_MODE_WRITE,&viewer);
-  VecView(gO,viewer);
-  PetscViewerDestroy(viewer);
-  /* g2HO */
-  PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2HO.bin",
-			FILE_MODE_WRITE,&viewer);
-  VecView(gHO,viewer);
-  PetscViewerDestroy(viewer);
+  bgy3d_save_vec ("g00.bin", gH);
+  bgy3d_save_vec ("g11.bin", gO);
+  bgy3d_save_vec ("g01.bin", gHO);
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
 

@@ -23,16 +23,9 @@ solute_init(){
     local svtdir curdir
     svtdir=$1
     curdir=$2
-    if [ ! -f $curdir/g2H.bin -o ! -f $curdir/g2O.bin -o ! -f $curdir/g2HO.bin ]; then
-        if [ -f $svtdir/g2H.bin -o -f $svtdir/g2O.bin -o -f $svtdir/g2HO.bin ]; then
-            ln -sf $svtdir/g2H.bin $curdir/g2H.bin
-            ln -sf $svtdir/g2O.bin $curdir/g2O.bin
-            ln -sf $svtdir/g2HO.bin $curdir/g2HO.bin
-        else
-            echo "Error: g2 function data cannot be found, run test for solvent only first."
-            exit 1
-        fi
-    fi
+    for f in g00.bin g01.bin g11.bin; do
+        ln -sf $svtdir/$f $curdir
+    done
 }
 
 
@@ -64,13 +57,13 @@ main(){
             # Get moments information for each particle pair
             echo | tee $resmoments
             echo "Moments for H-H:" | tee -a $resmoments
-            python $PYDIR/testmoments.py $workdir/g2H.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/testmoments.py $workdir/g00.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for Cl-Cl:" | tee -a $resmoments
-            python $PYDIR/testmoments.py  $workdir/g2O.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/testmoments.py  $workdir/g11.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for H-Cl:" | tee -a $resmoments
-            python $PYDIR/testmoments.py  $workdir/g2HO.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/testmoments.py  $workdir/g01.bin 2>&1 | tee -a $resmoments
             ;;
 
         # 2-site bgy3dM, HCl as both solvent and solute
