@@ -1,4 +1,4 @@
-/* -*- mode: c; c-basic-offset: 2; -*- */
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
 /* Used in bgy3d-test.c: */
 typedef struct BGY3dDivStruct
 {

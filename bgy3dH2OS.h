@@ -1,4 +1,4 @@
-/* -*- mode: c; c-basic-offset: 2; -*- */
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
