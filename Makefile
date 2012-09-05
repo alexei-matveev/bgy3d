@@ -16,6 +16,12 @@ include ${PETSC_DIR}/bmake/common/base
 SHELL = /bin/sh
 
 #
+# Guile  is  a  Scheme interpreter.  Set  this  to  one to  compile  a
+# BGY3d-enabled interpreter:
+#
+WITH_GUILE = 0
+
+#
 # Compile rarely used solvers.   These solvers have not beed converted
 # to direct  use of  FFTW MPI API  and rely  on the wrappers  by Steve
 # Plimpton,  see  ./fft  directory.    The  fft_3d.h  header  needs  a
@@ -68,6 +74,12 @@ bgy3d-objs = \
 	bgy3d-solutes.o \
 	bgy3d-getopt.o \
 	bgy3d-fft.o \
+
+ifeq ($(WITH_GUILE),1)
+	bgy3d-objs += bgy3d-guile.o
+	LIBS += -lguile
+	USERFLAGS += -DWITH_GUILE
+endif
 
 bgy3d-extra-objs = \
 	bgy3d-simple.o \

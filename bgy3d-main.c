@@ -25,9 +25,19 @@
 #include "bgy3d-simple.h"       /* BGY3d_solve */
 #endif
 
-static char helptext[] = "Solving BGY3d equation.\n";
+#ifdef WITH_GUILE
+#include "bgy3d-guile.h"        /* bgy3d_guile_main */
+#endif
 
 int verbosity = 0;          /* Used read-only in a few other files. */
+
+#ifdef WITH_GUILE
+int main (int argc, char **argv)
+{
+  bgy3d_guile_main (argc, argv);
+}
+#else
+static char helptext[] = "Solving BGY3d equation.\n";
 
 typedef Vec Solver (const ProblemData *PD, Vec g_ini);
 
@@ -180,6 +190,7 @@ int main (int argc, char **argv)
    */
   return 0;
 }
+#endif  /* else of ifdef WITH_GUILE */
 
 #ifdef DEBUG
 /* starts the gdb debugger for each process */
