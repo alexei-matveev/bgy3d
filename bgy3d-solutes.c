@@ -201,16 +201,6 @@ static void solute_field (State *BHD, int n, const Site S[n], real damp, real da
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
-  /* FIXME: an alternative version (QM) did not set them, nevertheless
-     the HCl case  appeared to work. Are these  really necessary? Also
-     this maybe specific to the 2-site model. */
-  // VecSet(BHD->gHO_ini, 0.0);    /* What is it used for? */
-  // VecSet(BHD->ucHO, 0.0);
-  FOR_DIM {
-    VecSet(BHD->fH_l[dim], 0.0);
-    VecSet(BHD->fO_l[dim], 0.0);
-    VecSet(BHD->fHO_l[dim], 0.0); /* What is it used for? */
-  }
 
   /*
     Calculate FF potential for all solvent sites.

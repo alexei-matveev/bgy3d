@@ -1473,6 +1473,15 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
               HCl (==0) for standard test */
       bgy3d_solute_field (&BHD, solute, (damp > 0.0 ? damp : 0.0), 1.0);
 
+      /* FIXME:  Check if this  is redundant  --- it  was mechanically
+         moved from  the body of the  above func (because  it does not
+         belong into solute code): */
+      FOR_DIM {
+        VecSet(BHD.fH_l[dim], 0.0);
+        VecSet(BHD.fO_l[dim], 0.0);
+        VecSet(BHD.fHO_l[dim], 0.0); /* What is it used for? */
+      }
+
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
       //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
@@ -1850,6 +1859,15 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
+
+      /* FIXME:  Check if this  is redundant  --- it  was mechanically
+         moved from the body of the bgy3d_solute_field() func (because
+         it does not belong into solute code): */
+      FOR_DIM {
+        VecSet(BHD.fH_l[dim], 0.0);
+        VecSet(BHD.fO_l[dim], 0.0);
+        VecSet(BHD.fHO_l[dim], 0.0); /* What is it used for? */
+      }
 
       //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
