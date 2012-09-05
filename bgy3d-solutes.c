@@ -599,11 +599,11 @@ static void read_charge_density (DA da, const ProblemData *PD,
     dz[2] *= Bohr;
 
     /* Allocate memory */
-    electron = malloc(AtomNum * sizeof(int));
-    zero = malloc(AtomNum * sizeof(float));
-    x = malloc(3 * sizeof(float));
-    y = malloc(3 * sizeof(float));
-    z = malloc(3 * sizeof(float));
+    electron = (int*) malloc(AtomNum * sizeof(*electron));
+    zero = (real*) malloc(AtomNum * sizeof(*zero));
+    x = (real*) malloc(3 * sizeof(*x));
+    y = (real*) malloc(3 * sizeof(*y));
+    z = (real*) malloc(3 * sizeof(*z));
 
 
     for (int i = 0; i < AtomNum; i++){
