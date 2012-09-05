@@ -70,10 +70,10 @@ out/%_moments.out:
 	$(SHELL) runtest.sh $(*)
 
 BGY2site:
-	(cd ${WORK_DIR}; ${EXE} --BGY2site ${CMDFLAG})
+	(cd ${WORK_DIR}; ${EXE} --BGY2Site ${CMDFLAG})
 
 BGYM2site:
-	(cd ${WORK_DIR}; ${EXE} --BGYM2site ${CMDFLAG})
+	(cd ${WORK_DIR}; ${EXE} --BGYM2Site ${CMDFLAG})
 
 clean:
 	rm -rf ${WORK_DIR}
