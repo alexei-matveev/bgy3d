@@ -15,7 +15,7 @@
  */
 
 #include "bgy3d.h"
-#include "bgy3d_SolventParameters.h"
+#include "bgy3d-solvents.h"
 #include "bgy3d-solutes.h"
 #include "bgy3dH2O.h"           /* Coulomb_short() */
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec_fftw(),
@@ -421,7 +421,7 @@ static real ljc (const Site *A, const Site S[], int nsites)
  */
 static real rho (const Site *A, const Site S[], int nsites)
 {
-    /* G  is predefind  in bgy3d_SolventParameters.h  FIXME:  make the
+    /* G  is predefind  in bgy3d-solvents.h  FIXME:  make the
        gaussian width a property of  the (solute) site in the same way
        as the charge of the site. */
     real prefac = pow(G / sqrt(M_PI), 3.0);
