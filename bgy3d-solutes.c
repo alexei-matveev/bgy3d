@@ -40,7 +40,7 @@ typedef struct Solute {
 } Solute;
 
 static void poisson (State *BHD, Vec uc, Vec rho, real q);
-static void solute_field (State *BHD, const Site S[], int nsites, real damp, real damp_LJ);
+static void solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -49,17 +49,17 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
  * return a  real number such as  an interaction energy  or the charge
  * density:
  */
-static real ljc (const Site *A, const Site S[], int nsites);
-static real rho (const Site *A, const Site S[], int nsites);
+static real ljc (const Site *A, int n, const Site S[n]);
+static real rho (const Site *A, int n, const Site S[n]);
 
 /*
  * This function expects a callback obeying the above interface as one
  * of the arguments:
  */
 static void field (DA da, const ProblemData *PD,
-                   Site A, const Site S[], int nsites,
+                   Site A, int n, const Site S[n],
                    real fact,
-                   real (*f)(const Site *A, const Site S[], int nsites),
+                   real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v);
 static void read_charge_density (DA da, const ProblemData *PD,
 				const char *filename, real fact, Vec v);
@@ -185,7 +185,7 @@ void bgy3d_solute_field (State *BHD, int index, real damp, real damp_LJ)
     PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", S->name);
 
     /* Functions that do the real work operate on array of sites: */
-    solute_field (BHD, S->sites, S->n, damp, damp_LJ);
+    solute_field (BHD, S->n, S->sites, damp, damp_LJ);
 }
 
 /*
@@ -197,7 +197,7 @@ void bgy3d_solute_field (State *BHD, int index, real damp, real damp_LJ)
  *      VM_coulomb_long), but is beta missing here?
  */
 
-static void solute_field (State *BHD, const Site S[], int nsites, real damp, real damp_LJ)
+static void solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -243,7 +243,7 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
 #ifndef QM
   for (int vsite = 0; vsite < 2; vsite++)
       field (BHD->da, BHD->PD,
-             solvent[vsite], S, nsites, factor, ljc,
+             solvent[vsite], n, S, factor, ljc,
              BHD->g_ini[vsite]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
@@ -258,7 +258,7 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
     neutral.charge = 0.0;          /* modify a copy */
 
     field (BHD->da, BHD->PD,
-           neutral, S, nsites, factor, ljc,
+           neutral, n, S, factor, ljc,
            BHD->g_ini[vsite]);
   }
 #endif
@@ -287,8 +287,8 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
       read_charge_density(BHD->da, BHD->PD, filename, 1.0, v);
   }
   else {
-      /* 1. Put the solute density into Vec v. Due to the inter */
-      field (BHD->da, BHD->PD, point, S, nsites, 1.0, rho, v);
+    /* 1. Put the solute density into Vec v. Due to the inter */
+    field (BHD->da, BHD->PD, point, n, S, 1.0, rho, v);
   }
 
   /*
@@ -328,9 +328,9 @@ static void solute_field (State *BHD, const Site S[], int nsites, real damp, rea
  * Vector "v" is the intent(out) argument.
  */
 static void field (DA da, const ProblemData *PD,
-                   Site A, const Site S[], int nsites,
+                   Site A, int n, const Site S[n],
                    real fact,
-                   real (*f)(const Site *A, const Site S[], int nsites),
+                   real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v)
 {
     PetscScalar ***vec;
@@ -371,7 +371,7 @@ static void field (DA da, const ProblemData *PD,
                  * by summing (LJ) contributions from all solute sites
                  * at that grid point:
                  */
-                vec[k][j][i] = fact * f (&A, S, nsites);
+                vec[k][j][i] = fact * f (&A, n, S);
             }
         }
     }
@@ -382,12 +382,12 @@ static void field (DA da, const ProblemData *PD,
  * Interaction of a charged LJ site (epsilon, sigma, charge) at (x, y,
  * z) with the solute S:
  */
-static real ljc (const Site *A, const Site S[], int nsites)
+static real ljc (const Site *A, int n, const Site S[n])
 {
     /* Sum force field contribution from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < nsites; site++) {
+    for (int site = 0; site < n; site++) {
 
         /* Interaction parameters for a pair of LJ sites: */
         real e2 = sqrt (A->epsilon * S[site].epsilon);
@@ -419,7 +419,7 @@ static real ljc (const Site *A, const Site S[], int nsites)
  *
  *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
  */
-static real rho (const Site *A, const Site S[], int nsites)
+static real rho (const Site *A, int n, const Site S[])
 {
     /* G  is predefind  in bgy3d-solvents.h  FIXME:  make the
        gaussian width a property of  the (solute) site in the same way
@@ -429,7 +429,7 @@ static real rho (const Site *A, const Site S[], int nsites)
     /* Sum Gaussian contributions from all solute sites: */
     real field = 0.0;
 
-    for (int site = 0; site < nsites; site++) {
+    for (int site = 0; site < n; site++) {
 
         /* Square of the distance from a grid point to this site: */
         real r2 = (SQR(A->x[0] - S[site].x[0]) +
