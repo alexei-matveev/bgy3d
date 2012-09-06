@@ -9,38 +9,29 @@
  * water in  this file.  Rather it is  general for all  2-site solvent
  * model. So it was later renamed.
  *
- * The  funciton solute_field()  initiates the  computation  of (short
- * range) force field  and long range Coulomb for  the (currently) two
- * solvent sites.
+ * The  funciton  bgy3d_solute_field()  initiates the  computation  of
+ * (short  range)   force  field  and  long  range   Coulomb  for  the
+ * (currently) two solvent sites.
  */
 
 #include "bgy3d.h"
 #include "bgy3d-solvents.h"
-#include "bgy3d-solutes.h"
 #include "bgy3dH2O.h"           /* Coulomb_short() */
 #include "bgy3d-fft.h"          /* ComputeFFTfromVec_fftw(),
                                    ComputeVecfromFFT_fftw() */
 #include "bgy3d-getopt.h"
-
-typedef struct Site {
-    char name[5];            /* atom types. What are they used for? */
-    real x[3];               /* coordinates */
-    real sigma;              /* sigma for LJ */
-    real epsilon;            /* epsilon for LJ */
-    real charge;             /* charge */
-} Site;
+#include "bgy3d-solutes.h"
 
 /* Solute is  isomorphic to an  array of sites.  Consider  handling it
    like that in the code.   Structs with flexible array members may be
    confusing. Such struct is convenient for literal data, though: */
 typedef struct Solute {
-    const char *name;           /* human readable name */
-    int n;                      /* number of sites */
-    Site sites[];               /* site descriptions */
+  const char *name;             /* human readable name */
+  int n;                        /* number of sites */
+  Site sites[];                 /* site descriptions */
 } Solute;
 
 static void poisson (State *BHD, Vec uc, Vec rho, real q);
-static void solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -168,24 +159,22 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
  * names  of the  sites  literally.   The same  structure  is used  to
  * represent all (2-site) solvents, such as HCl.
  *
- * FIXME:  in solute_field()  function below  it is  assumed  that the
- * number of solvent sites is exactly two:
+ * FIXME: in  bgy3d_solute_field() function  below it is  assumed that
+ * the number of solvent sites is exactly two:
  */
 static const Site solvent[] =
   {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
    {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
-void bgy3d_solute_field (State *BHD, int index, real damp, real damp_LJ)
+/* Get solute sites and name by index. Functions that do the real work
+   operate on array of sites: */
+void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name)
 {
-    assert (index >= 0 && index <= 5);
+    assert (solute >= 0 && solute <= 5);
 
-    const Solute *S = solutes[index];
-
-    /* "Side effect" here: */
-    PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", S->name);
-
-    /* Functions that do the real work operate on array of sites: */
-    solute_field (BHD, S->n, S->sites, damp, damp_LJ);
+    *n = solutes[solute]->n;
+    *sites = solutes[solute]->sites;
+    *name = solutes[solute]->name;
 }
 
 /*
@@ -197,7 +186,7 @@ void bgy3d_solute_field (State *BHD, int index, real damp, real damp_LJ)
  *      VM_coulomb_long), but is beta missing here?
  */
 
-static void solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ)
+void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 

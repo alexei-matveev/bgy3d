@@ -1259,7 +1259,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
  * a historical baggage.
  */
-Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
+static void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n])
 {
   real norm;
   Vec t_vec;                    /* used for all sites */
@@ -1293,9 +1293,6 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
   /* Zeropad */
   const real zpad = PD->zpad;
-
-  /* Solutes index */
-  const int solute = PD->solute; /* HCl by default */
 
   /* Inverse temperature: */
   const real beta = PD->beta;
@@ -1471,7 +1468,7 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
               and BHD.uc[0], BHD.uc[1], which are VM_Coulomb_long, but
               should they  multiply by  beta?  Solute is  hardcoded as
               HCl (==0) for standard test */
-      bgy3d_solute_field (&BHD, solute, (damp > 0.0 ? damp : 0.0), 1.0);
+      bgy3d_solute_field (&BHD, n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* FIXME:  Check if this  is redundant  --- it  was mechanically
          moved from  the body of the  above func (because  it does not
@@ -1723,13 +1720,51 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   VecDestroy(t_vec);
 
   finalize_state (&BHD);
-
-  return PETSC_NULL;
 }
 
+/* This one emulates historical solver interface: */
+Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
+{
+  (void) g_ini;                 /* FIXME: interface obligation */
+
+  int n;                        /* number of solute sites */
+  const Site *sites;            /* [n], array of sites */
+  const char *name;             /* human readable name */
+
+  /* Solute index between 0 and 5 (includive): */
+  const int solute = PD->solute;
+
+  /* Get the solute from the tables: */
+  bgy3d_solute_get (solute, &n, &sites, &name);
+
+  /* Code used to be verbose: */
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", name);
+
+  /* This does the real work: */
+  bgy3d_solve_with_solute (PD, n, sites);
+
+  return PETSC_NULL;            /* fake, interface obligation */
+}
+
+/* Legacy wrapper. FIXME:  revise BGY3dM_solve_H2O_3site() and get rid
+   of this: */
+static void solute_field_by_index (State *BHD, int solute, real damp, real damp_lj)
+{
+  int n;                        /* number of solute sites */
+  const Site *sites;            /* [n], array of sites */
+  const char *name;             /* human readable name */
+
+  /* Get the solute from the tables: */
+  bgy3d_solute_get (solute, &n, &sites, &name);
+
+  /* This does the real work: */
+  bgy3d_solute_field (BHD, n, sites, damp, damp_lj);
+}
 
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
+  (void) g_ini;                 /* FIXME: interface obligation */
+
   real a1, a, damp, damp_LJ;
   real count=0.0, norm, aO;
   int iter;
@@ -1837,7 +1872,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           damp_LJ=0;
           //a0=0.4;
           RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
+          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
@@ -1845,7 +1880,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           damp_LJ=1.0;
           //a0=0.5;
           RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
+          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
@@ -1856,7 +1891,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           //a0 = 0.1/4./(count);
           a0 = 0.1/(count+5.0);
           RecomputeInitialFFTs(&BHD, (damp), 1.0);
-          bgy3d_solute_field (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
+          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
 
