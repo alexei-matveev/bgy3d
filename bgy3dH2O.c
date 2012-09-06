@@ -5,6 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-solvents.h"
+#include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
 #include "bgy3dH2O.h"

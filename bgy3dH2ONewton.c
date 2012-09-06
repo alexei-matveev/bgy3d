@@ -4,8 +4,9 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
+#include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-getopt.h"
-#include "bgy3dH2OS.h"
+#include "bgy3dH2OS.h"          /* for this */
 #include "bgy3dH2O.h"
 #include "bgy3dH2ONewton.h"
 

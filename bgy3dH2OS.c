@@ -1259,7 +1259,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
  * a historical baggage.
  */
-static void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n])
+void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n])
 {
   real norm;
   Vec t_vec;                    /* used for all sites */

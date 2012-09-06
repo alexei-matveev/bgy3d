@@ -4,6 +4,7 @@
 #include "petscda.h"            /* PetscInitialize */
 
 #include "bgy3d.h"
+#include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3dH2O.h"
 #include "bgy3dH2OS.h"
 #include "bgy3d-guile.h"

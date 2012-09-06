@@ -1,4 +1,11 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
+
+/*
+ * This function is the main entry point for the BGY3dM equation for a
+ * 2-site solvent and an arbitrary solute:
+ */
+void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]);
+
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
