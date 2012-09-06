@@ -83,6 +83,62 @@ static ProblemData problem_data (SCM alist)
   return PD;
 }
 
+/* A Site is represented by an sexp like:
+
+   ("H" (0.6285 0.0 0.0) 2.735 0.03971 0.2) */
+static Site make_site (SCM s)
+{
+  Site S;
+
+  SCM name = scm_car (s);       /* site name */
+  SCM x = scm_cadr (s);         /* position */
+  SCM ff = scm_cddr (s);        /* force field params */
+
+  /* Currently  max_len  ==  5,  that  is  enough  for  4  letters  ++
+     '\0'. Anything that is longer will be truncated: */
+  const size_t max_len = sizeof(S.name);
+
+  /* Does not null-terminate, returns the number of bytes required for
+     the string not counting the terminating \0: */
+  size_t len = scm_to_locale_stringbuf (name, S.name, max_len);
+
+  if (len < max_len)
+    S.name[len] = '\0';
+  else
+    S.name[max_len - 1] = '\0'; /* FIXME: truncation here! */
+
+  // printf ("len=%ld, str=>%s<\n", len, S.name);
+
+  S.x[0] = scm_to_double (scm_car (x));
+  S.x[1] = scm_to_double (scm_cadr (x));
+  S.x[2] = scm_to_double (scm_caddr (x));
+
+  S.sigma = scm_to_double (scm_car (ff));
+  S.epsilon = scm_to_double (scm_cadr (ff));
+  S.charge = scm_to_double (scm_caddr (ff));
+
+  return S;
+}
+
+static void make_solute (SCM solute, int *n, Site **sites, char **name)
+{
+  SCM s_name = scm_car (solute);   /* string */
+  SCM l_sites = scm_cadr (solute); /* list */
+  int length = scm_to_int (scm_length (l_sites));
+
+  /* will you free() it? */
+  Site *new = (Site*) malloc (length * sizeof(Site));
+
+  for (int i = 0; i < length; i++) {
+    new[i] = make_site (scm_car (l_sites));
+    l_sites = scm_cdr (l_sites);
+  }
+
+  *n = length;
+  *sites = new;
+  *name = scm_to_locale_string (s_name); /* will you free() it? */
+}
+
 static SCM guile_run_solvent (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
@@ -95,15 +151,28 @@ static SCM guile_run_solvent (SCM alist)
   return alist;
 }
 
-static SCM guile_run_solute (SCM alist)
+static SCM guile_run_solute (SCM solute, SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (alist);
 
+  int n;
+  Site *sites;
+  char *name;
+
+  /* Allocates sites, name: */
+  make_solute (solute, &n, &sites, &name);
+
+  /* Code used to be verbose: */
+  PetscPrintf(PETSC_COMM_WORLD, "Solute is %s.\n", name);
+
   /* This takes  part of  the input  from the disk,  and writes  to it
      too: */
-  BGY3dM_solve_H2O_2site (&PD, NULL);
+  bgy3d_solve_with_solute (&PD, n, sites);
+
+  free (name);
+  free (sites);
 
   return alist;
 }
@@ -117,7 +186,7 @@ static void inner_main (void *closure, int argc, char **argv)
    * sources:
    */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 1, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
 
   scm_shell (argc, argv);     /* never returns */
 }
