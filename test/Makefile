@@ -1,9 +1,3 @@
-#
-# Use  current working  directory by  default.  WARNING:  "make clean"
-# will "rm -rf $(WORK_DIR)" so be carefull:
-#
-WORK_DIR ?= .
-
 # Shell
 SHELL = /bin/sh
 
@@ -25,15 +19,15 @@ CMDFLAG = \
 # In case $(EXE) is not defined, assume the executable is one level up
 # in directory structure:
 #
-EXE ?= $(PWD)/../bgy3d
+EXE ?= ../bgy3d
 
 #
 # These  are  phony  targets,  they   are  not  created  as  files  to
 # re-evaluate the diffs every time Make is executed:
 #
 diffs = \
-	HCl_moments.diff \
-	HClM_moments.diff
+	HCl.g2.diff \
+	HCl.g1.diff
 
 #
 # By default "make" all the diffs:
@@ -44,36 +38,44 @@ all: $(diffs)
 # Prerequisites for a  diff are the two files, keep  them in the order
 # old, new:
 #
-%.diff: out/%.out %.out
+%.diff: out/% %
 	diff $(^)
 
 #
-# Dont delete *.out files  rebuilt as intermediate targets.  Running a
-# test takes some time:
+# Dont  delete  distribution  summary  files rebuilt  as  intermediate
+# targets.  Running a test takes some time:
 #
-.PRECIOUS: %_moments.out
+.PRECIOUS: %.g2 %.g1
 
 #
 # Nothing to  be done for  reference outputs.  Without this  rule Make
 # will try to  re-build the reference outputs too  when the executable
 # gets changed:
 #
-out/%_moments.out:
+out/%:
 	 # nothing to be done, is there a better way to say that?
 
 #
-# To produce an XYZ_moments.out  file execute ./runqm.sh XYZ. Updating
-# the executable  should lead to re-running  the test, so add  it as a
-# pre-requisite:
+# Command line  to print  the distribution summary  from *.bin  or *.m
+# file(s). Darcs does not track file attributes, so that the *.py file
+# will not always have an execution bit set in a fresh repository:
 #
-%_moments.out: $(EXE)
-	$(SHELL) runtest.sh $(*)
+moments = python ../python/moments.py
 
-HCl:
-	(cd ${WORK_DIR}; ${EXE} --BGY2Site ${CMDFLAG})
+#
+# To produce a *.g2 or *.g1 summary file execute BGY3d and examine the
+# resulting  distributions.  Updating  the executable  should  lead to
+# re-running  the  test, so  add  it  as  a pre-requisite.   Also  the
+# solvent-solvent g2-distribution  is required for  g1-distribution of
+# the solvent in the presence of a solute:
+#
+%.g1: ../bgy3d %.g2
+	$(EXE) --BGYM2Site $(CMDFLAG)
+	$(moments) g0.bin g1.bin > $(@)
 
-HClM:
-	(cd ${WORK_DIR}; ${EXE} --BGYM2Site ${CMDFLAG})
+%.g2: ../bgy3d
+	$(EXE) --BGY2Site $(CMDFLAG)
+	$(moments) g00.bin g11.bin g01.bin > $(@)
 
 clean:
-	rm -rf ${WORK_DIR}
+	rm -f *.g1 *.g2 *.bin *.info *.m

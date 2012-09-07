@@ -41,6 +41,7 @@ def moments(path):
     # Use center to compute 2nd momenta
     m2 = bgy3d.moments2nd(h, center)
 
+    print "Moments from", path
     print "<1> = ", m1[0]
     print "<x> = ", m1[1] / m1[0]
     print "<y> = ", m1[2] / m1[0]
