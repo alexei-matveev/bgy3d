@@ -57,13 +57,13 @@ main(){
             # Get moments information for each particle pair
             echo | tee $resmoments
             echo "Moments for H-H:" | tee -a $resmoments
-            python $PYDIR/testmoments.py $workdir/g00.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/moments.py $workdir/g00.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for Cl-Cl:" | tee -a $resmoments
-            python $PYDIR/testmoments.py  $workdir/g11.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/moments.py  $workdir/g11.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for H-Cl:" | tee -a $resmoments
-            python $PYDIR/testmoments.py  $workdir/g01.bin 2>&1 | tee -a $resmoments
+            python $PYDIR/moments.py  $workdir/g01.bin 2>&1 | tee -a $resmoments
             ;;
 
         # 2-site bgy3dM, HCl as both solvent and solute
@@ -76,10 +76,10 @@ main(){
             # Get moments information for each particle pair
             echo | tee $resmoments
             echo "Moments for H-HCl:" | tee -a $resmoments
-            python ${PYDIR}/testmoments.py $workdir/g0.bin 2>&1 | tee -a $resmoments
+            python ${PYDIR}/moments.py $workdir/g0.bin 2>&1 | tee -a $resmoments
             echo | tee -a $resmoments
             echo "Moments for Cl-HCl:" | tee -a $resmoments
-            python ${PYDIR}/testmoments.py $workdir/g1.bin 2>&1 | tee -a $resmoments
+            python ${PYDIR}/moments.py $workdir/g1.bin 2>&1 | tee -a $resmoments
             # mv temp files
             rm -f ./vec*.dat
             ;;
