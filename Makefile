@@ -125,12 +125,12 @@ test-all:
 clean: myclean
 
 myclean:
-	rm -f *.o fft/*.o 
+	rm -f *.o fft/*.o *.bin *.info
 	rm -f bgy3d
 .PHONY: myclean
 
 distclean:
-	rm -f *.o *.d  fft/*.o fft/*.d 
+	rm -f *.o *.d  fft/*.o fft/*.d
 	rm -f bgy3d
 .PHONY: distclean
 
