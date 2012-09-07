@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import bgy3d
 import contf
 import sys
