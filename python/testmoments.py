@@ -1,45 +1,45 @@
 
-import bgy3d as bgy
-import contf as ctf
+import bgy3d
+import contf
 import sys
 import os
 
-def checkfile(path):
+def from_file(path):
     """
-    Check the file suffix provided by path, then 
-    use different method to read data.
+    Check the file suffix provided  by path, then use different method
+    to read data.
     """
 
-    filename = path.split(os.sep)[-1]
+    filename = os.path.basename(path)
 
-    filesuffix = filename.split(".")[-1]
+    base, suffix = os.path.splitext(filename);
 
-    if filesuffix == 'bin':
-        g = bgy.from_file(path)
-    elif filesuffix == 'm':
-        g = ctf.m2dat(path)
+    if suffix == '.bin':
+        g = bgy3d.from_file(path)
+    elif suffix == '.m':
+        g = contf.m2dat(path)
     else:
         print 'Unknown file suffix.'
         exit()
 
     return g
 
-# main function
-if __name__ == "__main__":
+def moments(path):
+    """
+    Computes and prints moments 0-2 to stdout.
+    """
 
-    path = sys.argv[1]
-
-    g = checkfile(path)
+    g = from_file(path)
 
     h = 1.0 - g
 
-    m1 = bgy.moments1(h)
+    m1 = bgy3d.moments1(h)
 
     # Get the center of distribution
     center = m1[1:4] / m1[0]
 
     # Use center to compute 2nd momenta
-    m2 = bgy.moments2nd(h, center)
+    m2 = bgy3d.moments2nd(h, center)
 
     print "<1> = ", m1[0]
     print "<x> = ", m1[1] / m1[0]
@@ -52,3 +52,6 @@ if __name__ == "__main__":
     print "<x^2 - y^2> = ", m2[4] / m1[0]
     print "<r^2> = ", m2[5] / m1[0]
 
+# main function
+if __name__ == "__main__":
+    map(moments, sys.argv[1:])
