@@ -230,11 +230,11 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
       assert (!ierr);
       ierr = DACreateGlobalVector(da, &(BHD->F[0][1][dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fH_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F_l[0][0][dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F_l[1][1][dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO_l[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F_l[0][1][dim])); // CHKERRQ(ierr);
       assert (!ierr);
       ierr = DACreateGlobalVector(da, &(BHD->v[dim])); // CHKERRQ(ierr);
       assert (!ierr);
@@ -1159,9 +1159,9 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
   VecSet(BHD->ucHO, 0.0);
   FOR_DIM
     {
-      VecSet(BHD->fH_l[dim],0.0);
-      VecSet(BHD->fO_l[dim],0.0);
-      VecSet(BHD->fHO_l[dim],0.0);
+      VecSet(BHD->F_l[0][0][dim],0.0);
+      VecSet(BHD->F_l[1][1][dim],0.0);
+      VecSet(BHD->F_l[0][1][dim],0.0);
     }
 
 
@@ -1172,8 +1172,8 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
 /*   DAVecGetArray(da, BHD->uc[1], &ucO_vec); */
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->fH_l[dim], &fHl_vec[dim]);
-      DAVecGetArray(da, BHD->fO_l[dim], &fOl_vec[dim]);
+      DAVecGetArray(da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
+      DAVecGetArray(da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
     }
 
   /* loop over local portion of grid */

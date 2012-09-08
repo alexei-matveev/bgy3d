@@ -93,7 +93,7 @@ typedef struct State
    */
   DA da;
   Vec F[2][2][3];
-  Vec fH_l[3], fO_l[3], fHO_l[3];
+  Vec F_l[2][2][3];
   Vec v[3];
   Vec g2[2][2];                 /* Site-site  distributions. Used only
                                    in the solute-solvent solvers. */

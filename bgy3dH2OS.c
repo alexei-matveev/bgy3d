@@ -93,9 +93,9 @@ static State initialize_state (const ProblemData *PD)
       ierr = DACreateGlobalVector (da, &BHD.F[0][0][dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.F[1][1][dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.F[0][1][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.fH_l[dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.fO_l[dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.fHO_l[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F_l[0][0][dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F_l[1][1][dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F_l[0][1][dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.v[dim]); assert (!ierr);
     }
 
@@ -166,9 +166,9 @@ static void finalize_state (State *BHD)
       VecDestroy(BHD->F[0][0][dim]);
       VecDestroy(BHD->F[1][1][dim]);
       VecDestroy(BHD->F[0][1][dim]);
-      VecDestroy(BHD->fH_l[dim]);
-      VecDestroy(BHD->fO_l[dim]);
-      VecDestroy(BHD->fHO_l[dim]);
+      VecDestroy(BHD->F_l[0][0][dim]);
+      VecDestroy(BHD->F_l[1][1][dim]);
+      VecDestroy(BHD->F_l[0][1][dim]);
       VecDestroy(BHD->v[dim]);
       bgy3d_fft_free (BHD->fg2HH_fft[dim]);
       bgy3d_fft_free (BHD->fg2OO_fft[dim]);
@@ -548,25 +548,25 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       VecSet (BHD->F[0][0][dim], 0.0);
       VecSet (BHD->F[1][1][dim], 0.0);
       VecSet (BHD->F[0][1][dim], 0.0);
-      VecSet (BHD->fH_l[dim], 0.0);
-      VecSet (BHD->fO_l[dim], 0.0);
-      VecSet (BHD->fHO_l[dim], 0.0);
+      VecSet (BHD->F_l[0][0][dim], 0.0);
+      VecSet (BHD->F_l[1][1][dim], 0.0);
+      VecSet (BHD->F_l[0][1][dim], 0.0);
     }
 
   /* Compute Coulomb from fft part */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->fO_l, BHD->ucO_fft, BHD->LJ_paramsO, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->fH_l, BHD->ucH_fft, BHD->LJ_paramsH, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->fHO_l, BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->ucO_fft, BHD->LJ_paramsO, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->ucH_fft, BHD->LJ_paramsH, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
 /* XXX: uc[1] and uc[0] will be updated by RecomputeInitialSoluteData_XXX(),
  *      ucHO is not used at all */
-  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft, q2O, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->fH_l, BHD->ucH_fft, q2H, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft, q2HO, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->F_l[1][1], BHD->ucO_fft, q2O, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->F_l[0][0], BHD->ucH_fft, q2H, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->F_l[0][1], BHD->ucHO_fft, q2HO, damp0);
 /*   FOR_DIM */
 /*     { */
-/*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->fO_l[dim]); */
-/*       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->fH_l[dim]); */
-/*       VecAXPY(BHD->F[0][1][dim], 1.0, BHD->fHO_l[dim]); */
+/*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]); */
+/*       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->F_l[0][0][dim]); */
+/*       VecAXPY(BHD->F[0][1][dim], 1.0, BHD->F_l[0][1][dim]); */
 /*     } */
 
   FOR_DIM
@@ -574,9 +574,9 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       DAVecGetArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
       DAVecGetArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
       DAVecGetArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
-      DAVecGetArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
-      DAVecGetArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
-      DAVecGetArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
+      DAVecGetArray (da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
+      DAVecGetArray (da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
+      DAVecGetArray (da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
 /*   VecSet(BHD->g2[0][0],0.0); */
 /*   VecSet(BHD->g2[1][1],0.0); */
@@ -668,9 +668,9 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       DAVecRestoreArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
       DAVecRestoreArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
       DAVecRestoreArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
-      DAVecRestoreArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
-      DAVecRestoreArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
-      DAVecRestoreArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
+      DAVecRestoreArray (da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
+      DAVecRestoreArray (da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
+      DAVecRestoreArray (da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
 /*   DAVecRestoreArray(da, BHD->g2[0][0], &gH_vec); */
 /*   DAVecRestoreArray(da, BHD->g2[1][1], &gO_vec); */
@@ -700,11 +700,11 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                               BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->fO_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->F_l[1][1][dim]);
       assert (!err);
 
       /* Next F_coulomb_long * g2 - F_coulomb_long: */
-      VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
+      VecAXPY(BHD->v[dim], -1.0, BHD->F_l[1][1][dim]);
 
       /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
@@ -718,10 +718,10 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch);
 
       /* Coulomb long */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->fH_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->F_l[0][0][dim]);
       assert (!err);
 
-      VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
+      VecAXPY(BHD->v[dim], -1.0, BHD->F_l[0][0][dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
                              BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch);
 
@@ -733,10 +733,10 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch);
 
       /* Coulomb long */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->fHO_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->F_l[0][1][dim]);
       assert (!err);
 
-      VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
+      VecAXPY(BHD->v[dim], -1.0, BHD->F_l[0][1][dim]);
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
                              BHD->v[dim], BHD->fg2HOl_fft[dim], BHD->fft_scratch);
     }
@@ -1335,9 +1335,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
          moved from  the body of the  above func (because  it does not
          belong into solute code): */
       FOR_DIM {
-        VecSet(BHD.fH_l[dim], 0.0);
-        VecSet(BHD.fO_l[dim], 0.0);
-        VecSet(BHD.fHO_l[dim], 0.0); /* What is it used for? */
+        VecSet(BHD.F_l[0][0][dim], 0.0);
+        VecSet(BHD.F_l[1][1][dim], 0.0);
+        VecSet(BHD.F_l[0][1][dim], 0.0); /* What is it used for? */
       }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1705,7 +1705,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   g0H=BHD.g_ini[0];
   g0O=BHD.g_ini[1];
 
-/*   VecView(BHD.fHO_l[0],PETSC_VIEWER_STDERR_WORLD);   */
+/*   VecView(BHD.F_l[0][1][0],PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
 
   /* set initial guess*/
@@ -1760,9 +1760,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
          moved from the body of the bgy3d_solute_field() func (because
          it does not belong into solute code): */
       FOR_DIM {
-        VecSet(BHD.fH_l[dim], 0.0);
-        VecSet(BHD.fO_l[dim], 0.0);
-        VecSet(BHD.fHO_l[dim], 0.0); /* What is it used for? */
+        VecSet(BHD.F_l[0][0][dim], 0.0);
+        VecSet(BHD.F_l[1][1][dim], 0.0);
+        VecSet(BHD.F_l[0][1][dim], 0.0); /* What is it used for? */
       }
 
       //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
