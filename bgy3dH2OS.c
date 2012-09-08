@@ -692,15 +692,6 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       PetscErrorCode err;
 
       /* O-O. First (F_LJ + F_coulomb_short) * g2: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->v[dim]);
-      assert (!err);
-
-      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->fO[dim]);
-      assert (!err);
-
-      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->g2[1][1]);
-      assert (!err);
-
       err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->fO[dim]);
       assert (!err);
 
