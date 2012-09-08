@@ -68,10 +68,10 @@ static State initialize_state (const ProblemData *PD)
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
 #ifndef L_BOUNDARY_MG
-  bgy3d_fft_init_da (PD->N, &(BHD.fft_plan_fw), &(BHD.fft_plan_bw), &(BHD.da), NULL);
+  bgy3d_fft_init_da (PD->N, &BHD.fft_plan_fw, &BHD.fft_plan_bw, &BHD.da, NULL);
 #else
   /* multigrid, apparently needs two descriptors: */
-  bgy3d_fft_init_da (PD->N, &(BHD.fft_plan_fw), &(BHD.fft_plan_bw), &(BHD.da), &(BHD.da_dmmg));
+  bgy3d_fft_init_da (PD->N, &BHD.fft_plan_fw, &BHD.fft_plan_bw, &BHD.da, &BHD.da_dmmg);
 #endif
 
   const DA da = BHD.da;         /* shorter alias */
@@ -104,9 +104,9 @@ static State initialize_state (const ProblemData *PD)
 
 #ifdef L_BOUNDARY
    /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD.M));
-  DACreateGlobalVector(da, &(BHD.x_lapl[0]));
-  DACreateGlobalVector(da, &(BHD.x_lapl[1]));
+  DAGetMatrix( da, MATMPIAIJ, &BHD.M);
+  DACreateGlobalVector(da, &BHD.x_lapl[0]);
+  DACreateGlobalVector(da, &BHD.x_lapl[1]);
   VecSet(BHD.x_lapl[0], 0.0);
   VecSet(BHD.x_lapl[1], 0.0);
 #endif
@@ -238,7 +238,7 @@ void InitializeLaplaceMatrix(State *BHD, real zpad)
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   FOR_DIM
     N[dim] = PD->N[dim];
@@ -308,8 +308,8 @@ void InitializeKSPSolver(State *BHD)
 
 
   /* Create ksp environment */
-  KSPCreate( PETSC_COMM_WORLD, &(BHD->ksp));
-  KSPGetPC(BHD->ksp, &(pc));
+  KSPCreate( PETSC_COMM_WORLD, &BHD->ksp);
+  KSPGetPC(BHD->ksp, &pc);
   KSPSetTolerances(BHD->ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
 
   /* Set Matrix */
@@ -341,7 +341,7 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
   border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*zpad))/PD->h[0]/2. );
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   DAVecGetArray(da, gfrom, &gfrom_vec);
   DAVecGetArray(da, gto, &gto_vec);
@@ -448,7 +448,7 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
   xg= (real*) malloc(sizeof(*xg));
   g= (real*) malloc(sizeof(*g));
 
-  while( fscanf(fp,"%lf %lf", &(xg[index]), &(g[index])) == 2)
+  while( fscanf(fp,"%lf %lf", &xg[index], &g[index]) == 2)
     {
       index++;
       xg= (real*) realloc(xg, (index+1)*sizeof(*xg));
@@ -463,7 +463,7 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
   /* interpolate to 3d grid */
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   DAVecGetArray(da, g2, &g2_vec);
 
@@ -789,7 +789,7 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
   beta = PD->beta;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
 
@@ -814,8 +814,8 @@ void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
 /*   DAVecGetArray(da, BHD->uc[1], &ucO_vec); */
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
-      DAVecGetArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
+      DAVecGetArray(da, BHD->fH_l[dim], &fHl_vec[dim]);
+      DAVecGetArray(da, BHD->fO_l[dim], &fOl_vec[dim]);
     }
 
   /* loop over local portion of grid */
@@ -936,7 +936,7 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
   const real scale = fac / L3;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
   int ijk = 0;
@@ -1033,7 +1033,7 @@ static void apply (const DA da,
   int x[3], n[3];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   int n3 = n[0] * n[1] * n[2];
 
@@ -1337,8 +1337,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
   for (int i = 0; i < 2; i++) {
       g_fft[i] = bgy3d_fft_malloc (BHD.da);
 
-      DACreateGlobalVector (BHD.da, &(g[i]));
-      DACreateGlobalVector (BHD.da, &(dg[i]));
+      DACreateGlobalVector (BHD.da, &g[i]);
+      DACreateGlobalVector (BHD.da, &dg[i]);
   }
 
   /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
