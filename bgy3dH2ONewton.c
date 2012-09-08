@@ -201,9 +201,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   DACreateGlobalVector(BHD->da_newton, &(BHD->pre));
   FOR_DIM
     {
-      DACreateGlobalVector(da, &(BHD->fH[dim]));
-      DACreateGlobalVector(da, &(BHD->fO[dim]));
-      DACreateGlobalVector(da, &(BHD->fHO[dim]));
+      DACreateGlobalVector(da, &(BHD->F[0][0][dim]));
+      DACreateGlobalVector(da, &(BHD->F[1][1][dim]));
+      DACreateGlobalVector(da, &(BHD->F[0][1][dim]));
       DACreateGlobalVector(da, &(BHD->fH_l[dim]));
       DACreateGlobalVector(da, &(BHD->fO_l[dim]));
       DACreateGlobalVector(da, &(BHD->fHO_l[dim]));
@@ -213,9 +213,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   FOR_DIM
     {
-      VecSet(BHD->fH[dim],0.0);
-      VecSet(BHD->fO[dim],0.0);
-      VecSet(BHD->fHO[dim],0.0);
+      VecSet(BHD->F[0][0][dim],0.0);
+      VecSet(BHD->F[1][1][dim],0.0);
+      VecSet(BHD->F[0][1][dim],0.0);
       VecSet(BHD->fH_l[dim],0.0);
       VecSet(BHD->fO_l[dim],0.0);
       VecSet(BHD->fHO_l[dim],0.0);
@@ -232,9 +232,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->fH[dim], &(fH_vec[dim]));
-      DAVecGetArray(da, BHD->fO[dim], &(fO_vec[dim]));
-      DAVecGetArray(da, BHD->fHO[dim], &(fHO_vec[dim]));
+      DAVecGetArray(da, BHD->F[0][0][dim], &(fH_vec[dim]));
+      DAVecGetArray(da, BHD->F[1][1][dim], &(fO_vec[dim]));
+      DAVecGetArray(da, BHD->F[0][1][dim], &(fHO_vec[dim]));
       DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
       DAVecGetArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
       DAVecGetArray(da, BHD->fHO_l[dim], &(fHOl_vec[dim]));
@@ -342,9 +342,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   DAVecRestoreArray(BHD->da_newton, BHD->pre, (void*) &pre_vec);
   FOR_DIM
     {
-      DAVecRestoreArray(da, BHD->fH[dim], &(fH_vec[dim]));
-      DAVecRestoreArray(da, BHD->fO[dim], &(fO_vec[dim]));
-      DAVecRestoreArray(da, BHD->fHO[dim], &(fHO_vec[dim]));
+      DAVecRestoreArray(da, BHD->F[0][0][dim], &(fH_vec[dim]));
+      DAVecRestoreArray(da, BHD->F[1][1][dim], &(fO_vec[dim]));
+      DAVecRestoreArray(da, BHD->F[0][1][dim], &(fHO_vec[dim]));
       DAVecRestoreArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
       DAVecRestoreArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
       DAVecRestoreArray(da, BHD->fHO_l[dim], &(fHOl_vec[dim]));
@@ -394,9 +394,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   FOR_DIM
     {
-      VecAXPY(BHD->fHO[dim], 1.0, BHD->fHO_l[dim]);
-      VecAXPY(BHD->fH[dim], 1.0, BHD->fH_l[dim]);
-      VecAXPY(BHD->fO[dim], 1.0, BHD->fO_l[dim]);
+      VecAXPY(BHD->F[0][1][dim], 1.0, BHD->fHO_l[dim]);
+      VecAXPY(BHD->F[0][0][dim], 1.0, BHD->fH_l[dim]);
+      VecAXPY(BHD->F[1][1][dim], 1.0, BHD->fO_l[dim]);
 	}
 
   free(lz);
@@ -477,9 +477,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "Computing dgHO, ");
   VecCopy(dgHO, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->fO, BHD->fO_l, gO, gHO,
+		       BHD->F[1][1], BHD->fO_l, gO, gHO,
 		       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
-		       BHD->fHO, BHD->fHO_l, gHO, gH,
+		       BHD->F[0][1], BHD->fHO_l, gHO, gH,
 		       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
 		       dgHO, BHD->f);
   VecAXPY(dgHO, BHD->PD->beta, BHD->ucHO);
@@ -493,12 +493,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecAXPY(dgHO, 2.0, help2);
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra(BHD, BHD->fHO, BHD->fHO_l, tHO, PETSC_NULL,
+  Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->fHO_l, tHO, PETSC_NULL,
 		       BHD->ucHO_fft, r_HH, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gHO, r_HH, help2, help2 , tHO, BHD->f, zpad);
   VecAXPY(dgHO, 1.0, help2);
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra(BHD, BHD->fO, BHD->fO_l, tO, PETSC_NULL,
+  Compute_dg_H2O_intra(BHD, BHD->F[1][1], BHD->fO_l, tO, PETSC_NULL,
 		       BHD->ucO_fft, r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gO, r_HO, help2, help2 , tHO, BHD->f, zpad);
   VecAXPY(dgHO, 1.0, help2);
@@ -507,12 +507,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   /* tO = gHO/int(gHO wHH) */
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HH, tHO, BHD->f);
-  Compute_dg_H2O_intraIII(BHD, BHD->fHO, BHD->fHO_l, tO, tHO,
+  Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->fHO_l, tO, tHO,
 			 BHD->ucHO_fft, r_HH, help2, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
   Compute_dg_H2O_normalization_intra( BHD, gO, r_HO, tHO, BHD->f);
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intraIII(BHD, BHD->fO, BHD->fO_l, tO, tHO,
+  Compute_dg_H2O_intraIII(BHD, BHD->F[1][1], BHD->fO_l, tO, tHO,
 			 BHD->ucO_fft, r_HO, help2, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
 #endif
@@ -528,9 +528,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->fHO, BHD->fHO_l, gHO, gHO,
+		       BHD->F[0][1], BHD->fHO_l, gHO, gHO,
 		       BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
-		       BHD->fH, BHD->fH_l, gH, gH,
+		       BHD->F[0][0], BHD->fH_l, gH, gH,
 		       BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
 		       dgH, BHD->f);
   VecAXPY(dgH, BHD->PD->beta, BHD->uc[0]);
@@ -549,12 +549,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tH , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra(BHD, BHD->fH, BHD->fH_l, tH, PETSC_NULL,
+  Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->fH_l, tH, PETSC_NULL,
 		       BHD->ucH_fft, r_HH, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gH, r_HH, help2, help2 , tH, BHD->f, zpad);
   VecAXPY(dgH, 1.0, help2);
   Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra(BHD, BHD->fHO, BHD->fHO_l, tHO, PETSC_NULL,
+  Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->fHO_l, tHO, PETSC_NULL,
 		       BHD->ucHO_fft, r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gHO, r_HO, help2, help2 , tH, BHD->f, zpad);
   VecAXPY(dgH, 1.0, help2);
@@ -563,12 +563,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   /* tO = gH/int(gH wHH) */
   Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gH, r_HH, tH, BHD->f);
-  Compute_dg_H2O_intraIII(BHD, BHD->fH, BHD->fH_l, tO, tH,
+  Compute_dg_H2O_intraIII(BHD, BHD->F[0][0], BHD->fH_l, tO, tH,
 			 BHD->ucH_fft, r_HH, help2, BHD->f);
   VecAXPY(dgH, 1.0, help2);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tH, BHD->f);
   Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intraIII(BHD, BHD->fHO, BHD->fHO_l, tHO, tH,
+  Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->fHO_l, tHO, tH,
 			 BHD->ucHO_fft, r_HO, help2, BHD->f);
   VecAXPY(dgH, 1.0, help2);
 #endif
@@ -584,9 +584,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->fHO, BHD->fHO_l, gHO, gHO,
+		       BHD->F[0][1], BHD->fHO_l, gHO, gHO,
 		       BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
-		       BHD->fO, BHD->fO_l, gO, gO,
+		       BHD->F[1][1], BHD->fO_l, gO, gO,
 		       BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
 		       dgO, BHD->f);
   VecAXPY(dgO, BHD->PD->beta, BHD->uc[1]);
@@ -600,7 +600,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecAXPY(dgO, 2.0, help2);
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gHO, tHO , help2, BHD->f, zpad);
-  Compute_dg_H2O_intra(BHD, BHD->fHO, BHD->fHO_l, tHO, PETSC_NULL,
+  Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->fHO_l, tHO, PETSC_NULL,
 		       BHD->ucHO_fft, r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gHO, r_HO, help2, help2 , tO, BHD->f, zpad);
   VecAXPY(dgO, 2.0, help2);
@@ -608,7 +608,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #ifdef INTRA2
   Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, BHD->f);
-  Compute_dg_H2O_intraIII(BHD, BHD->fHO, BHD->fHO_l, tHO, tO,
+  Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->fHO_l, tHO, tO,
 			 BHD->ucHO_fft, r_HO, help2, BHD->f);
   VecAXPY(dgO, 2.0, help2);
 #endif

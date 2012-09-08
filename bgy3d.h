@@ -92,7 +92,7 @@ typedef struct State
    * g2[2][2] with a constrain that g2[0][1] == g2[1][0].
    */
   DA da;
-  Vec fH[3],fO[3],fHO[3];
+  Vec F[2][2][3];
   Vec fH_l[3], fO_l[3], fHO_l[3];
   Vec v[3];
   Vec g2[2][2];                 /* Site-site  distributions. Used only

@@ -224,11 +224,11 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   FOR_DIM
     {
 
-      ierr = DACreateGlobalVector(da, &(BHD->fH[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F[0][0][dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fO[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F[1][1][dim])); // CHKERRQ(ierr);
       assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD->fHO[dim])); // CHKERRQ(ierr);
+      ierr = DACreateGlobalVector(da, &(BHD->F[0][1][dim])); // CHKERRQ(ierr);
       assert (!ierr);
       ierr = DACreateGlobalVector(da, &(BHD->fH_l[dim])); // CHKERRQ(ierr);
       assert (!ierr);

@@ -90,9 +90,9 @@ static State initialize_state (const ProblemData *PD)
 
   FOR_DIM
     {
-      ierr = DACreateGlobalVector (da, &BHD.fH[dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.fO[dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.fHO[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F[0][0][dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F[1][1][dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.F[0][1][dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.fH_l[dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.fO_l[dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.fHO_l[dim]); assert (!ierr);
@@ -163,9 +163,9 @@ static void finalize_state (State *BHD)
 
   FOR_DIM
     {
-      VecDestroy(BHD->fH[dim]);
-      VecDestroy(BHD->fO[dim]);
-      VecDestroy(BHD->fHO[dim]);
+      VecDestroy(BHD->F[0][0][dim]);
+      VecDestroy(BHD->F[1][1][dim]);
+      VecDestroy(BHD->F[0][1][dim]);
       VecDestroy(BHD->fH_l[dim]);
       VecDestroy(BHD->fO_l[dim]);
       VecDestroy(BHD->fHO_l[dim]);
@@ -545,18 +545,18 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
   FOR_DIM
     {
-      VecSet (BHD->fH[dim], 0.0);
-      VecSet (BHD->fO[dim], 0.0);
-      VecSet (BHD->fHO[dim], 0.0);
+      VecSet (BHD->F[0][0][dim], 0.0);
+      VecSet (BHD->F[1][1][dim], 0.0);
+      VecSet (BHD->F[0][1][dim], 0.0);
       VecSet (BHD->fH_l[dim], 0.0);
       VecSet (BHD->fO_l[dim], 0.0);
       VecSet (BHD->fHO_l[dim], 0.0);
     }
 
   /* Compute Coulomb from fft part */
-/*   ComputeFFTfromCoulombII(BHD, BHD->fO, BHD->fO_l, BHD->ucO_fft, BHD->LJ_paramsO, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->fH, BHD->fH_l, BHD->ucH_fft, BHD->LJ_paramsH, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->fHO, BHD->fHO_l, BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->fO_l, BHD->ucO_fft, BHD->LJ_paramsO, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->fH_l, BHD->ucH_fft, BHD->LJ_paramsH, damp); */
+/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->fHO_l, BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
 /* XXX: uc[1] and uc[0] will be updated by RecomputeInitialSoluteData_XXX(),
  *      ucHO is not used at all */
   ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->fO_l, BHD->ucO_fft, q2O, damp0);
@@ -564,16 +564,16 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->fHO_l, BHD->ucHO_fft, q2HO, damp0);
 /*   FOR_DIM */
 /*     { */
-/*       VecAXPY(BHD->fO[dim], 1.0, BHD->fO_l[dim]); */
-/*       VecAXPY(BHD->fH[dim], 1.0, BHD->fH_l[dim]); */
-/*       VecAXPY(BHD->fHO[dim], 1.0, BHD->fHO_l[dim]); */
+/*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->fO_l[dim]); */
+/*       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->fH_l[dim]); */
+/*       VecAXPY(BHD->F[0][1][dim], 1.0, BHD->fHO_l[dim]); */
 /*     } */
 
   FOR_DIM
     {
-      DAVecGetArray (da, BHD->fH[dim], &fH_vec[dim]);
-      DAVecGetArray (da, BHD->fO[dim], &fO_vec[dim]);
-      DAVecGetArray (da, BHD->fHO[dim], &fHO_vec[dim]);
+      DAVecGetArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
+      DAVecGetArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
+      DAVecGetArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
       DAVecGetArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
       DAVecGetArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
       DAVecGetArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
@@ -665,9 +665,9 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
   FOR_DIM
     {
-      DAVecRestoreArray (da, BHD->fH[dim], &fH_vec[dim]);
-      DAVecRestoreArray (da, BHD->fO[dim], &fO_vec[dim]);
-      DAVecRestoreArray (da, BHD->fHO[dim], &fHO_vec[dim]);
+      DAVecRestoreArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
+      DAVecRestoreArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
+      DAVecRestoreArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
       DAVecRestoreArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
       DAVecRestoreArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
       DAVecRestoreArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
@@ -692,7 +692,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       PetscErrorCode err;
 
       /* O-O. First (F_LJ + F_coulomb_short) * g2: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->fO[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->F[1][1][dim]);
       assert (!err);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
@@ -711,7 +711,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2OOl_fft[dim], BHD->fft_scratch);
 
       /* H-H. Repeat the same steps for HH pair ... */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->fH[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->F[0][0][dim]);
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
@@ -726,7 +726,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch);
 
       /* H-O. Finally for the H-O pair: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->fHO[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->F[0][1][dim]);
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
