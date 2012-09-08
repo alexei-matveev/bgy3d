@@ -83,11 +83,20 @@ void Molecule_free( real **x_M, int N);
 /*******************************************/
 typedef struct State
 {
+  /*
+   * In much of the code one refers  to the two sites by literal H and
+   * O, though the actual sites may be different.  Let us stick to the
+   * convention that data for H is  stored in first- and data for O is
+   * stored  in  second  position  of  an array.  For  symmetric  pair
+   * quantities  one may  chose  to store  them  in a  2x2 array,  say
+   * g2[2][2] with a constrain that g2[0][1] == g2[1][0].
+   */
   DA da;
   Vec fH[3],fO[3],fHO[3];
   Vec fH_l[3], fO_l[3], fHO_l[3];
   Vec v[3];
-  Vec g2H, g2O, g2HO;
+  Vec g2[2][2];                 /* Site-site  distributions. Used only
+                                   in the solute-solvent solvers. */
 
   Vec cH, cHO, cO;
 
@@ -97,13 +106,7 @@ typedef struct State
   /*
    * The solute  field for  each of the  two solvent sites  (scaled by
    * inverse  temperature beta)  is initially  put into  the following
-   * array.
-   *
-   * In much of the code one refers  to the two sites by literal H and
-   * O, though the actual sites may be different.  Let us stick to the
-   * convention that data for H is  stored in first- and data for O is
-   * stored  in second  position of  an  array. Here  in g_ini[0]  and
-   * g_ini[1] or uc[0] and uc[1], respectively.
+   * array:
    */
   Vec g_ini[2];                 /* Short-range  force   field  of  the
                                    solute   for  H   and  O   in  that

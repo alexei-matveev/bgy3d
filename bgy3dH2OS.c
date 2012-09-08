@@ -83,9 +83,9 @@ static State initialize_state (const ProblemData *PD)
   ierr = DACreateGlobalVector (da, &BHD.uc[0]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.uc[1]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.ucHO); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2H); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2O); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2HO); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2[0][0]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2[1][1]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2[0][1]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.pre); assert (!ierr);
 
   FOR_DIM
@@ -138,18 +138,18 @@ static State initialize_state (const ProblemData *PD)
 
 
   /* Read g^2  from file */
-/*   ReadPairDistribution(&BHD, "g2_OO", BHD.g2O); */
-/*   ReadPairDistribution(&BHD, "g2_HH", BHD.g2H); */
-/*   ReadPairDistribution(&BHD, "g2_HO", BHD.g2HO); */
+/*   ReadPairDistribution(&BHD, "g2_OO", BHD.g2[1][1]); */
+/*   ReadPairDistribution(&BHD, "g2_HH", BHD.g2[0][0]); */
+/*   ReadPairDistribution(&BHD, "g2_HO", BHD.g2[0][1]); */
 
 #ifdef CS2
-  ReadPairDistribution(&BHD, "g2C", BHD.g2O);
-  ReadPairDistribution(&BHD, "g2S", BHD.g2H);
-  ReadPairDistribution(&BHD, "g2CS", BHD.g2HO);
+  ReadPairDistribution(&BHD, "g2C", BHD.g2[1][1]);
+  ReadPairDistribution(&BHD, "g2S", BHD.g2[0][0]);
+  ReadPairDistribution(&BHD, "g2CS", BHD.g2[0][1]);
 #else
-  bgy3d_load_vec ("g00.bin", &BHD.g2H);
-  bgy3d_load_vec ("g11.bin", &BHD.g2O);
-  bgy3d_load_vec ("g01.bin", &BHD.g2HO);
+  bgy3d_load_vec ("g00.bin", &BHD.g2[0][0]);
+  bgy3d_load_vec ("g11.bin", &BHD.g2[1][1]);
+  bgy3d_load_vec ("g01.bin", &BHD.g2[0][1]);
 #endif
 
   return BHD;
@@ -196,9 +196,9 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->uc[0]);
   VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
-  VecDestroy(BHD->g2H);
-  VecDestroy(BHD->g2O);
-  VecDestroy(BHD->g2HO);
+  VecDestroy(BHD->g2[0][0]);
+  VecDestroy(BHD->g2[1][1]);
+  VecDestroy(BHD->g2[0][1]);
   VecDestroy(BHD->pre);
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
@@ -578,12 +578,12 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       DAVecGetArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
       DAVecGetArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
     }
-/*   VecSet(BHD->g2H,0.0); */
-/*   VecSet(BHD->g2O,0.0); */
-/*   VecSet(BHD->g2HO,0.0); */
-/*   DAVecGetArray(da, BHD->g2H, &gH_vec); */
-/*   DAVecGetArray(da, BHD->g2O, &gO_vec); */
-/*   DAVecGetArray(da, BHD->g2HO, &gHO_vec); */
+/*   VecSet(BHD->g2[0][0],0.0); */
+/*   VecSet(BHD->g2[1][1],0.0); */
+/*   VecSet(BHD->g2[0][1],0.0); */
+/*   DAVecGetArray(da, BHD->g2[0][0], &gH_vec); */
+/*   DAVecGetArray(da, BHD->g2[1][1], &gO_vec); */
+/*   DAVecGetArray(da, BHD->g2[0][1], &gHO_vec); */
 
   DAVecGetArray(da, BHD->v[0], &wHO_vec);
   DAVecGetArray(da, BHD->v[1], &wHH_vec);
@@ -672,9 +672,9 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       DAVecRestoreArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
       DAVecRestoreArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
     }
-/*   DAVecRestoreArray(da, BHD->g2H, &gH_vec); */
-/*   DAVecRestoreArray(da, BHD->g2O, &gO_vec); */
-/*   DAVecRestoreArray(da, BHD->g2HO, &gHO_vec); */
+/*   DAVecRestoreArray(da, BHD->g2[0][0], &gH_vec); */
+/*   DAVecRestoreArray(da, BHD->g2[1][1], &gO_vec); */
+/*   DAVecRestoreArray(da, BHD->g2[0][1], &gHO_vec); */
   DAVecRestoreArray(da, BHD->v[0], &wHO_vec);
   DAVecRestoreArray(da, BHD->v[1], &wHH_vec);
 
@@ -698,10 +698,10 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->fO[dim]);
       assert (!err);
 
-      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->g2O);
+      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->g2[1][1]);
       assert (!err);
 
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2O, BHD->fO[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->fO[dim]);
       assert (!err);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
@@ -709,7 +709,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                               BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->fO_l[dim]);
       assert (!err);
 
       /* Next F_coulomb_long * g2 - F_coulomb_long: */
@@ -720,14 +720,14 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2OOl_fft[dim], BHD->fft_scratch);
 
       /* H-H. Repeat the same steps for HH pair ... */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2H, BHD->fH[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->fH[dim]);
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
                              BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch);
 
       /* Coulomb long */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2H, BHD->fH_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->fH_l[dim]);
       assert (!err);
 
       VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
@@ -735,14 +735,14 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                              BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch);
 
       /* H-O. Finally for the H-O pair: */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2HO, BHD->fHO[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->fHO[dim]);
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
                              BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch);
 
       /* Coulomb long */
-      err = VecPointwiseMult (BHD->v[dim], BHD->g2HO, BHD->fHO_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->fHO_l[dim]);
       assert (!err);
 
       VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
@@ -1224,8 +1224,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
   VecSet(dg[1],0);
 
   if (bgy3d_getopt_test ("--from-g2")) {
-      ComputedgFromg (dg[0], g0[0], BHD.g2HO);
-      ComputedgFromg (dg[1], g0[1], BHD.g2O);
+      ComputedgFromg (dg[0], g0[0], BHD.g2[0][1]);
+      ComputedgFromg (dg[1], g0[1], BHD.g2[1][1]);
   }
 
   /* load initial configuration from file ??? */
@@ -1723,8 +1723,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("--from-g2")) {
-      ComputedgFromg (dgH, g0H, BHD.g2HO);
-      ComputedgFromg (dgO, g0O, BHD.g2O);
+      ComputedgFromg (dgH, g0H, BHD.g2[0][1]);
+      ComputedgFromg (dgO, g0O, BHD.g2[1][1]);
   }
 
   /* load initial configuration from file ??? */
@@ -1787,8 +1787,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       ComputeH2O_g( gO, g0O, dgO);
 
 
-  /*     VecCopy(BHD.g2HO, gH);  */
-/*       VecCopy(BHD.g2O, gO);  */
+  /*     VecCopy(BHD.g2[0][1], gH);  */
+/*       VecCopy(BHD.g2[1][1], gO);  */
 
       a=a0;
       a1=a0;

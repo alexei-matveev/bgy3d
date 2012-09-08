@@ -205,11 +205,11 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2H)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2[0][0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2O)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2[1][1])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->g2HO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->g2[0][1])); // CHKERRQ(ierr);
   assert (!ierr);
   DACreateGlobalVector(da, &(BHD->gH));
   DACreateGlobalVector(da, &(BHD->gO));
@@ -280,9 +280,9 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 
 
   /* Read g^2  from file */
-  ReadPairDistribution(BHD, "g2_OO", BHD->g2O);
-  ReadPairDistribution(BHD, "g2_HH", BHD->g2H);
-  ReadPairDistribution(BHD, "g2_HO", BHD->g2HO);
+  ReadPairDistribution(BHD, "g2_OO", BHD->g2[1][1]);
+  ReadPairDistribution(BHD, "g2_HH", BHD->g2[0][0]);
+  ReadPairDistribution(BHD, "g2_HO", BHD->g2[0][1]);
 
   /* Compute initial data */
   //RecomputeInitialFFTs(BHD, 1.0, 1.0);
