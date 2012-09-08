@@ -3,7 +3,8 @@
 
 (set! %load-path (cons "/users/alexei/darcs/bgy3d/guile" %load-path))
 
-(use-modules (ice-9 pretty-print))
+(use-modules (srfi srfi-1)              ; list manipulation
+             (ice-9 pretty-print))
 
 ;;
 ;; FIXME: at the moment this function only emulates the minimum of the
@@ -46,6 +47,36 @@
 ;; (write (slurp "guile/solutes.scm"))
 ;; (newline)
 
+;;
+;; Solute parameters are currently represented by a name and a list of
+;; sites:
+;;
+;; ("water"
+;;  (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
+;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
+;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
+;;
+(define (site-name site) (first site))
+(define (site-position site) (second site))
+(define (site-x site) (first (site-position site)))
+(define (site-y site) (second (site-position site)))
+(define (site-z site) (third (site-position site)))
+
+(define (print-xyz solute)
+  (let ((sites (second solute)))
+    (format #t "~a\n" (length sites))
+    (format #t "# ~a\n" (first solute))
+    (for-each (lambda (site)
+                (format #t "~a ~a ~a ~a\n"
+                        (site-name site)
+                        (site-x site)
+                        (site-y site)
+                        (site-z site)))
+              sites)))
+
+;; (for-each print-xyz (slurp (find-file "solutes.scm")))
+;; (exit 0)
+
 ;;;
 ;;; Ignores command line argumens. Petsc environment respects them:
 ;;;
@@ -73,6 +104,7 @@
     (for-each (lambda (solute)          ; process each solute ...
                 (display "Processing solute description:\n")
                 (pretty-print solute)
+                (print-xyz solute)
                 (bgy3d-run-solute solute settings))
               solutes)))                ; ... from this list
 
