@@ -113,3 +113,5 @@
 ;;; better interface:
 ;;;
 (old-main (command-line))
+
+(bgy3d-finalize)

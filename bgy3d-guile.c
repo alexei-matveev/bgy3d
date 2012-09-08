@@ -151,6 +151,16 @@ static SCM guile_run_solvent (SCM alist)
   return alist;
 }
 
+/* Finalize Petsc and MPI */
+static SCM guile_finalize (void)
+{
+  PetscErrorCode err = PetscFinalize();
+  assert (!err);
+
+  return scm_from_int (err);
+}
+
+
 static SCM guile_run_solute (SCM solute, SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
@@ -187,6 +197,7 @@ static void inner_main (void *closure, int argc, char **argv)
    */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-finalize", 0, 0, 0, guile_finalize);
 
   scm_shell (argc, argv);     /* never returns */
 }
