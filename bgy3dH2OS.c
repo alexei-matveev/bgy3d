@@ -77,26 +77,26 @@ static State initialize_state (const ProblemData *PD)
   const DA da = BHD.da;         /* shorter alias */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector(da, &(BHD.g_ini[0])); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g_ini[1])); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.gHO_ini)); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.uc[0])); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.uc[1])); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.ucHO)); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2H)); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2O)); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.g2HO)); assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD.pre)); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g_ini[0]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g_ini[1]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.gHO_ini); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.uc[0]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.uc[1]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.ucHO); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2H); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2O); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.g2HO); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.pre); assert (!ierr);
 
   FOR_DIM
     {
-      ierr = DACreateGlobalVector(da, &(BHD.fH[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fO[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fHO[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fH_l[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fO_l[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.fHO_l[dim])); assert (!ierr);
-      ierr = DACreateGlobalVector(da, &(BHD.v[dim])); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fH[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fO[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fHO[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fH_l[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fO_l[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.fHO_l[dim]); assert (!ierr);
+      ierr = DACreateGlobalVector (da, &BHD.v[dim]); assert (!ierr);
     }
 
 
@@ -497,12 +497,10 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 
 }
 
-void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
+void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 {
-  DA da;
-  PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
-  PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
-  // PetscScalar ***gO_vec, ***gH_vec, ***gHO_vec;
+  PetscScalar ***fH_vec[3], ***fO_vec[3], ***fHO_vec[3];
+  PetscScalar ***fHl_vec[3], ***fOl_vec[3], ***fHOl_vec[3];
   PetscScalar ***wHO_vec, ***wHH_vec;
   real r[3], r_s, h[3], interval[2], wconst_HO, wconst_HH, wG;
   int x[3], n[3], i[3];
@@ -522,9 +520,8 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
   q2O = BHD->LJ_paramsO[2];
   q2HO = BHD->LJ_paramsHO[2];
 
-
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
+  const DA da = BHD->da;
 
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing FFT data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -544,16 +541,16 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   FOR_DIM
     {
-      VecSet(BHD->fH[dim],0.0);
-      VecSet(BHD->fO[dim],0.0);
-      VecSet(BHD->fHO[dim],0.0);
-      VecSet(BHD->fH_l[dim],0.0);
-      VecSet(BHD->fO_l[dim],0.0);
-      VecSet(BHD->fHO_l[dim],0.0);
+      VecSet (BHD->fH[dim], 0.0);
+      VecSet (BHD->fO[dim], 0.0);
+      VecSet (BHD->fHO[dim], 0.0);
+      VecSet (BHD->fH_l[dim], 0.0);
+      VecSet (BHD->fO_l[dim], 0.0);
+      VecSet (BHD->fHO_l[dim], 0.0);
     }
 
   /* Compute Coulomb from fft part */
@@ -574,12 +571,12 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->fH[dim], &(fH_vec[dim]));
-      DAVecGetArray(da, BHD->fO[dim], &(fO_vec[dim]));
-      DAVecGetArray(da, BHD->fHO[dim], &(fHO_vec[dim]));
-      DAVecGetArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
-      DAVecGetArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
-      DAVecGetArray(da, BHD->fHO_l[dim], &(fHOl_vec[dim]));
+      DAVecGetArray (da, BHD->fH[dim], &fH_vec[dim]);
+      DAVecGetArray (da, BHD->fO[dim], &fO_vec[dim]);
+      DAVecGetArray (da, BHD->fHO[dim], &fHO_vec[dim]);
+      DAVecGetArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
+      DAVecGetArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
+      DAVecGetArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
     }
 /*   VecSet(BHD->g2H,0.0); */
 /*   VecSet(BHD->g2O,0.0); */
@@ -668,12 +665,12 @@ void RecomputeInitialFFTs(State *BHD, real damp, real damp_LJ)
 
   FOR_DIM
     {
-      DAVecRestoreArray(da, BHD->fH[dim], &(fH_vec[dim]));
-      DAVecRestoreArray(da, BHD->fO[dim], &(fO_vec[dim]));
-      DAVecRestoreArray(da, BHD->fHO[dim], &(fHO_vec[dim]));
-      DAVecRestoreArray(da, BHD->fH_l[dim], &(fHl_vec[dim]));
-      DAVecRestoreArray(da, BHD->fO_l[dim], &(fOl_vec[dim]));
-      DAVecRestoreArray(da, BHD->fHO_l[dim], &(fHOl_vec[dim]));
+      DAVecRestoreArray (da, BHD->fH[dim], &fH_vec[dim]);
+      DAVecRestoreArray (da, BHD->fO[dim], &fO_vec[dim]);
+      DAVecRestoreArray (da, BHD->fHO[dim], &fHO_vec[dim]);
+      DAVecRestoreArray (da, BHD->fH_l[dim], &fHl_vec[dim]);
+      DAVecRestoreArray (da, BHD->fO_l[dim], &fOl_vec[dim]);
+      DAVecRestoreArray (da, BHD->fHO_l[dim], &fHOl_vec[dim]);
     }
 /*   DAVecRestoreArray(da, BHD->g2H, &gH_vec); */
 /*   DAVecRestoreArray(da, BHD->g2O, &gO_vec); */
