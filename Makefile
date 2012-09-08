@@ -94,7 +94,7 @@ bgy3d-extra-objs = \
 	bgy3d-test.o \
 	bgy3dH2ONewton.o \
 	bgy3dH2OSNewton.o \
-	bgy3d_MG.o \
+	bgy3d-multigrid.o \
 
 fft3d-objs = \
 	fft/fft_3d.o \

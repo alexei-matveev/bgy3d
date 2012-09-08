@@ -4,7 +4,7 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-#include "bgy3d_MG.h"
+#include "bgy3d-multigrid.h"
 
 #ifdef L_BOUNDARY_MG
 /* Initialize M-Matrix with appropriate stencil */
