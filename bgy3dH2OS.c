@@ -678,55 +678,77 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   DAVecRestoreArray(da, BHD->v[0], &wHO_vec);
   DAVecRestoreArray(da, BHD->v[1], &wHH_vec);
 
-/*   VecView(BHD->v[0],PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);   */
+  /* Compute FFT(F * g^2).
 
-  /* Compute FFT(F*g^2) */
-  // XXX: F*g2 = (F_LJ + F_coulomb_short) * g2 + (F_coulomb_long * g2 - F_coulomb_long) + F_coulomb_long
-  // XXX: see (5.101) and (5.102) in Jager's thesis
-  // XXX: FFT(F_coulomb_long) has been calculated as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft by ComputeFFTfromCoulomb() above
+       F * g2 = (F_LJ + F_coulomb_short) * g2
+              + (F_coulomb_long * g2 - F_coulomb_long)
+              + F_coulomb_long
+
+     see  (5.101) and (5.102)  in Jager's  thesis. FFT(F_coulomb_long)
+     has been calculated  as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft
+     by ComputeFFTfromCoulomb() above */
   FOR_DIM
     {
-      /* OO */
-      // XXX: (F_LJ + F_coulomb_short) * g2 
-      VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO[dim]);
-      //VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
-      // XXX: FFT((F_LJ + F_coulomb_short) * g2) 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch);
-      /* Coulomb long */
-      // XXX: F_coulomb_long * g2 
-      VecPointwiseMult(BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
-      // XXX: F_coulomb_long * g2 - F_coulomb_long
+      PetscErrorCode err;
+
+      /* O-O. First (F_LJ + F_coulomb_short) * g2: */
+      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->v[dim]);
+      assert (!err);
+
+      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->fO[dim]);
+      assert (!err);
+
+      err = VecPointwiseMult (BHD->v[dim], BHD->v[dim], BHD->g2O);
+      assert (!err);
+
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2O, BHD->fO[dim]);
+      assert (!err);
+
+      /* Next FFT((F_LJ + F_coulomb_short) * g2): */
+      ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
+                              BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch);
+
+      /* Now Coulomb long. F_coulomb_long * g2: */
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2O, BHD->fO_l[dim]);
+      assert (!err);
+
+      /* Next F_coulomb_long * g2 - F_coulomb_long: */
       VecAXPY(BHD->v[dim], -1.0, BHD->fO_l[dim]);
-      // XXX: FFT(F_coulomb_long * g2 - F_coulomb_long)
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2OOl_fft[dim], BHD->fft_scratch);
-      /* HH */
-      VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH[dim]);
-      //VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch);
+
+      /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             BHD->v[dim], BHD->fg2OOl_fft[dim], BHD->fft_scratch);
+
+      /* H-H. Repeat the same steps for HH pair ... */
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2H, BHD->fH[dim]);
+      assert (!err);
+
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch);
+
       /* Coulomb long */
-      VecPointwiseMult(BHD->v[dim], BHD->g2H, BHD->fH_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2H, BHD->fH_l[dim]);
+      assert (!err);
+
       VecAXPY(BHD->v[dim], -1.0, BHD->fH_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch);
-      /* HO */
-      VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO[dim]);
-      //VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch);
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             BHD->v[dim], BHD->fg2HHl_fft[dim], BHD->fft_scratch);
+
+      /* H-O. Finally for the H-O pair: */
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2HO, BHD->fHO[dim]);
+      assert (!err);
+
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch);
+
       /* Coulomb long */
-      VecPointwiseMult(BHD->v[dim], BHD->g2HO, BHD->fHO_l[dim]);
+      err = VecPointwiseMult (BHD->v[dim], BHD->g2HO, BHD->fHO_l[dim]);
+      assert (!err);
+
       VecAXPY(BHD->v[dim], -1.0, BHD->fHO_l[dim]);
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], BHD->fg2HOl_fft[dim], BHD->fft_scratch);
-
-
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             BHD->v[dim], BHD->fg2HOl_fft[dim], BHD->fft_scratch);
     }
-
-
-
-
-
-/*   VecView(BHD->v[0],PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
 }
 
 void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
