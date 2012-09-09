@@ -526,96 +526,52 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 
 }
 
-void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
+static void  pair (State *BHD,
+                   const real LJ_params[3],
+                   const Vec g2,
+                   Vec F[3], Vec F_l[3],         /* intent(out) */
+                   fftw_complex *f_g2_fft[3], /* intent(out) */
+                   fftw_complex *fl_g2_fft[3], /* intent(out) */
+                   Vec u2, fftw_complex *u2_fft, /* intent(out) */
+                   real damp, real damp_LJ)
 {
-  PetscScalar ***fH_vec[3], ***fO_vec[3], ***fHO_vec[3];
-  PetscScalar ***fHl_vec[3], ***fOl_vec[3], ***fHOl_vec[3];
-  /* PetscScalar ***wHO_vec, ***wHH_vec; */
-  real r[3], r_s, h[3], interval[2]; //, wconst_HO, wconst_HH, wG;
+  PetscScalar ***f_vec[3];
+  PetscScalar ***fl_vec[3];
+  real r[3], r_s, h[3], interval[2];
   int x[3], n[3], i[3];
-  real epsilonH, epsilonO, epsilonHO;
-  real sigmaH, sigmaO, sigmaHO;
-  real q2H, q2O, q2HO;
 
-  epsilonH = BHD->LJ_paramsH[0];
-  epsilonO = BHD->LJ_paramsO[0];
-  epsilonHO = BHD->LJ_paramsHO[0];
-
-  sigmaH = BHD->LJ_paramsH[1];
-  sigmaO = BHD->LJ_paramsO[1];
-  sigmaHO = BHD->LJ_paramsHO[1];
-
-  q2H = BHD->LJ_paramsH[2];
-  q2O = BHD->LJ_paramsO[2];
-  q2HO = BHD->LJ_paramsHO[2];
+  const real epsilon = LJ_params[0]; /* geometric average of two */
+  const real sigma = LJ_params[1];   /* arithmetic average of two */
+  const real q2 = LJ_params[2];      /* charge product */
 
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
-
-  PetscPrintf(PETSC_COMM_WORLD,"Recomputing FFT data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
-
 
   FOR_DIM
     h[dim] = PD->h[dim];
 
   interval[0] = PD->interval[0];
 
-  /* wG = 1./h[0]; */
-  /* wconst_HO  = */
-  /*   4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HO/2./SQR(wG)+SQR(r_HO)*sqrt(M_PI)/2./wG); */
-  /* wconst_HO = 1./wconst_HO; */
-  /* wconst_HH  = */
-  /*   4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HH/2./SQR(wG)+SQR(r_HH)*sqrt(M_PI)/2./wG); */
-  /* wconst_HH = 1./wconst_HH; */
-
   /* Get local portion of the grid */
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   FOR_DIM
     {
-      VecSet (BHD->F[0][0][dim], 0.0);
-      VecSet (BHD->F[1][1][dim], 0.0);
-      VecSet (BHD->F[0][1][dim], 0.0);
-      VecSet (BHD->F_l[0][0][dim], 0.0);
-      VecSet (BHD->F_l[1][1][dim], 0.0);
-      VecSet (BHD->F_l[0][1][dim], 0.0);
+      VecSet (F[dim], 0.0);
+      VecSet (F_l[dim], 0.0);
     }
 
   /* Compute Coulomb from fft part */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1], BHD->LJ_paramsO, damp); */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0], BHD->LJ_paramsH, damp); */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1], BHD->LJ_paramsHO, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, F, F_l, u2_fft, LJ_params, damp); */
 
-  /* Here u2[1][1], u2[0][0], and u2[0][1] are intent(out) in the next
-     call: */
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1], q2O, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0], q2H, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1], q2HO, damp0);
-/*   FOR_DIM */
-/*     { */
-/*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]); */
-/*       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->F_l[0][0][dim]); */
-/*       VecAXPY(BHD->F[0][1][dim], 1.0, BHD->F_l[0][1][dim]); */
-/*     } */
+  /* Here u2 is intent(out) in the next call: */
+  ComputeFFTfromCoulomb(BHD, u2, F_l, u2_fft, q2, damp0);
 
   FOR_DIM
     {
-      DAVecGetArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
-      DAVecGetArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
-      DAVecGetArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
-      DAVecGetArray (da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
-      DAVecGetArray (da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
-      DAVecGetArray (da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
+      DAVecGetArray (da, F[dim], &f_vec[dim]);
+      DAVecGetArray (da, F_l[dim], &fl_vec[dim]);
     }
-/*   VecSet(BHD->g2[0][0],0.0); */
-/*   VecSet(BHD->g2[1][1],0.0); */
-/*   VecSet(BHD->g2[0][1],0.0); */
-/*   DAVecGetArray(da, BHD->g2[0][0], &gH_vec); */
-/*   DAVecGetArray(da, BHD->g2[1][1], &gO_vec); */
-/*   DAVecGetArray(da, BHD->g2[0][1], &gHO_vec); */
-
-  /* DAVecGetArray(da, BHD->v[0], &wHO_vec); */
-  /* DAVecGetArray(da, BHD->v[1], &wHH_vec); */
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -630,131 +586,101 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
           r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
-            /* Lennard-Jones */
-/*        gH_vec[i[2]][i[1]][i[0]] +=  */
-/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsH)); */
-/*        gO_vec[i[2]][i[1]][i[0]] +=  */
-/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsO)); */
-/*        gHO_vec[i[2]][i[1]][i[0]] +=  */
-/*          exp(-damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsHO)); */
-
-
-          /* omega_HH + omega_HO */
-/*        wHO_vec[i[2]][i[1]][i[0]] = wconst_HO * exp(-SQR(wG)*SQR(r_s-r_HO)); */
-/*        wHH_vec[i[2]][i[1]][i[0]] = wconst_HH * exp(-SQR(wG)*SQR(r_s-r_HH)); */
-/*        wHO_vec[i[2]][i[1]][i[0]] = damp * Coulomb_long( r_s, BHD->LJ_paramsO); */
-
-           FOR_DIM
+          FOR_DIM
             {
               /* Lennard-Jones */
-              fH_vec[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
-              fO_vec[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
-              fHO_vec[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
-
-
+              f_vec[dim][i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
               /* Coulomb short */
-              fH_vec[dim][i[2]][i[1]][i[0]] +=
-                damp * Coulomb_short_grad( r_s, r[dim], q2H);
-              fO_vec[dim][i[2]][i[1]][i[0]] +=
-                damp * Coulomb_short_grad( r_s, r[dim], q2O);
-              fHO_vec[dim][i[2]][i[1]][i[0]] +=
-                damp * Coulomb_short_grad( r_s, r[dim], q2HO);
-
-              /* Coulomb long */
-/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-              /* Coulomb long */
- /*           fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-              /* Coulomb */
-/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-
+              f_vec[dim][i[2]][i[1]][i[0]] +=
+                damp * Coulomb_short_grad( r_s, r[dim], q2);
             }
         }
 
   FOR_DIM
     {
-      DAVecRestoreArray (da, BHD->F[0][0][dim], &fH_vec[dim]);
-      DAVecRestoreArray (da, BHD->F[1][1][dim], &fO_vec[dim]);
-      DAVecRestoreArray (da, BHD->F[0][1][dim], &fHO_vec[dim]);
-      DAVecRestoreArray (da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
-      DAVecRestoreArray (da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
-      DAVecRestoreArray (da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
+      DAVecRestoreArray (da, F[dim], &f_vec[dim]);
+      DAVecRestoreArray (da, F_l[dim], &fl_vec[dim]);
     }
-  /* DAVecRestoreArray(da, BHD->g2[0][0], &gH_vec); */
-  /* DAVecRestoreArray(da, BHD->g2[1][1], &gO_vec); */
-  /* DAVecRestoreArray(da, BHD->g2[0][1], &gHO_vec); */
-  /* DAVecRestoreArray(da, BHD->v[0], &wHO_vec); */
-  /* DAVecRestoreArray(da, BHD->v[1], &wHH_vec); */
 
   /* Compute FFT(F * g^2).
 
-       F * g2 = (F_LJ + F_coulomb_short) * g2
-              + (F_coulomb_long * g2 - F_coulomb_long)
-              + F_coulomb_long
+     F * g2 = (F_LJ + F_coulomb_short) * g2
+            + (F_coulomb_long * g2 - F_coulomb_long)
+            + F_coulomb_long
 
      see  (5.101) and (5.102)  in Jager's  thesis. FFT(F_coulomb_long)
-     has been calculated  as BHD->u2_fft[0][0], BHD->u2_fft[1][1], BHD->u2_fft[0][1]
-     by  ComputeFFTfromCoulomb() above.  The code  needs at  least one
-     work vector, use this: */
+     has been  calculated as u2_fft  by ComputeFFTfromCoulomb() above.
+     The code needs at least one work vector, use this: */
   Vec work = BHD->v[0];
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++) {
-      assert (BHD->g2[j][i] == BHD->g2[i][j]);
-      FOR_DIM
-        {
-          assert (BHD->F[j][i][dim] == BHD->F[i][j][dim]);
-          assert (BHD->F_l[j][i][dim] == BHD->F_l[i][j][dim]);
-          assert (BHD->f_g2_fft[j][i][dim] == BHD->f_g2_fft[i][j][dim]);
-          assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
+  FOR_DIM
+    {
+      PetscErrorCode err;
 
-          PetscErrorCode err;
+      /* First (F_LJ + F_coulomb_short) * g2: */
+      err = VecPointwiseMult (work, g2, F[dim]);
+      assert (!err);
 
-          /* First (F_LJ + F_coulomb_short) * g2: */
-          err = VecPointwiseMult (work,
-                                  BHD->g2[i][j], BHD->F[i][j][dim]);
-          assert (!err);
+      /* Next FFT((F_LJ + F_coulomb_short) * g2): */
+      ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
+                              work, f_g2_fft[dim],
+                              BHD->fft_scratch);
 
-          /* Next FFT((F_LJ + F_coulomb_short) * g2): */
-          ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                                  work, BHD->f_g2_fft[i][j][dim],
-                                  BHD->fft_scratch);
+      /* Now Coulomb long. F_coulomb_long * g2: */
+      err = VecPointwiseMult (work, g2, F_l[dim]);
+      assert (!err);
 
-          /* Now Coulomb long. F_coulomb_long * g2: */
-          err = VecPointwiseMult (work,
-                                  BHD->g2[i][j], BHD->F_l[i][j][dim]);
-          assert (!err);
+      /* Next F_coulomb_long * g2 - F_coulomb_long: */
+      VecAXPY(work, -1.0, F_l[dim]);
 
-          /* Next F_coulomb_long * g2 - F_coulomb_long: */
-          VecAXPY(work, -1.0, BHD->F_l[i][j][dim]);
-
-          /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
-          ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                                 work, BHD->fl_g2_fft[i][j][dim],
-                                 BHD->fft_scratch);
-        }
+      /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
+      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
+                             work, fl_g2_fft[dim],
+                             BHD->fft_scratch);
     }
+}
+
+void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
+{
+  real ff_params[3];
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Recomputing FFT data with damping factor %f (damp_LJ=%f)\n",
+               damp, damp_LJ);
+
+  /* Over all distinct solvent site pairs: */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* For   debug  only,   check   the  symmetry   of  the   pair
+           quantities: */
+        if (1)
+          {
+            assert (BHD->g2[j][i] == BHD->g2[i][j]);
+            FOR_DIM
+              {
+                assert (BHD->F[j][i][dim] == BHD->F[i][j][dim]);
+                assert (BHD->F_l[j][i][dim] == BHD->F_l[i][j][dim]);
+                assert (BHD->f_g2_fft[j][i][dim] == BHD->f_g2_fft[i][j][dim]);
+                assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
+              }
+          }
+
+        /* Pair  interaction parameters.   FIXME: ignores  or, rather,
+           recomputes BHD->LJ_params* here: */
+        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
+        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
+        ff_params[2] = solvent[i].charge * solvent[j].charge;
+
+        /* Does real work: */
+        pair (BHD, ff_params,
+              BHD->g2[i][j], BHD->F[i][j], BHD->F_l[i][j],
+              BHD->f_g2_fft[i][j], BHD->fl_g2_fft[i][j],
+              BHD->u2[j][i], BHD->u2_fft[j][i], /* FIXME: ij ji */
+              damp, damp_LJ);
+      }
 }
 
 /*
