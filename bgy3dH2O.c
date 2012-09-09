@@ -88,9 +88,9 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   DACreateGlobalVector(da, &(BHD->g_ini[0]));
   DACreateGlobalVector(da, &(BHD->g_ini[1]));
   DACreateGlobalVector(da, &(BHD->gHO_ini));
-  DACreateGlobalVector(da, &(BHD->uc[0]));
-  DACreateGlobalVector(da, &(BHD->uc[1]));
-  DACreateGlobalVector(da, &(BHD->ucHO));
+  DACreateGlobalVector(da, &(BHD->u2[0][0]));
+  DACreateGlobalVector(da, &(BHD->u2[1][1]));
+  DACreateGlobalVector(da, &(BHD->u2[0][1]));
   DACreateGlobalVector(da, &(BHD->cH));
   DACreateGlobalVector(da, &(BHD->cO));
   DACreateGlobalVector(da, &(BHD->cHO));
@@ -171,9 +171,9 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->uc[0]);
-  VecDestroy(BHD->uc[1]);
-  VecDestroy(BHD->ucHO);
+  VecDestroy(BHD->u2[0][0]);
+  VecDestroy(BHD->u2[1][1]);
+  VecDestroy(BHD->u2[0][1]);
   VecDestroy(BHD->cH);
   VecDestroy(BHD->cO);
   VecDestroy(BHD->cHO);
@@ -1159,15 +1159,15 @@ static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, r
   VecSet(dgO,0.0);
   VecSet(dgHO,0.0);
 
-/*   VecShift(BHD->uc[0], BHD->ucH_0); */
-/*   VecShift(BHD->uc[1], BHD->ucO_0); */
-/*   VecShift(BHD->ucHO, BHD->ucHO_0); */
+/*   VecShift(BHD->u2[0][0], BHD->ucH_0); */
+/*   VecShift(BHD->u2[1][1], BHD->ucO_0); */
+/*   VecShift(BHD->u2[0][1], BHD->ucHO_0); */
 
-/*   VecCopy(BHD->uc[0], dgH); */
+/*   VecCopy(BHD->u2[0][0], dgH); */
 /*   VecScale(dgH, -damp*beta); */
-/*   VecCopy(BHD->uc[1], dgO); */
+/*   VecCopy(BHD->u2[1][1], dgO); */
 /*   VecScale(dgO, -damp*beta); */
-/*   VecView(BHD->ucHO,PETSC_VIEWER_STDERR_WORLD);  */
+/*   VecView(BHD->u2[0][1],PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
 }
 
@@ -1242,17 +1242,17 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   /*********************************************/
   /* Compute fft from Coulomb potential (long) */
   /********************************************/
-  //  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->F_l[0][1], BHD->ucHO_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft,
   //                    BHD->LJ_paramsHO, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->F_l[0][0], BHD->ucH_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft,
   //                    BHD->LJ_paramsH, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->F_l[1][1], BHD->ucO_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft,
   //                    BHD->LJ_paramsO, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->F_l[0][1], BHD->ucHO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft,
                         q2HO, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->F_l[0][0], BHD->ucH_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft,
                         q2H, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->F_l[1][1], BHD->ucO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft,
                         q2O, damp);
 
   FOR_DIM
@@ -1431,8 +1431,8 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
 
 
-/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->uc[0]); */
-/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->uc[1]); */
+/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->u2[0][0]); */
+/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->u2[1][1]); */
 
 /*   VecView(BHD->F[0][1][0],PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
@@ -3551,7 +3551,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
 /*        exit(1);    */
 
-          VecAXPY(dg_new, PD->beta, BHD->ucHO);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if(iter>=0)
             {
@@ -3624,7 +3624,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
 /*        exit(1);   */
 
-          VecAXPY(dg_new, PD->beta, BHD->ucHO);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if(iter>=0)
@@ -3710,7 +3710,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);   */
 
 
-          VecAXPY(dg_new, PD->beta, BHD->uc[0]);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
 
@@ -3779,7 +3779,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
 /*        exit(1);  */
 
-          VecAXPY(dg_new, PD->beta, BHD->uc[1]);
+          VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if(iter>=0)
             {
@@ -4193,7 +4193,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
 /*        exit(1);    */
 
-          VecAXPY(dg_new, PD->beta, BHD->ucHO);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if(iter>=0)
             {
@@ -4279,7 +4279,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
 /*        exit(1);   */
 
-          VecAXPY(dg_new, PD->beta, BHD->ucHO);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if(iter>=0)
@@ -4377,7 +4377,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);   */
 
 
-          VecAXPY(dg_new, PD->beta, BHD->uc[0]);
+          VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
 
@@ -4450,7 +4450,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
 /*        exit(1);  */
 
-          VecAXPY(dg_new, PD->beta, BHD->uc[1]);
+          VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if(iter>=0)
             {

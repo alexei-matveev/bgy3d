@@ -98,6 +98,9 @@ typedef struct State
   Vec g2[2][2];                 /* Site-site  distributions. Used only
                                    in the solute-solvent solvers. */
 
+  Vec u2[2][2];                 /* Long-range  Coulomb interaction for
+                                   solvent site pairs. */
+
   Vec cH, cHO, cO;
 
   real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ; /* sigma, epsilon and charge(product)  */
@@ -112,16 +115,12 @@ typedef struct State
                                    solute   for  H   and  O   in  that
                                    order. */
 
-  Vec uc[2];                    /* Long-range Coulomb  field for H and
-                                   O in that order. */
-
   real rhos[2];                 /* Site specific density.  Computed as
                                    a solvent  density rho times number
                                    of   sites  of   that  type   in  a
                                    solvent. */
 
   Vec gHO_ini;
-  Vec ucHO;
 
   real ucH_0, ucO_0, ucHO_0;
 

@@ -199,11 +199,11 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->gHO_ini)); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->uc[0])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->u2[0][0])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->uc[1])); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->u2[1][1])); // CHKERRQ(ierr);
   assert (!ierr);
-  ierr = DACreateGlobalVector(da, &(BHD->ucHO)); // CHKERRQ(ierr);
+  ierr = DACreateGlobalVector(da, &(BHD->u2[0][1])); // CHKERRQ(ierr);
   assert (!ierr);
   ierr = DACreateGlobalVector(da, &(BHD->g2[0][0])); // CHKERRQ(ierr);
   assert (!ierr);
@@ -411,7 +411,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 		     BHD->f_g2_fft[0][0], gH, BHD->rhos[0], help2);
   VecAXPY(dgH, 1.0, help2);
 
-  VecAXPY(dgH, 1.0, BHD->uc[0]);
+  VecAXPY(dgH, 1.0, BHD->u2[0][0]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/
@@ -449,7 +449,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 		     BHD->f_g2_fft[0][1], gH, BHD->rhos[0], help2);
   VecAXPY(dgO, 1.0, help2);
 
-  VecAXPY(dgO, 1.0, BHD->uc[1]);
+  VecAXPY(dgO, 1.0, BHD->u2[1][1]);
   /************************************************************/
   /* intra molecular part */
   /************************************************************/
@@ -1154,9 +1154,9 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
   VecSet(BHD->g_ini[0], 0.0);
   VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
-  VecSet(BHD->uc[0], 0.0);
-  VecSet(BHD->uc[1], 0.0);
-  VecSet(BHD->ucHO, 0.0);
+  VecSet(BHD->u2[0][0], 0.0);
+  VecSet(BHD->u2[1][1], 0.0);
+  VecSet(BHD->u2[0][1], 0.0);
   FOR_DIM
     {
       VecSet(BHD->F_l[0][0][dim],0.0);
@@ -1168,8 +1168,8 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
   DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
 
-/*   DAVecGetArray(da, BHD->uc[0], &ucH_vec); */
-/*   DAVecGetArray(da, BHD->uc[1], &ucO_vec); */
+/*   DAVecGetArray(da, BHD->u2[0][0], &ucH_vec); */
+/*   DAVecGetArray(da, BHD->u2[1][1], &ucO_vec); */
   FOR_DIM
     {
       DAVecGetArray(da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
@@ -1234,24 +1234,24 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
 
   DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
-/*   DAVecRestoreArray(da, BHD->uc[0], &ucH_vec); */
-/*   DAVecRestoreArray(da, BHD->uc[1], &ucO_vec); */
+/*   DAVecRestoreArray(da, BHD->u2[0][0], &ucH_vec); */
+/*   DAVecRestoreArray(da, BHD->u2[1][1], &ucO_vec); */
 
-  VecCopy( BHD->ucHO, BHD->uc[1]);
+  VecCopy( BHD->u2[0][1], BHD->u2[1][1]);
 
-/*   ComputeFFTSoluteII(BHD, BHD->uc[0] , BHD->ucHO, BHD->LJ_paramsHO, damp, zpad); */
-/*   VecScale(BHD->uc[0], beta); */
-/*   VecAXPY( BHD->g_ini[0], beta, BHD->ucHO); */
+/*   ComputeFFTSoluteII(BHD, BHD->u2[0][0] , BHD->u2[0][1], BHD->LJ_paramsHO, damp, zpad); */
+/*   VecScale(BHD->u2[0][0], beta); */
+/*   VecAXPY( BHD->g_ini[0], beta, BHD->u2[0][1]); */
 
-/*   ComputeFFTSoluteII(BHD, BHD->uc[1] , BHD->ucHO, BHD->LJ_paramsO,  damp, zpad); */
-/*   VecAXPY( BHD->g_ini[1], beta, BHD->ucHO); */
-/*   VecScale(BHD->uc[1], beta); */
+/*   ComputeFFTSoluteII(BHD, BHD->u2[1][1] , BHD->u2[0][1], BHD->LJ_paramsO,  damp, zpad); */
+/*   VecAXPY( BHD->g_ini[1], beta, BHD->u2[0][1]); */
+/*   VecScale(BHD->u2[1][1], beta); */
 
   /* Shift uc's */
-/*   VecSum(BHD->uc[0], &fac); */
-/*   VecShift(BHD->uc[0], -fac/N[0]/N[1]/N[2]); */
-/*   VecSum(BHD->uc[1], &fac); */
-/*   VecShift(BHD->uc[1], -fac/N[0]/N[1]/N[2]); */
+/*   VecSum(BHD->u2[0][0], &fac); */
+/*   VecShift(BHD->u2[0][0], -fac/N[0]/N[1]/N[2]); */
+/*   VecSum(BHD->u2[1][1], &fac); */
+/*   VecShift(BHD->u2[1][1], -fac/N[0]/N[1]/N[2]); */
 
 /*   VecView(BHD->g_ini[0],PETSC_VIEWER_STDERR_WORLD); */
 /*   exit(1); */

@@ -93,9 +93,9 @@ static State initialize_state (const ProblemData *PD)
   ierr = DACreateGlobalVector (da, &BHD.g_ini[0]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.g_ini[1]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.gHO_ini); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.uc[0]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.uc[1]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.ucHO); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.u2[0][0]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.u2[1][1]); assert (!ierr);
+  ierr = DACreateGlobalVector (da, &BHD.u2[0][1]); assert (!ierr);
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
@@ -225,9 +225,9 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
   VecDestroy(BHD->gHO_ini);
-  VecDestroy(BHD->uc[0]);
-  VecDestroy(BHD->uc[1]);
-  VecDestroy(BHD->ucHO);
+  VecDestroy(BHD->u2[0][0]);
+  VecDestroy(BHD->u2[1][1]);
+  VecDestroy(BHD->u2[0][1]);
   VecDestroy(BHD->pre);
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
@@ -586,12 +586,11 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->ucH_fft, BHD->LJ_paramsH, damp); */
   /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
 
-  /* XXX: uc[1], uc[0], and ucHO are  intent(out) in the next call. They
-   *      will also be updated by RecomputeInitialSoluteData_XXX(), ucHO
-   *      is not used at all */
-  ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->F_l[1][1], BHD->ucO_fft, q2O, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->F_l[0][0], BHD->ucH_fft, q2H, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->F_l[0][1], BHD->ucHO_fft, q2HO, damp0);
+  /* Here u2[1][1], u2[0][0], and u2[0][1] are intent(out) in the next
+     call: */
+  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft, q2O, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft, q2H, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft, q2HO, damp0);
 /*   FOR_DIM */
 /*     { */
 /*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]); */
@@ -1256,11 +1255,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
               to long  range Coulomb interation.  See  comments in the
               function.  Here F is force within solvents particles.
 
-              In  RecomputeInitialFFTs(),   BHD.uc[0],  BHD.uc[1]  and
-              BHD.ucHO  also get  updated  by ComputeFFTfromCoulomb(),
-              but  BHD.uc[0]   and  BHD.uc[1]  are   re-calculated  by
-              RecomputeInitialSoluteData_XXX  again  and BHD.ucHO  are
-              not used
+              In     RecomputeInitialFFTs(),    pairwise    long-range
+              interactions    in    BHD.u2[][]    are   computed    by
+              ComputeFFTfromCoulomb().
 
               According to Page. 115 - 116:
 
@@ -1320,8 +1317,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
                (A, M)     (B, M)
 
               and sum to the solution by the end of each iteration for
-              solvent site  A and B,  in the code hereafter,  they are
-              stored as BHD.uc[0] and BHD.uc[1] */
+              solvent site A and B, in the code hereafter.  These site
+              specific potentials  can be obtained  by multiplying the
+              common long-range  Coulomb potential (stored  in Vec uc)
+              by the solvent site charge. */
 
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
@@ -1344,9 +1343,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
           }
 
       /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
-         above) and uc[0], uc[1], which are VM_Coulomb_long.  No other
-         fields of the struct State except those passed explicitly are
-         modified: */
+         above) and  uc with VM_Coulomb_long.  No other  fields of the
+         struct State except those passed explicitly are modified: */
       bgy3d_solute_field (&BHD,
                           2, solvent,
                           g0, uc, /* intent(out) */
