@@ -78,47 +78,47 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
-  bgy3d_fft_init_da (PD->N, &(BHD->fft_plan_fw), &(BHD->fft_plan_bw), &(BHD->da), NULL);
+  bgy3d_fft_init_da (PD->N, &BHD->fft_plan_fw, &BHD->fft_plan_bw, &BHD->da, NULL);
 
   /* multigrid case apparently not considered here */
 
   const DA da = BHD->da;         /* shorter alias */
 
   /* Create global vectors */
-  DACreateGlobalVector(da, &(BHD->g_ini[0]));
-  DACreateGlobalVector(da, &(BHD->g_ini[1]));
-  DACreateGlobalVector(da, &(BHD->gHO_ini));
-  DACreateGlobalVector(da, &(BHD->u2[0][0]));
-  DACreateGlobalVector(da, &(BHD->u2[1][1]));
-  DACreateGlobalVector(da, &(BHD->u2[0][1]));
-  DACreateGlobalVector(da, &(BHD->cH));
-  DACreateGlobalVector(da, &(BHD->cO));
-  DACreateGlobalVector(da, &(BHD->cHO));
+  DACreateGlobalVector(da, &BHD->g_ini[0]);
+  DACreateGlobalVector(da, &BHD->g_ini[1]);
+  DACreateGlobalVector(da, &BHD->gHO_ini);
+  DACreateGlobalVector(da, &BHD->u2[0][0]);
+  DACreateGlobalVector(da, &BHD->u2[1][1]);
+  DACreateGlobalVector(da, &BHD->u2[0][1]);
+  DACreateGlobalVector(da, &BHD->cH);
+  DACreateGlobalVector(da, &BHD->cO);
+  DACreateGlobalVector(da, &BHD->cHO);
   FOR_DIM
     {
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F[0][0][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F[1][1][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F[0][1][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F_l[0][0][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F_l[1][1][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->F_l[0][1][dim])); */
-/*       VecDuplicate(BHD->g_ini[0], &(BHD->v[dim])); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F[0][0][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F[1][1][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F[0][1][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[0][0][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[1][1][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[0][1][dim]); */
+/*       VecDuplicate(BHD->g_ini[0], &BHD->v[dim]); */
 
-      DACreateGlobalVector(da, &(BHD->F[0][0][dim]));
-      DACreateGlobalVector(da, &(BHD->F[1][1][dim]));
-      DACreateGlobalVector(da, &(BHD->F[0][1][dim]));
-      DACreateGlobalVector(da, &(BHD->F_l[0][0][dim]));
-      DACreateGlobalVector(da, &(BHD->F_l[1][1][dim]));
-      DACreateGlobalVector(da, &(BHD->F_l[0][1][dim]));
-      DACreateGlobalVector(da, &(BHD->v[dim]));
+      DACreateGlobalVector(da, &BHD->F[0][0][dim]);
+      DACreateGlobalVector(da, &BHD->F[1][1][dim]);
+      DACreateGlobalVector(da, &BHD->F[0][1][dim]);
+      DACreateGlobalVector(da, &BHD->F_l[0][0][dim]);
+      DACreateGlobalVector(da, &BHD->F_l[1][1][dim]);
+      DACreateGlobalVector(da, &BHD->F_l[0][1][dim]);
+      DACreateGlobalVector(da, &BHD->v[dim]);
     }
 
 #ifdef L_BOUNDARY
   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-  DACreateGlobalVector(da, &(BHD->x_lapl[0]));
-  DACreateGlobalVector(da, &(BHD->x_lapl[1]));
-  DACreateGlobalVector(da, &(BHD->xHO));
+  DAGetMatrix( da, MATMPIAIJ, &BHD->M);
+  DACreateGlobalVector(da, &BHD->x_lapl[0]);
+  DACreateGlobalVector(da, &BHD->x_lapl[1]);
+  DACreateGlobalVector(da, &BHD->xHO);
   VecSet(BHD->x_lapl[0], 0.0);
   VecSet(BHD->x_lapl[1], 0.0);
   VecSet(BHD->xHO, 0.0);
@@ -501,7 +501,7 @@ void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
   da = BHD->da;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
   index = (int) ceil((-PD->interval[0]-zpad)/PD->h[0]);
@@ -543,7 +543,7 @@ static void UNUSED_ImposeBoundaryCondition( State *BHD, Vec g)
   index = BHD->p_index;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   if( PD->id  == BHD->p_id )
     {
@@ -575,7 +575,7 @@ static real UNUSED_ImposeBoundaryConditionII( State *BHD, Vec g, real zpad)
     h[dim] = PD->h[dim];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   DAVecGetArray(da, g, &g_vec);
   b_data=0;
@@ -645,7 +645,7 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
   interval[0] = PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
   DAVecGetArray(da, g, &g_vec);
@@ -696,7 +696,7 @@ void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
   border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*ZP))/PD->h[0]/2. );
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
   DAVecGetArray(da, g, &g_vec);
@@ -750,7 +750,7 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
   L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
   DAVecGetArray(da, uc, &v_vec);
@@ -894,7 +894,7 @@ static void UNUSED_ComputeFFTfromCoulombII(State *BHD, Vec f[3] , Vec f_l[3],
   L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
 
@@ -1011,7 +1011,7 @@ static void UNUSED_ComputeFFTSoluteII(State *BHD, Vec ucl , Vec ucs, real q2,
   L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
 
@@ -1109,7 +1109,7 @@ static void UNUSED_ComputeInitialGuess(State *BHD, Vec dgO, Vec dgH, Vec dgHO, r
   beta = PD->beta;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   DAVecGetArray(da, dgH, &dgH_vec);
   DAVecGetArray(da, dgO, &dgO_vec);
@@ -1223,7 +1223,7 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
    FOR_DIM
@@ -1272,12 +1272,12 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   DAVecGetArray(da, BHD->cHO, &cHO_vec);
   FOR_DIM
     {
-      DAVecGetArray(da, BHD->F[0][0][dim], &(fH_vec[dim]));
-      DAVecGetArray(da, BHD->F[1][1][dim], &(fO_vec[dim]));
-      DAVecGetArray(da, BHD->F[0][1][dim], &(fHO_vec[dim]));
-      DAVecGetArray(da, BHD->F_l[0][0][dim], &(fHl_vec[dim]));
-      DAVecGetArray(da, BHD->F_l[1][1][dim], &(fOl_vec[dim]));
-      DAVecGetArray(da, BHD->F_l[0][1][dim], &(fHOl_vec[dim]));
+      DAVecGetArray(da, BHD->F[0][0][dim], &fH_vec[dim]);
+      DAVecGetArray(da, BHD->F[1][1][dim], &fO_vec[dim]);
+      DAVecGetArray(da, BHD->F[0][1][dim], &fHO_vec[dim]);
+      DAVecGetArray(da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
+      DAVecGetArray(da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
+      DAVecGetArray(da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
 
 
@@ -1419,12 +1419,12 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   DAVecRestoreArray(da, BHD->cHO, &cHO_vec);
   FOR_DIM
     {
-      DAVecRestoreArray(da, BHD->F[0][0][dim], &(fH_vec[dim]));
-      DAVecRestoreArray(da, BHD->F[1][1][dim], &(fO_vec[dim]));
-      DAVecRestoreArray(da, BHD->F[0][1][dim], &(fHO_vec[dim]));
-      DAVecRestoreArray(da, BHD->F_l[0][0][dim], &(fHl_vec[dim]));
-      DAVecRestoreArray(da, BHD->F_l[1][1][dim], &(fOl_vec[dim]));
-      DAVecRestoreArray(da, BHD->F_l[0][1][dim], &(fHOl_vec[dim]));
+      DAVecRestoreArray(da, BHD->F[0][0][dim], &fH_vec[dim]);
+      DAVecRestoreArray(da, BHD->F[1][1][dim], &fO_vec[dim]);
+      DAVecRestoreArray(da, BHD->F[0][1][dim], &fHO_vec[dim]);
+      DAVecRestoreArray(da, BHD->F_l[0][0][dim], &fHl_vec[dim]);
+      DAVecRestoreArray(da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
+      DAVecRestoreArray(da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
 
 
@@ -1468,7 +1468,7 @@ void Compute_dg_H2O_inter(State *BHD,
   /* confac = SQR(M_PI/L/2.); */
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* rho1*F1*g1a g1b*/
@@ -1714,7 +1714,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -1842,7 +1842,7 @@ static void UNUSED_Compute_dg_H2O_intraII(State *BHD, Vec f[3], Vec f_l[3], Vec 
 
   //PetscPrintf(PETSC_COMM_WORLD, "ACHTUNG!!: Reiner Coulomb part ist falsch!\n");
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -2086,7 +2086,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -2408,7 +2408,7 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
   L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* F(g) */
@@ -2517,7 +2517,7 @@ static void UNUSED_Compute_dg_H2O_intra_lnII(State *BHD, Vec g, Vec t, real rab,
   fac = L/(2.*M_PI);
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* F(g) */
@@ -2702,7 +2702,7 @@ static void UNUSED_Compute_dg_H2O_intra_lnIII(State *BHD, Vec g, Vec t, real rab
   fac = L/(2.*M_PI);
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* F(g) */
@@ -2934,7 +2934,7 @@ static void UNUSED_Compute_Zero_Correction(State *BHD, Vec dg)
   L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dg, g_fft, scratch);
   //PetscPrintf(PETSC_COMM_WORLD,"%e\n",g_fft[0].re);
@@ -2982,7 +2982,7 @@ static void normalization_intra (const State *BHD,
   scratch = BHD->fft_scratch;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   index=0;
   /* loop over local portion of grid */
@@ -3096,7 +3096,7 @@ static void UNUSED_Compute_dg_H2O_normalization_inter(State *BHD, Vec g1, Vec g2
 
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
   /* fft(g) */
