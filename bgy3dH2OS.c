@@ -83,19 +83,34 @@ static State initialize_state (const ProblemData *PD)
   ierr = DACreateGlobalVector (da, &BHD.uc[0]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.uc[1]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.ucHO); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2[0][0]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2[1][1]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g2[0][1]); assert (!ierr);
+
+  /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
+     and work: */
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j <= i; j++) {
+      /* FIXME: see  bgy3d_load_vec below, arent  we overwriting these
+         g2 vecs? */
+      ierr = DACreateGlobalVector (da, &BHD.g2[i][j]);
+      BHD.g2[j][i] = BHD.g2[i][j];
+      assert (!ierr);
+
+      FOR_DIM
+        {
+          ierr = DACreateGlobalVector (da, &BHD.F[i][j][dim]);
+          BHD.F[j][i][dim] = BHD.F[i][j][dim];
+          assert (!ierr);
+
+          ierr = DACreateGlobalVector (da, &BHD.F_l[i][j][dim]);
+          BHD.F_l[j][i][dim] = BHD.F_l[i][j][dim];
+          assert (!ierr);
+        }
+    }
+  }
+
   ierr = DACreateGlobalVector (da, &BHD.pre); assert (!ierr);
 
   FOR_DIM
     {
-      ierr = DACreateGlobalVector (da, &BHD.F[0][0][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.F[1][1][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.F[0][1][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.F_l[0][0][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.F_l[1][1][dim]); assert (!ierr);
-      ierr = DACreateGlobalVector (da, &BHD.F_l[0][1][dim]); assert (!ierr);
       ierr = DACreateGlobalVector (da, &BHD.v[dim]); assert (!ierr);
     }
 
@@ -114,12 +129,16 @@ static State initialize_state (const ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD.f_g2_fft[0][0][dim] = bgy3d_fft_malloc (da);
-      BHD.f_g2_fft[1][1][dim] = bgy3d_fft_malloc (da);
-      BHD.f_g2_fft[0][1][dim] = bgy3d_fft_malloc (da);
-      BHD.fl_g2_fft[0][0][dim] = bgy3d_fft_malloc (da);
-      BHD.fl_g2_fft[1][1][dim] = bgy3d_fft_malloc (da);
-      BHD.fl_g2_fft[0][1][dim] = bgy3d_fft_malloc (da);
+      for (int i = 0; i < 2; i++) {
+        for (int j = 0; j <= i; j++) {
+          BHD.f_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
+          BHD.f_g2_fft[j][i][dim] = BHD.f_g2_fft[i][j][dim];
+
+          BHD.fl_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
+          BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
+        }
+      }
+
       BHD.fg2_fft[dim] = bgy3d_fft_malloc (da);
 
       BHD.fO_fft[dim] = bgy3d_fft_malloc (da);
@@ -137,11 +156,7 @@ static State initialize_state (const ProblemData *PD)
 
 
 
-  /* Read g^2  from file */
-/*   ReadPairDistribution(&BHD, "g2_OO", BHD.g2[1][1]); */
-/*   ReadPairDistribution(&BHD, "g2_HH", BHD.g2[0][0]); */
-/*   ReadPairDistribution(&BHD, "g2_HO", BHD.g2[0][1]); */
-
+  /* Read g^2 from file. FIXME: why did we allocate them above? */
 #ifdef CS2
   ReadPairDistribution(&BHD, "g2C", BHD.g2[1][1]);
   ReadPairDistribution(&BHD, "g2S", BHD.g2[0][0]);
@@ -151,6 +166,7 @@ static State initialize_state (const ProblemData *PD)
   bgy3d_load_vec ("g11.bin", &BHD.g2[1][1]);
   bgy3d_load_vec ("g01.bin", &BHD.g2[0][1]);
 #endif
+  BHD.g2[1][0] = BHD.g2[0][1];
 
   return BHD;
 }
@@ -161,21 +177,24 @@ static void finalize_state (State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
+  /* Pair quantities here: */
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j <= i; j++) {
+      VecDestroy (BHD->g2[i][j]);
+      FOR_DIM
+        {
+          VecDestroy (BHD->F[i][j][dim]);
+          VecDestroy (BHD->F_l[i][j][dim]);
+
+          bgy3d_fft_free (BHD->f_g2_fft[i][j][dim]);
+          bgy3d_fft_free (BHD->fl_g2_fft[i][j][dim]);
+        }
+    }
+  }
+
   FOR_DIM
     {
-      VecDestroy(BHD->F[0][0][dim]);
-      VecDestroy(BHD->F[1][1][dim]);
-      VecDestroy(BHD->F[0][1][dim]);
-      VecDestroy(BHD->F_l[0][0][dim]);
-      VecDestroy(BHD->F_l[1][1][dim]);
-      VecDestroy(BHD->F_l[0][1][dim]);
       VecDestroy(BHD->v[dim]);
-      bgy3d_fft_free (BHD->f_g2_fft[0][0][dim]);
-      bgy3d_fft_free (BHD->f_g2_fft[1][1][dim]);
-      bgy3d_fft_free (BHD->f_g2_fft[0][1][dim]);
-      bgy3d_fft_free (BHD->fl_g2_fft[0][0][dim]);
-      bgy3d_fft_free (BHD->fl_g2_fft[1][1][dim]);
-      bgy3d_fft_free (BHD->fl_g2_fft[0][1][dim]);
       bgy3d_fft_free (BHD->fg2_fft[dim]);
 
       bgy3d_fft_free (BHD->fO_fft[dim]);
@@ -196,9 +215,6 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->uc[0]);
   VecDestroy(BHD->uc[1]);
   VecDestroy(BHD->ucHO);
-  VecDestroy(BHD->g2[0][0]);
-  VecDestroy(BHD->g2[1][1]);
-  VecDestroy(BHD->g2[0][1]);
   VecDestroy(BHD->pre);
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
@@ -689,31 +705,37 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
      by ComputeFFTfromCoulomb() above */
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++) {
+      assert (BHD->g2[j][i] == BHD->g2[i][j]);
       FOR_DIM
         {
+          assert (BHD->F[j][i][dim] == BHD->F[i][j][dim]);
+          assert (BHD->F_l[j][i][dim] == BHD->F_l[i][j][dim]);
+          assert (BHD->f_g2_fft[j][i][dim] == BHD->f_g2_fft[i][j][dim]);
+          assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
+
           PetscErrorCode err;
 
           /* First (F_LJ + F_coulomb_short) * g2: */
           err = VecPointwiseMult (BHD->v[dim],
-                                  BHD->g2[j][i], BHD->F[j][i][dim]);
+                                  BHD->g2[i][j], BHD->F[i][j][dim]);
           assert (!err);
 
           /* Next FFT((F_LJ + F_coulomb_short) * g2): */
           ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                                  BHD->v[dim], BHD->f_g2_fft[j][i][dim],
+                                  BHD->v[dim], BHD->f_g2_fft[i][j][dim],
                                   BHD->fft_scratch);
 
           /* Now Coulomb long. F_coulomb_long * g2: */
           err = VecPointwiseMult (BHD->v[dim],
-                                  BHD->g2[j][i], BHD->F_l[j][i][dim]);
+                                  BHD->g2[i][j], BHD->F_l[i][j][dim]);
           assert (!err);
 
           /* Next F_coulomb_long * g2 - F_coulomb_long: */
-          VecAXPY(BHD->v[dim], -1.0, BHD->F_l[j][i][dim]);
+          VecAXPY(BHD->v[dim], -1.0, BHD->F_l[i][j][dim]);
 
           /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
           ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                                 BHD->v[dim], BHD->fl_g2_fft[j][i][dim],
+                                 BHD->v[dim], BHD->fl_g2_fft[i][j][dim],
                                  BHD->fft_scratch);
         }
     }
