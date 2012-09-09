@@ -517,8 +517,8 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 {
   PetscScalar ***fH_vec[3], ***fO_vec[3], ***fHO_vec[3];
   PetscScalar ***fHl_vec[3], ***fOl_vec[3], ***fHOl_vec[3];
-  PetscScalar ***wHO_vec, ***wHH_vec;
-  real r[3], r_s, h[3], interval[2], wconst_HO, wconst_HH, wG;
+  /* PetscScalar ***wHO_vec, ***wHH_vec; */
+  real r[3], r_s, h[3], interval[2]; //, wconst_HO, wconst_HH, wG;
   int x[3], n[3], i[3];
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
@@ -547,14 +547,13 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
   interval[0] = PD->interval[0];
 
-  wG = 1./h[0];
-  wconst_HO  =
-    4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HO/2./SQR(wG)+SQR(r_HO)*sqrt(M_PI)/2./wG);
-  wconst_HO = 1./wconst_HO;
-  wconst_HH  =
-    4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HH/2./SQR(wG)+SQR(r_HH)*sqrt(M_PI)/2./wG);
-  wconst_HH = 1./wconst_HH;
-
+  /* wG = 1./h[0]; */
+  /* wconst_HO  = */
+  /*   4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HO/2./SQR(wG)+SQR(r_HO)*sqrt(M_PI)/2./wG); */
+  /* wconst_HO = 1./wconst_HO; */
+  /* wconst_HH  = */
+  /*   4.*M_PI*2.*(sqrt(M_PI)/4./pow(wG,3)-r_HH/2./SQR(wG)+SQR(r_HH)*sqrt(M_PI)/2./wG); */
+  /* wconst_HH = 1./wconst_HH; */
 
   /* Get local portion of the grid */
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
@@ -601,8 +600,8 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 /*   DAVecGetArray(da, BHD->g2[1][1], &gO_vec); */
 /*   DAVecGetArray(da, BHD->g2[0][1], &gHO_vec); */
 
-  DAVecGetArray(da, BHD->v[0], &wHO_vec);
-  DAVecGetArray(da, BHD->v[1], &wHH_vec);
+  /* DAVecGetArray(da, BHD->v[0], &wHO_vec); */
+  /* DAVecGetArray(da, BHD->v[1], &wHH_vec); */
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -688,11 +687,11 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       DAVecRestoreArray (da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
       DAVecRestoreArray (da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
-/*   DAVecRestoreArray(da, BHD->g2[0][0], &gH_vec); */
-/*   DAVecRestoreArray(da, BHD->g2[1][1], &gO_vec); */
-/*   DAVecRestoreArray(da, BHD->g2[0][1], &gHO_vec); */
-  DAVecRestoreArray(da, BHD->v[0], &wHO_vec);
-  DAVecRestoreArray(da, BHD->v[1], &wHH_vec);
+  /* DAVecRestoreArray(da, BHD->g2[0][0], &gH_vec); */
+  /* DAVecRestoreArray(da, BHD->g2[1][1], &gO_vec); */
+  /* DAVecRestoreArray(da, BHD->g2[0][1], &gHO_vec); */
+  /* DAVecRestoreArray(da, BHD->v[0], &wHO_vec); */
+  /* DAVecRestoreArray(da, BHD->v[1], &wHH_vec); */
 
   /* Compute FFT(F * g^2).
 
