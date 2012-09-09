@@ -1765,33 +1765,26 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   for( damp=damp_start; damp <=1; damp+=0.1)
     {
-      if(damp==-0.01)
+      if (damp <= -0.01)
         {
-          damp_LJ=0;
-          //a0=0.4;
-          RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+          damp_LJ = 0.0;
         }
-      else if(damp==0.0)
+      else if (damp==0.0)
         {
-          damp_LJ=1.0;
-          //a0=0.5;
-          RecomputeInitialFFTs(&BHD, 0.0, 1.0);
-          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, 0.0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+          damp_LJ = 1.0;
         }
       else
         {
-          damp_LJ=1.0;
-          //a0=0.0002/damp;
-          count+=1.0;
-          //a0 = 0.1/4./(count);
-          a0 = 0.1/(count+5.0);
-          RecomputeInitialFFTs(&BHD, (damp), 1.0);
-          solute_field_by_index (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+          damp_LJ = 1.0;
+          count += 1.0;
+          a0 = 0.1 / (count + 5.0);
         }
+
+      RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), damp_LJ);
+      solute_field_by_index (&BHD, /* Butanoic Acid */ 4,
+                             (damp > 0.0 ? damp : 0.0), damp_LJ);
+
+      PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
       /* Historically   short-range  potential   is   stored  with   a
          factor: */
