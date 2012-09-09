@@ -1628,37 +1628,6 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   return PETSC_NULL;            /* fake, interface obligation */
 }
 
-/* Legacy wrapper. FIXME:  revise BGY3dM_solve_H2O_3site() and get rid
-   of this: */
-static void solute_field_by_index (State *BHD, int solute, real damp, real damp_lj)
-{
-  int n;                        /* number of solute sites */
-  const Site *sites;            /* [n], array of sites */
-  const char *name;             /* human readable name */
-  Vec uc;
-
-  DACreateGlobalVector(BHD->da, &uc); /* common for all sites */
-
-  /* Get the solute from the tables: */
-  bgy3d_solute_get (solute, &n, &sites, &name);
-
-  /* This does the real work: */
-  bgy3d_solute_field (BHD,
-                      2, solvent,
-                      BHD->g_ini, uc, /* intent(out) */
-                      n, sites,
-                      damp, damp_lj);
-
-  /* Copy  the  electrostatic potential  scaled  by  the solvent  site
-     charges into predefined locations: */
-  for (int i = 0; i < 2; i++) {
-    VecSet (BHD->uc[i], 0.0);
-    VecAXPY (BHD->uc[i], solvent[i].charge, uc);
-  }
-
-  VecDestroy (uc);
-}
-
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
   (void) g_ini;                 /* FIXME: interface obligation */
@@ -1781,8 +1750,35 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         }
 
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), damp_LJ);
-      solute_field_by_index (&BHD, /* Butanoic Acid */ 4,
-                             (damp > 0.0 ? damp : 0.0), damp_LJ);
+
+      /* Compute solute field in this block:*/
+      {
+        int n;                        /* number of solute sites */
+        const Site *sites;            /* [n], array of sites */
+        const char *name;             /* human readable name */
+        Vec uc;                       /* common for all sites */
+
+        DACreateGlobalVector(BHD.da, &uc); /* common for all sites */
+
+        /* Get the solute from the tables: */
+        bgy3d_solute_get (4, &n, &sites, &name); /* Butanoic Acid */
+
+        /* This does the real work: */
+        bgy3d_solute_field (&BHD,
+                            2, solvent,
+                            BHD.g_ini, uc, /* intent(out) */
+                            n, sites,
+                            (damp > 0.0 ? damp : 0.0), damp_LJ);
+
+        /* Copy  the  electrostatic potential  scaled  by  the solvent  site
+           charges into predefined locations: */
+        for (int i = 0; i < 2; i++) {
+          VecSet (BHD.uc[i], 0.0);
+          VecAXPY (BHD.uc[i], solvent[i].charge, uc);
+        }
+
+        VecDestroy (uc);
+      }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
