@@ -101,6 +101,8 @@ typedef struct State
   Vec u2[2][2];                 /* Long-range  Coulomb interaction for
                                    solvent site pairs. */
 
+  fftw_complex *u2_fft[2][2];   /* The fourier transform of the u2. */
+
   Vec cH, cHO, cO;
 
   real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ; /* sigma, epsilon and charge(product)  */
@@ -132,7 +134,6 @@ typedef struct State
    */
   //struct fft_plan_3d *fft_plan;
   fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
-  fftw_complex *ucH_fft, *ucO_fft, *ucHO_fft;
   fftw_complex *wHO_fft, *wHH_fft;
 
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;

@@ -161,9 +161,9 @@ static State initialize_state (const ProblemData *PD)
   BHD.g_fft = bgy3d_fft_malloc (da);
   BHD.gfg2_fft = bgy3d_fft_malloc (da);
   BHD.fft_scratch = bgy3d_fft_malloc (da);
-  BHD.ucH_fft = bgy3d_fft_malloc (da);
-  BHD.ucO_fft = bgy3d_fft_malloc (da);
-  BHD.ucHO_fft = bgy3d_fft_malloc (da);
+  BHD.u2_fft[0][0] = bgy3d_fft_malloc (da);
+  BHD.u2_fft[1][1] = bgy3d_fft_malloc (da);
+  BHD.u2_fft[0][1] = bgy3d_fft_malloc (da);
   BHD.wHO_fft = bgy3d_fft_malloc (da);
   BHD.wHH_fft = bgy3d_fft_malloc (da);
 
@@ -216,9 +216,9 @@ static void finalize_state (State *BHD)
   bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->gfg2_fft);
   bgy3d_fft_free (BHD->fft_scratch);
-  bgy3d_fft_free (BHD->ucH_fft);
-  bgy3d_fft_free (BHD->ucO_fft);
-  bgy3d_fft_free (BHD->ucHO_fft);
+  bgy3d_fft_free (BHD->u2_fft[0][0]);
+  bgy3d_fft_free (BHD->u2_fft[1][1]);
+  bgy3d_fft_free (BHD->u2_fft[0][1]);
   bgy3d_fft_free (BHD->wHO_fft);
   bgy3d_fft_free (BHD->wHH_fft);
 
@@ -582,15 +582,15 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
     }
 
   /* Compute Coulomb from fft part */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->ucO_fft, BHD->LJ_paramsO, damp); */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->ucH_fft, BHD->LJ_paramsH, damp); */
-  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1], BHD->LJ_paramsO, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0], BHD->LJ_paramsH, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1], BHD->LJ_paramsHO, damp); */
 
   /* Here u2[1][1], u2[0][0], and u2[0][1] are intent(out) in the next
      call: */
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft, q2O, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft, q2H, damp0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft, q2HO, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1], q2O, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0], q2H, damp0);
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1], q2HO, damp0);
 /*   FOR_DIM */
 /*     { */
 /*       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]); */
@@ -714,7 +714,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
               + F_coulomb_long
 
      see  (5.101) and (5.102)  in Jager's  thesis. FFT(F_coulomb_long)
-     has been calculated  as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft
+     has been calculated  as BHD->u2_fft[0][0], BHD->u2_fft[1][1], BHD->u2_fft[0][1]
      by  ComputeFFTfromCoulomb() above.  The code  needs at  least one
      work vector, use this: */
   Vec work = BHD->v[0];
@@ -1330,9 +1330,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
 
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][0], BHD.ucH_fft,  ker_fft_L[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][1], BHD.ucHO_fft, ker_fft_L[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[1][1], BHD.ucO_fft,  ker_fft_L[1][1]);
+      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0],  ker_fft_L[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1],  ker_fft_L[1][1]);
 
       /* FIXME: what is  the point to split the  kernel in two pieces?
          Redefine S := S + L and forget about L */
@@ -1826,9 +1826,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gO, BHD.ucHO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gO, BHD.u2_fft[0][1], (damp / damp0) * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], gH, BHD.ucH_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], gH, BHD.u2_fft[0][0], (damp / damp0) * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
@@ -1889,9 +1889,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], gO, BHD.ucO_fft, (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], gO, BHD.u2_fft[1][1], (damp / damp0) * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gH, BHD.ucHO_fft, (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gH, BHD.u2_fft[0][1], (damp / damp0) * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
 

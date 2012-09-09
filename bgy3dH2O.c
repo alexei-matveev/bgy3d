@@ -133,9 +133,9 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   BHD->g_fft = bgy3d_fft_malloc (da);
   BHD->gfg2_fft = bgy3d_fft_malloc (da);
   BHD->fft_scratch = bgy3d_fft_malloc (da);
-  BHD->ucH_fft = bgy3d_fft_malloc (da);
-  BHD->ucO_fft = bgy3d_fft_malloc (da);
-  BHD->ucHO_fft = bgy3d_fft_malloc (da);
+  BHD->u2_fft[0][0] = bgy3d_fft_malloc (da);
+  BHD->u2_fft[1][1] = bgy3d_fft_malloc (da);
+  BHD->u2_fft[0][1] = bgy3d_fft_malloc (da);
   BHD->wHO_fft = bgy3d_fft_malloc (da);
    /* Compute initial data */
   RecomputeInitialData(BHD, 1.0, 1.0);
@@ -163,9 +163,9 @@ static void BGY3dH2OData_free(State *BHD)
   bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->gfg2_fft);
   bgy3d_fft_free (BHD->fft_scratch);
-  bgy3d_fft_free (BHD->ucH_fft);
-  bgy3d_fft_free (BHD->ucO_fft);
-  bgy3d_fft_free (BHD->ucHO_fft);
+  bgy3d_fft_free (BHD->u2_fft[0][0]);
+  bgy3d_fft_free (BHD->u2_fft[1][1]);
+  bgy3d_fft_free (BHD->u2_fft[0][1]);
   bgy3d_fft_free (BHD->wHO_fft);
 
   VecDestroy(BHD->g_ini[0]);
@@ -1242,17 +1242,17 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   /*********************************************/
   /* Compute fft from Coulomb potential (long) */
   /********************************************/
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
   //                    BHD->LJ_paramsHO, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
   //                    BHD->LJ_paramsH, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft,
+  //  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
   //                    BHD->LJ_paramsO, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->ucHO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
                         q2HO, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->ucH_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
                         q2H, damp);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->ucO_fft,
+  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
                         q2O, damp);
 
   FOR_DIM
@@ -3514,9 +3514,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_HO */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
                                BHD->F[0][0], BHD->F_l[0][0], gH, gHO,
-                               BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecSet(dg_new,0.0);
@@ -3536,7 +3536,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, PETSC_NULL,
-                               BHD->ucH_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][0], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gH, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
@@ -3544,7 +3544,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gH, r_HO, tHO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, tHO,
-                                 BHD->ucH_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][0], r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
@@ -3582,9 +3582,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_OH */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-                               BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           VecPointwiseMult(dg_new, dg_new, BHD->cHO);
@@ -3606,7 +3606,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, PETSC_NULL,
-                               BHD->ucO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[1][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
@@ -3616,7 +3616,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gO, r_HO, tHO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, tHO,
-                                 BHD->ucO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[1][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
@@ -3665,9 +3665,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_H */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
                                BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-                               BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecScale(dg_new, 0.5);
@@ -3692,7 +3692,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-                               BHD->ucHO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
@@ -3701,7 +3701,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tH, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tH,
-                                 BHD->ucHO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
@@ -3739,9 +3739,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-                               BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           VecPointwiseMult(dg_new, dg_new, BHD->cO);
@@ -3760,7 +3760,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-                               BHD->ucHO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
@@ -3770,7 +3770,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
-                                 BHD->ucHO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           //Solve_NormalizationH2O_smallII( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
@@ -4090,14 +4090,14 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 /*       Compute_dg_H2O_inter(BHD,  */
 /*                         BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,  */
-/*                         BHD->ucHO_fft, BHD->rhos[0],  */
+/*                         BHD->u2_fft[0][1], BHD->rhos[0],  */
 /*                         BHD->F[1][1], BHD->F_l[1][1], gO, gO,  */
-/*                         BHD->ucO_fft, BHD->rhos[1],  */
+/*                         BHD->u2_fft[1][1], BHD->rhos[1],  */
 /*                         dg_new, f); */
 /*       Compute_dg_H2O_inter(BHD, BHD->F[0][0], BHD->F_l[0][0], gH, gHO,  */
-/*                         BHD->ucH_fft, BHD->rhos[0],  */
+/*                         BHD->u2_fft[0][0], BHD->rhos[0],  */
 /*                         BHD->F[0][1], BHD->F_l[0][1], gHO, gO,  */
-/*                         BHD->ucHO_fft, BHD->rhos[1],  */
+/*                         BHD->u2_fft[0][1], BHD->rhos[1],  */
 /*                         dg_new, f); */
 
       if( !(iter%10) && iter>0 )
@@ -4150,9 +4150,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_HO */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
                                BHD->F[0][0], BHD->F_l[0][0], gH, gHO,
-                               BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecSet(dg_new,0.0);
@@ -4178,7 +4178,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, PETSC_NULL,
-                               BHD->ucH_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][0], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gH, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 2.0, dg_new2);
 #endif
@@ -4186,7 +4186,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gH, r_HO, tHO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, tHO,
-                                 BHD->ucH_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][0], r_HO, dg_new2, f);
           VecAXPY(dg_new, 2.0, dg_new2);
 #endif
 
@@ -4223,9 +4223,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_OH */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-                               BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 
@@ -4247,13 +4247,13 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-                               BHD->ucHO_fft, r_HH, dg_new2, f);
+                               BHD->u2_fft[0][1], r_HH, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HH, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, PETSC_NULL,
-                               BHD->ucO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[1][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
@@ -4264,14 +4264,14 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HH, tHO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tO, tHO,
-                                 BHD->ucHO_fft, r_HH, dg_new2, f);
+                                 BHD->u2_fft[0][1], r_HH, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gHO, r_HH, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gO, r_HO, tHO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, tHO,
-                                 BHD->ucO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[1][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
@@ -4315,9 +4315,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_H */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->ucHO_fft, BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
                                BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-                               BHD->ucH_fft, BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecScale(dg_new, 0.5);
@@ -4346,12 +4346,12 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, PETSC_NULL,
-                               BHD->ucH_fft, r_HH, dg_new2, f);
+                               BHD->u2_fft[0][0], r_HH, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gH, r_HH, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-                               BHD->ucHO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
 
@@ -4361,14 +4361,14 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gH, r_HH, tH, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][0], BHD->F_l[0][0], tO, tH,
-                                  BHD->ucH_fft, r_HH, dg_new2, f);
+                                  BHD->u2_fft[0][0], r_HH, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gH, r_HH, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tH, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tH,
-                                 BHD->ucHO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
@@ -4405,9 +4405,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->ucHO_fft, BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-                               BHD->ucO_fft, BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 
@@ -4431,7 +4431,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-                               BHD->ucHO_fft, r_HO, dg_new2, f);
+                               BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 2.0, dg_new2);
 
@@ -4441,7 +4441,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
-                                 BHD->ucHO_fft, r_HO, dg_new2, f);
+                                 BHD->u2_fft[0][1], r_HO, dg_new2, f);
           //Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           //Solve_NormalizationH2O_smallII( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);//
           VecAXPY(dg_new, 2.0, dg_new2);
