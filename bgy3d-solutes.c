@@ -31,7 +31,7 @@ typedef struct Solute {
   Site sites[];                 /* site descriptions */
 } Solute;
 
-static void poisson (State *BHD, Vec uc, Vec rho, real q);
+static void poisson (const State *BHD, Vec uc, Vec rho, real q);
 
 /*
  * These two functions  obey the same interface. They  are supposed to
@@ -180,13 +180,14 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
 /*
  * Create initial solute data.
  *
- * XXX: See (5.106) and (5.08) in the thesis. Return BHD->g_ini[0] and
- *      BHD->g_ini[1], for  H and  O in that  order, (beta *  (VM_LJ +
- *      VM_coulomb_short))   and   BHD->uc[0],   BHD->uc[1]  (beta   *
- *      VM_coulomb_long), but is beta missing here?
+ * See (5.106) and (5.08) in  the thesis.  Fill g_ini[0] and g_ini[1],
+ * for H  and O in  that order with (scaled!)   short-range potential,
+ * beta   *  (VM_LJ   +  VM_coulomb_short)   and  uc[0],   uc[1]  with
+ * VM_coulomb_long for the two sites (not scaled by beta!).
  */
 
-void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real damp_LJ)
+void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
+                         int n, const Site S[n], real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -223,7 +224,7 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
   for (int i = 0; i < 2; i++)
       field (BHD->da, BHD->PD,
              solvent[i], n, S, factor, ljc,
-             BHD->g_ini[i]);
+             g_ini[i]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -238,7 +239,7 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
 
     field (BHD->da, BHD->PD,
            neutral, n, S, factor, ljc,
-           BHD->g_ini[i]);
+           g_ini[i]);
   }
 #endif
 
@@ -282,8 +283,8 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
    * charges into predefined locations:
    */
   for (int i = 0; i < 2; i++) {
-      VecSet (BHD->uc[i], 0.0);
-      VecAXPY (BHD->uc[i], solvent[i].charge, v);
+      VecSet (uc[i], 0.0);
+      VecAXPY (uc[i], solvent[i].charge, v);
   }
 
   /* MEMORY: deallocate huge array here! */
@@ -437,7 +438,7 @@ static real rho (const Site *A, int n, const Site S[n])
 
   Except of temporary  allocation of two complex arrays  does not have
   any side effect.  */
-void poisson (State *BHD, Vec uc, Vec rho, real q)
+void poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
     int x[3], n[3], i[3], ic[3], N[3], index;
     real h[3], interval[2], k2, fac, L, h3;

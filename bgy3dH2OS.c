@@ -1326,11 +1326,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
               bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
           }
 
-      /* XXX: Return BHD.g_ini[0], BHD.g_ini[1] (see definition above)
-              and BHD.uc[0], BHD.uc[1], which are VM_Coulomb_long, but
-              should they  multiply by  beta?  Solute is  hardcoded as
-              HCl (==0) for standard test */
-      bgy3d_solute_field (&BHD, n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
+      /* Fill  g_ini[0], g_ini[1]  (see definition  above)  and uc[0],
+         uc[1], which are VM_Coulomb_long, but should they multiply by
+         beta?   No other  fields  of the  struct  State except  those
+         passed explicitly are modified: */
+      bgy3d_solute_field (&BHD, BHD.g_ini, BHD.uc,
+                          n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* FIXME:  Check if this  is redundant  --- it  was mechanically
          moved from  the body of the  above func (because  it does not
@@ -1620,7 +1621,8 @@ static void solute_field_by_index (State *BHD, int solute, real damp, real damp_
   bgy3d_solute_get (solute, &n, &sites, &name);
 
   /* This does the real work: */
-  bgy3d_solute_field (BHD, n, sites, damp, damp_lj);
+  bgy3d_solute_field (BHD, BHD->g_ini, BHD->uc,
+                      n, sites, damp, damp_lj);
 }
 
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
