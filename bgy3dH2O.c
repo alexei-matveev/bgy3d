@@ -725,6 +725,7 @@ void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
+/* Vec uc is intent(out) here: */
 void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
                            fftw_complex *fft_data,
                            real q2, real damp)

@@ -569,11 +569,13 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
     }
 
   /* Compute Coulomb from fft part */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->ucO_fft, BHD->LJ_paramsO, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->ucH_fft, BHD->LJ_paramsH, damp); */
-/*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
-/* XXX: uc[1] and uc[0] will be updated by RecomputeInitialSoluteData_XXX(),
- *      ucHO is not used at all */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[1][1], BHD->F_l[1][1], BHD->ucO_fft, BHD->LJ_paramsO, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][0], BHD->F_l[0][0], BHD->ucH_fft, BHD->LJ_paramsH, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, BHD->F[0][1], BHD->F_l[0][1], BHD->ucHO_fft, BHD->LJ_paramsHO, damp); */
+
+  /* XXX: uc[1], uc[0], and ucHO are  intent(out) in the next call. They
+   *      will also be updated by RecomputeInitialSoluteData_XXX(), ucHO
+   *      is not used at all */
   ComputeFFTfromCoulomb(BHD, BHD->uc[1], BHD->F_l[1][1], BHD->ucO_fft, q2O, damp0);
   ComputeFFTfromCoulomb(BHD, BHD->uc[0], BHD->F_l[0][0], BHD->ucH_fft, q2H, damp0);
   ComputeFFTfromCoulomb(BHD, BHD->ucHO, BHD->F_l[0][1], BHD->ucHO_fft, q2HO, damp0);
@@ -1309,7 +1311,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
-         iterations. Only a scalr kernel is needed: */
+         iterations. Only a scalar kernel is needed: */
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][0], NULL, ker_fft_S[0][0]);
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
