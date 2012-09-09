@@ -220,10 +220,10 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
    * solute.
    */
 #ifndef QM
-  for (int vsite = 0; vsite < 2; vsite++)
+  for (int i = 0; i < 2; i++)
       field (BHD->da, BHD->PD,
-             solvent[vsite], n, S, factor, ljc,
-             BHD->g_ini[vsite]);
+             solvent[i], n, S, factor, ljc,
+             BHD->g_ini[i]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -231,14 +231,14 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
     a point  charge (Coulomb  short + Coulomb  long) to  a distributed
     Gaussian (Coulomb long only). */
 
-  for (int vsite = 0; vsite < 2; vsite++) {
+  for (int i = 0; i < 2; i++) {
 
-    Site neutral = solvent[vsite]; /* dont modify the global variable */
-    neutral.charge = 0.0;          /* modify a copy */
+    Site neutral = solvent[i];  /* dont modify the global variable */
+    neutral.charge = 0.0;       /* modify a copy */
 
     field (BHD->da, BHD->PD,
            neutral, n, S, factor, ljc,
-           BHD->g_ini[vsite]);
+           BHD->g_ini[i]);
   }
 #endif
 
@@ -281,9 +281,9 @@ void bgy3d_solute_field (State *BHD, int n, const Site S[n], real damp, real dam
    * 3. Copy  the electrostatic potential  scaled by the  solvent site
    * charges into predefined locations:
    */
-  for (int vsite = 0; vsite < 2; vsite++) {
-      VecSet (BHD->uc[vsite], 0.0);
-      VecAXPY (BHD->uc[vsite], solvent[vsite].charge, v);
+  for (int i = 0; i < 2; i++) {
+      VecSet (BHD->uc[i], 0.0);
+      VecAXPY (BHD->uc[i], solvent[i].charge, v);
   }
 
   /* MEMORY: deallocate huge array here! */
