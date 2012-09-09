@@ -114,9 +114,9 @@ static State initialize_state (const ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD.fg2HH_fft[dim] = bgy3d_fft_malloc (da);
-      BHD.fg2OO_fft[dim] = bgy3d_fft_malloc (da);
-      BHD.fg2HO_fft[dim] = bgy3d_fft_malloc (da);
+      BHD.f_g2_fft[0][0][dim] = bgy3d_fft_malloc (da);
+      BHD.f_g2_fft[1][1][dim] = bgy3d_fft_malloc (da);
+      BHD.f_g2_fft[0][1][dim] = bgy3d_fft_malloc (da);
       BHD.fg2HHl_fft[dim] = bgy3d_fft_malloc (da);
       BHD.fg2OOl_fft[dim] = bgy3d_fft_malloc (da);
       BHD.fg2HOl_fft[dim] = bgy3d_fft_malloc (da);
@@ -170,9 +170,9 @@ static void finalize_state (State *BHD)
       VecDestroy(BHD->F_l[1][1][dim]);
       VecDestroy(BHD->F_l[0][1][dim]);
       VecDestroy(BHD->v[dim]);
-      bgy3d_fft_free (BHD->fg2HH_fft[dim]);
-      bgy3d_fft_free (BHD->fg2OO_fft[dim]);
-      bgy3d_fft_free (BHD->fg2HO_fft[dim]);
+      bgy3d_fft_free (BHD->f_g2_fft[0][0][dim]);
+      bgy3d_fft_free (BHD->f_g2_fft[1][1][dim]);
+      bgy3d_fft_free (BHD->f_g2_fft[0][1][dim]);
       bgy3d_fft_free (BHD->fg2HHl_fft[dim]);
       bgy3d_fft_free (BHD->fg2OOl_fft[dim]);
       bgy3d_fft_free (BHD->fg2HOl_fft[dim]);
@@ -697,7 +697,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
       ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                              BHD->v[dim], BHD->fg2OO_fft[dim], BHD->fft_scratch);
+                              BHD->v[dim], BHD->f_g2_fft[1][1][dim], BHD->fft_scratch);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
       err = VecPointwiseMult (BHD->v[dim], BHD->g2[1][1], BHD->F_l[1][1][dim]);
@@ -715,7 +715,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                             BHD->v[dim], BHD->fg2HH_fft[dim], BHD->fft_scratch);
+                             BHD->v[dim], BHD->f_g2_fft[0][0][dim], BHD->fft_scratch);
 
       /* Coulomb long */
       err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][0], BHD->F_l[0][0][dim]);
@@ -730,7 +730,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
       assert (!err);
 
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                             BHD->v[dim], BHD->fg2HO_fft[dim], BHD->fft_scratch);
+                             BHD->v[dim], BHD->f_g2_fft[0][1][dim], BHD->fft_scratch);
 
       /* Coulomb long */
       err = VecPointwiseMult (BHD->v[dim], BHD->g2[0][1], BHD->F_l[0][1][dim]);
@@ -1309,9 +1309,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
 
       /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
          iterations. Only a scalr kernel is needed: */
-      kernel (BHD.da, BHD.PD, BHD.fg2HH_fft, NULL, ker_fft_S[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.fg2HO_fft, NULL, ker_fft_S[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fg2OO_fft, NULL, ker_fft_S[1][1]);
+      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][0], NULL, ker_fft_S[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
+      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
 
       kernel (BHD.da, BHD.PD, BHD.fg2HHl_fft, BHD.ucH_fft,  ker_fft_L[0][0]);
       kernel (BHD.da, BHD.PD, BHD.fg2HOl_fft, BHD.ucHO_fft, ker_fft_L[0][1]); /* == [1][0] */
@@ -1799,9 +1799,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* H */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, gO, BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][1], gO, BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fg2HH_fft, gH, BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][0], gH, BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
@@ -1863,9 +1863,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* O */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fg2OO_fft, gO, BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.f_g2_fft[1][1], gO, BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fg2HO_fft, gH, BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][1], gH, BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 

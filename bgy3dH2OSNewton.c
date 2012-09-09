@@ -259,9 +259,9 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      BHD->fg2HH_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2OO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2HO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD->f_g2_fft[0][0][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD->f_g2_fft[1][1][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      BHD->f_g2_fft[0][1][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
       BHD->fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
       BHD->fO_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
@@ -406,9 +406,9 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gO, BHD->rhos[1], dgH);
+		     BHD->f_g2_fft[0][1], gO, BHD->rhos[1], dgH);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HH_fft, gH, BHD->rhos[0], help2);
+		     BHD->f_g2_fft[0][0], gH, BHD->rhos[0], help2);
   VecAXPY(dgH, 1.0, help2);
 
   VecAXPY(dgH, 1.0, BHD->uc[0]);
@@ -444,9 +444,9 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2OO_fft, gO, BHD->rhos[1], dgO);
+		     BHD->f_g2_fft[1][1], gO, BHD->rhos[1], dgO);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gH, BHD->rhos[0], help2);
+		     BHD->f_g2_fft[0][1], gH, BHD->rhos[0], help2);
   VecAXPY(dgO, 1.0, help2);
 
   VecAXPY(dgO, 1.0, BHD->uc[1]);
@@ -599,9 +599,9 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gO, BHD->rhos[1], dgH);
+		     BHD->f_g2_fft[0][1], gO, BHD->rhos[1], dgH);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HH_fft, gH, BHD->rhos[0], help2);
+		     BHD->f_g2_fft[0][0], gH, BHD->rhos[0], help2);
   VecAXPY(dgH, 1.0, help2);
 
 
@@ -637,9 +637,9 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_H2O_interS(BHD,
-		     BHD->fg2OO_fft, gO, BHD->rhos[1], dgO);
+		     BHD->f_g2_fft[1][1], gO, BHD->rhos[1], dgO);
   Compute_H2O_interS(BHD,
-		     BHD->fg2HO_fft, gH, BHD->rhos[0], help2);
+		     BHD->f_g2_fft[0][1], gH, BHD->rhos[0], help2);
   VecAXPY(dgO, 1.0, help2);
   /************************************************************/
   /* intra molecular part */

@@ -141,8 +141,9 @@ typedef struct State
 
   const ProblemData *PD;
 
-  /* BGY3dM stuff. The quantities indexed by the two site indices */
-  fftw_complex *fg2OO_fft[3], *fg2HH_fft[3], *fg2HO_fft[3];
+  /* BGY3dM stuff.   These are vector field quantities  indexed by two
+     site indices */
+  fftw_complex *f_g2_fft[2][2][3];
   fftw_complex *fg2OOl_fft[3], *fg2HHl_fft[3], *fg2HOl_fft[3];
   fftw_complex *fO_fft[3], *fH_fft[3];
 
