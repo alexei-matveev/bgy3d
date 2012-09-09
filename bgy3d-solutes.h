@@ -15,7 +15,6 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
    every solvent site. The rest is intent(in). */
 void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m == 2 */
-                         Vec us[m], Vec ul[m],
+                         Vec us[m], Vec uc, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
                          real damp, real damp_LJ);
-

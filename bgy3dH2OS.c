@@ -1139,8 +1139,9 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
 void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n])
 {
   real norm;
-  Vec t_vec;                    /* used for all sites */
-  Vec  g[2], dg[2], dg_acc, work;
+  Vec t_vec;                 /* used for all sites */
+  Vec uc;                    /* Coulomb long, common for all sites. */
+  Vec g[2], dg[2], dg_acc, work;
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1220,6 +1221,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
   DACreateGlobalVector(BHD.da, &dg_acc);
   DACreateGlobalVector(BHD.da, &work);
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
+  DACreateGlobalVector(BHD.da, &uc);    /* common for all sites */
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. It is not filled with
@@ -1347,12 +1349,19 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
          modified: */
       bgy3d_solute_field (&BHD,
                           2, solvent,
-                          g0, BHD.uc, /* intent(out) */
+                          g0, uc, /* intent(out) */
                           n, solute,
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* Historically   short-range  potential   is   stored  with   a
-         factor: */
+      /* Copy the  electrostatic potential scaled by  the solvent site
+         charges into predefined locations: */
+      for (int i = 0; i < 2; i++) {
+        VecSet (BHD.uc[i], 0.0);
+        VecAXPY (BHD.uc[i], solvent[i].charge, uc);
+      }
+
+      /* Historically short-range  potential is scaled  by the inverse
+         temperature: */
       for (int i = 0; i < 2; i++)
         VecScale (g0[i], beta);
 
@@ -1601,9 +1610,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
       }
   }
 
-  VecDestroy(dg_acc);
-  VecDestroy(work);
-  VecDestroy(t_vec);
+  VecDestroy (dg_acc);
+  VecDestroy (work);
+  VecDestroy (t_vec);
+  VecDestroy (uc);
 
   finalize_state (&BHD);
 }
@@ -1639,6 +1649,9 @@ static void solute_field_by_index (State *BHD, int solute, real damp, real damp_
   int n;                        /* number of solute sites */
   const Site *sites;            /* [n], array of sites */
   const char *name;             /* human readable name */
+  Vec uc;
+
+  DACreateGlobalVector(BHD->da, &uc); /* common for all sites */
 
   /* Get the solute from the tables: */
   bgy3d_solute_get (solute, &n, &sites, &name);
@@ -1646,9 +1659,18 @@ static void solute_field_by_index (State *BHD, int solute, real damp, real damp_
   /* This does the real work: */
   bgy3d_solute_field (BHD,
                       2, solvent,
-                      BHD->g_ini, BHD->uc, /* intent(out) */
+                      BHD->g_ini, uc, /* intent(out) */
                       n, sites,
                       damp, damp_lj);
+
+  /* Copy  the  electrostatic potential  scaled  by  the solvent  site
+     charges into predefined locations: */
+  for (int i = 0; i < 2; i++) {
+    VecSet (BHD->uc[i], 0.0);
+    VecAXPY (BHD->uc[i], solvent[i].charge, uc);
+  }
+
+  VecDestroy (uc);
 }
 
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)

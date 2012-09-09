@@ -10,8 +10,9 @@
  * model. So it was later renamed.
  *
  * The  funciton  bgy3d_solute_field()  initiates the  computation  of
- * (short  range)   force  field  and  long  range   Coulomb  for  the
- * (currently) two solvent sites.
+ * (short  range)  site-specifc force  field  and  long range  Coulomb
+ * potential (common  for all sites) for arbitrary  number of solvent-
+ * and solute sites.
  */
 
 #include "bgy3d.h"
@@ -169,13 +170,13 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
  *
  * See (5.106) and (5.08) in the  thesis.  Fill us[0] and us[1], for H
  * and O in that order  with short-range, VM_LJ + VM_coulomb_short and
- * ul[0]  and ul[1]  with  long range  potential VM_coulomb_long  (not
- * scaled by beta!).
+ * uc  with long range  potential VM_coulomb_long  (not scaled  by the
+ * charges of the solvent sites).
  */
 
 void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m == 2 */
-                         Vec us[m], Vec ul[m],
+                         Vec us[m], Vec uc, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
                          real damp, real damp_LJ)
 {
@@ -239,42 +240,26 @@ void bgy3d_solute_field (const State *BHD,
 
   Site point = {"x", {0.0, 0.0, 0.0}, -1.0, -1.0, -1.0};
 
-  Vec v; /* Vector for solute charge density and its Coulomb field */
-
-  /* MEMORY:  huge array  here!  FIXME:  make re-use  of pre-allocated
-     vectors more transparent and get rid of this: */
-  DACreateGlobalVector (BHD->da, &v);
+  /* Vec uc  will first hold the  solute charge density  and later its
+     Coulomb field. */
 
   /* electron density file */
   size_t MAX_LEN = 260;
   char filename[MAX_LEN];
 
   if (bgy3d_getopt_string("--load-charge", filename, MAX_LEN)){
-      read_charge_density(BHD->da, BHD->PD, filename, 1.0, v);
+      read_charge_density(BHD->da, BHD->PD, filename, 1.0, uc);
   }
   else {
     /* 1. Put the solute density into Vec v. Due to the inter */
-    field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, v);
+    field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
   }
 
   /*
    * 2. Solve  the Poisson equation "in-place" by  specifying the same
-   * Vec v as  input and output.  (Original version  was ouputting the
-   * Coulomb potential into a pre-allocated vector BHD->v[0]).
+   * Vec uc as input and output:
    */
-  poisson (BHD, v, v, 1.0 * damp); /* WARNING: argument aliasing here! */
-
-  /*
-   * 3. Copy  the electrostatic potential  scaled by the  solvent site
-   * charges into predefined locations:
-   */
-  for (int i = 0; i < 2; i++) {
-      VecSet (ul[i], 0.0);
-      VecAXPY (ul[i], solvent[i].charge, v);
-  }
-
-  /* MEMORY: deallocate huge array here! */
-  VecDestroy (v);
+  poisson (BHD, uc, uc, 1.0 * damp); /* WARNING: argument aliasing here! */
 }
 
 /*
