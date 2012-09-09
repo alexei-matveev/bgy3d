@@ -702,7 +702,10 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
      see  (5.101) and (5.102)  in Jager's  thesis. FFT(F_coulomb_long)
      has been calculated  as BHD->ucH_fft, BHD->ucO_fft, BHD->ucHO_fft
-     by ComputeFFTfromCoulomb() above */
+     by  ComputeFFTfromCoulomb() above.  The code  needs at  least one
+     work vector, use this: */
+  Vec work = BHD->v[0];
+
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++) {
       assert (BHD->g2[j][i] == BHD->g2[i][j]);
@@ -716,26 +719,26 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
           PetscErrorCode err;
 
           /* First (F_LJ + F_coulomb_short) * g2: */
-          err = VecPointwiseMult (BHD->v[dim],
+          err = VecPointwiseMult (work,
                                   BHD->g2[i][j], BHD->F[i][j][dim]);
           assert (!err);
 
           /* Next FFT((F_LJ + F_coulomb_short) * g2): */
           ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                                  BHD->v[dim], BHD->f_g2_fft[i][j][dim],
+                                  work, BHD->f_g2_fft[i][j][dim],
                                   BHD->fft_scratch);
 
           /* Now Coulomb long. F_coulomb_long * g2: */
-          err = VecPointwiseMult (BHD->v[dim],
+          err = VecPointwiseMult (work,
                                   BHD->g2[i][j], BHD->F_l[i][j][dim]);
           assert (!err);
 
           /* Next F_coulomb_long * g2 - F_coulomb_long: */
-          VecAXPY(BHD->v[dim], -1.0, BHD->F_l[i][j][dim]);
+          VecAXPY(work, -1.0, BHD->F_l[i][j][dim]);
 
           /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
           ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                                 BHD->v[dim], BHD->fl_g2_fft[i][j][dim],
+                                 work, BHD->fl_g2_fft[i][j][dim],
                                  BHD->fft_scratch);
         }
     }
