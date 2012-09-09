@@ -1211,7 +1211,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. It is not filled with
           data yet, I assume. */
-  const Vec *g0 = BHD.g_ini;    /* just an alias */
+  Vec *g0 = BHD.g_ini;          /* FIXME: aliasing! */
 
   /* set initial guess*/
   VecSet(dg[0],0);
@@ -1328,16 +1328,17 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
               bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
           }
 
-      /* Fill  g_ini[0], g_ini[1]  (see definition  above)  and uc[0],
-         uc[1],  which are  VM_Coulomb_long.  No  other fields  of the
-         struct State except those passed explicitly are modified: */
-      bgy3d_solute_field (&BHD, BHD.g_ini, BHD.uc,
+      /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
+         above) and uc[0], uc[1], which are VM_Coulomb_long.  No other
+         fields of the struct State except those passed explicitly are
+         modified: */
+      bgy3d_solute_field (&BHD, g0, BHD.uc,
                           n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* Historically   short-range  potential   is   stored  with   a
          factor: */
       for (int i = 0; i < 2; i++)
-        VecScale (BHD.g_ini[i], beta);
+        VecScale (g0[i], beta);
 
       /* FIXME:  Check if this  is redundant  --- it  was mechanically
          moved from  the body of the  above func (because  it does not
