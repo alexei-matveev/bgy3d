@@ -24,6 +24,19 @@
 
 extern real NORM_REG;
 
+/*
+ * These are  the two  solvent sites.  Coordinates  will not  be used.
+ * Respective parameters are #defined  elsewhere. Also do not take the
+ * names  of the  sites  literally.   The same  structure  is used  to
+ * represent all (2-site) solvents, such as HCl.
+ *
+ * FIXME:  at many places  it is  assumed that  the number  of solvent
+ * sites is exactly two:
+ */
+static const Site solvent[] =
+  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
+   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
+
 static State initialize_state (const ProblemData *PD)
 {
   State BHD;
@@ -1332,8 +1345,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
          above) and uc[0], uc[1], which are VM_Coulomb_long.  No other
          fields of the struct State except those passed explicitly are
          modified: */
-      bgy3d_solute_field (&BHD, g0, BHD.uc,
-                          n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
+      bgy3d_solute_field (&BHD,
+                          2, solvent,
+                          g0, BHD.uc, /* intent(out) */
+                          n, solute,
+                          (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* Historically   short-range  potential   is   stored  with   a
          factor: */
@@ -1628,8 +1644,11 @@ static void solute_field_by_index (State *BHD, int solute, real damp, real damp_
   bgy3d_solute_get (solute, &n, &sites, &name);
 
   /* This does the real work: */
-  bgy3d_solute_field (BHD, BHD->g_ini, BHD->uc,
-                      n, sites, damp, damp_lj);
+  bgy3d_solute_field (BHD,
+                      2, solvent,
+                      BHD->g_ini, BHD->uc, /* intent(out) */
+                      n, sites,
+                      damp, damp_lj);
 }
 
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)

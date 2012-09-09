@@ -153,19 +153,6 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &ButanoicAcid,     /* 4 */
                                   &Hexane};          /* 5 */
 
-/*
- * These are  the two  solvent sites.  Coordinates  will not  be used.
- * Respective parameters are #defined  elsewhere. Also do not take the
- * names  of the  sites  literally.   The same  structure  is used  to
- * represent all (2-site) solvents, such as HCl.
- *
- * FIXME: in  bgy3d_solute_field() function  below it is  assumed that
- * the number of solvent sites is exactly two:
- */
-static const Site solvent[] =
-  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
-   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
-
 /* Get solute sites and name by index. Functions that do the real work
    operate on array of sites: */
 void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name)
@@ -186,8 +173,11 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
  * scaled by beta!).
  */
 
-void bgy3d_solute_field (const State *BHD, Vec us[2], Vec ul[2],
-                         int n, const Site S[n], real damp, real damp_LJ)
+void bgy3d_solute_field (const State *BHD,
+                         int m, const Site solvent[m], /* m == 2 */
+                         Vec us[m], Vec ul[m],
+                         int n, const Site solute[n], /* n arbitrary */
+                         real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
 
@@ -217,9 +207,9 @@ void bgy3d_solute_field (const State *BHD, Vec us[2], Vec ul[2],
    * solute.
    */
 #ifndef QM
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
       field (BHD->da, BHD->PD,
-             solvent[i], n, S, factor, ljc,
+             solvent[i], n, solute, factor, ljc,
              us[i]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
@@ -228,13 +218,13 @@ void bgy3d_solute_field (const State *BHD, Vec us[2], Vec ul[2],
     a point  charge (Coulomb  short + Coulomb  long) to  a distributed
     Gaussian (Coulomb long only). */
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < m; i++) {
 
     Site neutral = solvent[i];  /* dont modify the global variable */
     neutral.charge = 0.0;       /* modify a copy */
 
     field (BHD->da, BHD->PD,
-           neutral, n, S, factor, ljc,
+           neutral, n, solute, factor, ljc,
            us[i]);
   }
 #endif
@@ -264,7 +254,7 @@ void bgy3d_solute_field (const State *BHD, Vec us[2], Vec ul[2],
   }
   else {
     /* 1. Put the solute density into Vec v. Due to the inter */
-    field (BHD->da, BHD->PD, point, n, S, 1.0, rho, v);
+    field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, v);
   }
 
   /*
