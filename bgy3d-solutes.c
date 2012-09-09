@@ -458,7 +458,7 @@ void poisson (State *BHD, Vec uc, Vec rho, real q)
     fft_work = BHD->g_fft;
 
     /* Get local portion of the grid */
-    DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners(BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     /* Get FFT of rho: rho(i, j, k) -> fft_rho(kx, ky, kz) placed into
        fft_work(kx, ky, kz): */
