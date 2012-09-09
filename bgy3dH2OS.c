@@ -1637,6 +1637,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   int iter;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
+  Vec uc;                       /* common for all sites */
   PetscScalar dgH_norm, dgO_norm;
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
@@ -1703,6 +1704,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD.da, &dg_newH);
   DACreateGlobalVector(BHD.da, &dg_newO);
 
+  DACreateGlobalVector(BHD.da, &uc); /* common for all sites */
+
   DACreateGlobalVector(BHD.da, &dg_histO);
   DACreateGlobalVector(BHD.da, &dg_histH);
   VecSet(dg_histH, 0.0);
@@ -1756,9 +1759,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         int n;                        /* number of solute sites */
         const Site *sites;            /* [n], array of sites */
         const char *name;             /* human readable name */
-        Vec uc;                       /* common for all sites */
-
-        DACreateGlobalVector(BHD.da, &uc); /* common for all sites */
 
         /* Get the solute from the tables: */
         bgy3d_solute_get (4, &n, &sites, &name); /* Butanoic Acid */
@@ -1769,15 +1769,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
                             BHD.g_ini, uc, /* intent(out) */
                             n, sites,
                             (damp > 0.0 ? damp : 0.0), damp_LJ);
-
-        /* Copy  the  electrostatic potential  scaled  by  the solvent  site
-           charges into predefined locations: */
-        for (int i = 0; i < 2; i++) {
-          VecSet (BHD.uc[i], 0.0);
-          VecAXPY (BHD.uc[i], solvent[i].charge, uc);
-        }
-
-        VecDestroy (uc);
       }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1865,10 +1856,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 /*        else if(dgH_norm >1.0) */
 /*          VecScale(dg_new, 0.8); */
 
-
-          //VecShift(dg_new, -0.01);
-          //VecAXPY(dg_new, dgH_norm,  BHD.uc[0]);
-          VecAXPY(dg_new, 1.0, BHD.uc[0]);
+          /* Copy  the electrostatic potential  scaled by  the solvent
+             site charges into predefined locations: */
+          VecAXPY(dg_new, solvent[0].charge, uc);
 /*        dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
           //VecShift(dg_new, -dgH_norm);
@@ -1926,10 +1916,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 /*        else if(dgO_norm >1.0) */
 /*          VecScale(dg_new, 1.1); */
 
-
-          //VecShift(dg_new, 0.01);
-          //VecAXPY(dg_new, dgO_norm, BHD.uc[1]);
-          VecAXPY(dg_new, 1, BHD.uc[1]);
+          /* Copy  the electrostatic potential  scaled by  the solvent
+             site charges into predefined locations: */
+          VecAXPY(dg_new, solvent[1].charge, uc);
 /*        dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
 /*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
           //VecShift(dg_new, -dgO_norm);
@@ -2113,16 +2102,15 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   VecDestroy(tH);
   VecDestroy(tO);
+
+  VecDestroy (uc);
+
   VecDestroy(dg_newH);
   VecDestroy(dg_newO);
   VecDestroy(dg_histH);
   VecDestroy(dg_histO);
 
   finalize_state (&BHD);
-
-
-  //VecView(BHD.uc[1],PETSC_VIEWER_STDERR_WORLD);
-   //exit(1);
 
   return PETSC_NULL;
 }
