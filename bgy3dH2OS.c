@@ -1353,13 +1353,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
                           n, solute,
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* Copy the  electrostatic potential scaled by  the solvent site
-         charges into predefined locations: */
-      for (int i = 0; i < 2; i++) {
-        VecSet (BHD.uc[i], 0.0);
-        VecAXPY (BHD.uc[i], solvent[i].charge, uc);
-      }
-
       /* Historically short-range  potential is scaled  by the inverse
          temperature: */
       for (int i = 0; i < 2; i++)
@@ -1425,15 +1418,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
              The    factor   (damp/    damp0)   in    the    call   to
              Compute_H2O_interS_C()  looks  odd,  but  note  that  the
              Coulomb  field was  defined  having the  factor damp0  in
-             RecomputeInitialFFTs(). FIXME: avoid this ugliness.
-
-             I assume  BHD.uc[] was not  modified since it was  set in
-             the  solute   specific  RecomputeInitialSoluteData()  and
-             before it first use  in VecAXPY() below.  Note that uc[0]
-             and  uc[1] differ from  the true  Coulomb potential  by a
-             factor equal  to the charge of the  respective site.  Why
-             do  we   keep  two  versions  of   essentially  the  same
-             potential?  Why not adapt the factor here instead? */
+             RecomputeInitialFFTs(). FIXME: avoid this ugliness. */
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
@@ -1480,8 +1465,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
 
               VecAXPY(dg_acc, 1.0, work);
 
-              /* Add Coulomb field BHD.uc[i] to: */
-              VecAXPY(dg_acc, 1.0, BHD.uc[i]);
+              /* Add Coulomb  field uc scaled  by the site  chanrge to
+                 the accumulator: */
+              VecAXPY(dg_acc, solvent[i].charge, uc);
 
               /* Vec t_vec is intent(out) here: */
               ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad, NULL);
