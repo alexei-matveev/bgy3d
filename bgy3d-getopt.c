@@ -50,24 +50,25 @@ int bgy3d_getopt_string (const char key[], char *val, size_t len)
 void bgy3d_load_vec (const char file[], Vec *vec) {
     PetscViewer viewer;
 
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
-    VecLoad(viewer, VECMPI, vec);
-    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+    VecLoad (viewer, VECMPI, vec);
+    PetscViewerDestroy (viewer);
 }
 
 void bgy3d_save_vec (const char file[], const Vec vec) {
     PetscViewer viewer;
 
-    PetscViewerBinaryOpen(PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
-    VecView(vec, viewer);
-    PetscViewerDestroy(viewer);
+    PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
+    VecView (vec, viewer);
+    PetscViewerDestroy (viewer);
 }
 
 void bgy3d_save_vec_ascii (const char file[], const Vec vec) {
     PetscViewer viewer;
 
-    PetscViewerASCIIOpen(PETSC_COMM_WORLD, file, &viewer);
-    PetscViewerSetFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
-    VecView(vec, viewer);
-    PetscViewerDestroy(viewer);
+    PetscViewerASCIIOpen (PETSC_COMM_WORLD, file, &viewer);
+    PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB);
+    /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */
+    VecView (vec, viewer);
+    PetscViewerDestroy (viewer);
 }
