@@ -1329,11 +1329,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
           }
 
       /* Fill  g_ini[0], g_ini[1]  (see definition  above)  and uc[0],
-         uc[1], which are VM_Coulomb_long, but should they multiply by
-         beta?   No other  fields  of the  struct  State except  those
-         passed explicitly are modified: */
+         uc[1],  which are  VM_Coulomb_long.  No  other fields  of the
+         struct State except those passed explicitly are modified: */
       bgy3d_solute_field (&BHD, BHD.g_ini, BHD.uc,
                           n, solute, (damp > 0.0 ? damp : 0.0), 1.0);
+
+      /* Historically   short-range  potential   is   stored  with   a
+         factor: */
+      for (int i = 0; i < 2; i++)
+        VecScale (BHD.g_ini[i], beta);
 
       /* FIXME:  Check if this  is redundant  --- it  was mechanically
          moved from  the body of the  above func (because  it does not
@@ -1760,6 +1764,11 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           solute_field_by_index (&BHD, /* Butanoic Acid */ 4, damp, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
+
+      /* Historically   short-range  potential   is   stored  with   a
+         factor: */
+      for (int i = 0; i < 2; i++)
+        VecScale (BHD.g_ini[i], BHD.PD->beta);
 
       /* FIXME:  Check if this  is redundant  --- it  was mechanically
          moved from the body of the bgy3d_solute_field() func (because

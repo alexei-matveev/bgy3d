@@ -180,13 +180,13 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
 /*
  * Create initial solute data.
  *
- * See (5.106) and (5.08) in  the thesis.  Fill g_ini[0] and g_ini[1],
- * for H  and O in  that order with (scaled!)   short-range potential,
- * beta   *  (VM_LJ   +  VM_coulomb_short)   and  uc[0],   uc[1]  with
- * VM_coulomb_long for the two sites (not scaled by beta!).
+ * See (5.106) and (5.08) in the  thesis.  Fill us[0] and us[1], for H
+ * and O in that order  with short-range, VM_LJ + VM_coulomb_short and
+ * ul[0]  and ul[1]  with  long range  potential VM_coulomb_long  (not
+ * scaled by beta!).
  */
 
-void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
+void bgy3d_solute_field (const State *BHD, Vec us[2], Vec ul[2],
                          int n, const Site S[n], real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
@@ -194,10 +194,6 @@ void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
 
   /*
     Calculate FF potential for all solvent sites.
-
-    Beta  is the  (inverse) temperature.   For historical  reasons the
-    solute  field  acting on  solvent  sites  is  defined having  this
-    factor.
 
     FIXME:  scaling the  epsilon of  the  solvent site  by factor  X^2
     scales the interaction with the  solute by factor X. Why not using
@@ -208,7 +204,7 @@ void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
     short-range Coulomb interaction  using two different factors.  The
     new code uses just one, that is why the assertion:
   */
-  real factor = damp * BHD->PD->beta;
+  real factor = damp;
   assert (damp == damp_LJ);
   assert (factor >= 0.0);
 
@@ -224,7 +220,7 @@ void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
   for (int i = 0; i < 2; i++)
       field (BHD->da, BHD->PD,
              solvent[i], n, S, factor, ljc,
-             g_ini[i]);
+             us[i]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -239,7 +235,7 @@ void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
 
     field (BHD->da, BHD->PD,
            neutral, n, S, factor, ljc,
-           g_ini[i]);
+           us[i]);
   }
 #endif
 
@@ -283,8 +279,8 @@ void bgy3d_solute_field (const State *BHD, Vec g_ini[2], Vec uc[2],
    * charges into predefined locations:
    */
   for (int i = 0; i < 2; i++) {
-      VecSet (uc[i], 0.0);
-      VecAXPY (uc[i], solvent[i].charge, v);
+      VecSet (ul[i], 0.0);
+      VecAXPY (ul[i], solvent[i].charge, v);
   }
 
   /* MEMORY: deallocate huge array here! */
