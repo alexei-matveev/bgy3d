@@ -420,35 +420,29 @@ real Coulomb_grad( real r, real rx, real q2)
     return re;
 }
 
-
-void ComputeH2O_g(Vec g, Vec g0, Vec dg)
+/* g := exp[-(g0 + dg)], with a sanity check: */
+void ComputeH2O_g (Vec g, Vec g0, Vec dg)
 {
-  int local_size, i;
+  int local_size;
   PetscScalar *g_vec, *dg_vec, *g0_vec;
-  real  k; // g_norm
 
+  VecGetArray (g, &g_vec);
+  VecGetArray (g0, &g0_vec);
+  VecGetArray (dg, &dg_vec);
 
+  VecGetLocalSize (g, &local_size);
 
-  VecGetArray( g, &g_vec);
-  VecGetArray( g0, &g0_vec);
-  VecGetArray( dg, &dg_vec);
-  VecGetLocalSize(g, &local_size);
-
-  for(i=0; i<local_size; i++)
+  for (int i = 0; i < local_size; i++)
     {
-
-      k = -g0_vec[i]-dg_vec[i];
+      real k = - g0_vec[i] - dg_vec[i];
       g_vec[i] = exp(k);
 
       assert(!isinf(g_vec[i]) && !isnan(g_vec[i]));
     }
 
-  VecRestoreArray(g, &g_vec);
-  VecRestoreArray(g, &g0_vec);
-  VecRestoreArray(dg, &dg_vec);
-
-/*   VecView(g,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
+  VecRestoreArray (g, &g_vec);
+  VecRestoreArray (g, &g0_vec);
+  VecRestoreArray (dg, &dg_vec);
 }
 
 static void UNUSED_CheckMax( Vec g, char name[5], real max)
