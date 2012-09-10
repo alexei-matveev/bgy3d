@@ -633,6 +633,8 @@ static void HNC3dNewtonData_free(HNC3dNewtonData HD)
 /* F for Newton method, solving h and c simultaneously */
 static PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   HNC3dNewtonData HD;
   ProblemData *PD;
   DA da;
@@ -976,6 +978,8 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 /* c appears as an input here */
 static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   FFT_DATA *h_fft, *c_fft, *ch_fft;
   int x[3], n[3], i[3], index;
   HNC3dData HD;
@@ -1053,6 +1057,8 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 /* different F than above */
 static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   FFT_DATA *h_fft, *c_fft, *ch_fft;
   int x[3], n[3], i[3], index;
   HNC3dData HD;

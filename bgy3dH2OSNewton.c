@@ -341,6 +341,8 @@ static void InitializePreconditioner(State *BHD)
 //      to SNESSetFunction()
 static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   State *BHD;
   H2OSdg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgO_vec;
@@ -524,6 +526,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 //      to SNESSetFunction()
 static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *data)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   State *BHD;
   DA da;
   H2OSdgF ***dg_struct;

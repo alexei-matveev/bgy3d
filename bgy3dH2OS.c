@@ -926,6 +926,8 @@ typedef struct StepDataStruct
 
 static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 {
+  (void) snes;                 /* unused, but interface obligation? */
+
   StepData SD;
   real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;

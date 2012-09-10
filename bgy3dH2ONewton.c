@@ -411,6 +411,8 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 //      to SNESSetFunction()
 static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   State *BHD;
   H2Odg ***dg_struct;
   PetscScalar ***dgH_vec, ***dgHO_vec, ***dgO_vec;

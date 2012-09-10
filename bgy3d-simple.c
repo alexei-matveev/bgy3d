@@ -770,6 +770,8 @@ static void CreateInitialGuessFromg2(BGY3dParameter *params, Vec g)
 
 static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -870,6 +872,7 @@ static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa)
 static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *flag,
 			 void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_data, *fft_gFg2, *Ftimesg2_fft;
@@ -1014,6 +1017,8 @@ static PetscErrorCode Compute_J(SNES snes, Vec g, Mat *A, Mat *B, MatStructure *
 
 static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
 {
+  (void) snes;                  /* FIXME: interface obligation? */
+
   DA da;
   BGY3dParameter *params;
   FFT_DATA *fft_fg, *fft_g, *fft_fgg;
