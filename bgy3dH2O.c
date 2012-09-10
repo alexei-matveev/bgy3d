@@ -3728,7 +3728,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        } */
 /*        for(in_iter=0; in_iter<300; in_iter++) { */
 /*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-        gO:
+          /* LABEL: gO: */
           /* g_O */
           //goto ende;
           Compute_dg_H2O_inter(BHD,
@@ -3789,8 +3789,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           PetscPrintf(PETSC_COMM_WORLD,"O= %e  (%f)  ", dgO_norm/aO, aO);
           //ComputeH2O_g( gO, g0O, dgO);
 
-        ende:
-          ;
+          /* LABEL: ende: */
           ComputeH2O_g( gHO, g0HO, dgHO);
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
@@ -4394,7 +4393,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        } */
 /*        for(in_iter=0; in_iter<300; in_iter++) { */
 /*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-        gO:
+          /* LABEL: gO: */
           /* g_O */
           //goto ende;
           Compute_dg_H2O_inter(BHD,
@@ -4459,8 +4458,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           PetscPrintf(PETSC_COMM_WORLD,"O= %e  (%f)  ", dgO_norm/aO, aO);
           //ComputeH2O_g( gO, g0O, dgO);
 
-        ende:
-          ;
+          /* LABEL: ende: */
           ComputeH2O_g( gHO, g0HO, dgHO);
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
