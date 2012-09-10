@@ -593,11 +593,9 @@ void AssembleMatrix(BGY3dDivData BDD, DA da, Mat M)
   int x[3], n[3], i[3], N[3];
   MatStencil col[7],row;
   PetscScalar v[3], ***ddU_vec, ***(f_vec[3]);
-  real h[3], beta;
+  real h[3];
 
   const ProblemData *PD = BDD->PD;
-
-  beta = BDD->beta;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -927,19 +925,11 @@ void ComputeIntegralPart_kirk(BGY3dDivData BDD, Vec g, Vec f)
 void AssembleSystemMatrix(BGY3dDivData BDD, Mat SM, Vec f)
 {
   DA da;
-  int x[3], n[3], i[3], N[3];
-  real h[3];
+  int x[3], n[3], i[3];
   MatStencil col,row;
   PetscScalar ***f_vec;
 
-
-  const ProblemData *PD = BDD->PD;
   da = BDD->da;
-
-  FOR_DIM
-    N[dim] = PD->N[dim];
-  FOR_DIM
-    h[dim] = PD->h[dim];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -1277,17 +1267,13 @@ void ComputeRHS(BGY3dDivData BDD, Vec b, Vec g0, Vec f)
 void ComputeRHS2(BGY3dDivData BDD, Vec b)
 {
   DA da;
-  int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
+  int x[3], n[3], i[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
-
 
   const ProblemData *PD = BDD->PD;
   da = BDD->da;
 
-
-  FOR_DIM
-    N[dim] = PD->N[dim];
   FOR_DIM
     h[dim] = PD->h[dim];
 
@@ -1335,17 +1321,13 @@ void ComputeRHS2(BGY3dDivData BDD, Vec b)
 void ComputeRHS_laplace(BGY3dDivData BDD, Vec b)
 {
   DA da;
-  int x[3], n[3], i[3], N[3], ic1, ic2, ic3;
+  int x[3], n[3], i[3], ic1, ic2, ic3;
   real h[3];
   PetscScalar ***(i_vec[3]), ***b_vec;
-
 
   const ProblemData *PD = BDD->PD;
   da = BDD->da;
 
-
-  FOR_DIM
-    N[dim] = PD->N[dim];
   FOR_DIM
     h[dim] = PD->h[dim];
 
