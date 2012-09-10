@@ -358,18 +358,15 @@ static void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 		    real sigma_K)
 {
   DA da;
-  int x[3], n[3], i[3], N[3];
+  int x[3], n[3], i[3];
   PetscScalar ***g_vec, ***rhs_vec;
-  real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
+  real h[3], r[3], r_s, facconv, s2, ss2;
 
   da = BDD->da;
   const ProblemData *PD = BDD->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
-  L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -379,7 +376,7 @@ static void ComputeRHStest(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
   DAVecGetArray(da, rhs, &(rhs_vec));
 
 
-  facg = 1./(sigma_g*sqrt(2.*M_PI));
+  /* facg = 1./(sigma_g*sqrt(2.*M_PI)); */
   s2=1./SQR(sigma_g);
   ss2 = 1./(SQR(sigma_g)+SQR(sigma_K));
   facconv = PD->beta*PD->rho/(sqrt(2.*M_PI*(SQR(sigma_g)+SQR(sigma_K)))) *
@@ -415,18 +412,15 @@ void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
 			   real sigma_K)
 {
   DA da;
-  int x[3], n[3], i[3], N[3];
+  int x[3], n[3], i[3];
   PetscScalar ***g_vec, ***rhs_vec;
-  real h[3], r[3], r_s, facg, facconv, L, s2, ss2;
+  real h[3], r[3], r_s, facconv, s2, ss2;
 
   da = BDD->da;
   const ProblemData *PD = BDD->PD;
 
   FOR_DIM
     h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
-  L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -436,7 +430,7 @@ void ComputeRHStestFourier(BGY3dDivData BDD, Vec g, Vec rhs, real sigma_g,
   DAVecGetArray(da, rhs, &(rhs_vec));
 
 
-  facg = 1./(sigma_g*sqrt(2.*M_PI));
+  /* facg = 1./(sigma_g*sqrt(2.*M_PI)); */
   s2=1./SQR(sigma_g);
   ss2 = 1./(SQR(sigma_g)+SQR(sigma_K));
   facconv = PD->beta*PD->rho/(sqrt(2.*M_PI*(SQR(sigma_g)+SQR(sigma_K)))) *
