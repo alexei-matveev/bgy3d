@@ -54,7 +54,7 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 {
   State *BHD;
   DA da;
-  real interval[2], h[3], N[3], L, r[3], r_s, beta;
+  real interval[2], h[3], r[3], r_s, beta;
   int i[3], x[3], n[3];
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
@@ -115,11 +115,9 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
-  L=interval[1]-interval[0];
+
   FOR_DIM
     h[dim]=PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
 
   /* Initialize parallel stuff: fftw + petsc */
   BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
