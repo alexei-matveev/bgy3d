@@ -1409,8 +1409,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dg_norm[1], a);
 
-          /* Now  that dg[]  has bee  computed one  can  safely update
-             g[]: */
+          /* Now that dg[] has bee computed one can safely update g[].
+             Compute g := exp[-(g0 + dg)], with a sanity check: */
           for (int i = 0; i < 2; i++)
               ComputeH2O_g (g[i], g0[i], dg[i]);
 
