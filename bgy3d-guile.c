@@ -6,10 +6,22 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3dH2O.h"
-#include "bgy3dH2OS.h"
+#include "bgy3dH2OS.h"          /* bgy3d_solve_with_solute */
+#include "bgy3d-getopt.h"       /* bgy3d_save_vec, bgy3d_load_vec */
 #include "bgy3d-guile.h"
 
+
+
+#ifndef SIZEOF_VOID_PTR_EQ_4 /* on 32 bit platforms set this CPP var. */
+# define scmx_ptr(x) scm_from_uint64 ((intptr_t) (x)) /* scm eXtension */
+# define void_ptr(x) ((void*) scm_to_uint64 (x))
+#else
+# define scmx_ptr(x) scm_from_uint32 ((intptr_t) (x))
+# define void_ptr(x) ((void*) scm_to_uint32 (x))
+#endif
+
 static char helptext[] = "BGY3d Guile.\n";
+
 
 /* Update  an  integer  with   the  entry  from  an  association  list
    [intent(in)]  or leave it  unchanged if  there is  no corresponding
@@ -26,6 +38,7 @@ static bool alist_getopt_int (SCM alist, const char *key, int *val)
   return test;
 }
 
+
 /* Update  a real  number  with  the entry  from  an association  list
    [intent(in)]  or leave it  unchanged if  there is  no corresponding
    entry: */
@@ -40,6 +53,7 @@ static bool alist_getopt_real (SCM alist, const char *key, double *val)
 
   return test;
 }
+
 
 static ProblemData problem_data (SCM alist)
 {
@@ -83,6 +97,7 @@ static ProblemData problem_data (SCM alist)
   return PD;
 }
 
+
 /* A Site is represented by an sexp like:
 
    ("H" (0.6285 0.0 0.0) 2.735 0.03971 0.2) */
@@ -120,6 +135,7 @@ static Site make_site (SCM s)
   return S;
 }
 
+
 static void make_solute (SCM solute, int *n, Site **sites, char **name)
 {
   SCM s_name = scm_car (solute);   /* string */
@@ -139,6 +155,7 @@ static void make_solute (SCM solute, int *n, Site **sites, char **name)
   *name = scm_to_locale_string (s_name); /* will you free() it? */
 }
 
+
 static SCM guile_run_solvent (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
@@ -151,6 +168,7 @@ static SCM guile_run_solvent (SCM alist)
   return alist;
 }
 
+
 /* Finalize Petsc and MPI */
 static SCM guile_finalize (void)
 {
@@ -161,35 +179,89 @@ static SCM guile_finalize (void)
 }
 
 
-static SCM guile_run_solute (SCM solute, SCM alist)
+static SCM guile_run_solute (SCM solute, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
-  const ProblemData PD = problem_data (alist);
+  const ProblemData PD = problem_data (settings);
 
   int n;
   Site *sites;
   char *name;
+  Vec g[2];
 
   /* Allocates sites, name: */
   make_solute (solute, &n, &sites, &name);
 
   /* Code used to be verbose: */
-  PetscPrintf(PETSC_COMM_WORLD, "Solute is %s.\n", name);
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
-  /* This takes  part of  the input  from the disk,  and writes  to it
-     too: */
-  bgy3d_solve_with_solute (&PD, n, sites);
+  /* This  takes part  of the  input  from the  disk, returns  solvent
+     distribution in Vec g[] (dont forget to destroy them): */
+  bgy3d_solve_with_solute (&PD, n, sites, g);
 
   free (name);
   free (sites);
 
-  return alist;
+  /* Caller, dont forget to destroy them! */
+  return scm_list_2 (scmx_ptr (g[0]), scmx_ptr (g[1]));
 }
+
+
+
+static SCM guile_vec_destroy (SCM vec)
+{
+  PetscErrorCode err = VecDestroy (void_ptr (vec));
+  assert (!err);
+
+  return scm_from_int (err);
+}
+
+
+static SCM guile_vec_save (SCM path, SCM vec)
+{
+  char *c_path = scm_to_locale_string (path); /* free() it! */
+
+  bgy3d_save_vec (c_path, void_ptr (vec));
+
+  free (c_path);
+
+  return SCM_UNDEFINED;
+}
+
+
+static SCM guile_vec_load (SCM path)
+{
+  char *c_path = scm_to_locale_string (path); /* free() it! */
+
+  Vec vec;
+  bgy3d_load_vec (c_path, &vec);
+
+  free (c_path);
+
+  return scmx_ptr (vec);
+}
+
+
+static SCM guile_test (SCM inp)
+{
+  Vec v = void_ptr (inp);
+
+  return scmx_ptr (v);
+}
+
+
 
 static void inner_main (void *closure, int argc, char **argv)
 {
   (void) closure;               /* FIXME: otherwise unused. */
+
+  assert (sizeof (Vec) == sizeof (void*));
+#ifndef SIZEOF_VOID_PTR_EQ_4
+  assert (sizeof (void*) == sizeof (uint64_t));
+#else
+  assert (sizeof (void*) == sizeof (uint32_t));
+#endif
 
   /*
    * Calling this  will define a  few bgy3d-* gsubrs defined  in these
@@ -198,6 +270,10 @@ static void inner_main (void *closure, int argc, char **argv)
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
   scm_c_define_gsubr ("bgy3d-finalize", 0, 0, 0, guile_finalize);
+  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
+  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
+  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
+  scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
 
   scm_shell (argc, argv);     /* never returns */
 }

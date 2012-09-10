@@ -1059,16 +1059,23 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
 
 
 /*
- * This function is the main entry point for the BGY3dM equation for a
- * 2-site solvent and an arbitrary solute.  I guess H2O in the name is
- * a historical baggage.
+  This function is the main entry  point for the BGY3dM equation for a
+  2-site solvent and an arbitrary solute.  The two vectors in
+
+  Vec g[2], intent(out)
+
+  are  initialized as global  distributed arrays  and filled  with the
+  solvent site  distributions. It is the responsibility  of the caller
+  to destroy them when no more needed.
  */
-void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n])
+void bgy3d_solve_with_solute (const ProblemData *PD,
+                              int n, const Site solute[n],
+                              Vec g[2])
 {
   real norm;
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
-  Vec g[2], dg[2], dg_acc, work;
+  Vec dg[2], dg_acc, work;
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1123,8 +1130,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
   for (int i = 0; i < 2; i++) {
       g_fft[i] = bgy3d_fft_malloc (BHD.da);
 
-      DACreateGlobalVector (BHD.da, &g[i]);
       DACreateGlobalVector (BHD.da, &dg[i]);
+
+      /* Here the storage for the output is allocated, the caller will
+         have to destroy them: */
+      DACreateGlobalVector (BHD.da, &g[i]);
   }
 
   /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
@@ -1506,15 +1516,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD, int n, const Site solute[n]
       }
   } /* damp loop */
 
-  /* Save final distribution, use binary format: */
-  bgy3d_save_vec ("g0.bin", g[0]); /* gH */
-  bgy3d_save_vec ("g1.bin", g[1]); /* gO */
-
   /* Clean up and exit ... */
   bgy3d_fft_free (dg_acc_fft);
 
   for (int i = 0; i < 2; i++) {
-      VecDestroy (g[i]);
+      /* Delegated to the caller:
+         VecDestroy (g[i]); */
       VecDestroy (dg[i]);
 
       bgy3d_fft_free (g_fft[i]);
@@ -1541,8 +1548,9 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   int n;                        /* number of solute sites */
   const Site *sites;            /* [n], array of sites */
   const char *name;             /* human readable name */
+  Vec g[2];                     /* solution */
 
-  /* Solute index between 0 and 5 (includive): */
+  /* Solute index between 0 and 5 (inclusive): */
   const int solute = PD->solute;
 
   /* Get the solute from the tables: */
@@ -1551,8 +1559,16 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   /* Code used to be verbose: */
   PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", name);
 
-  /* This does the real work: */
-  bgy3d_solve_with_solute (PD, n, sites);
+  /* This does the  real work. Vec g[2] is  intent(out) in all senses,
+     dont forget to destroy them: */
+  bgy3d_solve_with_solute (PD, n, sites, g);
+
+  /* Save final distribution, use binary format: */
+  bgy3d_save_vec ("g0.bin", g[0]); /* gH */
+  bgy3d_save_vec ("g1.bin", g[1]); /* gO */
+
+  for (int i = 0; i < 2; i++)
+    VecDestroy (g[i]);
 
   return PETSC_NULL;            /* fake, interface obligation */
 }

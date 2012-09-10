@@ -19,8 +19,12 @@
   ;;
   ((member "--BGYM2Site" argv)
    (let ((h-cl                       ; Assuming first entry is for HCl
-          (car (slurp (find-file "solutes.scm")))))
-     (bgy3d-run-solute h-cl '()))) ; Use defaults and Petsc env
+          (car (slurp (find-file "solutes.scm"))))
+         (g1-files
+          (list "g0.bin" "g1.bin")))
+     (map bgy3d-vec-save
+          g1-files
+          (bgy3d-run-solute h-cl '())))) ; Use defaults and Petsc env
   ;;
   (else
    (new-main argv))))
@@ -92,20 +96,36 @@
            (damp-start . 1.0)
            (lambda . 0.02)))
         (solutes                        ; all entries in the file
-         (slurp (find-file "solutes.scm"))))
+         (slurp (find-file "solutes.scm")))
+        (g1-files
+         (list "x0.bin" "x1.bin")))
     ;;
-    ;; At the moment both functions, bgy3d-run-solvent and
-    ;; bgy3d-run-solute, echo settings as is:
+    ;; At the moment  the function bgy3d-run-solvent echos settings as
+    ;; is, the output is written to disk instead:
     ;;
-    (pretty-print solutes)
-    (display "Processing pure solvent. Settings:\n")
-    (pretty-print settings)
+    ;; (pretty-print solutes)
+    ;; (display "Processing pure solvent. Settings:\n")
+    ;; (pretty-print settings)
     (bgy3d-run-solvent settings)
     (for-each (lambda (solute)          ; process each solute ...
-                (display "Processing solute description:\n")
-                (pretty-print solute)
-                (print-xyz solute)
-                (bgy3d-run-solute solute settings))
+                ;; (display "Processing solute description:\n")
+                ;; (pretty-print solute)
+                ;; (print-xyz solute)
+                ;;
+                ;; The function bgy3d-run-solute allocates and returns
+                ;; a (two) Petsc Vecs in a list, it is the callers
+                ;; responsibility to destroy them:
+                ;;
+                (let ((g1 (bgy3d-run-solute solute settings)))
+                  ;;
+                  ;; Do something usefull with g1, then destroy them:
+                  ;;
+                  ;; (pretty-print g1)
+                  (map bgy3d-vec-save g1-files g1)
+                  (map bgy3d-vec-destroy g1)
+                  (let ((g1 (map bgy3d-vec-load g1-files)))
+                    ;; (pretty-print g1)
+                    (map bgy3d-vec-destroy g1))))
               solutes)))                ; ... from this list
 
 ;;;
@@ -114,4 +134,7 @@
 ;;;
 (old-main (command-line))
 
+;;
+;; Translates to PetscFinalize():
+;;
 (bgy3d-finalize)
