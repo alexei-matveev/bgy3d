@@ -40,7 +40,7 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD
 {
   BGY3dDiatomicABData BDD;
   DA da;
-  real interval[2], h[3], N[3], L, r[3], r_s, beta;
+  real interval[2], h[3], r[3], r_s, beta;
   int i[3], x[3], n[3];
   PetscScalar ***(fa_vec[3]),***(fb_vec[3]),***(fab_vec[3]);
   PetscScalar ***gaini_vec, ***gbini_vec, ***gabini_vec;
@@ -49,7 +49,6 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD
   PetscInt lx[1], ly[1], *lz;
   real epsilona, epsilonb, epsilonab;
   real sigmaa, sigmab, sigmaab;
-
 
   real eps[]={ 1.0, 1.0}, sig[]={ 0.5, 1.0};
   //real eps[]={ 0.1512, 0.046}, sig[]={ 3.1506, 0.4};
@@ -85,11 +84,9 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD
 
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
-  L=interval[1]-interval[0];
+
   FOR_DIM
     h[dim]=PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
 
   /* Initialize parallel stuff: fftw + petsc */
   BDD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
@@ -713,7 +710,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
   fftw_complex *g_fft, *dg_fft, *scratch;
-  real fac, L, k, h, beta;
+  real L, k, h;
   PetscScalar *g_vec;
 
 
@@ -728,8 +725,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   dg_fft = BDD->gfg2_fft;
   scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  fac = L/(2.*M_PI); /* siehe oben ... */
-  beta = PD->beta;
+  /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
   /* Get local portion of the grid */
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
@@ -809,7 +805,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, beta; // sign;
+  real L, k, h;
 
   const ProblemData *PD = BDD->PD;
 
@@ -823,8 +819,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
   dg_fft = BDD->gfg2_fft;
   scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
-  fac = L/(2.*M_PI); /* siehe oben ... */
+  /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
 
   /* Get local portion of the grid */
@@ -862,7 +857,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 	  else
 	    {
 	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-	      k_fac = beta*fac/k;
+	      /* k_fac = beta*fac/k; */
 	      k = 2.0*M_PI*sqrt(k)*rab/L;
 
 
@@ -898,7 +893,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
   fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
-  real fac, k_fac, L, k, h, sign, beta;
+  real L, k, h, sign;
 
   const ProblemData *PD = BDD->PD;
 
@@ -913,8 +908,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   dg_fft = BDD->gfg2_fft;
   scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
-  fac = L/(2.*M_PI); /* siehe oben ... */
+  /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
 
   /* Get local portion of the grid */
@@ -953,7 +947,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 	  else
 	    {
 	      k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-	      k_fac = beta*fac/k;
+	      /* k_fac = beta*fac/k; */
 	      k = 2.0*M_PI*sqrt(k)*rab/L;
 	      /* phase shift factor for x=x+L/2 */
 	      sign = cos(M_PI*ic[0])*cos(M_PI*ic[1])*cos(M_PI*ic[2]);
@@ -990,10 +984,7 @@ static void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec
 			 real norm_tol)
 {
   int i;
-  real tab_norm, ta_norm, tb_norm, h; // a=0.2, g_norm, h;
-
-  h = BDD->PD->h[0]*BDD->PD->h[1]*BDD->PD->h[2]/1000.;
-
+  real tab_norm, ta_norm, tb_norm; // a=0.2, g_norm, h;
 
   VecCopy(ga, ta);
   VecCopy(gb, tb);
@@ -1111,7 +1102,6 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
   Vec g0a, g0b, g0ab, dga, dgb, dgab, dg_new, dg_new2, f, ga, gb, gab;
   Vec dgba, gba;
   Vec ta, tb, tab, tba;
-  real h;
   int iter;
   PetscScalar dga_norm, dgb_norm, dgab_norm;
 
@@ -1205,8 +1195,6 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 /*   VecScale(g0ab, 1./(BDD->norm_const*dgab_norm)); */
 //  BDD->c_ab = 0.95;//dga_norm/dgb_norm;
 //  BDD->c_aab = 0.98;//dga_norm/dgab_norm;
-
-  h = PD->h[0]*PD->h[1]*PD->h[2]/1000.;
 
   /* g=g0+exp(-dg) */
   ComputeDiatomicAB_g( ga, g0a, dga);
