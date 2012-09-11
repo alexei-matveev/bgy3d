@@ -194,13 +194,9 @@ static void BGY3dH2OData_free(State *BHD)
 
 static real LJ_repulsive(real r, real epsilon, real sigma)
 {
-  // real epsilon, sigma, sr6, sr, re;
   real sr6, sr, re;
 
   r=r+SHIFT;
-
-  // epsilon = ((double*)LJ_params)[0];
-  // sigma   = ((double*)LJ_params)[1];
 
   sr = sigma/r;
   sr6 = SQR(sr)*SQR(sr)*SQR(sr);
@@ -231,20 +227,15 @@ real Coulomb_short (real r, real q2)
     re = EPSILON0INV * q2 * erfc(G * r) / r;
 
     /* Check for large values remember: exp(-re) will be computed: */
-    if(fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF*1.0e-5)))
+    if (fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
         return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
-    /*   else if( -re>1e+1) */
-    /*     return -1e+1; */
     else
         return re;
 }
 
 real Coulomb_short_grad( real r, real rx, real q2 )
 {
-  // real q2, re;
   real re;
-
-  // q2 = ((double*)params)[2];
 
   if(rx==0)
     return 0;
@@ -260,36 +251,30 @@ real Coulomb_short_grad( real r, real rx, real q2 )
     return re;
 }
 
-real Coulomb_long( real r, real q2)
+/* Coulomb_long  (r, 1.0) =  EPSILON0INV *  erf (G  * r)  / r  in most
+   general  case.   An  extra  argument  q2  is  the  overall  scaling
+   factor. */
+real Coulomb_long (real r, real q2)
 {
   real re;
 
-   if(r==0)
+   if (r == 0.0)
      {
-       return EPSILON0INV * q2 * G * 2./sqrt(M_PI);
+       return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
      }
 
-  re = EPSILON0INV * q2 * erf(G*r)/r;
+  re = EPSILON0INV * q2 * erf (G * r) / r;
 
-
-
-  /* check for large values */
-  /* remember: exp(-re) will be computed */
-  if(fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF*1.0e-5)))
-    return EPSILON0INV * q2 * (CUTOFF*1.0e-5);
-/*   else if( -re>1e+1) */
-/*     return -1e+1; */
+  /* Check for large values, remember: exp(-re) will be computed */
+  if (fabs(re) > fabs(EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+    return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
   else
     return re;
 }
 
-// real Coulomb_long_grad( real r, real rx, void *params)
 real Coulomb_long_grad( real r, real rx, real q2)
 {
-  // real q2, re;
   real re;
-
-  // q2 = ((double*)params)[2];
 
   if(r==0)
     return 0;
@@ -771,7 +756,6 @@ void ComputeFFTfromCoulomb (State *BHD,
 /*            r[1] < ZEROPAD && r[1] >= -ZEROPAD && */
 /*            r[2] < ZEROPAD && r[2] >= -ZEROPAD ) */
             v_vec[i[2]][i[1]][i[0]] =
-              // damp * Coulomb_long( r_s, LJ_params);
               damp * Coulomb_long( r_s, q2);
 /*        else */
 /*          v_vec[i[2]][i[1]][i[0]] = 0.0; */
