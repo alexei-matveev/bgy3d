@@ -92,21 +92,27 @@ typedef struct State
    * g2[2][2] with a constrain that g2[0][1] == g2[1][0].
    */
   DA da;
-  Vec F[2][2][3];
-  Vec F_l[2][2][3];
-  Vec v[3];
+  Vec F[2][2][3];               /* sort range pair force */
+  Vec F_l[2][2][3];             /* long range pair force, redundant */
+  Vec v[3];                     /* work vectors */
   Vec g2[2][2];                 /* Site-site  distributions. Used only
                                    in the solute-solvent solvers. */
 
-  Vec u2[2][2];                 /* Long-range  Coulomb interaction for
-                                   solvent site pairs. */
+  /* Long-range Coulomb interaction for solvent site pairs. So far the
+     pairs differ only by a factor q[i] * q[j]. Maybe we should rather
+     store just one? */
+  Vec u2[2][2];
 
-  fftw_complex *u2_fft[2][2];   /* The fourier transform of the u2. */
+  fftw_complex *u2_fft[2][2];   /* The  fourier transform of  u2.  The
+                                   same redundancy. */
 
   Vec cH, cHO, cO;
 
-  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3] ; /* sigma, epsilon and charge(product)  */
-  real beta, rho;
+  /* Pair  interaction parameters.  Not used  with  impurities.  Array
+     entries are: sigma, epsilon and charge product. */
+  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3];
+
+  real beta, rho;          /* inverse temperature, solvent density. */
 
   /*
    * The solute  field for  each of the  two solvent sites  (scaled by
@@ -132,7 +138,6 @@ typedef struct State
     g_fft appears to be used as a temporary in
     ComputeSoluteDatafromCoulomb*() group of functions.
    */
-  //struct fft_plan_3d *fft_plan;
   fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
   fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
 
