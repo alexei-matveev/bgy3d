@@ -569,9 +569,15 @@ static void  pair (State *BHD,
 
   /* Here Vec u2 and a  complex array u2_fft[] both are intent(out) in
      the next  call. The Vec f_long, intent(out),  optional, is filled
-     with the corresponding force: */
+     with the  corresponding force.  Performs  4 FFTs. Again  not that
+     the only difference  for all u2[i][j] and their  FFT transform is
+     the  overall scaling  factor  q[i] *  q[j].   FIXME: why  keeping
+     O(m^2) versions, with m being  number of solvent sites, of almost
+     the same field and repeating unnecessary FFTs? */
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
 
+  /* Sort-range  potential/force is  specific  for each  pair, on  the
+     other hand: */
   FOR_DIM
     {
       DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
