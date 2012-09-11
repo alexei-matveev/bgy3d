@@ -191,9 +191,9 @@ static void load (const State *BHD, Vec g2[2][2])
   ReadPairDistribution (BHD, "g2CS", g2[0][1]);
 #else
   /* Read g^2 from file. FIXME: why did we allocate them above? */
-  bgy3d_load_vec ("g00.bin", &g2[0][0]);
-  bgy3d_load_vec ("g11.bin", &g2[1][1]);
-  bgy3d_load_vec ("g01.bin", &g2[0][1]);
+  g2[0][0] = bgy3d_load_vec ("g00.bin");
+  g2[0][1] = bgy3d_load_vec ("g01.bin");
+  g2[1][1] = bgy3d_load_vec ("g11.bin");
 #endif
   g2[1][0] = g2[0][1];
 }
@@ -1190,8 +1190,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dg0.bin", &dg[0]); /* dgH */
-      bgy3d_load_vec ("dg1.bin", &dg[1]); /* dgO */
+      dg[0] = bgy3d_load_vec ("dg0.bin"); /* dgH */
+      dg[1] = bgy3d_load_vec ("dg1.bin"); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
@@ -1688,8 +1688,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dg0.bin", &dgH); /* dgH */
-      bgy3d_load_vec ("dg1.bin", &dgO); /* dgO */
+      dgH = bgy3d_load_vec ("dg0.bin"); /* dgH */
+      dgO = bgy3d_load_vec ("dg1.bin"); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 

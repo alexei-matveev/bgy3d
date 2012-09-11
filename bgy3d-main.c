@@ -150,7 +150,7 @@ int main (int argc, char **argv)
   if(solver) {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("--load")) {
-          bgy3d_load_vec ("g.bin", &g_ini);
+          g_ini = bgy3d_load_vec ("g.bin");
           PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
       }
       else

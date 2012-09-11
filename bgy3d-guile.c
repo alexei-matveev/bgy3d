@@ -234,8 +234,7 @@ static SCM guile_vec_load (SCM path)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
-  Vec vec;
-  bgy3d_load_vec (c_path, &vec);
+  Vec vec = bgy3d_load_vec (c_path);
 
   free (c_path);
 

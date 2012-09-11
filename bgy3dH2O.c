@@ -3387,9 +3387,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dg00.bin", &dgH); /* dgH */
-      bgy3d_load_vec ("dg11.bin", &dgO); /* dgO */
-      bgy3d_load_vec ("dg01.bin", &dgHO); /* dgHO */
+      dgH = bgy3d_load_vec ("dg00.bin"); /* dgH */
+      dgO = bgy3d_load_vec ("dg11.bin"); /* dgO */
+      dgHO = bgy3d_load_vec ("dg01.bin"); /* dgHO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 
@@ -4008,9 +4008,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      bgy3d_load_vec ("dg00.bin", &dgH);
-      bgy3d_load_vec ("dg11.bin", &dgO);
-      bgy3d_load_vec ("dg01.bin", &dgHO);
+      dgH = bgy3d_load_vec ("dg00.bin");
+      dgO = bgy3d_load_vec ("dg11.bin");
+      dgHO = bgy3d_load_vec ("dg01.bin");
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
     }
 

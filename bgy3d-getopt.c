@@ -38,37 +38,57 @@ int bgy3d_getopt_real (const char key[], double *val)
 
 int bgy3d_getopt_string (const char key[], char *val, size_t len)
 {
-    PetscTruth test;
+  PetscTruth test;
 
-    PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULL, key, val, len, &test);
-    assert (!ierr);
+  PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULL, key, val, len, &test);
+  assert (!ierr);
 
-    return (int) test;
+  return (int) test;
 }
 
+/* This one is supposed to save enough meta-info (such as distribution
+   pattern, dimensions) to recover the vector from scratch: */
+void bgy3d_save_vec (const char file[], const Vec vec)
+{
+  PetscViewer viewer;
 
-void bgy3d_load_vec (const char file[], Vec *vec) {
-    PetscViewer viewer;
-
-    PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
-    VecLoad (viewer, VECMPI, vec);
-    PetscViewerDestroy (viewer);
+  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
+  VecView (vec, viewer);
+  PetscViewerDestroy (viewer);
 }
 
-void bgy3d_save_vec (const char file[], const Vec vec) {
-    PetscViewer viewer;
+/* This one  returns a newly  created vector: */
+Vec bgy3d_load_vec (const char file[])
+{
+  Vec vec;                      /* new one */
+  PetscViewer viewer;
 
-    PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
-    VecView (vec, viewer);
-    PetscViewerDestroy (viewer);
+  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+  VecLoad (viewer, VECMPI, &vec); /* creates it */
+  PetscViewerDestroy (viewer);
+
+  return vec;
 }
 
-void bgy3d_save_vec_ascii (const char file[], const Vec vec) {
-    PetscViewer viewer;
+/* This one takes an allocated vector  and fills it with the data read
+   from from disk. Pass a valid vector here: */
+void bgy3d_read_vec (const char file[], Vec vec)
+{
+  PetscViewer viewer;
 
-    PetscViewerASCIIOpen (PETSC_COMM_WORLD, file, &viewer);
-    PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB);
-    /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */
-    VecView (vec, viewer);
-    PetscViewerDestroy (viewer);
+  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+  VecLoadIntoVector (viewer, vec);
+  PetscViewerDestroy (viewer);
+}
+
+/* This one will not save much of a meta-info: */
+void bgy3d_save_vec_ascii (const char file[], const Vec vec)
+{
+  PetscViewer viewer;
+
+  PetscViewerASCIIOpen (PETSC_COMM_WORLD, file, &viewer);
+  PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB);
+  /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */
+  VecView (vec, viewer);
+  PetscViewerDestroy (viewer);
 }
