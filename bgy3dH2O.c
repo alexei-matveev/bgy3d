@@ -719,10 +719,15 @@ void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-/* Vec uc is intent(out) here: */
-void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
-                           fftw_complex *fft_data,
-                           real q2, real damp)
+/* Long range pair  potential Vec uc is intent(out)  here, same as its
+   FFT transform uc_fft. If Vec f_l  is not NULL it is filled with the
+   corresponding  force derived  by means  of FFT  from  the potential
+   uc. */
+void ComputeFFTfromCoulomb (State *BHD,
+                            Vec uc,     /* intent(out) */
+                            Vec f_l[3], /* intent(out), optional */
+                            fftw_complex *uc_fft, /* intent(out) */
+                            real q2, real damp)
 {
   DA da;
   int x[3], n[3], i[3], ic[3], N[3], index;
@@ -781,8 +786,8 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
             }
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              fft_data[index].re = 0;
-              fft_data[index].im = 0;
+              uc_fft[index].re = 0;
+              uc_fft[index].im = 0;
               FOR_DIM
                 {
                   fg_fft[dim][index].re =0;
@@ -796,15 +801,15 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
               /* potential */
-              fft_data[index].re =   damp * q2 * sign *fac * exp(-k*SQR(M_PI)/SQR(G));
-              fft_data[index].im = 0;
+              uc_fft[index].re =   damp * q2 * sign *fac * exp(-k*SQR(M_PI)/SQR(G));
+              uc_fft[index].im = 0;
 
 
               /* force */
               FOR_DIM
                 {
                   fg_fft[dim][index].re =0;
-                  fg_fft[dim][index].im = 2.*M_PI*ic[dim]/L*fft_data[index].re;
+                  fg_fft[dim][index].im = 2.*M_PI*ic[dim]/L*uc_fft[index].re;
                 }
 
 
@@ -824,13 +829,15 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 /*                       BHD->fft_scratch); */
 /*   tmp_fft[0].re=0; */
 
-  /* Copy fft_data to temporary array for back trafo */
+  /* Copy  uc_fft  to  temporary   array  for  back  trafo.   FIXME:
+     ComputeVecfromFFT_fftw() transforms in place, only then packs the
+     result to a Vec. */
   for(i[0]=0; i[0]<n[0]*n[1]*n[2]; i[0]++)
     {
-      tmp_fft[i[0]].re=fft_data[i[0]].re;
-      tmp_fft[i[0]].im=fft_data[i[0]].im;
-      //fft_data[i[0]].re= h3 * tmp_fft[i[0]].re;
-      //fft_data[i[0]].im= h3 * tmp_fft[i[0]].im;
+      tmp_fft[i[0]].re = uc_fft[i[0]].re;
+      tmp_fft[i[0]].im = uc_fft[i[0]].im;
+      //uc_fft[i[0]].re = h3 * tmp_fft[i[0]].re;
+      //uc_fft[i[0]].im = h3 * tmp_fft[i[0]].im;
 
       //fprintf(stderr,"%e\n", tmp_fft[i[0]].re);
     }
@@ -842,8 +849,8 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
 
 
 
-  /* FFT force */
-  if( f_l != PETSC_NULL)
+  /* FFT force, optional? */
+  if (f_l != PETSC_NULL)
     {
       FOR_DIM
         {
@@ -851,10 +858,6 @@ void ComputeFFTfromCoulomb(State *BHD, Vec uc, Vec f_l[3],
           VecScale(f_l[dim], 1./L/L/L);
         }
     }
-
-/*  VecView(uc,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
 }
 
 //#define SPHERE_G 1.8
