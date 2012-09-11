@@ -190,6 +190,7 @@ static void load (const State *BHD, Vec g2[2][2])
   ReadPairDistribution (BHD, "g2S", g2[0][0]);
   ReadPairDistribution (BHD, "g2CS", g2[0][1]);
 #else
+  (void) BHD;                   /* unused */
   /* Read g^2 from file. FIXME: why did we allocate them above? */
   g2[0][0] = bgy3d_load_vec ("g00.bin");
   g2[0][1] = bgy3d_load_vec ("g01.bin");
