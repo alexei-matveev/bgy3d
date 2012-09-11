@@ -572,7 +572,7 @@ static void  pair (State *BHD,
   /* Here Vec u2 and a  complex array u2_fft[] both are intent(out) in
      the next  call. The Vec f_long, intent(out),  optional, is filled
      with the corresponding force: */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2, damp0);
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2 * damp0);
 
   FOR_DIM
     {

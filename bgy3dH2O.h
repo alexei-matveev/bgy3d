@@ -16,7 +16,7 @@ void ImposeBoundaryCondition_Initialize (State *BHD, real zpad);
 
 void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);
 
-void ComputeFFTfromCoulomb (State *BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, real q2, real damp);
+void ComputeFFTfromCoulomb (State *BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, real factor);
 
 void RecomputeInitialData (State *BHD, real damp, real damp_LJ);
 

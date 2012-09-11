@@ -377,18 +377,12 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   BHD->u2_fft[0][1] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
   /* Compute fft from Coulomb potential (long) */
-  /* ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-			BHD->LJ_paramsHO, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-			BHD->LJ_paramsH, 1.0);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-			BHD->LJ_paramsO, 1.0); */
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-			q2HO, 1.0);
+			q2HO);
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-			q2H, 1.0);
+			q2H);
   ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-			q2O, 1.0);
+			q2O);
 
   FOR_DIM
     {

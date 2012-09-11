@@ -712,7 +712,7 @@ void ComputeFFTfromCoulomb (State *BHD,
                             Vec uc,     /* intent(out) */
                             Vec f_l[3], /* intent(out), optional */
                             fftw_complex *uc_fft, /* intent(out) */
-                            real q2, real damp)
+                            real factor)
 {
   DA da;
   int x[3], n[3], i[3], ic[3], N[3], index;
@@ -755,8 +755,7 @@ void ComputeFFTfromCoulomb (State *BHD,
 /*        if( r[0] < ZEROPAD && r[0] >= -ZEROPAD && */
 /*            r[1] < ZEROPAD && r[1] >= -ZEROPAD && */
 /*            r[2] < ZEROPAD && r[2] >= -ZEROPAD ) */
-            v_vec[i[2]][i[1]][i[0]] =
-              damp * Coulomb_long( r_s, q2);
+            v_vec[i[2]][i[1]][i[0]] = Coulomb_long (r_s, factor);
 /*        else */
 /*          v_vec[i[2]][i[1]][i[0]] = 0.0; */
 
@@ -785,8 +784,8 @@ void ComputeFFTfromCoulomb (State *BHD,
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
               /* potential */
-              uc_fft[index].re =   damp * q2 * sign *fac * exp(-k*SQR(M_PI)/SQR(G));
-              uc_fft[index].im = 0;
+              uc_fft[index].re = factor * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
+              uc_fft[index].im = 0.0;
 
 
               /* force */
@@ -1223,18 +1222,12 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
   /*********************************************/
   /* Compute fft from Coulomb potential (long) */
   /********************************************/
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-  //                    BHD->LJ_paramsHO, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-  //                    BHD->LJ_paramsH, damp);
-  //  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-  //                    BHD->LJ_paramsO, damp);
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-                        q2HO, damp);
+                        q2HO * damp);
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-                        q2H, damp);
+                        q2H * damp);
   ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-                        q2O, damp);
+                        q2O * damp);
 
   FOR_DIM
     {
