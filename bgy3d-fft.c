@@ -158,10 +158,14 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
 }
 
 /*
- * The function  has a feature,  if the output  array g_fft is  NULL a
- * fresh array is allocated with the size derived from the distributed
- * array  description.  This  size  is suffucient  to  hold the  local
- * portion of the array.
+ The function  has a feature,  if the output  array g_fft is  NULL a
+ fresh array is allocated with the size derived from the distributed
+ array  description.  This  size  is suffucient  to  hold the  local
+ portion of the array.
+
+ Vec  g  is  intent(in),  g_fftw  is  intent(out).   All  fftwnd_mpi()
+ transforms  are in-place,  but  may be  more  efficient with  scratch
+ arrays.
  */
 fftw_complex *ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
 				fftw_complex *g_fft, fftw_complex *scratch)
@@ -173,19 +177,22 @@ fftw_complex *ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
     unpack (da, g, g_fft);
 
     /* forward fft */
-    fftwnd_mpi( fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
+    fftwnd_mpi (fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
 
     return g_fft;
 }
 
 
+/* Vec   g  is  intent(out),   needs  to   be  allocated,   g_fftw  is
+   intent(inout). All fftwnd_mpi() transforms are in-place, but may be
+   more efficient with scratch arrays. */
 void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
 			    fftw_complex *g_fft, fftw_complex *scratch)
 {
     assert (g_fft != NULL);
 
     /* backward fft */
-    fftwnd_mpi( fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
+    fftwnd_mpi (fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
 
     /* Pack a  complex vector with (hopefully)  vanishing imaginary part
        into a real Vec: */
