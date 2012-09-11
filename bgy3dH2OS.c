@@ -166,8 +166,8 @@ static State initialize_state (const ProblemData *PD)
   BHD.u2_fft[0][0] = bgy3d_fft_malloc (da);
   BHD.u2_fft[1][1] = bgy3d_fft_malloc (da);
   BHD.u2_fft[0][1] = bgy3d_fft_malloc (da);
-  BHD.wHO_fft = bgy3d_fft_malloc (da);
-  BHD.wHH_fft = bgy3d_fft_malloc (da);
+  BHD.wHO_fft = NULL;           /* not used with impurities */
+  BHD.wHH_fft = NULL;           /* not used with impurities */
 
   /* FIXME: broken, see the comments inside the function itself: */
   load (&BHD, BHD.g2);
@@ -233,8 +233,8 @@ static void finalize_state (State *BHD)
   bgy3d_fft_free (BHD->u2_fft[0][0]);
   bgy3d_fft_free (BHD->u2_fft[1][1]);
   bgy3d_fft_free (BHD->u2_fft[0][1]);
-  bgy3d_fft_free (BHD->wHO_fft);
-  bgy3d_fft_free (BHD->wHH_fft);
+  assert (BHD->wHO_fft == NULL); /* not used with impurities */
+  assert (BHD->wHH_fft == NULL); /* not used with impurities */
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);

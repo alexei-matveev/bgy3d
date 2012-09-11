@@ -122,7 +122,7 @@ typedef struct State
                                    of   sites  of   that  type   in  a
                                    solvent. */
 
-  Vec gHO_ini;
+  Vec gHO_ini;                  /* used for pure solvent only */
 
   real ucH_0, ucO_0, ucHO_0;
 
@@ -134,7 +134,7 @@ typedef struct State
    */
   //struct fft_plan_3d *fft_plan;
   fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
-  fftw_complex *wHO_fft, *wHH_fft;
+  fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
 
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
   int p_id, p_index;
