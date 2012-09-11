@@ -20,8 +20,6 @@
 #include <complex.h>
 #endif
 
-#define damp0 0.001
-
 extern real NORM_REG;
 
 /*
@@ -572,7 +570,7 @@ static void  pair (State *BHD,
   /* Here Vec u2 and a  complex array u2_fft[] both are intent(out) in
      the next  call. The Vec f_long, intent(out),  optional, is filled
      with the corresponding force: */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2 * damp0);
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
 
   FOR_DIM
     {
@@ -1215,16 +1213,16 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
       kernel (BHD.da, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
 
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0],  ker_fft_L[0][0]);
+      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0], ker_fft_L[0][0]);
       kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1],  ker_fft_L[1][1]);
+      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1], ker_fft_L[1][1]);
 
       /* FIXME: what is  the point to split the  kernel in two pieces?
          Redefine S := S + L and forget about L */
       for (int i = 0; i < 2; i++)
           for (int j = 0; j <= i; j++) {
-              /* S := (damp / damp0) * L + damp_LJ * S */
-              bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp / damp0, damp_LJ, ker_fft_L[i][j]);
+              /* S := damp * L + damp_LJ * S */
+              bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
           }
 
       /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
@@ -1287,12 +1285,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
              Same    holds    for    Solve_NormalizationH2O_smallII(),
              ImposeLaplaceBoundary()  and  Zeropad_Function()  to  the
-             best of my (limited) knowledge.
-
-             The    factor   (damp/    damp0)   in    the    call   to
-             Compute_H2O_interS_C()  looks  odd,  but  note  that  the
-             Coulomb  field was  defined  having the  factor damp0  in
-             RecomputeInitialFFTs(). FIXME: avoid this ugliness. */
+             best of my (limited) knowledge. */
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
@@ -1695,9 +1688,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gO, BHD.u2_fft[0][1], (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gO, BHD.u2_fft[0][1], damp * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], gH, BHD.u2_fft[0][0], (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], gH, BHD.u2_fft[0][0], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( &BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
@@ -1758,9 +1751,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], gO, BHD.u2_fft[1][1], (damp / damp0) * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], gO, BHD.u2_fft[1][1], damp * BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gH, BHD.u2_fft[0][1], (damp / damp0) * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], gH, BHD.u2_fft[0][1], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
 
