@@ -1296,10 +1296,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
-              g_fft[i] =
-                  ComputeFFTfromVec_fftw (BHD.da, BHD.fft_plan_fw,
-                                          g[i], g_fft[i],
-                                          BHD.fft_scratch); /* work array */
+            ComputeFFTfromVec_fftw (BHD.da, BHD.fft_plan_fw,
+                                    g[i], g_fft[i],
+                                    BHD.fft_scratch); /* work array */
 
           /* for H, O in that order ... */
           for (int i = 0; i < 2; i++) {
