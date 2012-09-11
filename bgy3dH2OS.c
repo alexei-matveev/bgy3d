@@ -37,6 +37,8 @@ static const Site solvent[] =
   {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
    {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
+static void load (const State *BHD, Vec g2[2][2]);
+
 static State initialize_state (const ProblemData *PD)
 {
   State BHD;
@@ -167,23 +169,34 @@ static State initialize_state (const ProblemData *PD)
   BHD.wHO_fft = bgy3d_fft_malloc (da);
   BHD.wHH_fft = bgy3d_fft_malloc (da);
 
-
-
-  /* Read g^2 from file. FIXME: why did we allocate them above? */
-#ifdef CS2
-  ReadPairDistribution(&BHD, "g2C", BHD.g2[1][1]);
-  ReadPairDistribution(&BHD, "g2S", BHD.g2[0][0]);
-  ReadPairDistribution(&BHD, "g2CS", BHD.g2[0][1]);
-#else
-  bgy3d_load_vec ("g00.bin", &BHD.g2[0][0]);
-  bgy3d_load_vec ("g11.bin", &BHD.g2[1][1]);
-  bgy3d_load_vec ("g01.bin", &BHD.g2[0][1]);
-#endif
-  BHD.g2[1][0] = BHD.g2[0][1];
+  /* FIXME: broken, see the comments inside the function itself: */
+  load (&BHD, BHD.g2);
 
   return BHD;
 }
 
+
+/* This returns  an array of newly allocated  Vecs with solven-solvent
+   pair distributions:  */
+static void load (const State *BHD, Vec g2[2][2])
+{
+  /* FIXME: this is broken. In one case (ifdef CS2) it is assumed that
+     g2 vectors are  allocated and here they are  filled with data. In
+     another case the vectors are constructed from scratch, eventually
+     overwriting  the references  to other  allocated Vecs  and making
+     them inaccesible. */
+#ifdef CS2
+  ReadPairDistribution (BHD, "g2C", g2[1][1]);
+  ReadPairDistribution (BHD, "g2S", g2[0][0]);
+  ReadPairDistribution (BHD, "g2CS", g2[0][1]);
+#else
+  /* Read g^2 from file. FIXME: why did we allocate them above? */
+  bgy3d_load_vec ("g00.bin", &g2[0][0]);
+  bgy3d_load_vec ("g11.bin", &g2[1][1]);
+  bgy3d_load_vec ("g01.bin", &g2[0][1]);
+#endif
+  g2[1][0] = g2[0][1];
+}
 
 
 static void finalize_state (State *BHD)
