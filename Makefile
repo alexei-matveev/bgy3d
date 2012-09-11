@@ -63,15 +63,13 @@ LDFLAGS  =
 
 
 INCDIRS = ${PETSC_INCLUDE} -I./fft
-LIBDIRS = 
-LIBS    = -lm -lfftw -lfftw_mpi  ${PETSC_LIB} 
+LIBS    = -lfftw_mpi -lfftw -lm ${PETSC_LIB}
 
 #--------------------------------------------------------------------------------
 # Make rules
 #--------------------------------------------------------------------------------
 
-bgy3d-objs = \
-	bgy3d-main.o \
+libbgy3d.a = \
 	bgy3d.o \
 	bgy3dH2O.o \
 	bgy3dH2OS.o \
@@ -80,7 +78,7 @@ bgy3d-objs = \
 	bgy3d-fft.o \
 
 ifeq ($(WITH_GUILE),1)
-	bgy3d-objs += bgy3d-guile.o
+	libbgy3d.a += bgy3d-guile.o
 	LIBS += -lguile
 	USERFLAGS += -DWITH_GUILE
 endif
@@ -103,14 +101,18 @@ fft3d-objs = \
 	fft/remap_3d.o \
 	fft/factor.o
 
-OBJECTS = $(bgy3d-objs)
-
 ifeq ($(WITH_EXTRA_SOLVERS),1)
-OBJECTS += $(bgy3d-extra-objs) $(fft3d-objs)
+libbgy3d.a += $(bgy3d-extra-objs) $(fft3d-objs)
 endif
 
-bgy3d : $(OBJECTS)
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $(OBJECTS) ${LIBDIRS} ${LIBS}
+OBJECTS = bgy3d-main.o
+
+libbgy3d.a: $(libbgy3d.a)
+	$(AR) ruv $@  $(^)
+	$(RANLIB) $@
+
+bgy3d: $(OBJECTS) libbgy3d.a
+	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $(OBJECTS) -L. -lbgy3d ${LIBS}
 
 #
 # Dont call the target "test" because we have a directory called so:
@@ -125,7 +127,7 @@ test-all:
 clean: myclean
 
 myclean:
-	rm -f *.o fft/*.o *.bin *.info
+	rm -f *.a *.o fft/*.o *.bin *.info
 	rm -f bgy3d
 .PHONY: myclean
 
@@ -135,6 +137,7 @@ distclean:
 .PHONY: distclean
 
 include $(OBJECTS:.o=.d)
+include $(libbgy3d.a:.o=.d)
 
 # This do-it-all rule  is specific to gcc version  >= 3.0, and updates
 # the object file  and the dependency file at the  same time.  The -MP
