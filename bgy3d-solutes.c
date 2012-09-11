@@ -63,89 +63,89 @@ static void read_charge_density (DA da, const ProblemData *PD,
 /*********************************/
 
 static const Solute HydrogenChloride =
-    {"Hydrogen chloride", 2,
-     {{"H", {0.6285, 0.0, 0.0}, 2.735, 0.03971, 0.2},
-      {"Cl", {-0.6285, 0.0, 0.0}, 3.353, 0.51434, -0.2}}};
+  {"Hydrogen chloride", 2,
+   {{"H", {0.6285, 0.0, 0.0}, 2.735, 0.03971, 0.2},
+    {"Cl", {-0.6285, 0.0, 0.0}, 3.353, 0.51434, -0.2}}};
 
 /*********************************/
 /* CS2 */
 /*********************************/
 
 static const Solute CarbonDisulfide =
-    {"Carbon disulfide", 3,
-     {{"C", {0.0, 0.0, 0.0}, 3.2, 0.10128, -0.308},
-      {"S1", {-1.56, 0.0, 0.0}, 3.52, 0.395, 0.154},
-      {"S2", {1.56, 0.0, 0.0}, 3.52, 0.395, 0.154}}};
+  {"Carbon disulfide", 3,
+   {{"C", {0.0, 0.0, 0.0}, 3.2, 0.10128, -0.308},
+    {"S1", {-1.56, 0.0, 0.0}, 3.52, 0.395, 0.154},
+    {"S2", {1.56, 0.0, 0.0}, 3.52, 0.395, 0.154}}};
 
 /*********************************/
 /* Water */
 /*********************************/
 
 static const Solute Water =
-    {"Water", 3,
-     {{"O", {-0.2929, 0.0, 0.0}, 3.1506, 0.1521, -0.834},
-      {"OH", {0.2929, 0.757, 0.0}, 0.4, 0.046, 0.417},
-      {"OH", {0.2929, -0.757, 0.0}, 0.4, 0.046, 0.417}}};
+  {"Water", 3,
+   {{"O", {-0.2929, 0.0, 0.0}, 3.1506, 0.1521, -0.834},
+    {"OH", {0.2929, 0.757, 0.0}, 0.4, 0.046, 0.417},
+    {"OH", {0.2929, -0.757, 0.0}, 0.4, 0.046, 0.417}}};
 
 /*********************************/
 /* Methanol */
 /*********************************/
 
 static const Solute Methanol =
-    {"Methanol", 6,
-     {{"C", {-0.748, -0.015, 0.024}, 3.5, 0.066, 0.145},
-      {"HC1", {-1.293, -0.202, -0.901}, 2.5, 0.03, 0.04},
-      {"HC2", {-1.263, 0.754, 0.6}, 2.5, 0.03, 0.04},
-      {"HC3", {-0.699, -0.934, 0.609}, 2.5, 0.03, 0.04},
-      {"O", {0.558, 0.42, -0.278}, 3.12, 0.17, -0.683},
-      {"OH", {0.716, 1.404, 0.137}, 0.4, 0.04, 0.418}}};
+  {"Methanol", 6,
+   {{"C", {-0.748, -0.015, 0.024}, 3.5, 0.066, 0.145},
+    {"HC1", {-1.293, -0.202, -0.901}, 2.5, 0.03, 0.04},
+    {"HC2", {-1.263, 0.754, 0.6}, 2.5, 0.03, 0.04},
+    {"HC3", {-0.699, -0.934, 0.609}, 2.5, 0.03, 0.04},
+    {"O", {0.558, 0.42, -0.278}, 3.12, 0.17, -0.683},
+    {"OH", {0.716, 1.404, 0.137}, 0.4, 0.04, 0.418}}};
 
 /* BUTANOIC ACID */
 /* H1 sigma and epsilon adopted */
 
 static const Solute ButanoicAcid =
-    {"Butanoic Acid", 14,
-     {{"C1", {1.422, -0.017, 0.0}, 3.75, 0.105, 0.52},
-      {"O1", {1.422, 1.353, 0.0}, 2.96, 0.21, -0.44},
-      {"O2", {2.643, -0.722, 0.0}, 3.0, 0.17, -0.53},
-      {"C2", {0.1, -0.78, 0.0}, 3.5, 0.066, -0.12},
-      {"C3", {-1.06, 0.212, 0.0}, 3.5, 0.066, -0.12},
-      {"C4", {-2.381, -0.551, 0.0}, 3.5, 0.066, -0.18},
-      {"OH", {3.21, -0.461, 0.882}, 3.4, 0.046, 0.45},
-      {"H2", {0.043, -1.407, 0.89}, 2.5, 0.03, 0.06},
-      {"H3", {0.043, -1.407, -0.89}, 2.5, 0.03, 0.06},
-      {"H4", {-1.002, 0.838, -0.89}, 2.5, 0.03, 0.06},
-      {"H5", {-1.002, 0.838, 0.89}, 2.5, 0.03, 0.06},
-      {"H6", {-2.439, -1.178, 0.89}, 2.5, 0.03, 0.06},
-      {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
-      {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
+  {"Butanoic Acid", 14,
+   {{"C1", {1.422, -0.017, 0.0}, 3.75, 0.105, 0.52},
+    {"O1", {1.422, 1.353, 0.0}, 2.96, 0.21, -0.44},
+    {"O2", {2.643, -0.722, 0.0}, 3.0, 0.17, -0.53},
+    {"C2", {0.1, -0.78, 0.0}, 3.5, 0.066, -0.12},
+    {"C3", {-1.06, 0.212, 0.0}, 3.5, 0.066, -0.12},
+    {"C4", {-2.381, -0.551, 0.0}, 3.5, 0.066, -0.18},
+    {"OH", {3.21, -0.461, 0.882}, 3.4, 0.046, 0.45},
+    {"H2", {0.043, -1.407, 0.89}, 2.5, 0.03, 0.06},
+    {"H3", {0.043, -1.407, -0.89}, 2.5, 0.03, 0.06},
+    {"H4", {-1.002, 0.838, -0.89}, 2.5, 0.03, 0.06},
+    {"H5", {-1.002, 0.838, 0.89}, 2.5, 0.03, 0.06},
+    {"H6", {-2.439, -1.178, 0.89}, 2.5, 0.03, 0.06},
+    {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
+    {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
 
 /*********************************/
 /* Hexane */
 /*********************************/
 
 static const Solute Hexane =
-    {"Hexane", 20,
-     {{"C", {1.709, -2.812, 0.0}, 3.5, 0.066, -0.18},
-      {"C", {1.684, -1.278, 0.0}, 3.5, 0.066, -0.12},
-      {"C", {0.245, -0.753, 0.0}, 3.5, 0.066, -0.12},
-      {"C", {0.241, 0.779, 0.0}, 3.5, 0.066, -0.12},
-      {"C", {-1.198, 1.304, 0.0}, 3.5, 0.066, -0.12},
-      {"C", {-1.206, 2.834, 0.0}, 3.5, 0.066, -0.18},
-      {"H", {2.236, -3.164, 0.887}, 2.5, 0.03, 0.06},
-      {"H", {2.232, -3.164, -0.89}, 2.5, 0.03, 0.06},
-      {"H", {0.691, -3.204, 0.003}, 2.5, 0.03, 0.06},
-      {"H", {2.202, -0.914, -0.888}, 2.5, 0.03, 0.06},
-      {"H", {2.201, -0.914, 0.89}, 2.5, 0.03, 0.06},
-      {"H", {-0.273, -1.115, 0.889}, 2.5, 0.03, 0.06},
-      {"H", {-0.272, -1.115, -0.89}, 2.5, 0.03, 0.06},
-      {"H", {0.757, 1.142, -0.89}, 2.5, 0.03, 0.06},
-      {"H", {0.757, 1.141, 0.89}, 2.5, 0.03, 0.06},
-      {"H", {-1.716, 0.944, 0.89}, 2.5, 0.03, 0.06},
-      {"H", {-1.716, 0.944, -0.89}, 2.5, 0.03, 0.06},
-      {"H", {-0.696, 3.204, -0.89}, 2.5, 0.03, 0.06},
-      {"H", {-0.696, 3.204, 0.89}, 2.5, 0.03, 0.06},
-      {"H", {-2.236, 3.19, 0.0}, 2.5, 0.03, 0.06}}};
+  {"Hexane", 20,
+   {{"C", {1.709, -2.812, 0.0}, 3.5, 0.066, -0.18},
+    {"C", {1.684, -1.278, 0.0}, 3.5, 0.066, -0.12},
+    {"C", {0.245, -0.753, 0.0}, 3.5, 0.066, -0.12},
+    {"C", {0.241, 0.779, 0.0}, 3.5, 0.066, -0.12},
+    {"C", {-1.198, 1.304, 0.0}, 3.5, 0.066, -0.12},
+    {"C", {-1.206, 2.834, 0.0}, 3.5, 0.066, -0.18},
+    {"H", {2.236, -3.164, 0.887}, 2.5, 0.03, 0.06},
+    {"H", {2.232, -3.164, -0.89}, 2.5, 0.03, 0.06},
+    {"H", {0.691, -3.204, 0.003}, 2.5, 0.03, 0.06},
+    {"H", {2.202, -0.914, -0.888}, 2.5, 0.03, 0.06},
+    {"H", {2.201, -0.914, 0.89}, 2.5, 0.03, 0.06},
+    {"H", {-0.273, -1.115, 0.889}, 2.5, 0.03, 0.06},
+    {"H", {-0.272, -1.115, -0.89}, 2.5, 0.03, 0.06},
+    {"H", {0.757, 1.142, -0.89}, 2.5, 0.03, 0.06},
+    {"H", {0.757, 1.141, 0.89}, 2.5, 0.03, 0.06},
+    {"H", {-1.716, 0.944, 0.89}, 2.5, 0.03, 0.06},
+    {"H", {-1.716, 0.944, -0.89}, 2.5, 0.03, 0.06},
+    {"H", {-0.696, 3.204, -0.89}, 2.5, 0.03, 0.06},
+    {"H", {-0.696, 3.204, 0.89}, 2.5, 0.03, 0.06},
+    {"H", {-2.236, 3.19, 0.0}, 2.5, 0.03, 0.06}}};
 
 static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &CarbonDisulfide,  /* 1 */
@@ -158,11 +158,11 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
    operate on array of sites: */
 void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name)
 {
-    assert (solute >= 0 && solute <= 5);
+  assert (solute >= 0 && solute <= 5);
 
-    *n = solutes[solute]->n;
-    *sites = solutes[solute]->sites;
-    *name = solutes[solute]->name;
+  *n = solutes[solute]->n;
+  *sites = solutes[solute]->sites;
+  *name = solutes[solute]->name;
 }
 
 /*
@@ -209,9 +209,8 @@ void bgy3d_solute_field (const State *BHD,
    */
 #ifndef QM
   for (int i = 0; i < m; i++)
-      field (BHD->da, BHD->PD,
-             solvent[i], n, solute, factor, ljc,
-             us[i]);
+    field (BHD->da, BHD->PD, solvent[i], n, solute, factor, ljc,
+           us[i]);
 #else
   /* At  this  place the  (short  range)  Coulomb  interaction of  the
     solvent  site   with  the  solute  was   deliberately  omitted  by
@@ -219,15 +218,15 @@ void bgy3d_solute_field (const State *BHD,
     a point  charge (Coulomb  short + Coulomb  long) to  a distributed
     Gaussian (Coulomb long only). */
 
-  for (int i = 0; i < m; i++) {
+  for (int i = 0; i < m; i++)
+    {
+      Site neutral = solvent[i]; /* dont modify the global variable */
+      neutral.charge = 0.0;      /* modify a copy */
 
-    Site neutral = solvent[i];  /* dont modify the global variable */
-    neutral.charge = 0.0;       /* modify a copy */
-
-    field (BHD->da, BHD->PD,
-           neutral, n, solute, factor, ljc,
-           us[i]);
-  }
+      field (BHD->da, BHD->PD,
+             neutral, n, solute, factor, ljc,
+             us[i]);
+    }
 #endif
 
   /*
@@ -247,13 +246,15 @@ void bgy3d_solute_field (const State *BHD,
   size_t MAX_LEN = 260;
   char filename[MAX_LEN];
 
-  if (bgy3d_getopt_string("--load-charge", filename, MAX_LEN)){
+  if (bgy3d_getopt_string("--load-charge", filename, MAX_LEN))
+    {
       read_charge_density(BHD->da, BHD->PD, filename, 1.0, uc);
-  }
-  else {
-    /* 1. Put the solute density into Vec v. Due to the inter */
-    field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
-  }
+    }
+  else
+    {
+      /* 1. Put the solute density into Vec v. Due to the inter */
+      field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
+    }
 
   /*
    * 2. Solve  the Poisson equation "in-place" by  specifying the same
@@ -284,49 +285,49 @@ static void field (DA da, const ProblemData *PD,
                    real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v)
 {
-    PetscScalar ***vec;
-    real h[3];
-    int i0, j0, k0;
-    int ni, nj, nk;
+  PetscScalar ***vec;
+  real h[3];
+  int i0, j0, k0;
+  int ni, nj, nk;
 
-    /*
-     * FIXME: do we really assume that intervals for x-, y- and z- are
-     * the same? This  basically means the corner of  the unit cell is
-     * at (offset, offset, offset):
-     */
-    real offset = PD->interval[0];
+  /*
+   * FIXME: do we  really assume that intervals for x-,  y- and z- are
+   * the same? This basically means the  corner of the unit cell is at
+   * (offset, offset, offset):
+   */
+  real offset = PD->interval[0];
 
-    FOR_DIM
-        h[dim] = PD->h[dim];
+  FOR_DIM
+    h[dim] = PD->h[dim];
 
-    /* Get local portion of the grid */
-    DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  /* Get local portion of the grid */
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-    DAVecGetArray (da, v, &vec);
+  DAVecGetArray (da, v, &vec);
 
-    /* loop over local portion of grid */
-    for (int k = k0; k < k0 + nk; k++) {
+  /* loop over local portion of grid */
+  for (int k = k0; k < k0 + nk; k++)
+    {
+      A.x[2] = k * h[2] + offset;
 
-        A.x[2] = k * h[2] + offset;
+      for (int j = j0; j < j0 + nj; j++)
+        {
+          A.x[1] = j * h[1] + offset;
 
-        for (int j = j0; j < j0 + nj; j++) {
+          for (int i = i0; i < i0 + ni; i++)
+            {
+              A.x[0] = i * h[0] + offset;
 
-            A.x[1] = j * h[1] + offset;
-
-            for (int i = i0; i < i0 + ni; i++) {
-
-                A.x[0] = i * h[0] + offset;
-
-                /*
-                 * Compute the field f at (x, y, z) <-> (i, j, k) e.g.
-                 * by summing (LJ) contributions from all solute sites
-                 * at that grid point:
-                 */
-                vec[k][j][i] = fact * f (&A, n, S);
+              /*
+               * Compute the field  f at (x, y, z) <->  (i, j, k) e.g.
+               * by summing  (LJ) contributions from  all solute sites
+               * at that grid point:
+               */
+              vec[k][j][i] = fact * f (&A, n, S);
             }
         }
     }
-    DAVecRestoreArray (da, v, &vec);
+  DAVecRestoreArray (da, v, &vec);
 }
 
 /*
@@ -335,30 +336,31 @@ static void field (DA da, const ProblemData *PD,
  */
 static real ljc (const Site *A, int n, const Site S[n])
 {
-    /* Sum force field contribution from all solute sites: */
-    real field = 0.0;
+  /* Sum force field contribution from all solute sites: */
+  real field = 0.0;
 
-    for (int site = 0; site < n; site++) {
+  for (int site = 0; site < n; site++)
+    {
 
-        /* Interaction parameters for a pair of LJ sites: */
-        real e2 = sqrt (A->epsilon * S[site].epsilon);
-        real s2 = 0.5 * (A->sigma + S[site].sigma);
+      /* Interaction parameters for a pair of LJ sites: */
+      real e2 = sqrt (A->epsilon * S[site].epsilon);
+      real s2 = 0.5 * (A->sigma + S[site].sigma);
 
-        /* Distance from a grid point to this site: */
-        real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
-                         SQR(A->x[1] - S[site].x[1]) +
-                         SQR(A->x[2] - S[site].x[2]));
+      /* Distance from a grid point to this site: */
+      real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
+                       SQR(A->x[1] - S[site].x[1]) +
+                       SQR(A->x[2] - S[site].x[2]));
 
-        /* 1. Lennard-Jones */
-        field += Lennard_Jones (r_s, e2, s2);
+      /* 1. Lennard-Jones */
+      field += Lennard_Jones (r_s, e2, s2);
 
-        /* 2. Coulomb,  short range part.  For  historical reasons the
-           overall scaling factor, the  product of solvent- and solute
-           site charges, is handled by the function itself: */
-        field += Coulomb_short (r_s, A->charge * S[site].charge);
+      /* 2.  Coulomb, short  range part.   For historical  reasons the
+         overall scaling  factor, the  product of solvent-  and solute
+         site charges, is handled by the function itself: */
+      field += Coulomb_short (r_s, A->charge * S[site].charge);
     }
 
-    return field;
+  return field;
 }
 
 /*
@@ -372,27 +374,28 @@ static real ljc (const Site *A, int n, const Site S[n])
  */
 static real rho (const Site *A, int n, const Site S[n])
 {
-    /* G  is predefind  in bgy3d-solvents.h  FIXME:  make the
-       gaussian width a property of  the (solute) site in the same way
-       as the charge of the site. */
-    real prefac = pow(G / sqrt(M_PI), 3.0);
+  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
+     a property of the (solute) site  in the same way as the charge of
+     the site. */
+  real prefac = pow(G / sqrt(M_PI), 3.0);
 
-    /* Sum Gaussian contributions from all solute sites: */
-    real field = 0.0;
+  /* Sum Gaussian contributions from all solute sites: */
+  real field = 0.0;
 
-    for (int site = 0; site < n; site++) {
+  for (int site = 0; site < n; site++)
+    {
 
-        /* Square of the distance from a grid point to this site: */
-        real r2 = (SQR(A->x[0] - S[site].x[0]) +
-                   SQR(A->x[1] - S[site].x[1]) +
-                   SQR(A->x[2] - S[site].x[2]));
+      /* Square of the distance from a grid point to this site: */
+      real r2 = (SQR(A->x[0] - S[site].x[0]) +
+                 SQR(A->x[1] - S[site].x[1]) +
+                 SQR(A->x[2] - S[site].x[2]));
 
-        /* Gaussian  distribution, note  that G  is not  a  width, but
-           rather an inverse of it: */
-        field += prefac * S[site].charge * exp(- G * G * r2);
+      /* Gaussian  distribution, note  that G  is not  a  width, but
+         rather an inverse of it: */
+      field += prefac * S[site].charge * exp(- G * G * r2);
     }
 
-    return field;
+  return field;
 }
 
 /*
@@ -411,91 +414,95 @@ static real rho (const Site *A, int n, const Site S[n])
   any side effect.  */
 void poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
-    int x[3], n[3], i[3], ic[3], N[3], index;
-    real h[3], interval[2], k2, fac, L, h3;
+  int x[3], n[3], i[3], ic[3], N[3], index;
+  real h[3], interval[2], k2, fac, L, h3;
 
-    interval[0] = BHD->PD->interval[0];
-    interval[1] = BHD->PD->interval[1];
-    L = interval[1] - interval[0];
-    FOR_DIM
-        h[dim] = BHD->PD->h[dim];
-    FOR_DIM
-        N[dim] = BHD->PD->N[dim];
-    h3 = h[0] * h[1] * h[2];
+  interval[0] = BHD->PD->interval[0];
+  interval[1] = BHD->PD->interval[1];
+  L = interval[1] - interval[0];
+  FOR_DIM
+    h[dim] = BHD->PD->h[dim];
+  FOR_DIM
+    N[dim] = BHD->PD->N[dim];
+  h3 = h[0] * h[1] * h[2];
 
-    /* Scratch arrays: */
-    fftw_complex *fft_work = bgy3d_fft_malloc (BHD->da);
-    fftw_complex *fft_scratch = bgy3d_fft_malloc (BHD->da);
+  /* Scratch arrays: */
+  fftw_complex *fft_work = bgy3d_fft_malloc (BHD->da);
+  fftw_complex *fft_scratch = bgy3d_fft_malloc (BHD->da);
 
-    /* Get local portion of the grid */
-    DAGetCorners(BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  /* Get local portion of the grid */
+  DAGetCorners(BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    /* Get FFT of rho: rho(i, j, k) -> fft_rho(kx, ky, kz) placed into
-       fft_work(kx, ky, kz): */
-    ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_work, fft_scratch);
+  /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
+     fft_work(kx, ky, kz): */
+  ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_work, fft_scratch);
 
-    /*
-      Solving Poisson Equation (SI units) with FFT and IFFT:
+  /*
+    Solving Poisson Equation (SI units) with FFT and IFFT:
 
-          - LAPLACIAN U (x, y, z) = (1 / epsilon0) rho(x, y, z)
-                       c
+        - LAPLACIAN U (x, y, z) = (1 / epsilon0) rho(x, y, z)
+                     c
 
-      because of x = i h, y = j  h, and z = k h, with grid spacing h =
-      L / n:
+    because of x = i h, y = j h, and z = k h, with grid spacing h =
+    L/n:
 
-             2   2
-          - n / L  LAPLACIAN uc(i, j, k) = (1 / epsilon0) rho(i, j, k)
+           2   2
+        - n / L  LAPLACIAN uc(i, j, k) = (1 / epsilon0) rho(i, j, k)
 
-      FFT (see FFTW manual "What FFTW Really Computes"):
+    FFT (see FFTW manual "What FFTW Really Computes"):
 
-                                    2          2    2
-      fft_uc(kx, ky, kz) = 1 / [4 pi epsilon0 k  / L ] fft_rho(kx, ky, kz)
+                                  2          2    2
+    fft_uc(kx, ky, kz) = 1 / [4 pi epsilon0 k  / L ] fft_rho(kx, ky, kz)
 
-      with
+    with
 
-           2    2    2    2
-          k = kx + ky + kz
+         2    2    2    2
+        k = kx + ky + kz
 
-      IFFT (see FFTW manual "What FFTW Really Computes"):
+    IFFT (see FFTW manual "What FFTW Really Computes"):
 
-      because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
+    because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
 
-                     3   3
-      uc(i, j, k) = h / L  * IFFT(fft_uc(kx, ky, kz))
-    */
+                   3   3
+    uc(i, j, k) = h / L  * IFFT(fft_uc(kx, ky, kz))
+  */
 
     // EPSILON0INV = 1 / 4 * pi * epsilon0:
     real scale = q * EPSILON0INV / M_PI * h3 / (L * L * L);
 
     index = 0;
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-        for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-            for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++) {
+      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+          {
 
-                FOR_DIM {
-                    if( i[dim] <= N[dim] / 2)
-                        ic[dim] = i[dim];
-                    else
-                        ic[dim] = i[dim] - N[dim];
-                }
+            FOR_DIM
+              {
+                if( i[dim] <= N[dim] / 2)
+                  ic[dim] = i[dim];
+                else
+                  ic[dim] = i[dim] - N[dim];
+              }
 
-                if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0) {
-                    /* No point to scale zeros, obviousely: */
-                    fft_work[index].re = 0;
-                    fft_work[index].im = 0;
-                }
-                else {
-                    k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+            if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+              {
+                /* No point to scale zeros, obviousely: */
+                fft_work[index].re = 0;
+                fft_work[index].im = 0;
+              }
+            else
+              {
+                k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
 
-                    fac = scale / k2;
+                fac = scale / k2;
 
-                    /* Here  we compute  in place:  uc(kx, ky,  kz) :=
-                       scale * rho(kx, ky, kz) / k^2 */
-                    fft_work[index].re = fac * fft_work[index].re;
-                    fft_work[index].im = fac * fft_work[index].im;
-                }
-                index++;
-            }
+                /* Here we compute in place: uc(kx, ky, kz) := scale *
+                   rho(kx, ky, kz) / k^2 */
+                fft_work[index].re = fac * fft_work[index].re;
+                fft_work[index].im = fac * fft_work[index].im;
+              }
+            index++;
+          }
     // NOT NEEDED: VecSet(uc, 00.0);
 
     /* uc := IFFT(uc(kx, ky, kz)) */
@@ -505,15 +512,15 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
     bgy3d_fft_free (fft_scratch);
 }
 
-/* Read density file generated by GPAW calculation
- * need Bohr to scale the length values back */
+/* Read density file generated by  GPAW calculation need Bohr to scale
+ * the length values back */
 #define Bohr 0.52917725750691647
 static void read_charge_density (DA da, const ProblemData *PD,
                                  const char *filename, real fact, Vec v)
 {
   PetscScalar ***vec;
   char line_buffer[BUFSIZ];
-  int AtomNum; /* atom numbers in the molecule */
+  int AtomNum;                  /* atom numbers in the molecule */
   real corner[3], dx[3], dy[3], dz[3];
   int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
   real h[3];
@@ -547,9 +554,9 @@ static void read_charge_density (DA da, const ProblemData *PD,
   dz[2] *= Bohr;
 
   /* Allocate memory */
-  int electron[AtomNum];      /* electrons of each atom */
-  real zero[AtomNum]; /* = 0.0 as in ase.io.cube.write_cube, don't
-                         know the meaning */
+  int electron[AtomNum];  /* electrons of each atom */
+  real zero[AtomNum];     /* = 0.0 as in ase.io.cube.write_cube, don't
+                             know the meaning */
   real x[AtomNum], y[AtomNum], z[AtomNum];
 
   for (int i = 0; i < AtomNum; i++)
