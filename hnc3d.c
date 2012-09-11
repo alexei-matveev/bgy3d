@@ -1139,7 +1139,7 @@ static PetscErrorCode UNUSED_ComputeHNC2b_F(SNES snes, Vec h, Vec f, void *pa)
 Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
-  Vec c, h, h_old, gg, v;
+  Vec h, h_old, gg, v; // c
   real g_norm, rho, beta;
   int slow_iter=10, k, n[3], x[3], i[3], index;
   FFT_DATA *c_fft, *ch_fft, *h_fft;
@@ -1173,7 +1173,7 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   VecDuplicate(HD->pot, &h);
   VecDuplicate(HD->pot, &h_old);
   VecDuplicate(HD->pot, &gg);
-  c=HD->c;
+  /* c=HD->c; */
   v=HD->v;
   /* Set initial guess */
   //VecSet(h,0.0);
