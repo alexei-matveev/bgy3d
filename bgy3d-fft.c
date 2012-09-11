@@ -78,7 +78,7 @@ void bgy3d_fft_init_da (const int N[3],
                  da_mg);
   }
 
-  DAGetCorners(*da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners(*da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   if (verbosity > 2)
     {
@@ -98,7 +98,7 @@ fftw_complex *bgy3d_fft_malloc (DA da)
     int x[3], n[3];
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     return (fftw_complex*) malloc(n[0] * n[1] * n[2] * sizeof(fftw_complex));
 }
@@ -114,7 +114,7 @@ static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
     PetscScalar ***g_vec;
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(i0), &(j0), &(k0), &(ni), &(nj), &(nk));
+    DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
     DAVecGetArray(da, g, &g_vec);
 
@@ -138,7 +138,7 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
     PetscScalar ***g_vec;
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(i0), &(j0), &(k0), &(ni), &(nj), &(nk));
+    DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
     DAVecGetArray(da, g, &g_vec);
 
@@ -201,7 +201,7 @@ fftw_complex *bgy3d_fft_axpby (DA da, fftw_complex *restrict y,
     int z[3], n[3], N;
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(z[0]), &(z[1]), &(z[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners(da, &z[0], &z[1], &z[2], &n[0], &n[1], &n[2]);
 
     N = n[0] * n[1] * n[2];
 
@@ -225,7 +225,7 @@ fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha)
     int z[3], n[3], N;
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(z[0]), &(z[1]), &(z[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners(da, &z[0], &z[1], &z[2], &n[0], &n[1], &n[2]);
 
     N = n[0] * n[1] * n[2];
 
@@ -245,7 +245,7 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
     int x[3], n[3];
 
     /* Get local portion of the grid */
-    DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     if(g_fft==NULL)
         g_fft = (FFT_DATA*) calloc(n[0] * n[1] * n[2], sizeof(*g_fft));
