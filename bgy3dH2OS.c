@@ -177,9 +177,14 @@ static void load (const State *BHD, Vec g2[2][2])
 #else
   (void) BHD;                   /* unused */
   /* Read g^2 from file. FIXME: why did we allocate them above? */
-  g2[0][0] = bgy3d_load_vec ("g00.bin");
-  g2[0][1] = bgy3d_load_vec ("g01.bin");
-  g2[1][1] = bgy3d_load_vec ("g11.bin");
+  /* Note in bgy3d_load_vec(), a new 'local' vec will be created
+   * but the new local vec isn't derived from the global vector
+   * here. Since global vectors are abused in this code, we might
+   * simply retain operating with global vectors instead of converting
+   * and assembling between global and local vectors? */
+  bgy3d_read_vec ("g00.bin", g2[0][0]);
+  bgy3d_read_vec ("g01.bin", g2[0][1]);
+  bgy3d_read_vec ("g11.bin", g2[1][1]);
 #endif
   g2[1][0] = g2[0][1];
 }
