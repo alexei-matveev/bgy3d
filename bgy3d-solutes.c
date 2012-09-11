@@ -509,89 +509,88 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
  * need Bohr to scale the length values back */
 #define Bohr 0.52917725750691647
 static void read_charge_density (DA da, const ProblemData *PD,
-				const char *filename, real fact, Vec v)
+                                 const char *filename, real fact, Vec v)
 {
-    PetscScalar ***vec;
-    char line_buffer[BUFSIZ];
-    int AtomNum; /* atom numbers in the molecule */
-    real corner[3], dx[3], dy[3], dz[3];
-    int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
-    real h[3];
-    FILE *fp;
-    int i0, j0, k0;
-    int ni, nj, nk;
+  PetscScalar ***vec;
+  char line_buffer[BUFSIZ];
+  int AtomNum; /* atom numbers in the molecule */
+  real corner[3], dx[3], dy[3], dz[3];
+  int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
+  real h[3];
+  FILE *fp;
+  int i0, j0, k0;
+  int ni, nj, nk;
 
 
-    fp = fopen(filename, "r");
-    if (fp == NULL) {
-	PetscPrintf(PETSC_COMM_WORLD, "Can not open file %s. \n", filename);
-	exit(1);
+  fp = fopen(filename, "r");
+  if (fp == NULL)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Can not open file %s. \n", filename);
+      exit(1);
     }
 
-    PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
-    /* Skip the first two lines */
-    for (int i = 0; i < 2; i++) {
-	fgets(line_buffer, sizeof(line_buffer), fp);
+  PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
+  /* Skip the first two lines */
+  for (int i = 0; i < 2; i++)
+    fgets(line_buffer, sizeof(line_buffer), fp);
+
+  /* Atom numers and corner shifts */
+  fscanf(fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
+
+  /* Grid numbers and spaces */
+  FOR_DIM
+    fscanf(fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
+
+  /* Scale the grid space */
+  dx[0] *= Bohr;
+  dy[1] *= Bohr;
+  dz[2] *= Bohr;
+
+  /* Allocate memory */
+  int electron[AtomNum];      /* electrons of each atom */
+  real zero[AtomNum]; /* = 0.0 as in ase.io.cube.write_cube, don't
+                         know the meaning */
+  real x[AtomNum], y[AtomNum], z[AtomNum];
+
+  for (int i = 0; i < AtomNum; i++)
+    {
+      fscanf(fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
+      x[i] *= Bohr;
+      y[i] *= Bohr;
+      z[i] *= Bohr;
     }
 
-    /* Atom numers and corner shifts */
-    fscanf(fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
+  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-    /* Grid numbers and spaces */
-    FOR_DIM {
-	fscanf(fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
+  FOR_DIM
+    h[dim] = PD->h[dim];
+
+
+  /* FIXME: will need interpolation if grid not match */
+  if ( GridNum[0] * GridNum[1] * GridNum[2] != ni * nj * nk)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Grid size not match!\n");
+      exit(1);
+    }
+  else if ( fabs(dx[0] - h[0]) >= 0.001 || fabs(dy[1] - h[1]) >= 0.001 || fabs(dz[2] - h[2]) >= 0.001)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Grid space not match!\n");
+      exit(1);
     }
 
-    /* Scale the grid space */
-    dx[0] *= Bohr;
-    dy[1] *= Bohr;
-    dz[2] *= Bohr;
+  DAVecGetArray(da, v, &vec);
 
-    /* Allocate memory */
-    int electron[AtomNum];      /* electrons of each atom */
-    real zero[AtomNum]; /* = 0.0 as in ase.io.cube.write_cube, don't
-                           know the meaning */
-    real x[AtomNum], y[AtomNum], z[AtomNum];
+  /* electron density scaled by Bohr^3 in python script */
+  real invB3 = 1. / Bohr / Bohr / Bohr;
+  for (int i = i0; i < i0 + ni; i++)
+    for (int j = j0; j < j0 + nj; j++)
+      for (int k = k0; k < k0 + nk; k++)
+        {
+          fscanf(fp, "%lf", &vec[i][j][k]);
+          vec[i][j][k] *= fact * invB3;
+        }
 
-    for (int i = 0; i < AtomNum; i++){
-	fscanf(fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
-	x[i] *= Bohr;
-	y[i] *= Bohr;
-	z[i] *= Bohr;
-    }
-
-    DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-    FOR_DIM {
-	h[dim] = PD->h[dim];
-    }
-
-
-    /* FIXME: will need interpolation if grid not match */
-    if ( GridNum[0] * GridNum[1] * GridNum[2] != ni * nj * nk) {
-	PetscPrintf(PETSC_COMM_WORLD, "Grid size not match!\n");
-	exit(1);
-    }
-    else if ( fabs(dx[0] - h[0]) >= 0.001 || fabs(dy[1] - h[1]) >= 0.001 || fabs(dz[2] - h[2]) >= 0.001) {
-	PetscPrintf(PETSC_COMM_WORLD, "Grid space not match!\n");
-	exit(1);
-    }
-
-    DAVecGetArray(da, v, &vec);
-
-    /* electron density scaled by Bohr^3 in python script */
-    real invB3 = 1. / Bohr / Bohr / Bohr;
-    for (int i = i0; i < i0 + ni; i++) {
-	for (int j = j0; j < j0 + nj; j++) {
-	    for (int k = k0; k < k0 + nk; k++) {
-		fscanf(fp, "%lf", &vec[i][j][k]);
-		vec[i][j][k] *= fact * invB3;
-	    }
-	}
-    }
-
-    fclose(fp);
-    DAVecRestoreArray(da, v, &vec);
-
+  fclose(fp);
+  DAVecRestoreArray(da, v, &vec);
 }
 
