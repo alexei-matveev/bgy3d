@@ -551,7 +551,6 @@ static void  pair (State *BHD,
                    real damp, real damp_LJ)
 {
   PetscScalar ***fs_vec[3];
-  PetscScalar ***fl_vec[3];
   real r[3], r_s, h[3], interval[2];
   int x[3], n[3], i[3];
 
@@ -585,7 +584,6 @@ static void  pair (State *BHD,
   FOR_DIM
     {
       DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
-      DAVecGetArray (da, f_long[dim], &fl_vec[dim]);
     }
 
   /* loop over local portion of grid */
@@ -616,7 +614,6 @@ static void  pair (State *BHD,
   FOR_DIM
     {
       DAVecRestoreArray (da, f_short[dim], &fs_vec[dim]);
-      DAVecRestoreArray (da, f_long[dim], &fl_vec[dim]);
     }
 
   /* Compute FFT(F * g^2).
