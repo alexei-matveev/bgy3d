@@ -462,6 +462,8 @@ real ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, in
 
 #endif
 
+/* Fills Vec  g2 with  3D distribution derived  from the 1D  g(r) data
+   from the disk.  Here g2 should be a valid allocated vector. */
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 {
   DA da;
