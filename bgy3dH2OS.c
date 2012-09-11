@@ -161,32 +161,27 @@ static State initialize_state (const ProblemData *PD)
 }
 
 
-/* This returns  an array of newly allocated  Vecs with solven-solvent
-   pair distributions:  */
+/* This fills  an array of preallocated Vecs  with solven-solvent pair
+   distributions:  */
 static void load (const State *BHD, Vec g2[2][2])
 {
-  /* FIXME: this is broken. In one case (ifdef CS2) it is assumed that
-     g2 vectors are  allocated and here they are  filled with data. In
-     another case the vectors are constructed from scratch, eventually
-     overwriting  the references  to other  allocated Vecs  and making
-     them inaccesible. */
 #ifdef CS2
   ReadPairDistribution (BHD, "g2C", g2[1][1]);
   ReadPairDistribution (BHD, "g2S", g2[0][0]);
   ReadPairDistribution (BHD, "g2CS", g2[0][1]);
 #else
   (void) BHD;                   /* unused */
-  /* Read g^2 from file. FIXME: why did we allocate them above? */
-  /* Note in bgy3d_load_vec(), a new 'local' vec will be created
-   * but the new local vec isn't derived from the global vector
-   * here. Since global vectors are abused in this code, we might
-   * simply retain operating with global vectors instead of converting
-   * and assembling between global and local vectors? */
+  /* Read  g^2 from  file  into a  pre-allocated global  (distributed)
+   * vector.   Note in  bgy3d_load_vec(), a  new 'local'  Vec  will be
+   * created  but the  new local  vec  isn't derived  from the  global
+   * vector  here.  Since  global vectors  are used  in this  code, we
+   * might  simply retain  operating  with global  vectors instead  of
+   * converting and assembling between global and local vectors? */
   bgy3d_read_vec ("g00.bin", g2[0][0]);
   bgy3d_read_vec ("g01.bin", g2[0][1]);
   bgy3d_read_vec ("g11.bin", g2[1][1]);
 #endif
-  g2[1][0] = g2[0][1];
+  assert (g2[1][0] == g2[0][1]);
 }
 
 
