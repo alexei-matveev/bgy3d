@@ -109,15 +109,14 @@ static State initialize_state (const ProblemData *PD)
       BHD.g2[j][i] = BHD.g2[i][j];
       assert (!ierr);
 
+      /* Used with pure solvent only: */
       FOR_DIM
         {
-          ierr = DACreateGlobalVector (da, &BHD.F[i][j][dim]);
-          BHD.F[j][i][dim] = BHD.F[i][j][dim];
-          assert (!ierr);
+          BHD.F[i][j][dim] = PETSC_NULL;
+          BHD.F[j][i][dim] = PETSC_NULL;
 
-          ierr = DACreateGlobalVector (da, &BHD.F_l[i][j][dim]);
-          BHD.F_l[j][i][dim] = BHD.F_l[i][j][dim];
-          assert (!ierr);
+          BHD.F_l[i][j][dim] = PETSC_NULL;
+          BHD.F_l[j][i][dim] = PETSC_NULL;
         }
     }
   }
@@ -206,10 +205,12 @@ static void finalize_state (State *BHD)
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j <= i; j++) {
       VecDestroy (BHD->g2[i][j]);
+
       FOR_DIM
         {
-          VecDestroy (BHD->F[i][j][dim]);
-          VecDestroy (BHD->F_l[i][j][dim]);
+          /* Used with pure solvent only: */
+          assert (BHD->F[i][j][dim] == PETSC_NULL);
+          assert (BHD->F_l[i][j][dim] == PETSC_NULL);
 
           bgy3d_fft_free (BHD->f_g2_fft[i][j][dim]);
           bgy3d_fft_free (BHD->fl_g2_fft[i][j][dim]);
@@ -664,6 +665,19 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
                "Recomputing FFT data with damping factor %f (damp_LJ=%f)\n",
                damp, damp_LJ);
 
+  /* FIXME: maybe use BHD->v[3] for one of them? */
+  Vec force_short[3];           /* work vectors for pair() */
+  Vec force_long[3];            /* work vectors for pair() */
+  FOR_DIM
+    {
+      PetscErrorCode err;
+      err = DACreateGlobalVector (BHD->da, &force_short[dim]);
+      assert (!err);
+      err = DACreateGlobalVector (BHD->da, &force_long[dim]);
+      assert (!err);
+    }
+
+
   /* Over all distinct solvent site pairs: */
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
@@ -675,8 +689,6 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
             assert (BHD->g2[j][i] == BHD->g2[i][j]);
             FOR_DIM
               {
-                assert (BHD->F[j][i][dim] == BHD->F[i][j][dim]);
-                assert (BHD->F_l[j][i][dim] == BHD->F_l[i][j][dim]);
                 assert (BHD->f_g2_fft[j][i][dim] == BHD->f_g2_fft[i][j][dim]);
                 assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
               }
@@ -690,11 +702,22 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 
         /* Does real work: */
         pair (BHD, ff_params,
-              BHD->g2[i][j], BHD->F[i][j], BHD->F_l[i][j],
+              BHD->g2[i][j],
+              force_short, force_long, /* work vectors*/
               BHD->f_g2_fft[i][j], BHD->fl_g2_fft[i][j],
               BHD->u2[j][i], BHD->u2_fft[j][i], /* FIXME: ij ji */
               damp, damp_LJ);
       }
+
+  /* Clean up and exit: */
+  FOR_DIM
+    {
+      PetscErrorCode err;
+      err = VecDestroy (force_short[dim]);
+      assert (!err);
+      err = VecDestroy (force_long[dim]);
+      assert (!err);
+    }
 }
 
 /*
@@ -1228,15 +1251,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       for (int i = 0; i < 2; i++)
         VecScale (g0[i], beta);
 
-      /* FIXME:  Check if this  is redundant  --- it  was mechanically
-         moved from  the body of the  above func (because  it does not
-         belong into solute code): */
-      FOR_DIM {
-        VecSet(BHD.F_l[0][0][dim], 0.0);
-        VecSet(BHD.F_l[1][1][dim], 0.0);
-        VecSet(BHD.F_l[0][1][dim], 0.0); /* What is it used for? */
-      }
-
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
 
       //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
@@ -1590,9 +1604,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   g0H=BHD.g_ini[0];
   g0O=BHD.g_ini[1];
 
-/*   VecView(BHD.F_l[0][1][0],PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);   */
-
   /* set initial guess*/
   VecSet(dgH,0);
   VecSet(dgO,0);
@@ -1653,15 +1664,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
          factor: */
       for (int i = 0; i < 2; i++)
         VecScale (BHD.g_ini[i], BHD.PD->beta);
-
-      /* FIXME:  Check if this  is redundant  --- it  was mechanically
-         moved from the body of the bgy3d_solute_field() func (because
-         it does not belong into solute code): */
-      FOR_DIM {
-        VecSet(BHD.F_l[0][0][dim], 0.0);
-        VecSet(BHD.F_l[1][1][dim], 0.0);
-        VecSet(BHD.F_l[0][1][dim], 0.0); /* What is it used for? */
-      }
 
       //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
