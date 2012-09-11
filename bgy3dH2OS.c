@@ -94,7 +94,7 @@ static State initialize_state (const ProblemData *PD)
   /* Create global vectors */
   ierr = DACreateGlobalVector (da, &BHD.g_ini[0]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.g_ini[1]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.gHO_ini); assert (!ierr);
+  BHD.gHO_ini = PETSC_NULL;     /* unused with impurities */
   ierr = DACreateGlobalVector (da, &BHD.u2[0][0]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.u2[1][1]); assert (!ierr);
   ierr = DACreateGlobalVector (da, &BHD.u2[0][1]); assert (!ierr);
@@ -237,7 +237,7 @@ static void finalize_state (State *BHD)
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
-  VecDestroy(BHD->gHO_ini);
+  assert (BHD->gHO_ini == PETSC_NULL); /* unused for impurities */
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
