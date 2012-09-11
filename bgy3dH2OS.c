@@ -122,15 +122,13 @@ static State initialize_state (const ProblemData *PD)
     }
   }
 
-  ierr = DACreateGlobalVector (da, &BHD.pre); assert (!ierr);
+  BHD.pre = PETSC_NULL;         /* used for newton solver only */
 
   FOR_DIM
     {
       ierr = DACreateGlobalVector (da, &BHD.v[dim]); assert (!ierr);
     }
 
-
-  VecSet(BHD.pre,0.0);
 
 #ifdef L_BOUNDARY
    /* Create Matrix with appropriate non-zero structure */
@@ -242,7 +240,7 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
-  VecDestroy(BHD->pre);
+  assert (BHD->pre == PETSC_NULL); /* used for newton solver */
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
   KSPDestroy(BHD->ksp);
