@@ -931,23 +931,23 @@ real ComputeCharge(State *BHD, Vec g1, Vec g2)
   return c;
 }
 
-typedef struct StepDataStruct
+typedef struct StepData
 {
   State *BHD ;
   Vec dg_newO, dgO, dgH;
-}*StepData;
+} StepData;
 
 static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
 {
   (void) snes;                 /* unused, but interface obligation? */
 
-  StepData SD;
+  StepData *SD;
   real con, sumO, sumH; // res
   PetscScalar *x_vec, *f_vec;
   State *BHD;
   Vec gO, gH, dgO2;
 
-  SD = (StepData) data;
+  SD = (StepData*) data;
   BHD = SD->BHD;
   const ProblemData *PD = BHD->PD;
   gO = BHD->v[0];
@@ -984,10 +984,10 @@ static real GetOptimalStepSize(State *BHD, Vec dg_newO, Vec dgO, Vec dgH)
   SNES snes;
   Vec s, f;
   PetscScalar *s_vec;
-  StepData SD;
+  StepData *SD;
   real step;
 
-  SD = (StepData) malloc(sizeof(*SD));
+  SD = (StepData*) malloc(sizeof(*SD));
   SD->BHD = BHD;
   SD->dg_newO = dg_newO;
   SD->dgO = dgO;
