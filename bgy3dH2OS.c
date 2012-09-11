@@ -544,13 +544,13 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
 static void  pair (State *BHD,
                    const real LJ_params[3],
                    const Vec g2,
-                   Vec F[3], Vec F_l[3],         /* intent(out) */
-                   fftw_complex *f_g2_fft[3], /* intent(out) */
-                   fftw_complex *fl_g2_fft[3], /* intent(out) */
-                   Vec u2, fftw_complex *u2_fft, /* intent(out) */
+                   Vec f_short[3], Vec f_long[3], /* work arrays */
+                   fftw_complex *fs_g2_fft[3],    /* intent(out) */
+                   fftw_complex *fl_g2_fft[3],    /* intent(out) */
+                   Vec u2, fftw_complex *u2_fft,  /* intent(out) */
                    real damp, real damp_LJ)
 {
-  PetscScalar ***f_vec[3];
+  PetscScalar ***fs_vec[3];
   PetscScalar ***fl_vec[3];
   real r[3], r_s, h[3], interval[2];
   int x[3], n[3], i[3];
@@ -572,20 +572,20 @@ static void  pair (State *BHD,
 
   FOR_DIM
     {
-      VecSet (F[dim], 0.0);
-      VecSet (F_l[dim], 0.0);
+      VecSet (f_short[dim], 0.0);
+      VecSet (f_long[dim], 0.0);
     }
 
   /* Compute Coulomb from fft part */
-  /*   ComputeFFTfromCoulombII(BHD, F, F_l, u2_fft, LJ_params, damp); */
+  /*   ComputeFFTfromCoulombII(BHD, f_short, f_long, u2_fft, LJ_params, damp); */
 
   /* Here u2 is intent(out) in the next call: */
-  ComputeFFTfromCoulomb(BHD, u2, F_l, u2_fft, q2, damp0);
+  ComputeFFTfromCoulomb(BHD, u2, f_long, u2_fft, q2, damp0);
 
   FOR_DIM
     {
-      DAVecGetArray (da, F[dim], &f_vec[dim]);
-      DAVecGetArray (da, F_l[dim], &fl_vec[dim]);
+      DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
+      DAVecGetArray (da, f_long[dim], &fl_vec[dim]);
     }
 
   /* loop over local portion of grid */
@@ -604,19 +604,19 @@ static void  pair (State *BHD,
           FOR_DIM
             {
               /* Lennard-Jones */
-              f_vec[dim][i[2]][i[1]][i[0]] +=
+              fs_vec[dim][i[2]][i[1]][i[0]] +=
                 damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
 
               /* Coulomb short */
-              f_vec[dim][i[2]][i[1]][i[0]] +=
+              fs_vec[dim][i[2]][i[1]][i[0]] +=
                 damp * Coulomb_short_grad( r_s, r[dim], q2);
             }
         }
 
   FOR_DIM
     {
-      DAVecRestoreArray (da, F[dim], &f_vec[dim]);
-      DAVecRestoreArray (da, F_l[dim], &fl_vec[dim]);
+      DAVecRestoreArray (da, f_short[dim], &fs_vec[dim]);
+      DAVecRestoreArray (da, f_long[dim], &fl_vec[dim]);
     }
 
   /* Compute FFT(F * g^2).
@@ -635,20 +635,20 @@ static void  pair (State *BHD,
       PetscErrorCode err;
 
       /* First (F_LJ + F_coulomb_short) * g2: */
-      err = VecPointwiseMult (work, g2, F[dim]);
+      err = VecPointwiseMult (work, g2, f_short[dim]);
       assert (!err);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
       ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                              work, f_g2_fft[dim],
+                              work, fs_g2_fft[dim],
                               BHD->fft_scratch);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
-      err = VecPointwiseMult (work, g2, F_l[dim]);
+      err = VecPointwiseMult (work, g2, f_long[dim]);
       assert (!err);
 
       /* Next F_coulomb_long * g2 - F_coulomb_long: */
-      VecAXPY(work, -1.0, F_l[dim]);
+      VecAXPY(work, -1.0, f_long[dim]);
 
       /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
       ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
