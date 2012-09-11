@@ -931,89 +931,6 @@ real ComputeCharge(State *BHD, Vec g1, Vec g2)
   return c;
 }
 
-typedef struct StepData
-{
-  State *BHD ;
-  Vec dg_newO, dgO, dgH;
-} StepData;
-
-static PetscErrorCode ComputeStepFunction(SNES snes, Vec x, Vec f, void *data)
-{
-  (void) snes;                 /* unused, but interface obligation? */
-
-  StepData *SD;
-  real con, sumO, sumH; // res
-  PetscScalar *x_vec, *f_vec;
-  State *BHD;
-  Vec gO, gH, dgO2;
-
-  SD = (StepData*) data;
-  BHD = SD->BHD;
-  const ProblemData *PD = BHD->PD;
-  gO = BHD->v[0];
-  gH = BHD->v[1];
-  dgO2 = BHD->v[3];
-
-
-  con = PD->h[0]*PD->h[1]*PD->h[2]*BHD->rho;
-
-  VecCopy(SD->dgO, dgO2);
-  VecGetArray(x, &x_vec);
-  //fprintf(stderr,"x = %e\n", x_vec[0]);
-  // VecAXPY(dgO2, x_vec[0], SD->dg_newO);
-  VecAXPBY(dgO2, SQR(x_vec[0]), (1-SQR(x_vec[0])), SD->dg_newO);
-  //VecScale(dgO2, x_vec[0]);
-  VecRestoreArray(x, &x_vec);
-
-  ComputeH2O_g( gH, BHD->g_ini[0], SD->dgH);
-  ComputeH2O_g( gO, BHD->g_ini[1], dgO2);
-
-  VecSum(gH, &sumH);
-  VecSum(gO, &sumO);
-
-  VecGetArray(f, &f_vec);
-  f_vec[0] = SQR(con*(sumH-sumO)-1.0);
-  VecRestoreArray(f, &f_vec);
-
-  return 0;
-}
-
-
-static real GetOptimalStepSize(State *BHD, Vec dg_newO, Vec dgO, Vec dgH)
-{
-  SNES snes;
-  Vec s, f;
-  PetscScalar *s_vec;
-  StepData *SD;
-  real step;
-
-  SD = (StepData*) malloc(sizeof(*SD));
-  SD->BHD = BHD;
-  SD->dg_newO = dg_newO;
-  SD->dgO = dgO;
-  SD->dgH = dgH;
-
-  VecCreateSeq(PETSC_COMM_SELF, 1, &s);
-  VecCreateSeq(PETSC_COMM_SELF, 1, &f);
-
-  SNESCreate(PETSC_COMM_WORLD, &snes);
-
-  SNESSetFunction(snes, f, ComputeStepFunction, (void*)SD);
-  SNESSetType(snes, SNESLS);
-
-  SNESSolve(snes, PETSC_NULL, s);
-
-  VecGetArray(s, &s_vec);
-  step = s_vec[0];
-  VecRestoreArray(s, &s_vec);
-
-  VecDestroy(s);
-  VecDestroy(f);
-  SNESDestroy(snes);
-
-  return step;
-}
-
 static void ComputedgFromg (Vec dg, Vec g0, Vec g)
 {
   int local_size, i;
@@ -1591,7 +1508,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   (void) g_ini;                 /* FIXME: interface obligation */
 
   real a1, a, damp, damp_LJ;
-  real count=0.0, norm, aO;
+  real count=0.0, norm;
   int iter;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
@@ -1929,20 +1846,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
 
           /* Move dgO */
-          if(0&& iter>10)
-            {
-              aO = GetOptimalStepSize(&BHD, dg_newO, dgO, dgH);
-              //if(aO<0) aO = a;
-              VecCopy(dgO, f);
-              VecAXPBY(dgO, SQR(aO), (1-SQR(aO)), dg_newO);
-              //VecCopy(dg_newO, dgO);
-              //VecScale(dgO, aO);
-
-              VecAXPY(f, -1.0,  dgO);
-              VecNorm(f, NORM_INFINITY, &dgO_norm);
-              PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/aO, aO);
-            }
-          else
+          if (1)
             {
               VecCopy(dgO, f);
 /*            VecAXPY(dg_histO, 1.0, dg_newO); */
