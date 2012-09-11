@@ -566,25 +566,21 @@ static void  pair (State *BHD,
 
   interval[0] = PD->interval[0];
 
-  /* Get local portion of the grid */
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  FOR_DIM
-    {
-      VecSet (f_short[dim], 0.0);
-      VecSet (f_long[dim], 0.0);
-    }
-
   /* Compute Coulomb from fft part */
   /*   ComputeFFTfromCoulombII(BHD, f_short, f_long, u2_fft, LJ_params, damp); */
 
-  /* Here u2 is intent(out) in the next call: */
-  ComputeFFTfromCoulomb(BHD, u2, f_long, u2_fft, q2, damp0);
+  /* Here Vec u2 and a  complex array u2_fft[] both are intent(out) in
+     the next  call. The Vec f_long, intent(out),  optional, is filled
+     with the corresponding force: */
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2, damp0);
 
   FOR_DIM
     {
       DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
     }
+
+  /* Get local portion of the grid */
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -601,13 +597,10 @@ static void  pair (State *BHD,
 
           FOR_DIM
             {
-              /* Lennard-Jones */
-              fs_vec[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
-
-              /* Coulomb short */
-              fs_vec[dim][i[2]][i[1]][i[0]] +=
-                damp * Coulomb_short_grad( r_s, r[dim], q2);
+              /* Lennard-Jones + Coulomb short */
+              fs_vec[dim][i[2]][i[1]][i[0]] =
+                damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
+                damp * Coulomb_short_grad (r_s, r[dim], q2);
             }
         }
 
