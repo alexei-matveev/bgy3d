@@ -251,16 +251,19 @@ static SCM guile_test (SCM inp)
 
 
 
-static void inner_main (void *closure, int argc, char **argv)
+void bgy3d_guile_init (int argc, char **argv)
 {
-  (void) closure;               /* FIXME: otherwise unused. */
-
   assert (sizeof (Vec) == sizeof (void*));
 #ifndef SIZEOF_VOID_PTR_EQ_4
   assert (sizeof (void*) == sizeof (uint64_t));
 #else
   assert (sizeof (void*) == sizeof (uint32_t));
 #endif
+
+  /* MPI may  choose to rewrite the  command line, do  it early. Petsc
+     does  not  rewrite argv.   Guile  will  not  understand the  some
+     flags. */
+  PetscInitialize (&argc, &argv, (char*) 0, helptext);
 
   /*
    * Calling this  will define a  few bgy3d-* gsubrs defined  in these
@@ -273,15 +276,19 @@ static void inner_main (void *closure, int argc, char **argv)
   scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
   scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
+}
+
+static void inner_main (void *closure, int argc, char **argv)
+{
+  (void) closure;               /* FIXME: otherwise unused. */
+
+  bgy3d_guile_init (argc, argv);
 
   scm_shell (argc, argv);     /* never returns */
 }
 
 int bgy3d_guile_main (int argc, char **argv)
 {
-  /* MPI may choose to rewrite the command line, do it early: */
-  PetscInitialize (&argc, &argv, (char*) 0, helptext);
-
   /* Petsc does not rewrite argv.   Guile will not understand the some
      flags. */
   /* scm_boot_guile (0, NULL, inner_main, NULL); */
