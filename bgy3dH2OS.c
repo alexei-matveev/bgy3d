@@ -166,9 +166,9 @@ static State initialize_state (const ProblemData *PD)
 static void load (const State *BHD, Vec g2[2][2])
 {
 #ifdef CS2
-  ReadPairDistribution (BHD, "g2C", g2[1][1]);
-  ReadPairDistribution (BHD, "g2S", g2[0][0]);
-  ReadPairDistribution (BHD, "g2CS", g2[0][1]);
+  ReadPairDistribution (BHD, "g11.txt", g2[1][1]);
+  ReadPairDistribution (BHD, "g00.txt", g2[0][0]);
+  ReadPairDistribution (BHD, "g01.txt", g2[0][1]);
 #else
   (void) BHD;                   /* unused */
   /* Read  g^2 from  file  into a  pre-allocated global  (distributed)
