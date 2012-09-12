@@ -30,8 +30,6 @@
 #include "bgy3d-guile.h"        /* bgy3d_guile_main */
 #endif
 
-int verbosity = 0;          /* Used read-only in a few other files. */
-
 #ifdef WITH_GUILE
 int main (int argc, char **argv)
 {

@@ -6,6 +6,11 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 
+/* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
+   files.  Moved here  because  bgy3d-main.c is  not  linked when  the
+   main() is taken from elsewhere: */
+int verbosity = 0;
+
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
    interface: */
 ProblemData bgy3d_problem_data (void)
