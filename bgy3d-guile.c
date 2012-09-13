@@ -70,18 +70,20 @@ static ProblemData problem_data (SCM alist)
   alist_getopt_real (alist, "zpad", &PD.zpad);
 
   real length;
-  if (alist_getopt_real (alist, "L", &length)) {
-    PD.interval[0] = -length;
-    PD.interval[1] = +length;
-  }
+  if (alist_getopt_real (alist, "L", &length))
+    {
+      PD.interval[0] = -length;
+      PD.interval[1] = +length;
+    }
 
   /* Integer options: */
   int n;
-  if (alist_getopt_int (alist, "N", &n)) {
-    PD.N[0] = n;
-    PD.N[1] = n;
-    PD.N[2] = n;
-  }
+  if (alist_getopt_int (alist, "N", &n))
+    {
+      PD.N[0] = n;
+      PD.N[1] = n;
+      PD.N[2] = n;
+    }
 
   alist_getopt_int (alist, "max-iter", &PD.max_iter);
   alist_getopt_int (alist, "solute", &PD.solute);
@@ -145,10 +147,11 @@ static void make_solute (SCM solute, int *n, Site **sites, char **name)
   /* will you free() it? */
   Site *new = (Site*) malloc (length * sizeof(Site));
 
-  for (int i = 0; i < length; i++) {
-    new[i] = make_site (scm_car (l_sites));
-    l_sites = scm_cdr (l_sites);
-  }
+  for (int i = 0; i < length; i++)
+    {
+      new[i] = make_site (scm_car (l_sites));
+      l_sites = scm_cdr (l_sites);
+    }
 
   *n = length;
   *sites = new;
