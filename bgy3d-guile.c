@@ -172,16 +172,6 @@ static SCM guile_run_solvent (SCM alist)
 }
 
 
-/* Finalize Petsc and MPI */
-static SCM guile_finalize (void)
-{
-  PetscErrorCode err = PetscFinalize();
-  assert (!err);
-
-  return scm_from_int (err);
-}
-
-
 static SCM guile_run_solute (SCM solute, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
@@ -252,6 +242,14 @@ static SCM guile_test (SCM inp)
   return scmx_ptr (v);
 }
 
+
+/* Finalize Petsc and MPI */
+static void finalize (void)
+{
+  PetscErrorCode err = PetscFinalize ();
+  assert (!err);
+}
+
 
 
 void bgy3d_guile_init (int argc, char **argv)
@@ -264,9 +262,12 @@ void bgy3d_guile_init (int argc, char **argv)
 #endif
 
   /* MPI may  choose to rewrite the  command line, do  it early. Petsc
-     does  not  rewrite argv.   Guile  will  not  understand the  some
-     flags. */
-  PetscInitialize (&argc, &argv, (char*) 0, helptext);
+     does not rewrite argv.  Guile will not understand Petsc flags. */
+  PetscInitialize (&argc, &argv, NULL, helptext);
+
+  /* Add  an  exit handler  that  calls  PetscFinalize(). Executed  by
+     exit() according to POSIX: */
+  atexit (finalize);
 
   /*
    * Calling this  will define a  few bgy3d-* gsubrs defined  in these
@@ -274,7 +275,6 @@ void bgy3d_guile_init (int argc, char **argv)
    */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
-  scm_c_define_gsubr ("bgy3d-finalize", 0, 0, 0, guile_finalize);
   scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
   scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);

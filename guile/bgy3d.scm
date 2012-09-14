@@ -133,8 +133,3 @@
 ;;; better interface:
 ;;;
 (old-main (command-line))
-
-;;
-;; Translates to PetscFinalize():
-;;
-(bgy3d-finalize)
