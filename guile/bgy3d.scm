@@ -60,6 +60,8 @@
 ;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
 ;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 ;;
+(define (solute-name solute) (first solute))
+(define (solute-sites solute) (second solute))
 (define (site-name site) (first site))
 (define (site-position site) (second site))
 (define (site-x site) (first (site-position site)))
@@ -67,9 +69,9 @@
 (define (site-z site) (third (site-position site)))
 
 (define (print-xyz solute)
-  (let ((sites (second solute)))
+  (let ((sites (solute-sites solute)))
     (format #t "~a\n" (length sites))
-    (format #t "# ~a\n" (first solute))
+    (format #t "# ~a\n" (solute-name solute))
     (for-each (lambda (site)
                 (format #t "~a ~a ~a ~a\n"
                         (site-name site)
