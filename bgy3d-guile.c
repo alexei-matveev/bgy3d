@@ -235,6 +235,31 @@ static SCM guile_vec_load (SCM path)
 }
 
 
+static SCM guile_vec_length (SCM vec)
+{
+  int len;
+  Vec c_vec = void_ptr (vec);
+
+  VecGetSize (c_vec, &len);
+
+  return scm_from_int (len);
+}
+
+
+static SCM guile_vec_ref (SCM vec, SCM ix)
+{
+  real vals[1];
+
+  Vec c_vec = void_ptr (vec);
+
+  int keys[1] = {scm_to_int (ix)};
+
+  VecGetValues (c_vec, 1, keys, vals);
+
+  return scm_from_double (vals[0]);
+}
+
+
 static SCM guile_test (SCM inp)
 {
   Vec v = void_ptr (inp);
@@ -278,6 +303,8 @@ void bgy3d_guile_init (int argc, char **argv)
   scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
   scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
+  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
+  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
   scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
 }
 
