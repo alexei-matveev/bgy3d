@@ -98,7 +98,7 @@
            (damp-start . 1.0)
            (lambda . 0.02)))
         (solutes                        ; all entries in the file
-         (slurp (find-file "solutes.scm")))
+         (list (list-ref (slurp (find-file "solutes.scm")) 4)))
         (g1-files
          (list "x0.bin" "x1.bin")))
     ;;
