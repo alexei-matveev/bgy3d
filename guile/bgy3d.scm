@@ -18,8 +18,9 @@
    (bgy3d-run-solvent '()))             ; Use defaults and Petsc env
   ;;
   ((member "--BGYM2Site" argv)
-   (let ((h-cl                       ; Assuming first entry is for HCl
-          (car (slurp (find-file "solutes.scm"))))
+   (let ((h-cl   ; find entry with "hydrogen cloride" in car position:
+          (assoc "hydrogen chloride"
+                 (slurp (find-file "solutes.scm"))))
          (g1-files
           (list "g0.bin" "g1.bin")))
      (map bgy3d-vec-save
@@ -84,10 +85,12 @@
 ;; (exit 0)
 
 ;;
-;; Will   not  work   with   distributed  vectros.   The  problem   is
+;; Will   not  work   with  distributed   vectors.   The   problem  is
 ;; bgy3d-vec-ref (VecGetValues) does not either.
 ;;
 (define (vec-fold kons knil vec)
+  "A (left) fold of a (Petsc) vector.  E.g. (vec-fold + 0.0 vec)
+computes the sum of all vector elements."
   (let ((len (bgy3d-vec-length vec))
         (vec (lambda (i) (bgy3d-vec-ref vec i))))
     (let loop ((knil knil)
@@ -98,13 +101,11 @@
           knil))))
 
 ;;
-;; Obligatory example of using fold:
+;; BGY3d  code operates  in angstroms,  QM codes  use atomic  units by
+;; convention:
 ;;
-(define (vec-sum v)
-  (vec-fold + 0.0 v))
-
-(define BOHR 0.52917706)
-(define ANGSTROM (/ 1.0 BOHR))
+(define (bohr->angstrom x) (* x 0.52917706))
+(define (angstrom->bohr x) (/ x 0.52917706))
 
 ;;
 ;; Brain-dead implementation of cubic root:
@@ -139,9 +140,9 @@
   (for-each (lambda (site)
               (format #t "~a ~a ~a ~a\n"
                       (site-name site)
-                      (* (site-x site) ANGSTROM) ; punch file is in AU
-                      (* (site-y site) ANGSTROM)
-                      (* (site-z site) ANGSTROM)))
+                      (angstrom->bohr (site-x site)) ; punch file is in AU
+                      (angstrom->bohr (site-y site))
+                      (angstrom->bohr (site-z site))))
             (solute-sites solute))
   ;;
   ;; Description of the bonds:
@@ -158,7 +159,7 @@
                (len (bgy3d-vec-length vec))
                (n (cubic-root len))
                (L (or (assq-ref settings 'L) 10.0))
-               (L (* L ANGSTROM))       ; punch file is in AU
+               (L (angstrom->bohr L))   ; punch file is in AU
                (S (* L (/ (- n 1) n)))) ; FIXME: off-by-one?
           (header '((block . data) (records . 0)))
           (header '((block . grid_title) (records . 1)))
