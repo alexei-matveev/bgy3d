@@ -3827,11 +3827,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
       /*********************************/
 
 
-      if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol )//&&NORM_REG<=1.0e-2)
-        break;
+      /* Last print didnt CR LF: */
+      PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-
-      PetscPrintf(PETSC_COMM_WORLD,"\n");
+      if (dgH_norm / aH<=norm_tol && dgO_norm / aO <= norm_tol && dgHO_norm / aHO <= norm_tol)
+          break;
     }
 
 
@@ -3844,7 +3844,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   sprintf(nameO, "vec11-%d.m", namecount-1);
   sprintf(nameHO, "vec01-%d.m", namecount-1);
 
-  PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
+  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
   bgy3d_save_vec_ascii (nameH, gH); /* g_H */
   bgy3d_save_vec_ascii (nameO, gO); /* g_O */
   bgy3d_save_vec_ascii (nameHO, gHO); /* g_HO */
@@ -4582,7 +4582,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   sprintf(nameO, "vec11-%d.m", namecount-1);
   sprintf(nameHO, "vec01-%d.m", namecount-1);
 
-  PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
+  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
   bgy3d_save_vec_ascii (nameH, gH);
   bgy3d_save_vec_ascii (nameO, gO);
   bgy3d_save_vec_ascii (nameHO, gHO);
