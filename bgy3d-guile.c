@@ -277,6 +277,24 @@ static void finalize (void)
 
 
 
+/* Calling this will define a few bgy3d-* gsubrs introduced above: */
+static SCM guile_bgy3d_module_init (void)
+{
+  /* If Scheme executes this code  inside a module (which we do), then
+     all these gsubrs will be  module procedures available only in the
+     module itself or by an explicit (use-modules ...): */
+  scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
+  scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
+  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
+  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
+  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
+  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
+  scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
+
+  return SCM_UNSPECIFIED;
+}
+
 void bgy3d_guile_init (int argc, char **argv)
 {
   assert (sizeof (Vec) == sizeof (void*));
@@ -295,17 +313,14 @@ void bgy3d_guile_init (int argc, char **argv)
   atexit (finalize);
 
   /*
-   * Calling this  will define a  few bgy3d-* gsubrs defined  in these
-   * sources:
+   * Note  that  the names  defined  here  are  put into  the  private
+   * namespace  of (guile-user)  module. If  you want  to call  any of
+   * these you may need to "steal" it from there by dereferencing them
+   * as e.g. (@@ (guile-user) guile-bgy3d-module-init).
+   *
+   * Calling this will define bgy3d-* gsubrs:
    */
-  scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
-  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
-  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
-  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
-  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
-  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
-  scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
+  scm_c_define_gsubr ("guile-bgy3d-module-init", 0, 0, 0, guile_bgy3d_module_init);
 }
 
 static void inner_main (void *closure, int argc, char **argv)

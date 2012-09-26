@@ -1,15 +1,38 @@
-#!/users/alexei/darcs/bgy3d/bgy3d -s
-!#
-
-(set! %load-path (cons "/users/alexei/darcs/bgy3d/guile" %load-path))
+;;;
+;;; Scheme  interface  to  BGY3d  code.   Not to  pollute  the  global
+;;; namespace  we put bgy3d-*  functions into  this module.
+;;;
+(define-module (guile bgy3d)
+  #:export (new-main
+            old-main))
 
 (use-modules (srfi srfi-1)              ; list manipulation
              (ice-9 pretty-print))
 
+;;;
+;;; This name has to be defined on guile startup, see the C sources of
+;;; bgy3d_guile_init() in bgy3d-guile.c:
+;;;
+(define guile-bgy3d-module-init
+  (@@ (guile-user) guile-bgy3d-module-init))
+
+;;;
+;;; The list of the procedures defined by the next call includes:
+;;;
+;;;   bgy3d-run-solvent
+;;;   bgy3d-run-solute
+;;;
+;;; and posissibly more, depending on the compilation options.
+;;;
+(guile-bgy3d-module-init)
+
 ;;
 ;; FIXME: at the moment this function only emulates the minimum of the
 ;; functionality of the original  executable. The new functionality is
-;; in flux:
+;; in flux.
+;;
+;; Also note  that find-file assumes the %load-path  contains the repo
+;; directory in order to find "guile/solutes.scm".
 ;;
 (define (old-main argv)
  (cond
@@ -20,7 +43,7 @@
   ((member "--BGYM2Site" argv)
    (let ((h-cl   ; find entry with "hydrogen cloride" in car position:
           (assoc "hydrogen chloride"
-                 (slurp (find-file "solutes.scm"))))
+                 (slurp (find-file "guile/solutes.scm"))))
          (g1-files
           (list "g0.bin" "g1.bin")))
      (map bgy3d-vec-save
@@ -200,7 +223,7 @@ computes the sum of all vector elements."
            (damp-start . 1.0)
            (lambda . 0.02)))
         (solutes                        ; all entries in the file
-         (list (list-ref (slurp (find-file "solutes.scm")) 4)))
+         (list (list-ref (slurp (find-file "guile/solutes.scm")) 4)))
         (g1-files
          (list "x0.bin" "x1.bin")))
     ;;
@@ -232,9 +255,3 @@ computes the sum of all vector elements."
                     ;; (pretty-print g1)
                     (map bgy3d-vec-destroy g1))))
               solutes)))                ; ... from this list
-
-;;;
-;;; Trying to  emulate behaviour  of old executable  unless we  find a
-;;; better interface:
-;;;
-(old-main (command-line))
