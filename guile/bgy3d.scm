@@ -223,7 +223,8 @@ computes the sum of all vector elements."
            (damp-start . 1.0)
            (lambda . 0.02)))
         (solutes                        ; all entries in the file
-         (list (list-ref (slurp (find-file "guile/solutes.scm")) 4)))
+         (list (assoc "butanoic acid"   ; use the largest one
+                      (slurp (find-file "guile/solutes.scm")))))
         (g1-files
          (list "x0.bin" "x1.bin")))
     ;;
