@@ -53,6 +53,18 @@ static void field (DA da, const ProblemData *PD,
                    real fact,
                    real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v);
+
+/* This is  another type of  (elemental) callbacks that take  array of
+   coordinates and return an array of respective values: */
+static void gf_density (int m, const real x[m][3], real rho[m],
+                        int n, const Site S[n]); /* extra */
+
+/* Callback here  is that of  gf_density() closure over all  but three
+   leading arguments: */
+static void grid_map (DA da, const ProblemData *PD,
+                      void (*f)(int m, const real x[m][3], real fx[m]),
+                      Vec v);
+
 static void read_charge_density (DA da, const ProblemData *PD,
 				const char *filename, real fact, Vec v);
 
@@ -253,7 +265,24 @@ void bgy3d_solute_field (const State *BHD,
   else
     {
       /* 1. Put the solute density into Vec v. Due to the inter */
-      field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
+      if (0)
+        field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
+      else
+        {
+          /* This function computes the gaussian density of the solute
+             at an  array of  points. FIXME: nested  closure function,
+             GCC extension. */
+          void f (int m, const real x[m][3], real rho[m])
+          {
+            /* Bind solute description from the enclosing scope: */
+            gf_density (m, x, rho, n, solute);
+          }
+
+          /* Now  use f()  to  compute the  gaussian-density at  every
+             point of  the local  grid portion and  put that  into Vec
+             uc: */
+          grid_map (BHD->da, BHD->PD, f, uc);
+        }
     }
 
   /*
@@ -330,6 +359,60 @@ static void field (DA da, const ProblemData *PD,
   DAVecRestoreArray (da, v, &vec);
 }
 
+static void grid_map (DA da, const ProblemData *PD,
+                      void (*f)(int m, const real x[m][3], real fx[m]),
+                      Vec v)
+{
+  int i0, j0, k0;
+  int ni, nj, nk;
+
+  /* Get local portion of the grid */
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  /* MEMORY: huge arrays here: */
+  int m = ni * nj * nk;
+  real x[m][3], fx[m];
+
+  /* Get coordinates of the local grid portion: */
+  {
+    int ijk = 0;
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            /* Coordinates  (x, y,  z) <->  (i, j,  k).  FIXME:  do we
+               really assume that intervals for  x-, y- and z- are the
+               same? This basically means  the corner of the unit cell
+               is at (offset, offset, offset): */
+            x[ijk][0] = i * PD->h[0] + PD->interval[0];
+            x[ijk][1] = j * PD->h[1] + PD->interval[0];
+            x[ijk][2] = k * PD->h[2] + PD->interval[0];
+            ijk++;
+          }
+    assert (ijk == m);
+  }
+
+  /* Let the function f() compute  the field/density at our portion of
+     the grid. FIXME: cast here is to silence the const-warning: */
+  f (m, (const real (*)[3]) x, fx);
+
+  /* Copy contents of fx[] to the output vector: */
+  {
+    PetscScalar ***vec;
+    DAVecGetArray (da, v, &vec);
+    int ijk = 0;
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            vec[k][j][i] = fx[ijk];
+            ijk++;
+          }
+    assert (ijk == m);
+    DAVecRestoreArray (da, v, &vec);
+  }
+}
+
 /*
  * Interaction of a charged LJ site (epsilon, sigma, charge) at (x, y,
  * z) with the solute S:
@@ -371,6 +454,9 @@ static real ljc (const Site *A, int n, const Site S[n])
  * Each gaussian is evaluated as:
  *
  *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
+ *
+ * Compare to the  function gf_density() below that does  the same for
+ * many points at a time.
  */
 static real rho (const Site *A, int n, const Site S[n])
 {
@@ -397,6 +483,41 @@ static real rho (const Site *A, int n, const Site S[n])
 
   return field;
 }
+
+/*
+ * Gaussian functions (gf) represent  each solute site charge, compute
+ * the  total  charge density  at  every  point  x[]. Compare  to  the
+ * function rho() above that does the same for one point at a time:
+ */
+static void gf_density (int m, const real x[m][3], /* coordinates */
+                        real rho[m],            /* output densities */
+                        int n, const Site S[n]) /* solute description */
+{
+  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
+     a property of the (solute) site  in the same way as the charge of
+     the site. */
+  real prefac = pow(G / sqrt(M_PI), 3.0);
+
+  for (int i = 0; i < m; i++)
+    {
+      /* Sum Gaussian contributions from all solute sites: */
+      real ro = 0.0;
+      for (int j = 0; j < n; j++)
+        {
+
+          /* Square of the distance from a grid point to this site: */
+          real r2 = (SQR(x[i][0] - S[j].x[0]) +
+                     SQR(x[i][1] - S[j].x[1]) +
+                     SQR(x[i][2] - S[j].x[2]));
+
+          /* Gaussian  distribution, note  that G  is not  a  width, but
+             rather an inverse of it: */
+          ro += prefac * S[j].charge * exp(- G * G * r2);
+        }
+      rho[i] = ro;
+    }
+}
+
 
 /*
   Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
