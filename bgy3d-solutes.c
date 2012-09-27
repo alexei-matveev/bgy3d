@@ -265,7 +265,7 @@ void bgy3d_solute_field (const State *BHD,
   else
     {
       /* 1. Put the solute density into Vec v. Due to the inter */
-      if (0)
+      if (1)
         field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
       else
         {
@@ -448,8 +448,8 @@ static real ljc (const Site *A, int n, const Site S[n])
 
 /*
  * Charge  density  of  the solute  S  at  (x,  y, z).   Solvent  site
- * parameters (epsilon, sigma, charge) unused only the location of the
- * solvent site A->x is used here.
+ * parameters (epsilon,  sigma, charge) are unused,  only the location
+ * of the solvent site A->x is used here.
  *
  * Each gaussian is evaluated as:
  *
@@ -460,28 +460,9 @@ static real ljc (const Site *A, int n, const Site S[n])
  */
 static real rho (const Site *A, int n, const Site S[n])
 {
-  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
-     a property of the (solute) site  in the same way as the charge of
-     the site. */
-  real prefac = pow(G / sqrt(M_PI), 3.0);
-
-  /* Sum Gaussian contributions from all solute sites: */
-  real field = 0.0;
-
-  for (int site = 0; site < n; site++)
-    {
-
-      /* Square of the distance from a grid point to this site: */
-      real r2 = (SQR(A->x[0] - S[site].x[0]) +
-                 SQR(A->x[1] - S[site].x[1]) +
-                 SQR(A->x[2] - S[site].x[2]));
-
-      /* Gaussian  distribution, note  that G  is not  a  width, but
-         rather an inverse of it: */
-      field += prefac * S[site].charge * exp(- G * G * r2);
-    }
-
-  return field;
+  real ro[1];
+  gf_density (1, &A->x, ro, n, S);
+  return ro[0];
 }
 
 /*
@@ -510,7 +491,7 @@ static void gf_density (int m, const real x[m][3], /* coordinates */
                      SQR(x[i][1] - S[j].x[1]) +
                      SQR(x[i][2] - S[j].x[2]));
 
-          /* Gaussian  distribution, note  that G  is not  a  width, but
+          /* Gaussian distribution,  note that G  is not a  width, but
              rather an inverse of it: */
           ro += prefac * S[j].charge * exp(- G * G * r2);
         }
