@@ -101,11 +101,14 @@
 ;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
 ;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 ;;
+(define (make-solute name sites)
+  (list name sites))
+
 (define (solute-name solute) (first solute))
 (define (solute-sites solute) (second solute))
 
-(define (make-solute name sites)
-  (list name sites))
+(define (make-site name position sigma epsilon charge)
+  (list name position sigma epsilon charge))
 
 (define (site-name site) (first site))
 (define (site-position site) (second site))
@@ -116,9 +119,6 @@
 (define (site-x site) (first (site-position site)))
 (define (site-y site) (second (site-position site)))
 (define (site-z site) (third (site-position site)))
-
-(define (make-site name position sigma epsilon charge)
-  (list name position sigma epsilon charge))
 
 (define (print-xyz solute)
   (let ((sites (solute-sites solute)))
