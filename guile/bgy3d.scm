@@ -51,16 +51,16 @@
   (or (assoc name (slurp (find-file "guile/solutes.scm")))
       (error "No such solute: " name)))
 
-;;
-;; Find a file in the search patch, or die:
-;;
+;;;
+;;; Find a file in the search patch, or die:
+;;;
 (define (find-file file)
   (or (search-path %load-path file)
       (error "Not found:" file)))
 
-;;
-;; Slurps the whole file into a list:
-;;
+;;;
+;;; Slurps the whole file into a list:
+;;;
 (define (slurp file)
   (with-input-from-file file
     (lambda ()
@@ -73,15 +73,15 @@
 ;; (write (slurp "guile/solutes.scm"))
 ;; (newline)
 
-;;
-;; Solute parameters are currently represented by a name and a list of
-;; sites:
-;;
-;; ("water"
-;;  (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
-;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
-;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
-;;
+;;;
+;;; Solute parameters are  currently represented by a name  and a list
+;;; of sites:
+;;;
+;;; ("water"
+;;;  (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
+;;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
+;;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
+;;;
 (define (make-solute name sites)
   (list name sites))
 
@@ -135,10 +135,10 @@
                  (map update-one
                       (solute-sites solute)))))
 
-;;
-;; Will   not  work   with  distributed   vectors.   The   problem  is
-;; bgy3d-vec-ref (VecGetValues) does not either.
-;;
+;;;
+;;; Will  not   work  with   distributed  vectors.   The   problem  is
+;;; bgy3d-vec-ref (VecGetValues) does not either.
+;;;
 (define (vec-fold kons knil vec)
   "A (left) fold of a (Petsc) vector.  E.g. (vec-fold + 0.0 vec)
 computes the sum of all vector elements."
@@ -151,24 +151,24 @@ computes the sum of all vector elements."
                 (+ 1 i))
           knil))))
 
-;;
-;; BGY3d  code operates  in angstroms,  QM codes  use atomic  units by
-;; convention:
-;;
+;;;
+;;; BGY3d code  operates in  angstroms, QM codes  use atomic  units by
+;;; convention:
+;;;
 (define (bohr->angstrom x) (* x 0.52917706))
 (define (angstrom->bohr x) (/ x 0.52917706))
 
-;;
-;; Brain-dead implementation of cubic root:
-;;
+;;;
+;;; Brain-dead implementation of cubic root:
+;;;
 (define (cubic-root n)
   (let loop ((x 0))
     (if (< n (* x x x))
         (- x 1)
         (loop (+ 1 x)))))
-;;
-;; This writes a GAMESS-UK punch file to the current output port:
-;;
+;;;
+;;; This writes a GAMESS-UK punch file to the current output port:
+;;;
 (define (write-punch-file solute vecs settings)
   (define (header alist)
     (for-each (lambda (pair)
