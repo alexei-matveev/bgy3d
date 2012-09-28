@@ -43,32 +43,6 @@
     (zpad . 10.0)                       ; ??
     (damp-start . 1.0)                  ; scaling factor?
     (lambda . 0.02)))                   ; not the scheme lambda
-;;
-;; FIXME: at the moment this function only emulates the minimum of the
-;; functionality of the original  executable. The new functionality is
-;; in flux.
-;;
-;; Also note  that find-file assumes the %load-path  contains the repo
-;; directory in order to find "guile/solutes.scm".
-;;
-(define (old-main argv)
- (cond
-  ;;
-  ((member "--BGY2Site" argv)
-   (bgy3d-run-solvent '()))             ; Use defaults and Petsc env
-  ;;
-  ((member "--BGYM2Site" argv)
-   (let ((h-cl   ; find entry with "hydrogen cloride" in car position:
-          (assoc "hydrogen chloride"
-                 (slurp (find-file "guile/solutes.scm"))))
-         (g1-files
-          (list "g0.bin" "g1.bin")))
-     (map bgy3d-vec-save
-          g1-files
-          (bgy3d-run-solute h-cl '())))) ; Use defaults and Petsc env
-  ;;
-  (else
-   (new-main argv))))
 
 ;;;
 ;;; Find a solute in a database or die:
@@ -292,6 +266,30 @@ computes the sum of all vector elements."
       ;; Dont forget to destroy them after use:
       ;;
       (map bgy3d-vec-destroy g1))))
+
+;;;
+;;; FIXME: at  the moment this  function only emulates the  minimum of
+;;; the   functionality   of   the   original  executable.   The   new
+;;; functionality is in flux.
+;;;
+;;; Also note that find-file  assumes the %load-path contains the repo
+;;; directory in order to find "guile/solutes.scm".
+;;;
+(define (old-main argv)
+ (cond
+  ;;
+  ((member "--BGY2Site" argv)
+   (bgy3d-run-solvent '()))             ; Use defaults and Petsc env
+  ;;
+  ((member "--BGYM2Site" argv)
+   (let ((h-cl (find-solute "hydrogen chloride"))
+         (g1-files (list "g0.bin" "g1.bin")))
+     (map bgy3d-vec-save
+          g1-files
+          (bgy3d-run-solute h-cl '())))) ; Use defaults and Petsc env
+  ;;
+  (else
+   (new-main argv))))
 
 ;;;
 ;;; Ignores command line argumens. Petsc environment respects them:
