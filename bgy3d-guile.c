@@ -190,8 +190,10 @@ static SCM guile_run_solute (SCM solute, SCM settings)
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
   /* This  takes part  of the  input  from the  disk, returns  solvent
-     distribution in Vec g[] (dont forget to destroy them): */
-  bgy3d_solve_with_solute (&PD, n, sites, g);
+     distribution in Vec  g[] (dont forget to destroy  them).  Here no
+     additional  charge distribution  (yet),  so supply  NULL for  the
+     function pointer: */
+  bgy3d_solve_with_solute (&PD, n, sites, NULL, g);
 
   free (name);
   free (sites);

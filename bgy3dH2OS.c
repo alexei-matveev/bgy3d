@@ -1007,6 +1007,7 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
  */
 void bgy3d_solve_with_solute (const ProblemData *PD,
                               int n, const Site solute[n],
+                              void (*density)(int k, const real x[k][3], real rho[k]),
                               Vec g[2])
 {
   real norm;
@@ -1227,7 +1228,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                           2, solvent,
                           g0, uc, /* intent(out) */
                           n, solute,
-                          NULL, /* void (*density)(...) */
+                          density, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* Historically short-range  potential is scaled  by the inverse
@@ -1483,8 +1484,9 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", name);
 
   /* This does the  real work. Vec g[2] is  intent(out) in all senses,
-     dont forget to destroy them: */
-  bgy3d_solve_with_solute (PD, n, sites, g);
+     dont  forget   to  destroy   them.  Here  no   additional  charge
+     distribution, so supply NULL for the function pointer: */
+  bgy3d_solve_with_solute (PD, n, sites, NULL, g);
 
   /* Save final distribution, use binary format: */
   bgy3d_save_vec ("g0.bin", g[0]); /* gH */
