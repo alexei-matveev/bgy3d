@@ -198,8 +198,8 @@ computes the sum of all vector elements."
   ;;
   ;; Description of the bonds:
   ;;
-  (header '((block . connectivity) (records . 1)))
-  (format #t "1 2\n")                   ; FIXME: real ones
+  (header '((block . connectivity) (records . 0)))
+  ;; (format #t "1 2\n")                   ; FIXME: real ones
   ;;
   ;; Grid data:
   ;;
