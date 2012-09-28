@@ -4,7 +4,9 @@
 ;;;
 (define-module (guile bgy3d)
   #:export (new-main
-            old-main))
+            old-main
+            bgy3d-run-solvent
+            bgy3d-run-solute))
 
 (use-modules (srfi srfi-1)              ; list manipulation
              (ice-9 pretty-print))
