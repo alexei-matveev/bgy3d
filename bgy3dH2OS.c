@@ -1227,6 +1227,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                           2, solvent,
                           g0, uc, /* intent(out) */
                           n, solute,
+                          NULL, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
       /* Historically short-range  potential is scaled  by the inverse
@@ -1632,6 +1633,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
                             2, solvent,
                             BHD.g_ini, uc, /* intent(out) */
                             n, sites,
+                            NULL, /* void (*density)(...) */
                             (damp > 0.0 ? damp : 0.0), damp_LJ);
       }
 

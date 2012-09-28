@@ -184,12 +184,18 @@ void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name
  * and O in that order  with short-range, VM_LJ + VM_coulomb_short and
  * uc  with long range  potential VM_coulomb_long  (not scaled  by the
  * charges of the solvent sites).
+ *
+ * The function  pointer density() passed  to bgy3d_solute_field(), if
+ * not NULL,  may be used  to compute the distributed  charge density,
+ * e.g. originating from electrons.  FIXME: be more specific about the
+ * sign, is it a charge density or the electron density?
  */
 
 void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m == 2 */
                          Vec us[m], Vec uc, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
+                         void (*density)(int k, const real x[k][3], real rho[k]),
                          real damp, real damp_LJ)
 {
   PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
@@ -243,35 +249,34 @@ void bgy3d_solute_field (const State *BHD,
 
   /*
    * Compute the charge density  of the solute.  The callback function
-   * rho() sums charge distribution for  each solute site and does not
-   * use (epsilon,  sigma, charge) parameters of the  solvent site, so
-   * that  we  provide -1.0  for  them.   The  overall factor  is  1.0
-   * (idependent of the solvent charge):
+   * gf_density() sums  (net or nuclear) charge  distribution for each
+   * solute site. The overall factor for the Coulomb potential derived
+   * from this density is 1.0 (idependent of the solvent charge).
+   *
+   * Vec uc  will first hold the  solute charge density  and later its
+   * Coulomb field.
+   *
+   * 1.  Put  the  solute  charge  density  (positive  core,  negative
+   * electrons) into Vec uc:
    */
 
-  Site point = {"x", {0.0, 0.0, 0.0}, -1.0, -1.0, -1.0};
+  char filename[260];           /* electron density file */
 
-  /* Vec uc  will first hold the  solute charge density  and later its
-     Coulomb field. */
-
-  /* electron density file */
-  size_t MAX_LEN = 260;
-  char filename[MAX_LEN];
-
-  if (bgy3d_getopt_string("--load-charge", filename, MAX_LEN))
+  if (bgy3d_getopt_string("--load-charge", filename, sizeof (filename)))
     {
-      read_charge_density(BHD->da, BHD->PD, filename, 1.0, uc);
+      read_charge_density (BHD->da, BHD->PD, filename, 1.0, uc);
     }
   else
     {
-      /* 1. Put the solute density into Vec v. Due to the inter */
-      if (1)
-        field (BHD->da, BHD->PD, point, n, solute, 1.0, rho, uc);
+      if (density)
+        {
+          assert (0);           /* not implemented yet */
+        }
       else
         {
           /* This function computes the gaussian density of the solute
-             at an  array of  points. FIXME: nested  closure function,
-             GCC extension. */
+             at an  array of points.  FIXME:  nested closure function,
+             GCC extension: */
           void f (int m, const real x[m][3], real rho[m])
           {
             /* Bind solute description from the enclosing scope: */

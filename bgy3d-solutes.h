@@ -11,10 +11,12 @@ typedef struct Site {
 /* Get solute sites and name by index: */
 void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name);
 
-/* Fill  intent(out) us[]  and ul[]  fields with  the solute  field on
-   every solvent site. The rest is intent(in). */
+/* Fill intent(out) us[] and uc  fields with the solute field on every
+   solvent site. The rest is intent(in). */
 void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m == 2 */
                          Vec us[m], Vec uc, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
+                         void (*density)(int k, const real x[k][3], real rho[k]),
                          real damp, real damp_LJ);
+
