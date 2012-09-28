@@ -70,6 +70,13 @@
   (else
    (new-main argv))))
 
+;;;
+;;; Find a solute in a database or die:
+;;;
+(define (find-solute name)
+  (or (assoc name (slurp (find-file "guile/solutes.scm")))
+      (error "No such solute: " name)))
+
 ;;
 ;; Find a file in the search patch, or die:
 ;;
@@ -136,19 +143,18 @@
 ;; (exit 0)
 
 (define (update-sites solute)
-  (let* ((solutes
-          (slurp (find-file "guile/solutes.scm")))
-         (table                     ; fake solute with site-parameters
-          (second (assoc "bgy3d" solutes)))
-         (update-one (lambda (site)
-                       ;; (pretty-print site)
-                       (let* ((name (site-name site))
-                              (table-site (assoc name table)))
-                         (make-site name ; original, same as in table
-                                    (site-position site)    ; original
-                                    (site-sigma table-site) ; from table
-                                    (site-epsilon table-site) ; from table
-                                    (site-charge table-site)))))) ; from table
+  (let* ((table                     ; fake solute with site-parameters
+          (solute-sites (find-solute "bgy3d")))
+         (update-one
+          (lambda (site)
+            ;; (pretty-print site)
+            (let* ((name (site-name site))
+                   (table-site (assoc name table)))
+              (make-site name                          ; original
+                         (site-position site)          ; original
+                         (site-sigma table-site)       ; from table
+                         (site-epsilon table-site)     ; from table
+                         (site-charge table-site)))))) ; from table
     ;; (pretty-print solutes)
     ;; (pretty-print table)
     (make-solute (solute-name solute)
@@ -292,11 +298,8 @@ computes the sum of all vector elements."
 ;;;
 (define (new-main argv)
   ;; (pretty-print argv)
-  (let* ((solutes (slurp (find-file "guile/solutes.scm")))
-         (run (lambda (name)
-                (let ((solute (assoc name solutes)))
-                  (if solute
-                      (apply bgy3d-run solute)
-                      (error "no such solute: " name))))))
+  (let* ((run (lambda (name)
+                (apply bgy3d-run (find-solute name)))))
     (map run (cdr argv))))
+
 
