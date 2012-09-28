@@ -135,6 +135,26 @@
 ;; (for-each print-xyz (slurp (find-file "solutes.scm")))
 ;; (exit 0)
 
+(define (update-sites solute)
+  (let* ((solutes
+          (slurp (find-file "guile/solutes.scm")))
+         (table                     ; fake solute with site-parameters
+          (second (assoc "bgy3d" solutes)))
+         (update-one (lambda (site)
+                       ;; (pretty-print site)
+                       (let* ((name (site-name site))
+                              (table-site (assoc name table)))
+                         (make-site name ; original, same as in table
+                                    (site-position site)    ; original
+                                    (site-sigma table-site) ; from table
+                                    (site-epsilon table-site) ; from table
+                                    (site-charge table-site)))))) ; from table
+    ;; (pretty-print solutes)
+    ;; (pretty-print table)
+    (make-solute (solute-name solute)
+                 (map update-one
+                      (solute-sites solute)))))
+
 ;;
 ;; Will   not  work   with  distributed   vectors.   The   problem  is
 ;; bgy3d-vec-ref (VecGetValues) does not either.
@@ -242,6 +262,10 @@ computes the sum of all vector elements."
   "To be called from QM code."
   (let ((settings bgy3d-settings)
         (solute args))                  ; FIXME!
+    (if (equal? (solute-name solute) "bgy3d") ; only when called by PG
+        (set! solute (update-sites solute))) ; update force-field params
+    (pretty-print solute)
+    (force-output)
     ;;
     ;; At the moment  the function bgy3d-run-solvent echos settings as
     ;; is, the output is written to disk instead:
@@ -267,6 +291,12 @@ computes the sum of all vector elements."
 ;;; Ignores command line argumens. Petsc environment respects them:
 ;;;
 (define (new-main argv)
-  (let ((solute (assoc "butanoic acid"  ; use the largest one
-                       (slurp (find-file "guile/solutes.scm")))))
-    (apply bgy3d-run solute)))
+  ;; (pretty-print argv)
+  (let* ((solutes (slurp (find-file "guile/solutes.scm")))
+         (run (lambda (name)
+                (let ((solute (assoc name solutes)))
+                  (if solute
+                      (apply bgy3d-run solute)
+                      (error "no such solute: " name))))))
+    (map run (cdr argv))))
+
