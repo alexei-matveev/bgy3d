@@ -6,7 +6,8 @@
   #:export (new-main
             old-main
             bgy3d-run-solvent
-            bgy3d-run-solute))
+            bgy3d-run-solute
+            bgy3d-run))
 
 (use-modules (srfi srfi-1)              ; list manipulation
              (ice-9 pretty-print))
@@ -28,6 +29,20 @@
 ;;;
 (guile-bgy3d-module-init)
 
+;;;
+;;; Settings  are  handled  as  an  association list,  these  are  the
+;;; settings used in regression tests:
+;;;
+(define bgy3d-settings
+  '((N . 32)                            ; grid dimension
+    (rho . 0.018)                       ; solvent density
+    (beta . 1.1989)                     ; inverse temperature
+    (norm-tol . 1.0e-2)                 ; convergence threshold
+    (max-iter . 200)                    ; max number of iterations
+    (L . 10.0)                          ; [-L, L] gives the box size
+    (zpad . 10.0)                       ; ??
+    (damp-start . 1.0)                  ; scaling factor?
+    (lambda . 0.02)))                   ; not the scheme lambda
 ;;
 ;; FIXME: at the moment this function only emulates the minimum of the
 ;; functionality of the original  executable. The new functionality is
@@ -209,52 +224,38 @@ computes the sum of all vector elements."
           (loop (cdr vecs)
                 (+ 1 vec-id))))))
 
+;;;
+;;; This hook is called from PG:
+;;;
+(define (bgy3d-run . args)
+  "To be called from QM code."
+  (let ((settings bgy3d-settings)
+        (solute args))                  ; FIXME!
+    ;;
+    ;; At the moment  the function bgy3d-run-solvent echos settings as
+    ;; is, the output is written to disk instead:
+    ;;
+    (bgy3d-run-solvent settings)        ; writes g??.bin files to disk
+    ;;
+    ;; The function bgy3d-run-solute allocates and returns two Petsc
+    ;; Vecs in a list, it is the callers responsibility to destroy
+    ;; them:
+    ;;
+    (let ((g1 (bgy3d-run-solute solute settings))) ; reads g??.bin
+      ;;
+      ;; Use g1 vectors to produce a *.pun file for visualization:
+      ;;
+      (with-output-to-file "plot.pun"
+        (lambda () (write-punch-file solute g1 settings)))
+      ;;
+      ;; Dont forget to destroy them after use:
+      ;;
+      (map bgy3d-vec-destroy g1))))
 
 ;;;
 ;;; Ignores command line argumens. Petsc environment respects them:
 ;;;
 (define (new-main argv)
-  (let ((settings       ; Settings are handled as an association list:
-         '((N . 32)
-           (rho . 0.018)
-           (beta . 1.1989)
-           (norm-tol . 1.0e-2)
-           (max-iter . 200)
-           (L . 10.0)
-           (zpad . 10.0)
-           (damp-start . 1.0)
-           (lambda . 0.02)))
-        (solutes                        ; all entries in the file
-         (list (assoc "butanoic acid"   ; use the largest one
-                      (slurp (find-file "guile/solutes.scm")))))
-        (g1-files
-         (list "x0.bin" "x1.bin")))
-    ;;
-    ;; At the moment  the function bgy3d-run-solvent echos settings as
-    ;; is, the output is written to disk instead:
-    ;;
-    ;; (pretty-print solutes)
-    ;; (display "Processing pure solvent. Settings:\n")
-    ;; (pretty-print settings)
-    (bgy3d-run-solvent settings)
-    (for-each (lambda (solute)          ; process each solute ...
-                ;; (display "Processing solute description:\n")
-                ;; (pretty-print solute)
-                ;; (print-xyz solute)
-                ;;
-                ;; The function bgy3d-run-solute allocates and returns
-                ;; a (two) Petsc Vecs in a list, it is the callers
-                ;; responsibility to destroy them:
-                ;;
-                (let ((g1 (bgy3d-run-solute solute settings)))
-                  ;;
-                  ;; Do something usefull with g1, then destroy them:
-                  ;;
-                  (with-output-to-file "plot.pun"
-                    (lambda () (write-punch-file solute g1 settings)))
-                  (map bgy3d-vec-save g1-files g1)
-                  (map bgy3d-vec-destroy g1)
-                  (let ((g1 (map bgy3d-vec-load g1-files)))
-                    ;; (pretty-print g1)
-                    (map bgy3d-vec-destroy g1))))
-              solutes)))                ; ... from this list
+  (let ((solute (assoc "butanoic acid"  ; use the largest one
+                       (slurp (find-file "guile/solutes.scm")))))
+    (apply bgy3d-run solute)))
