@@ -58,3 +58,12 @@
   ("H" (-0.696 3.204 -0.89) 2.5 0.03 0.06)
   ("H" (-0.696 3.204 0.89) 2.5 0.03 0.06)
   ("H" (-2.236 3.19 0.0) 2.5 0.03 0.06)))
+
+;;;
+;;; This  is a fake  solute which  tabulates some  half-way meaningful
+;;; force field parameters for various sites:
+;;;
+("bgy3d"
+ (("H" (0.0 0.0 0.0) 2.735 0.03971 0.2)
+  ("Cl" (0 0.0 0.0) 3.353 0.51434 -0.2)
+  ("Pd" (0.0 0.0 0.0) 2.5 0.1 0.0)))    ; fake numbers
