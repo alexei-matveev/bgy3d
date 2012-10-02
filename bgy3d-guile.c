@@ -207,11 +207,22 @@ static SCM guile_run_solute (SCM solute, SCM settings)
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
+  /* This declares and  sets a function pointer. If  the settings dont
+     specify it, it should remain NULL: */
+  void (*qm_density) (int n, const real x[n][3], real rho[n]) = NULL;
+
+  /* Cast is to silence the warning here.  Note that we pass a pointer
+     to  a  funptr,  void  (**)(),  as the  function  is  supposed  to
+     (eventually) set that funptr to something meaningful: */
+  alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
+
+  // printf ("qm-density=%p\n", qm_density); /* print funptr in hex */
+
   /* This  takes part  of the  input  from the  disk, returns  solvent
-     distribution in Vec  g[] (dont forget to destroy  them).  Here no
-     additional  charge distribution  (yet),  so supply  NULL for  the
-     function pointer: */
-  bgy3d_solve_with_solute (&PD, n, sites, NULL, g);
+     distribution in  Vec g[]  (dont forget to  destroy them).   If no
+     additional charge distribution is associated with the solute pass
+     NULL as the function pointer: */
+  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g);
 
   free (name);
   free (sites);
