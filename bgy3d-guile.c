@@ -299,12 +299,24 @@ static SCM guile_bgy3d_module_init (void)
 
 void bgy3d_guile_init (int argc, char **argv)
 {
+  /* The  code  above  assumes an  opaque  type  Vec  can be  cast  to
+     void*: */
   assert (sizeof (Vec) == sizeof (void*));
+
+  /* Depending on this preprocessor flag,  void* is cast either to 32-
+     or 64-bit integers. Make sure we use the right size: */
 #ifndef SIZEOF_VOID_PTR_EQ_4
   assert (sizeof (void*) == sizeof (uint64_t));
 #else
   assert (sizeof (void*) == sizeof (uint32_t));
 #endif
+
+  /* This is  not used anywhere so  far. Can we assume  that data- and
+     function pointers are of the same size? */
+  {
+    void (*fn)(void);           /* only for an assert */
+    assert (sizeof (fn) == sizeof (void*));
+  }
 
   /* MPI may  choose to rewrite the  command line, do  it early. Petsc
      does not rewrite argv.  Guile will not understand Petsc flags. */
