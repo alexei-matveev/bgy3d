@@ -12,13 +12,23 @@
 
 
 
-#ifndef SIZEOF_VOID_PTR_EQ_4 /* on 32 bit platforms set this CPP var. */
-# define scmx_ptr(x) scm_from_uint64 ((intptr_t) (x)) /* scm eXtension */
-# define void_ptr(x) ((void*) scm_to_uint64 (x))
+/* We  need  to apply  either  scm_from_uint32() or  scm_from_uint64()
+   depending on the size of intptr_t.  This would be a good use of C11
+   type generic macros.  SCMX stays  for SCM eXtension in order not to
+   confuse the  macros with those in  libguile.h. Here we  make use of
+   the macro defined by libguile.h for the size of intptr_t: */
+#if SCM_SIZEOF_INTPTR_T == 8
+# define scmx_from_intptr scm_from_uint64
+# define scmx_to_intptr scm_to_uint64
+#elif SCM_SIZEOF_INTPTR_T == 4
+# define scmx_from_intptr scm_from_uint32
+# define scmx_to_intptr scm_to_uint32
 #else
-# define scmx_ptr(x) scm_from_uint32 ((intptr_t) (x))
-# define void_ptr(x) ((void*) scm_to_uint32 (x))
+# error "unknown pointer size!"
 #endif
+
+#define scmx_ptr(x) scmx_from_intptr ((intptr_t) (x))
+#define void_ptr(x) ((void*) scmx_to_intptr (x))
 
 static char helptext[] = "BGY3d Guile.\n";
 
@@ -333,15 +343,16 @@ void bgy3d_guile_init (int argc, char **argv)
   assert (sizeof (Vec) == sizeof (void*));
 
   /* Depending on this preprocessor flag,  void* is cast either to 32-
-     or 64-bit integers. Make sure we use the right size: */
-#ifndef SIZEOF_VOID_PTR_EQ_4
+     or 64-bit integers.  Make sure we  use the right size. Would be a
+     good use for a static (compile time) assert: */
+#if SCM_SIZEOF_INTPTR_T == 8
   assert (sizeof (void*) == sizeof (uint64_t));
 #else
   assert (sizeof (void*) == sizeof (uint32_t));
 #endif
 
-  /* This is  not used anywhere so  far. Can we assume  that data- and
-     function pointers are of the same size? */
+  /* We assume that  data- and function pointers are  of the same size
+     when assigning a void* to void (*)() in alist_getopt_funptr(): */
   {
     void (*fn)(void);           /* only for an assert */
     assert (sizeof (fn) == sizeof (void*));
