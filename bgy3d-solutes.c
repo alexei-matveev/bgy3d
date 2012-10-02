@@ -268,26 +268,45 @@ void bgy3d_solute_field (const State *BHD,
     }
   else
     {
-      if (density)
-        {
-          assert (0);           /* not implemented yet */
-        }
-      else
-        {
-          /* This function computes the gaussian density of the solute
-             at an  array of points.  FIXME:  nested closure function,
-             GCC extension: */
-          void f (int m, const real x[m][3], real rho[m])
-          {
-            /* Bind solute description from the enclosing scope: */
-            gf_density (m, x, rho, n, solute);
-          }
+      /* This function computes the density  of the solute as a sum of
+         gaussian functions and  distributed (electron) charge density
+         at an  array of points.  FIXME: nested  closure function, GCC
+         extension: */
+      void f (int m, const real x[m][3], real rho[m])
+      {
+        /* Bind solute description  from the enclosing scope.  Compute
+           the  (positive)   charge  density  of  (gaussian-broadened)
+           cores: */
+        gf_density (m, x, rho, n, solute);
 
-          /* Now  use f()  to  compute the  gaussian-density at  every
-             point of  the local  grid portion and  put that  into Vec
-             uc: */
-          grid_map (BHD->da, BHD->PD, f, uc);
-        }
+        /* If not NULL, add charge density of electrons: */
+        if (density)
+          {
+            /* Electron density goes here: */
+            real rho1[m];       /* MEMORY: huge array here! */
+
+            /* This   computes   the   (unsigned)   electron   density
+               distributed in space by QM rules: */
+            density (m, x, rho1);
+
+            for (int i = 0; i < m; i++)
+              rho[i] -= rho1[i]; /* electrons are negative */
+          }
+      }
+
+      /* Use f()  to compute total core  & electron at  every point of
+         the local grid portion and put that into Vec uc: */
+      grid_map (BHD->da, BHD->PD, f, uc);
+    }
+
+  if (1)                        /* debug prints only */
+    {
+      PetscScalar sum;
+      real dV = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
+      VecSum (uc, &sum);
+      PetscPrintf (PETSC_COMM_WORLD,
+                   "integrated charge = %f (should be close to zero)\n",
+                   sum * dV);
     }
 
   /*
