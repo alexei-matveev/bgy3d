@@ -52,7 +52,9 @@
       (error "No such solute: " name)))
 
 ;;;
-;;; Find a file in the search patch, or die:
+;;; Find  a file in  the search  patch, or  die.  Note  that find-file
+;;; assumes  the %load-path contains  the repo  directory in  order to
+;;; find "guile/solutes.scm".
 ;;;
 (define (find-file file)
   (or (search-path %load-path file)
@@ -116,6 +118,12 @@
 ;; (for-each print-xyz (slurp (find-file "solutes.scm")))
 ;; (exit 0)
 
+;;;
+;;; Update site force field parameters by replacing them with the data
+;;; from a table. The name of the site serves as a key to lookup table
+;;; entries. The table is stored in guile/solutes.scm as a fake solute
+;;; with all possible sites listed once.
+;;;
 (define (update-sites solute)
   (let* ((table                     ; fake solute with site-parameters
           (solute-sites (find-solute "bgy3d")))
@@ -272,9 +280,6 @@ computes the sum of all vector elements."
 ;;; the   functionality   of   the   original  executable.   The   new
 ;;; functionality is in flux.
 ;;;
-;;; Also note that find-file  assumes the %load-path contains the repo
-;;; directory in order to find "guile/solutes.scm".
-;;;
 (define (old-main argv)
  (cond
   ;;
@@ -292,7 +297,8 @@ computes the sum of all vector elements."
    (new-main argv))))
 
 ;;;
-;;; Ignores command line argumens. Petsc environment respects them:
+;;; Interpretes each argument as the name of the solute and runs first
+;;; a pure solvent then a solute calculations:
 ;;;
 (define (new-main argv)
   ;; (pretty-print argv)
