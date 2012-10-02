@@ -456,10 +456,6 @@ static real ljc (const Site *A, int n, const Site S[n])
  * parameters (epsilon,  sigma, charge) are unused,  only the location
  * of the solvent site A->x is used here.
  *
- * Each gaussian is evaluated as:
- *
- *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
- *
  * Compare to the  function gf_density() below that does  the same for
  * many points at a time.
  */
@@ -473,7 +469,11 @@ static real rho (const Site *A, int n, const Site S[n])
 /*
  * Gaussian functions (gf) represent  each solute site charge, compute
  * the  total  charge density  at  every  point  x[]. Compare  to  the
- * function rho() above that does the same for one point at a time:
+ * function rho() above that does the same for one point at a time.
+ *
+ * Each gaussian is evaluated as:
+ *
+ *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
  */
 static void gf_density (int m, const real x[m][3], /* coordinates */
                         real rho[m],            /* output densities */
@@ -492,9 +492,9 @@ static void gf_density (int m, const real x[m][3], /* coordinates */
         {
 
           /* Square of the distance from a grid point to this site: */
-          real r2 = (SQR(x[i][0] - S[j].x[0]) +
-                     SQR(x[i][1] - S[j].x[1]) +
-                     SQR(x[i][2] - S[j].x[2]));
+          real r2 = SQR (x[i][0] - S[j].x[0]) +
+                    SQR (x[i][1] - S[j].x[1]) +
+                    SQR (x[i][2] - S[j].x[2]);
 
           /* Gaussian distribution,  note that G  is not a  width, but
              rather an inverse of it: */
