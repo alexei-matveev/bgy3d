@@ -23,9 +23,9 @@
 static char helptext[] = "BGY3d Guile.\n";
 
 
-/* Update  an  integer  with   the  entry  from  an  association  list
-   [intent(in)]  or leave it  unchanged if  there is  no corresponding
-   entry. */
+/* Update an integer with the  entry from an association list or leave
+   it  unchanged if  there is  no  corresponding entry.  Alist is  not
+   modified. */
 static bool alist_getopt_int (SCM alist, const char *key, int *val)
 {
   SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
@@ -39,9 +39,9 @@ static bool alist_getopt_int (SCM alist, const char *key, int *val)
 }
 
 
-/* Update  a real  number  with  the entry  from  an association  list
-   [intent(in)]  or leave it  unchanged if  there is  no corresponding
-   entry: */
+/* Update a  real number  with the entry  from an association  list or
+   leave it unchanged if there is no corresponding entry. Alist is not
+   modified. */
 static bool alist_getopt_real (SCM alist, const char *key, double *val)
 {
   SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
