@@ -281,20 +281,25 @@ computes the sum of all vector elements."
 ;;; functionality is in flux.
 ;;;
 (define (old-main argv)
- (cond
-  ;;
-  ((member "--BGY2Site" argv)
-   (bgy3d-run-solvent '()))             ; Use defaults and Petsc env
-  ;;
-  ((member "--BGYM2Site" argv)
-   (let ((h-cl (find-solute "hydrogen chloride"))
-         (g1-files (list "g0.bin" "g1.bin")))
-     (map bgy3d-vec-save
-          g1-files
-          (bgy3d-run-solute h-cl '())))) ; Use defaults and Petsc env
-  ;;
-  (else
-   (new-main argv))))
+  (cond
+   ;;
+   ;; Pure solvent:
+   ;;
+   ((member "--BGY2Site" argv)
+    (bgy3d-run-solvent '()))            ; Use defaults and Petsc env
+   ;;
+   ;; Solute with solvent:
+   ;;
+   ((member "--BGYM2Site" argv)
+    (let ((h-cl (find-solute "hydrogen chloride")))
+      (let ((g1 (bgy3d-run-solute h-cl '()))) ; Use defaults and Petsc env
+        (map bgy3d-vec-save (list "g0.bin" "g1.bin") g1)
+        (map bgy3d-vec-destroy g1))))   ; dont forget to destroy them
+   ;;
+   ;; Fall through to the new variant:
+   ;;
+   (else
+    (new-main argv))))
 
 ;;;
 ;;; Interpretes each argument as the name of the solute and runs first
