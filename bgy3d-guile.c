@@ -54,6 +54,24 @@ static bool alist_getopt_real (SCM alist, const char *key, double *val)
   return test;
 }
 
+/* Update a function  pointer with the entry from  an association list
+   or leave it unchanged if there is no corresponding entry: */
+static bool alist_getopt_funptr (SCM alist, /* intent(in) */
+                                 const char *key,
+                                 void (**val)(void))
+{
+  SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
+
+  bool test = scm_is_true (kv);
+
+  /* FIXME: potentially non-portable conversion of an integer to void*
+     and then to function pointer, void (*)(): */
+  if (test)
+    *val = void_ptr (scm_cdr (kv));
+
+  return test;
+}
+
 
 static ProblemData problem_data (SCM alist)
 {
