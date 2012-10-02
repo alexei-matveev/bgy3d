@@ -136,7 +136,7 @@
                          (site-position site)          ; original
                          (site-sigma table-site)       ; from table
                          (site-epsilon table-site)     ; from table
-                         (site-charge table-site)))))) ; from table
+                         (site-charge site))))))       ; original
     ;; (pretty-print solutes)
     ;; (pretty-print table)
     (make-solute (solute-name solute)
@@ -246,13 +246,24 @@ computes the sum of all vector elements."
 ;;;
 ;;; This hook is called from PG:
 ;;;
-(define (bgy3d-run . args)
+(define (bgy3d-run name sites . rest)
   "To be called from QM code."
   (let ((settings bgy3d-settings)
-        (solute args))                  ; FIXME!
-    (if (equal? (solute-name solute) "bgy3d") ; only when called by PG
+        (solute (list name sites))    ; incomplete solute descr
+        (funptr (if (null? rest)      ; integer function pointer
+                    0                 ; only present if called from PG
+                    (first rest))))
+    (if (equal? name "bgy3d")                ; only when called by PG
         (set! solute (update-sites solute))) ; update force-field params
+    ;;
+    ;; Extend settings by an  entry with the funciton pointer that can
+    ;; be used to compute additional solute charge density:
+    ;;
+    (set! settings (acons 'qm-density   ; key
+                          funptr        ; value
+                          settings))    ; alist
     (pretty-print solute)
+    (pretty-print settings)
     (force-output)
     ;;
     ;; At the moment  the function bgy3d-run-solvent echos settings as
