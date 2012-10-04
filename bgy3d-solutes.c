@@ -319,7 +319,7 @@ void bgy3d_solute_field (const State *BHD,
 
 /*
  * Calculate a  real field "f"  for the solvent site  characterized by
- * (epsilon, sigma,  charge) in the presence  of the solute  S with an
+ * (sigma,  epsilon, charge) in the presence  of the solute  S with an
  * overall factor "fact" at every point (x, y, z) of the local grid.
  *
  * The function f(x, y, z, eps, sig,  chg, S) can be ljc() or rho() as
@@ -439,7 +439,7 @@ static void grid_map (DA da, const ProblemData *PD,
 }
 
 /*
- * Interaction of a charged LJ site (epsilon, sigma, charge) at (x, y,
+ * Interaction of a charged LJ site (sigma, epsilon, charge) at (x, y,
  * z) with the solute S:
  */
 static real ljc (const Site *A, int n, const Site S[n])
