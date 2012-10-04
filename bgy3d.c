@@ -102,10 +102,6 @@ ProblemData bgy3d_problem_data (void)
     PD.zpad = 1000.0;
     bgy3d_getopt_real ("--zpad", &PD.zpad);
 
-    /* Solutes index, HCl by default: */
-    PD.solute = 0;
-    bgy3d_getopt_int ("--solute", &PD.solute);
-
     /* Parallel staff: */
     MPI_Comm_size(PETSC_COMM_WORLD, &PD.np);
     MPI_Comm_rank(PETSC_COMM_WORLD, &PD.id);

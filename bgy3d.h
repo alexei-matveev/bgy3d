@@ -63,8 +63,6 @@ typedef struct ProblemData
   int max_iter;                 /* Maximal number of iterations. */
   real norm_tol;                /* Convergence threshold. */
   real zpad;                    /* FIXME: ??? */
-  int solute;                   /* Solute description, for BGY3dM
-                                   only. */
 } ProblemData;
 
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
