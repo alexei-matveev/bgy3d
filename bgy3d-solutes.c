@@ -490,7 +490,7 @@ static real ljc (const Site *A, int n, const Site S[n])
  *
  * Each gaussian is evaluated as:
  *
- *   rho(r) = q * [ G / sqrt(pi)]^3 * exp[-G^2 * (r - x0)^2]
+ *   ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
  */
 static void gf_density (int m, const real x[m][3], /* coordinates */
                         real rho[m],            /* output densities */
