@@ -1376,16 +1376,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            */
           mycount++;
 
-          if (((iter - 1) % 10) &&
-              (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
-            {
-              upwards = 1;
-            }
+          if ((iter - 1) % 10 && (dgH_old < dg_norm[0] ||
+                                  dgO_old < dg_norm[1]))
+            upwards = 1;
           else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
                   (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
             {
-              a1 /= 2.;
-              if(a1 < a0)
+              a1 /= 2.0;
+              if (a1 < a0)
                 a1 = a0;
               mycount = 0;
             }
@@ -1396,17 +1394,16 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             {
               /* Scale the  coefficient "a1" up by a  factor, but make
                  sure it is not above 1.0. Reset mycount. */
-              if (a1 <= 0.5) {
+              if (a1 <= 0.5)
                 a1 *= 2.0;
-              }
-              else {
+              else
                 a1 = 1.0;
-              }
               mycount = 0;
             }
           /* otherwise leave "a1" and "mycount" unchanged */
 
-          PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
+          PetscPrintf (PETSC_COMM_WORLD, "count= %d  upwards= %d",
+                       mycount, upwards);
           dgH_old = dg_norm[0];
           dgO_old = dg_norm[1];
 
