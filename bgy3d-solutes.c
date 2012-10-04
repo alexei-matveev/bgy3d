@@ -175,10 +175,9 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites)
   // Check whether we have the solute name in solutes[]
   while (strcmp(name, solutes[i]->name))
   {
-    /* cannot find the solute name
-    FIXME: any better way? sizeof(solutes) / sizeof(Solute) doesn't work well */
-    assert (i <= 5);
     i += 1;
+    /* cannot find the solute name */
+    assert (i < sizeof(solutes) / sizeof(Solute*));
   }
 
   /* Code used to be verbose: */
