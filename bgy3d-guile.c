@@ -286,16 +286,35 @@ static SCM guile_vec_length (SCM vec)
   return scm_from_int (len);
 }
 
+/* Reduce buffer by summing respective entries on all workeres: */
+static void comm_allreduce (void *buf, int count, MPI_Datatype type)
+{
+  int err = MPI_Allreduce (MPI_IN_PLACE, buf, count, type, MPI_SUM,
+                           PETSC_COMM_WORLD);
+  assert (!err);
+}
 
+/* An inefficient way of getting just one value, vec[ix], even if that
+   value is not stored locally. Collective. */
 static SCM guile_vec_ref (SCM vec, SCM ix)
 {
-  real vals[1];
+  assert (sizeof(real) == sizeof(double)); /* See MPI_DOUBLE */
 
   Vec c_vec = void_ptr (vec);
+  int i = scm_to_int (ix);
 
-  int keys[1] = {scm_to_int (ix)};
+  PetscInt lo, hi;
+  VecGetOwnershipRange (c_vec, &lo, &hi);
 
-  VecGetValues (c_vec, 1, keys, vals);
+  PetscInt keys[1] = {i};
+  real vals[1];
+  if (lo <= i && i < hi)
+    VecGetValues (c_vec, 1, keys, vals); /* local */
+  else
+    vals[0] = 0.0;
+
+  /* Make result known on all workers: */
+  comm_allreduce (vals, 1, MPI_DOUBLE);
 
   return scm_from_double (vals[0]);
 }
