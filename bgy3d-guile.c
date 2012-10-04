@@ -114,7 +114,6 @@ static ProblemData problem_data (SCM alist)
     }
 
   alist_getopt_int (alist, "max-iter", &PD.max_iter);
-  alist_getopt_int (alist, "solute", &PD.solute);
 
   /* Preserve invariants or get rid of redundancies: */
   PD.N3 = PD.N[0] * PD.N[1] * PD.N[2];
