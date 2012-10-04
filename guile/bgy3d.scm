@@ -291,8 +291,11 @@ computes the sum of all vector elements."
     (set! settings (acons 'qm-density   ; key
                           funptr        ; value
                           settings))    ; alist
-    (pretty-print solute)
-    (pretty-print settings)
+    ;; Print on master only:
+    (if (zero? (bgy3d-rank))
+        (begin
+          (pretty-print solute)
+          (pretty-print settings)))
     (force-output)
     ;;
     ;; At the moment  the function bgy3d-run-solvent echos settings as
