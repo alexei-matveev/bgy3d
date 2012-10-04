@@ -35,14 +35,13 @@ typedef struct Solute {
 static void poisson (const State *BHD, Vec uc, Vec rho, real q);
 
 /*
- * These two functions  obey the same interface. They  are supposed to
- * get (1)  parameters of  the solvent site  such as its  location and
- * force field  parameters, and  (2) a description  of the  solute and
- * return a  real number such as  an interaction energy  or the charge
- * density:
+ * This function  obeys the callback interface assumed  in field(). It
+ * is supposed to  get (1) parameters of the solvent  site such as its
+ * location and force  field parameters, and (2) a  description of the
+ * solute and  return a real number  such as an  interaction energy or
+ * the charge density:
  */
 static real ljc (const Site *A, int n, const Site S[n]);
-static real rho (const Site *A, int n, const Site S[n]);
 
 /*
  * This function expects a callback obeying the above interface as one
@@ -468,21 +467,6 @@ static real ljc (const Site *A, int n, const Site S[n])
     }
 
   return field;
-}
-
-/*
- * Charge  density  of  the solute  S  at  (x,  y, z).   Solvent  site
- * parameters (epsilon,  sigma, charge) are unused,  only the location
- * of the solvent site A->x is used here.
- *
- * Compare to the  function gf_density() below that does  the same for
- * many points at a time.
- */
-static real rho (const Site *A, int n, const Site S[n])
-{
-  real ro[1];
-  gf_density (1, &A->x, ro, n, S);
-  return ro[0];
 }
 
 /*
