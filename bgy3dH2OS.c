@@ -1261,8 +1261,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       ComputeH2O_g (g[0], g0[0], dg[0]);
       ComputeH2O_g (g[1], g0[1], dg[1]);
 
-      real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
-                                            value is right.  */
+      real dg_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
+                                           value is right.  */
+
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
         {
@@ -1370,17 +1371,17 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            * coefficient  "a1"   depending  on  iteration   count  and
            * convergence.    Everytime  "mycount"   becomes   >20  the
            * coefficient "a1" is  changed. The compiler is complaining
-           * that "upwards, dgH_old, dgO_old maybe used uninitialized"
+           * that upwards  and dg_nomr_old[] maybe  used uninitialized
            * here. At the moment I  am not able to confirm/reject that
            * claim.
            */
           mycount++;
 
-          if ((iter - 1) % 10 && (dgH_old < dg_norm[0] ||
-                                  dgO_old < dg_norm[1]))
+          if ((iter - 1) % 10 && (dg_norm_old[0] < dg_norm[0] ||
+                                  dg_norm_old[1] < dg_norm[1]))
             upwards = 1;
           else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-                  (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
+                  (dg_norm_old[0] < dg_norm[0] || dg_norm_old[1] < dg_norm[1]))
             {
               a1 /= 2.0;
               if (a1 < a0)
@@ -1404,8 +1405,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           PetscPrintf (PETSC_COMM_WORLD, "count= %d  upwards= %d",
                        mycount, upwards);
-          dgH_old = dg_norm[0];
-          dgO_old = dg_norm[1];
+          dg_norm_old[0] = dg_norm[0];
+          dg_norm_old[1] = dg_norm[1];
 
           /*********************************/
 
