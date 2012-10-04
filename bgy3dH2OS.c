@@ -1623,7 +1623,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       {
         int n;                        /* number of solute sites */
         const Site *sites;            /* [n], array of sites */
-        const char *name;             /* human readable name */
 
         /* Get the solute from the tables: */
         bgy3d_solute_get ("Butanoic Acid", &n, &sites); /* Butanoic Acid */
