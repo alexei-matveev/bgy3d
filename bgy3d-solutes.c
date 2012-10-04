@@ -197,7 +197,9 @@ void bgy3d_solute_field (const State *BHD,
                          void (*density)(int k, const real x[k][3], real rho[k]),
                          real damp, real damp_LJ)
 {
-  PetscPrintf(PETSC_COMM_WORLD,"Recomputing solute data with damping factor %f (damp_LJ=%f)\n", damp, damp_LJ);
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Computing solute data with damping factors %f, %f\n",
+               damp, damp_LJ);
 
 
   /*
