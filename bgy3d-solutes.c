@@ -165,7 +165,7 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &ButanoicAcid,     /* 4 */
                                   &Hexane};          /* 5 */
 
-/* Get solute sites and name. Functions that do the real work
+/* Get solute  sites by solute name.  Functions that do  the real work
    operate on array of sites: */
 void bgy3d_solute_get (const char *name, int *n, const Site **sites)
 {
@@ -183,7 +183,7 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites)
   /* Could not find the solute name: */
   assert (i < len);
 
-  /* Get solute sites and name: */
+  /* Return solute sites and their count: */
   *n = solutes[i]->n;
   *sites = solutes[i]->sites;
 }
