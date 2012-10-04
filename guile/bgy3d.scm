@@ -175,7 +175,8 @@ computes the sum of all vector elements."
         (- x 1)
         (loop (+ 1 x)))))
 ;;;
-;;; This writes a GAMESS-UK punch file to the current output port:
+;;; This writes a GAMESS-UK punch file to the current output port. See
+;;; interfaces/filepunch.py in CCP1 GUI repo:
 ;;;
 (define (write-punch-file solute vecs settings)
   (define (header alist)
@@ -219,18 +220,38 @@ computes the sum of all vector elements."
                (n (cubic-root len))
                (L (or (assq-ref settings 'L) 10.0))
                (L (angstrom->bohr L))   ; punch file is in AU
-               (S (* L (/ (- n 1) n)))) ; FIXME: off-by-one?
+               (S (* L (/ (- n 2) n)))) ; off-by-one on a 2L interval
           (header '((block . data) (records . 0)))
           (header '((block . grid_title) (records . 1)))
           (format #t "Solvent site hole density ~a\n" vec-id)
+          ;;
+          ;; Only  the number  of points "n"  is being  interpreted by
+          ;; CCP1 GUI:
+          ;;
           (header '((block . grid_axes) (records . 3)))
-          (format #t "~a   0.000000 ~a 0 au xaxis\n" n (* 2 S))
-          (format #t "~a   0.000000 ~a 0 au yaxis\n" n (* 2 S))
-          (format #t "~a   0.000000 ~a 0 au zaxis\n" n (* 2 S))
+          (format #t "~a   0.000000 ~a 0 au xaxis\n" n (+ L S))
+          (format #t "~a   0.000000 ~a 0 au yaxis\n" n (+ L S))
+          (format #t "~a   0.000000 ~a 0 au zaxis\n" n (+ L S))
+          ;;
+          ;; The grid mapping block consists of six triples of floats:
+          ;;
+          ;;   O    A
+          ;;   .    B
+          ;;   .    C
+          ;;
+          ;; with  positions marked by dot apparently  ignored by CCP1
+          ;; GUI.  All four points,  O, A, B,  and C, correspond  to a
+          ;; grid point  of a regular grid at  four corners. Beware of
+          ;; off-by-one errors when  converting periodic grids to this
+          ;; representation:  if, say, the  left corner is at  -L then
+          ;; its  periodic  image  to  the  right  is  at +L  but  the
+          ;; rightmost point of the unique  grid portion is at S = L -
+          ;; h, with h = 2L/n:
+          ;;
           (header '((block . grid_mapping) (records . 3)))
-          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (+ S) (- S) (- S))
-          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (- S) (+ S) (- S))
-          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (- S) (- S) (+ S))
+          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (+ S) (- L) (- L))
+          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (- L) (+ S) (- L))
+          (format #t "~a ~a ~a  ~a ~a ~a\n" (- L) (- L) (- L) (- L) (- L) (+ S))
           ;;
           ;; Actual numeric data:
           ;;
