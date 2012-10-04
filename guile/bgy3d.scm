@@ -104,9 +104,10 @@
 (define (site-z site) (third (site-position site)))
 
 (define (print-xyz solute)
-  (let ((sites (solute-sites solute)))
+  (let ((name (solute-name solute))
+        (sites (solute-sites solute)))
     (format #t "~a\n" (length sites))
-    (format #t "# ~a\n" (solute-name solute))
+    (format #t "# ~a\n" name)
     (for-each (lambda (site)
                 (format #t "~a ~a ~a ~a\n"
                         (site-name site)
@@ -115,7 +116,7 @@
                         (site-z site)))
               sites)))
 
-;; (for-each print-xyz (slurp (find-file "solutes.scm")))
+;; (for-each print-xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
 ;;;
