@@ -169,9 +169,6 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
    operate on array of sites: */
 void bgy3d_solute_get (const char *name, int *n, const Site **sites)
 {
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
-
   /* Number of known solutes: */
   const size_t len = sizeof (solutes) / sizeof (*solutes);
 

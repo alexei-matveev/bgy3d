@@ -1465,7 +1465,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 }
 
 /* This one emulates historical solver interface: */
-Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
+Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
 {
   (void) g_ini;                 /* FIXME: interface obligation */
 
@@ -1476,6 +1476,9 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
   /* Solutes name, HCl by default: */
   bgy3d_getopt_string ("--solute", name, sizeof(name));
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
   /* Get the solute from the tables: */
   bgy3d_solute_get (name, &n, &sites);
