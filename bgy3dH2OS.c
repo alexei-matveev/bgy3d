@@ -1471,17 +1471,10 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
 
   int n;                        /* number of solute sites */
   const Site *sites;            /* [n], array of sites */
-  const char *name;             /* human readable name */
   Vec g[2];                     /* solution */
 
-  /* Solute index between 0 and 5 (inclusive): */
-  const int solute = PD->solute;
-
   /* Get the solute from the tables: */
-  bgy3d_solute_get (solute, &n, &sites, &name);
-
-  /* Code used to be verbose: */
-  PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", name);
+  bgy3d_solute_get (&n, &sites);
 
   /* This does the  real work. Vec g[2] is  intent(out) in all senses,
      dont  forget   to  destroy   them.  Here  no   additional  charge
@@ -1628,7 +1621,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         const char *name;             /* human readable name */
 
         /* Get the solute from the tables: */
-        bgy3d_solute_get (4, &n, &sites, &name); /* Butanoic Acid */
+        bgy3d_solute_get (&n, &sites); /* Butanoic Acid */
 
         /* This does the real work: */
         bgy3d_solute_field (&BHD,

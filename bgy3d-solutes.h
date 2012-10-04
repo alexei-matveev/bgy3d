@@ -8,8 +8,8 @@ typedef struct Site {
   real charge;               /* charge */
 } Site;
 
-/* Get solute sites and name by index: */
-void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name);
+/* Get solute sites and name by its name: */
+void bgy3d_solute_get (int *n, const Site **sites);
 
 /* Fill intent(out) us[] and uc  fields with the solute field on every
    solvent site. The rest is intent(in). */

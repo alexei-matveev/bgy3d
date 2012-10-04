@@ -165,15 +165,33 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &ButanoicAcid,     /* 4 */
                                   &Hexane};          /* 5 */
 
-/* Get solute sites and name by index. Functions that do the real work
+/* Get solute sites and name. Functions that do the real work
    operate on array of sites: */
-void bgy3d_solute_get (int solute, int *n, const Site **sites, const char **name)
+void bgy3d_solute_get (int *n, const Site **sites)
 {
-  assert (solute >= 0 && solute <= 5);
+  const char name[200];
 
-  *n = solutes[solute]->n;
-  *sites = solutes[solute]->sites;
-  *name = solutes[solute]->name;
+  /* Solutes name, HCl by default: */
+  strcpy (name, "Hydrogen chloride");
+  bgy3d_getopt_string ("--solute", name, sizeof(name));
+
+  int i = 0;
+
+  // Check whether we have the solute name in solutes[]
+  while (strcmp(name, solutes[i]->name))
+  {
+    /* cannot find the solute name
+    FIXME: any better way? sizeof(solutes) / sizeof(Solute) doesn't work well */
+    assert (i <= 5);
+    i += 1;
+  }
+
+  /* Code used to be verbose: */
+  PetscPrintf(PETSC_COMM_WORLD,"Solute is %s.\n", name);
+
+  // Get solute sites and name
+  *n = solutes[i]->n;
+  *sites = solutes[i]->sites;
 }
 
 /*
