@@ -286,6 +286,24 @@ static SCM guile_vec_length (SCM vec)
   return scm_from_int (len);
 }
 
+/* Return MPI runk in PETSC_COMM_WORLD: */
+static SCM guile_rank (void)
+{
+  int rank;
+  MPI_Comm_rank (PETSC_COMM_WORLD, &rank);
+  return scm_from_int (rank);
+}
+
+
+/* Return MPI size of PETSC_COMM_WORLD: */
+static SCM guile_size (void)
+{
+  int size;
+  MPI_Comm_size (PETSC_COMM_WORLD, &size);
+  return scm_from_int (size);
+}
+
+
 /* Reduce buffer by summing respective entries on all workeres: */
 static void comm_allreduce (void *buf, int count, MPI_Datatype type)
 {
@@ -350,6 +368,8 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
   scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
   scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
+  scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
+  scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
   scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
 
   return SCM_UNSPECIFIED;
