@@ -1023,7 +1023,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   State BHD = initialize_state (PD);
 
   if (r_HH > 0.0)
-      PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
+    PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -1065,7 +1065,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
      local portion of the grid and free after the loop. */
   fftw_complex *g_fft[2];
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+    {
       g_fft[i] = bgy3d_fft_malloc (BHD.da);
 
       DACreateGlobalVector (BHD.da, &dg[i]);
@@ -1073,7 +1074,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /* Here the storage for the output is allocated, the caller will
          have to destroy them: */
       DACreateGlobalVector (BHD.da, &g[i]);
-  }
+    }
 
   /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
      OH. */
@@ -1081,12 +1082,13 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   fftw_complex *ker_fft_L[2][2];
 
   for (int i = 0; i < 2; i++)
-      for (int j = 0; j <= i; j++) {
-          ker_fft_S[i][j] = bgy3d_fft_malloc (BHD.da);
-          ker_fft_S[j][i] = ker_fft_S[i][j];
+    for (int j = 0; j <= i; j++)
+      {
+        ker_fft_S[i][j] = bgy3d_fft_malloc (BHD.da);
+        ker_fft_S[j][i] = ker_fft_S[i][j];
 
-          ker_fft_L[i][j] = bgy3d_fft_malloc (BHD.da);
-          ker_fft_L[j][i] = ker_fft_L[i][j];
+        ker_fft_L[i][j] = bgy3d_fft_malloc (BHD.da);
+        ker_fft_L[j][i] = ker_fft_L[i][j];
       }
 
   /* There is no point to  transform each contribution computed in the
@@ -1107,20 +1109,23 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecSet(dg[0],0);
   VecSet(dg[1],0);
 
-  if (bgy3d_getopt_test ("--from-g2")) {
+  if (bgy3d_getopt_test ("--from-g2"))
+    {
       ComputedgFromg (dg[0], g0[0], BHD.g2[0][1]);
       ComputedgFromg (dg[1], g0[1], BHD.g2[1][1]);
-  }
+    }
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-H2O")) {
+  if (bgy3d_getopt_test ("--load-H2O"))
+    {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       dg[0] = bgy3d_load_vec ("dg0.bin"); /* dgH */
       dg[1] = bgy3d_load_vec ("dg1.bin"); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-  }
+    }
 
-  for (real damp = damp_start; damp <= 1; damp += 0.1) {
+  for (real damp = damp_start; damp <= 1; damp += 0.1)
+    {
 
       /*
         FIXME: I guess the logic with damping factors can be made more
@@ -1216,10 +1221,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /* FIXME: what is  the point to split the  kernel in two pieces?
          Redefine S := S + L and forget about L */
       for (int i = 0; i < 2; i++)
-          for (int j = 0; j <= i; j++) {
-              /* S := damp * L + damp_LJ * S */
-              bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
-          }
+        for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
+          bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
 
       /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
          above) and  uc with VM_Coulomb_long.  No other  fields of the
@@ -1261,7 +1264,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       real dgH_old = 0.0, dgO_old = 0.0; /* Not sure  if 0.0 as inital
                                             value is right.  */
       real a1 = a0;             /* loop-local variable */
-      for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++) {
+      for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
+        {
 
           real a;               /* Used only inside the loop. */
           if (!(iter % 10) && iter > 0)
@@ -1291,7 +1295,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                                     BHD.fft_scratch); /* work array */
 
           /* for H, O in that order ... */
-          for (int i = 0; i < 2; i++) {
+          for (int i = 0; i < 2; i++)
+            {
 
               /* ... sum over H, O  in that order. LJ, short- and long
                  range Coulomb,  and a  so called strange  addition is
@@ -1299,10 +1304,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                  accumulator: */
               bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
 
-              for (int j = 0; j < 2; j++) {
-                  /* This increments the accumulator: */
-                  apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
-              }
+              for (int j = 0; j < 2; j++) /* This increments the accumulator: */
+                apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
 
               /* Compute   IFFT   of   dg_acc_fft  for   the   current
                  site. Other contributions are added to the real space
@@ -1319,9 +1322,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                  Earlier   version,  Solve_NormalizationH2O_smallII(),
                  did FFT itself wasting one FFT per site: */
               if (i == 0)
-                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[1], t_vec);
+                bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[1], t_vec);
               else
-                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
+                bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
 
               /* Vec t_vec is intent(in) and work is intent(out): */
               Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
@@ -1343,7 +1346,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                *     norm = |dg_new - dg|
                */
               dg_norm[i] = mix (dg[i], dg_acc, a, work); /* last arg is a temp */
-          } /* over sites i */
+            } /* over sites i */
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
           PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dg_norm[1], a);
@@ -1351,7 +1354,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* Now that dg[] has bee computed one can safely update g[].
              Compute g := exp[-(g0 + dg)], with a sanity check: */
           for (int i = 0; i < 2; i++)
-              ComputeH2O_g (g[i], g0[i], dg[i]);
+            ComputeH2O_g (g[i], g0[i], dg[i]);
 
           /* Again a  strange case of  literal constants 0 and  1. Why
              not 1, 0? */
@@ -1374,7 +1377,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           mycount++;
 
           if (((iter - 1) % 10) &&
-             (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
+              (dgH_old < dg_norm[0] || dgO_old < dg_norm[1]))
             {
               upwards = 1;
             }
@@ -1389,19 +1392,18 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           else
             upwards = 0;
 
-          if (mycount > 20) {
-            /*
-             * Scale  the coefficient "a1"  up by  a factor,  but make
-             * sure it is not above 1.0. Reset mycount.
-             */
-            if (a1 <= 0.5) {
-              a1 *= 2.0;
+          if (mycount > 20)
+            {
+              /* Scale the  coefficient "a1" up by a  factor, but make
+                 sure it is not above 1.0. Reset mycount. */
+              if (a1 <= 0.5) {
+                a1 *= 2.0;
+              }
+              else {
+                a1 = 1.0;
+              }
+              mycount = 0;
             }
-            else {
-              a1 = 1.0;
-            }
-            mycount = 0;
-          }
           /* otherwise leave "a1" and "mycount" unchanged */
 
           PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
@@ -1415,7 +1417,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           if (dg_norm[0] <= norm_tol &&  dg_norm[1] <= norm_tol) //&& NORM_REG<5.0e-2)
             break;
 
-      } /* iter loop */
+        } /* iter loop */
       /*************************************/
 
       /* FIXME:  Debug  output  from  every iteration  with  different
@@ -1432,29 +1434,32 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /************************************/
 
       /* Save dg to binary file. FIXME: Why dg and not g? */
-      if (bgy3d_getopt_test ("--save-H2O")) {
+      if (bgy3d_getopt_test ("--save-H2O"))
+        {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dg0.bin", dg[0]); /* dgH */
           bgy3d_save_vec ("dg1.bin", dg[1]); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-      }
-  } /* damp loop */
+        }
+    } /* damp loop */
 
   /* Clean up and exit ... */
   bgy3d_fft_free (dg_acc_fft);
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++)
+    {
       /* Delegated to the caller:
          VecDestroy (g[i]); */
       VecDestroy (dg[i]);
 
       bgy3d_fft_free (g_fft[i]);
 
-      for (int j = 0; j <= i; j++) {
+      for (int j = 0; j <= i; j++)
+        {
           bgy3d_fft_free (ker_fft_S[i][j]);
           bgy3d_fft_free (ker_fft_L[i][j]);
-      }
-  }
+        }
+    }
 
   VecDestroy (dg_acc);
   VecDestroy (work);
