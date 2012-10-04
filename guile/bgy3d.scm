@@ -24,6 +24,13 @@
 ;;;
 ;;;   bgy3d-run-solvent
 ;;;   bgy3d-run-solute
+;;;   bgy3d-vec-destroy
+;;;   bgy3d-vec-save
+;;;   bgy3d-vec-load
+;;;   bgy3d-vec-length
+;;;   bgy3d-vec-ref
+;;;   bgy3d-rank
+;;;   bgy3d-size
 ;;;
 ;;; and posissibly more, depending on the compilation options.
 ;;;
