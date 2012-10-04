@@ -1472,9 +1472,14 @@ Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini)
   int n;                        /* number of solute sites */
   const Site *sites;            /* [n], array of sites */
   Vec g[2];                     /* solution */
+  char name[200];               /* solute name */
+
+  /* Solutes name, HCl by default: */
+  strcpy (name, "Hydrogen chloride");
+  bgy3d_getopt_string ("--solute", name, sizeof(name));
 
   /* Get the solute from the tables: */
-  bgy3d_solute_get (&n, &sites);
+  bgy3d_solute_get (name, &n, &sites);
 
   /* This does the  real work. Vec g[2] is  intent(out) in all senses,
      dont  forget   to  destroy   them.  Here  no   additional  charge
@@ -1621,7 +1626,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         const char *name;             /* human readable name */
 
         /* Get the solute from the tables: */
-        bgy3d_solute_get (&n, &sites); /* Butanoic Acid */
+        bgy3d_solute_get ("Butanoic Acid", &n, &sites); /* Butanoic Acid */
 
         /* This does the real work: */
         bgy3d_solute_field (&BHD,

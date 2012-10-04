@@ -167,13 +167,8 @@ static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
 
 /* Get solute sites and name. Functions that do the real work
    operate on array of sites: */
-void bgy3d_solute_get (int *n, const Site **sites)
+void bgy3d_solute_get (const char *name, int *n, const Site **sites)
 {
-  const char name[200];
-
-  /* Solutes name, HCl by default: */
-  strcpy (name, "Hydrogen chloride");
-  bgy3d_getopt_string ("--solute", name, sizeof(name));
 
   int i = 0;
 
