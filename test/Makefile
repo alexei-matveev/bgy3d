@@ -26,8 +26,13 @@ EXE ?= ../bgy3d
 # re-evaluate the diffs every time Make is executed:
 #
 diffs = \
-	HCl.g2.diff \
-	HCl.g1.diff
+	hydrogen_chloride.g2.diff \
+	hydrogen_chloride.g1.diff \
+	carbon_disulfide.g1.diff \
+	water.g1.diff \
+	methanol.g1.diff \
+	butanoic_acid.g1.diff \
+	hexane.g1.diff
 
 #
 # By default "make" all the diffs:
@@ -69,8 +74,8 @@ moments = python ../python/moments.py
 # solvent-solvent g2-distribution  is required for  g1-distribution of
 # the solvent in the presence of a solute:
 #
-%.g1: ../bgy3d %.g2
-	$(EXE) --BGYM2Site $(CMDFLAG)
+%.g1: ../bgy3d hydrogen_chloride.g2
+	$(EXE) --BGYM2Site $(CMDFLAG) --solute "$(subst _, ,$(*))"
 	$(moments) g0.bin g1.bin > $(@)
 
 %.g2: ../bgy3d
