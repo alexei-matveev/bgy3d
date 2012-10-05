@@ -19,6 +19,7 @@
 #ifdef WITH_COMPLEX
 #include <complex.h>
 #endif
+#include <float.h>              /* DBL_MAX */
 
 extern real NORM_REG;
 
@@ -993,6 +994,22 @@ static real mix (Vec dg, Vec dg_new, real a, Vec work)
     return norm / a;
 }
 
+/* Returns most  negative number for  zero sized arrays.   Will return
+   NaN if there is any in the array. */
+static double maxval (size_t n, const double x[n])
+{
+  double max = -DBL_MAX;
+  for (size_t i = 0; i < n && !isnan (max); i++)
+    {
+      /* If x[i] is  NaN comparison will fail and  max will become NaN
+         too:  */
+      max = x[i] < max ? max : x[i];
+      /* We  need  to  break  out  otherwise  in  the  next  iteration
+         comparison will  fail again and  max may be overwritten  by a
+         valid number ... */
+    }
+  return max;
+}
 
 
 /*
