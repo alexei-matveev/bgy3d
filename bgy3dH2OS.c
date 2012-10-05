@@ -1285,14 +1285,16 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
         {
-          /* Every tenth iter, but not first one: */
-          const bool tenth = !(iter % 10) && iter > 0;
+          /* Every tenth iteration, starting with iter == 0: */
+          const bool tenth = !(iter % 10);
 
-          /* "a  = a1" is  taken in  iteration 10,  20, etc.   "a1" is
+          /* "a = a1"  is taken in iteration 0, 10,  20, etc.  "a1" is
              modified during the loop.
 
-             "a =  a0" is taken  in iterations 0-9, 11-19,  etc.  "a0"
-             remains unchanged during the loop. */
+             "a =  a0" is taken  in iterations 1-9, 11-19,  etc.  "a0"
+             remains unchanged during the loop.
+
+             Note that in the first iteration a1 == a0. */
           const real a = tenth? a1 : a0;
 
           /* The  functions  Compute_H2O_interS/_C() use  preallocated
