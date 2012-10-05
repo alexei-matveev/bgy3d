@@ -1416,10 +1416,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             }
           /* otherwise leave "a1" and "mycount" unchanged */
 
-          dg_norm_old[0] = dg_norm[0];
-          dg_norm_old[1] = dg_norm[1];
-
-          /*********************************/
+          for (int i = 0; i < 2; i++)
+            dg_norm_old[i] = dg_norm[i];
 
           PetscPrintf (PETSC_COMM_WORLD, "iter %d: function norms: %e ",
                        iter + 1, NORM_REG);
