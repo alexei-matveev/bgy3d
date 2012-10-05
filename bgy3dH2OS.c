@@ -1035,12 +1035,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   int namecount = 0;
   char nameH[20], nameO[20];
 
-  PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
+  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
   State BHD = initialize_state (PD);
 
   if (r_HH > 0.0)
-    PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
+    PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -1135,10 +1135,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
     {
-      PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
+      PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
       dg[0] = bgy3d_load_vec ("dg0.bin"); /* dgH */
       dg[1] = bgy3d_load_vec ("dg1.bin"); /* dgO */
-      PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+      PetscPrintf (PETSC_COMM_WORLD, "done.\n");
     }
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
@@ -1256,7 +1256,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       for (int i = 0; i < 2; i++)
         VecScale (g0[i], beta);
 
-      PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
+      PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0[0], zpad-1, zpad, 0.0);
@@ -1295,7 +1295,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                                    11-19, etc.  "a0" remains unchanged
                                    during the loop. */
 
-          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter + 1, NORM_REG);
+          PetscPrintf (PETSC_COMM_WORLD, "iter %d: function norms: %e ",
+                       iter + 1, NORM_REG);
 
           /* The  functions  Compute_H2O_interS/_C() use  preallocated
              fftw_complex  arrays in  State BHD  for work  but  do not
@@ -1366,8 +1367,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               dg_norm[i] = mix (dg[i], dg_acc, a, work); /* last arg is a temp */
             } /* over sites i */
 
-          PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dg_norm[0], a);
-          PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dg_norm[1], a);
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e (a=%f) ", dg_norm[0], a);
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e (a=%f) ", dg_norm[1], a);
 
           /* Now that dg[] has bee computed one can safely update g[].
              Compute g := exp[-(g0 + dg)], with a sanity check: */
@@ -1377,7 +1378,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* Again a  strange case of  literal constants 0 and  1. Why
              not 1, 0? */
           norm = ComputeCharge(&BHD, g[0], g[1]);
-          PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
+          PetscPrintf (PETSC_COMM_WORLD, " %e ", norm);
 
           /*
            * Fancy step size control.
@@ -1427,7 +1428,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /*********************************/
 
-          PetscPrintf(PETSC_COMM_WORLD,"\n");
+          PetscPrintf (PETSC_COMM_WORLD, "\n");
 
           if (dg_norm[0] <= norm_tol &&  dg_norm[1] <= norm_tol) //&& NORM_REG<5.0e-2)
             break;
@@ -1442,19 +1443,19 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       sprintf(nameH, "vec0-%d.m", namecount-1);
       sprintf(nameO, "vec1-%d.m", namecount-1);
 
-      PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
+      PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
       bgy3d_save_vec_ascii (nameH, g[0]); /* g_H */
       bgy3d_save_vec_ascii (nameO, g[1]); /* g_O */
-      PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+      PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
 
       /* Save dg to binary file. FIXME: Why dg and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
         {
-          PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
+          PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
           bgy3d_save_vec ("dg0.bin", dg[0]); /* dgH */
           bgy3d_save_vec ("dg1.bin", dg[1]); /* dgO */
-          PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+          PetscPrintf (PETSC_COMM_WORLD, "done.\n");
         }
     } /* damp loop */
 
