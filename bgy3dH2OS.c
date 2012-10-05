@@ -20,6 +20,7 @@
 #include <complex.h>
 #endif
 #include <float.h>              /* DBL_MAX */
+#include <stdbool.h>            /* bool */
 
 extern real NORM_REG;
 
@@ -1284,16 +1285,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
         {
+          /* Every tenth iter, but not first one: */
+          const bool tenth = !(iter % 10) && iter > 0;
 
-          real a;               /* Used only inside the loop. */
-          if (!(iter % 10) && iter > 0)
-            a = a1;             /* This is taken  in iteration 10, 20,
-                                   etc.  "a1" is  modified  during the
-                                   loop. */
-          else
-            a = a0;             /* This  is taken  in  iterations 0-9,
-                                   11-19, etc.  "a0" remains unchanged
-                                   during the loop. */
+          /* "a  = a1" is  taken in  iteration 10,  20, etc.   "a1" is
+             modified during the loop.
+
+             "a =  a0" is taken  in iterations 0-9, 11-19,  etc.  "a0"
+             remains unchanged during the loop. */
+          const real a = tenth? a1 : a0;
 
           /* The  functions  Compute_H2O_interS/_C() use  preallocated
              fftw_complex  arrays in  State BHD  for work  but  do not
