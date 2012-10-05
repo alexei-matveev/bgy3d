@@ -1388,6 +1388,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            * here. At the moment I  am not able to confirm/reject that
            * claim.
            */
+
+          /* Infinity (max-abs) norm of dg[] over all site indices: */
+          real norm8 = maxval (2, dg_norm);
+
           mycount++;
 
           if ((iter - 1) % 10 && (dg_norm_old[0] < dg_norm[0] ||
@@ -1428,7 +1432,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                        mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-          if (dg_norm[0] <= norm_tol &&  dg_norm[1] <= norm_tol) //&& NORM_REG<5.0e-2)
+          /* Exit  when any  of  dg[]  does not  change  by more  than
+             norm_tol: */
+          if (norm8 <= norm_tol)
             break;
 
         } /* iter loop */
