@@ -1295,9 +1295,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                                    11-19, etc.  "a0" remains unchanged
                                    during the loop. */
 
-          PetscPrintf (PETSC_COMM_WORLD, "iter %d: function norms: %e ",
-                       iter + 1, NORM_REG);
-
           /* The  functions  Compute_H2O_interS/_C() use  preallocated
              fftw_complex  arrays in  State BHD  for work  but  do not
              re-define  any  of  the  Vec(tors)  except  those  passed
@@ -1367,9 +1364,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               dg_norm[i] = mix (dg[i], dg_acc, a, work); /* last arg is a temp */
             } /* over sites i */
 
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e (a=%f) ", dg_norm[0], a);
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e (a=%f) ", dg_norm[1], a);
-
           /* Now that dg[] has bee computed one can safely update g[].
              Compute g := exp[-(g0 + dg)], with a sanity check: */
           for (int i = 0; i < 2; i++)
@@ -1378,7 +1372,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* Again a  strange case of  literal constants 0 and  1. Why
              not 1, 0? */
           norm = ComputeCharge(&BHD, g[0], g[1]);
-          PetscPrintf (PETSC_COMM_WORLD, " %e ", norm);
 
           /*
            * Fancy step size control.
@@ -1421,13 +1414,18 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             }
           /* otherwise leave "a1" and "mycount" unchanged */
 
-          PetscPrintf (PETSC_COMM_WORLD, "count= %d  upwards= %d",
-                       mycount, upwards);
           dg_norm_old[0] = dg_norm[0];
           dg_norm_old[1] = dg_norm[1];
 
           /*********************************/
 
+          PetscPrintf (PETSC_COMM_WORLD, "iter %d: function norms: %e ",
+                       iter + 1, NORM_REG);
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e (a=%f) ", dg_norm[0], a);
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e (a=%f) ", dg_norm[1], a);
+          PetscPrintf (PETSC_COMM_WORLD, " %e ", norm);
+          PetscPrintf (PETSC_COMM_WORLD, "count= %d  upwards= %d",
+                       mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
 
           if (dg_norm[0] <= norm_tol &&  dg_norm[1] <= norm_tol) //&& NORM_REG<5.0e-2)
