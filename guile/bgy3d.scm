@@ -400,8 +400,8 @@ computes the sum of all vector elements."
 ;;;
 (define (new-main argv)
   ;; (pretty-print argv)
-  (let* ((run (lambda (name)
-                (apply bgy3d-run (find-solute name)))))
+  (let ((run (lambda (name)
+               (apply bgy3d-run (find-solute name)))))
     (map run (cdr argv))))
 
 
