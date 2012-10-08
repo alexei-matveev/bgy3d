@@ -10,7 +10,8 @@
             bgy3d-run))
 
 (use-modules (srfi srfi-1)              ; list manipulation
-             (ice-9 pretty-print))
+             (ice-9 pretty-print)
+             (ice-9 getopt-long))
 
 ;;;
 ;;; This name has to be defined on guile startup, see the C sources of
@@ -35,6 +36,23 @@
 ;;; and posissibly more, depending on the compilation options.
 ;;;
 (guile-bgy3d-module-init)
+
+;;;
+;;; Specifications of command line flags for use with getopt-long:
+;;;
+(define option-spec
+  '((solute (value #t))                 ; a string
+    (N (value #t))                      ; grid dimension
+    (rho (value #t))                    ; solvent density
+    (beta (value #t))                   ; inverse temperature
+    (norm-tol (value #t))               ; convergence threshold
+    (max-iter (value #t))               ; max number of iterations
+    (L (value #t))                      ; [-L, L] gives the box size
+    (zpad (value #t))                   ; ??
+    (damp-start (value #t))             ; scaling factor?
+    (lambda (value #t))                 ; mixing parameter
+    (BGY2Site (value #f))               ; pure solvent run
+    (BGYM2Site (value #f))))            ; solute + solvent run
 
 ;;;
 ;;; Settings  are  handled  as  an  association list,  these  are  the
@@ -327,25 +345,31 @@ computes the sum of all vector elements."
 ;;; functionality is in flux.
 ;;;
 (define (old-main argv)
-  (cond
-   ;;
-   ;; Pure solvent:
-   ;;
-   ((member "--BGY2Site" argv)
-    (bgy3d-run-solvent '()))            ; Use defaults and Petsc env
-   ;;
-   ;; Solute with solvent:
-   ;;
-   ((member "--BGYM2Site" argv)
-    (let ((h-cl (find-solute "hydrogen chloride")))
-      (let ((g1 (bgy3d-run-solute h-cl '()))) ; Use defaults and Petsc env
-        (map bgy3d-vec-save (list "g0.bin" "g1.bin") g1)
-        (map bgy3d-vec-destroy g1))))   ; dont forget to destroy them
-   ;;
-   ;; Fall through to the new variant:
-   ;;
-   (else
-    (new-main argv))))
+  (let ((opts (getopt-long argv option-spec)))
+    ;; (pretty-print opts)
+    (cond
+     ;;
+     ;; Pure solvent:
+     ;;
+     ((option-ref opts 'BGY2Site #f)
+      (bgy3d-run-solvent '()))          ; Use defaults and Petsc env
+     ;;
+     ;; Solute  with solvent.  Note  that at variance with  the legacy
+     ;; code the function find-solute uses on-disk database of solutes
+     ;; in ./solutes.scm and not  the compiled in set of (currently) 6
+     ;; preset solutes from bgy3d-solutes.c:
+     ;;
+     ((option-ref opts 'BGYM2Site #f)
+      (let ((name (option-ref opts 'solute "hydrogen chloride")))
+        (let ((g1 (bgy3d-run-solute (find-solute name)
+                                    '()))) ; Use defaults and Petsc env
+          (map bgy3d-vec-save (list "g0.bin" "g1.bin") g1)
+          (map bgy3d-vec-destroy g1)))) ; dont forget to destroy them
+     ;;
+     ;; Fall through to the new variant:
+     ;;
+     (else
+      (new-main argv)))))
 
 ;;;
 ;;; Interpretes each argument as the name of the solute and runs first
