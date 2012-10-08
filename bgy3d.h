@@ -36,6 +36,7 @@
 /* which dimension of the vector equation is solved ? */
 /* UNUSED: #define VEC_DIM 1 */
 
+#define ANGSTROM 0.52917706 /* <- used in PG, 0.52917725750691647 */
 #define CUTOFF 1.0e+8
 #define SHIFT 0.0
 
