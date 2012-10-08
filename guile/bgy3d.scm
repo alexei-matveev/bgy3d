@@ -38,23 +38,6 @@
 (guile-bgy3d-module-init)
 
 ;;;
-;;; Specifications of command line flags for use with getopt-long:
-;;;
-(define option-spec
-  '((solute (value #t))                 ; a string
-    (N (value #t))                      ; grid dimension
-    (rho (value #t))                    ; solvent density
-    (beta (value #t))                   ; inverse temperature
-    (norm-tol (value #t))               ; convergence threshold
-    (max-iter (value #t))               ; max number of iterations
-    (L (value #t))                      ; [-L, L] gives the box size
-    (zpad (value #t))                   ; ??
-    (damp-start (value #t))             ; scaling factor?
-    (lambda (value #t))                 ; mixing parameter
-    (BGY2Site (value #f))               ; pure solvent run
-    (BGYM2Site (value #f))))            ; solute + solvent run
-
-;;;
 ;;; Settings  are  handled  as  an  association list,  these  are  the
 ;;; settings used in regression tests:
 ;;;
@@ -338,6 +321,46 @@ computes the sum of all vector elements."
       ;; Dont forget to destroy them after use:
       ;;
       (map bgy3d-vec-destroy g1))))
+
+;;;
+;;; Specifications of command line flags for use with getopt-long:
+;;;
+(define option-spec
+  (quasiquote
+   ((solute                             ; a string
+     (value #t)
+     (predicate (unquote find-solute)))
+    (N                                  ; grid dimension
+     (value #t)
+     (predicate (unquote string->number)))
+    (rho                                ; solvent density
+     (value #t)
+     (predicate (unquote string->number)))
+    (beta                               ; inverse temperature
+     (value #t)
+     (predicate (unquote string->number)))
+    (norm-tol                           ; convergence threshold
+     (value #t)
+     (predicate (unquote string->number)))
+    (max-iter                           ; max number of iterations
+     (value #t)
+     (predicate (unquote string->number)))
+    (L                                  ; [-L, L] gives the box size
+     (value #t)
+     (predicate (unquote string->number)))
+    (zpad                               ; ??
+     (value #t)
+     (predicate (unquote string->number)))
+    (damp-start                         ; scaling factor?
+     (value #t)
+     (predicate (unquote string->number)))
+    (lambda                             ; mixing parameter
+     (value #t)
+     (predicate (unquote string->number)))
+    (BGY2Site                           ; pure solvent run
+     (value #f))
+    (BGYM2Site                          ; solute + solvent run
+     (value #f)))))
 
 ;;;
 ;;; FIXME: at  the moment this  function only emulates the  minimum of
