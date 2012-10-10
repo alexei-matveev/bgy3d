@@ -158,7 +158,7 @@ include $(libbgy3d.a:.o=.d)
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
 	[ -s $@ ] || rm -f $@
 
-TAGS: $(OBJECTS:.o=.c)
-	etags $(OBJECTS:.o=.c)
+TAGS: $(OBJECTS:.o=.c) $(libbgy3d.a:.o=.c)
+	etags $(^)
 
 #---End of Makefile---
