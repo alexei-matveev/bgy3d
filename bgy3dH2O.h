@@ -22,9 +22,9 @@ void RecomputeInitialData (State *BHD, real damp, real damp_LJ);
 
 void Compute_dg_H2O_inter (State *BHD,
                            Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                           fftw_complex *coul1_fft, real rho1, real shift1,
+                           fftw_complex *coul1_fft, real rho1,
                            Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                           fftw_complex *coul2_fft, real rho2, real shift2,
+                           fftw_complex *coul2_fft, real rho2,
                            Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,

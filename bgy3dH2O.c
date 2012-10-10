@@ -891,12 +891,12 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
 }
 
-void Compute_dg_H2O_inter(State *BHD,
-                          Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                          fftw_complex *coul1_fft, real rho1, real shift1,
-                          Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                          fftw_complex *coul2_fft, real rho2, real shift2,
-                          Vec dg, Vec dg_help)
+void Compute_dg_H2O_inter (State *BHD,
+                           Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
+                           fftw_complex *coul1_fft, real rho1,
+                           Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
+                           fftw_complex *coul2_fft, real rho2,
+                           Vec dg, Vec dg_help)
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
@@ -2112,9 +2112,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_HO */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1],
                                BHD->F[0][0], BHD->F_l[0][0], gH, gHO,
-                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecSet(dg_new,0.0);
@@ -2180,9 +2180,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_OH */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1],
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           VecPointwiseMult(dg_new, dg_new, BHD->cHO);
@@ -2263,9 +2263,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           /* g_H */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1],
                                BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecScale(dg_new, 0.5);
@@ -2337,9 +2337,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0],
                                BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           VecPointwiseMult(dg_new, dg_new, BHD->cO);
@@ -2744,9 +2744,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_HO */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1],
                                BHD->F[0][0], BHD->F_l[0][0], gH, gHO,
-                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecSet(dg_new,0.0);
@@ -2817,9 +2817,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_OH */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1],
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 
@@ -2909,9 +2909,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           /* g_H */
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[1],
                                BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-                               BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
+                               BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
           //VecScale(dg_new, 0.5);
@@ -2999,9 +2999,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-                               BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+                               BHD->u2_fft[0][1], BHD->rhos[0],
                                BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-                               BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+                               BHD->u2_fft[1][1], BHD->rhos[1],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 

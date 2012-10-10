@@ -472,9 +472,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgHO, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-		       BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+		       BHD->u2_fft[1][1], BHD->rhos[1],
 		       BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-		       BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+		       BHD->u2_fft[0][1], BHD->rhos[0],
 		       dgHO, BHD->f);
   VecAXPY(dgHO, BHD->PD->beta, BHD->u2[0][1]);
   /************************************************************/
@@ -523,9 +523,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgH, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-		       BHD->u2_fft[0][1], BHD->rhos[1], BHD->ucHO_0,
+		       BHD->u2_fft[0][1], BHD->rhos[1],
 		       BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-		       BHD->u2_fft[0][0], BHD->rhos[0], BHD->ucH_0,
+		       BHD->u2_fft[0][0], BHD->rhos[0],
 		       dgH, BHD->f);
   VecAXPY(dgH, BHD->PD->beta, BHD->u2[0][0]);
   /************************************************************/
@@ -579,9 +579,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   VecCopy(dgO, help);
   Compute_dg_H2O_inter(BHD,
 		       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-		       BHD->u2_fft[0][1], BHD->rhos[0], BHD->ucHO_0,
+		       BHD->u2_fft[0][1], BHD->rhos[0],
 		       BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-		       BHD->u2_fft[1][1], BHD->rhos[1], BHD->ucO_0,
+		       BHD->u2_fft[1][1], BHD->rhos[1],
 		       dgO, BHD->f);
   VecAXPY(dgO, BHD->PD->beta, BHD->u2[1][1]);
   /************************************************************/
