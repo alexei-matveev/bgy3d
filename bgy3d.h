@@ -167,8 +167,6 @@ typedef struct State
   Vec dgH, dgHO, dgO;
   Vec f, f2, f3, f4;
   Vec pre;
-  real zpad;
-
 } State;
 
 #endif  /* ifndef BGY3d_H */

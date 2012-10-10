@@ -411,7 +411,6 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   int i[3], x[3], n[3];
   Vec dgH, dgHO, dgO, gH, gHO, gO, help;
   Vec tHO, tO, tH, help2;
-  real zpad;
 
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, "--- Function evaluation starts...\n");
@@ -428,7 +427,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   tHO =  BHD->f4;
   tO  =  BHD->f4;
   tH  =  BHD->f4;
-  zpad = BHD->zpad;
+  const real zpad = BHD->PD->zpad;
 
   /* Get arrays from PETSC Vectors */
   DAVecGetArray(BHD->da, dgH, &dgH_vec);
@@ -773,8 +772,6 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
 
   /* Zeropad */
   const real zpad = PD->zpad;
-
-  BHD->zpad = zpad;
 
   DACreateGlobalVector(BHD->da_newton, &f);
   DACreateGlobalVector(BHD->da_newton, &u);

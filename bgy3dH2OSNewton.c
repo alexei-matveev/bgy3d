@@ -335,7 +335,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   int i[3], x[3], n[3];
   Vec dgH, dgO, gH, gO, help;
   Vec tO, tH, help2, ff;
-  real zpad; //, norm;
+
   static int counter=0;
   counter++;
   if( verbosity>0)
@@ -351,7 +351,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   tO  =  BHD->f4;
   tH  =  BHD->f4;
   ff = BHD->f;
-  zpad = BHD->zpad;
+  const real zpad = BHD->PD->zpad;
 
   /* Get arrays from PETSC Vectors */
   DAVecGetArray(BHD->da, dgH, &dgH_vec);
@@ -517,7 +517,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   int i[3], x[3], n[3], index, N3;
   Vec dgH, dgO, gH, gO, help;
   Vec tO, tH, help2, ff;
-  real zpad; //, norm;
+
   fftw_complex *uO_fft, *uH_fft;
   static int counter=0;
   counter++;
@@ -536,7 +536,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   tO  =  BHD->f4;
   tH  =  BHD->f4;
   ff = BHD->f;
-  zpad = BHD->zpad;
+  const real zpad = BHD->PD->zpad;
   uO_fft = BHD->wHO_fft;
   uH_fft = BHD->wHH_fft;
 
@@ -887,8 +887,6 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   /* Zeropad */
   const real zpad = PD->zpad;
 
-  BHD->zpad = zpad;
-
   DACreateGlobalVector(BHD->da_newton, &f);
   DACreateGlobalVector(BHD->da_newton, &u);
   DACreateGlobalVector(BHD->da_newton, &b);
@@ -1002,8 +1000,6 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
 
   /* Zeropad */
   const real zpad = PD->zpad;
-
-  BHD->zpad = zpad;
 
   DACreateGlobalVector(BHD->da_newtonF, &f);
   DACreateGlobalVector(BHD->da_newtonF, &u);
