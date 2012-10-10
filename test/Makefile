@@ -2,14 +2,15 @@
 SHELL = /bin/sh
 
 #
-# Flags for bgy3d executable:
+# Flags  for  bgy3d executable.  With  current  version  it takes  312
+# iterations to converge butanoic acid in HCl.
 #
 CMDFLAG = \
 	--N 32 \
 	--rho 0.018 \
 	--beta 1.1989 \
 	--norm-tol 1.0e-2 \
-	--max-iter 10000 \
+	--max-iter 320 \
 	--L 10.0 \
 	--zpad 10.0 \
 	--damp-start 1.0 \

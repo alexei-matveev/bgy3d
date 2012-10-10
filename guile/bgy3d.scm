@@ -46,7 +46,7 @@
     (rho . 0.018)                       ; solvent density
     (beta . 1.1989)                     ; inverse temperature
     (norm-tol . 1.0e-2)                 ; convergence threshold
-    (max-iter . 200)                    ; max number of iterations
+    (max-iter . 320)                    ; max number of iterations
     (L . 10.0)                          ; [-L, L] gives the box size
     (zpad . 10.0)                       ; ??
     (damp-start . 1.0)                  ; scaling factor?
