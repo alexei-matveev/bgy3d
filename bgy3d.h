@@ -137,7 +137,6 @@ typedef struct State
   fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
 
   fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
-  int p_id, p_index;
 
   const ProblemData *PD;
 

@@ -381,9 +381,6 @@ void ImposeBoundaryCondition_Initialize( State *BHD, real zpad)
   MPI_Reduce( &p_id, &p_idr, 1,MPI_INT, MPI_SUM, 0, PETSC_COMM_WORLD );
   MPI_Bcast ( &p_idr, 1, MPI_INT, 0, PETSC_COMM_WORLD );
 
-
-  BHD->p_id = p_idr;
-  BHD->p_index = index;
   PetscPrintf(PETSC_COMM_WORLD,"Root id is %d (%d,%d,%d).\n",
               p_idr, index, PD->N[1]/2, PD->N[2]/2);
   //intf("%d Root id is %d (%d,%d,%d).\n", PD->id, p_idr, index, PD->N[1]/2, PD->N[2]/2);
