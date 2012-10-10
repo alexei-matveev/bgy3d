@@ -56,8 +56,9 @@
 ;;; Find a solute in a database or die:
 ;;;
 (define (find-solute name)
-  (or (assoc name (slurp (find-file "guile/solutes.scm")))
-      (error "No such solute: " name)))
+  (let ((solutes (slurp (find-file "guile/solutes.scm"))))
+    (or (assoc name solutes)
+        (error "Not in the list:" name (map first solutes)))))
 
 ;;;
 ;;; Find  a file in  the search  patch, or  die.  Note  that find-file
