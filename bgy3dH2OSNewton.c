@@ -382,9 +382,6 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
 
-/*   norm = ComputeCharge(BHD, gH, gO); */
-/*   PetscPrintf(PETSC_COMM_WORLD, " %e \t", norm); */
-
   /* Compute right hand side */
 
   /***********************************************************/
@@ -576,9 +573,6 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
   ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
-
-/*   norm = ComputeCharge(BHD, gH, gO); */
-/*   PetscPrintf(PETSC_COMM_WORLD, " %e \t", norm); */
 
   /* Compute right hand side */
 
