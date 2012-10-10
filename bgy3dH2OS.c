@@ -1414,7 +1414,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, 2, solvent, g, BHD.v[0]));
+                       ComputeCharge (PD, 2, solvent, g, work));
 
           PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
                        mycount, upwards);
@@ -1863,7 +1863,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, 2, solvent, g, BHD.v[0]));
+                       ComputeCharge (PD, 2, solvent, g, f));
 
           //EnforceNormalizationCondition(&BHD, dgO, dgH, g[1], g[0]);
 
