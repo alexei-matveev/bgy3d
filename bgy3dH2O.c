@@ -22,8 +22,8 @@
 #define SL 16.0
 #define SR 16.0
 
-real  NORM_REG=1.0e-1;
-real  NORM_REG2=1.0e-2;
+static real NORM_REG=1.0e-1;
+static real NORM_REG2=1.0e-2;
 
 static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
 {
