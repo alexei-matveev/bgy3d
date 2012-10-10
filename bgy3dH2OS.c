@@ -916,25 +916,25 @@ void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic ar
     Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
 }
 
-static real ComputeCharge (State *BHD, Vec g1, Vec g2)
+static real ComputeCharge (const ProblemData *PD,
+                           int m, const Site solvent[m],
+                           const Vec g[m],
+                           Vec work)
 {
-  real g1_sum, g2_sum, c;
-  Vec help;
+  const real dV = PD->h[0] * PD->h[1] * PD->h[2];
+  const real rho = PD->rho;
 
+  real total = 0.0;
+  for (int i = 0; i < m; i++)
+    {
+      real sum;
+      VecCopy (g[i], work);
+      VecShift (work, -1.0);
+      VecSum (work, &sum);
+      total += sum * rho * dV * solvent[i].charge;
+    }
 
-  const ProblemData *PD = BHD->PD;
-  help = BHD->v[0];
-
-  VecCopy(g1, help);
-  VecShift(help, -1.0);
-  VecSum(help, &g1_sum);
-  VecCopy(g2, help);
-  VecShift(help, -1.0);
-  VecSum(g2, &g2_sum);
-
-  c= PD->h[0]*PD->h[1]*PD->h[2]*BHD->rho*(g1_sum-0.*g2_sum);
-
-  return c;
+  return total;
 }
 
 static void ComputedgFromg (Vec dg, Vec g0, Vec g)
@@ -1420,10 +1420,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0]);
           PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1]);
 
-          /* Again a  strange case of  literal constants 0 and  1. Why
-             not 1, 0? */
-          PetscPrintf (PETSC_COMM_WORLD, "%e ",
-                       ComputeCharge (&BHD, g[0], g[1]));
+          /* Last argument to ComputeCharge() is a work array: */
+          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
+                       ComputeCharge (PD, 2, solvent, g, BHD.v[0]));
 
           PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
                        mycount, upwards);
@@ -1873,8 +1872,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           ComputeH2O_g( g[0], g0H, dgH);
           ComputeH2O_g( g[1], g0O, dgO);
 
-          PetscPrintf (PETSC_COMM_WORLD, " %e ",
-                       ComputeCharge (&BHD, g[0], g[1]));
+          /* Last argument to ComputeCharge() is a work array: */
+          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
+                       ComputeCharge (PD, 2, solvent, g, BHD.v[0]));
 
           //EnforceNormalizationCondition(&BHD, dgO, dgH, g[1], g[0]);
 
