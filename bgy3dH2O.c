@@ -21,8 +21,6 @@
 
 #define SL 16.0
 #define SR 16.0
-//#define NORM_REG 1.0e-1
-//#define NORM_REG 8.0e-1
 
 real  NORM_REG=1.0e-1;
 real  NORM_REG2=1.0e-2;
@@ -3478,8 +3476,6 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);     */
 
           //if(iter < 50) goto gH;
-/*        if( !(iter%50) && iter>0 && NORM_REG>=2.0e-2) */
-/*          NORM_REG/=2.; */
 
 /*        ComputeH2O_g( gH, g0H, dgH); */
 /*        ComputeH2O_g( gO, g0O, dgO); */
@@ -4099,7 +4095,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           aHO=a;
         }
 
-      //PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
       /* f=integral(g) */
       if (1)                    /* kflg was set when with -pair */
@@ -4110,8 +4105,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);     */
 
           //if(iter < 50) goto gH;
-/*        if( !(iter%50) && iter>0 && NORM_REG>=2.0e-2) */
-/*          NORM_REG/=2.; */
 
 /*        ComputeH2O_g( gH, g0H, dgH); */
 /*        ComputeH2O_g( gO, g0O, dgO); */
@@ -4562,7 +4555,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*       if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol && dgHO_norm/a<=norm_tol &&  */
 /*       dgOH_norm/a<=norm_tol) */
 /*      break; */
-      if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol )//&&NORM_REG<=1.0e-2)
+      if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol)
         break;
 
 /*       VecSum(dgHO, &dgHO_norm); */
