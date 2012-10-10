@@ -33,9 +33,10 @@
 #define SQR(a)   ((a)*(a))
 #define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
-/*  One Bohr  is 0.53  Angstrom.  Bohrs, or  rather atomic  units, are
-    used in QM codes. This code uses historically angstroms: */
-#define BOHR 0.52917706 /* <- used in PG, 0.52917725750691647 */
+/* One Bohr is 0.53 Angstrom.  Bohrs, or rather atomic units, are used
+   in QM codes. This  code uses angstroms, historically.  This literal
+   value is used in PG, an alternative is 0.52917725750691647. */
+#define BOHR 0.52917706
 #define CUTOFF 1.0e+8
 #define SHIFT 0.0
 
