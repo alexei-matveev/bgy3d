@@ -1523,7 +1523,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   real a1, a, damp, damp_LJ;
   real count = 0.0;
   int iter;
-  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f;
+  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2;
+  Vec work;
   Vec g[2];
   Vec tH, tO, dg_newH, dg_newO;
   Vec uc;                       /* common for all sites */
@@ -1582,7 +1583,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD.da, &dgO);
   DACreateGlobalVector(BHD.da, &dg_new);
   DACreateGlobalVector(BHD.da, &dg_new2);
-  DACreateGlobalVector(BHD.da, &f);
+  DACreateGlobalVector(BHD.da, &work);
 
   DACreateGlobalVector(BHD.da, &tH);
   DACreateGlobalVector(BHD.da, &tO);
@@ -1697,15 +1698,15 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], g[0], BHD.u2_fft[0][0], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HH, g[0], tH , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HH, g[0], tH , dg_new2, work, zpad);
 
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2);
-          VecCopy (dg_new2, f); /* FIXME: need that? */
+          VecCopy (dg_new2, work); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
-          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HO, g[1], tO , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HO, g[1], tO , dg_new2, work, zpad);
 
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2);
-          VecCopy (dg_new2, f); /* FIXME: need that? */
+          VecCopy (dg_new2, work); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* Copy  the electrostatic potential  scaled by  the solvent
@@ -1733,9 +1734,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[0], BHD.u2_fft[0][1], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], tH , dg_new2, f, zpad);
+          Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], tH , dg_new2, work, zpad);
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2);
-          VecCopy (dg_new2, f); /* FIXME: need that? */
+          VecCopy (dg_new2, work); /* FIXME: need that? */
 
           VecAXPY(dg_new, 2.0, dg_new2);
 
@@ -1751,20 +1752,20 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecCopy(dg_new, dg_newO);
 
           /* Move dgH */
-          VecCopy(dgH, f);
+          VecCopy(dgH, work);
           VecAXPBY(dgH, a, (1-a), dg_newH);
-          VecAXPY(f, -1.0, dgH);
-          VecNorm(f, NORM_INFINITY, &dgH_norm);
+          VecAXPY(work, -1.0, dgH);
+          VecNorm(work, NORM_INFINITY, &dgH_norm);
 
           PetscPrintf(PETSC_COMM_WORLD,"H= %e (a=%f) ", dgH_norm/a, a);
 
           /* Move dgO */
           if (1)
             {
-              VecCopy(dgO, f);
+              VecCopy(dgO, work);
               VecAXPBY(dgO, a, (1-a), dg_newO);
-              VecAXPY(f, -1.0,  dgO);
-              VecNorm(f, NORM_INFINITY, &dgO_norm);
+              VecAXPY(work, -1.0,  dgO);
+              VecNorm(work, NORM_INFINITY, &dgO_norm);
               PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
             }
           ComputeH2O_g( g[0], g0H, dgH);
@@ -1772,7 +1773,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, 2, solvent, g, f));
+                       ComputeCharge (PD, 2, solvent, g, work));
 
           /* (fancy) step size control */
           mycount++;
@@ -1837,7 +1838,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecDestroy(dgO);
   VecDestroy(dg_new);
   VecDestroy(dg_new2);
-  VecDestroy(f);
+  VecDestroy(work);
 
   VecDestroy(tH);
   VecDestroy(tO);
