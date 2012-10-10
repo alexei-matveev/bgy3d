@@ -12,7 +12,7 @@ void Zeropad_Function (const State *BHD, Vec g, real ZP, real shift);
 
 void ComputeH2O_g (Vec g, Vec g0, Vec dg);
 
-void ImposeBoundaryCondition_Initialize (State *BHD, real zpad);
+void ImposeBoundaryCondition_Initialize (const State *BHD, real zpad);
 
 void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);
 
