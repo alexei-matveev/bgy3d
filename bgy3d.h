@@ -129,8 +129,6 @@ typedef struct State
 
   Vec gHO_ini;                  /* used for pure solvent only */
 
-  real ucH_0, ucO_0, ucHO_0;
-
   /*
     Parallel FFT.
 
