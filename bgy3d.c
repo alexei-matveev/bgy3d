@@ -166,7 +166,13 @@ real** Load_Molecule(int *N)
       exit(1);
     }
 
-  fscanf(fp,"%d",N);
+  /* First entry in the file appears to be the number of sites: */
+  if (1 != fscanf (fp, "%d", N))
+    {
+      PetscPrintf (PETSC_COMM_WORLD, "Error reading file (molecule).\n");
+      exit (1);
+    }
+
   if(verbosity>2)
     PetscPrintf(PETSC_COMM_WORLD,"Reading molecule data:\n%d particles\n", *N);
 
@@ -176,7 +182,7 @@ real** Load_Molecule(int *N)
   for(i=0; i<*N; i++)
     {
       x_M[i] = (real*) malloc(sizeof(real)*3);
-      if( 3!=fscanf(fp,"%lf %lf %lf\n", &x_M[i][0], &x_M[i][1], &x_M[i][2]) )
+      if (3 != fscanf (fp, "%lf %lf %lf\n", &x_M[i][0], &x_M[i][1], &x_M[i][2]))
 	{
 	  PetscPrintf(PETSC_COMM_WORLD,"Error reading file (molecule).\n");
 	  exit(1);
