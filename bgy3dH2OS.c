@@ -77,25 +77,25 @@ static State initialize_state (const ProblemData *PD)
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j <= i; j++) {
-      /* FIXME: see  bgy3d_load_vec below, arent  we overwriting these
-         g2 vecs? */
-      ierr = DACreateGlobalVector (da, &BHD.g2[i][j]);
-      BHD.g2[j][i] = BHD.g2[i][j];
-      assert (!ierr);
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* FIXME: see bgy3d_load_vec below, arent we overwriting these
+           g2 vecs? */
+        ierr = DACreateGlobalVector (da, &BHD.g2[i][j]);
+        BHD.g2[j][i] = BHD.g2[i][j];
+        assert (!ierr);
 
-      /* Used with pure solvent only: */
-      FOR_DIM
-        {
-          BHD.F[i][j][dim] = PETSC_NULL;
-          BHD.F[j][i][dim] = PETSC_NULL;
+        /* Used with pure solvent only: */
+        FOR_DIM
+          {
+            BHD.F[i][j][dim] = PETSC_NULL;
+            BHD.F[j][i][dim] = PETSC_NULL;
 
-          BHD.F_l[i][j][dim] = PETSC_NULL;
-          BHD.F_l[j][i][dim] = PETSC_NULL;
-        }
-    }
-  }
+            BHD.F_l[i][j][dim] = PETSC_NULL;
+            BHD.F_l[j][i][dim] = PETSC_NULL;
+          }
+      }
 
   BHD.pre = PETSC_NULL;         /* used for newton solver only */
 
@@ -117,15 +117,15 @@ static State initialize_state (const ProblemData *PD)
   /* Allocate memory for fft */
   FOR_DIM
     {
-      for (int i = 0; i < 2; i++) {
-        for (int j = 0; j <= i; j++) {
-          BHD.f_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
-          BHD.f_g2_fft[j][i][dim] = BHD.f_g2_fft[i][j][dim];
+      for (int i = 0; i < 2; i++)
+        for (int j = 0; j <= i; j++)
+          {
+            BHD.f_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
+            BHD.f_g2_fft[j][i][dim] = BHD.f_g2_fft[i][j][dim];
 
-          BHD.fl_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
-          BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
-        }
-      }
+            BHD.fl_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
+            BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
+          }
 
       BHD.fg2_fft[dim] = bgy3d_fft_malloc (da);
 
@@ -189,21 +189,21 @@ static void finalize_state (State *BHD)
   MPI_Barrier( PETSC_COMM_WORLD);
 
   /* Pair quantities here: */
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j <= i; j++) {
-      VecDestroy (BHD->g2[i][j]);
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        VecDestroy (BHD->g2[i][j]);
 
-      FOR_DIM
-        {
-          /* Used with pure solvent only: */
-          assert (BHD->F[i][j][dim] == PETSC_NULL);
-          assert (BHD->F_l[i][j][dim] == PETSC_NULL);
+        FOR_DIM
+          {
+            /* Used with pure solvent only: */
+            assert (BHD->F[i][j][dim] == PETSC_NULL);
+            assert (BHD->F_l[i][j][dim] == PETSC_NULL);
 
-          bgy3d_fft_free (BHD->f_g2_fft[i][j][dim]);
-          bgy3d_fft_free (BHD->fl_g2_fft[i][j][dim]);
-        }
-    }
-  }
+            bgy3d_fft_free (BHD->f_g2_fft[i][j][dim]);
+            bgy3d_fft_free (BHD->fl_g2_fft[i][j][dim]);
+          }
+      }
 
   FOR_DIM
     {
@@ -519,13 +519,11 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
             g2_vec[i[2]][i[1]][i[0]] = g[k] + (r_s-xg[k])*(g[k+1]-g[k])/(xg[k+1]-xg[k]);
           if(g2_vec[i[2]][i[1]][i[0]]<0)
             g2_vec[i[2]][i[1]][i[0]]=0;
-
         }
   DAVecRestoreArray(da, g2, &g2_vec);
 
   free(xg);
   free(g);
-
 }
 
 static void  pair (State *BHD,
