@@ -2397,18 +2397,6 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           ComputeH2O_g( gHO, g0HO, dgHO);
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
-
-
-/*        norm = ComputeCharge(BHD, gHO, gH); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " HO=%.2e ", norm); */
-/*        norm = ComputeCharge(BHD, gO, gHO); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " O=%.2e ", norm); */
-/*        norm = ComputeCharge(BHD, gH, gHO); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " H=%.2e ", norm); */
-
-
-
-
         }
       else {
         // nothing
@@ -3067,12 +3055,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*        CheckMax(gHO, "HO", 4.0); */
 /*        CheckMax(gH, "H", 4.0); */
 /*        CheckMax(gO, "O", 4.0); */
-
-/*        norm = ComputeCharge(BHD, gH, gHO); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " H-OH=%e ", norm); */
-/*        norm = ComputeCharge(BHD, gO, gHO); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " O-OH=%e ", norm); */
-
 
           //if(iter==max_iter-1) VecCopy(f, dgO);
           //ComputeH2O_Renormalization(BHD, gO);
