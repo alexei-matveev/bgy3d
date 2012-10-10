@@ -916,7 +916,7 @@ void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic ar
     Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
 }
 
-real ComputeCharge(State *BHD, Vec g1, Vec g2)
+static real ComputeCharge (State *BHD, Vec g1, Vec g2)
 {
   real g1_sum, g2_sum, c;
   Vec help;
