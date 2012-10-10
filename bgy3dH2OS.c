@@ -1057,7 +1057,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Inverse temperature: */
   const real beta = PD->beta;
 
-  ImposeBoundaryCondition_Initialize (&BHD, zpad);
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(&BHD, zpad);
@@ -1566,7 +1565,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   /* Zeropad */
   const real zpad = PD->zpad;
 
-  ImposeBoundaryCondition_Initialize( &BHD, zpad);
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(&BHD, zpad);

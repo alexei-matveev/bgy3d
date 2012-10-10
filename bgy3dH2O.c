@@ -353,33 +353,6 @@ void ComputeH2O_g (Vec g, Vec g0, Vec dg)
   VecRestoreArray (dg, &dg_vec);
 }
 
-/* This function appars to have no effect except a print on tty. */
-void ImposeBoundaryCondition_Initialize (const State *BHD, real zpad)
-{
-  int x[3], n[3], index, p_id, p_idr=0;
-
-  const ProblemData *PD = BHD->PD;
-
-  /* Get local portion of the grid */
-  DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  index = (int) ceil((-PD->interval[0] - zpad) / PD->h[0]);
-
-  if( index      >= x[0] && index      < x[0]+n[0] &&
-      PD->N[1]/2 >= x[1] && PD->N[1]/2 < x[1]+n[1] &&
-      PD->N[2]/2 >= x[2] && PD->N[2]/2 < x[2]+n[2]   )
-    p_id = PD->id;
-  else
-    p_id = 0;
-
-  MPI_Reduce (&p_id, &p_idr, 1,MPI_INT, MPI_SUM, 0, PETSC_COMM_WORLD );
-  MPI_Bcast (&p_idr, 1, MPI_INT, 0, PETSC_COMM_WORLD );
-
-  PetscPrintf (PETSC_COMM_WORLD, "Root id is %d (%d,%d,%d).\n",
-               p_idr, index, PD->N[1]/2, PD->N[2]/2);
-}
-
-
 void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 {
   DA da;
