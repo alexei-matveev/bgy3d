@@ -68,8 +68,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   PetscPrintf(PETSC_COMM_WORLD,"q1  = %f \t q2  = %f\n", qH, qO);
   PetscPrintf(PETSC_COMM_WORLD,"--------------------------------\n");
 
-  BHD->beta = PD->beta;
-  BHD->rho  = PD->rho;
   BHD->rhos[0] = PD->rho; //2.*PD->rho;
   BHD->rhos[1] = PD->rho;
 

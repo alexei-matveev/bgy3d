@@ -49,8 +49,8 @@ typedef struct ProblemData
 {
   real interval[2];             /* min and max of the domain: 3d-box*/
   real h[3];                    /* mesh width */
-  real beta;                    /* 1/kT */
-  real rho;                     /* density */
+  real beta;                    /* inverse temperature, 1/kT */
+  real rho;                     /* solvent density */
   int N[3], N3;                 /* global Grid size */
 
   /* Parallel stuff */
@@ -110,8 +110,6 @@ typedef struct State
   /* Pair  interaction parameters.  Not used  with  impurities.  Array
      entries are: sigma, epsilon and charge product. */
   real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3];
-
-  real beta, rho;          /* inverse temperature, solvent density. */
 
   /*
    * The solute  field for  each of the  two solvent sites  (scaled by

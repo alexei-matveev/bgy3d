@@ -50,8 +50,6 @@ static State initialize_state (const ProblemData *PD)
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
   /******************************/
-  BHD.beta = PD->beta;
-  BHD.rho  = PD->rho;
   BHD.rhos[0] = PD->rho;
   BHD.rhos[1] = PD->rho;
 
