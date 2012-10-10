@@ -22,8 +22,6 @@
 #include <float.h>              /* DBL_MAX */
 #include <stdbool.h>            /* bool */
 
-extern real NORM_REG;
-
 /*
  * These are  the two  solvent sites.  Coordinates  will not  be used.
  * Respective parameters are #defined  elsewhere. Also do not take the
@@ -49,7 +47,6 @@ static State initialize_state (const ProblemData *PD)
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
   //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
-  //PetscPrintf(PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG= %e\n", NORM_REG);
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
   /******************************/
@@ -1423,19 +1420,24 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           for (int i = 0; i < 2; i++)
             dg_norm_old[i] = dg_norm[i];
 
-          PetscPrintf (PETSC_COMM_WORLD, "iter %d: function norms: %e ",
-                       iter + 1, NORM_REG);
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e (a=%f) ", dg_norm[0], a);
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e (a=%f) ", dg_norm[1], a);
-          PetscPrintf (PETSC_COMM_WORLD, " %e ", norm);
-          PetscPrintf (PETSC_COMM_WORLD, "count= %d  upwards= %d",
+          PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
+          PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
+          PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0]);
+          PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1]);
+          PetscPrintf (PETSC_COMM_WORLD, "%e ", norm);
+          PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
                        mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
 
           /* Exit  when any  of  dg[]  does not  change  by more  than
              norm_tol: */
           if (norm8 <= norm_tol)
-            break;
+            {
+              PetscPrintf (PETSC_COMM_WORLD,
+                           "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+                           norm8, norm_tol, iter + 1, max_iter);
+              break;
+            }
 
         } /* iter loop */
       /*************************************/
@@ -1696,10 +1698,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           else
             a=a0;
 
-/*        if( !(iter%50) && iter>0 && NORM_REG>=5.0e-2) */
-/*          NORM_REG/=2.; */
-
-          PetscPrintf(PETSC_COMM_WORLD,"iter %d: function norms: %e ", iter+1, NORM_REG);
+          PetscPrintf (PETSC_COMM_WORLD, "%03d: ", iter + 1);
 
 
           /* H */
@@ -1933,7 +1932,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           PetscPrintf(PETSC_COMM_WORLD,"\n");
 
-          if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol) //&& NORM_REG<5.0e-2)
+          if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol)
             break;
 
         }
