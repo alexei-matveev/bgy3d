@@ -659,14 +659,23 @@ static void read_charge_density (DA da, const ProblemData *PD,
   PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
   /* Skip the first two lines */
   for (int i = 0; i < 2; i++)
-    fgets(line_buffer, sizeof(line_buffer), fp);
+    {
+      char *p = fgets (line_buffer, sizeof(line_buffer), fp);
+      assert (p != NULL);
+    }
 
   /* Atom numers and corner shifts */
-  fscanf(fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
+  {
+    int n = fscanf (fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
+    assert (n == 4);
+  }
 
   /* Grid numbers and spaces */
   FOR_DIM
-    fscanf(fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
+    {
+      int n = fscanf (fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
+      assert (n == 4);
+    }
 
   /* Scale the grid space */
   dx[0] *= ANGSTROM;
@@ -681,7 +690,8 @@ static void read_charge_density (DA da, const ProblemData *PD,
 
   for (int i = 0; i < AtomNum; i++)
     {
-      fscanf(fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
+      int n = fscanf (fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
+      assert (n == 5);
       x[i] *= ANGSTROM;
       y[i] *= ANGSTROM;
       z[i] *= ANGSTROM;
@@ -713,7 +723,8 @@ static void read_charge_density (DA da, const ProblemData *PD,
     for (int j = j0; j < j0 + nj; j++)
       for (int k = k0; k < k0 + nk; k++)
         {
-          fscanf(fp, "%lf", &vec[i][j][k]);
+          int n = fscanf (fp, "%lf", &vec[i][j][k]);
+          assert (n == 1);
           vec[i][j][k] *= fact * invB3;
         }
 
