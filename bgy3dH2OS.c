@@ -1025,7 +1025,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                               void (*density)(int k, const real x[k][3], real rho[k]),
                               Vec g[2])
 {
-  real norm;
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
   Vec dg[2], dg_acc, work;
@@ -1368,10 +1367,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           for (int i = 0; i < 2; i++)
             ComputeH2O_g (g[i], g0[i], dg[i]);
 
-          /* Again a  strange case of  literal constants 0 and  1. Why
-             not 1, 0? */
-          norm = ComputeCharge(&BHD, g[0], g[1]);
-
           /*
            * Fancy step size control.
            *
@@ -1424,7 +1419,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
           PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0]);
           PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1]);
-          PetscPrintf (PETSC_COMM_WORLD, "%e ", norm);
+
+          /* Again a  strange case of  literal constants 0 and  1. Why
+             not 1, 0? */
+          PetscPrintf (PETSC_COMM_WORLD, "%e ",
+                       ComputeCharge (&BHD, g[0], g[1]));
+
           PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
                        mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
@@ -1530,7 +1530,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   (void) g_ini;                 /* FIXME: interface obligation */
 
   real a1, a, damp, damp_LJ;
-  real count=0.0, norm;
+  real count = 0.0;
   int iter;
   Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2, f, gH, gO;
   Vec tH, tO, dg_newH, dg_newO;
@@ -1731,8 +1731,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 /*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
 /*        exit(1);    */
 
-          //dgH_norm = ComputeCharge(&BHD, gH, gO);
-          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm);
 /*        if(dgH_norm<1.0) */
 /*          VecScale(dg_new, 1.2); */
 /*        else if(dgH_norm >1.0) */
@@ -1791,8 +1789,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);    */
 
 
-          //dgO_norm = ComputeCharge(&BHD, gH, gO);
-          //PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm);
 /*        if(dgO_norm<1.0) */
 /*          VecScale(dg_new, 0.9); */
 /*        else if(dgO_norm >1.0) */
@@ -1875,8 +1871,10 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 /*          } */
           ComputeH2O_g( gH, g0H, dgH);
           ComputeH2O_g( gO, g0O, dgO);
-          norm = ComputeCharge(&BHD, gH, gO);
-          PetscPrintf(PETSC_COMM_WORLD, " %e ", norm);
+
+          PetscPrintf (PETSC_COMM_WORLD, " %e ",
+                       ComputeCharge (&BHD, gH, gO));
+
           //EnforceNormalizationCondition(&BHD, dgO, dgH, gO, gH);
 
 
