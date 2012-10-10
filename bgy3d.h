@@ -33,10 +33,9 @@
 #define SQR(a)   ((a)*(a))
 #define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
-/* which dimension of the vector equation is solved ? */
-/* UNUSED: #define VEC_DIM 1 */
-
-#define ANGSTROM 0.52917706 /* <- used in PG, 0.52917725750691647 */
+/*  One Bohr  is 0.53  Angstrom.  Bohrs, or  rather atomic  units, are
+    used in QM codes. This code uses historically angstroms: */
+#define BOHR 0.52917706 /* <- used in PG, 0.52917725750691647 */
 #define CUTOFF 1.0e+8
 #define SHIFT 0.0
 
