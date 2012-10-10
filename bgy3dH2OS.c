@@ -1661,9 +1661,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < 2; i++)
         VecScale (BHD.g_ini[i], BHD.PD->beta);
 
-      //Smooth_Function(&BHD, g0O, zpad-1, zpad, 0.0);
-      //Smooth_Function(&BHD, g0H, zpad-1, zpad, 0.0);
-
       ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.x_lapl[0], zpad, NULL);
       ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.x_lapl[1], zpad, NULL);
       Zeropad_Function(&BHD, g0O, zpad, 0.0);
@@ -1672,10 +1669,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
       ComputeH2O_g( g[0], g0H, dgH);
       ComputeH2O_g( g[1], g0O, dgO);
-
-
-  /*     VecCopy(BHD.g2[0][1], g[0]);  */
-/*       VecCopy(BHD.g2[1][1], g[1]);  */
 
       a=a0;
       a1=a0;
@@ -1705,51 +1698,26 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII( &BHD, g[0], r_HH, g[0], tH , dg_new2, f, zpad);
-          //Compute_dg_H2O_intra_lnIII(&BHD, g[0], tH, r_HH, dg_new2, f);
-          //Compute_dg_H2O_intra_lnII(&BHD, g[0], tH, r_HH, dg_new2, f);
+
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
           Solve_NormalizationH2O_smallII( &BHD, g[0], r_HO, g[1], tO , dg_new2, f, zpad);
-          //Compute_dg_H2O_intra_lnIII(&BHD, g[1], tO, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnII(&BHD, g[1], tO, r_HO, dg_new2, f);
+
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*        exit(1);    */
-
-/*        if(dgH_norm<1.0) */
-/*          VecScale(dg_new, 1.2); */
-/*        else if(dgH_norm >1.0) */
-/*          VecScale(dg_new, 0.8); */
-
           /* Copy  the electrostatic potential  scaled by  the solvent
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
-/*        dgH_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgH_norm); */
-          //VecShift(dg_new, -dgH_norm);
-          //ImposeBoundaryCondition( &BHD, dg_new);
 
           ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[0], zpad, &iteri);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
 
           PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
-
-
           VecCopy(dg_new, dg_newH);
-
-/*        VecCopy(dgH, f); */
-/*        VecAXPBY(dgH, a, (1-a), dg_new); */
-/*        VecAXPY(f, -1.0, dgH); */
-/*        VecNorm(f, NORM_INFINITY, &dgH_norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"H= %e  ", dgH_norm/a); */
-          //ComputeH2O_g( g[0], g0H, dgH);
-
 
           /* O */
           VecSet(dg_new,0.0);
@@ -1765,72 +1733,25 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[0], BHD.u2_fft[0][1], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-
-
           Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(&BHD, g[0], tH, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(&BHD, g[0], tH, r_HO, dg_new2, f);
+
           VecAXPY(dg_new, 2.0, dg_new2);
-
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);      */
-/*        exit(1);    */
-
-
-/*        if(dgO_norm<1.0) */
-/*          VecScale(dg_new, 0.9); */
-/*        else if(dgO_norm >1.0) */
-/*          VecScale(dg_new, 1.1); */
 
           /* Copy  the electrostatic potential  scaled by  the solvent
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
-/*        dgO_norm = ImposeBoundaryConditionII(&BHD, dg_new, zpad); */
-/*        PetscPrintf(PETSC_COMM_WORLD, " %e ", dgO_norm); */
-          //VecShift(dg_new, -dgO_norm);
-          //ImposeBoundaryCondition( &BHD, dg_new);
-
-          //ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, tO, zpad, &iteri);
 
           ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[1], zpad, &iteri);
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
           //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
           PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
-/*        if(iter==51) */
-/*          { */
-/*            VecView(tO,PETSC_VIEWER_STDERR_WORLD);  */
-/*            exit(1); */
-/*          }  */
-
           VecCopy(dg_new, dg_newO);
-
-
-/*        VecCopy(dgO, f); */
-/*        VecAXPBY(dgO, a, (1-a), dg_new); */
-/*        VecAXPY(f, -1.0,  dgO); */
-/*        VecNorm(f, NORM_INFINITY, &dgO_norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"O= %e  ", dgO_norm/a); */
-          //ComputeH2O_g( g[1], g0O, dgO);
-
-/*        if(iter<=10) */
-/*          a=0.01; */
-/*        else */
-/*          a=0.05; */
-/*        if( iter==0) */
-/*          { */
-/*            VecScale(dg_newO, a); */
-/*            VecScale(dg_newH, a); */
-/*            EnforceNormalizationCondition(&BHD, dg_newO, dg_newH, g[1], g[0]); */
-/*            a=1.0; */
-/*          } */
 
           /* Move dgH */
           VecCopy(dgH, f);
-/*        VecAXPY(dg_histH, 1.0, dg_newH); */
-/*        norm = (iter)%50 + 1; */
-
           VecAXPBY(dgH, a, (1-a), dg_newH);
           VecAXPY(f, -1.0, dgH);
           VecNorm(f, NORM_INFINITY, &dgH_norm);
@@ -1841,23 +1762,11 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           if (1)
             {
               VecCopy(dgO, f);
-/*            VecAXPY(dg_histO, 1.0, dg_newO); */
-/*            norm = (iter)%20 + 1; */
               VecAXPBY(dgO, a, (1-a), dg_newO);
               VecAXPY(f, -1.0,  dgO);
               VecNorm(f, NORM_INFINITY, &dgO_norm);
               PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
             }
-          //a=a+0.002;
-/*        if( !((iter+1)%50) && iter>0) */
-/*          { */
-/*            a=0.01; */
-/*            PetscPrintf(PETSC_COMM_WORLD,"Adding history_vec..."); */
-/*            VecAXPY(dgO, -2.0, dg_histO); */
-/*            VecAXPY(dgH, -2.0, dg_histH); */
-/*            VecSet(dg_histO, 0.0); */
-/*            VecSet(dg_histH, 0.0); */
-/*          } */
           ComputeH2O_g( g[0], g0H, dgH);
           ComputeH2O_g( g[1], g0O, dgO);
 
@@ -1865,26 +1774,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
                        ComputeCharge (PD, 2, solvent, g, f));
 
-          //EnforceNormalizationCondition(&BHD, dgO, dgH, g[1], g[0]);
-
-
-/*        if( !(iter%10) &&iter>0  ) */
-/*          { */
-/*            EnforceNormalizationCondition(&BHD, dgO, dgH, g[1], g[0]); */
-
-/*          } */
-
-/*        if(dgO_norm/a<0.1 && dgH_norm/a<0.1) */
-/*          { */
-/*            EnforceNormalizationCondition(&BHD, dgO, dgH, g[1], g[0]); */
-/*            a0=0.1; */
-/*          } */
-
-/*        if( fabs(norm-1.0) > 0.05 ) */
-/*          a=0.005; */
-/*        else  */
-/*          a=0.01; */
-           /* (fancy) step size control */
+          /* (fancy) step size control */
           mycount++;
           if( ((iter-1)%10) &&
               (dgH_old<dgH_norm/a || dgO_old<dgO_norm/a ) )
@@ -1916,15 +1806,12 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           dgH_old = dgH_norm/a;
           dgO_old = dgO_norm/a;
 
-          /*********************************/
-
           PetscPrintf(PETSC_COMM_WORLD,"\n");
 
           if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol)
             break;
-
         }
-      /*************************************/
+
       /* output */
       namecount++;
       sprintf(nameH, "vec0-%d.m", namecount-1);
@@ -1935,8 +1822,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       bgy3d_save_vec_ascii (nameO, g[1]); /* g_O */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
-      /************************************/
-
       /* save g to binary file */
       if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
@@ -1945,9 +1830,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
-
-
-
 
   VecDestroy(g[0]);
   VecDestroy(g[1]);
