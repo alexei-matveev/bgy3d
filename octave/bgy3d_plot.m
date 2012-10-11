@@ -34,10 +34,7 @@ function bgy3d_plot (path)
   colorbar ();
 
   ## Append .png to the input path:
-  len = size (path, 2);         # FIXME: is there a len() function?
-  out = blanks (len + 4);
-  out (1:len) = path;
-  out (len+1:len+4) = ".png";
+  out = [path, ".png"];
 
   ## This saves the figure in a format derived from the file extension:
   print (out);
