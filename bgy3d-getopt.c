@@ -87,8 +87,10 @@ void bgy3d_save_vec_ascii (const char file[], const Vec vec)
   PetscViewer viewer;
 
   PetscViewerASCIIOpen (PETSC_COMM_WORLD, file, &viewer);
-  PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB);
+  /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB); */
+  /* PetscViewerSetFormat (viewer, PETSC_VIEWER_DEFAULT); */
   /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */
+  PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_COMMON);
   VecView (vec, viewer);
   PetscViewerDestroy (viewer);
 }
