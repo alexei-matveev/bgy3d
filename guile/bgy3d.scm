@@ -412,12 +412,26 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; Interpretes each argument as the name of the solute and runs first
-;;; a pure solvent then a solute calculations:
+;;; a pure solvent then all the solute calculations:
 ;;;
 (define (new-main argv)
-  ;; (pretty-print argv)
-  (let ((run (lambda (name)
-               (apply bgy3d-run (find-solute name)))))
-    (map run (cdr argv))))
+  (let ((options (getopt-long argv option-spec)))
+    (let ((args                  ; positional arguments (solute names)
+           (option-ref options '() '()))
+          (settings               ; defaults updated from command line
+           (update-settings bgy3d-settings options)))
+      ;;
+      ;; Check  if we can find  the solutes by names  early, typos are
+      ;; common:
+      ;;
+      (let ((solutes (map find-solute args)))
+        ;;
+        ;; Only then run pure solvent:
+        ;;
+        (bgy3d-run-solvent settings)
+        (map (lambda (solute)
+               (let ((g1 (bgy3d-run-solute solute settings)))
+                 (map bgy3d-vec-destroy g1)))
+             solutes)))))
 
 
