@@ -10,6 +10,7 @@
             bgy3d-run))
 
 (use-modules (srfi srfi-1)              ; list manipulation
+             (ice-9 match)
              (ice-9 pretty-print)
              (ice-9 getopt-long))
 
@@ -362,6 +363,20 @@ computes the sum of all vector elements."
      (value #f))
     (BGYM2Site                          ; solute + solvent run
      (value #f)))))
+
+;;;
+;;; Returns  new   settings  with   updated  fields  taken   from  the
+;;; getopt-long options:
+;;;
+(define (update-settings settings options)
+  (let ((update-pair                    ; a function ...
+         (match-lambda
+          ((key . value)                ; that takes a pair ...
+           (let ((op (option-ref options key "")))
+             (cons key                     ; and returns updated pair.
+                   (or (string->number op) ; converts "" -> #f
+                       value)))))))
+    (map update-pair settings)))
 
 ;;;
 ;;; FIXME: at  the moment this  function only emulates the  minimum of
