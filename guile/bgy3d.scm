@@ -131,28 +131,25 @@
 
 ;;;
 ;;; Update site force field parameters by replacing them with the data
-;;; from a table. The name of the site serves as a key to lookup table
-;;; entries. The table is stored in guile/solutes.scm as a fake solute
-;;; with all possible sites listed once.
+;;; from a  table identified  by string table-name.   The name  of the
+;;; site serves as a key to lookup table entries.  The table is stored
+;;; in  guile/solutes.scm as  a fake  solute with  all  possible sites
+;;; listed once.
 ;;;
-(define (update-sites solute)
+(define (update-sites table-name sites)
   (let* ((table                     ; fake solute with site-parameters
-          (solute-sites (find-solute "bgy3d")))
+          (solute-sites (find-solute table-name)))
          (update-one
           (lambda (site)
-            ;; (pretty-print site)
             (let* ((name (site-name site))
                    (table-site (assoc name table)))
-              (make-site name                          ; original
-                         (site-position site)          ; original
-                         (site-sigma table-site)       ; from table
-                         (site-epsilon table-site)     ; from table
-                         (site-charge site))))))       ; original
-    ;; (pretty-print solutes)
-    ;; (pretty-print table)
-    (make-solute (solute-name solute)
-                 (map update-one
-                      (solute-sites solute)))))
+              (make-site name                      ; original
+                         (site-position site)      ; original
+                         (site-sigma table-site)   ; from table
+                         (site-epsilon table-site) ; from table
+                         (site-charge site))))))   ; original
+    (map update-one sites)))
+
 
 ;;;
 ;;; Will  not   work  with   distributed  vectors.   The   problem  is
@@ -280,14 +277,12 @@ computes the sum of all vector elements."
 ;;;
 (define (bgy3d-run name sites funptr)
   "To be called from QM code."
+  (or (equal? name "bgy3d")             ; only when called by PG
+      (error "Only for use from QM!" name sites funptr))
   (let ((settings bgy3d-settings)
-        (solute (make-solute name sites))) ; incomplete solute descr
-    (or (equal? name "bgy3d")              ; only when called by PG
-        (error "Only for use from QM!" name))
-    ;;
-    ;; Update force-field params:
-    ;;
-    (set! solute (update-sites solute))
+        (solute (make-solute name
+                             (update-sites name
+                                           sites))))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
