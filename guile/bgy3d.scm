@@ -152,8 +152,9 @@
 
 
 ;;;
-;;; Will  not   work  with   distributed  vectors.   The   problem  is
-;;; bgy3d-vec-ref (VecGetValues) does not either.
+;;; Will work inefficiently with  distributed vectors.  The problem is
+;;; bgy3d-vec-ref is  collective.  The Petsc  primitive VecGetValues()
+;;; only works for local section.
 ;;;
 (define (vec-fold kons knil vec)
   "A (left) fold of a (Petsc) vector.  E.g. (vec-fold + 0.0 vec)
