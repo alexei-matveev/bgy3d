@@ -278,15 +278,16 @@ computes the sum of all vector elements."
 ;;;
 ;;; This hook is called from PG:
 ;;;
-(define (bgy3d-run name sites . rest)
+(define (bgy3d-run name sites funptr)
   "To be called from QM code."
   (let ((settings bgy3d-settings)
-        (solute (list name sites))    ; incomplete solute descr
-        (funptr (if (null? rest)      ; integer function pointer
-                    0                 ; only present if called from PG
-                    (first rest))))
-    (if (equal? name "bgy3d")                ; only when called by PG
-        (set! solute (update-sites solute))) ; update force-field params
+        (solute (make-solute name sites))) ; incomplete solute descr
+    (or (equal? name "bgy3d")              ; only when called by PG
+        (error "Only for use from QM!" name))
+    ;;
+    ;; Update force-field params:
+    ;;
+    (set! solute (update-sites solute))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
@@ -437,3 +438,4 @@ computes the sum of all vector elements."
                (let ((g1 (bgy3d-run-solute solute settings)))
                  (map bgy3d-vec-destroy g1)))
              solutes)))))
+
