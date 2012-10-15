@@ -359,6 +359,8 @@ computes the sum of all vector elements."
     (lambda                             ; mixing parameter
      (value #t)
      (predicate (unquote string->number)))
+    (solvent
+     (value #f))
     (BGY2Site                           ; pure solvent run
      (value #f))
     (BGYM2Site                          ; solute + solvent run
@@ -426,12 +428,12 @@ computes the sum of all vector elements."
       ;;
       (let ((solutes (map find-solute args)))
         ;;
-        ;; Only then run pure solvent:
+        ;; Only then run pure solvent, if --solvent was present in the
+        ;; command line:
         ;;
-        (bgy3d-run-solvent settings)
+        (if (option-ref options 'solvent #f)
+            (bgy3d-run-solvent settings))
         (map (lambda (solute)
                (let ((g1 (bgy3d-run-solute solute settings)))
                  (map bgy3d-vec-destroy g1)))
              solutes)))))
-
-
