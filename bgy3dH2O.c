@@ -434,9 +434,9 @@ void Zeropad_Function (const State *BHD, Vec g, real ZP, real shift)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
         for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
           {
-            if ((i[0] <= border || i[0] >= N[0] - border) ||
-                (i[1] <= border || i[1] >= N[1] - border) ||
-                (i[2] <= border || i[2] >= N[2] - border))
+            if (i[0] <= border || i[0] >= N[0] - border ||
+                i[1] <= border || i[1] >= N[1] - border ||
+                i[2] <= border || i[2] >= N[2] - border)
               g_vec[i[2]][i[1]][i[0]] = shift;
           }
     DAVecRestoreArray (BHD->da, g, &g_vec);
