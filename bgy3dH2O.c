@@ -405,48 +405,42 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-void Zeropad_Function(const State *BHD, Vec g, real ZP, real shift)
+/* This function appears to set  everything in the 3d-array g[:, :, :]
+   outside of the central section  g[a:N-a, a:N-a, a:N-a] to the value
+   "shift" (typically 0.0, less often 1.0). With the value of ZP equal
+   to  the (half)  the box  size  L the  value of  the local  variable
+   "border" is 1. */
+void Zeropad_Function (const State *BHD, Vec g, real ZP, real shift)
 {
-  DA da;
-  int x[3], n[3], i[3], border, N[3];
-  PetscScalar ***g_vec;
-
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
+  const int *N = PD->N;         /* N[3] */
 
-  FOR_DIM
-    N[dim] = PD->N[dim];
+  const real size = PD->interval[1] - PD->interval[0];
+  const int border = 1 + (int) ceil ((size - 2.0 * ZP) / PD->h[0] / 2.0);
 
-  border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*ZP))/PD->h[0]/2. );
+  /* Holds for all regression tests! */
+  /* assert (border == 1); */
 
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  {
+    int x[3], n[3], i[3];
+    PetscScalar ***g_vec;
 
+    /* Get local portion of the grid */
+    DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DAVecGetArray(da, g, &g_vec);
-   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-
-          if( ( i[0]<=border+1 || i[0]>=N[0]-1-border) ||
-              ( i[1]<=border+1 || i[1]>=N[1]-1-border) ||
-              ( i[2]<=border+1 || i[2]>=N[2]-1-border) )
-            g_vec[i[2]][i[1]][i[0]] = shift;
-
-/*        FOR_DIM */
-/*          r[dim] = i[dim]*h[dim]+interval[0]; */
-/*        r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) ); */
-
-/*        if( r[0] < ZP && r[0] >= -ZP && */
-/*            r[1] < ZP && r[1] >= -ZP && */
-/*            r[2] < ZP && r[2] >= -ZP ) */
-/*          g_vec[i[2]][i[1]][i[0]] = g_vec[i[2]][i[1]][i[0]]; */
-/*        else  */
-/*          g_vec[i[2]][i[1]][i[0]] = shift; */
-        }
-  DAVecRestoreArray(da, g, &g_vec);
+    DAVecGetArray (BHD->da, g, &g_vec);
+    /* loop over local portion of grid */
+    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+          {
+            if ((i[0] <= border || i[0] >= N[0] - border) ||
+                (i[1] <= border || i[1] >= N[1] - border) ||
+                (i[2] <= border || i[2] >= N[2] - border))
+              g_vec[i[2]][i[1]][i[0]] = shift;
+          }
+    DAVecRestoreArray (BHD->da, g, &g_vec);
+  }
 }
 
 /* Long range pair  potential Vec uc is intent(out)  here, same as its
