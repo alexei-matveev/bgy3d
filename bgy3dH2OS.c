@@ -244,7 +244,7 @@ static void finalize_state (State *BHD)
 
 #ifdef L_BOUNDARY
 /* Initialize M-Matrix with appropriate stencil */
-void InitializeLaplaceMatrix(State *BHD, real zpad)
+void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
   Mat M;
   DA da;
@@ -253,7 +253,7 @@ void InitializeLaplaceMatrix(State *BHD, real zpad)
   PetscScalar v[3], vb=1.0;
   real h[3];
 
-  PetscPrintf(PETSC_COMM_WORLD,"Assembling Matrix...");
+  PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
   da = BHD->da;
   const ProblemData *PD = BHD->PD;
@@ -325,7 +325,7 @@ void InitializeLaplaceMatrix(State *BHD, real zpad)
   MatAssemblyBegin(M,MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(M,MAT_FINAL_ASSEMBLY);
 
-  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
 
 void InitializeKSPSolver(State *BHD)
