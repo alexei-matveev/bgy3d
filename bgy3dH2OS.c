@@ -282,9 +282,9 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
             }
 
           /* Boundary */
-          if (i[0] <= border || i[1] <= border || i[2] <= border)
-            MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
-          else if (i[0] >= N[0] - border || i[1] >= N[1] - border || i[2] >= N[2] - border)
+          if (i[0] <= border || i[0] >= N[0] - border ||
+              i[1] <= border || i[1] >= N[1] - border ||
+              i[2] <= border || i[2] >= N[2] - border)
             MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
           else
             {
