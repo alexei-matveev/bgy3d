@@ -46,7 +46,11 @@ void bgy3d_fft_init_da (const int N[3],
   /* Create Petsc Distributed Array according to fftw data distribution*/
   lz = (PetscInt*) malloc(np*sizeof(*lz));
 
-  MPI_Allgather( &local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+  {
+    int ierr = MPI_Allgather (&local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+    assert (ierr == MPI_SUCCESS);
+  }
+
   ly[0] = N[1];
   lx[0] = N[2];
 
