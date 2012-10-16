@@ -49,7 +49,7 @@
     (norm-tol . 1.0e-2)                 ; convergence threshold
     (max-iter . 320)                    ; max number of iterations
     (L . 10.0)                          ; [-L, L] gives the box size
-    (zpad . 10.0)                       ; ??
+    (zpad . 10.0)                       ; affects boundary condition
     (damp-start . 1.0)                  ; scaling factor?
     (lambda . 0.02)))                   ; not the scheme lambda
 
@@ -323,37 +323,16 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; Specifications of command line  flags common for old- and new-main
-;;; for use with getopt-long:
+;;; for  use with  getopt-long. All  of these  happen to  be  real- or
+;;; integer numbers:
 ;;;
 (define option-spec-base
-  (quasiquote
-   ((N                                  ; grid dimension
-     (value #t)
-     (predicate (unquote string->number)))
-    (rho                                ; solvent density
-     (value #t)
-     (predicate (unquote string->number)))
-    (beta                               ; inverse temperature
-     (value #t)
-     (predicate (unquote string->number)))
-    (norm-tol                           ; convergence threshold
-     (value #t)
-     (predicate (unquote string->number)))
-    (max-iter                           ; max number of iterations
-     (value #t)
-     (predicate (unquote string->number)))
-    (L                                  ; [-L, L] gives the box size
-     (value #t)
-     (predicate (unquote string->number)))
-    (zpad                               ; ??
-     (value #t)
-     (predicate (unquote string->number)))
-    (damp-start                         ; scaling factor?
-     (value #t)
-     (predicate (unquote string->number)))
-    (lambda                             ; mixing parameter
-     (value #t)
-     (predicate (unquote string->number))))))
+  (map (lambda (op)
+         (quasiquote
+          ((unquote op)
+           (value #t)
+           (predicate (unquote string->number)))))
+       (map car bgy3d-settings)))       ; all of them are numbers
 
 (define option-spec-new
   (quasiquote
@@ -448,4 +427,3 @@ computes the sum of all vector elements."
                (let ((g1 (bgy3d-run-solute solute settings)))
                  (map bgy3d-vec-destroy g1)))
              solutes)))))
-
