@@ -1623,7 +1623,11 @@ Vec BGY3dDiv_solve(const ProblemData *PD, Vec g_ini)
     DAGetMatrix( BDD->da, MATSEQAIJ, &SM);
   else
     DAGetMatrix( BDD->da, MATMPIAIJ, &SM);
-  MatSetOption(SM, MAT_NO_NEW_NONZERO_LOCATIONS);
+#if PETSC_VERSION_MAJOR > 2
+  MatSetOption (SM, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+#else  /* Debian Lenny! */
+  MatSetOption (SM, MAT_NO_NEW_NONZERO_LOCATIONS);
+#endif
 
   /* set initial guess*/
   VecSet(dg,0.0);
@@ -1784,7 +1788,11 @@ Vec BGY3dDiv_solve2(const ProblemData *PD, Vec g_ini)
     DAGetMatrix( BDD->da, MATSEQAIJ, &SM);
   else
     DAGetMatrix( BDD->da, MATMPIAIJ, &SM);
-  MatSetOption(SM, MAT_NO_NEW_NONZERO_LOCATIONS);
+#if PETSC_VERSION_MAJOR > 2
+  MatSetOption (SM, MAT_NEW_NONZERO_LOCATIONS, PETSC_FALSE);
+#else  /* Debian Lenny! */
+  MatSetOption (SM, MAT_NO_NEW_NONZERO_LOCATIONS);
+#endif
 
   /* set initial guess*/
   VecSet(dg,1.0);
