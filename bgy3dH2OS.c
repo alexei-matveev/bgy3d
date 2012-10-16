@@ -293,9 +293,18 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                   /* position in matrix */
                   switch(dim)
                     {
-                    case 0: col[0].i -= 1; col[2].i += 1;break;
-                    case 1: col[0].j -= 1; col[2].j += 1;break;
-                    case 2: col[0].k -= 1; col[2].k += 1;break;
+                    case 0:
+                      col[0].i -= 1;
+                      col[2].i += 1;
+                      break;
+                    case 1:
+                      col[0].j -= 1;
+                      col[2].j += 1;
+                      break;
+                    case 2:
+                      col[0].k -= 1;
+                      col[2].k += 1;
+                      break;
                     }
                   /* values to enter */
                   v[0] = +1.0 / SQR (h[dim]);
@@ -306,11 +315,19 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                   MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
                   switch(dim)
                     {
-                    case 0: col[0].i += 1; col[2].i -= 1;break;
-                    case 1: col[0].j += 1; col[2].j -= 1;break;
-                    case 2: col[0].k += 1; col[2].k -= 1;break;
+                    case 0:
+                      col[0].i += 1;
+                      col[2].i -= 1;
+                      break;
+                    case 1:
+                      col[0].j += 1;
+                      col[2].j -= 1;
+                      break;
+                    case 2:
+                      col[0].k += 1;
+                      col[2].k -= 1;
+                      break;
                     }
-
                 }
             }
         }
