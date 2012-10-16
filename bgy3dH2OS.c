@@ -246,7 +246,6 @@ static void finalize_state (State *BHD)
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
-  int x[3], n[3], i[3];
   MatStencil col[3], row;
   PetscScalar v[3], vb=1.0;
 
@@ -254,19 +253,29 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
 
   const DA da = BHD->da;
   const ProblemData *PD = BHD->PD;
+  const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
+
   Mat M = BHD->M;
   MatZeroEntries(M);
 
   const real size = PD->interval[1] - PD->interval[0];
-  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
+  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / h[0] / 2.0);
+
+  /* This code constructs (a compact  representation of) the N^3 x N^3
+     matrix  M.  An identity  or another  diagonal matrix  will always
+     have  row == col.   The Laplace  matrix is  sparse as  in "nearly
+     diagonal".  col[3] will be used  to hold the coordinated of three
+     stencil points in a row. Note that "3" is not the space dimension
+     but  rather  the  stencil  size  for  second  derivative  in  one
+     dimension.   The  central  point,   in  col[1]  ==  *(col  +  1),
+     corresponds to the current grid point with indices i[]. */
 
   /* Get local portion of the grid */
+  int x[3], n[3], i[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
-
-  /* loop over local portion of grid */
+  /* Loop over local portion of grid: */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
