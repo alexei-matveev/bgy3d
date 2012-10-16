@@ -58,12 +58,14 @@ void bgy3d_fft_init_da (const int N[3],
   const PetscInt stencil_width = 0;
 #endif
 
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
-             N[0], N[1], N[2],
-             1, 1, np,
-             1, stencil_width,
-             lx, ly, lz,
-             da);
+  DACreate3d (PETSC_COMM_WORLD,
+              DA_NONPERIODIC,
+              DA_STENCIL_STAR,
+              N[0], N[1], N[2],
+              1, 1, np,
+              1, stencil_width,
+              lx, ly, lz,
+              da);
 
   /* In multigird case, also construct distributed array discriptor of
      half the size. Used only ifdef L_BOUNDARY_MG: */
@@ -72,12 +74,13 @@ void bgy3d_fft_init_da (const int N[3],
           lz[p] /= 2;
       lx[0] /= 2;
       ly[0] /= 2;
-      DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
-                 N[0] / 2, N[1] / 2, N[2] / 2,
-                 1, 1, np,
-                 1, stencil_width,
-                 lx, ly, lz,
-                 da_mg);
+      DACreate3d (PETSC_COMM_WORLD,
+                  DA_NONPERIODIC, DA_STENCIL_STAR,
+                  N[0] / 2, N[1] / 2, N[2] / 2,
+                  1, 1, np,
+                  1, stencil_width,
+                  lx, ly, lz,
+                  da_mg);
   }
 
   DAGetCorners(*da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
