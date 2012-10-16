@@ -22,7 +22,6 @@ void bgy3d_fft_init_da (const int N[3],
   int x[3], n[3];
   int np, id;
   int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
-  PetscInt lx[1], ly[1], *lz;
 
   /* Initialize parallel stuff: fftw + petsc */
   *fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
@@ -44,8 +43,7 @@ void bgy3d_fft_init_da (const int N[3],
   MPI_Comm_rank (PETSC_COMM_WORLD, &id);
 
   /* Create Petsc Distributed Array according to fftw data distribution*/
-  lz = (PetscInt*) malloc(np*sizeof(*lz));
-
+  PetscInt lx[1], ly[1], lz[np]; /* sum (lz[:]) == N[2] */
   {
     int ierr = MPI_Allgather (&local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
     assert (ierr == MPI_SUCCESS);
@@ -93,8 +91,6 @@ void bgy3d_fft_init_da (const int N[3],
       PetscSynchronizedFlush(PETSC_COMM_WORLD);
     }
   assert (n[0] * n[1] * n[2] == total_local_size);
-
-  free(lz);
 }
 
 fftw_complex *bgy3d_fft_malloc (DA da)
