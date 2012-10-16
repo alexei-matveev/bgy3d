@@ -246,8 +246,6 @@ static void finalize_state (State *BHD)
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
-  MatStencil col[3], row;
-  PetscScalar v[3];
   const PetscScalar one = 1.0;
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
@@ -281,18 +279,12 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          MatStencil row;
           /* This  is the  point  on the  diagonal  of the  N^3 x  N^3
              matrix: */
           row.i = i[0];
           row.j = i[1];
           row.k = i[2];
-          /* Loop over stencil points, not over space dimensions: */
-          for (int p = 0; p < 3; p++)
-            {
-              col[p].i = row.i;
-              col[p].j = row.j;
-              col[p].k = row.k;
-            }
 
           /* Boundary */
           if (i[0] <= border || i[0] >= N[0] - border ||
@@ -305,6 +297,15 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
             }
           else
             {
+              MatStencil col[3];
+              /* Loop over stencil points, not over space dimensions: */
+              for (int p = 0; p < 3; p++)
+                {
+                  col[p].i = row.i;
+                  col[p].j = row.j;
+                  col[p].k = row.k;
+                }
+
               FOR_DIM
                 {
                   /* position in matrix */
@@ -323,11 +324,10 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                       col[2].k += 1;
                       break;
                     }
-                  /* values to enter */
-                  v[0] = +1.0 / SQR (h[dim]);
-                  v[1] = -2.0 / SQR (h[dim]);
-                  v[2] = +1.0 / SQR (h[dim]);
 
+                  /* Values to enter for the Laplacian stencil: */
+                  const real h2 = SQR (h[dim]);
+                  const PetscScalar v[3] = {1.0 / h2, -2.0 / h2, 1.0 / h2};
 
                   MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
                   switch(dim)
