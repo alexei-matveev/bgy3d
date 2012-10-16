@@ -98,8 +98,12 @@ ProblemData bgy3d_problem_data (void)
     PD.norm_tol = 1.0e-2;
     bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
-    /* Zeropad */
-    PD.zpad = 1000.0;
+    /*
+      Zeropad.  FIXME:  The  code   appears  to  break  when  zpad  >
+      L. Regression tests have them  equal, so make it the default to
+      have one command line flag fewer:
+    */
+    PD.zpad = maxL;
     bgy3d_getopt_real ("--zpad", &PD.zpad);
 
     /* Parallel staff: */
