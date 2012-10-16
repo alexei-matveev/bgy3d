@@ -246,52 +246,46 @@ static void finalize_state (State *BHD)
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
-  Mat M;
-  DA da;
-  int x[3], n[3], i[3], N[3], border;
-  MatStencil col[3],row;
+  int x[3], n[3], i[3];
+  MatStencil col[3], row;
   PetscScalar v[3], vb=1.0;
-  real h[3];
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
-  da = BHD->da;
+  const DA da = BHD->da;
   const ProblemData *PD = BHD->PD;
-  M = BHD->M;
+  Mat M = BHD->M;
   MatZeroEntries(M);
 
-
-  border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*zpad))/PD->h[0]/2. );
-
+  const real size = PD->interval[1] - PD->interval[0];
+  const int border = (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  FOR_DIM
-    N[dim] = PD->N[dim];
-  FOR_DIM
-    h[dim] = PD->h[dim];
+  const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
 
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
           FOR_DIM
             {
-              col[dim].i=i[0];
-              col[dim].j=i[1];
-              col[dim].k=i[2];
-              row.i=i[0];
-              row.j=i[1];
-              row.k=i[2];
+              col[dim].i = i[0];
+              col[dim].j = i[1];
+              col[dim].k = i[2];
+              row.i = i[0];
+              row.j = i[1];
+              row.k = i[2];
             }
 
           /* Boundary */
-          if( i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
-            MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
-          else if( i[0]>=N[0]-1-border || i[1]>=N[1]-1-border || i[2]>=N[2]-1-border)
-            MatSetValuesStencil(M,1,&row,1,col+1,&vb,ADD_VALUES);
+          if (i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
+            MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
+          else if (i[0] >= N[0] - 1 - border || i[1] >= N[1] - 1 - border || i[2] >= N[2] - 1 - border)
+            MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
           else
             {
               FOR_DIM
@@ -304,12 +298,12 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                     case 2: col[0].k -= 1; col[2].k += 1;break;
                     }
                   /* values to enter */
-                  v[0]=1.0/SQR(h[dim]);
-                  v[1]=-2.0/SQR(h[dim]);
-                  v[2]=+1.0/SQR(h[dim]);
+                  v[0] = +1.0 / SQR (h[dim]);
+                  v[1] = -2.0 / SQR (h[dim]);
+                  v[2] = +1.0 / SQR (h[dim]);
 
 
-                  MatSetValuesStencil(M,1,&row,3,col,v,ADD_VALUES);
+                  MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
                   switch(dim)
                     {
                     case 0: col[0].i += 1; col[2].i -= 1;break;
@@ -322,8 +316,8 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
         }
 
 
-  MatAssemblyBegin(M,MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd(M,MAT_FINAL_ASSEMBLY);
+  MatAssemblyBegin (M, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd (M, MAT_FINAL_ASSEMBLY);
 
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
