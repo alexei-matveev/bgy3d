@@ -322,14 +322,12 @@ computes the sum of all vector elements."
       (map bgy3d-vec-destroy g1))))
 
 ;;;
-;;; Specifications of command line flags for use with getopt-long:
+;;; Specifications of command line  flags common for old- and new-main
+;;; for use with getopt-long:
 ;;;
-(define option-spec
+(define option-spec-base
   (quasiquote
-   ((solute                             ; a string
-     (value #t)
-     (predicate (unquote find-solute)))
-    (N                                  ; grid dimension
+   ((N                                  ; grid dimension
      (value #t)
      (predicate (unquote string->number)))
     (rho                                ; solvent density
@@ -355,13 +353,29 @@ computes the sum of all vector elements."
      (predicate (unquote string->number)))
     (lambda                             ; mixing parameter
      (value #t)
-     (predicate (unquote string->number)))
-    (solvent
+     (predicate (unquote string->number))))))
+
+(define option-spec-new
+  (quasiquote
+   ((solvent
      (value #f))
+    (unquote-splicing option-spec-base)))) ; common options
+
+;;;
+;;; FIXME: ./runbgy.scm invokes old-main at the moment, so that it has
+;;; to accept  the options of  the new-main. This leads  to unhelpfull
+;;; error messages:
+;;;
+(define option-spec-all
+  (quasiquote
+   ((solute                             ; a string
+     (value #t)
+     (predicate (unquote find-solute)))
     (BGY2Site                           ; pure solvent run
      (value #f))
     (BGYM2Site                          ; solute + solvent run
-     (value #f)))))
+     (value #f))
+    (unquote-splicing option-spec-new)))) ; new and common
 
 ;;;
 ;;; Returns  new   settings  with   updated  fields  taken   from  the
@@ -383,7 +397,7 @@ computes the sum of all vector elements."
 ;;; functionality is in flux.
 ;;;
 (define (old-main argv)
-  (let ((opts (getopt-long argv option-spec)))
+  (let ((opts (getopt-long argv option-spec-all)))
     ;; (pretty-print opts)
     (cond
      ;;
@@ -414,7 +428,7 @@ computes the sum of all vector elements."
 ;;; a pure solvent then all the solute calculations:
 ;;;
 (define (new-main argv)
-  (let ((options (getopt-long argv option-spec)))
+  (let ((options (getopt-long argv option-spec-new)))
     (let ((args                  ; positional arguments (solute names)
            (option-ref options '() '()))
           (settings               ; defaults updated from command line
