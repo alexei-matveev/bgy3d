@@ -408,15 +408,15 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 /* This function appears to set  everything in the 3d-array g[:, :, :]
    outside of the central section g[i, j, k] with b < i < N - b, (same
    for  j, and  k) to  the value  "shift" (typically  0.0,  less often
-   1.0). With the value  of ZP equal to the (half) the  box size L the
+   1.0). With the value of zpad equal to the (half) the box size L the
    value of the local variable "border" is 1. */
-void Zeropad_Function (const State *BHD, Vec g, real ZP, real shift)
+void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
 
   const real size = PD->interval[1] - PD->interval[0];
-  const int border = 1 + (int) ceil ((size - 2.0 * ZP) / PD->h[0] / 2.0);
+  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
 
   /* Holds for all regression tests! */
   /* assert (border == 1); */
