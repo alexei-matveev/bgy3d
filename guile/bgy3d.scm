@@ -3,16 +3,15 @@
 ;;; namespace  we put bgy3d-*  functions into  this module.
 ;;;
 (define-module (guile bgy3d)
+  #:use-module (srfi srfi-1)            ; list manipulation
+  #:use-module (ice-9 match)
+  #:use-module (ice-9 pretty-print)
+  #:use-module (ice-9 getopt-long)
   #:export (new-main
             old-main
             bgy3d-run-solvent
             bgy3d-run-solute
             bgy3d-run))
-
-(use-modules (srfi srfi-1)              ; list manipulation
-             (ice-9 match)
-             (ice-9 pretty-print)
-             (ice-9 getopt-long))
 
 ;;;
 ;;; This name has to be defined on guile startup, see the C sources of
