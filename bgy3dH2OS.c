@@ -297,31 +297,47 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
             }
           else
             {
-              MatStencil col[3];
-              /* Loop over stencil points, not over space dimensions: */
-              for (int p = 0; p < 3; p++)
-                {
-                  col[p].i = row.i;
-                  col[p].j = row.j;
-                  col[p].k = row.k;
-                }
+              MatStencil col[3]; /* Three stencil points in the row. */
+
+              /* Central point of the stencil, same as row: */
+              col[1].i = row.i;
+              col[1].j = row.j;
+              col[1].k = row.k;
 
               FOR_DIM
                 {
-                  /* position in matrix */
-                  switch(dim)
+                  /* Other two  points of the  stencil offset by  1 in
+                     -dim and +dim, respectively: */
+                  switch (dim)
                     {
                     case 0:
-                      col[0].i -= 1;
-                      col[2].i += 1;
+                      col[0].i = row.i - 1;
+                      col[0].j = row.j;
+                      col[0].k = row.k;
+
+                      col[2].i = row.i + 1;
+                      col[2].j = row.j;
+                      col[2].k = row.k;
                       break;
+
                     case 1:
-                      col[0].j -= 1;
-                      col[2].j += 1;
+                      col[0].i = row.i;
+                      col[0].j = row.j - 1;
+                      col[0].k = row.k;
+
+                      col[2].i = row.i;
+                      col[2].j = row.j + 1;
+                      col[2].k = row.k;
                       break;
+
                     case 2:
-                      col[0].k -= 1;
-                      col[2].k += 1;
+                      col[0].i = row.i;
+                      col[0].j = row.j;
+                      col[0].k = row.k - 1;
+
+                      col[2].i = row.i;
+                      col[2].j = row.j;
+                      col[2].k = row.k + 1;
                       break;
                     }
 
@@ -330,21 +346,6 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                   const PetscScalar v[3] = {1.0 / h2, -2.0 / h2, 1.0 / h2};
 
                   MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
-                  switch(dim)
-                    {
-                    case 0:
-                      col[0].i += 1;
-                      col[2].i -= 1;
-                      break;
-                    case 1:
-                      col[0].j += 1;
-                      col[2].j -= 1;
-                      break;
-                    case 2:
-                      col[0].k += 1;
-                      col[2].k -= 1;
-                      break;
-                    }
                 }
             }
         }
