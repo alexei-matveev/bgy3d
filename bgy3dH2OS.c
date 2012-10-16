@@ -258,7 +258,7 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
   MatZeroEntries(M);
 
   const real size = PD->interval[1] - PD->interval[0];
-  const int border = (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
+  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
 
   /* Get local portion of the grid */
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
@@ -282,9 +282,9 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
             }
 
           /* Boundary */
-          if (i[0] <= border+1 || i[1] <= border+1 || i[2] <= border+1)
+          if (i[0] <= border || i[1] <= border || i[2] <= border)
             MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
-          else if (i[0] >= N[0] - 1 - border || i[1] >= N[1] - 1 - border || i[2] >= N[2] - 1 - border)
+          else if (i[0] >= N[0] - border || i[1] >= N[1] - border || i[2] >= N[2] - border)
             MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
           else
             {
