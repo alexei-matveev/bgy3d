@@ -43,15 +43,17 @@
 ;;; settings used in regression tests:
 ;;;
 (define bgy3d-settings
-  '((N . 32)                            ; grid dimension
-    (rho . 0.018)                       ; solvent density
-    (beta . 1.1989)                     ; inverse temperature
-    (norm-tol . 1.0e-2)                 ; convergence threshold
-    (max-iter . 320)                    ; max number of iterations
-    (L . 10.0)                          ; [-L, L] gives the box size
-    (zpad . 10.0)                       ; affects boundary condition
-    (damp-start . 1.0)                  ; scaling factor?
-    (lambda . 0.02)))                   ; not the scheme lambda
+  (let ((half-size 10.0))
+    (quasiquote
+     ((N . 32)                          ; grid dimension
+      (rho . 0.018)                     ; solvent density
+      (beta . 1.1989)                   ; inverse temperature
+      (norm-tol . 1.0e-2)               ; convergence threshold
+      (max-iter . 320)                  ; max number of iterations
+      (L . (unquote half-size))         ; [-L, L] gives the box size
+      (zpad . (unquote half-size))      ; affects boundary condition
+      (damp-start . 1.0)                ; scaling factor?
+      (lambda . 0.02)))))               ; not the scheme lambda
 
 ;;;
 ;;; Find a solute in a database or die:
