@@ -51,9 +51,9 @@ void bgy3d_fft_init_da (const int N[3],
   lx[0] = N[2];
 
 #if defined(L_BOUNDARY) || defined(L_BOUNDARY_MG)
-    const PetscInt stencil_width = 1;
+  const PetscInt stencil_width = 1;
 #else
-    const PetscInt stencil_width = 0;
+  const PetscInt stencil_width = 0;
 #endif
 
   DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR,
