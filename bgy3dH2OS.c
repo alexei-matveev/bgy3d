@@ -247,7 +247,8 @@ static void finalize_state (State *BHD)
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
   MatStencil col[3], row;
-  PetscScalar v[3], vb=1.0;
+  PetscScalar v[3];
+  const PetscScalar one = 1.0;
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
@@ -288,16 +289,20 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
           /* Loop over stencil points, not over space dimensions: */
           for (int p = 0; p < 3; p++)
             {
-              col[p].i = i[0];
-              col[p].j = i[1];
-              col[p].k = i[2];
+              col[p].i = row.i;
+              col[p].j = row.j;
+              col[p].k = row.k;
             }
 
           /* Boundary */
           if (i[0] <= border || i[0] >= N[0] - border ||
               i[1] <= border || i[1] >= N[1] - border ||
               i[2] <= border || i[2] >= N[2] - border)
-            MatSetValuesStencil (M, 1, &row, 1, col + 1, &vb, ADD_VALUES);
+            {
+              /* This  sets this  particular diagonal  element  of the
+                 matrix to 1.0: */
+              MatSetValuesStencil (M, 1, &row, 1, &row, &one, ADD_VALUES);
+            }
           else
             {
               FOR_DIM
