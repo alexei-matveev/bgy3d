@@ -404,6 +404,9 @@ void bgy3d_guile_init (int argc, char **argv)
      exit() according to POSIX: */
   atexit (finalize);
 
+  /* Make Petsc abort when it encounters an error: */
+  PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
+
   /*
    * Note  that  the names  defined  here  are  put into  the  private
    * namespace  of (guile-user)  module. If  you want  to call  any of
