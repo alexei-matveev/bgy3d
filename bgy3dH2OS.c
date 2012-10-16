@@ -280,14 +280,17 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          FOR_DIM
+          /* This  is the  point  on the  diagonal  of the  N^3 x  N^3
+             matrix: */
+          row.i = i[0];
+          row.j = i[1];
+          row.k = i[2];
+          /* Loop over stencil points, not over space dimensions: */
+          for (int p = 0; p < 3; p++)
             {
-              col[dim].i = i[0];
-              col[dim].j = i[1];
-              col[dim].k = i[2];
-              row.i = i[0];
-              row.j = i[1];
-              row.k = i[2];
+              col[p].i = i[0];
+              col[p].j = i[1];
+              col[p].k = i[2];
             }
 
           /* Boundary */
