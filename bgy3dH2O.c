@@ -1552,49 +1552,50 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
 }
 
-/* Compute  intramolecular   part.   The   first  thing  it   does  is
-   transforming g(x)  -> g(k). The  real space representation  g(x) is
-   not otherwise used.
+/*
+  Compute   intramolecular  part.    The  first   thing  it   does  is
+  transforming g(x) -> g(k). The real space representation g(x) is not
+  otherwise used.
 
-   Vec dg is intent(out). */
+  Vec g is intent(in).
+  Vec dg is intent(out).
+
+  Side  effects:  uses  BHD->{g_fft,  gfg2_fft, fft_scratch}  as  temp
+  arrays.
+
+  FIXME: compare the code to normalization_intra().
+*/
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 {
-  DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
-  fftw_complex *g_fft, *dg_fft, *scratch;
-  real L, k, h;
-  PetscScalar *g_vec;
-
+  int x[3], n[3], i[3], ic[3];
   const ProblemData *PD = BHD->PD;
+  const DA da = BHD->da;
+  const int *N = PD->N;             /* N[3] */
 
-  da = BHD->da;
-  FOR_DIM
-    N[dim] = PD->N[dim];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BHD->g_fft;
-  dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
-  L = PD->interval[1]-PD->interval[0];
+  fftw_complex *g_fft = BHD->g_fft;
+  fftw_complex *dg_fft = BHD->gfg2_fft;
+  fftw_complex *scratch = BHD->fft_scratch;
+
+  const real L = PD->interval[1] - PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* F(g) */
   /************************************************/
+  ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw, g, g_fft, scratch);
 
-
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g, g_fft, scratch);
-
-  index=0;
+  int index = 0;
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft[index].re = 0;
+          dg_fft[index].im = 0;
 
           FOR_DIM
             {
@@ -1604,60 +1605,49 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
                 ic[dim] = i[dim] - N[dim];
             }
 
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
-              dg_fft[index].re = g_fft[0].re*h;
-              dg_fft[index].im = 0;
+              dg_fft[index].re = h3 * g_fft[0].re;
+              dg_fft[index].im = 0.0;
             }
           else
             {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-              //k_fac = beta*fac/k;
-              k = 2.0*M_PI*rab/L*sqrt(k);
+              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+
+              real k = 2.0 * M_PI * sqrt(k2) * rab / L;
 
               /* + should be correct ??? */
-              dg_fft[index].re += h*g_fft[index].re*sin(k)/k;
-
-              dg_fft[index].im += h*g_fft[index].im*sin(k)/k;
-
-/*            if( (SQR(ic[0])+SQR(ic[1])+SQR(ic[2]))>SQR(N[0]/2-5)) */
-/*              { */
-/*                dg_fft[index].re= 0; */
-/*                dg_fft[index].im= 0; */
-/*              } */
-
+              dg_fft[index].re += h3 * g_fft[index].re * sin(k) / k;
+              dg_fft[index].im += h3 * g_fft[index].im * sin(k) / k;
             }
-          //fprintf(stderr,"%e\n",dg_fft[index].re);
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (da, BHD->fft_plan_bw, dg, dg_fft, scratch);
 
-  VecScale(dg, 1./L/L/L);
-
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
+  VecScale (dg, 1./L/L/L);
 
   /* ln(g) */
-  VecGetArray( dg, &g_vec);
-  VecGetLocalSize(dg, &local_size);
+  {
+    PetscScalar *g_vec;
+    int local_size;
 
-  for(index=0; index<local_size; index++)
-    {
+    VecGetArray (dg, &g_vec);
+    VecGetLocalSize (dg, &local_size);
 
-      k= g_vec[index];
-      if( k<1.0e-8)
-        k=1.0e-8;
+    for(int i = 0; i < local_size; i++)
+      {
+        real g_i = g_vec[i];
+        if (g_i < 1.0e-8)
+          g_i = 1.0e-8;
 
-      g_vec[index] = -log(k);
-      //g_vec[index] = -k;
-    }
-  VecRestoreArray(dg, &g_vec);
-  /******************************/
+        g_vec[i] = -log(g_i);
+      }
+    VecRestoreArray(dg, &g_vec);
+  }
 
-  /* insure normalization condition int(u)=0 */
-/*   VecSum(dg, &k); */
-/*   VecShift( dg, -k/N[0]/N[1]/N[2]); */
+  /* Ensure normalization condition int(u)=0 */
+  /* VecSum (dg, &k); */
+  /* VecShift (dg, -k/N[0]/N[1]/N[2]); */
 }
 
 
@@ -1671,6 +1661,8 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
   Vec dg is  intent(out).
 
   Side effects: uses BHD->{gfg2_fft, fft_scratch} as work arrays.
+
+  FIXME: compare the code to Compute_dg_H2O_intra_ln().
  */
 static void normalization_intra (const State *BHD,
                                  const fftw_complex *g_fft,
