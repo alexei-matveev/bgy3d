@@ -1325,23 +1325,28 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* Every tenth iteration, starting with iter == 0: */
           const bool tenth = !(iter % 10);
 
-          /* "a = a1"  is taken in iteration 0, 10,  20, etc.  "a1" is
-             modified during the loop.
+          /*
+            "a =  a1" is taken in  iteration 0, 10, 20,  etc.  "a1" is
+            modified during the loop.
 
-             "a =  a0" is taken  in iterations 1-9, 11-19,  etc.  "a0"
-             remains unchanged during the loop.
+            "a =  a0" is  taken in iterations  1-9, 11-19,  etc.  "a0"
+            remains unchanged during the loop.
 
-             Note that in the first iteration a1 == a0. */
+            Note that in the first iteration a1 == a0.
+          */
           const real a = tenth? a1 : a0;
 
-          /* The  functions  Compute_H2O_interS/_C() use  preallocated
-             fftw_complex  arrays in  State BHD  for work  but  do not
-             re-define  any  of  the  Vec(tors)  except  those  passed
-             explicitly.
+          /*
+            Some   functions,  such   as  bgy3d_solve_normalization(),
+            Compute_dg_H2O_intra_ln(), and Compute_H2O_interS/_C() use
+            preallocated fftw_complex arrays in State BHD for work but
+            do not  re-define any  of the Vecs  in that  struct except
+            those passed explicitly.
 
-             Same    holds    for    Solve_NormalizationH2O_smallII(),
-             ImposeLaplaceBoundary()  and  Zeropad_Function()  to  the
-             best of my (limited) knowledge. */
+            Same     holds    for    Solve_NormalizationH2O_smallII(),
+            ImposeLaplaceBoundary() and Zeropad_Function() to the best
+            of my (limited) knowledge.
+          */
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
@@ -1352,19 +1357,21 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* for H, O in that order ... */
           for (int i = 0; i < 2; i++)
             {
-
-              /* ... sum over H, O  in that order. LJ, short- and long
-                 range Coulomb,  and a  so called strange  addition is
-                 accounted   for   in    the   kernel.   First   clear
-                 accumulator: */
+              /*
+                ... sum over H, O  in that order.  LJ, short- and long
+                range  Coulomb, and  a so  called strange  addition is
+                accounted for in the kernel.  First clear accumulator:
+              */
               bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
 
               for (int j = 0; j < 2; j++) /* This increments the accumulator: */
                 apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
 
-              /* Compute   IFFT   of   dg_acc_fft  for   the   current
-                 site. Other contributions are added to the real space
-                 dg_acc below: */
+              /*
+                Compute IFFT of dg_acc_fft for the current site. Other
+                contributions  are  added  to  the real  space  dg_acc
+                below:
+              */
               ComputeVecfromFFT_fftw (BHD.da, BHD.fft_plan_bw,
                                       dg_acc, /* result */
                                       dg_acc_fft,
@@ -1383,16 +1390,28 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     This  body  is executed  exactly  once for  2-site
                     models.   FIXME:  in   a  more  general  case  the
                     distance  should be  the  intra-molecular distance
-                    between sites i and j:
+                    between sites i and j.
 
-                    Vec t_vec,  is intent(out) here.   Pass the g_fft.
-                    Earlier version, Solve_NormalizationH2O_smallII(),
-                    did FFT itself wasting one FFT per site:
+                    The  first   step  is  to   compute  normalization
+                    functions ĝ(x), Eqs. (4.105), (4.106) and (4.110).
+                    This already involves  a convolution integral with
+                    the geometric factor δ(|x| - r) / 4πr².
+
+                    Vec t_vec, is intent  (out) here and is re-used as
+                    a work  vector to  pass the result  further.  Pass
+                    the g(k), not g(x). Does one FFT^-1.
                   */
                   bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[j], t_vec);
 
                   /*
-                    Vec t_vec  is intent(in) and  work is intent(out).
+                    The   next  step  is   to  use   the  "conditional
+                    distribution" ĝ(x) again in a convolution integral
+                    with the same geometric  factor δ(|x| - r) / 4πr²,
+                    Eq. (4.114).
+
+                    Vec t_vec is intent(in)  and work is intent (out).
+                    Does one  FFT and one FFT^-1. Here  it is actually
+                    possible to use the same Vec as in- and output:
                   */
                   Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
 
