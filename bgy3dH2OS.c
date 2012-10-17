@@ -1350,24 +1350,40 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                                       dg_acc_fft,
                                       BHD.fft_scratch);
 
-              /* FIXME:   ugly  branch.    Very  specific   to  2-site
-                 models. Literal  constants 0  and 1, how  comes?
+              /*
+                In the following the sum is  over all sites j /= i. It
+                is supposed  to account for  intra-molecular site-site
+                correlation  of the  solvent  sites due  to the  rigid
+                bonds.  See e.g. Eq. (4.114), Jager Diss:
+              */
+              for (int j = 0; j < 2; j++)
+                {
+                  if (j == i) continue;
+                  /*
+                    This  body  is executed  exactly  once for  2-site
+                    models.   FIXME:  in   a  more  general  case  the
+                    distance  should be  the  intra-molecular distance
+                    between sites i and j:
 
-                 Vec  t_vec,  is intent(out)  here.   Pass the  g_fft.
-                 Earlier   version,  Solve_NormalizationH2O_smallII(),
-                 did FFT itself wasting one FFT per site: */
-              if (i == 0)
-                bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[1], t_vec);
-              else
-                bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[0], t_vec);
+                    Vec t_vec,  is intent(out) here.   Pass the g_fft.
+                    Earlier version, Solve_NormalizationH2O_smallII(),
+                    did FFT itself wasting one FFT per site:
+                  */
+                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[j], t_vec);
 
-              /* Vec t_vec is intent(in) and work is intent(out): */
-              Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
+                  /*
+                    Vec t_vec  is intent(in) and  work is intent(out).
+                  */
+                  Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
 
-              VecAXPY(dg_acc, 1.0, work);
+                  /* Add the contrinution of site j /= i to dg[i]: */
+                  VecAXPY (dg_acc, 1.0, work);
+                }
 
-              /* Add Coulomb  field uc scaled  by the site  chanrge to
-                 the accumulator: */
+              /*
+                Add Coulomb field uc scaled  by the site charge to the
+                accumulator:
+              */
               VecAXPY(dg_acc, solvent[i].charge, uc);
 
               /* Vec t_vec is intent(out) here: */
