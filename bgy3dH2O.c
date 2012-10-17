@@ -1662,51 +1662,44 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 
 
 /*
- * Compute  normalization condition.  This takes  into g(k)  as input.
- * The    result    is   manipulated    in    the   real-space    rep,
- * unfortunately. Though  this manipulation is plain  screening of the
- * too small (negative) values.
- *
- * Vec dg is  intent(out).
- *
- * Side effects:
- *
- *     Uses BHD->{gfg2_fft, fft_scratch} as work arrays.
+  Compute normalization condition.  Output  is the convolution of g(x)
+  with ω(x)  = δ(|x| - r)  / 4πr². This function  takes momentum space
+  g(k)  as  input.   The  convolution  result is  manipulated  in  the
+  real-space  rep, unfortunately.  Though this  manipulation  is plain
+  screening of the too small (negative) values.
+
+  Vec dg is  intent(out).
+
+  Side effects: uses BHD->{gfg2_fft, fft_scratch} as work arrays.
  */
 static void normalization_intra (const State *BHD,
                                  const fftw_complex *g_fft,
                                  real rab,
                                  Vec dg) /* intent(out) */
 {
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *dg_fft, *scratch;
-  real k;
-  PetscScalar *g_vec;
-  int local_size;
+  int x[3], n[3], i[3], ic[3];
 
   const ProblemData *PD = BHD->PD;
+  const int *N = PD->N;         /* N[3] */
   const DA da = BHD->da;
-
-  FOR_DIM
-    N[dim] = PD->N[dim];
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
-  dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
+  fftw_complex *dg_fft = BHD->gfg2_fft;
+  fftw_complex *scratch = BHD->fft_scratch;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  index=0;
+  int index = 0;
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft[index].re = 0;
+          dg_fft[index].im = 0;
 
           FOR_DIM
             {
@@ -1716,16 +1709,16 @@ static void normalization_intra (const State *BHD,
                 ic[dim] = i[dim] - N[dim];
             }
 
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
               dg_fft[index].re = h3 * g_fft[0].re;
-              dg_fft[index].im = 0;
+              dg_fft[index].im = 0.0;
             }
           else
             {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
+              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
 
-              k = 2.0 * M_PI * sqrt(k) * rab / L;
+              real k = 2.0 * M_PI * sqrt(k2) * rab / L;
 
               /* + hier richtig !! */
               dg_fft[index].re += h3 * g_fft[index].re * sin(k) / k;
@@ -1733,26 +1726,28 @@ static void normalization_intra (const State *BHD,
             }
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (da, BHD->fft_plan_bw, dg, dg_fft, scratch);
 
+  VecScale (dg, 1./L/L/L);
 
-  VecScale(dg, 1./L/L/L);
+  /* g >= 0 ?? */
+  {
+    PetscScalar *g_vec;
+    int local_size;
 
-  /* g>=0 ?? */
-  VecGetArray(dg, &g_vec);
-  VecGetLocalSize(dg, &local_size);
+    VecGetArray (dg, &g_vec);
+    VecGetLocalSize (dg, &local_size);
 
-  for(index=0; index<local_size; index++)
-    {
+    for(int i = 0; i < local_size; i++)
+      {
+        real g_i = g_vec[i];
+        if (g_i < 1.0e-8)
+          g_i = 1.0e-8;
 
-      k= g_vec[index];
-      if( k<1.0e-8)
-        k=1.0e-8;
-
-      g_vec[index] = k;
-
-    }
-  VecRestoreArray(dg, &g_vec);
+        g_vec[i] = g_i;
+      }
+    VecRestoreArray (dg, &g_vec);
+  }
 }
 
 /*
