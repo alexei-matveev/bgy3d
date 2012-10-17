@@ -250,7 +250,9 @@ static int mod (int a, int b)
 }
 
 #ifdef L_BOUNDARY
-/* Initialize M-Matrix with appropriate stencil */
+
+/* Initialize M-Matrix with appropriate stencil. FIXME: this should be
+   probably implemented using matrix free facilities of Petsc. */
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
 {
   const PetscScalar one = 1.0;
@@ -311,40 +313,52 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
               col[1].j = row.j;
               col[1].k = row.k;
 
+              /*
+                Other two  points of the  stencil offset by 1  in -dim
+                and +dim, respectively are  set in the switch statment
+                inside  the loop  over dim.   FIXME: we  might  have a
+                problem for parallel runs here as the manual says:
+
+                  The columns  and rows in  the stencil passed  in [to
+                  MatSetValuesStencil()] MUST  be contained within the
+                  ghost  region  of  the  given process  as  set  with
+                  DMDACreateXXX() or MatSetStencil().
+
+                See  call to  DACreate3d() in  bgy3d-fft.c, especially
+                the periodicity and stencil options there.
+              */
               FOR_DIM
                 {
-                  /* Other two  points of the  stencil offset by  1 in
-                     -dim and +dim, respectively: */
                   switch (dim)
                     {
                     case 0:
-                      col[0].i = row.i - 1;
+                      col[0].i = mod (row.i - 1, N[0]);
                       col[0].j = row.j;
                       col[0].k = row.k;
 
-                      col[2].i = row.i + 1;
+                      col[2].i = mod (row.i + 1, N[0]);
                       col[2].j = row.j;
                       col[2].k = row.k;
                       break;
 
                     case 1:
                       col[0].i = row.i;
-                      col[0].j = row.j - 1;
+                      col[0].j = mod (row.j - 1, N[1]);
                       col[0].k = row.k;
 
                       col[2].i = row.i;
-                      col[2].j = row.j + 1;
+                      col[2].j = mod (row.j + 1, N[1]);
                       col[2].k = row.k;
                       break;
 
                     case 2:
                       col[0].i = row.i;
                       col[0].j = row.j;
-                      col[0].k = row.k - 1;
+                      col[0].k = mod (row.k - 1, N[2]);
 
                       col[2].i = row.i;
                       col[2].j = row.j;
-                      col[2].k = row.k + 1;
+                      col[2].k = mod (row.k + 1, N[2]);
                       break;
                     }
 
@@ -356,7 +370,6 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                 }
             }
         }
-
 
   MatAssemblyBegin (M, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd (M, MAT_FINAL_ASSEMBLY);
