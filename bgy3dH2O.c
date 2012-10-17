@@ -25,6 +25,11 @@
 static real NORM_REG=1.0e-1;
 static real NORM_REG2=1.0e-2;
 
+static void normalization_intra (const State *BHD,
+                                 const fftw_complex *g_fft,
+                                 real rab,
+                                 Vec dg);
+
 static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
 {
   State *BHD;
@@ -1560,71 +1565,22 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   Vec g is intent(in).
   Vec dg is intent(out).
 
-  Side  effects:  uses  BHD->{g_fft,  gfg2_fft, fft_scratch}  as  temp
-  arrays.
+  Side effects: uses BHD->{g_fft, fft_scratch} as temp arrays.
 
   FIXME: compare the code to normalization_intra().
 */
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 {
-  int x[3], n[3], i[3], ic[3];
-  const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
-  const int *N = PD->N;             /* N[3] */
-
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
   fftw_complex *g_fft = BHD->g_fft;
-  fftw_complex *dg_fft = BHD->gfg2_fft;
   fftw_complex *scratch = BHD->fft_scratch;
 
-  const real L = PD->interval[1] - PD->interval[0];
-
-  /* Get local portion of the grid */
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /************************************************/
-  /* F(g) */
-  /************************************************/
+  /* g(x) -> g(k): */
   ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw, g, g_fft, scratch);
 
-  int index = 0;
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          dg_fft[index].re = 0;
-          dg_fft[index].im = 0;
-
-          FOR_DIM
-            {
-              if( i[dim] <= N[dim]/2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
-
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            {
-              dg_fft[index].re = h3 * g_fft[0].re;
-              dg_fft[index].im = 0.0;
-            }
-          else
-            {
-              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-
-              real k = 2.0 * M_PI * sqrt(k2) * rab / L;
-
-              /* + should be correct ??? */
-              dg_fft[index].re += h3 * g_fft[index].re * sin(k) / k;
-              dg_fft[index].im += h3 * g_fft[index].im * sin(k) / k;
-            }
-          index++;
-        }
-  ComputeVecfromFFT_fftw (da, BHD->fft_plan_bw, dg, dg_fft, scratch);
-
-  VecScale (dg, 1./L/L/L);
+  /* g_fft is intent(in), Vec dg is intent(out) here: */
+  normalization_intra (BHD, g_fft, rab, dg);
 
   /* ln(g) */
   {
@@ -1634,11 +1590,10 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
     VecGetArray (dg, &g_vec);
     VecGetLocalSize (dg, &local_size);
 
-    for(int i = 0; i < local_size; i++)
+    for (int i = 0; i < local_size; i++)
       {
         real g_i = g_vec[i];
-        if (g_i < 1.0e-8)
-          g_i = 1.0e-8;
+        assert (g_i >= 1.0e-8);  /* See normalization_intra() */
 
         g_vec[i] = -log(g_i);
       }
