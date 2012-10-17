@@ -59,7 +59,7 @@ void bgy3d_fft_init_da (const int N[3],
 #endif
 
   DACreate3d (PETSC_COMM_WORLD,
-              DA_NONPERIODIC,
+              DA_XYZPERIODIC,    /* was DA_NONPERIODIC */
               DA_STENCIL_STAR,
               N[0], N[1], N[2],
               1, 1, np,
@@ -75,7 +75,8 @@ void bgy3d_fft_init_da (const int N[3],
       lx[0] /= 2;
       ly[0] /= 2;
       DACreate3d (PETSC_COMM_WORLD,
-                  DA_NONPERIODIC, DA_STENCIL_STAR,
+                  DA_XYZPERIODIC, /* was DA_NONPERIODIC */
+                  DA_STENCIL_STAR,
                   N[0] / 2, N[1] / 2, N[2] / 2,
                   1, 1, np,
                   1, stencil_width,
