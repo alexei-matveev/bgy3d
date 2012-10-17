@@ -242,6 +242,13 @@ static void finalize_state (State *BHD)
   fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
 }
 
+/* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
+   work for b <= 0: */
+static int mod (int a, int b)
+{
+  return ((a % b) + b) % b;
+}
+
 #ifdef L_BOUNDARY
 /* Initialize M-Matrix with appropriate stencil */
 void InitializeLaplaceMatrix (const State *BHD, real zpad)
