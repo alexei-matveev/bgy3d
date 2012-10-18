@@ -487,7 +487,7 @@ double bgy3d_test_fft (int m, int n, int k)
   const int N[3] = {m, n, k};
   const int NNN = N[0] * N[1] * N[2];
   Mat A;
-  const DA da;
+  DA da;
 
   /* pid_t pid = getpid(); */
   /* printf ("PID=%d\n", pid); */
