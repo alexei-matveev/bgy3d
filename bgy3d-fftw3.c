@@ -13,6 +13,11 @@
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 
+#ifndef c_re
+#define c_re(x) c_re(c) ((c)[0])
+#define c_im(x) c_re(c) ((c)[1])
+#endif
+
 typedef struct {
   /* Array  descriptor  that  shares  the  distribution  pattern  with
      FFTW-MPI: */
@@ -153,8 +158,8 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < nip; i++)
           {
-            g_vec[k0 + k][j0 + j][i0 + i].re = (*view)[k][j][i][0];
-            g_vec[k0 + k][j0 + j][i0 + i].im = (*view)[k][j][i][1];
+            g_vec[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
+            g_vec[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
           }
     DAVecRestoreArray (da, g, &g_vec);
   }
@@ -203,8 +208,8 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < nip; i++)
           {
-            (*view)[k][j][i][0] = g_vec[k0 + k][j0 + j][i0 + i].re;
-            (*view)[k][j][i][1] = g_vec[k0 + k][j0 + j][i0 + i].im;
+            c_re ((*view)[k][j][i]) = g_vec[k0 + k][j0 + j][i0 + i].re;
+            c_im ((*view)[k][j][i]) = g_vec[k0 + k][j0 + j][i0 + i].im;
           }
     DAVecRestoreArray (da, g, &g_vec);
   }

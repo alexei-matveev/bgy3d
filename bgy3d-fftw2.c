@@ -12,6 +12,11 @@
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 
+#ifndef c_re
+#define c_re(x) c_re(c) ((c)[0])
+#define c_im(x) c_re(c) ((c)[1])
+#endif
+
 typedef struct {
   /* Array  descriptor  that  shares  the  distribution  pattern  with
      FFTW-MPI: */
