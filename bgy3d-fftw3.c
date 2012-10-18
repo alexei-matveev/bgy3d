@@ -148,8 +148,7 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    typedef struct {PetscScalar re, im;} Cmplx;
-    Cmplx ***g_vec;
+    struct {PetscScalar re, im;} ***g_vec;
 
     DAVecGetArray (da, g, &g_vec);
 
@@ -199,8 +198,7 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    typedef struct {PetscScalar re, im;} Cmplx;
-    Cmplx ***g_vec;
+    struct {PetscScalar re, im;} ***g_vec;
 
     DAVecGetArray (da, g, &g_vec);
 
