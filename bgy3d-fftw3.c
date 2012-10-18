@@ -16,7 +16,7 @@
 typedef struct {
   /* Array  descriptor  that  shares  the  distribution  pattern  with
      FFTW-MPI: */
-  DA da;
+  DA da, dc;
 
   /* Two plans for doubl -> cmplx and cmplx -> doubl: */
   fftw_plan fw, bw;
@@ -31,21 +31,25 @@ typedef struct {
 } FFT;
 
 
-/* doubl := Vec: */
+static const int debug = 0;
+
+/* doubl := Vec, for forward FFT */
 static void unpack_real (DA da, Vec g, double *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* Get the official (full) dimension of the array: */
   DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
+  assert (dof == 1);
 
   /* Padded (physically the last) dimension. */
   const int nip = 2 * (NI / 2 + 1);
-  /* printf ("unpack_real: shape = %d %d %d\n", nk, nj, nip); */
+  if (debug)
+    printf ("unpack_real: shape = %d %d %d\n", nk, nj, nip);
   assert (ni < nip);
 
   /* The  view of  local FFT  padded storage  as a  3d array  with the
@@ -68,21 +72,23 @@ static void unpack_real (DA da, Vec g, double *restrict doubl)
 }
 
 
-/* Vec := doubl: */
+/* Vec := doubl, for inverse FFT */
 static void pack_real (DA da, Vec g, const double *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* Get the official (full) dimension of the array: */
   DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
+  assert (dof == 1);
 
   /* Padded (physically the last) dimension. */
   const int nip = 2 * (NI / 2 + 1);
-  /* printf ("pack_real: shape = %d %d %d\n", nk, nj, nip); */
+  if (debug)
+    printf ("pack_real: shape = %d %d %d\n", nk, nj, nip);
   assert (ni < nip);
 
   /* The  view of  local FFT  padded storage  as a  3d array  with the
@@ -105,17 +111,18 @@ static void pack_real (DA da, Vec g, const double *restrict doubl)
 }
 
 
-/* Vec := cmplx: */
+/* Vec := cmplx, for forward FFT */
 static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* Get the official (full) dimension of the array: */
   DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
+  assert (dof == 2);
 
   /*
     Otherwise  we  cannot  convert  between complex  and  half-complex
@@ -127,7 +134,8 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 
   /* Padded (physically the last) dimension: */
   const int nip = NI / 2 + 1;
-  /* printf ("pack_cmplx: shape = %d %d %d\n", nk, nj, nip); */
+  if (debug)
+    printf ("pack_cmplx: shape = %d %d %d\n", nk, nj, nip);
 
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
@@ -135,52 +143,36 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_vec;
+    typedef struct {PetscScalar re, im;} Cmplx;
+    Cmplx ***g_vec;
+
     DAVecGetArray (da, g, &g_vec);
 
     /* loop over local portion of grid */
-    /* Attention: order of indices is not variable */
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
-        {
-          /*
-            Halfcomplex format: the  real array of size n  is built of
-            (non-vanishing)  real and imaginary  parts of  the complex
-            array of size  n / 2 +  1. Here is the layout  of the real
-            array:
-
-            r, r , ..., r   , i         , ..., i , i
-             0  1        n/2   (n+1)/2-1        2   1
-
-            At  positions 0  <= i  <= NI/2 in
-            doubl[] one puts the real parts of cmplx[i]:
-          */
-          for (int i = 0; i <= NI / 2; i++)
-            g_vec[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i][0];
-
-          /*
-            At  positions  NI/2 <  i  < NI  in  doubl[]  one puts  the
-            imaginary parts of cmplx[??]:
-          */
-          for (int i = NI - 1; i > NI / 2; i--)
-            g_vec[k0 + k][j0 + j][i0 + i] = (*view)[k][j][NI - i][1];
-        }
+        for (int i = 0; i < nip; i++)
+          {
+            g_vec[k0 + k][j0 + j][i0 + i].re = (*view)[k][j][i][0];
+            g_vec[k0 + k][j0 + j][i0 + i].im = (*view)[k][j][i][1];
+          }
     DAVecRestoreArray (da, g, &g_vec);
   }
 }
 
 
-/* cmplx := Vec: */
+/* cmplx := Vec, for inverse FFT */
 static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* Get the official (full) dimension of the array: */
   DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
+  assert (dof == 2);
 
   /*
     Otherwise  we  cannot  convert  between complex  and  half-complex
@@ -192,7 +184,9 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 
   /* Padded (physically the last) dimension: */
   const int nip = NI / 2 + 1;
-  /* printf ("unpack_cmplx: shape = %d %d %d\n", nk, nj, nip); */
+  if (debug)
+    printf ("unpack_cmplx: shape = %d %d %d\n", nk, nj, nip);
+  assert (ni < 2 * nip);
 
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
@@ -200,30 +194,18 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_vec;
+    typedef struct {PetscScalar re, im;} Cmplx;
+    Cmplx ***g_vec;
+
     DAVecGetArray (da, g, &g_vec);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
-        {
-          /*
-            Halfcomplex format: see pack_cmplx().
-          */
-          for (int i = 0; i <= NI / 2; i++)
-            (*view)[k][j][i][0] = g_vec[k0 + k][j0 + j][i0 + i];
-
-          for (int i = NI - 1; i > NI / 2; i--)
-            (*view)[k][j][NI - i][1] = g_vec[k0 + k][j0 + j][i0 + i];
-
-          /*
-            Frequency  zero (i ==  0) and  n /  2 for  even n  has no
-            imaginary part and are not stored in halfcomplex format:
-          */
-          (*view)[k][j][0][1] = 0.0;
-
-          if (NI % 2 == 0)
-            (*view)[k][j][NI / 2][1] = 0.0;
-        }
+        for (int i = 0; i < nip; i++)
+          {
+            (*view)[k][j][i][0] = g_vec[k0 + k][j0 + j][i0 + i].re;
+            (*view)[k][j][i][1] = g_vec[k0 + k][j0 + j][i0 + i].im;
+          }
     DAVecRestoreArray (da, g, &g_vec);
   }
 }
@@ -243,8 +225,8 @@ static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
   /* forward fft */
   fftw_execute (fft->fw);
 
-  /* Pack complex output into real y in halfcomplex format: */
-  pack_cmplx (fft->da, y, fft->cmplx);
+  /* Pack complex output into complex Vec y: */
+  pack_cmplx (fft->dc, y, fft->cmplx);
 
   return 0;
 }
@@ -259,7 +241,7 @@ PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
   MatShellGetContext (A, (void**) &fft);
 
   /* Fill complex array with halfcomplex data from x: */
-  unpack_cmplx (fft->da, x, fft->cmplx);
+  unpack_cmplx (fft->dc, x, fft->cmplx);
 
   /* inverse fft */
   fftw_execute (fft->bw);
@@ -281,6 +263,7 @@ PetscErrorCode mat_destroy_fft (Mat A)
   /* Abstraction  leaking  here:  mat_create_fft()  return DA  to  the
      caller, what if he continues to use it? */
   DADestroy(fft->da);
+  DADestroy(fft->dc);
 
   fftw_destroy_plan (fft->fw);
   fftw_destroy_plan (fft->bw);
@@ -339,7 +322,7 @@ PetscErrorCode mat_destroy_fft (Mat A)
   elements which is the main reason for the padding, actually.
 */
 static int fftw_mpi_init_called = 0;
-PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da)
+PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da, DA *dc)
 {
   /* FIXME: find a better place: */
   if (!fftw_mpi_init_called)
@@ -402,7 +385,7 @@ PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da)
     l0[0] = N[0];
     l1[0] = N[1];
 
-    if (0)
+    if (debug)
       {
         printf ("%d: local_range = %d, local_start = %d\n",
                 id, local_range, local_start);
@@ -430,13 +413,24 @@ PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da)
                 1, stencil_width,
                 l0, l1, l2,
                 &fft->da);
+
+    /* For complex vectors: */
+    int l0half[1] = {N[0] / 2 + 1};
+    DACreate3d (PETSC_COMM_WORLD,
+                DA_XYZPERIODIC,    /* was DA_NONPERIODIC */
+                DA_STENCIL_STAR,
+                N[0] / 2 + 1, N[1], N[2], /* ~half as many, but ... */
+                1, 1, np,
+                2, stencil_width, /* ... with two DOF */
+                l0half, l1, l2,
+                &fft->dc);
   }
 
   /* Get local dimensions: */
   int x[3], n[3];
   DAGetCorners (fft->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  if (0)
+  if (debug)
     {
       for (int i = 0; i < 3; i++)
         printf ("%d: n[%d] = %d, x[%d] = %d\n",
@@ -454,15 +448,19 @@ PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da)
     dimension:
   */
   {
-    int M = 1, m = 1;
-    for (int i = 0; i < 3; i++)
-      {
-        M *= N[i];
-        m *= n[i];
-      }
+    const int M0 = N[2] * N[1] * (N[0] / 2 + 1) * 2;
+    const int M1 = N[2] * N[1] * N[0];
 
+    const int m0 = n[2] * n[1] * (n[0] / 2 + 1) * 2;
+    const int m1 = n[2] * n[1] * n[0];
+
+    if (debug)
+      {
+        printf ("%d: matrix dim %d x %d (local), %d x %d (global)\n",
+                id, m0, m1, M0, M1);
+      }
     /* Also puts internals into the matrix. FIXME: local sizes? */
-    MatCreateShell (PETSC_COMM_WORLD, m, m, M, M, (void*) fft, A);
+    MatCreateShell (PETSC_COMM_WORLD, m0, m1, M0, M1, (void*) fft, A);
   }
 
   /* Set matrix operations: */
@@ -478,59 +476,57 @@ PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da)
   /* Also return  DA descriptor so  that the user can  create suitable
      vectors: */
   *da = fft->da;
+  *dc = fft->dc;
 
   return 0;
 }
 
-double bgy3d_test_fft (int m, int n, int k)
+
+double bgy3d_test_fft (int m, int n, int p)
 {
-  const int N[3] = {m, n, k};
+  const int N[3] = {m, n, p};
   const int NNN = N[0] * N[1] * N[2];
   Mat A;
-  DA da;
+  DA da, dc;
 
-  /* pid_t pid = getpid(); */
-  /* printf ("PID=%d\n", pid); */
-  /* sleep (20); */
+  mat_create_fft (N, &A, &da, &dc);
 
-  mat_create_fft (N, &A, &da);
-
-  Vec x, y, z;
+  Vec x, z;                     /* real */
+  Vec y;                        /* complex */
 
   DACreateGlobalVector (da, &x);
-  DACreateGlobalVector (da, &y);
   DACreateGlobalVector (da, &z);
 
-  VecSet (x, 1.0);
-  VecSet (y, 99.0);
-  VecSet (z, 999.0);
+  /* This one is complex, note use of another array descriptor: */
+  DACreateGlobalVector (dc, &y);
+
+  VecSetRandom (x, NULL);
+  /* VecSet (x, 1.0); */
 
   /* This corresponds to direct FFT, y = fft(x): */
   MatMult (A, x, y);
-
-  /* VecView (y, PETSC_VIEWER_STDOUT_WORLD); */
 
   /* This corresponds to inverse FFT, z = fft(y): */
   MatMultTranspose (A, y, z);
 
   /*
-    FIXME: The matrix should probably  be made orthogonal sot that the
-    intuitive relation A^T A  * x == x holds. At the  moment A^T * A =
-    grid size:
+    The matrix may  be made orthogonal so that  the intuitive relation
+    A^T A * x ==  x holds. At the moment A^T * A =  V with V being the
+    grid "volume" (number of points):
   */
-  VecAXPY (z, -NNN, x);
-
+  VecScale (z, 1.0 / NNN);
   /* VecView (z, PETSC_VIEWER_STDOUT_WORLD); */
+  VecAXPY (z, -1.0, x);
+
   double norm;
   VecNorm (z, NORM_INFINITY, &norm);
-
-  /* PetscPrintf (PETSC_COMM_WORLD, "norm=%e\n", norm); */
 
   VecDestroy (x);
   VecDestroy (y);
   VecDestroy (z);
 
-  /* FIXME: Also destroys array descriptor da: */
+  /* FIXME:  Also  destroys array  descriptors  for  real and  complex
+     vectors: */
   MatDestroy (A);
 
   return norm;
