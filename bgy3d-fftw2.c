@@ -10,7 +10,7 @@
 // #include <complex.h>          /* makes setting re and im cumbersome */
 #include <rfftw_mpi.h>
 #include "petscda.h"            /* DA, Vec */
-#include "bgy3d-fftw2.h"
+#include "bgy3d-fftw.h"         /* Common interface for two impls */
 
 typedef struct {
   /* Array  descriptor  that  shares  the  distribution  pattern  with

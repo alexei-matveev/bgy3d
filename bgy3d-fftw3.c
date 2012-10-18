@@ -11,7 +11,7 @@
 #include <fftw3.h>
 #include <fftw3-mpi.h>
 #include "petscda.h"            /* DA, Vec */
-#include "bgy3d-fftw3.h"
+#include "bgy3d-fftw.h"         /* Common interface for two impls */
 
 typedef struct {
   /* Array  descriptor  that  shares  the  distribution  pattern  with
