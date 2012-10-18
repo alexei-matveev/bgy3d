@@ -370,13 +370,12 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
       distribution. The  FFTW MPI distributes the  work/data among the
       workers along the leading dimension:
     */
-    ptrdiff_t l0[1], l1[1], l2[np]; /* sum (l2[:]) == N[0] */
+    int l0[1], l1[1], l2[np]; /* sum (l2[:]) == N[0] */
 
     /* Collect  the  info  about  the  local  shares  of  the  leading
        dimension from all workers: */
     {
-      assert (sizeof(ptrdiff_t) == sizeof(long));
-      int err = MPI_Allgather (&local_range, 1, MPI_LONG, l2, 1, MPI_LONG, PETSC_COMM_WORLD);
+      int err = MPI_Allgather (&local_range, 1, MPI_INT, l2, 1, MPI_INT, PETSC_COMM_WORLD);
       assert (err == MPI_SUCCESS);
     }
     l0[0] = N[0];
