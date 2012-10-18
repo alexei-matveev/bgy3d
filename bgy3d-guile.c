@@ -8,6 +8,7 @@
 #include "bgy3dH2O.h"
 #include "bgy3dH2OS.h"          /* bgy3d_solve_with_solute */
 #include "bgy3d-getopt.h"       /* bgy3d_save_vec, bgy3d_load_vec */
+#include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-guile.h"
 
 
@@ -337,11 +338,11 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
 }
 
 
-static SCM guile_test (SCM inp)
+static SCM guile_test (SCM m, SCM n, SCM k)
 {
-  Vec v = void_ptr (inp);
-
-  return scmx_ptr (v);
+  return scm_from_double (bgy3d_fft_test (scm_to_int (m),
+                                          scm_to_int (n),
+                                          scm_to_int (k)));
 }
 
 
@@ -369,7 +370,7 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
-  scm_c_define_gsubr ("bgy3d-test", 1, 0, 0, guile_test);
+  scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);
 
   return SCM_UNSPECIFIED;
 }

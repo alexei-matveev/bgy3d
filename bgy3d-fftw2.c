@@ -237,7 +237,7 @@ static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
 /* Does y = A^T * x. The inverse FFT. */
 PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
 {
-  /* Only  matrices  constructed   by  mat_create_fft()  are  accepted
+  /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
   FFT *fft;
   MatShellGetContext (A, (void**) &fft);
@@ -257,12 +257,12 @@ PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
 
 PetscErrorCode mat_destroy_fft (Mat A)
 {
-  /* Only  matrices  constructed   by  mat_create_fft()  are  accepted
+  /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
   FFT *fft;
   MatShellGetContext (A, (void**) &fft);
 
-  /* Abstraction  leaking  here:  mat_create_fft()  return DA  to  the
+  /* Abstraction leaking here: bgy3d_fft_mat_create() return DA to the
      caller, what if he continues to use it? */
   DADestroy(fft->da);
   DADestroy(fft->dc);
@@ -323,7 +323,8 @@ PetscErrorCode mat_destroy_fft (Mat A)
   2  * (N/2 +  1).  The  corresponding complex  arrays will  have NP/2
   elements which is the main reason for the padding, actually.
 */
-PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da, DA *dc)
+PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
+                                     DA *da, DA *dc)
 {
   /* Allocates storage for an FFT struct: */
   FFT *fft = malloc (sizeof *fft);
@@ -475,55 +476,4 @@ PetscErrorCode mat_create_fft (const int N[3], Mat *A, DA *da, DA *dc)
   *dc = fft->dc;
 
   return 0;
-}
-
-
-double bgy3d_test_fft (int m, int n, int p)
-{
-  const int N[3] = {m, n, p};
-  const int NNN = N[0] * N[1] * N[2];
-  Mat A;
-  DA da, dc;
-
-  mat_create_fft (N, &A, &da, &dc);
-
-  Vec x, z;                     /* real */
-  Vec y;                        /* complex */
-
-  DACreateGlobalVector (da, &x);
-  DACreateGlobalVector (da, &z);
-
-  /* This one is complex, note use of another array descriptor: */
-  DACreateGlobalVector (dc, &y);
-
-  VecSetRandom (x, NULL);
-  /* VecSet (x, 1.0); */
-
-  /* This corresponds to direct FFT, y = fft(x): */
-  MatMult (A, x, y);
-
-  /* This corresponds to inverse FFT, z = fft(y): */
-  MatMultTranspose (A, y, z);
-
-  /*
-    The matrix may  be made orthogonal so that  the intuitive relation
-    A^T A * x ==  x holds. At the moment A^T * A =  V with V being the
-    grid "volume" (number of points):
-  */
-  VecScale (z, 1.0 / NNN);
-  /* VecView (z, PETSC_VIEWER_STDOUT_WORLD); */
-  VecAXPY (z, -1.0, x);
-
-  double norm;
-  VecNorm (z, NORM_INFINITY, &norm);
-
-  VecDestroy (x);
-  VecDestroy (y);
-  VecDestroy (z);
-
-  /* FIXME:  Also  destroys array  descriptors  for  real and  complex
-     vectors: */
-  MatDestroy (A);
-
-  return norm;
 }

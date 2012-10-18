@@ -1,1 +1,2 @@
-double bgy3d_test_fft (int m, int n, int k);
+PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
+                                     DA *da, DA *dc);

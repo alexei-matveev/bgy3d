@@ -23,3 +23,4 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
 		       FFT_DATA *g_fft);
 
+double bgy3d_fft_test (int m, int n, int k);

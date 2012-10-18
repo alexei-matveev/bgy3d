@@ -11,7 +11,8 @@
             old-main
             bgy3d-run-solvent
             bgy3d-run-solute
-            bgy3d-run))
+            bgy3d-run
+            bgy3d-test))
 
 ;;;
 ;;; This name has to be defined on guile startup, see the C sources of
