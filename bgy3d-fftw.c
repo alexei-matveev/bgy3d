@@ -198,10 +198,16 @@ PetscErrorCode mat_destroy_fft (Mat A)
   FFT *fft;
   MatShellGetContext (A, (void**) &fft);
 
-  /* Abstraction leaking here: bgy3d_fft_mat_create() return DA to the
-     caller, what if he continues to use it? */
-  DADestroy(fft->da);
-  DADestroy(fft->dc);
+  /*
+    Since  bgy3d_fft_mat_create()  returns  DA  for real  and  complex
+    vectors  to the caller,  it is  his/her responsibility  to destroy
+    them after use.   Otherwise she may be left  with dangling pointer
+    if we do it here. Of course  it is not advisable to use the matrix
+    after that.
+
+    DADestroy (fft->da);
+    DADestroy (fft->dc);
+  */
 
   fftwnd_mpi_destroy_plan (fft->fw);
   fftwnd_mpi_destroy_plan (fft->bw);

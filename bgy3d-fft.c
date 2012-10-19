@@ -331,5 +331,8 @@ double bgy3d_fft_test (int m, int n, int p)
      vectors: */
   MatDestroy (A);
 
+  DADestroy (da);
+  DADestroy (dc);
+
   return norm;
 }
