@@ -2,7 +2,7 @@
 
 /*
  * Provides  a   Petsc  Mat  interface   to  the  FFTW   package.  See
- * bgy3d_test_fft() for an example use.
+ * bgy3d_fft_test() for an example use.
  */
 
 // #include <unistd.h>             /* getpid(), remove later */
@@ -18,8 +18,8 @@
 #endif
 
 typedef struct {
-  /* Array  descriptor  that  shares  the  distribution  pattern  with
-     FFTW-MPI: */
+  /* Array  descriptors for real  and complex  vectors that  share the
+     distribution pattern with FFTW-MPI: */
   DA da, dc;
 
   /* Two plans for doubl -> cmplx and cmplx -> doubl: */
@@ -440,7 +440,7 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
     Create the matrix itself:
 
     First, set  total and local size  of the matrix  (section). I gues
-    this  only works  because the  dork/storage is  divided  along one
+    this  only works  because the  work/storage is  divided  along one
     dimension:
   */
   {
@@ -455,7 +455,7 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
         printf ("%d: matrix dim %d x %d (local), %d x %d (global)\n",
                 id, m0, m1, M0, M1);
       }
-    /* Also puts internals into the matrix. FIXME: local sizes? */
+    /* Also puts internals (FFT struct) into the matrix: */
     MatCreateShell (PETSC_COMM_WORLD, m0, m1, M0, M1, (void*) fft, A);
   }
 
@@ -469,8 +469,8 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
   MatShellSetOperation (*A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy_fft);
 
-  /* Also return  DA descriptor so  that the user can  create suitable
-     vectors: */
+  /* Also return DA  descriptors for real and complex  vectors so that
+     the user can create them: */
   *da = fft->da;
   *dc = fft->dc;
 
