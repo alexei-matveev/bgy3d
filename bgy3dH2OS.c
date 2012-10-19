@@ -1048,6 +1048,30 @@ static double maxval (size_t n, const double x[n])
   return max;
 }
 
+/*
+ * Function to generate solvent electrostatic potential field
+ *
+ */
+static void bgy3d_solvent_efield (const ProblemData *PD,
+                           int m, const Site solvent[m], /* m == 2*/
+                           Vec g[m], /* intent(in) */
+                           Vec ge) /* intent(out) */
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Generating solvent electrostatic potential field ...\n");
+
+  /* FIXME: assuming PD->rho for all solvent particles */
+  /* not scaled yet */
+  const real rho = PD->rho;
+
+  /* Reset its value to zero */
+  VecSet (ge, 0.0);
+
+  for (int i = 0; i < m; i++)
+    {
+      VecAXPY (ge, solvent[i].charge, g[i]);
+    }
+}
+
 
 /*
   This function is the main entry  point for the BGY3dM equation for a
@@ -1066,7 +1090,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 {
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
-  Vec dg[2], dg_acc, work;
+  Vec dg[2], dg_acc, work, ge;  /* ge for solvent electrostaic potential field */
   PetscScalar dg_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -1148,6 +1172,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   DACreateGlobalVector(BHD.da, &work);
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
   DACreateGlobalVector(BHD.da, &uc);    /* common for all sites */
+  DACreateGlobalVector(BHD.da, &ge);    /* solvent electrostatic potential field */
 
   /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
           (5.106) and (5.108) in Jager's thesis. It is not filled with
@@ -1521,6 +1546,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
 
+      /* Test for solvent electrostatic potential field */
+      bgy3d_solvent_efield (PD, 2, solvent, g, ge);
+      bgy3d_save_vec_ascii ("vec-ge.m", ge);
+
       /* Save dg to binary file. FIXME: Why dg and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
         {
@@ -1553,6 +1582,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
+  VecDestroy (ge);
 
   finalize_state (&BHD);
 }
