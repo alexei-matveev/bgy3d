@@ -214,13 +214,20 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 }
 
 
+static FFT* context (Mat A)
+{
+  FFT *fft;
+  MatShellGetContext (A, (void**) &fft);
+  return fft;
+}
+
+
 /* Does y = A * x. Forward FFT with the interface for use by Petsc: */
 static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
 {
   /* Only  matrices  constructed   by  mat_create_fft()  are  accepted
      here: */
-  FFT *fft;
-  MatShellGetContext (A, (void**) &fft);
+  FFT *fft = context (A);
 
   /* Fill real array with real data from x: */
   unpack_real (fft->da, x, fft->doubl);
@@ -240,8 +247,7 @@ PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
 {
   /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
-  FFT *fft;
-  MatShellGetContext (A, (void**) &fft);
+  FFT *fft = context (A);
 
   /* Fill complex array with halfcomplex data from x: */
   unpack_cmplx (fft->dc, x, fft->cmplx);
@@ -260,8 +266,7 @@ PetscErrorCode mat_destroy_fft (Mat A)
 {
   /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
-  FFT *fft;
-  MatShellGetContext (A, (void**) &fft);
+  FFT *fft = context (A);
 
   /*
     Since  bgy3d_fft_mat_create()  returns  DA  for real  and  complex
