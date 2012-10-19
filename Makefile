@@ -66,7 +66,7 @@ INCDIRS = ${PETSC_INCLUDE} -I./fft
 fftw3-libs = -lfftw3_mpi -lfftw3
 fftw2-libs = -lfftw_mpi -lfftw
 rfftw2-libs = -lrfftw_mpi -lfftw_mpi -lrfftw -lfftw
-LIBS = $(rfftw2-libs) -lm ${PETSC_LIB}
+LIBS = $(fftw2-libs) -lm ${PETSC_LIB}
 
 #--------------------------------------------------------------------------------
 # Make rules
@@ -79,7 +79,7 @@ libbgy3d.a = \
 	bgy3d-solutes.o \
 	bgy3d-getopt.o \
 	bgy3d-fft.o \
-	bgy3d-fftw2.o \
+	bgy3d-fftw.o \
 
 ifeq ($(WITH_GUILE),1)
 	libbgy3d.a += bgy3d-guile.o
