@@ -172,19 +172,16 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
  transforms  are in-place,  but  may be  more  efficient with  scratch
  arrays.
  */
-fftw_complex *ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
-				fftw_complex *g_fft, fftw_complex *scratch)
+void ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
+                             fftw_complex *g_fft, fftw_complex *scratch)
 {
-  if (g_fft == NULL)
-    g_fft = bgy3d_fft_malloc (da);
+  assert (g_fft != NULL);
 
   /* Real Vec into complex array: */
   unpack (da, g, g_fft);
 
   /* forward fft */
   fftwnd_mpi (fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
-
-  return g_fft;
 }
 
 
