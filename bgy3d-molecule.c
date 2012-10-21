@@ -205,46 +205,6 @@ static void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
 }
 
 
-static void ComputeDiatomicAB_g_old(BGY3dDiatomicABData BDD, Vec g, Vec g0, Vec dg)
-{
-  DA da;
-  int x[3], n[3], i[3];
-  PetscScalar ***g_vec, ***dg_vec;
-  // real g_norm;
-
-  da = BDD->da;
-
-
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-
-  DAVecGetArray(da, g, &g_vec);
-  DAVecGetArray(da, dg, &dg_vec);
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  g_vec[i[2]][i[1]][i[0]] = exp(-dg_vec[i[2]][i[1]][i[0]]);
-	}
-  DAVecRestoreArray(da, g, &g_vec);
-  DAVecRestoreArray(da, dg, &dg_vec);
-
-  /* g=g0*exp(-dg) */
-  VecPointwiseMult(g, g, g0);
-
-  /* apply same normalization for all g functions */
-/*   VecSum(g, &g_norm); */
-/*   VecScale(g, 1./(BDD->norm_const*g_norm)); */
-  //PetscPrintf(PETSC_COMM_WORLD,"Hier:: %e\n",BDD->norm_const*g_norm);
-
-/*   VecView(g0,PETSC_VIEWER_STDERR_WORLD); */
-/*   VecView(g,PETSC_VIEWER_STDERR_WORLD); */
-}
-
 static void ComputeDiatomicAB_g(Vec g, Vec g0, Vec dg)
 {
   int local_size, i;
@@ -956,19 +916,6 @@ static void Solve_Normalization_old(BGY3dDiatomicABData BDD, Vec ga, Vec gb, Vec
   VecPointwiseDivide(ta, ga, tb);
   VecPointwiseDivide(tb, ga, tb);
   VecPointwiseDivide(tab, gab, tab);
-
-}
-
-
-static void Solve_Normalization(BGY3dDiatomicABData BDD, Vec gc, Vec g, Vec t, Vec dg,
-			     Vec dg_help)
-{
-
-  //VecCopy(g, t);
-
-
-  Compute_dg_Pair_normalization_intra( BDD, gc, dg, dg_help);
-  VecPointwiseDivide(t, g, dg);
 
 }
 
