@@ -866,7 +866,7 @@ void Compute_dg_H2O_inter (State *BHD,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
+  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac, L, k, h, sign; // confac;
 
   const ProblemData *PD = BHD->PD;
@@ -880,7 +880,6 @@ void Compute_dg_H2O_inter (State *BHD,
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BHD->g_fft;
   dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI);  /* BHD->f ist nur grad U, nicht F=-grad U  */
   /* confac = SQR(M_PI/L/2.); */
@@ -1109,7 +1108,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
+  fftw_complex *(fg2_fft[3]), *dg_fft;
   real fac, k_fac, L, k, h;
 
   const ProblemData *PD = BHD->PD;
@@ -1122,7 +1121,6 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
   dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI); /* siehe oben ... */
 
@@ -1237,7 +1235,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
-  fftw_complex *(fg2_fft[3]), *dg_fft, *scratch;
+  fftw_complex *(fg2_fft[3]), *dg_fft;
   real fac, k_fac, L, k, h;
   PetscScalar *v_vec, *tg_vec;
 
@@ -1251,7 +1249,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
   dg_fft = BHD->gfg2_fft;
-  scratch = BHD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   fac = L/(2.*M_PI); /* siehe oben ... */
 
@@ -1561,16 +1558,13 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   Vec g is intent(in).
   Vec dg is intent(out).
 
-  Side effects: uses BHD->{g_fft, fft_scratch} as temp arrays.
+  Side effects: uses BHD->g_fft as temp array.
 
   FIXME: compare the code to normalization_intra().
 */
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 {
-  const DA da = BHD->da;
-
   fftw_complex *g_fft = BHD->g_fft;
-  fftw_complex *scratch = BHD->fft_scratch;
 
   /* g(x) -> g(k): */
   ComputeFFTfromVec_fftw (BHD->fft_mat, g, g_fft);
@@ -1611,7 +1605,7 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 
   Vec dg is  intent(out).
 
-  Side effects: uses BHD->{gfg2_fft, fft_scratch} as work arrays.
+  Side effects: uses BHD->gfg2_fft as work array.
 
   FIXME: compare the code to Compute_dg_H2O_intra_ln().
  */
@@ -1630,7 +1624,6 @@ static void normalization_intra (const State *BHD,
   const real L = PD->interval[1] - PD->interval[0];
 
   fftw_complex *dg_fft = BHD->gfg2_fft;
-  fftw_complex *scratch = BHD->fft_scratch;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
