@@ -9,6 +9,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
 #include "bgy3dH2O.h"
+#include "bgy3d-fftw.h"
 #include "bgy3d-fft.h"
 
 #define R_r  9
@@ -79,9 +80,7 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
-  bgy3d_fft_init_da (PD->N, &BHD->fft_plan_fw, &BHD->fft_plan_bw, &BHD->da, NULL);
-
-  /* multigrid case apparently not considered here */
+  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
 
   const DA da = BHD->da;         /* shorter alias */
 
@@ -178,7 +177,7 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->cH);
   VecDestroy(BHD->cO);
   VecDestroy(BHD->cHO);
-  DADestroy(BHD->da);
+
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
   KSPDestroy(BHD->ksp);
@@ -187,8 +186,9 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->x_lapl[1]);
 #endif
 
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
+  DADestroy (BHD->da);
+  DADestroy (BHD->dc);
+  MatDestroy (BHD->fft_mat);
 
   free(BHD);
 }
@@ -560,8 +560,8 @@ void ComputeFFTfromCoulomb (State *BHD,
 
   //VecSum(uc, &fac);
   //PetscPrintf(PETSC_COMM_WORLD, "int(uc)= %e\n", fac);
-/*   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, uc, tmp_fft,  */
-/*                       BHD->fft_scratch); */
+/*   ComputeFFTfromVec_fftw (BHD->fft_mat, uc, tmp_fft,  */
+/*                       ); */
 /*   tmp_fft[0].re=0; */
 
   /* Copy  uc_fft  to  temporary   array  for  back  trafo.   FIXME:
@@ -578,7 +578,7 @@ void ComputeFFTfromCoulomb (State *BHD,
     }
 
   /* FFT potential */
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, uc, tmp_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, uc, tmp_fft);
   VecScale(uc, 1./L/L/L);
   //VecScale(uc, 1./N[0]/N[1]/N[2]);
 
@@ -589,7 +589,7 @@ void ComputeFFTfromCoulomb (State *BHD,
     {
       FOR_DIM
         {
-          ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, f_l[dim], fg_fft[dim], BHD->fft_scratch);
+          ComputeVecfromFFT_fftw (BHD->fft_mat, f_l[dim], fg_fft[dim]);
           VecScale(f_l[dim], 1./L/L/L);
         }
     }
@@ -899,14 +899,14 @@ void Compute_dg_H2O_inter (State *BHD,
       /* special treatment: Coulomb long */
       VecAXPY(BHD->v[dim], -1.0, f1_l[dim]);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
 
     }
 /*      VecView(f1_l[0],PETSC_VIEWER_STDERR_WORLD);   */
 /*      exit(1);   */
 
   /* fft(g) */
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g1b, g_fft, scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, g1b, g_fft);
 
 
   index=0;
@@ -971,7 +971,7 @@ void Compute_dg_H2O_inter (State *BHD,
           //fprintf(stderr,"%e\n",fg2_fft[0][index].re);
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
 
   VecScale(dg_help, rho1*PD->beta/L/L/L);
 
@@ -998,13 +998,13 @@ void Compute_dg_H2O_inter (State *BHD,
       /* special treatment: Coulomb long */
       VecAXPY(BHD->v[dim], -1.0, f2_l[dim]);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g-1) */
   //VecCopy(g2b, dg_help);
   //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g2b, g_fft, scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, g2b, g_fft);
 /*   VecView(BHD->v[0],PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);  */
 
@@ -1081,7 +1081,7 @@ void Compute_dg_H2O_inter (State *BHD,
         }
 
 
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
 
   VecScale(dg_help, rho2*PD->beta/L/L/L);
 
@@ -1101,10 +1101,6 @@ void Compute_dg_H2O_inter (State *BHD,
 /*   exit(1);  */
 
 }
-
-
-
-
 
 
 /* Compute intramolecular part */
@@ -1147,12 +1143,12 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
       /* special treatment: Coulomb long */
       VecAXPY(BHD->v[dim], -1.0, f_l[dim]);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g2) */
 
-/*   ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, g2, g_fft, scratch, */
+/*   ComputeFFTfromVec_fftw (BHD->fft_mat, g2, g_fft, */
 /*                       ); */
 
   index=0;
@@ -1220,7 +1216,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
           //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -1274,7 +1270,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
       /* special treatment: Coulomb long */
       VecAXPY(BHD->v[dim], -1.0, f_l[dim]);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
 
@@ -1332,7 +1328,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
   FOR_DIM
     {
-      ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeVecfromFFT_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
       VecScale(BHD->v[dim], 1./L/L/L);
     }
 
@@ -1384,7 +1380,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
       //VecPointwiseDivide( BHD->v[dim], BHD->v[dim], tg);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
    VecRestoreArray( tg, &tg_vec);
 
@@ -1450,7 +1446,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
             }
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg_help, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -1458,7 +1454,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   VecGetArray( tg, &tg_vec);
   FOR_DIM
     {
-      ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeVecfromFFT_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
       VecScale(BHD->v[dim], 1./L/L/L);
 
      VecGetLocalSize(BHD->v[dim], &local_size);
@@ -1494,7 +1490,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
       //VecPointwiseDivide(BHD->v[dim], BHD->v[dim], tg);
 
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, BHD->v[dim], fg2_fft[dim], scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
   VecRestoreArray( tg, &tg_vec);
 
@@ -1545,7 +1541,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
             }
           index++;
         }
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dg, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg, dg_fft);
 
   VecScale(dg, PD->beta/L/L/L);
 
@@ -1577,7 +1573,7 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
   fftw_complex *scratch = BHD->fft_scratch;
 
   /* g(x) -> g(k): */
-  ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw, g, g_fft, scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, g, g_fft);
 
   /* g_fft is intent(in), Vec dg is intent(out) here: */
   normalization_intra (BHD, g_fft, rab, dg);
@@ -1673,7 +1669,7 @@ static void normalization_intra (const State *BHD,
             }
           index++;
         }
-  ComputeVecfromFFT_fftw (da, BHD->fft_plan_bw, dg, dg_fft, scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dg, dg_fft);
 
   VecScale (dg, 1./L/L/L);
 
@@ -1718,7 +1714,7 @@ void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
                                          Vec dg_help) /* intent(out) */
 {
   /* fft(g/t) */
-  ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, g, BHD->g_fft, BHD->fft_scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, g, BHD->g_fft);
 
   /* FIXME: Uses BHD->gfg2_fft,  BHD->fft_scratch as work arrays, huge
      potential for confusion: */

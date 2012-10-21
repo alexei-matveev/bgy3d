@@ -113,6 +113,7 @@ void bgy3d_fft_free (fftw_complex *ptr)
   free(ptr);
 }
 
+#ifdef WITH_EXTRA_SOLVERS
 static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
 {
   int index, i0, j0, k0, ni, nj, nk;
@@ -161,45 +162,7 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
         }
   DAVecRestoreArray(da, g, &g_vec);
 }
-
-/*
- The function  has a feature,  if the output  array g_fft is  NULL a
- fresh array is allocated with the size derived from the distributed
- array  description.  This  size  is suffucient  to  hold the  local
- portion of the array.
-
- Vec  g  is  intent(in),  g_fftw  is  intent(out).   All  fftwnd_mpi()
- transforms  are in-place,  but  may be  more  efficient with  scratch
- arrays.
- */
-void ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
-                             fftw_complex *g_fft, fftw_complex *scratch)
-{
-  assert (g_fft != NULL);
-
-  /* Real Vec into complex array: */
-  unpack (da, g, g_fft);
-
-  /* forward fft */
-  fftwnd_mpi (fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
-}
-
-
-/* Vec   g  is  intent(out),   needs  to   be  allocated,   g_fftw  is
-   intent(inout). All fftwnd_mpi() transforms are in-place, but may be
-   more efficient with scratch arrays. */
-void ComputeVecfromFFT_fftw(DA da, fftwnd_mpi_plan fft_plan, Vec g,
-			    fftw_complex *g_fft, fftw_complex *scratch)
-{
-  assert (g_fft != NULL);
-
-  /* backward fft */
-  fftwnd_mpi (fft_plan, 1, g_fft, scratch, FFTW_NORMAL_ORDER);
-
-  /* Pack a  complex vector with (hopefully)  vanishing imaginary part
-     into a real Vec: */
-  pack (da, g, g_fft);
-}
+#endif
 
 /* y := alpha  * x + beta *  y. FIXME: is there anything  like that in
    FFTW? */
@@ -246,7 +209,7 @@ fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha)
   return y;
 }
 
-
+#ifdef WITH_EXTRA_SOLVERS
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft)
 {
@@ -280,6 +243,8 @@ void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
      into a real Vec: */
   pack (da, g, g_fft);
 }
+#endif
+
 
 double bgy3d_fft_test (int m, int n, int p)
 {

@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-getopt.h"
+#include "bgy3d-fftw.h"
 #include "bgy3dH2OS.h"          /* for this */
 #include "bgy3dH2O.h"
 #include "bgy3dH2ONewton.h"
@@ -44,24 +45,14 @@ typedef struct H2Odg
 #define EPSILON0INV 331.84164 //331.84164
 
 
-
-
-
-
-
-
 static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 {
   State *BHD;
-  DA da;
   real interval[2], h[3], r[3], r_s, beta;
   int i[3], x[3], n[3];
   PetscScalar ***(fH_vec[3]),***(fO_vec[3]),***(fHO_vec[3]);
   PetscScalar ***(fHl_vec[3]),***(fOl_vec[3]),***(fHOl_vec[3]);
   PetscScalar ***gHini_vec, ***gOini_vec, ***gHOini_vec;
-  int np;
-  int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
-  PetscInt lx[1], ly[1], *lz;
   H2Odg ***pre_vec;
   real epsilonH, epsilonO, epsilonHO;
   real sigmaH, sigmaO, sigmaHO;
@@ -99,8 +90,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   /****************************************************/
 
-
-
   BHD->PD = PD;
 
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
@@ -117,65 +106,49 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   FOR_DIM
     h[dim]=PD->h[dim];
 
-  /* Initialize parallel stuff: fftw + petsc */
-  BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_FORWARD, FFTW_ESTIMATE);
-  BHD->fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftwnd_mpi_local_sizes(BHD->fft_plan_fw, &local_nx, &local_x_start,
-			 &local_ny, &local_y_start, &total_local_size);
-  /* Get number of processes */
-  MPI_Comm_size(PETSC_COMM_WORLD, &np);
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
+  const DA da = BHD->da;
 
-  /* Create Petsc Distributed Array according to fftw data distribution*/
-  lz = (PetscInt*) malloc(np*sizeof(*lz));
-
-  MPI_Allgather( &local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
-  ly[0]=PD->N[1];
-  lx[0]=PD->N[2];
-
-
-  #ifdef L_BOUNDARY
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,1,
-	     lx, ly, lz,
-	     &(BHD->da));
-  da = BHD->da;
+#ifdef L_BOUNDARY
   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-#else
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,0,
-	     lx, ly, lz,
-	     &(BHD->da));
-  da = BHD->da;
+  DAGetMatrix (da, MATMPIAIJ, &BHD->M);
 #endif
 
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     3,0,
-	     lx, ly, lz,
-	     &(BHD->da_newton));
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
+  /* Create  Petsc  Distributed  Array   with  3  degrees  of  freedom
+     according to fftw data distribution: */
+  {
+    /* Get number of processes */
+    int np;
+    MPI_Comm_size (PETSC_COMM_WORLD, &np);
 
+    int lx[1] = {PD->N[2]};
+    int ly[1] = {PD->N[1]};
+    int lz[np];
 
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-  if( verbosity >2)
+    assert (0);                 /* FIXME: untested, n[0]? */
+    MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+
     {
-      PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\tfft: %d %d\n",
-			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
-			      local_nx, local_x_start);
-      PetscSynchronizedFlush(PETSC_COMM_WORLD);
+      PetscInt dim, M, N, P, m, n, p, dof, s;
+      DAPeriodicType wrap;
+      DAStencilType st;
+      DAGetInfo (da, &dim, &M, &N, &P, &m, &n, &p, &dof, &s, &wrap, &st);
+      DACreate3d (PETSC_COMM_WORLD,
+                  DA_NONPERIODIC,
+                  DA_STENCIL_STAR ,
+                  M, N, P,
+                  m, n, p,
+                  3, 0,
+                  lx, ly, lz,
+                  &BHD->da_newton);
     }
-  assert( n[0]*n[1]*n[2] == total_local_size);
+  }
+
   /* Create global vectors */
   DACreateGlobalVector(da, &(BHD->g_ini[0]));
   DACreateGlobalVector(da, &(BHD->g_ini[1]));
@@ -193,6 +166,7 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   DACreateGlobalVector(da, &(BHD->f2));
   DACreateGlobalVector(da, &(BHD->f3));
   DACreateGlobalVector(da, &(BHD->f4));
+
   /* Preconditioner */
   DACreateGlobalVector(BHD->da_newton, &(BHD->pre));
   FOR_DIM
@@ -205,7 +179,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
       DACreateGlobalVector(da, &(BHD->F_l[0][1][dim]));
       DACreateGlobalVector(da, &(BHD->v[dim]));
     }
-
 
   FOR_DIM
     {
@@ -220,9 +193,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   VecSet(BHD->g_ini[1], 0.0);
   VecSet(BHD->gHO_ini, 0.0);
 
-
-
-
   DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
@@ -236,7 +206,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
       DAVecGetArray(da, BHD->F_l[0][1][dim], &(fHOl_vec[dim]));
     }
   DAVecGetArray(BHD->da_newton, BHD->pre, (void*) &pre_vec);
-
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -346,21 +315,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
       DAVecRestoreArray(da, BHD->F_l[0][1][dim], &(fHOl_vec[dim]));
     }
 
-
-/*   VecView(BHD->gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
-
-
-
-  if(BHD->fft_plan_fw == NULL || BHD->fft_plan_bw == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-		  PD->id);
-      exit(1);
-    }
-
-
   /* Allocate memory for fft */
   FOR_DIM
     {
@@ -388,8 +342,6 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->F_l[0][0][dim]);
       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]);
 	}
-
-  free(lz);
 
   return BHD;
 }

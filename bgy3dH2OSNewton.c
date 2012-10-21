@@ -8,6 +8,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"          /* for this */
 #include "bgy3dH2O.h"
+#include "bgy3d-fftw.h"
 #include "bgy3d-fft.h"
 #include "bgy3dH2OSNewton.h"
 
@@ -58,11 +59,7 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
 static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 {
   State *BHD;
-  DA da;
   int x[3], n[3];
-  int np;
-  int local_nx, local_x_start, local_ny, local_y_start, total_local_size;
-  PetscInt lx[1], ly[1], *lz;
   PetscErrorCode ierr;
 
   BHD = (State*) malloc(sizeof(*BHD));
@@ -99,75 +96,56 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   BHD->rhos[0] = 2.*PD->rho;
   BHD->rhos[1] = PD->rho;
 
-  /* Initialize parallel stuff: fftw + petsc */
-  BHD->fft_plan_fw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_FORWARD, FFTW_ESTIMATE);
-  BHD->fft_plan_bw = fftw3d_mpi_create_plan(PETSC_COMM_WORLD,
-					    PD->N[2], PD->N[1], PD->N[0],
-					    FFTW_BACKWARD, FFTW_ESTIMATE);
-  fftwnd_mpi_local_sizes(BHD->fft_plan_fw, &local_nx, &local_x_start,
-			 &local_ny, &local_y_start, &total_local_size);
-  /* Get number of processes */
-  MPI_Comm_size(PETSC_COMM_WORLD, &np);
-
-  /* Create Petsc Distributed Array according to fftw data distribution*/
-  lz = (PetscInt*) malloc(np*sizeof(*lz));
-
-  MPI_Allgather( &local_nx, 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
-  ly[0]=PD->N[1];
-  lx[0]=PD->N[2];
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
+  const DA da = BHD->da;
 
 #ifdef L_BOUNDARY
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,1,
-	     lx, ly, lz,
-	     &(BHD->da));
-  da = BHD->da;
    /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-
-
-
-#else
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     1,0,
-	     lx, ly, lz,
-	     &(BHD->da));
-
-
-  da = BHD->da;
 #endif
 
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     2,0,
-	     lx, ly, lz,
-	     &(BHD->da_newton));
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     1, 1, np,
-	     4,0,
-	     lx, ly, lz,
-	     &(BHD->da_newtonF));
+  /* Create  Petsc  Distributed  Array   with  3  degrees  of  freedom
+     according to fftw data distribution: */
+  {
+    /* Get number of processes */
+    int np;
+    MPI_Comm_size (PETSC_COMM_WORLD, &np);
 
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+    int lx[1] = {PD->N[2]};
+    int ly[1] = {PD->N[1]};
+    int lz[np];
 
-  if( verbosity >2)
+    assert (0);                 /* FIXME: untested, n[0]? */
+    MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+
     {
-      PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\tfft: %d %d\n",
-			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2],
-			      local_nx, local_x_start);
-      PetscSynchronizedFlush(PETSC_COMM_WORLD);
+      PetscInt dim, M, N, P, m, n, p, dof, s;
+      DAPeriodicType wrap;
+      DAStencilType st;
+      DAGetInfo (da, &dim, &M, &N, &P, &m, &n, &p, &dof, &s, &wrap, &st);
+      DACreate3d (PETSC_COMM_WORLD,
+                  DA_NONPERIODIC,
+                  DA_STENCIL_STAR ,
+                  M, N, P,
+                  m, n, p,
+                  2, 0,
+                  lx, ly, lz,
+                  &BHD->da_newton);
+      DACreate3d (PETSC_COMM_WORLD,
+                  DA_NONPERIODIC,
+                  DA_STENCIL_STAR ,
+                  M, N, P,
+                  m, n, p,
+                  4, 0,
+                  lx, ly, lz,
+                  &BHD->da_newtonF);
     }
-  assert( n[0]*n[1]*n[2] == total_local_size);
+  }
 
   /*
    * CHKERRQ()  is  a  macro that  expands  to  an  if with  a  return
@@ -224,22 +202,6 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
       assert (!ierr);
     }
 
-
-
-
-/*   VecView(BHD->gHO_ini,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
-
-
-  if(BHD->fft_plan_fw == NULL || BHD->fft_plan_bw == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-		  PD->id);
-      exit(1);
-    }
-
-
   /* Allocate memory for fft */
   FOR_DIM
     {
@@ -273,8 +235,6 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 
   /* Compute Solute dependent initial data */
   //RecomputeInitialSoluteData(BHD, 1.0, 1.0);
-
-  free(lz);
 
   return BHD;
 }
@@ -561,8 +521,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
 
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch);
-  ComputeVecfromFFT_fftw(da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dgO, uO_fft);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dgH, uH_fft);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
@@ -654,8 +614,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 /*   Zeropad_Function(BHD, dgO, zpad, 0.0); */
 /*   Zeropad_Function(BHD, dgH, zpad, 0.0); */
 
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgH, uH_fft, BHD->fft_scratch);
-  ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw, dgO, uO_fft, BHD->fft_scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, dgH, uH_fft);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, dgO, uO_fft);
 
 
   /* Get arrays from PETSC Vectors */
@@ -735,8 +695,8 @@ static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
 
-  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgO, uO_fft, BHD->fft_scratch);
-  ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, dgH, uH_fft, BHD->fft_scratch);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dgO, uO_fft);
+  ComputeVecfromFFT_fftw (BHD->fft_mat, dgH, uH_fft);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 

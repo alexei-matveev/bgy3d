@@ -556,7 +556,7 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
 
   /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
      fft_work(kx, ky, kz): */
-  ComputeFFTfromVec_fftw(BHD->da, BHD->fft_plan_fw, rho, fft_work, fft_scratch);
+  ComputeFFTfromVec_fftw (BHD->fft_mat, rho, fft_work);
 
   /*
     Solving Poisson Equation (SI units) with FFT and IFFT:
@@ -627,7 +627,7 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
     // NOT NEEDED: VecSet(uc, 00.0);
 
     /* uc := IFFT(uc(kx, ky, kz)) */
-    ComputeVecfromFFT_fftw(BHD->da, BHD->fft_plan_bw, uc, fft_work, fft_scratch);
+    ComputeVecfromFFT_fftw (BHD->fft_mat, uc, fft_work);
 
     bgy3d_fft_free (fft_work);
     bgy3d_fft_free (fft_scratch);

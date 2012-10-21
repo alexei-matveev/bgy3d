@@ -410,3 +410,41 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
 
   return 0;
 }
+
+
+/*
+ Vec  g  is  intent(in),  g_fftw  is  intent(out).   All  fftwnd_mpi()
+ transforms  are in-place,  but  may be  more  efficient with  scratch
+ arrays.
+ */
+void ComputeFFTfromVec_fftw (Mat A, Vec g, fftw_complex *g_fft)
+{
+  assert (g_fft != NULL);
+
+  FFT *fft = context (A);
+
+  /* Real Vec into complex array: */
+  unpack_real (fft->da, g, g_fft);
+
+  /* forward fft */
+  fftwnd_mpi (fft->fw, 1, g_fft, fft->cmplx, FFTW_NORMAL_ORDER);
+}
+
+
+/* Vec   g  is  intent(out),   needs  to   be  allocated,   g_fftw  is
+   intent(inout). All fftwnd_mpi() transforms are in-place, but may be
+   more efficient with scratch arrays. */
+void ComputeVecfromFFT_fftw (Mat A, Vec g, fftw_complex *g_fft)
+{
+  assert (g_fft != NULL);
+
+  FFT *fft = context (A);
+
+  /* backward fft */
+  fftwnd_mpi (fft->bw, 1, g_fft, fft->cmplx, FFTW_NORMAL_ORDER);
+
+  /* Pack a  complex vector with (hopefully)  vanishing imaginary part
+     into a real Vec: */
+  pack_real (fft->da, g, g_fft);
+}
+

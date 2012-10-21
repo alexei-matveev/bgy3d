@@ -13,10 +13,8 @@ fftw_complex *bgy3d_fft_axpby (DA da, fftw_complex *restrict y,
 fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha);
 
 
-void ComputeFFTfromVec_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
-                             fftw_complex *g_fft, fftw_complex *work);
-void ComputeVecfromFFT_fftw (DA da, fftwnd_mpi_plan fft_plan, Vec g,
-                             fftw_complex *g_fft, fftw_complex *work);
+void ComputeFFTfromVec_fftw (Mat fft_mat, Vec g, fftw_complex *g_fft);
+void ComputeVecfromFFT_fftw (Mat fft_mat, Vec g, fftw_complex *g_fft);
 
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft);

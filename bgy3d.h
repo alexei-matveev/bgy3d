@@ -83,6 +83,18 @@ void Molecule_free (real **x_M, int N);
 typedef struct State
 {
   /*
+    These are array  descriptors for real and complex  vectors and the
+    FFT matrix.  The  data distribution of Petsc vectors  and FFTW MPI
+    needs to be consistent, so  that these three should be constructed
+    accordingly:
+  */
+  DA da, dc;
+  Mat fft_mat;
+
+  /* Immutable command line parameters are stored here: */
+  const ProblemData *PD;
+
+  /*
    * In much of the code one refers  to the two sites by literal H and
    * O, though the actual sites may be different.  Let us stick to the
    * convention that data for H is  stored in first- and data for O is
@@ -90,7 +102,6 @@ typedef struct State
    * quantities  one may  chose  to store  them  in a  2x2 array,  say
    * g2[2][2] with a constrain that g2[0][1] == g2[1][0].
    */
-  DA da;
   Vec F[2][2][3];               /* sort range pair force */
   Vec F_l[2][2][3];             /* long range pair force, redundant */
   Vec v[3];                     /* work vectors */
@@ -135,10 +146,6 @@ typedef struct State
    */
   fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
   fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
-
-  fftwnd_mpi_plan fft_plan_fw, fft_plan_bw;
-
-  const ProblemData *PD;
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two
      site indices */

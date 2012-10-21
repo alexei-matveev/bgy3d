@@ -10,6 +10,7 @@
 #include "bgy3d-solutes.h"
 #include "bgy3dH2O.h"
 #include "bgy3dH2OS.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
 
 #ifndef L_BOUNDARY_MG
@@ -56,11 +57,11 @@ static State initialize_state (const ProblemData *PD)
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
-#ifndef L_BOUNDARY_MG
-  bgy3d_fft_init_da (PD->N, &BHD.fft_plan_fw, &BHD.fft_plan_bw, &BHD.da, NULL);
-#else
+  bgy3d_fft_mat_create (PD->N, &BHD.fft_mat, &BHD.da, &BHD.dc);
+
+#ifdef L_BOUNDARY_MG
   /* multigrid, apparently needs two descriptors: */
-  bgy3d_fft_init_da (PD->N, &BHD.fft_plan_fw, &BHD.fft_plan_bw, &BHD.da, &BHD.da_dmmg);
+#error "Need BHD.da_dmmg"
 #endif
 
   const DA da = BHD.da;         /* shorter alias */
@@ -236,10 +237,10 @@ static void finalize_state (State *BHD)
 #ifdef L_BOUNDARY_MG
   DMMGDestroy(BHD->dmmg);
 #endif
-  DADestroy(BHD->da);
 
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_fw);
-  fftwnd_mpi_destroy_plan(BHD->fft_plan_bw);
+  DADestroy (BHD->da);
+  DADestroy (BHD->dc);
+  MatDestroy (BHD->fft_mat);
 }
 
 /* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
@@ -667,9 +668,7 @@ static void  pair (State *BHD,
       assert (!err);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
-      ComputeFFTfromVec_fftw (da, BHD->fft_plan_fw,
-                              work, fs_g2_fft[dim],
-                              BHD->fft_scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, work, fs_g2_fft[dim]);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
       err = VecPointwiseMult (work, g2, f_long[dim]);
@@ -679,9 +678,7 @@ static void  pair (State *BHD,
       VecAXPY(work, -1.0, f_long[dim]);
 
       /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
-      ComputeFFTfromVec_fftw(da, BHD->fft_plan_fw,
-                             work, fl_g2_fft[dim],
-                             BHD->fft_scratch);
+      ComputeFFTfromVec_fftw (BHD->fft_mat, work, fl_g2_fft[dim]);
     }
 }
 
@@ -926,9 +923,7 @@ static void Compute_H2O_interS_C (const State *BHD,
 
 
   /* fft(g) */
-  ComputeFFTfromVec_fftw (BHD->da, BHD->fft_plan_fw, g,
-                          BHD->g_fft,        /* result */
-                          BHD->fft_scratch); /* work array */
+  ComputeFFTfromVec_fftw (BHD->fft_mat, g, BHD->g_fft); /* result */
 
   /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
      iterations.   Here  we   put   the  fft   of   the  kernel   into
@@ -943,10 +938,9 @@ static void Compute_H2O_interS_C (const State *BHD,
          BHD->gfg2_fft);        /* will be incremented */
 
   /* ifft(dg) */
-  ComputeVecfromFFT_fftw (BHD->da, BHD->fft_plan_bw,
+  ComputeVecfromFFT_fftw (BHD->fft_mat,
                           dg_help, /* result */
-                          BHD->gfg2_fft,
-                          BHD->fft_scratch);
+                          BHD->gfg2_fft);
 }
 
 /*
@@ -1350,9 +1344,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
-            ComputeFFTfromVec_fftw (BHD.da, BHD.fft_plan_fw,
-                                    g[i], g_fft[i],
-                                    BHD.fft_scratch); /* work array */
+            ComputeFFTfromVec_fftw (BHD.fft_mat, g[i], g_fft[i]);
 
           /* for H, O in that order ... */
           for (int i = 0; i < 2; i++)
@@ -1372,10 +1364,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 contributions  are  added  to  the real  space  dg_acc
                 below:
               */
-              ComputeVecfromFFT_fftw (BHD.da, BHD.fft_plan_bw,
+              ComputeVecfromFFT_fftw (BHD.fft_mat,
                                       dg_acc, /* result */
-                                      dg_acc_fft,
-                                      BHD.fft_scratch);
+                                      dg_acc_fft);
 
               /*
                 In the following the sum is  over all sites j /= i. It
