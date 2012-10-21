@@ -32,7 +32,7 @@ typedef struct BGY3dDiatomicABStruct
   Vec ga_ini, gb_ini, gab_ini;
 
   /* Parallel FFT */
-  fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft, *fft_scratch;
+  fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft;
 
 } *BGY3dDiatomicABData;
 
@@ -171,7 +171,6 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD
 
   BDD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BDD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BDD->fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
 
   return BDD;
 }
@@ -192,7 +191,7 @@ static void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
     }
   free(BDD->g_fft);
   free(BDD->gfg2_fft);
-  free(BDD->fft_scratch);
+
   VecDestroy(BDD->ga_ini);
   VecDestroy(BDD->gb_ini);
   VecDestroy(BDD->gab_ini);
