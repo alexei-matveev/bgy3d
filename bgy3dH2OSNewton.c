@@ -929,8 +929,8 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   VecDestroy(b);
   SNESDestroy(snes);
 
+  assert (0);                   /* FIXME: clean up BHD? */
   return PETSC_NULL;
-
 }
 
 
@@ -1041,8 +1041,8 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   VecDestroy(b);
   SNESDestroy(snes);
 
+  assert (0);                   /* FIXME: clean up BHD? */
   return PETSC_NULL;
-
 }
 
 static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
