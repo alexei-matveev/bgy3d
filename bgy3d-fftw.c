@@ -81,7 +81,6 @@ static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
     PetscScalar ***g_vec;
     DAVecGetArray (da, g, &g_vec);
 
-    /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
@@ -108,7 +107,6 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
     struct {PetscScalar re, im;} ***g_vec;
     DAVecGetArray (da, g, &g_vec);
 
-    /* loop over local portion of grid */
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
