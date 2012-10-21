@@ -121,7 +121,8 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
     int lz[np];
 
     assert (0);                 /* FIXME: untested, n[0]? */
-    MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+    int err = MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+    assert (!err);
 
     {
       PetscInt dim, M, N, P, m, n, p, dof, s;
@@ -470,7 +471,6 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   (void) snes;                  /* FIXME: interface obligation? */
 
   State *BHD;
-  DA da;
   H2OSdgF ***dg_struct;
   int i[3], x[3], n[3], index, N3;
   Vec dgH, dgO, gH, gO, help;
@@ -484,7 +484,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 
   BHD = (State*) data;
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
+
   gH= BHD->gH;
   gO= BHD->gO;
   dgH= BHD->dgH;
