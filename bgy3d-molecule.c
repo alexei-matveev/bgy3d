@@ -310,7 +310,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
+  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac, L, k, rho, h, sign;
 
   const ProblemData *PD = BDD->PD;
@@ -324,7 +324,6 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BDD->g_fft;
   dg_fft = BDD->gfg2_fft;
-  scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   rho = PD->rho;
   fac = L/(2.*M_PI);  /* BDD->f ist nur grad U, nicht F=-grad U  */
@@ -499,7 +498,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
+  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft;
   real fac, k_fac, L, k, h, beta; // sign;
 
   const ProblemData *PD = BDD->PD;
@@ -513,7 +512,6 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BDD->g_fft;
   dg_fft = BDD->gfg2_fft;
-  scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   beta = PD->beta;
   fac = L/(2.*M_PI); /* siehe oben ... */
@@ -614,7 +612,7 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3], local_size;
-  fftw_complex *g_fft, *dg_fft, *scratch;
+  fftw_complex *g_fft, *dg_fft;
   real L, k, h;
   PetscScalar *g_vec;
 
@@ -628,7 +626,6 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BDD->g_fft;
   dg_fft = BDD->gfg2_fft;
-  scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
@@ -709,7 +706,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *g_fft, *dg_fft, *scratch;
+  fftw_complex  *g_fft, *dg_fft;
   real L, k, h;
 
   const ProblemData *PD = BDD->PD;
@@ -722,7 +719,6 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BDD->g_fft;
   dg_fft = BDD->gfg2_fft;
-  scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
@@ -797,7 +793,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 {
   DA da;
   int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft, *scratch;
+  fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft;
   real L, k, h, sign;
 
   const ProblemData *PD = BDD->PD;
@@ -811,7 +807,6 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   h=PD->h[0]*PD->h[1]*PD->h[2];
   g_fft = BDD->g_fft;
   dg_fft = BDD->gfg2_fft;
-  scratch = BDD->fft_scratch;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
