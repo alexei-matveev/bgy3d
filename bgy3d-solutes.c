@@ -582,8 +582,8 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
     int x[3], n[3], i[3], ic[3];
     DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    struct {PetscScalar re, im;} ***fft_work;
-    DAVecGetArray (BHD->dc, work, &fft_work);
+    struct {PetscScalar re, im;} ***work_;
+    DAVecGetArray (BHD->dc, work, &work_);
 
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -602,8 +602,8 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
             if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
               {
                 /* The gamma point, k = 0, we cannot divide by 0: */
-                fft_work[i[2]][i[1]][i[0]].re = 0.0;
-                fft_work[i[2]][i[1]][i[0]].im = 0.0;
+                work_[i[2]][i[1]][i[0]].re = 0.0;
+                work_[i[2]][i[1]][i[0]].im = 0.0;
               }
             else
               {
@@ -613,11 +613,11 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
 
                 /* Here we compute in place: uc(kx, ky, kz) := scale *
                    rho(kx, ky, kz) / k^2 */
-                fft_work[i[2]][i[1]][i[0]].re *= fac;
-                fft_work[i[2]][i[1]][i[0]].im *= fac;
+                work_[i[2]][i[1]][i[0]].re *= fac;
+                work_[i[2]][i[1]][i[0]].im *= fac;
               }
           }
-    DAVecRestoreArray (BHD->dc, work, &fft_work);
+    DAVecRestoreArray (BHD->dc, work, &work_);
   }
 
   /* uc := IFFT(uc(kx, ky, kz)) */
