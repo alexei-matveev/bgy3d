@@ -888,7 +888,6 @@ static void apply (const DA dc,
   DAVecGetArray (dc, g, &g_);
 
   /* loop over local portion of grid */
-  int ijk = 0;
   for (int k = x[2]; k < x[2] + n[2]; k++)
     for (int j = x[1]; j < x[1] + n[1]; j++)
       for (int i = x[0]; i < x[0] + n[0]; i++)
@@ -906,7 +905,6 @@ static void apply (const DA dc,
                                       ker_[k][j][i].im * g_[k][j][i].im);
           dg_[k][j][i].im += scale * (ker_[k][j][i].re * g_[k][j][i].im +
                                       ker_[k][j][i].im * g_[k][j][i].re);
-          ijk++;
         }
   DAVecRestoreArray (dc, ker, &ker_);
   DAVecRestoreArray (dc, dg, &dg_);
