@@ -27,9 +27,10 @@ static real NORM_REG=1.0e-1;
 static real NORM_REG2=1.0e-2;
 
 static void normalization_intra (const State *BHD,
-                                 const fftw_complex *g_fft,
+                                 Vec g_fft, /* complex, in */
                                  real rab,
-                                 Vec dg);
+                                 Vec work, /* complex, work */
+                                 Vec dg);  /* real, out */
 
 static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
 {
@@ -1560,19 +1561,21 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   Vec g is intent(in).
   Vec dg is intent(out).
 
-  Side effects: uses BHD->g_fft as temp array.
+  Side effects: uses BHD->fft_scratch as temp Vec.
 
   FIXME: compare the code to normalization_intra().
 */
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 {
-  fftw_complex *g_fft = BHD->g_fft;
-
   /* g(x) -> g(k): */
-  ComputeFFTfromVec_fftw (BHD->fft_mat, g, g_fft);
+  MatMult (BHD->fft_mat, g, BHD->fft_scratch);
 
-  /* g_fft is intent(in), Vec dg is intent(out) here: */
-  normalization_intra (BHD, g_fft, rab, dg);
+  /*
+    FIXME:  argument aliasing!   BHD->fft_scratch is  the  input alias
+    work  array.  Its  contents  is  destroyed on  return.  Vec dg  is
+    intent(out) here:
+  */
+  normalization_intra (BHD, BHD->fft_scratch, rab, BHD->fft_scratch, dg);
 
   /* ln(g) */
   {
@@ -1607,64 +1610,76 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 
   Vec dg is  intent(out).
 
-  Side effects: uses BHD->gfg2_fft as work array.
+  Needs a complex  work vector. As a matter of fact,  the work Vec and
+  the  input  Vec  g_fft  may  be  aliased. Then  the  input  will  be
+  destroyed, of course.
 
   FIXME: compare the code to Compute_dg_H2O_intra_ln().
  */
 static void normalization_intra (const State *BHD,
-                                 const fftw_complex *g_fft,
+                                 Vec g_fft, /* g(k), intent(in) */
                                  real rab,
-                                 Vec dg) /* intent(out) */
+                                 Vec work, /* complex work Vec */
+                                 Vec dg)   /* ĝ(x), intent(out) */
 {
   int x[3], n[3], i[3], ic[3];
 
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
-  const DA da = BHD->da;
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
-  fftw_complex *dg_fft = BHD->gfg2_fft;
-
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  int index = 0;
+  struct {PetscScalar re, im;} ***g_fft_, ***work_;
+  DAVecGetArray (BHD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BHD->dc, work, &work_);
+
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          dg_fft[index].re = 0;
-          dg_fft[index].im = 0;
-
           FOR_DIM
             {
-              if( i[dim] <= N[dim]/2)
+              if (i[dim] <= N[dim] / 2)
                 ic[dim] = i[dim];
               else
                 ic[dim] = i[dim] - N[dim];
             }
 
+          /* Get g(k): */
+          real re = g_fft_[i[2]][i[1]][i[0]].re;
+          real im = g_fft_[i[2]][i[1]][i[0]].im;
+
+          /* Scale by ω(k): */
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
-              dg_fft[index].re = h3 * g_fft[0].re;
-              dg_fft[index].im = 0.0;
+              re *= h3;         /* sinc(0) = 1 */
+              im = 0.0;         /* zero anyway? */
             }
           else
             {
-              real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-
-              real k = 2.0 * M_PI * sqrt(k2) * rab / L;
+              const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+              const real k = 2.0 * M_PI * sqrt(k2) * rab / L;
+              const real sinc = sin(k) / k;
 
               /* + hier richtig !! */
-              dg_fft[index].re += h3 * g_fft[index].re * sin(k) / k;
-              dg_fft[index].im += h3 * g_fft[index].im * sin(k) / k;
+              re *= h3 * sinc;
+              im *= h3 * sinc;
             }
-          index++;
+
+          /* Set ĝ(k): */
+          work_[i[2]][i[1]][i[0]].re = re;
+          work_[i[2]][i[1]][i[0]].im = im;
         }
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg, dg_fft);
+  DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BHD->dc, work, &work_);
+
+  /* Inverse FFT, ĝ(k) -> ĝ(x): */
+  MatMultTranspose (BHD->fft_mat, work, dg);
 
   VecScale (dg, 1./L/L/L);
 
@@ -1676,7 +1691,7 @@ static void normalization_intra (const State *BHD,
     VecGetArray (dg, &g_vec);
     VecGetLocalSize (dg, &local_size);
 
-    for(int i = 0; i < local_size; i++)
+    for (int i = 0; i < local_size; i++)
       {
         real g_i = g_vec[i];
         if (g_i < 1.0e-8)
@@ -1700,23 +1715,25 @@ static void normalization_intra (const State *BHD,
  * Vec dg is  intent(out).  FIXME: Appears to be the  same as the also
  * intent(out) Vec dg_help.
  *
- * Side effects:
- *
- *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ * Side effects: uses BHD->fft_scratch as work Vec.
  */
 void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
                                          Vec dg, /* intent(out) */
                                          Vec dg_help) /* intent(out) */
 {
   /* fft(g/t) */
-  ComputeFFTfromVec_fftw (BHD->fft_mat, g, BHD->g_fft);
+  MatMult (BHD->fft_mat, g, BHD->fft_scratch);
 
-  /* FIXME: Uses BHD->gfg2_fft,  BHD->fft_scratch as work arrays, huge
-     potential for confusion: */
-  normalization_intra (BHD, BHD->g_fft, rab, dg); /* dg is intent(out) */
+  /*
+    FIXME: argument aliasing! BHD->fft_scratch is used as input and as
+    work array here.  Gets  overwritten as the result.  Huge potential
+    for confusion:
+  */
+  normalization_intra (BHD, BHD->fft_scratch, rab, BHD->fft_scratch,
+                       dg); /* dg is intent(out) */
 
   /* Original functions did that. FIXME: does anyone rely on that? */
-  VecCopy(dg, dg_help);
+  VecCopy (dg, dg_help);
 }
 
 
@@ -1773,28 +1790,31 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
      same data: */
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg, dg_help);
 
-  /* t =  g / dg, avoiding  small denominators. Some  of the commented
-     code used VecPointwiseDivide(t, g, dg). */
+  /* t(x)  = g(x)  / ĝ(x),  avoiding small  denominators. Some  of the
+     commented code used VecPointwiseDivide(t, g, dg). */
   safe_pointwise_divide (t, g, dg, NORM_REG2);
 
   Zeropad_Function(BHD, dg, zpad, 1.0);
 }
 
 void bgy3d_solve_normalization (const State *BHD,
-                                const fftw_complex *gc_fft,
+                                Vec gc_fft, /* intent(in) */
                                 real rc,
                                 Vec g,     /* intent(in) */
                                 Vec t)     /* intent(out) */
 {
-    Vec dg = t;                 /* alias, uses the same storage */
+  /*
+    ĝ(x) goes into Vec t  which is is intent(out) here, fft_scratch is
+    a work array:
+  */
+  normalization_intra (BHD, gc_fft, rc, BHD->fft_scratch, t);
 
-    /* Vec dg is intent(out) here: */
-    normalization_intra (BHD, gc_fft, rc, dg); /* use t storage */
-
-    /* t  = g  / dg  (or rather  t  = g  / t  with argument  aliasing)
-       avoiding small  denominators. Some  of the commented  code used
-       VecPointwiseDivide(t, g, dg). */
-    safe_pointwise_divide (t, g, dg, NORM_REG2); /* argument aliasing */
+  /*
+    t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
+    aliasing) avoiding small denominators.  Some of the commented code
+    used VecPointwiseDivide(t, g, dg).
+  */
+  safe_pointwise_divide (t, g, t, NORM_REG2); /* argument aliasing */
 }
 
 

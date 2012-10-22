@@ -867,21 +867,23 @@ static void kernel (const DA dc,
  * an increment to "dg". The latter probably needs a better name. Dont
  * forget to clear "dg" early enough.
  *
- * Complex array dg is intent(inout).
+ * Complex Vec dg is intent(inout).
  */
 static void apply (const DA dc,
-                   Vec ker,  /* kernel */
-                   const fftw_complex *restrict g,    /* current g */
-                   const real scale,          /* overall scale */
-                   fftw_complex *restrict dg) /* intent(inout) */
+                   Vec ker,          /* kernel, intent(in) */
+                   Vec g,            /* current g, intent(in) */
+                   const real scale, /* overall scale */
+                   Vec dg)           /* incremented, intent(inout) */
 {
   int x[3], n[3];
 
   /* Get local portion of the grid */
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  struct {PetscScalar re, im;} ***ker_fft;
-  DAVecGetArray (dc, ker, &ker_fft);
+  struct {PetscScalar re, im;} ***ker_, ***g_, ***dg_;
+  DAVecGetArray (dc, ker, &ker_);
+  DAVecGetArray (dc, dg, &dg_);
+  DAVecGetArray (dc, g, &g_);
 
   /* loop over local portion of grid */
   int ijk = 0;
@@ -898,13 +900,15 @@ static void apply (const DA dc,
            Poisson solution.   The factor scale = βρ  is not included,
            on the other hand. See kernel() for details:
            */
-          dg[ijk].re += scale * (ker_fft[k][j][i].re * g[ijk].re -
-                                 ker_fft[k][j][i].im * g[ijk].im);
-          dg[ijk].im += scale * (ker_fft[k][j][i].re * g[ijk].im +
-                                 ker_fft[k][j][i].im * g[ijk].re);
+          dg_[k][j][i].re += scale * (ker_[k][j][i].re * g_[k][j][i].re -
+                                      ker_[k][j][i].im * g_[k][j][i].im);
+          dg_[k][j][i].im += scale * (ker_[k][j][i].re * g_[k][j][i].im +
+                                      ker_[k][j][i].im * g_[k][j][i].re);
           ijk++;
         }
-  DAVecRestoreArray (dc, ker, &ker_fft);
+  DAVecRestoreArray (dc, ker, &ker_);
+  DAVecRestoreArray (dc, dg, &dg_);
+  DAVecRestoreArray (dc, g, &g_);
 }
 
 /*
@@ -915,7 +919,7 @@ static void apply (const DA dc,
 static void Compute_H2O_interS_C (const State *BHD,
                                   fftw_complex *(fg2_fft[3]), Vec g,
                                   const fftw_complex *coul_fft,
-                                  real rho, Vec dg_help)
+                                  real rho, Vec dg)
 {
   /* Avoid separate VecScale at the end: */
   const real scale = rho * BHD->PD->beta;
@@ -924,27 +928,35 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* rho*F*g^2 g*/
   /************************************************/
 
+  /* FIXME: move allocations out of the loop: */
+  Vec ker_fft, g_fft, dg_fft;
+  DACreateGlobalVector (BHD->dc, &ker_fft);
+  DACreateGlobalVector (BHD->dc, &g_fft);
+  DACreateGlobalVector (BHD->dc, &dg_fft);
+
+  /*
+    FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
+    iterations.   Here we put  the fft  of the  kernel into  local Vec
+    ker_fft:
+  */
+  kernel (BHD->dc, BHD->PD, fg2_fft, coul_fft,
+          ker_fft);    /* result */
 
   /* fft(g) */
-  ComputeFFTfromVec_fftw (BHD->fft_mat, g, BHD->g_fft); /* result */
+  MatMult (BHD->fft_mat, g, g_fft);
 
-  /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
-     iterations.   Here  we   put   the  fft   of   the  kernel   into
-     BHD->fft_scratch: */
-  kernel (BHD->dc, BHD->PD,
-          fg2_fft, coul_fft,
-          BHD->fft_scratch);    /* result */
+  /* Will be incremented: */
+  VecSet (dg_fft, 0.0);
 
-  /* Apply the kernel, Put result into BHD->gfg2_fft */
-  bgy3d_fft_set (BHD->da, BHD->gfg2_fft, 0.0);
-
-  apply (BHD->dc, BHD->fft_scratch, BHD->g_fft, scale,
-         BHD->gfg2_fft);        /* will be incremented */
+  /* Apply the kernel, Put result into the complex temp Vec dg_fft: */
+  apply (BHD->dc, ker_fft, g_fft, scale, dg_fft);
 
   /* ifft(dg) */
-  ComputeVecfromFFT_fftw (BHD->fft_mat,
-                          dg_help, /* result */
-                          BHD->gfg2_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg);
+
+  VecDestroy (ker_fft);
+  VecDestroy (g_fft);
+  VecDestroy (dg_fft);
 }
 
 /*
@@ -1138,19 +1150,22 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   InitializeDMMGSolver(&BHD);
 #endif
 
-  /* These will hold  FFT of the current g. Allocate  enough to hold a
-     local portion of the grid and free after the loop. */
-  fftw_complex *g_fft[2];
+  /*
+    These complex  vectors will  hold FFT of  the current  g. Allocate
+    enough to  hold a  local portion  of the grid  and free  after the
+    loop.
+  */
+  Vec g_fft[2];
 
   for (int i = 0; i < 2; i++)
     {
-      g_fft[i] = bgy3d_fft_malloc (BHD.da);
+      DACreateGlobalVector (BHD.dc, &g_fft[i]); /* complex */
 
-      DACreateGlobalVector (BHD.da, &dg[i]);
+      DACreateGlobalVector (BHD.da, &dg[i]); /* real */
 
       /* Here the storage for the output is allocated, the caller will
          have to destroy them: */
-      DACreateGlobalVector (BHD.da, &g[i]);
+      DACreateGlobalVector (BHD.da, &g[i]); /* real */
     }
 
   /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
@@ -1161,16 +1176,20 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       {
-        DACreateGlobalVector (BHD.dc, &ker_fft_S[i][j]);
+        DACreateGlobalVector (BHD.dc, &ker_fft_S[i][j]); /* complex */
         ker_fft_S[j][i] = ker_fft_S[i][j];
 
-        DACreateGlobalVector (BHD.dc, &ker_fft_L[i][j]);
+        DACreateGlobalVector (BHD.dc, &ker_fft_L[i][j]); /* complex */
         ker_fft_L[j][i] = ker_fft_L[i][j];
       }
 
-  /* There is no point to  transform each contribution computed in the
-     momentum scpace back, accumulate them on the k-grid here: */
-  fftw_complex *dg_acc_fft = bgy3d_fft_malloc (BHD.da);
+  /*
+    There is no  point to transform each contribution  computed in the
+    momentum  scpace  back, accumulate  them  on  the  k-grid in  this
+    comples Vec:
+  */
+  Vec dg_acc_fft;
+  DACreateGlobalVector (BHD.dc, &dg_acc_fft); /* complex */
 
   DACreateGlobalVector(BHD.da, &dg_acc);
   DACreateGlobalVector(BHD.da, &work);
@@ -1373,7 +1392,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < 2; i++)
-            ComputeFFTfromVec_fftw (BHD.fft_mat, g[i], g_fft[i]);
+            MatMult (BHD.fft_mat, g[i], g_fft[i]);
 
           /* for H, O in that order ... */
           for (int i = 0; i < 2; i++)
@@ -1383,7 +1402,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 range  Coulomb, and  a so  called strange  addition is
                 accounted for in the kernel.  First clear accumulator:
               */
-              bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
+              VecSet (dg_acc_fft, 0.0);
 
               for (int j = 0; j < 2; j++) /* This increments the accumulator: */
                 apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
@@ -1393,9 +1412,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 contributions  are  added  to  the real  space  dg_acc
                 below:
               */
-              ComputeVecfromFFT_fftw (BHD.fft_mat,
-                                      dg_acc, /* result */
-                                      dg_acc_fft);
+              MatMultTranspose (BHD.fft_mat, dg_acc_fft, dg_acc);
 
               /*
                 In the following the sum is  over all sites j /= i. It
@@ -1565,15 +1582,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     } /* damp loop */
 
   /* Clean up and exit ... */
-  bgy3d_fft_free (dg_acc_fft);
+  VecDestroy (dg_acc_fft);
 
   for (int i = 0; i < 2; i++)
     {
       /* Delegated to the caller:
          VecDestroy (g[i]); */
-      VecDestroy (dg[i]);
 
-      bgy3d_fft_free (g_fft[i]);
+      VecDestroy (dg[i]);
+      VecDestroy (g_fft[i]);
 
       for (int j = 0; j <= i; j++)
         {
