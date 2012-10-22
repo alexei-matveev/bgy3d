@@ -785,8 +785,8 @@ static void kernel (const DA dc,
   /* Loop over local portion of grid: */
   int ijk = 0;
 
-  struct {PetscScalar re, im;} ***dfg_fft;
-  DAVecGetArray (dc, dfg, &dfg_fft);
+  struct {PetscScalar re, im;} ***dfg_;
+  DAVecGetArray (dc, dfg, &dfg_);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -833,8 +833,8 @@ static void kernel (const DA dc,
               re += ic[p] * fg[p][ijk].im;
               im -= ic[p] * fg[p][ijk].re;
           }
-          dfg_fft[i[2]][i[1]][i[0]].re = k_fac * re;
-          dfg_fft[i[2]][i[1]][i[0]].im = k_fac * im;
+          dfg_[i[2]][i[1]][i[0]].re = k_fac * re;
+          dfg_[i[2]][i[1]][i[0]].im = k_fac * im;
 
           /*
            * FIXME: Origin of  this occasional addition needs some
@@ -849,12 +849,12 @@ static void kernel (const DA dc,
            * Long range Coulomb part (right one):
            */
           if (coul) {
-              dfg_fft[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul[ijk].re;
-              dfg_fft[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul[ijk].im;
+              dfg_[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul[ijk].re;
+              dfg_[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul[ijk].im;
           }
           ijk++;
         }
-  DAVecRestoreArray (dc, dfg, &dfg_fft);
+  DAVecRestoreArray (dc, dfg, &dfg_);
 }
 
 /*
