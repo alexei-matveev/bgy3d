@@ -461,13 +461,12 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
 
 /*
   Long range  pair potential Vec uc  is intent(out) here,  same as its
-  FFT transform uc_fft.  If Vec f_l is not NULL it  is filled with the
-  corresponding  force derived  by  means of  FFT  from the  potential
-  uc.
+  FFT transform  uc_fft.  Vec f_l[]  is filled with  the corresponding
+  force derived by means of FFT from the potential uc.
 */
 void ComputeFFTfromCoulomb (State *BHD,
                             Vec uc,     /* intent(out) */
-                            Vec f_l[3], /* intent(out), optional */
+                            Vec f_l[3], /* intent(out) */
                             fftw_complex *uc_fft, /* intent(out) */
                             real factor)
 {
@@ -558,15 +557,12 @@ void ComputeFFTfromCoulomb (State *BHD,
   ComputeVecfromFFT_fftw (BHD->fft_mat, uc, tmp_fft);
   VecScale (uc, 1./L/L/L);
 
-
-  /* FFT force, optional? */
-  if (f_l != PETSC_NULL)
+  /* FFT force, seems to be always requested: */
+  assert (f_l != NULL);
+  FOR_DIM
     {
-      FOR_DIM
-        {
-          ComputeVecfromFFT_fftw (BHD->fft_mat, f_l[dim], fg_fft[dim]);
-          VecScale (f_l[dim], 1./L/L/L);
-        }
+      ComputeVecfromFFT_fftw (BHD->fft_mat, f_l[dim], fg_fft[dim]);
+      VecScale (f_l[dim], 1./L/L/L);
     }
 }
 
