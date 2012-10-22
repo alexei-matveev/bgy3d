@@ -560,31 +560,27 @@ void poisson (const State *BHD, Vec uc, Vec rho, real q)
   /*
     Solving Poisson Equation (SI units) with FFT and IFFT:
 
-        - ΔU (x, y, z) = (1 / ε0) ρ(x, y, z)
+        - ΔU (x, y, z) = (1 / ε₀) ρ(x, y, z)
             c
 
     because of x = i h, y = j h, and z = k h, with grid spacing h =
     L/n:
 
-           2   2
-        - n / L  Δuc(i, j, k) = (1 / ε0) ρ(i, j, k)
+        - n² / L²  Δuc(i, j, k) = (1 / ε₀) ρ(i, j, k)
 
     FFT (see FFTW manual "What FFTW Really Computes"):
 
-                                 2     2    2
-    fft_uc(kx, ky, kz) = 1 / [4 π  ε0 k  / L ] fft_rho(kx, ky, kz)
+    fft_uc(kx, ky, kz) = 1 / [4 π²  ε₀ k²  / L² ] fft_rho(kx, ky, kz)
 
     with
 
-         2    2    2    2
-        k = kx + ky + kz
+        k² = kx² + ky² + kz²
 
     IFFT (see FFTW manual "What FFTW Really Computes"):
 
-    because: IFFT(fft_uc(kx, ky, kz)) = n^3 * uc(i, j, k)
+    because: IFFT(fft_uc(kx, ky, kz)) = n³ * uc(i, j, k)
 
-                   3   3
-    uc(i, j, k) = h / L  * IFFT(fft_uc(kx, ky, kz))
+    uc(i, j, k) = h³ / L³  * IFFT(fft_uc(kx, ky, kz))
   */
 
     // EPSILON0INV = 1 / 4 π ε0:
