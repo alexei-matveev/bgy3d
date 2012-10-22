@@ -511,12 +511,12 @@ void ComputeFFTfromCoulomb (State *BHD,
             }
           else
             {
-              const real k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-              const real fac = EPSILON0INV / M_PI / k;
+              const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+              const real fac = EPSILON0INV / M_PI / k2;
               const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /* potential */
-              uc_fft[ijk].re = factor * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
+              uc_fft[ijk].re = factor * sign * fac * exp(- k2 * SQR(M_PI) / SQR(G));
               uc_fft[ijk].im = 0.0;
 
               /* force */
