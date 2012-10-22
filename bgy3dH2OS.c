@@ -601,12 +601,12 @@ static void  pair (State *BHD,
     Compute Coulomb from fft part.
 
     Here Vec u2  and a complex array u2_fft[]  both are intent(out) in
-    the next call. The  Vec f_long[], intent(out), optional, is filled
-    with the  corresponding force.  Performs  4 FFTs. Again  note that
-    the only  difference for all  u2[i][j] and their FFT  transform is
-    the overall scaling factor q[i] * q[j].  FIXME: why keeping O(m^2)
-    versions, with m being number of solvent sites, of almost the same
-    field and repeating unnecessary FFTs?
+    the next call.  The Vec f_long[], intent(out), is  filled with the
+    corresponding force.   Performs 4 FFTs.  Again note that  the only
+    difference for all u2[i][j] and their FFT transform is the overall
+    scaling factor  q[i] * q[j].  FIXME: why  keeping O(m^2) versions,
+    with m being number of solvent sites, of almost the same field and
+    repeating unnecessary FFTs?
   */
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
 
@@ -1174,8 +1174,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /*
     There is no  point to transform each contribution  computed in the
-    momentum  scpace  back, accumulate  them  on  the  k-grid in  this
-    comples Vec:
+    momentum space back, accumulate them on the k-grid in this complex
+    Vec:
   */
   Vec dg_acc_fft;
   DACreateGlobalVector (BHD.dc, &dg_acc_fft); /* complex */
