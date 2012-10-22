@@ -132,9 +132,11 @@ static State initialize_state (const ProblemData *PD)
       BHD.fH_fft[dim] = bgy3d_fft_malloc (da);
     }
 
+  /* Complex scratch vector: */
+  DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
+
   BHD.g_fft = bgy3d_fft_malloc (da);
   BHD.gfg2_fft = bgy3d_fft_malloc (da);
-  BHD.fft_scratch = bgy3d_fft_malloc (da);
   BHD.u2_fft[0][0] = bgy3d_fft_malloc (da);
   BHD.u2_fft[1][1] = bgy3d_fft_malloc (da);
   BHD.u2_fft[0][1] = bgy3d_fft_malloc (da);
@@ -214,12 +216,13 @@ static void finalize_state (State *BHD)
     }
   bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->gfg2_fft);
-  bgy3d_fft_free (BHD->fft_scratch);
   bgy3d_fft_free (BHD->u2_fft[0][0]);
   bgy3d_fft_free (BHD->u2_fft[1][1]);
   bgy3d_fft_free (BHD->u2_fft[0][1]);
   assert (BHD->wHO_fft == NULL); /* not used with impurities */
   assert (BHD->wHH_fft == NULL); /* not used with impurities */
+
+  VecDestroy (BHD->fft_scratch);
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);
@@ -764,9 +767,11 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
  *
  * No known side effects.
  */
-static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
+static void kernel (const DA dc,
+                    const ProblemData *PD,
+                    fftw_complex *(fg[3]),
                     const fftw_complex *coul,
-                    fftw_complex dfg[])
+                    Vec dfg)
 {
   int x[3], n[3], i[3], N[3], ic[3];
 
@@ -780,17 +785,21 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
   const real scale = fac / L3;
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
   int ijk = 0;
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+
+  struct {PetscScalar re, im;} ***dfg_fft;
+  DAVecGetArray (dc, dfg, &dfg_fft);
+
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
           FOR_DIM
             {
-              if( i[dim] <= N[dim]/2)
+              if (i[dim] <= N[dim] / 2)
                 ic[dim] = i[dim];
               else
                 ic[dim] = i[dim] - N[dim];
@@ -829,8 +838,8 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
               re += ic[p] * fg[p][ijk].im;
               im -= ic[p] * fg[p][ijk].re;
           }
-          dfg[ijk].re = k_fac * re;
-          dfg[ijk].im = k_fac * im;
+          dfg_fft[i[2]][i[1]][i[0]].re = k_fac * re;
+          dfg_fft[i[2]][i[1]][i[0]].im = k_fac * im;
 
           /*
            * FIXME: Origin of  this occasional addition needs some
@@ -845,21 +854,13 @@ static void kernel (const DA da, const ProblemData *PD, fftw_complex *(fg[3]),
            * Long range Coulomb part (right one):
            */
           if (coul) {
-              dfg[ijk].re += (h3 / L3) * sign * coul[ijk].re;
-              dfg[ijk].im += (h3 / L3) * sign * coul[ijk].im;
+              dfg_fft[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul[ijk].re;
+              dfg_fft[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul[ijk].im;
           }
           ijk++;
         }
+  DAVecRestoreArray (dc, dfg, &dfg_fft);
 }
-
-#ifdef WITH_COMPLEX
-static void mul (int n, const complex *restrict a, const complex *restrict b,
-                 const double alpha, complex *restrict c)
-{
-  for (int i = 0; i < n; i++)
-      c[i] += alpha * a[i] * b[i];
-}
-#endif
 
 /*
  * This applies the kernel compured by  kernel() to FFT of g to obtain
@@ -868,8 +869,8 @@ static void mul (int n, const complex *restrict a, const complex *restrict b,
  *
  * Complex array dg is intent(inout).
  */
-static void apply (const DA da,
-                   const fftw_complex *restrict ker,  /* kernel */
+static void apply (const DA dc,
+                   Vec ker,  /* kernel */
                    const fftw_complex *restrict g,    /* current g */
                    const real scale,          /* overall scale */
                    fftw_complex *restrict dg) /* intent(inout) */
@@ -877,31 +878,33 @@ static void apply (const DA da,
   int x[3], n[3];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  int n3 = n[0] * n[1] * n[2];
+  struct {PetscScalar re, im;} ***ker_fft;
+  DAVecGetArray (dc, ker, &ker_fft);
 
-#ifdef WITH_COMPLEX
-  mul (n3, (complex*) ker, (complex*) g, scale, (complex*) dg);
-#else
   /* loop over local portion of grid */
-  for (int ijk = 0; ijk < n3; ijk++) {
-      /*
-       * Retrive  the precomuted Fourier  transform of  of the
-       * divergence of  the "weighted force" vector  div (F g)
-       * which  serves  as  a  convolution  kernel  in  BGY3dM
-       * equations.  The additional factor -k^(-2) effectively
-       * included in the kernel recovers the Fourier transform
-       * of  the corresponding  Poisson solution.   The factor
-       * scale =  βρ is not  included, on the other  hand. See
-       * kernel() for details:
-       */
-      dg[ijk].re += scale * (ker[ijk].re * g[ijk].re -
-                             ker[ijk].im * g[ijk].im);
-      dg[ijk].im += scale * (ker[ijk].re * g[ijk].im +
-                             ker[ijk].im * g[ijk].re);
-  }
-#endif
+  int ijk = 0;
+  for (int k = x[2]; k < x[2] + n[2]; k++)
+    for (int j = x[1]; j < x[1] + n[1]; j++)
+      for (int i = x[0]; i < x[0] + n[0]; i++)
+        {
+          /*
+           Retrive  the   precomuted  Fourier  transform   of  of  the
+           divergence of  the "weighted force" vector div  (F g) which
+           serves as  a convolution  kernel in BGY3dM  equations.  The
+           additional  factor  -k^(-2)  effectively  included  in  the
+           kernel recovers the  Fourier transform of the corresponding
+           Poisson solution.   The factor scale = βρ  is not included,
+           on the other hand. See kernel() for details:
+           */
+          dg[ijk].re += scale * (ker_fft[k][j][i].re * g[ijk].re -
+                                 ker_fft[k][j][i].im * g[ijk].im);
+          dg[ijk].im += scale * (ker_fft[k][j][i].re * g[ijk].im +
+                                 ker_fft[k][j][i].im * g[ijk].re);
+          ijk++;
+        }
+  DAVecRestoreArray (dc, ker, &ker_fft);
 }
 
 /*
@@ -928,13 +931,14 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* FIXME:  Move  computation  of   the  kernel  out  of  the  BGY3dM
      iterations.   Here  we   put   the  fft   of   the  kernel   into
      BHD->fft_scratch: */
-  kernel (BHD->da, BHD->PD, fg2_fft, coul_fft,
+  kernel (BHD->dc, BHD->PD,
+          fg2_fft, coul_fft,
           BHD->fft_scratch);    /* result */
 
   /* Apply the kernel, Put result into BHD->gfg2_fft */
   bgy3d_fft_set (BHD->da, BHD->gfg2_fft, 0.0);
 
-  apply (BHD->da, BHD->fft_scratch, BHD->g_fft, scale,
+  apply (BHD->dc, BHD->fft_scratch, BHD->g_fft, scale,
          BHD->gfg2_fft);        /* will be incremented */
 
   /* ifft(dg) */
@@ -1149,18 +1153,18 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       DACreateGlobalVector (BHD.da, &g[i]);
     }
 
-  /* These  are the  (four) kernels  HH, HO,  OH, OO.  Note that  HO =
-     OH. */
-  fftw_complex *ker_fft_S[2][2];
-  fftw_complex *ker_fft_L[2][2];
+  /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
+     vectors in momentum space.  Note that HO = OH. */
+  Vec ker_fft_S[2][2];
+  Vec ker_fft_L[2][2];
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       {
-        ker_fft_S[i][j] = bgy3d_fft_malloc (BHD.da);
+        DACreateGlobalVector (BHD.dc, &ker_fft_S[i][j]);
         ker_fft_S[j][i] = ker_fft_S[i][j];
 
-        ker_fft_L[i][j] = bgy3d_fft_malloc (BHD.da);
+        DACreateGlobalVector (BHD.dc, &ker_fft_L[i][j]);
         ker_fft_L[j][i] = ker_fft_L[i][j];
       }
 
@@ -1284,19 +1288,19 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
          iterations. Only a scalar kernel is needed: */
-      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][0], NULL, ker_fft_S[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
+      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[0][0], NULL, ker_fft_S[0][0]);
+      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
+      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
 
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0], ker_fft_L[0][0]);
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
-      kernel (BHD.da, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1], ker_fft_L[1][1]);
+      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0], ker_fft_L[0][0]);
+      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
+      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1], ker_fft_L[1][1]);
 
       /* FIXME: what is  the point to split the  kernel in two pieces?
          Redefine S := S + L and forget about L */
       for (int i = 0; i < 2; i++)
         for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
-          bgy3d_fft_axpby (BHD.da, ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
+          VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
 
       /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
          above) and  uc with VM_Coulomb_long.  No other  fields of the
@@ -1382,7 +1386,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               bgy3d_fft_set (BHD.da, dg_acc_fft, 0.0);
 
               for (int j = 0; j < 2; j++) /* This increments the accumulator: */
-                apply (BHD.da, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
+                apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
 
               /*
                 Compute IFFT of dg_acc_fft for the current site. Other
@@ -1573,8 +1577,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       for (int j = 0; j <= i; j++)
         {
-          bgy3d_fft_free (ker_fft_S[i][j]);
-          bgy3d_fft_free (ker_fft_L[i][j]);
+          VecDestroy (ker_fft_S[i][j]);
+          VecDestroy (ker_fft_L[i][j]);
         }
     }
 

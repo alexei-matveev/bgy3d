@@ -204,6 +204,9 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
     }
 
   /* Allocate memory for fft */
+  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch);
+  /* FIXME: where is the cleanup code? */
+
   FOR_DIM
     {
       BHD->f_g2_fft[0][0][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
@@ -217,7 +220,6 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 
   BHD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BHD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->fft_scratch = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BHD->u2_fft[0][0] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BHD->u2_fft[1][1] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BHD->u2_fft[0][1] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));

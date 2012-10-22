@@ -139,12 +139,16 @@ typedef struct State
   Vec gHO_ini;                  /* used for pure solvent only */
 
   /*
-    Parallel FFT.
+    Parallel FFT. This is a  complex vector. FIXME: use Vec instead of
+    fftw_complex arrays to store FFT images:
+  */
+  Vec fft_scratch;
 
+  /*
     g_fft appears to be used as a temporary in
     ComputeSoluteDatafromCoulomb*() group of functions.
    */
-  fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft, *fft_scratch;
+  fftw_complex *fg2_fft[3], *g_fft, *gfg2_fft;
   fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two

@@ -130,9 +130,11 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
       BHD->fg2_fft[dim] = bgy3d_fft_malloc (da);
     }
 
+  /* Complex scratch vector. FIXME: is it used in pure code? */
+  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch);
+
   BHD->g_fft = bgy3d_fft_malloc (da);
   BHD->gfg2_fft = bgy3d_fft_malloc (da);
-  BHD->fft_scratch = bgy3d_fft_malloc (da);
   BHD->u2_fft[0][0] = bgy3d_fft_malloc (da);
   BHD->u2_fft[1][1] = bgy3d_fft_malloc (da);
   BHD->u2_fft[0][1] = bgy3d_fft_malloc (da);
@@ -162,7 +164,6 @@ static void BGY3dH2OData_free(State *BHD)
     }
   bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->gfg2_fft);
-  bgy3d_fft_free (BHD->fft_scratch);
   bgy3d_fft_free (BHD->u2_fft[0][0]);
   bgy3d_fft_free (BHD->u2_fft[1][1]);
   bgy3d_fft_free (BHD->u2_fft[0][1]);
@@ -177,6 +178,7 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->cH);
   VecDestroy(BHD->cO);
   VecDestroy(BHD->cHO);
+  VecDestroy (BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
   MatDestroy(BHD->M);
