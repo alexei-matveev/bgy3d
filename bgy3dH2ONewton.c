@@ -823,6 +823,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   VecDestroy(b);
   SNESDestroy(snes);
 
+  assert (0);                   /* FIXME: clean up BHD? */
   return PETSC_NULL;
 
 }
