@@ -459,132 +459,104 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
   }
 }
 
-/* Long range pair  potential Vec uc is intent(out)  here, same as its
-   FFT transform uc_fft. If Vec f_l  is not NULL it is filled with the
-   corresponding  force derived  by means  of FFT  from  the potential
-   uc. */
+/*
+  Long range  pair potential Vec uc  is intent(out) here,  same as its
+  FFT transform uc_fft.  If Vec f_l is not NULL it  is filled with the
+  corresponding  force derived  by  means of  FFT  from the  potential
+  uc.
+*/
 void ComputeFFTfromCoulomb (State *BHD,
                             Vec uc,     /* intent(out) */
                             Vec f_l[3], /* intent(out), optional */
                             fftw_complex *uc_fft, /* intent(out) */
                             real factor)
 {
-  DA da;
-  int x[3], n[3], i[3], ic[3], N[3], index;
+  int x[3], n[3], i[3], ic[3];
   PetscScalar ***v_vec;
-  real r[3], r_s, h[3], interval[2], k, fac, L, sign;
   fftw_complex *tmp_fft, *(fg_fft[3]);
 
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
+  const real *h = PD->h;        /* h[3] */
+  const int *N = PD->N;         /* N[3] */
+  const real *interval = PD->interval; /* [2] */
+  const real L = PD->interval[1] - PD->interval[0];
+  const DA da = BHD->da;
+
   tmp_fft = BHD->g_fft;
   FOR_DIM
     fg_fft[dim] = BHD->fg2_fft[dim];
-  FOR_DIM
-    h[dim] = PD->h[dim];
-  FOR_DIM
-    N[dim] = PD->N[dim];
-
-  interval[0] = PD->interval[0];
-  L = PD->interval[1]-PD->interval[0];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-
-  DAVecGetArray(da, uc, &v_vec);
-  index=0;
+  DAVecGetArray (da, uc, &v_vec);
+  int ijk = 0;
    /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          real r[3];
+
           /* set force vectors */
-
           FOR_DIM
-            r[dim] = i[dim]*h[dim]+interval[0];
+            r[dim] = i[dim] * h[dim] + interval[0];
 
+          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-/*        if( r[0] < ZEROPAD && r[0] >= -ZEROPAD && */
-/*            r[1] < ZEROPAD && r[1] >= -ZEROPAD && */
-/*            r[2] < ZEROPAD && r[2] >= -ZEROPAD ) */
-            v_vec[i[2]][i[1]][i[0]] = Coulomb_long (r_s, factor);
-/*        else */
-/*          v_vec[i[2]][i[1]][i[0]] = 0.0; */
+          v_vec[i[2]][i[1]][i[0]] = Coulomb_long (r_s, factor);
 
           FOR_DIM
             {
-              if( i[dim] <= N[dim]/2)
+              if (i[dim] <= N[dim] / 2)
                 ic[dim] = i[dim];
               else
                 ic[dim] = i[dim] - N[dim];
-
             }
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+
+          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
-              uc_fft[index].re = 0;
-              uc_fft[index].im = 0;
+              uc_fft[ijk].re = 0;
+              uc_fft[ijk].im = 0;
               FOR_DIM
                 {
-                  fg_fft[dim][index].re =0;
-                  fg_fft[dim][index].im = 0;
+                  fg_fft[dim][ijk].re = 0;
+                  fg_fft[dim][ijk].im = 0;
                 }
             }
           else
             {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]))/SQR(L);
-              fac = EPSILON0INV/M_PI/k;
-              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
+              const real k = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+              const real fac = EPSILON0INV / M_PI / k;
+              const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /* potential */
-              uc_fft[index].re = factor * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
-              uc_fft[index].im = 0.0;
-
+              uc_fft[ijk].re = factor * sign * fac * exp(-k * SQR(M_PI) / SQR(G));
+              uc_fft[ijk].im = 0.0;
 
               /* force */
               FOR_DIM
                 {
-                  fg_fft[dim][index].re =0;
-                  fg_fft[dim][index].im = 2.*M_PI*ic[dim]/L*uc_fft[index].re;
+                  fg_fft[dim][ijk].re = 0;
+                  fg_fft[dim][ijk].im = 2. * M_PI * ic[dim] / L * uc_fft[ijk].re;
                 }
-
-
             }
-          index++;
-
+          ijk++;
         }
-  DAVecRestoreArray(da, uc, &v_vec);
-
-/*   VecSum(uc, &fac); */
-/*   VecShift(uc, -fac/N[0]/N[1]/N[2]); */
-  //Zeropad_Function(BHD, uc, ZEROPAD, 0.0);
-
-  //VecSum(uc, &fac);
-  //PetscPrintf(PETSC_COMM_WORLD, "int(uc)= %e\n", fac);
-/*   ComputeFFTfromVec_fftw (BHD->fft_mat, uc, tmp_fft,  */
-/*                       ); */
-/*   tmp_fft[0].re=0; */
+  DAVecRestoreArray (da, uc, &v_vec);
 
   /* Copy  uc_fft  to  temporary   array  for  back  trafo.   FIXME:
      ComputeVecfromFFT_fftw() transforms in place, only then packs the
      result to a Vec. */
-  for(i[0]=0; i[0]<n[0]*n[1]*n[2]; i[0]++)
+  for (int ijk = 0; ijk < n[0] * n[1] * n[2]; ijk++)
     {
-      tmp_fft[i[0]].re = uc_fft[i[0]].re;
-      tmp_fft[i[0]].im = uc_fft[i[0]].im;
-      //uc_fft[i[0]].re = h3 * tmp_fft[i[0]].re;
-      //uc_fft[i[0]].im = h3 * tmp_fft[i[0]].im;
-
-      //fprintf(stderr,"%e\n", tmp_fft[i[0]].re);
+      tmp_fft[ijk].re = uc_fft[ijk].re;
+      tmp_fft[ijk].im = uc_fft[ijk].im;
     }
 
   /* FFT potential */
   ComputeVecfromFFT_fftw (BHD->fft_mat, uc, tmp_fft);
-  VecScale(uc, 1./L/L/L);
-  //VecScale(uc, 1./N[0]/N[1]/N[2]);
-
+  VecScale (uc, 1./L/L/L);
 
 
   /* FFT force, optional? */
@@ -593,7 +565,7 @@ void ComputeFFTfromCoulomb (State *BHD,
       FOR_DIM
         {
           ComputeVecfromFFT_fftw (BHD->fft_mat, f_l[dim], fg_fft[dim]);
-          VecScale(f_l[dim], 1./L/L/L);
+          VecScale (f_l[dim], 1./L/L/L);
         }
     }
 }
