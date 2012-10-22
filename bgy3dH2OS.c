@@ -135,11 +135,12 @@ static State initialize_state (const ProblemData *PD)
   /* Complex scratch vector: */
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
 
-  BHD.g_fft = bgy3d_fft_malloc (da);
-  BHD.gfg2_fft = bgy3d_fft_malloc (da);
+  BHD.g_fft = bgy3d_fft_malloc (da); /* used by ComputeFFTfromCoulomb() */
   BHD.u2_fft[0][0] = bgy3d_fft_malloc (da);
   BHD.u2_fft[1][1] = bgy3d_fft_malloc (da);
   BHD.u2_fft[0][1] = bgy3d_fft_malloc (da);
+
+  BHD.gfg2_fft = NULL;          /* not used with impurities */
   BHD.wHO_fft = NULL;           /* not used with impurities */
   BHD.wHH_fft = NULL;           /* not used with impurities */
 
@@ -215,12 +216,13 @@ static void finalize_state (State *BHD)
       bgy3d_fft_free (BHD->fH_fft[dim]);
     }
   bgy3d_fft_free (BHD->g_fft);
-  bgy3d_fft_free (BHD->gfg2_fft);
   bgy3d_fft_free (BHD->u2_fft[0][0]);
   bgy3d_fft_free (BHD->u2_fft[1][1]);
   bgy3d_fft_free (BHD->u2_fft[0][1]);
-  assert (BHD->wHO_fft == NULL); /* not used with impurities */
-  assert (BHD->wHH_fft == NULL); /* not used with impurities */
+
+  assert (BHD->gfg2_fft == NULL); /* not used with impurities */
+  assert (BHD->wHO_fft == NULL);  /* not used with impurities */
+  assert (BHD->wHH_fft == NULL);  /* not used with impurities */
 
   VecDestroy (BHD->fft_scratch);
 
@@ -912,9 +914,7 @@ static void apply (const DA dc,
 }
 
 /*
- * Side effects:
- *
- *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ * Side effects: none, but consider efficiency.
  */
 static void Compute_H2O_interS_C (const State *BHD,
                                   fftw_complex *(fg2_fft[3]), Vec g,
@@ -960,9 +960,7 @@ static void Compute_H2O_interS_C (const State *BHD,
 }
 
 /*
- * Side effects:
- *
- *     Uses BHD->{g_fft, gfg2_fft, fft_scratch} as work arrays.
+ * Side effects: none, but see Compute_H2O_interS_C().
  */
 void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
                          fftw_complex *(fg2_fft[3]), Vec g,
