@@ -471,13 +471,10 @@ void ComputeFFTfromCoulomb (State *BHD,
                             real factor)
 {
   int x[3], n[3], i[3], ic[3];
-  PetscScalar ***v_vec;
   fftw_complex *tmp_fft, *(fg_fft[3]);
 
   const ProblemData *PD = BHD->PD;
-  const real *h = PD->h;        /* h[3] */
   const int *N = PD->N;         /* N[3] */
-  const real *interval = PD->interval; /* [2] */
   const real L = PD->interval[1] - PD->interval[0];
   const DA da = BHD->da;
 
@@ -488,23 +485,12 @@ void ComputeFFTfromCoulomb (State *BHD,
   /* Get local portion of the grid */
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DAVecGetArray (da, uc, &v_vec);
   int ijk = 0;
    /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          real r[3];
-
-          /* set force vectors */
-          FOR_DIM
-            r[dim] = i[dim] * h[dim] + interval[0];
-
-          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
-
-          v_vec[i[2]][i[1]][i[0]] = Coulomb_long (r_s, factor);
-
           FOR_DIM
             {
               if (i[dim] <= N[dim] / 2)
@@ -542,7 +528,6 @@ void ComputeFFTfromCoulomb (State *BHD,
             }
           ijk++;
         }
-  DAVecRestoreArray (da, uc, &v_vec);
 
   /* Copy  uc_fft  to  temporary   array  for  back  trafo.   FIXME:
      ComputeVecfromFFT_fftw() transforms in place, only then packs the
