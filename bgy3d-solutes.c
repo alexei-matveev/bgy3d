@@ -529,8 +529,9 @@ static void gf_density (int m, const real x[m][3], /* coordinates */
   factual parameter  for rho and  uc to effectively solve  the Poisson
   equation "in place".
 
-  Except of temporary  allocation of two complex arrays  does not have
-  any side effect.  */
+  Except of  temporary allocation of a  complex Vec does  not have any
+  side effect.
+*/
 void poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
   const real *interval = BHD->PD->interval; /* [2] */
