@@ -18,8 +18,6 @@
 #include "bgy3d.h"
 #include "bgy3d-solvents.h"
 #include "bgy3dH2O.h"           /* Coulomb_short() */
-#include "bgy3d-fft.h"          /* ComputeFFTfromVec_fftw(),
-                                   ComputeVecfromFFT_fftw() */
 #include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"
 
