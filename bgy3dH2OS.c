@@ -588,80 +588,73 @@ static void  pair (State *BHD,
                    Vec u2, fftw_complex *u2_fft,  /* intent(out) */
                    real damp, real damp_LJ)
 {
-  PetscScalar ***fs_vec[3];
-  real r[3], r_s, h[3], interval[2];
-  int x[3], n[3], i[3];
-
   const real epsilon = LJ_params[0]; /* geometric average of two */
   const real sigma = LJ_params[1];   /* arithmetic average of two */
   const real q2 = LJ_params[2];      /* charge product */
 
   const ProblemData *PD = BHD->PD;
+  const real *h = PD->h;        /* h[3] */
   const DA da = BHD->da;
+  const real off = PD->interval[0];
 
-  FOR_DIM
-    h[dim] = PD->h[dim];
+  /*
+    Compute Coulomb from fft part.
 
-  interval[0] = PD->interval[0];
-
-  /* Compute Coulomb from fft part */
-  /*   ComputeFFTfromCoulombII(BHD, f_short, f_long, u2_fft, LJ_params, damp); */
-
-  /* Here Vec u2 and a  complex array u2_fft[] both are intent(out) in
-     the next  call. The Vec f_long, intent(out),  optional, is filled
-     with the  corresponding force.  Performs  4 FFTs. Again  not that
-     the only difference  for all u2[i][j] and their  FFT transform is
-     the  overall scaling  factor  q[i] *  q[j].   FIXME: why  keeping
-     O(m^2) versions, with m being  number of solvent sites, of almost
-     the same field and repeating unnecessary FFTs? */
+    Here Vec u2  and a complex array u2_fft[]  both are intent(out) in
+    the next call. The  Vec f_long[], intent(out), optional, is filled
+    with the  corresponding force.  Performs  4 FFTs. Again  note that
+    the only  difference for all  u2[i][j] and their FFT  transform is
+    the overall scaling factor q[i] * q[j].  FIXME: why keeping O(m^2)
+    versions, with m being number of solvent sites, of almost the same
+    field and repeating unnecessary FFTs?
+  */
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
 
-  /* Sort-range  potential/force is  specific  for each  pair, on  the
-     other hand: */
+  /*
+    Sort-range  potential/force is  specific  for each  pair, on  the
+    other hand:
+  */
+  PetscScalar ***fs_vec[3];
   FOR_DIM
-    {
-      DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
-    }
+    DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
 
   /* Get local portion of the grid */
+  int x[3], n[3], i[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
-  for(i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for(i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for(i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          real r[3], r_s;
           /* set force vectors */
-
           FOR_DIM
-            r[dim] = i[dim] * h[dim] + interval[0];
-
+            r[dim] = i[dim] * h[dim] + off; /* FIXME: offset */
 
           r_s = sqrt (SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
 
+          /* Lennard-Jones + Coulomb short */
           FOR_DIM
-            {
-              /* Lennard-Jones + Coulomb short */
-              fs_vec[dim][i[2]][i[1]][i[0]] =
-                damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
-                damp * Coulomb_short_grad (r_s, r[dim], q2);
-            }
+            fs_vec[dim][i[2]][i[1]][i[0]] =
+            damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
+            damp * Coulomb_short_grad (r_s, r[dim], q2);
         }
 
   FOR_DIM
-    {
-      DAVecRestoreArray (da, f_short[dim], &fs_vec[dim]);
-    }
+    DAVecRestoreArray (da, f_short[dim], &fs_vec[dim]);
 
-  /* Compute FFT(F * g^2).
+  /*
+    Compute FFT(F * g^2).
 
-     F * g2 = (F_LJ + F_coulomb_short) * g2
-            + (F_coulomb_long * g2 - F_coulomb_long)
-            + F_coulomb_long
+    F * g2 = (F_LJ + F_coulomb_short) * g2
+           + (F_coulomb_long * g2 - F_coulomb_long)
+           + F_coulomb_long
 
-     see  (5.101) and (5.102)  in Jager's  thesis. FFT(F_coulomb_long)
-     has been  calculated as u2_fft  by ComputeFFTfromCoulomb() above.
-     The code needs at least one work vector, use this: */
+    see (5.101) and (5.102) in Jager's thesis. FFT(F_coulomb_long) has
+    been calculated  as u2_fft by  ComputeFFTfromCoulomb() above.  The
+    code needs at least one work vector, use this:
+  */
   Vec work = BHD->v[0];
 
   FOR_DIM
