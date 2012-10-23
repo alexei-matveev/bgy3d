@@ -144,8 +144,8 @@ typedef struct State
   */
   Vec fft_scratch;              /* complex */
   Vec fg2_fft[3];               /* complex */
+  Vec gfg2_fft;                 /* complex */
 
-  fftw_complex *gfg2_fft;
   fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two

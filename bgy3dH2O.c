@@ -131,8 +131,7 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
 
   /* Complex scratch vector. FIXME: is it used in pure code? */
   DACreateGlobalVector (BHD->dc, &BHD->fft_scratch);
-
-  BHD->gfg2_fft = bgy3d_fft_malloc (da);
+  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);
 
   /* FIXME: these probably differ only by factors: */
   for (int i = 0; i < 2; i++)
@@ -166,7 +165,7 @@ static void BGY3dH2OData_free(State *BHD)
       VecDestroy(BHD->v[dim]);
       VecDestroy (BHD->fg2_fft[dim]);
     }
-  bgy3d_fft_free (BHD->gfg2_fft);
+  VecDestroy (BHD->gfg2_fft);
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
@@ -823,7 +822,6 @@ void Compute_dg_H2O_inter (State *BHD,
                            Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], index, ic[3];
-  fftw_complex *dg_fft;
   real k_fac, k, sign; // confac;
 
   const ProblemData *PD = BHD->PD;
@@ -834,7 +832,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
   const real h = PD->h[0] * PD->h[1] * PD->h[2];
   Vec g_fft = BHD->fft_scratch;
-  dg_fft = BHD->gfg2_fft;
+  Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
   /* confac = SQR(M_PI/L/2.); */
@@ -862,8 +860,9 @@ void Compute_dg_H2O_inter (State *BHD,
   /* fft(g) */
   MatMult (BHD->fft_mat, g1b, g_fft);
 
-  struct {PetscScalar re, im;} ***g_fft_, ***coul1_fft_, ***fg2_fft_[3];
+  struct {PetscScalar re, im;} ***g_fft_, ***dg_fft_, ***coul1_fft_, ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul1_fft, &coul1_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
@@ -874,8 +873,8 @@ void Compute_dg_H2O_inter (State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft_[i[2]][i[1]][i[0]].re = 0;
+          dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
           FOR_DIM
             {
@@ -887,8 +886,8 @@ void Compute_dg_H2O_inter (State *BHD,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft[index].re = 0;//coul1_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-              dg_fft[index].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]].re = 0;//coul1_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
+              dg_fft_[i[2]][i[1]][i[0]].im = 0;
             }
           else
             {
@@ -898,33 +897,34 @@ void Compute_dg_H2O_inter (State *BHD,
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * sign *
+                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
                 (fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
                  fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re) ;
 
               FOR_DIM
-                dg_fft[index].im += ic[dim] * k_fac * sign *
+                dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
                 (- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
                  + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
 
               /* long range Coulomb part */
-              dg_fft[index].re += h * sign *
+              dg_fft_[i[2]][i[1]][i[0]].re += h * sign *
                 (coul1_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re -
                  coul1_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
-              dg_fft[index].im += h * sign *
+              dg_fft_[i[2]][i[1]][i[0]].im += h * sign *
                 (coul1_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
                  coul1_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
             }
           index++;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, coul1_fft, &coul1_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, rho1*PD->beta/L/L/L);
 
@@ -963,6 +963,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
   struct {PetscScalar re, im;} ***coul2_fft_;
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul2_fft, &coul2_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
@@ -973,8 +974,8 @@ void Compute_dg_H2O_inter (State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft_[i[2]][i[1]][i[0]].re = 0;
+          dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
           FOR_DIM
             {
@@ -986,8 +987,8 @@ void Compute_dg_H2O_inter (State *BHD,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft[index].re = 0;//coul2_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-              dg_fft[index].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]].re = 0;//coul2_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
+              dg_fft_[i[2]][i[1]][i[0]].im = 0;
             }
           else
             {
@@ -998,32 +999,33 @@ void Compute_dg_H2O_inter (State *BHD,
 
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * sign *
+                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
                 (fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
                  fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
 
               FOR_DIM
-                dg_fft[index].im += ic[dim] * k_fac * sign *
+                dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
                 (- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
                  + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
               /* long range Coulomb part */
-              dg_fft[index].re += h * sign *
+              dg_fft_[i[2]][i[1]][i[0]].re += h * sign *
                 (coul2_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re -
                  coul2_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
-              dg_fft[index].im += h * sign *
+              dg_fft_[i[2]][i[1]][i[0]].im += h * sign *
                 (coul2_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
                  coul2_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
             }
           index++;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, coul2_fft, &coul2_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, rho2*PD->beta/L/L/L);
 
@@ -1050,7 +1052,6 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                           fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], index, ic[3];
-  fftw_complex *dg_fft;
   real k_fac, k;
 
   const ProblemData *PD = BHD->PD;
@@ -1060,7 +1061,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
   const Vec *fg2_fft = BHD->fg2_fft; /* fg2_fft[3] */
 
   const real h = PD->h[0] * PD->h[1] * PD->h[2];
-  dg_fft = BHD->gfg2_fft;
+  Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* siehe oben ... */
 
@@ -1086,7 +1087,8 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
   /* fft(g2) */
 
-  struct {PetscScalar re, im;} ***fg2_fft_[3];
+  struct {PetscScalar re, im;} ***dg_fft_, ***fg2_fft_[3];
+  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
@@ -1096,8 +1098,8 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft_[i[2]][i[1]][i[0]].re= 0;
+          dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
           FOR_DIM
             {
@@ -1109,8 +1111,8 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft[index].re = 0; //-coul_fft[0].re*h;
-              dg_fft[index].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]].re = 0; //-coul_fft[0].re*h;
+              dg_fft_[i[2]][i[1]][i[0]].im = 0;
             }
           else
             {
@@ -1119,28 +1121,29 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
               k = 2.0*M_PI*sqrt(k)*rab/L;
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac *
+                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac *
                 (h * fg2_fft_[dim][i[2]][i[1]][i[0]].im * sin(k) / k);
 
               FOR_DIM
-                dg_fft[index].im += ic[dim] * k_fac *
+                dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac *
                 (-h * fg2_fft_[dim][i[2]][i[1]][i[0]].re * sin(k) / k);
 
 
               /* long range Coulomb part */
-              dg_fft[index].re +=
+              dg_fft_[i[2]][i[1]][i[0]].re +=
                 coul_fft[index].re*sin(k)/k;
 
-              dg_fft[index].im +=
+              dg_fft_[i[2]][i[1]][i[0]].im +=
                 coul_fft[index].im*sin(k)/k;
                 }
           index++;
         }
+  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
   /* FIXME: is fg2_fft[] used afterwards? */
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -1153,7 +1156,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                             Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], index, ic[3], local_size;
-  fftw_complex *dg_fft;
   real k_fac, k;
   PetscScalar *v_vec, *tg_vec;
 
@@ -1163,7 +1165,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
 
   const real h = PD->h[0] * PD->h[1] * PD->h[2];
-  dg_fft = BHD->gfg2_fft;
+  Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* siehe oben ... */
 
@@ -1285,10 +1287,11 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
-   VecRestoreArray( tg, &tg_vec);
+  VecRestoreArray (tg, &tg_vec);
 
   /*******************************************/
-  struct {PetscScalar re, im;} ***coul_fft_;
+  struct {PetscScalar re, im;} ***dg_fft_, ***coul_fft_;
+  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
@@ -1299,8 +1302,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft_[i[2]][i[1]][i[0]].re= 0;
+          dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
           FOR_DIM
             {
@@ -1312,8 +1315,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft[index].re = 0;
-              dg_fft[index].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]].re = 0;
+              dg_fft_[i[2]][i[1]][i[0]].im = 0;
               FOR_DIM
                 {
                   fg2_fft_[dim][i[2]][i[1]][i[0]].im=0;
@@ -1327,10 +1330,10 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
               k = 2.0*M_PI*sqrt(k)*rab/L;
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].im;
+                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].im;
 
               FOR_DIM
-                dg_fft[index].im -= ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].re;
+                dg_fft_[i[2]][i[1]][i[0]].im -= ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].re;
 
 
               FOR_DIM
@@ -1340,11 +1343,12 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
             }
           index++;
         }
+  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg_help, dg_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
@@ -1392,6 +1396,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
     }
   VecRestoreArray( tg, &tg_vec);
 
+  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
@@ -1401,8 +1406,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft[index].re= 0;
-          dg_fft[index].im= 0;
+          dg_fft_[i[2]][i[1]][i[0]].re = 0;
+          dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
           FOR_DIM
             {
@@ -1414,8 +1419,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft[index].re = 0;
-              dg_fft[index].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]].re = 0;
+              dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
             }
           else
@@ -1424,17 +1429,18 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
               k_fac = fac/k;
 
               FOR_DIM
-                dg_fft[index].re += ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].im;
+                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].im;
 
               FOR_DIM
-                dg_fft[index].im -= ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].re;
+                dg_fft_[i[2]][i[1]][i[0]].im -= ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].re;
             }
           index++;
         }
+  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dg, dg_fft);
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
   VecScale(dg, PD->beta/L/L/L);
 
