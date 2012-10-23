@@ -154,8 +154,8 @@ typedef struct State
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two
      site indices */
-  fftw_complex *f_g2_fft[2][2][3];
-  fftw_complex *fl_g2_fft[2][2][3];
+  Vec fs_g2_fft[2][2][3];       /* complex */
+  Vec fl_g2_fft[2][2][3];       /* complex */
 
 #ifdef L_BOUNDARY
   Mat M;

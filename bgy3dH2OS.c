@@ -117,10 +117,10 @@ static State initialize_state (const ProblemData *PD)
       for (int i = 0; i < 2; i++)
         for (int j = 0; j <= i; j++)
           {
-            BHD.f_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
-            BHD.f_g2_fft[j][i][dim] = BHD.f_g2_fft[i][j][dim];
+            DACreateGlobalVector (BHD.dc, &BHD.fs_g2_fft[i][j][dim]);
+            BHD.fs_g2_fft[j][i][dim] = BHD.fs_g2_fft[i][j][dim];
 
-            BHD.fl_g2_fft[i][j][dim] = bgy3d_fft_malloc (da);
+            DACreateGlobalVector (BHD.dc, &BHD.fl_g2_fft[i][j][dim]);
             BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
           }
 
@@ -201,8 +201,8 @@ static void finalize_state (State *BHD)
             assert (BHD->F[i][j][dim] == PETSC_NULL);
             assert (BHD->F_l[i][j][dim] == PETSC_NULL);
 
-            bgy3d_fft_free (BHD->f_g2_fft[i][j][dim]);
-            bgy3d_fft_free (BHD->fl_g2_fft[i][j][dim]);
+            VecDestroy (BHD->fs_g2_fft[i][j][dim]);
+            VecDestroy (BHD->fl_g2_fft[i][j][dim]);
           }
       }
 
@@ -580,8 +580,8 @@ static void  pair (State *BHD,
                    const real LJ_params[3],
                    const Vec g2,
                    Vec f_short[3], Vec f_long[3], /* work arrays */
-                   fftw_complex *fs_g2_fft[3],    /* intent(out) */
-                   fftw_complex *fl_g2_fft[3],    /* intent(out) */
+                   Vec fs_g2_fft[3],              /* intent(out) */
+                   Vec fl_g2_fft[3],              /* intent(out) */
                    Vec u2, Vec u2_fft,            /* intent(out) */
                    real damp, real damp_LJ)
 {
@@ -663,7 +663,7 @@ static void  pair (State *BHD,
       assert (!err);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
-      ComputeFFTfromVec_fftw (BHD->fft_mat, work, fs_g2_fft[dim]);
+      MatMult (BHD->fft_mat, work, fs_g2_fft[dim]);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
       err = VecPointwiseMult (work, g2, f_long[dim]);
@@ -673,7 +673,7 @@ static void  pair (State *BHD,
       VecAXPY(work, -1.0, f_long[dim]);
 
       /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
-      ComputeFFTfromVec_fftw (BHD->fft_mat, work, fl_g2_fft[dim]);
+      MatMult (BHD->fft_mat, work, fl_g2_fft[dim]);
     }
 }
 
@@ -709,7 +709,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
             assert (BHD->g2[j][i] == BHD->g2[i][j]);
             FOR_DIM
               {
-                assert (BHD->f_g2_fft[j][i][dim] == BHD->f_g2_fft[i][j][dim]);
+                assert (BHD->fs_g2_fft[j][i][dim] == BHD->fs_g2_fft[i][j][dim]);
                 assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
               }
           }
@@ -723,7 +723,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
         pair (BHD, ff_params,
               BHD->g2[i][j],
               force_short, force_long, /* work vectors*/
-              BHD->f_g2_fft[i][j], BHD->fl_g2_fft[i][j],
+              BHD->fs_g2_fft[i][j], BHD->fl_g2_fft[i][j],
               BHD->u2[j][i], BHD->u2_fft[j][i], /* FIXME: ij ji */
               damp, damp_LJ);
       }
@@ -761,7 +761,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
  */
 static void kernel (const DA dc,
                     const ProblemData *PD,
-                    fftw_complex *(fg[3]),
+                    Vec fg[3],  /* complex, intent(in) */
                     Vec coul,   /* complex, intent(in) */
                     Vec dfg)    /* complex, intent(out) */
 {
@@ -782,10 +782,12 @@ static void kernel (const DA dc,
   /* Loop over local portion of grid: */
   int ijk = 0;
 
-  struct {PetscScalar re, im;} ***dfg_, ***coul_;
+  struct {PetscScalar re, im;} ***fg_[3], ***dfg_, ***coul_;
   DAVecGetArray (dc, dfg, &dfg_);
   if (coul)
     DAVecGetArray (dc, coul, &coul_);
+  FOR_DIM
+    DAVecGetArray (dc, fg[dim], &fg_[dim]);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -829,8 +831,8 @@ static void kernel (const DA dc,
           real re = 0.0;
           real im = 0.0;
           for (int p = 0; p < 3; p++) {
-              re += ic[p] * fg[p][ijk].im;
-              im -= ic[p] * fg[p][ijk].re;
+              re += ic[p] * fg_[p][i[2]][i[1]][i[0]].im;
+              im -= ic[p] * fg_[p][i[2]][i[1]][i[0]].re;
           }
           dfg_[i[2]][i[1]][i[0]].re = k_fac * re;
           dfg_[i[2]][i[1]][i[0]].im = k_fac * im;
@@ -856,6 +858,8 @@ static void kernel (const DA dc,
   DAVecRestoreArray (dc, dfg, &dfg_);
   if (coul)
     DAVecRestoreArray (dc, coul, &coul_);
+  FOR_DIM
+    DAVecRestoreArray (dc, fg[dim], &fg_[dim]);
 }
 
 /*
@@ -906,7 +910,8 @@ static void apply (const DA dc,
  * Side effects: none, but consider efficiency.
  */
 static void Compute_H2O_interS_C (const State *BHD,
-                                  fftw_complex *(fg2_fft[3]), Vec g,
+                                  Vec fg2_fft[3], /* complex, intent(in) */
+                                  Vec g,        /* real, intent(in) */
                                   Vec coul_fft, /* complex, intent(in) */
                                   real rho, Vec dg)
 {
@@ -952,7 +957,8 @@ static void Compute_H2O_interS_C (const State *BHD,
  * Side effects: none, but see Compute_H2O_interS_C().
  */
 void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
-                         fftw_complex *(fg2_fft[3]), Vec g,
+                         Vec fg2_fft[3],   /* complex, intent(in) */
+                         Vec g,            /* real, intent(in) */
                          real rho, Vec dg_help)
 {
     Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
@@ -1294,9 +1300,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
          iterations. Only a scalar kernel is needed: */
-      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[0][0], NULL, ker_fft_S[0][0]);
-      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
-      kernel (BHD.dc, BHD.PD, BHD.f_g2_fft[1][1], NULL, ker_fft_S[1][1]);
+      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][0], NULL, ker_fft_S[0][0]);
+      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
+      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[1][1], NULL, ker_fft_S[1][1]);
 
       kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0], ker_fft_L[0][0]);
       kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
@@ -1799,9 +1805,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* H */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][1], g[1], BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[1], BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][0], g[0], BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][0], g[0], BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
@@ -1835,9 +1841,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* O */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.f_g2_fft[1][1], g[1], BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[1][1], g[1], BHD.rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.f_g2_fft[0][1], g[0], BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[0], BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
