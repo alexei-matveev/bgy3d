@@ -780,7 +780,7 @@ static void kernel (const DA dc,
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
-  struct {PetscScalar re, im;} ***fg_[3], ***dfg_, ***coul_;
+  complex ***fg_[3], ***dfg_, ***coul_;
   DAVecGetArray (dc, dfg, &dfg_);
   if (coul)
     DAVecGetArray (dc, coul, &coul_);
@@ -826,14 +826,15 @@ static void kernel (const DA dc,
            * Poisson solution.
            */
 
-          real re = 0.0;
-          real im = 0.0;
-          for (int p = 0; p < 3; p++) {
-              re += ic[p] * fg_[p][i[2]][i[1]][i[0]].im;
-              im -= ic[p] * fg_[p][i[2]][i[1]][i[0]].re;
-          }
-          dfg_[i[2]][i[1]][i[0]].re = k_fac * re;
-          dfg_[i[2]][i[1]][i[0]].im = k_fac * im;
+          /*
+            Complex  arithmetics here.   "I" is  a macro  expanding to
+            imaginary unit:
+          */
+          complex sum = 0.0;
+          for (int p = 0; p < 3; p++)
+            sum += -I * ic[p] * fg_[p][i[2]][i[1]][i[0]];
+
+          dfg_[i[2]][i[1]][i[0]] = k_fac * sum;
 
           /*
            * FIXME: Origin of  this occasional addition needs some
@@ -847,10 +848,8 @@ static void kernel (const DA dc,
            *
            * Long range Coulomb part (right one):
            */
-          if (coul) {
-              dfg_[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].re;
-              dfg_[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].im;
-          }
+          if (coul)
+            dfg_[i[2]][i[1]][i[0]] += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]];
         }
   DAVecRestoreArray (dc, dfg, &dfg_);
   if (coul)
