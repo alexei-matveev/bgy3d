@@ -53,6 +53,9 @@ int main (int argc, char **argv)
      early: */
   PetscInitialize (&argc, &argv, (char*)0, helptext);
 
+  /* Make Petsc abort when it encounters an error: */
+  PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
+
   /* Read the command  line options. Petsc insists on  keys having the
      leading dash, so keep them  for the moment.  Set global verbosity
      early  enough. This is  the only  short option!  Use long-options
