@@ -39,7 +39,6 @@ static void load (const State *BHD, Vec g2[2][2]);
 static State initialize_state (const ProblemData *PD)
 {
   State BHD;
-  PetscErrorCode ierr;
 
   BHD.PD = PD;
 
@@ -65,12 +64,14 @@ static State initialize_state (const ProblemData *PD)
   const DA da = BHD.da;         /* shorter alias */
 
   /* Create global vectors */
-  ierr = DACreateGlobalVector (da, &BHD.g_ini[0]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.g_ini[1]); assert (!ierr);
+  DACreateGlobalVector (da, &BHD.g_ini[0]);
+  DACreateGlobalVector (da, &BHD.g_ini[1]);
+
   BHD.gHO_ini = PETSC_NULL;     /* unused with impurities */
-  ierr = DACreateGlobalVector (da, &BHD.u2[0][0]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.u2[1][1]); assert (!ierr);
-  ierr = DACreateGlobalVector (da, &BHD.u2[0][1]); assert (!ierr);
+
+  DACreateGlobalVector (da, &BHD.u2[0][0]);
+  DACreateGlobalVector (da, &BHD.u2[1][1]);
+  DACreateGlobalVector (da, &BHD.u2[0][1]);
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
@@ -79,9 +80,8 @@ static State initialize_state (const ProblemData *PD)
       {
         /* FIXME: see bgy3d_load_vec below, arent we overwriting these
            g2 vecs? */
-        ierr = DACreateGlobalVector (da, &BHD.g2[i][j]);
+        DACreateGlobalVector (da, &BHD.g2[i][j]);
         BHD.g2[j][i] = BHD.g2[i][j];
-        assert (!ierr);
 
         /* Used with pure solvent only: */
         FOR_DIM
@@ -97,9 +97,7 @@ static State initialize_state (const ProblemData *PD)
   BHD.pre = PETSC_NULL;         /* used for newton solver only */
 
   FOR_DIM
-    {
-      ierr = DACreateGlobalVector (da, &BHD.v[dim]); assert (!ierr);
-    }
+    DACreateGlobalVector (da, &BHD.v[dim]);
 
 
 #ifdef L_BOUNDARY
@@ -656,21 +654,17 @@ static void  pair (State *BHD,
 
   FOR_DIM
     {
-      PetscErrorCode err;
-
       /* First (F_LJ + F_coulomb_short) * g2: */
-      err = VecPointwiseMult (work, g2, f_short[dim]);
-      assert (!err);
+      VecPointwiseMult (work, g2, f_short[dim]);
 
       /* Next FFT((F_LJ + F_coulomb_short) * g2): */
       MatMult (BHD->fft_mat, work, fs_g2_fft[dim]);
 
       /* Now Coulomb long. F_coulomb_long * g2: */
-      err = VecPointwiseMult (work, g2, f_long[dim]);
-      assert (!err);
+      VecPointwiseMult (work, g2, f_long[dim]);
 
       /* Next F_coulomb_long * g2 - F_coulomb_long: */
-      VecAXPY(work, -1.0, f_long[dim]);
+      VecAXPY (work, -1.0, f_long[dim]);
 
       /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
       MatMult (BHD->fft_mat, work, fl_g2_fft[dim]);
@@ -690,11 +684,8 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   Vec force_long[3];            /* work vectors for pair() */
   FOR_DIM
     {
-      PetscErrorCode err;
-      err = DACreateGlobalVector (BHD->da, &force_short[dim]);
-      assert (!err);
-      err = DACreateGlobalVector (BHD->da, &force_long[dim]);
-      assert (!err);
+      DACreateGlobalVector (BHD->da, &force_short[dim]);
+      DACreateGlobalVector (BHD->da, &force_long[dim]);
     }
 
 
@@ -731,11 +722,8 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   /* Clean up and exit: */
   FOR_DIM
     {
-      PetscErrorCode err;
-      err = VecDestroy (force_short[dim]);
-      assert (!err);
-      err = VecDestroy (force_long[dim]);
-      assert (!err);
+      VecDestroy (force_short[dim]);
+      VecDestroy (force_long[dim]);
     }
 }
 
