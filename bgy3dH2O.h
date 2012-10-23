@@ -25,13 +25,14 @@ void Compute_dg_H2O_inter (State *BHD,
                            Vec coul2_fft, real rho2,
                            Vec dg, Vec dg_help);
 
-/* Used ifdef INTRA1, though this build seems to be broken: */
+#ifdef INTRA1
+/* This build seems to be broken: */
 void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                            Vec coul_fft, real rab, Vec dg, Vec dg_help);
-
-/* Used ifdef INTRA2, default: */
+#else
 void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                              Vec coul_fft, real rab, Vec dg, Vec dg_help);
+#endif
 
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
 

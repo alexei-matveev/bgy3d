@@ -449,8 +449,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 		       BHD->u2_fft[1][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gO, r_HO, help2, help2 , tHO, BHD->f, zpad);
   VecAXPY(dgHO, 1.0, help2);
-#endif
-#ifdef INTRA2
+#else
   /* tO = gHO/int(gHO wHH) */
   Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HH, tHO, BHD->f);
@@ -505,8 +504,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 		       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gHO, r_HO, help2, help2 , tH, BHD->f, zpad);
   VecAXPY(dgH, 1.0, help2);
-#endif
-#ifdef INTRA2
+#else
   /* tO = gH/int(gH wHH) */
   Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gH, r_HH, tH, BHD->f);
@@ -551,8 +549,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 		       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small( BHD, gHO, r_HO, help2, help2 , tO, BHD->f, zpad);
   VecAXPY(dgO, 2.0, help2);
-#endif
-#ifdef INTRA2
+#else
   Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , help2, BHD->f, zpad);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
