@@ -135,7 +135,6 @@ static State initialize_state (const ProblemData *PD)
         BHD.u2_fft[j][i] = BHD.u2_fft[i][j];
       }
 
-  BHD.g_fft = NULL;             /* not used with impurities */
   BHD.gfg2_fft = NULL;          /* not used with impurities */
   BHD.wHO_fft = NULL;           /* not used with impurities */
   BHD.wHH_fft = NULL;           /* not used with impurities */
@@ -213,7 +212,6 @@ static void finalize_state (State *BHD)
     for (int j = 0; j <= i; j++)
       VecDestroy (BHD->u2_fft[i][j]);
 
-  assert (BHD->g_fft == NULL);    /* not used with impurities */
   assert (BHD->gfg2_fft == NULL); /* not used with impurities */
   assert (BHD->wHO_fft == NULL);  /* not used with impurities */
   assert (BHD->wHH_fft == NULL);  /* not used with impurities */

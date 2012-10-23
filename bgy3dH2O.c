@@ -132,7 +132,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   /* Complex scratch vector. FIXME: is it used in pure code? */
   DACreateGlobalVector (BHD->dc, &BHD->fft_scratch);
 
-  BHD->g_fft = bgy3d_fft_malloc (da);
   BHD->gfg2_fft = bgy3d_fft_malloc (da);
 
   /* FIXME: these probably differ only by factors: */
@@ -167,7 +166,6 @@ static void BGY3dH2OData_free(State *BHD)
       VecDestroy(BHD->v[dim]);
       VecDestroy (BHD->fg2_fft[dim]);
     }
-  bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->gfg2_fft);
 
   for (int i = 0; i < 2; i++)
