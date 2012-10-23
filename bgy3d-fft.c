@@ -10,8 +10,6 @@
 #include "bgy3d-fftw.h"
 #include "bgy3d-fft.h"
 
-extern int verbosity;   /* FIXME: dont want to #include bgy3d.h yet */
-
 fftw_complex *bgy3d_fft_malloc (DA da)
 {
   int x[3], n[3];
