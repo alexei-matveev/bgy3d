@@ -78,33 +78,6 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
 }
 #endif
 
-/* y := alpha  * x + beta *  y. FIXME: is there anything  like that in
-   FFTW? */
-fftw_complex *bgy3d_fft_axpby (DA da, fftw_complex *restrict y,
-                               double alpha, double beta,
-                               const fftw_complex *x)
-{
-  int z[3], n[3], N;
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &z[0], &z[1], &z[2], &n[0], &n[1], &n[2]);
-
-  N = n[0] * n[1] * n[2];
-
-  if (beta != 0.0)            /* ignore junk in y */
-    for (int i = 0; i < N; i++) {
-      y[i].re = alpha * x[i].re + beta * y[i].re;
-      y[i].im = alpha * x[i].im + beta * y[i].im;
-    }
-  else
-    for (int i = 0; i < N; i++) {
-      y[i].re = alpha * x[i].re;
-      y[i].im = alpha * x[i].im;
-    }
-
-  return y;
-}
-
 /* FIXME: constant is double so far: */
 fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha)
 {
