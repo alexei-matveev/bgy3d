@@ -1046,7 +1046,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
 /* Compute intramolecular part */
 void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
-                          fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help)
+                          Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], index, ic[3];
   real k_fac, k;
@@ -1084,8 +1084,9 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
   /* fft(g2) */
 
-  struct {PetscScalar re, im;} ***dg_fft_, ***fg2_fft_[3];
+  struct {PetscScalar re, im;} ***dg_fft_, ***fg2_fft_[3], ***coul_fft_;
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
+  DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
@@ -1128,14 +1129,15 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
               /* long range Coulomb part */
               dg_fft_[i[2]][i[1]][i[0]].re +=
-                coul_fft[index].re*sin(k)/k;
+                coul_fft_[i[2]][i[1]][i[0]].re*sin(k)/k;
 
               dg_fft_[i[2]][i[1]][i[0]].im +=
-                coul_fft[index].im*sin(k)/k;
+                coul_fft_[i[2]][i[1]][i[0]].im*sin(k)/k;
                 }
           index++;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
+  DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
   /* FIXME: is fg2_fft[] used afterwards? */

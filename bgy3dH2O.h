@@ -26,7 +26,7 @@ void Compute_dg_H2O_inter (State *BHD,
                            Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
-                           fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
+                           Vec coul_fft, real rab, Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                              Vec coul_fft, real rab, Vec dg, Vec dg_help);
