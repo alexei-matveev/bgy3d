@@ -139,15 +139,11 @@ typedef struct State
   Vec gHO_ini;                  /* used for pure solvent only */
 
   /*
-    Parallel  FFT.  These are  the  complex  vectors.  FIXME: use  Vec
-    instead of fftw_complex arrays to store FFT images:
+    Parallel FFT.  These are the complex vectors to store FFT images:
   */
   Vec fft_scratch;              /* complex */
   Vec fg2_fft[3];               /* complex */
   Vec gfg2_fft;                 /* complex */
-
-  /* Used only in Newton solver: */
-  Vec wHO_fft, wHH_fft;         /* complex */
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two
      site indices */
@@ -165,8 +161,9 @@ typedef struct State
   DA da_dmmg;
 #endif
 
-
   /* Newton stuff */
+  Vec wHO_fft, wHH_fft;         /* complex */
+
   DA da_newton, da_newtonF;
   Vec gH, gHO, gO;
   Vec dgH, dgHO, dgO;
