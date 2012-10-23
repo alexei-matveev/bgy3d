@@ -212,7 +212,7 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
       BHD->f_g2_fft[0][0][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
       BHD->f_g2_fft[1][1][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
       BHD->f_g2_fft[0][1][dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-      BHD->fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+      DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]);
     }
 
   BHD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));

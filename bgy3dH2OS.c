@@ -124,7 +124,7 @@ static State initialize_state (const ProblemData *PD)
             BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
           }
 
-      BHD.fg2_fft[dim] = bgy3d_fft_malloc (da);
+      DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* used by ComputeFFTfromCoulomb() */
     }
 
   /* Complex scratch vector: */
@@ -208,8 +208,8 @@ static void finalize_state (State *BHD)
 
   FOR_DIM
     {
-      VecDestroy(BHD->v[dim]);
-      bgy3d_fft_free (BHD->fg2_fft[dim]);
+      VecDestroy (BHD->v[dim]);
+      VecDestroy (BHD->fg2_fft[dim]);
     }
 
   for (int i = 0; i < 2; i++)
