@@ -132,8 +132,6 @@ static State initialize_state (const ProblemData *PD)
   /* Complex scratch vector: */
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
 
-  BHD.g_fft = bgy3d_fft_malloc (da); /* used by ComputeFFTfromCoulomb() */
-
   /* FIXME: these probably differ only by factors: */
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
@@ -142,6 +140,7 @@ static State initialize_state (const ProblemData *PD)
         BHD.u2_fft[j][i] = BHD.u2_fft[i][j];
       }
 
+  BHD.g_fft = NULL;             /* not used with impurities */
   BHD.gfg2_fft = NULL;          /* not used with impurities */
   BHD.wHO_fft = NULL;           /* not used with impurities */
   BHD.wHH_fft = NULL;           /* not used with impurities */
@@ -214,12 +213,12 @@ static void finalize_state (State *BHD)
       VecDestroy(BHD->v[dim]);
       bgy3d_fft_free (BHD->fg2_fft[dim]);
     }
-  bgy3d_fft_free (BHD->g_fft);
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       VecDestroy (BHD->u2_fft[i][j]);
 
+  assert (BHD->g_fft == NULL);    /* not used with impurities */
   assert (BHD->gfg2_fft == NULL); /* not used with impurities */
   assert (BHD->wHO_fft == NULL);  /* not used with impurities */
   assert (BHD->wHH_fft == NULL);  /* not used with impurities */
