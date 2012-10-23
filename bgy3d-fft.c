@@ -78,24 +78,6 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
 }
 #endif
 
-/* FIXME: constant is double so far: */
-fftw_complex *bgy3d_fft_set (DA da, fftw_complex *y, double alpha)
-{
-  int z[3], n[3], N;
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &z[0], &z[1], &z[2], &n[0], &n[1], &n[2]);
-
-  N = n[0] * n[1] * n[2];
-
-  for (int i = 0; i < N; i++) {
-    y[i].re = alpha;
-    y[i].im = 0.0;
-  }
-
-  return y;
-}
-
 #ifdef WITH_EXTRA_SOLVERS
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft)
