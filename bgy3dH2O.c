@@ -1044,7 +1044,10 @@ void Compute_dg_H2O_inter (State *BHD,
 }
 
 
-/* Compute intramolecular part */
+#ifdef INTRA1
+/*
+  Compute intramolecular  part.  Only used if  compiled with -DINTRA1:
+ */
 void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                           Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
@@ -1148,8 +1151,9 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 
   VecCopy(dg_help,dg);
 }
+#endif
 
-
+#ifdef INTRA2                   /* default */
 /* Compute intramolecular part */
 void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                             Vec coul_fft, real rab, Vec dg, Vec dg_help)
@@ -1445,6 +1449,8 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
   VecAXPY(dg, 1.0, dg_help);
 }
+#endif
+
 
 /*
   Compute   intramolecular  part.    The  first   thing  it   does  is
@@ -2008,14 +2014,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*        exit(1);    */
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, PETSC_NULL,
                                BHD->u2_fft[1][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
 #endif
 #ifdef INTRA2
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HO, gO, tO , dg_new2, f, zpad);
@@ -2094,13 +2097,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
                                BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
-
 #endif
 #ifdef INTRA2
           Solve_NormalizationH2O_smallII( BHD, gH, r_HO, gHO, tHO , dg_new2, f, zpad);
@@ -2162,16 +2163,13 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
                                BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
-
 #endif
 #ifdef INTRA2
-
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
@@ -2633,7 +2631,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gHO, r_HH, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
                                BHD->u2_fft[0][1], r_HH, dg_new2, f);
@@ -2645,8 +2642,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[1][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
 #endif
 #ifdef INTRA2
           /* tO = gHO/int(gHO wHH) */
@@ -2732,7 +2727,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, PETSC_NULL,
                                BHD->u2_fft[0][0], r_HH, dg_new2, f);
@@ -2743,7 +2737,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 1.0, dg_new2);
-
 #endif
 #ifdef INTRA2
           /* tO = gH/int(gH wHH) */
@@ -2817,16 +2810,13 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
 #ifdef INTRA1
-
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
                                BHD->u2_fft[0][1], r_HO, dg_new2, f);
           Solve_NormalizationH2O_small( BHD, gHO, r_HO, dg_new2, dg_new2 , tOH, f, zpad);
           VecAXPY(dg_new, 2.0, dg_new2);
-
 #endif
 #ifdef INTRA2
-
           Solve_NormalizationH2O_smallII( BHD, gO, r_HO, gHO, tHO , dg_new2, f, zpad);
           Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, f);
           Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
