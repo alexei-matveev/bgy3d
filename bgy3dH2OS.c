@@ -127,9 +127,6 @@ static State initialize_state (const ProblemData *PD)
           }
 
       BHD.fg2_fft[dim] = bgy3d_fft_malloc (da);
-
-      BHD.fO_fft[dim] = bgy3d_fft_malloc (da);
-      BHD.fH_fft[dim] = bgy3d_fft_malloc (da);
     }
 
   /* Complex scratch vector: */
@@ -211,9 +208,6 @@ static void finalize_state (State *BHD)
     {
       VecDestroy(BHD->v[dim]);
       bgy3d_fft_free (BHD->fg2_fft[dim]);
-
-      bgy3d_fft_free (BHD->fO_fft[dim]);
-      bgy3d_fft_free (BHD->fH_fft[dim]);
     }
   bgy3d_fft_free (BHD->g_fft);
   bgy3d_fft_free (BHD->u2_fft[0][0]);
