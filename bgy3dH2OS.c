@@ -136,8 +136,6 @@ static State initialize_state (const ProblemData *PD)
       }
 
   BHD.gfg2_fft = NULL;          /* not used with impurities */
-  BHD.wHO_fft = NULL;           /* not used with impurities */
-  BHD.wHH_fft = NULL;           /* not used with impurities */
 
   /* Not used with impurities: */
   BHD.LJ_paramsH[0] = -1;
@@ -213,8 +211,6 @@ static void finalize_state (State *BHD)
       VecDestroy (BHD->u2_fft[i][j]);
 
   assert (BHD->gfg2_fft == NULL); /* not used with impurities */
-  assert (BHD->wHO_fft == NULL);  /* not used with impurities */
-  assert (BHD->wHH_fft == NULL);  /* not used with impurities */
 
   VecDestroy (BHD->fft_scratch);
 

@@ -141,7 +141,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
         BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
       }
 
-  BHD->wHO_fft = bgy3d_fft_malloc (da);
    /* Compute initial data */
   RecomputeInitialData(BHD, 1.0, 1.0);
 
@@ -170,8 +169,6 @@ static void BGY3dH2OData_free(State *BHD)
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       VecDestroy (BHD->u2_fft[i][j]);
-
-  bgy3d_fft_free (BHD->wHO_fft);
 
   VecDestroy(BHD->g_ini[0]);
   VecDestroy(BHD->g_ini[1]);

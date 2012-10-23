@@ -146,7 +146,8 @@ typedef struct State
   Vec fg2_fft[3];               /* complex */
   Vec gfg2_fft;                 /* complex */
 
-  fftw_complex *wHO_fft, *wHH_fft; /* used for pure solvent only */
+  /* Used only in Newton solver: */
+  Vec wHO_fft, wHH_fft;         /* complex */
 
   /* BGY3dM stuff.   These are vector field quantities  indexed by two
      site indices */

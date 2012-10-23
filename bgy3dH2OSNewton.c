@@ -225,8 +225,8 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
         BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
       }
 
-  BHD->wHO_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->wHH_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  DACreateGlobalVector (BHD->dc, &BHD->wHO_fft);
+  DACreateGlobalVector (BHD->dc, &BHD->wHH_fft);
 
 
 
@@ -480,7 +480,6 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   Vec dgH, dgO, gH, gO, help;
   Vec tO, tH, help2, ff;
 
-  fftw_complex *uO_fft, *uH_fft;
   static int counter=0;
   counter++;
   if( verbosity>0)
@@ -499,14 +498,18 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   tH  =  BHD->f4;
   ff = BHD->f;
   const real zpad = BHD->PD->zpad;
-  uO_fft = BHD->wHO_fft;
-  uH_fft = BHD->wHH_fft;
+  Vec uO_fft = BHD->wHO_fft;
+  Vec uH_fft = BHD->wHH_fft;
 
   N3 = PD->N[0]*PD->N[1]*PD->N[2];
 
-  /* Get arrays from PETSC Vectors */
 
-  DAVecGetArray(BHD->da_newtonF, u, (void*) &dg_struct);
+  assert (0);                   /* untested */
+  /* Get arrays from PETSC Vectors */
+  struct {PetscScalar re, im;} ***uH_fft_, ***uO_fft_;
+  DAVecGetArray (BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecGetArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecGetArray (BHD->dc, uO_fft, &uO_fft_);
 
   DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
   index=0;
@@ -516,17 +519,19 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  /* Copy from u to single Vectors */
-	  uH_fft[index].re = dg_struct[i[2]][i[1]][i[0]].dgHre;
-	  uH_fft[index].im = dg_struct[i[2]][i[1]][i[0]].dgHim;
-	  uO_fft[index].re = dg_struct[i[2]][i[1]][i[0]].dgOre;
-	  uO_fft[index].im = dg_struct[i[2]][i[1]][i[0]].dgOim;
+	  uH_fft_[i[2]][i[1]][i[0]].re = dg_struct[i[2]][i[1]][i[0]].dgHre;
+	  uH_fft_[i[2]][i[1]][i[0]].im = dg_struct[i[2]][i[1]][i[0]].dgHim;
+	  uO_fft_[i[2]][i[1]][i[0]].re = dg_struct[i[2]][i[1]][i[0]].dgOre;
+	  uO_fft_[i[2]][i[1]][i[0]].im = dg_struct[i[2]][i[1]][i[0]].dgOim;
 	  index++;
 	}
   /* Restore arrays from PETSC Vectors */
-  DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecRestoreArray (BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecRestoreArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecRestoreArray (BHD->dc, uO_fft, &uO_fft_);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dgO, uO_fft);
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dgH, uH_fft);
+  MatMultTranspose (BHD->fft_mat, uH_fft, dgH);
+  MatMultTranspose (BHD->fft_mat, uO_fft, dgO);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
@@ -618,12 +623,14 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 /*   Zeropad_Function(BHD, dgO, zpad, 0.0); */
 /*   Zeropad_Function(BHD, dgH, zpad, 0.0); */
 
-  ComputeFFTfromVec_fftw (BHD->fft_mat, dgH, uH_fft);
-  ComputeFFTfromVec_fftw (BHD->fft_mat, dgO, uO_fft);
+  MatMult (BHD->fft_mat, dgH, uH_fft);
+  MatMult (BHD->fft_mat, dgO, uO_fft);
 
-
+  assert (0);                   /* untested */
   /* Get arrays from PETSC Vectors */
   DAVecGetArray(BHD->da_newtonF, f, (void*) &dg_struct);
+  DAVecGetArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecGetArray (BHD->dc, uO_fft, &uO_fft_);
 
   index=0;
   /* loop over local portion of grid */
@@ -632,16 +639,16 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  /* Copy from single Vectors to f */
-	  dg_struct[i[2]][i[1]][i[0]].dgHre= uH_fft[index].re;
-	  dg_struct[i[2]][i[1]][i[0]].dgHim= uH_fft[index].im;
-	  dg_struct[i[2]][i[1]][i[0]].dgOre= uO_fft[index].re;
-	  dg_struct[i[2]][i[1]][i[0]].dgOim= uO_fft[index].im;
+	  dg_struct[i[2]][i[1]][i[0]].dgHre= uH_fft_[i[2]][i[1]][i[0]].re;
+	  dg_struct[i[2]][i[1]][i[0]].dgHim= uH_fft_[i[2]][i[1]][i[0]].im;
+	  dg_struct[i[2]][i[1]][i[0]].dgOre= uO_fft_[i[2]][i[1]][i[0]].re;
+	  dg_struct[i[2]][i[1]][i[0]].dgOim= uO_fft_[i[2]][i[1]][i[0]].im;
 	  index++;
 	}
   /* Restore arrays from PETSC Vectors */
-
-  DAVecRestoreArray(BHD->da_newtonF, f, (void*) &dg_struct);
-
+  DAVecRestoreArray (BHD->da_newtonF, f, (void*) &dg_struct);
+  DAVecRestoreArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecRestoreArray (BHD->dc, uO_fft, &uO_fft_);
 
 
   if( verbosity>0)
@@ -662,7 +669,6 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
 {
   H2OSdgF ***dg_struct;
-  fftw_complex *uH_fft, *uO_fft;
   int i[3], x[3], n[3], N3, index;
   Vec dgH, dgO, gH, gO;
   PetscViewer viewer;
@@ -674,13 +680,17 @@ static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
   gO= BHD->gO;
   dgH= BHD->dgH;
   dgO= BHD->dgO;
-  uO_fft = BHD->wHO_fft;
-  uH_fft = BHD->wHH_fft;
+  Vec uO_fft = BHD->wHO_fft;
+  Vec uH_fft = BHD->wHH_fft;
   N3 = PD->N[0]*PD->N[1]*PD->N[2];
 
     /* Get arrays from PETSC Vectors */
 
-  DAVecGetArray(BHD->da_newtonF, u, (void*) &dg_struct);
+  struct {PetscScalar re, im;} ***uH_fft_, ***uO_fft_;
+  DAVecGetArray (BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecGetArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecGetArray (BHD->dc, uO_fft, &uO_fft_);
+
 
   DAGetCorners(BHD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
   index=0;
@@ -690,17 +700,19 @@ static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  /* Copy from u to single Vectors */
-	  uH_fft[index].re = dg_struct[i[2]][i[1]][i[0]].dgHre;
-	  uH_fft[index].im = dg_struct[i[2]][i[1]][i[0]].dgHim;
-	  uO_fft[index].re = dg_struct[i[2]][i[1]][i[0]].dgOre;
-	  uO_fft[index].im = dg_struct[i[2]][i[1]][i[0]].dgOim;
+	  uH_fft_[i[2]][i[1]][i[0]].re = dg_struct[i[2]][i[1]][i[0]].dgHre;
+	  uH_fft_[i[2]][i[1]][i[0]].im = dg_struct[i[2]][i[1]][i[0]].dgHim;
+	  uO_fft_[i[2]][i[1]][i[0]].re = dg_struct[i[2]][i[1]][i[0]].dgOre;
+	  uO_fft_[i[2]][i[1]][i[0]].im = dg_struct[i[2]][i[1]][i[0]].dgOim;
 	  index++;
 	}
   /* Restore arrays from PETSC Vectors */
-  DAVecRestoreArray(BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecRestoreArray (BHD->da_newtonF, u, (void*) &dg_struct);
+  DAVecRestoreArray (BHD->dc, uH_fft, &uH_fft_);
+  DAVecRestoreArray (BHD->dc, uO_fft, &uO_fft_);
 
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dgO, uO_fft);
-  ComputeVecfromFFT_fftw (BHD->fft_mat, dgH, uH_fft);
+  MatMultTranspose (BHD->fft_mat, uH_fft, dgH);
+  MatMultTranspose (BHD->fft_mat, uO_fft, dgO);
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
