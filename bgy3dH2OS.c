@@ -780,8 +780,6 @@ static void kernel (const DA dc,
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
-  int ijk = 0;
-
   struct {PetscScalar re, im;} ***fg_[3], ***dfg_, ***coul_;
   DAVecGetArray (dc, dfg, &dfg_);
   if (coul)
@@ -853,7 +851,6 @@ static void kernel (const DA dc,
               dfg_[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].re;
               dfg_[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].im;
           }
-          ijk++;
         }
   DAVecRestoreArray (dc, dfg, &dfg_);
   if (coul)
