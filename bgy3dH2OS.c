@@ -17,11 +17,9 @@
 #include "bgy3d-multigrid.h"    /* InitializeDMMGSolver */
 #endif
 
-#ifdef WITH_COMPLEX
-#include <complex.h>
-#endif
 #include <float.h>              /* DBL_MAX */
 #include <stdbool.h>            /* bool */
+#include <complex.h>            /* after fftw.h */
 
 /*
  * These are  the two  solvent sites.  Coordinates  will not  be used.
@@ -878,7 +876,7 @@ static void apply (const DA dc,
   /* Get local portion of the grid */
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  struct {PetscScalar re, im;} ***ker_, ***g_, ***dg_;
+  complex ***ker_, ***g_, ***dg_;
   DAVecGetArray (dc, ker, &ker_);
   DAVecGetArray (dc, dg, &dg_);
   DAVecGetArray (dc, g, &g_);
@@ -897,10 +895,7 @@ static void apply (const DA dc,
            Poisson solution.   The factor scale = βρ  is not included,
            on the other hand. See kernel() for details:
            */
-          dg_[k][j][i].re += scale * (ker_[k][j][i].re * g_[k][j][i].re -
-                                      ker_[k][j][i].im * g_[k][j][i].im);
-          dg_[k][j][i].im += scale * (ker_[k][j][i].re * g_[k][j][i].im +
-                                      ker_[k][j][i].im * g_[k][j][i].re);
+          dg_[k][j][i] += scale * (ker_[k][j][i] * g_[k][j][i]); /* complex */
         }
   DAVecRestoreArray (dc, ker, &ker_);
   DAVecRestoreArray (dc, dg, &dg_);
