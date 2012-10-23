@@ -14,22 +14,22 @@ void ComputeH2O_g (Vec g, Vec g0, Vec dg);
 
 void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);
 
-void ComputeFFTfromCoulomb (State *BHD, Vec uc, Vec f_l[3], fftw_complex *fft_data, real factor);
+void ComputeFFTfromCoulomb (State *BHD, Vec uc, Vec f_l[3], Vec uc_fft, real factor);
 
 void RecomputeInitialData (State *BHD, real damp, real damp_LJ);
 
 void Compute_dg_H2O_inter (State *BHD,
                            Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                           fftw_complex *coul1_fft, real rho1,
+                           Vec coul1_fft, real rho1,
                            Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                           fftw_complex *coul2_fft, real rho2,
+                           Vec coul2_fft, real rho2,
                            Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                            fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
-                             fftw_complex *coul_fft, real rab, Vec dg, Vec dg_help);
+                             Vec coul_fft, real rab, Vec dg, Vec dg_help);
 
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
 

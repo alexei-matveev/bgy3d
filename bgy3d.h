@@ -113,8 +113,8 @@ typedef struct State
      store just one? */
   Vec u2[2][2];
 
-  fftw_complex *u2_fft[2][2];   /* The  fourier transform of  u2.  The
-                                   same redundancy. */
+  Vec u2_fft[2][2];             /* The  fourier transform of  u2.  The
+                                   same redundancy. Complex Vecs. */
 
   Vec cH, cHO, cO;
 

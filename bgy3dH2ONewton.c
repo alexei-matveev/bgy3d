@@ -326,9 +326,14 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   BHD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
   BHD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->u2_fft[0][0] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->u2_fft[1][1] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BHD->u2_fft[0][1] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+
+  /* FIXME: these probably differ only by factors: */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD->dc, &BHD->u2_fft[i][j]);
+        BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
+      }
 
   /* Compute fft from Coulomb potential (long) */
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],

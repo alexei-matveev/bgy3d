@@ -133,9 +133,14 @@ static State initialize_state (const ProblemData *PD)
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
 
   BHD.g_fft = bgy3d_fft_malloc (da); /* used by ComputeFFTfromCoulomb() */
-  BHD.u2_fft[0][0] = bgy3d_fft_malloc (da);
-  BHD.u2_fft[1][1] = bgy3d_fft_malloc (da);
-  BHD.u2_fft[0][1] = bgy3d_fft_malloc (da);
+
+  /* FIXME: these probably differ only by factors: */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD.dc, &BHD.u2_fft[i][j]);
+        BHD.u2_fft[j][i] = BHD.u2_fft[i][j];
+      }
 
   BHD.gfg2_fft = NULL;          /* not used with impurities */
   BHD.wHO_fft = NULL;           /* not used with impurities */
@@ -210,9 +215,10 @@ static void finalize_state (State *BHD)
       bgy3d_fft_free (BHD->fg2_fft[dim]);
     }
   bgy3d_fft_free (BHD->g_fft);
-  bgy3d_fft_free (BHD->u2_fft[0][0]);
-  bgy3d_fft_free (BHD->u2_fft[1][1]);
-  bgy3d_fft_free (BHD->u2_fft[0][1]);
+
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (BHD->u2_fft[i][j]);
 
   assert (BHD->gfg2_fft == NULL); /* not used with impurities */
   assert (BHD->wHO_fft == NULL);  /* not used with impurities */
@@ -579,7 +585,7 @@ static void  pair (State *BHD,
                    Vec f_short[3], Vec f_long[3], /* work arrays */
                    fftw_complex *fs_g2_fft[3],    /* intent(out) */
                    fftw_complex *fl_g2_fft[3],    /* intent(out) */
-                   Vec u2, fftw_complex *u2_fft,  /* intent(out) */
+                   Vec u2, Vec u2_fft,            /* intent(out) */
                    real damp, real damp_LJ)
 {
   const real epsilon = LJ_params[0]; /* geometric average of two */
@@ -759,8 +765,8 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
 static void kernel (const DA dc,
                     const ProblemData *PD,
                     fftw_complex *(fg[3]),
-                    const fftw_complex *coul,
-                    Vec dfg)
+                    Vec coul,   /* complex, intent(in) */
+                    Vec dfg)    /* complex, intent(out) */
 {
   int x[3], n[3], i[3], N[3], ic[3];
 
@@ -779,8 +785,10 @@ static void kernel (const DA dc,
   /* Loop over local portion of grid: */
   int ijk = 0;
 
-  struct {PetscScalar re, im;} ***dfg_;
+  struct {PetscScalar re, im;} ***dfg_, ***coul_;
   DAVecGetArray (dc, dfg, &dfg_);
+  if (coul)
+    DAVecGetArray (dc, coul, &coul_);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -843,12 +851,14 @@ static void kernel (const DA dc,
            * Long range Coulomb part (right one):
            */
           if (coul) {
-              dfg_[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul[ijk].re;
-              dfg_[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul[ijk].im;
+              dfg_[i[2]][i[1]][i[0]].re += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].re;
+              dfg_[i[2]][i[1]][i[0]].im += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]].im;
           }
           ijk++;
         }
   DAVecRestoreArray (dc, dfg, &dfg_);
+  if (coul)
+    DAVecRestoreArray (dc, coul, &coul_);
 }
 
 /*
@@ -903,7 +913,7 @@ static void apply (const DA dc,
  */
 static void Compute_H2O_interS_C (const State *BHD,
                                   fftw_complex *(fg2_fft[3]), Vec g,
-                                  const fftw_complex *coul_fft,
+                                  Vec coul_fft, /* complex, intent(in) */
                                   real rho, Vec dg)
 {
   /* Avoid separate VecScale at the end: */
