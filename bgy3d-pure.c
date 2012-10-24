@@ -808,61 +808,28 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
 }
 
-/*
-  Side effects: uses BHD->{fft_scratch, gfg2_fft} as work Vecs.
-*/
-void Compute_dg_H2O_inter (State *BHD,
-                           Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                           Vec coul1_fft, real rho1,
-                           Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                           Vec coul2_fft, real rho2,
-                           Vec dg, Vec dg_help)
+/* All vectors are complex here. No side effects. */
+static void kapply (const State *BHD,
+                    Vec fg2_fft[3],          /* intent(in) */
+                    Vec g_fft, Vec coul_fft, /* intent(in) */
+                    Vec dg_fft)              /* intent(out) */
 {
-  int x[3], n[3], i[3], ic[3];
-  real k_fac, k, sign; // confac;
-
   const ProblemData *PD = BHD->PD;
-
-  const DA da = BHD->da;
   const int *N = PD->N;         /* N[3] */
-  const Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
-
   const real h = PD->h[0] * PD->h[1] * PD->h[2];
-  Vec g_fft = BHD->fft_scratch;
-  Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
-  /* confac = SQR(M_PI/L/2.); */
 
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /************************************************/
-  /* rho1*F1*g1a g1b*/
-  /************************************************/
-
-  /* fft(f*g) */
-  FOR_DIM
-    {
-      VecPointwiseMult(BHD->v[dim], g1a, f1[dim]);
-      /* special treatment: Coulomb long */
-      VecAXPY(BHD->v[dim], -1.0, f1_l[dim]);
-
-      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-
-    }
-/*      VecView(f1_l[0],PETSC_VIEWER_STDERR_WORLD);   */
-/*      exit(1);   */
-
-  /* fft(g) */
-  MatMult (BHD->fft_mat, g1b, g_fft);
-
-  complex ***g_fft_, ***dg_fft_, ***coul1_fft_, ***fg2_fft_[3];
+  complex ***g_fft_, ***dg_fft_, ***coul_fft_, ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecGetArray (BHD->dc, coul1_fft, &coul1_fft_);
+  DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
+  /* Get local portion of the grid */
+  int x[3], n[3], i[3], ic[3];
+  DAGetCorners(BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -873,7 +840,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
           FOR_DIM
             {
-              if( i[dim] <= N[dim]/2)
+              if (i[dim] <= N[dim] / 2)
                 ic[dim] = i[dim];
               else
                 ic[dim] = i[dim] - N[dim];
@@ -885,10 +852,11 @@ void Compute_dg_H2O_inter (State *BHD,
             }
           else
             {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-              k_fac = h*h*fac/k;
+              const real k = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+              const real k_fac = h * h * fac / k;
+
               /* phase shift factor for x=x+L/2 */
-              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
+              const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /* "I" is an imaginary unit here: */
               FOR_DIM
@@ -898,31 +866,71 @@ void Compute_dg_H2O_inter (State *BHD,
               /* Long  range  Coulomb part.  Note  there  is not  "-I"
                  factor here: */
               dg_fft_[i[2]][i[1]][i[0]] += h * sign *
-                (coul1_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
+                (coul_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecRestoreArray (BHD->dc, coul1_fft, &coul1_fft_);
+  DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+}
 
-  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
+/*
+  Side effects:  uses BHD->{fft_scratch, fg2_fft[],  gfg2_fft} as work
+  Vecs. Does 2 * (4 + 1) FFTs. Two inverse ones
+*/
+void Compute_dg_H2O_inter (State *BHD,
+                           Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
+                           Vec coul1_fft, real rho1,
+                           Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
+                           Vec coul2_fft, real rho2,
+                           Vec dg, Vec dg_help)
+{
+  const ProblemData *PD = BHD->PD;
+  const real L = PD->interval[1] - PD->interval[0];
 
-  VecScale(dg_help, rho1*PD->beta/L/L/L);
-
-  VecCopy(dg_help, dg);
+  Vec g_fft = BHD->fft_scratch;
+  Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
+  Vec dg_fft = BHD->gfg2_fft;
 
   /************************************************/
-  /* F2*g2a g2b*/
+  /* rho1 * F1*g1a g1b */
   /************************************************/
 
   /* fft(f*g) */
   FOR_DIM
     {
-      VecPointwiseMult(BHD->v[dim], g2a, f2[dim]);
+      VecPointwiseMult (BHD->v[dim], g1a, f1[dim]);
+
       /* special treatment: Coulomb long */
-      VecAXPY(BHD->v[dim], -1.0, f2_l[dim]);
+      VecAXPY (BHD->v[dim], -1.0, f1_l[dim]);
+
+      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
+    }
+
+  /* fft(g) */
+  MatMult (BHD->fft_mat, g1b, g_fft);
+
+  kapply (BHD, fg2_fft, g_fft, coul1_fft, dg_fft);
+
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
+
+  VecScale (dg_help, rho1 * PD->beta/L/L/L);
+
+  VecCopy (dg_help, dg);
+
+  /************************************************/
+  /* rho2 * F2*g2a g2b */
+  /************************************************/
+
+  /* fft(f*g) */
+  FOR_DIM
+    {
+      VecPointwiseMult (BHD->v[dim], g2a, f2[dim]);
+
+      /* special treatment: Coulomb long */
+      VecAXPY (BHD->v[dim], -1.0, f2_l[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
@@ -930,61 +938,13 @@ void Compute_dg_H2O_inter (State *BHD,
   /* fft(g-1) */
   MatMult (BHD->fft_mat, g2b, g_fft);
 
-  complex ***coul2_fft_;
-  DAVecGetArray (BHD->dc, g_fft, &g_fft_);
-  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecGetArray (BHD->dc, coul2_fft, &coul2_fft_);
-  FOR_DIM
-    DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-          dg_fft_[i[2]][i[1]][i[0]] = 0; /* complex zero */
-
-          FOR_DIM
-            {
-              if( i[dim] <= N[dim]/2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
-
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
-            {
-              dg_fft_[i[2]][i[1]][i[0]] = 0.0; //coul2_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-            }
-          else
-            {
-              k = (SQR(ic[2])+SQR(ic[1])+SQR(ic[0]));
-              k_fac = h*h*fac/k;
-              /* phase shift factor for x=x+L/2 */
-              sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
-
-              /* "I" is an imaginary unit here: */
-              FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * sign *
-                (-I * fg2_fft_[dim][i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
-
-              /* Long range Coulomb part.  Note there is no "I" factor
-                 here: */
-              dg_fft_[i[2]][i[1]][i[0]] += h * sign *
-                (coul2_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
-            }
-        }
-  DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
-  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecRestoreArray (BHD->dc, coul2_fft, &coul2_fft_);
-  FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+  kapply (BHD, fg2_fft, g_fft, coul2_fft, dg_fft);
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
-  VecScale(dg_help, rho2*PD->beta/L/L/L);
+  VecScale (dg_help, rho2 * PD->beta/L/L/L);
 
-  VecAXPY(dg,1.0, dg_help);
+  VecAXPY (dg, 1.0, dg_help);
 }
 
 
