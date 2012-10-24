@@ -9,8 +9,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
 #include "bgy3dH2O.h"
-#include "bgy3d-fftw.h"
-#include "bgy3d-fft.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 
 #define R_r  9
 #define R_l  7
