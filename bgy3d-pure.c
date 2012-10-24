@@ -818,7 +818,7 @@ void Compute_dg_H2O_inter (State *BHD,
                            Vec coul2_fft, real rho2,
                            Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3], index, ic[3];
+  int x[3], n[3], i[3], ic[3];
   real k_fac, k, sign; // confac;
 
   const ProblemData *PD = BHD->PD;
@@ -864,7 +864,6 @@ void Compute_dg_H2O_inter (State *BHD,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -901,7 +900,6 @@ void Compute_dg_H2O_inter (State *BHD,
               dg_fft_[i[2]][i[1]][i[0]] += h * sign *
                 (coul1_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
-          index++;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
@@ -939,7 +937,6 @@ void Compute_dg_H2O_inter (State *BHD,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -976,7 +973,6 @@ void Compute_dg_H2O_inter (State *BHD,
               dg_fft_[i[2]][i[1]][i[0]] += h * sign *
                 (coul2_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
-          index++;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
@@ -999,7 +995,7 @@ void Compute_dg_H2O_inter (State *BHD,
 void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
                           Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3], index, ic[3];
+  int x[3], n[3], i[3], ic[3];
   real k_fac, k;
 
   const ProblemData *PD = BHD->PD;
@@ -1041,7 +1037,6 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -1085,7 +1080,6 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
               dg_fft_[i[2]][i[1]][i[0]].im +=
                 coul_fft_[i[2]][i[1]][i[0]].im*sin(k)/k;
                 }
-          index++;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
@@ -1106,7 +1100,7 @@ void Compute_dg_H2O_intra(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
 void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                             Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3], index, ic[3], local_size;
+  int x[3], n[3], i[3], ic[3], local_size;
   real k_fac, k;
   PetscScalar *v_vec, *tg_vec;
 
@@ -1144,7 +1138,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* Compute int(F*g*omega) */
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -1177,7 +1170,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
               FOR_DIM
                 fg2_fft_[dim][i[2]][i[1]][i[0]].im *= h * sin(k) / k;
             }
-          index++;
         }
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
@@ -1205,7 +1197,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
       VecGetArray( BHD->v[dim] , &v_vec);
 
 
-      for(index=0; index<local_size; index++)
+      for (int index=0; index < local_size; index++)
         {
           k = tg_vec[index];
           if( k<NORM_REG)
@@ -1247,7 +1239,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -1292,7 +1283,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
               FOR_DIM
                 fg2_fft_[dim][i[2]][i[1]][i[0]].im =  ic[dim] / fac * coul_fft_[i[2]][i[1]][i[0]].re * sin(k) / k;;
             }
-          index++;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
@@ -1314,7 +1304,7 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
      VecGetArray( BHD->v[dim] , &v_vec);
 
 
-      for(index=0; index<local_size; index++)
+      for (int index=0; index < local_size; index++)
         {
 
           k = tg_vec[index];
@@ -1351,7 +1341,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -1385,7 +1374,6 @@ void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
               FOR_DIM
                 dg_fft_[i[2]][i[1]][i[0]].im -= ic[dim] * k_fac * h * fg2_fft_[dim][i[2]][i[1]][i[0]].re;
             }
-          index++;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
