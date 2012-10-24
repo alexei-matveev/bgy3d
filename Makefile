@@ -94,7 +94,7 @@ bgy3d-extra-objs = \
 	bgy3ddiv.o \
 	bgy3d-fourier.o \
 	bgy3d-test.o \
-	bgy3dH2ONewton.o \
+	bgy3d-newton-pure.o \
 	bgy3dH2OSNewton.o \
 	bgy3d-multigrid.o \
 
