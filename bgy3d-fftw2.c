@@ -5,9 +5,7 @@
  * bgy3d_fft_test() for an example use.
  */
 
-// #include <unistd.h>             /* getpid(), remove later */
 #include <assert.h>
-// #include <complex.h>          /* makes setting re and im cumbersome */
 #include <rfftw_mpi.h>
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
