@@ -7,7 +7,7 @@
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"
-#include "bgy3dH2OS.h"          /* for this */
+#include "bgy3d-impure.h"       /* for this */
 #include "bgy3d-pure.h"
 #include "bgy3dH2ONewton.h"
 

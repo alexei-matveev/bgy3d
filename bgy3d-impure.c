@@ -9,8 +9,8 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"
 #include "bgy3d-pure.h"
-#include "bgy3dH2OS.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
+#include "bgy3d-impure.h"
 
 #ifndef L_BOUNDARY_MG
 #include "bgy3d-multigrid.h"    /* InitializeDMMGSolver */
