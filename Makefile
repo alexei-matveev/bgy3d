@@ -74,7 +74,7 @@ LIBS = $(fftw2-libs) -lm ${PETSC_LIB}
 
 libbgy3d.a = \
 	bgy3d.o \
-	bgy3dH2O.o \
+	bgy3d-pure.o \
 	bgy3dH2OS.o \
 	bgy3d-solutes.o \
 	bgy3d-getopt.o \

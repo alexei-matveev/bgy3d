@@ -8,7 +8,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"
 #include "bgy3dH2OS.h"          /* for this */
-#include "bgy3dH2O.h"
+#include "bgy3d-pure.h"
 #include "bgy3dH2ONewton.h"
 
 typedef struct H2Odg

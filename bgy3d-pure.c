@@ -8,8 +8,8 @@
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"
-#include "bgy3dH2O.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
+#include "bgy3d-pure.h"
 
 #define R_r  9
 #define R_l  7

@@ -5,7 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
-#include "bgy3dH2O.h"
+#include "bgy3d-pure.h"
 #include "bgy3dH2OS.h"          /* bgy3d_solve_with_solute */
 #include "bgy3d-getopt.h"       /* bgy3d_save_vec, bgy3d_load_vec */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
