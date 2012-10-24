@@ -241,7 +241,7 @@ static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
 
 
 /* Does y = A^T * x. The inverse FFT. */
-PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
+static PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
 {
   /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
@@ -260,7 +260,7 @@ PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
 }
 
 
-PetscErrorCode mat_destroy_fft (Mat A)
+static PetscErrorCode mat_destroy_fft (Mat A)
 {
   /* Only matrices constructed  by bgy3d_fft_mat_create() are accepted
      here: */
