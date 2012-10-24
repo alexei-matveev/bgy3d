@@ -6,8 +6,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-#include "bgy3d-fftw.h"
-#include "bgy3d-fft.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-molecule.h"
 
 #define rab 1.0
@@ -31,8 +30,8 @@ typedef struct BGY3dDiatomicABStruct
 
   Vec ga_ini, gb_ini, gab_ini;
 
-  /* Parallel FFT */
-  fftw_complex *(fg2_fft[3]), *g_fft, *gfg2_fft;
+  /* Complex Vecs for parallel FFT: */
+  Vec fg2_fft[3], g_fft, gfg2_fft; /* complex */
 
 } *BGY3dDiatomicABData;
 
@@ -165,12 +164,10 @@ static BGY3dDiatomicABData BGY3dDiatomicABData_Pair_malloc(const ProblemData *PD
 
   /* Allocate memory for fft */
   FOR_DIM
-    {
-      BDD->fg2_fft[dim] = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-    }
+    DACreateGlobalVector (BDD->dc, &BDD->fg2_fft[dim]);
 
-  BDD->g_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
-  BDD->gfg2_fft = (fftw_complex*) malloc(n[0]*n[1]*n[2]*sizeof(fftw_complex));
+  DACreateGlobalVector (BDD->dc, &BDD->g_fft);
+  DACreateGlobalVector (BDD->dc, &BDD->gfg2_fft);
 
   return BDD;
 }
@@ -187,14 +184,18 @@ static void BGY3dDiatomicABData_free(BGY3dDiatomicABData BDD)
       VecDestroy(BDD->fb[dim]);
       VecDestroy(BDD->fab[dim]);
       VecDestroy(BDD->v[dim]);
-      free(BDD->fg2_fft[dim]);
     }
-  free(BDD->g_fft);
-  free(BDD->gfg2_fft);
 
   VecDestroy(BDD->ga_ini);
   VecDestroy(BDD->gb_ini);
   VecDestroy(BDD->gab_ini);
+
+  /* Free memory for fft */
+  FOR_DIM
+    VecDestroy (BDD->fg2_fft[dim]);
+
+  VecDestroy (BDD->g_fft);
+  VecDestroy (BDD->gfg2_fft);
 
   DADestroy (BDD->da);
   DADestroy (BDD->dc);
@@ -268,8 +269,7 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 			   Vec dg, Vec dg_help)
 {
   DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft;
+  int x[3], n[3], i[3], N[3], ic[3];
   real fac, k_fac, L, k, rho, h, sign;
 
   const ProblemData *PD = BDD->PD;
@@ -277,12 +277,12 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
   da = BDD->da;
   FOR_DIM
     N[dim] = PD->N[dim];
-  FOR_DIM
-    fg2_fft[dim] = BDD->fg2_fft[dim];
+
+  Vec *fg2_fft = BDD->fg2_fft;  /* [3] */
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BDD->g_fft;
-  dg_fft = BDD->gfg2_fft;
+  Vec g_fft = BDD->g_fft;
+  Vec dg_fft = BDD->gfg2_fft;
   L = PD->interval[1]-PD->interval[0];
   rho = PD->rho;
   fac = L/(2.*M_PI);  /* BDD->f ist nur grad U, nicht F=-grad U  */
@@ -294,8 +294,6 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
   /************************************************/
   /* F1*g1a g1b*/
   /************************************************/
-  //VecCopy(g1a, dg_help);
-  //ShiftVec(da, dg_help, BDD->v[0], N);
 
   /* fft(f*g) */
   FOR_DIM
@@ -303,25 +301,26 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g1a, f1[dim]);
       if(sign1 != 1.0)
 	VecScale(BDD->v[dim], sign1);
-      ComputeFFTfromVec_fftw (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
+      MatMult (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g-1) */
-  //VecCopy(g1b, dg_help);
-  //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g1b, g_fft);
+  MatMult (BDD->fft_mat, g1b, g_fft);
 
-/*   PetscPrintf(PETSC_COMM_WORLD, "1: int g= %e\tint fg= %e\n",  */
-/* 	      g_fft[0].re*BDD->norm_const,  */
-/* 	      fg2_fft[0][0].re*BDD->norm_const); */
-  index=0;
+  struct {PetscScalar re, im;} ***g_fft_, ***fg2_fft_[3], ***dg_fft_;
+
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecGetArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re = 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
 	  FOR_DIM
 	    {
@@ -333,8 +332,8 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-	      dg_fft[index].re = 0;//g_fft[0].re*h;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = 0;//g_fft[0].re*h;
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -344,32 +343,31 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	      sign = cos(M_PI*ic[0])*cos(M_PI*ic[1])*cos(M_PI*ic[2]);
 
 	      FOR_DIM
-		dg_fft[index].re += ic[dim] * k_fac * sign *
-		(fg2_fft[dim][index].re * g_fft[index].im
-		 + fg2_fft[dim][index].im * g_fft[index].re) ;
+		dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
+		(fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
+                 fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re) ;
 
 	      FOR_DIM
-		dg_fft[index].im += ic[dim] * k_fac * sign *
-		(-fg2_fft[dim][index].re * g_fft[index].re
-		 + fg2_fft[dim][index].im * g_fft[index].im);
+		dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
+		(- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
+		 + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
 	    }
-	  //fprintf(stderr,"%e\n",dg_fft[index].re);
-	  index++;
 	}
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecRestoreArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
   VecCopy(dg_help, dg);
 
-
-
   /************************************************/
   /* F2*g2a g2b*/
   /************************************************/
-  //VecCopy(g2a, dg_help);
-  //ShiftVec(da, dg_help, BDD->v[0], N);
 
   /* fft(f*g) */
   FOR_DIM
@@ -377,25 +375,24 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
       VecPointwiseMult(BDD->v[dim], g2a, f2[dim]);
       if(sign2 != 1.0)
 	VecScale(BDD->v[dim], sign2);
-      ComputeFFTfromVec_fftw (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
+      MatMult (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g-1) */
-  //VecCopy(g2b, dg_help);
-  //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g2b, g_fft);
+  MatMult (BDD->fft_mat, g2b, g_fft);
 
-/*   PetscPrintf(PETSC_COMM_WORLD, "2: int g= %e\tint fg= %e\n",  */
-/* 	      g_fft[0].re*BDD->norm_const,  */
-/* 	      fg2_fft[0][0].re*BDD->norm_const); */
-  index=0;
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecGetArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re = 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im = 0;
 
 	  FOR_DIM
 	    {
@@ -407,8 +404,8 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-	      dg_fft[index].re = 0;//g_fft[0].re*h;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = 0;//g_fft[0].re*h;
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -418,36 +415,27 @@ void Compute_dg_Pair_inter(BGY3dDiatomicABData BDD,
 	      sign = cos(M_PI*ic[0])*cos(M_PI*ic[1])*cos(M_PI*ic[2]);
 
 	      FOR_DIM
-		dg_fft[index].re += ic[dim] * k_fac * sign *
-		(fg2_fft[dim][index].re * g_fft[index].im
-		 + fg2_fft[dim][index].im * g_fft[index].re);
+		dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
+		(fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
+                 fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
 
 	      FOR_DIM
-		dg_fft[index].im += ic[dim] * k_fac * sign *
-		(-fg2_fft[dim][index].re * g_fft[index].re
-		 + fg2_fft[dim][index].im * g_fft[index].im);
+		dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
+		(- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
+		 + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
 
 	    }
-	  //fprintf(stderr,"%e\n",dg_fft[index].im);
-	  index++;
 	}
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecRestoreArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, PD->beta/L/L/L);
 
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
   VecAXPY(dg,1.0, dg_help);
-
-
-
-  //ShiftVec(da, dg, BDD->v[0], N);
-  //VecView(dg,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-
 }
 
 
@@ -456,8 +444,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 			   Vec dg, Vec dg_help)
 {
   DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex *(fg2_fft[3]), *g_fft, *dg_fft;
+  int x[3], n[3], i[3], N[3], ic[3];
   real fac, k_fac, L, k, h, beta; // sign;
 
   const ProblemData *PD = BDD->PD;
@@ -465,12 +452,12 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   da = BDD->da;
   FOR_DIM
     N[dim] = PD->N[dim];
-  FOR_DIM
-    fg2_fft[dim] = BDD->fg2_fft[dim];
+
+  Vec *fg2_fft = BDD->fg2_fft;  /* [3] */
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BDD->g_fft;
-  dg_fft = BDD->gfg2_fft;
+  Vec g_fft = BDD->g_fft;
+  Vec dg_fft = BDD->gfg2_fft;
   L = PD->interval[1]-PD->interval[0];
   beta = PD->beta;
   fac = L/(2.*M_PI); /* siehe oben ... */
@@ -482,29 +469,31 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
   /************************************************/
   /* Fa*ga ga*/
   /************************************************/
-  //VecCopy(g1, dg_help);
-  //ShiftVec(da, dg_help, BDD->v[0], N);
 
   /* fft(f*g) */
   FOR_DIM
     {
       VecPointwiseMult(BDD->v[dim], g1, f[dim]);
-      ComputeFFTfromVec_fftw (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
+      MatMult (BDD->fft_mat, BDD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g) */
-  //VecCopy(g2, dg_help);
-  //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g2, g_fft);
+  MatMult (BDD->fft_mat, g2, g_fft);
 
-  index=0;
+  struct {PetscScalar re, im;} ***g_fft_, ***fg2_fft_[3], ***dg_fft_;
+
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecGetArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
 	  FOR_DIM
 	    {
@@ -516,8 +505,8 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-	      dg_fft[index].re = 0;//g_fft[0].re*h;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = 0;//g_fft[0].re*h;
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -525,43 +514,25 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 	      k_fac = beta*fac/k;
 	      k = 2.0*M_PI*sqrt(k)*rab/L;
 
-	      /* phase shift factor for x=x+L/2 */
-	      //sign = cos(M_PI*ic[0])*cos(M_PI*ic[1])*cos(M_PI*ic[2]);
-
-
-
  	      FOR_DIM
-		dg_fft[index].re += ic[dim] * k_fac *
-		(h*fg2_fft[dim][index].im * sin(k)/k);
-
-	      /* - should be correct ??? */
-	      //dg_fft[index].re -= h*g_fft[index].re*sin(k)/k;
-
-
+		dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac *
+		(h * fg2_fft_[dim][i[2]][i[1]][i[0]].im * sin(k)/k);
 
 	      FOR_DIM
-		dg_fft[index].im += ic[dim] * k_fac *
-		(-h*fg2_fft[dim][index].re * sin(k)/k);
-
-
-
-		}
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
+		dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac *
+		(-h * fg2_fft_[dim][i[2]][i[1]][i[0]].re * sin(k)/k);
+            }
 	}
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
+  FOR_DIM
+    DAVecRestoreArray (BDD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, 1./L/L/L);
 
-  //VectorMovetoZero( BDD, dg_help);
-
-  //VecAXPY(dg, 1.0, dg_help);
   VecCopy(dg_help,dg);
-
-  //ShiftVec(da, dg, BDD->v[0], N);
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
 }
 
 
@@ -570,8 +541,7 @@ void Compute_dg_Pair_intra(BGY3dDiatomicABData BDD, Vec f[3], Vec g1, Vec g2,
 static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, Vec dg, Vec dg_help)
 {
   DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3], local_size;
-  fftw_complex *g_fft, *dg_fft;
+  int x[3], n[3], i[3], N[3], ic[3], local_size;
   real L, k, h;
   PetscScalar *g_vec;
 
@@ -583,8 +553,8 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
     N[dim] = PD->N[dim];
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BDD->g_fft;
-  dg_fft = BDD->gfg2_fft;
+  Vec g_fft = BDD->g_fft;
+  Vec dg_fft = BDD->gfg2_fft;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
@@ -595,17 +565,20 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   /* F(g) */
   /************************************************/
 
+  MatMult (BDD->fft_mat, g, g_fft);
 
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g, g_fft);
+  struct {PetscScalar re, im;} ***g_fft_, ***dg_fft_;
 
-  index=0;
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
 	  FOR_DIM
 	    {
@@ -617,8 +590,8 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-	      dg_fft[index].re = g_fft[0].re*h;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = g_fft_[0][0][0].re * h; /* FIXME? */
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -627,13 +600,14 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
 	      k = 2.0*M_PI*sqrt(k)*rab/L;
 
 	      /* + should be correct ??? */
-	      dg_fft[index].re += h*g_fft[index].re*sin(k)/k;
+	      dg_fft_[i[2]][i[1]][i[0]].re += h*g_fft_[i[2]][i[1]][i[0]].re*sin(k)/k;
 
 		}
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
 	}
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
+
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, 1./L/L/L);
 
@@ -641,19 +615,13 @@ static void Compute_dg_Pair_intra_ln(BGY3dDiatomicABData BDD, Vec g, real sign, 
   VecGetArray( dg_help, &g_vec);
   VecGetLocalSize(dg_help, &local_size);
 
-  for(index=0; index<local_size; index++)
-    g_vec[index] = sign*log(g_vec[index]);
-  //PetscPrintf(PETSC_COMM_WORLD, "%e\n", g_vec[0]);
+  for (int ijk = 0; ijk < local_size; ijk++)
+    g_vec[ijk] = sign * log (g_vec[ijk]);
+
   VecRestoreArray(dg_help, &g_vec);
   /******************************/
 
   VecAXPY(dg, 1.0, dg_help);
-  //VecCopy(dg_help,dg);
-
-
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
 }
 
 
@@ -664,8 +632,7 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 					 Vec dg, Vec dg_help)
 {
   DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *g_fft, *dg_fft;
+  int x[3], n[3], i[3], N[3], ic[3];
   real L, k, h;
 
   const ProblemData *PD = BDD->PD;
@@ -676,8 +643,8 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BDD->g_fft;
-  dg_fft = BDD->gfg2_fft;
+  Vec g_fft = BDD->g_fft;
+  Vec dg_fft = BDD->gfg2_fft;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
@@ -687,18 +654,20 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 
 
   /* fft(g/t) */
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g, g_fft);
+  MatMult (BDD->fft_mat, g, g_fft);
 
+  struct {PetscScalar re, im;} ***g_fft_, ***dg_fft_;
 
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
 
-  index=0;
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
 	  FOR_DIM
 	    {
@@ -710,9 +679,8 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-
-	      dg_fft[index].re = h*g_fft[0].re;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = h * g_fft_[0][0][0].re; /* FIXME! */
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -720,30 +688,18 @@ void Compute_dg_Pair_normalization_intra(BGY3dDiatomicABData BDD, Vec g,
 	      /* k_fac = beta*fac/k; */
 	      k = 2.0*M_PI*sqrt(k)*rab/L;
 
-
-
 	      /* + oder - hier ??? */
-	      dg_fft[index].re += h*g_fft[index].re*sin(k)/k;
-
-
-
+	      dg_fft_[i[2]][i[1]][i[0]].re += h*g_fft_[i[2]][i[1]][i[0]].re*sin(k)/k;
 	    }
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
 	}
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
 
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, 1./L/L/L);
 
-
-  //VecAXPY(dg, 1.0, dg_help);
   VecCopy(dg_help,dg);
-
-
-  //VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-
 }
 
 /* Compute normalization condition */
@@ -751,8 +707,7 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 				   Vec dg, Vec dg_help)
 {
   DA da;
-  int x[3], n[3], i[3], index, N[3], ic[3];
-  fftw_complex  *(fg2_fft[3]), *g_fft, *dg_fft;
+  int x[3], n[3], i[3], N[3], ic[3];
   real L, k, h, sign;
 
   const ProblemData *PD = BDD->PD;
@@ -760,12 +715,11 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
   da = BDD->da;
   FOR_DIM
     N[dim] = PD->N[dim];
-  FOR_DIM
-    fg2_fft[dim] = BDD->fg2_fft[dim];
+  Vec fg2_fft = BDD->fg2_fft[0]; /* FIXME? */
 
   h=PD->h[0]*PD->h[1]*PD->h[2];
-  g_fft = BDD->g_fft;
-  dg_fft = BDD->gfg2_fft;
+  Vec g_fft = BDD->g_fft;
+  Vec dg_fft = BDD->gfg2_fft;
   L = PD->interval[1]-PD->interval[0];
   /* fac = L/(2.*M_PI); /\* siehe oben ... *\/ */
 
@@ -775,20 +729,23 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 
 
   /* fft(g) */
-  //VecCopy(g2, dg_help);
-  //VecShift(dg_help, -1.0);
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g1, g_fft);
+  MatMult (BDD->fft_mat, g1, g_fft);
 
-  ComputeFFTfromVec_fftw (BDD->fft_mat, g2, fg2_fft[0]);
+  MatMult (BDD->fft_mat, g2, fg2_fft);
 
-  index=0;
+  struct {PetscScalar re, im;} ***g_fft_, ***fg2_fft_, ***dg_fft_;
+
+  DAVecGetArray (BDD->dc, g_fft, &g_fft_);
+  DAVecGetArray (BDD->dc, dg_fft, &dg_fft_);
+  DAVecGetArray (BDD->dc, fg2_fft, &fg2_fft_);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  dg_fft[index].re= 0;
-	  dg_fft[index].im= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].re= 0;
+	  dg_fft_[i[2]][i[1]][i[0]].im= 0;
 
 	  FOR_DIM
 	    {
@@ -800,8 +757,8 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 
 	  if( ic[0]==0 && ic[1]==0 && ic[2]==0)
 	    {
-	      dg_fft[index].re = h*h*g_fft[0].re*fg2_fft[0][0].re;
-	      dg_fft[index].im = 0;
+	      dg_fft_[i[2]][i[1]][i[0]].re = h * h * g_fft_[0][0][0].re * fg2_fft_[0][0][0].re; /* FIXME! */
+	      dg_fft_[i[2]][i[1]][i[0]].im = 0;
 	    }
 	  else
 	    {
@@ -811,30 +768,25 @@ void Compute_dg_Pair_normalization(BGY3dDiatomicABData BDD, Vec g1, Vec g2,
 	      /* phase shift factor for x=x+L/2 */
 	      sign = cos(M_PI*ic[0])*cos(M_PI*ic[1])*cos(M_PI*ic[2]);
 
-	      dg_fft[index].re += h*h*sign*
-		(g_fft[index].re*fg2_fft[0][index].re -
-		 g_fft[index].im*fg2_fft[0][index].im );
+	      dg_fft_[i[2]][i[1]][i[0]].re += h*h*sign*
+		(g_fft_[i[2]][i[1]][i[0]].re*fg2_fft_[i[2]][i[1]][i[0]].re -
+		 g_fft_[i[2]][i[1]][i[0]].im*fg2_fft_[i[2]][i[1]][i[0]].im );
 
-	      dg_fft[index].im += h*h*sign*
-		(g_fft[index].im*fg2_fft[0][index].re +
-		 g_fft[index].re*fg2_fft[0][index].im );
+	      dg_fft_[i[2]][i[1]][i[0]].im += h*h*sign*
+		(g_fft_[i[2]][i[1]][i[0]].im*fg2_fft_[i[2]][i[1]][i[0]].re +
+		 g_fft_[i[2]][i[1]][i[0]].re*fg2_fft_[i[2]][i[1]][i[0]].im );
 
 	    }
-	  //fprintf(stderr,"%e\n",fg2_fft[0][index].im);
-	  index++;
 	}
-  ComputeVecfromFFT_fftw (BDD->fft_mat, dg_help, dg_fft);
+  DAVecRestoreArray (BDD->dc, g_fft, &g_fft_);
+  DAVecRestoreArray (BDD->dc, dg_fft, &dg_fft_);
+  DAVecRestoreArray (BDD->dc, fg2_fft, &fg2_fft_);
+
+  MatMultTranspose (BDD->fft_mat, dg_fft, dg_help);
 
   VecScale(dg_help, 1./L/L/L/L/L/L);
 
-
-  //VecAXPY(dg, 1.0, dg_help);
   VecCopy(dg_help,dg);
-
-
-  //VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-
 }
 
 
@@ -1123,6 +1075,7 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
         // nothing
       }
 
+      /* FIXME: dgba_norm may be used uninitialized here: */
       if(dga_norm<=norm_tol &&  dgb_norm<=norm_tol && dgab_norm<=norm_tol &&
 	 dgba_norm<=norm_tol)
 	break;
