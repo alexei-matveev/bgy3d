@@ -670,26 +670,18 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
           /* Lennard-Jones */
           gHini_vec[i[2]][i[1]][i[0]] +=
-            // damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsH);
             damp_LJ * beta* Lennard_Jones( r_s, epsilonH, sigmaH);
           gOini_vec[i[2]][i[1]][i[0]] +=
-            // damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsO);
             damp_LJ * beta* Lennard_Jones( r_s, epsilonO, sigmaO);
           gHOini_vec[i[2]][i[1]][i[0]] +=
-            // damp_LJ * beta* Lennard_Jones( r_s, BHD->LJ_paramsHO);
             damp_LJ * beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
 
           /* Coulomb short */
           gHini_vec[i[2]][i[1]][i[0]] +=
-            // damp*beta* Coulomb_short( r_s, BHD->LJ_paramsH);
-            // Following the form in BGY3dH2OData_Pair_malloc() 
-            // to pass member of void pointer
             damp*beta* Coulomb_short( r_s, q2H);
           gOini_vec[i[2]][i[1]][i[0]] +=
-            // damp*beta* Coulomb_short( r_s, BHD->LJ_paramsO);
             damp*beta* Coulomb_short( r_s, q2O);
           gHOini_vec[i[2]][i[1]][i[0]] +=
-            // damp*beta* Coulomb_short( r_s, BHD->LJ_paramsHO);
             damp*beta* Coulomb_short( r_s, q2HO);
 
           /* Coulomb long */
@@ -717,26 +709,18 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
             {
               /* Lennard-Jones */
               fH_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp_LJ * Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsH);
                 damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
               fO_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp_LJ * Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsO);
                 damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
               fHO_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp_LJ * Lennard_Jones_grad( r_s, r[dim], BHD->LJ_paramsHO);
                 damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
 
               /* Coulomb short */
               fH_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsH);
-                // Following the form in BGY3dH2OData_Pair_malloc() 
-                // to pass member of void pointer
                 damp * Coulomb_short_grad( r_s, r[dim], q2H);
               fO_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsO);
                 damp * Coulomb_short_grad( r_s, r[dim], q2O);
               fHO_vec[dim][i[2]][i[1]][i[0]] +=
-                // damp * Coulomb_short_grad( r_s, r[dim], BHD->LJ_paramsHO);
                 damp * Coulomb_short_grad( r_s, r[dim], q2HO);
 
               /* Coulomb long */
@@ -765,13 +749,10 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 
               /* deterministic correction */
               cH_vec[i[2]][i[1]][i[0]] =
-                // exp(-beta* LJ_repulsive( r_s, BHD->LJ_paramsH));
                 exp(-beta* LJ_repulsive( r_s, epsilonH, sigmaH));
               cO_vec[i[2]][i[1]][i[0]] =
-                // exp(-beta* LJ_repulsive( r_s, BHD->LJ_paramsO));
                 exp(-beta* LJ_repulsive( r_s, epsilonO, sigmaO));
               cHO_vec[i[2]][i[1]][i[0]] =
-                // exp(-beta* LJ_repulsive( r_s, BHD->LJ_paramsHO));
                 exp(-beta* LJ_repulsive( r_s, epsilonHO, sigmaHO));
 
 
