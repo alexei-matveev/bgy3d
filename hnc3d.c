@@ -66,12 +66,8 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   HD = (HNC3dData) malloc(sizeof(*HD));
 
-
-  // HD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
-  // ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
-  HD->LJ_params[0] = 1.0;
-  HD->LJ_params[1] = 1.0;
+  HD->LJ_params[0] = 1.0;       /* epsilon */
+  HD->LJ_params[1] = 1.0;       /* sigma */
   epsilon = HD->LJ_params[0];
   sigma = HD->LJ_params[1];
 
@@ -151,12 +147,9 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 		}
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	      pot_vec[i[2]][i[1]][i[0]] +=
-		//exp(-r_s*r_s);
-		// Lennard_Jones( r_s, HD->LJ_params);
 		Lennard_Jones( r_s, epsilon, sigma);
 
 	      hini_vec[i[2]][i[1]][i[0]] *=
-		// exp(-beta* Lennard_Jones( r_s, HD->LJ_params));
 		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 
 	    }
@@ -230,7 +223,6 @@ static void HNC3dData_free(HNC3dData HD)
   DADestroy(HD->da);
   fft_3d_destroy_plan(HD->fft_plan);
 
-  // free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
   free(HD->ch_fft);
@@ -485,12 +477,8 @@ static HNC3dNewtonData HNC3dNewtonData_malloc(ProblemData *PD)
 
   HD = (HNC3dNewtonData) malloc(sizeof(*HD));
 
-
-  // HD->LJ_params = (void* ) malloc(sizeof(real)*2);
-  // ((real*)(HD->LJ_params))[0] = 1.0;   /* espilon */
-  // ((real*)(HD->LJ_params))[1] = 1.0;   /* sigma   */
-  HD->LJ_params[0] = 1.0;
-  HD->LJ_params[1] = 1.0;
+  HD->LJ_params[0] = 1.0;       /* espilon */
+  HD->LJ_params[1] = 1.0;       /* sigma */
   epsilon = HD->LJ_params[0];
   sigma = HD->LJ_params[1];
 
@@ -566,8 +554,6 @@ static HNC3dNewtonData HNC3dNewtonData_malloc(ProblemData *PD)
 
 	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 	      pot_vec[i[2]][i[1]][i[0]].h +=
-		//exp(-r_s*r_s);
-		// Lennard_Jones( r_s, HD->LJ_params);
 		Lennard_Jones( r_s, epsilon, sigma);
 	    }
 
@@ -623,7 +609,6 @@ static void HNC3dNewtonData_free(HNC3dNewtonData HD)
   DADestroy(HD->da1);
   fft_3d_destroy_plan(HD->fft_plan);
 
-  // free(HD->LJ_params);
   free(HD->c_fft);
   free(HD->h_fft);
   free(HD->ch_fft);
