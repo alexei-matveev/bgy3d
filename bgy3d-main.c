@@ -18,7 +18,7 @@
 #ifdef WITH_EXTRA_SOLVERS
 #include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
 #include "bgy3d-newton-pure.h"
-#include "bgy3dH2OSNewton.h"
+#include "bgy3d-newton-impure.h"
 #include "hnc3d.h"
 #include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
 #include "bgy3d-test.h"         /* BGY3dDiv_test */
