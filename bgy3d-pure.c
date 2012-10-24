@@ -10,6 +10,7 @@
 #include "bgy3d-impure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-pure.h"
+#include <complex.h>            /* after fftw.h */
 
 #define R_r  9
 #define R_l  7
@@ -856,7 +857,7 @@ void Compute_dg_H2O_inter (State *BHD,
   /* fft(g) */
   MatMult (BHD->fft_mat, g1b, g_fft);
 
-  struct {PetscScalar re, im;} ***g_fft_, ***dg_fft_, ***coul1_fft_, ***fg2_fft_[3];
+  complex ***g_fft_, ***dg_fft_, ***coul1_fft_, ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul1_fft, &coul1_fft_);
@@ -869,8 +870,7 @@ void Compute_dg_H2O_inter (State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft_[i[2]][i[1]][i[0]].re = 0;
-          dg_fft_[i[2]][i[1]][i[0]].im = 0;
+          dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex zero */
 
           FOR_DIM
             {
@@ -882,8 +882,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft_[i[2]][i[1]][i[0]].re = 0;//coul1_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-              dg_fft_[i[2]][i[1]][i[0]].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]] = 0.0; // coul1_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
             }
           else
             {
@@ -892,25 +891,15 @@ void Compute_dg_H2O_inter (State *BHD,
               /* phase shift factor for x=x+L/2 */
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
+              /* "I" is an imaginary unit here: */
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
-                (fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
-                 fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re) ;
+                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * sign *
+                (-I * fg2_fft_[dim][i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
 
-              FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
-                (- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
-                 + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
-
-
-              /* long range Coulomb part */
-              dg_fft_[i[2]][i[1]][i[0]].re += h * sign *
-                (coul1_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re -
-                 coul1_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
-
-              dg_fft_[i[2]][i[1]][i[0]].im += h * sign *
-                (coul1_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
-                 coul1_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
+              /* Long  range  Coulomb part.  Note  there  is not  "-I"
+                 factor here: */
+              dg_fft_[i[2]][i[1]][i[0]] += h * sign *
+                (coul1_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
           index++;
         }
@@ -924,21 +913,11 @@ void Compute_dg_H2O_inter (State *BHD,
 
   VecScale(dg_help, rho1*PD->beta/L/L/L);
 
-/*   VecScale(dg_help, 1./L/L/L); */
-/*   Compute_dg_H2O_normalization_inter( BHD, g1a, g1b, BHD->v[0], BHD->v[1]); */
-/*   VecPointwiseDivide(dg_help, dg_help, BHD->v[0]); */
-/*   VecScale(dg_help, rho1*PD->beta); */
-
   VecCopy(dg_help, dg);
-
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
 
   /************************************************/
   /* F2*g2a g2b*/
   /************************************************/
-  //VecCopy(g2a, dg_help);
-  //ShiftVec(da, dg_help, BHD->v[0], N);
 
   /* fft(f*g) */
   FOR_DIM
@@ -951,13 +930,9 @@ void Compute_dg_H2O_inter (State *BHD,
     }
 
   /* fft(g-1) */
-  //VecCopy(g2b, dg_help);
-  //VecShift(dg_help, -1.0);
   MatMult (BHD->fft_mat, g2b, g_fft);
-/*   VecView(BHD->v[0],PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
 
-  struct {PetscScalar re, im;} ***coul2_fft_;
+  complex ***coul2_fft_;
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul2_fft, &coul2_fft_);
@@ -970,8 +945,7 @@ void Compute_dg_H2O_inter (State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
-          dg_fft_[i[2]][i[1]][i[0]].re = 0;
-          dg_fft_[i[2]][i[1]][i[0]].im = 0;
+          dg_fft_[i[2]][i[1]][i[0]] = 0; /* complex zero */
 
           FOR_DIM
             {
@@ -983,8 +957,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
           if( ic[0]==0 && ic[1]==0 && ic[2]==0)
             {
-              dg_fft_[i[2]][i[1]][i[0]].re = 0;//coul2_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-              dg_fft_[i[2]][i[1]][i[0]].im = 0;
+              dg_fft_[i[2]][i[1]][i[0]] = 0.0; //coul2_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
             }
           else
             {
@@ -993,25 +966,15 @@ void Compute_dg_H2O_inter (State *BHD,
               /* phase shift factor for x=x+L/2 */
               sign = COSSIGN(ic[0])*COSSIGN(ic[1])*COSSIGN(ic[2]);
 
-
+              /* "I" is an imaginary unit here: */
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]].re += ic[dim] * k_fac * sign *
-                (fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
-                 fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
+                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * sign *
+                (-I * fg2_fft_[dim][i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
 
-              FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]].im += ic[dim] * k_fac * sign *
-                (- fg2_fft_[dim][i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re
-                 + fg2_fft_[dim][i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
-
-              /* long range Coulomb part */
-              dg_fft_[i[2]][i[1]][i[0]].re += h * sign *
-                (coul2_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].re -
-                 coul2_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].im);
-
-              dg_fft_[i[2]][i[1]][i[0]].im += h * sign *
-                (coul2_fft_[i[2]][i[1]][i[0]].re * g_fft_[i[2]][i[1]][i[0]].im +
-                 coul2_fft_[i[2]][i[1]][i[0]].im * g_fft_[i[2]][i[1]][i[0]].re);
+              /* Long range Coulomb part.  Note there is no "I" factor
+                 here: */
+              dg_fft_[i[2]][i[1]][i[0]] += h * sign *
+                (coul2_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
           index++;
         }
@@ -1025,21 +988,7 @@ void Compute_dg_H2O_inter (State *BHD,
 
   VecScale(dg_help, rho2*PD->beta/L/L/L);
 
-/*   VecScale(dg_help, 1./L/L/L); */
-/*   Compute_dg_H2O_normalization_inter( BHD, g2a, g2b, BHD->v[0], BHD->v[1]); */
-/*   VecPointwiseDivide(dg_help, dg_help, BHD->v[0]); */
-/*   VecScale(dg_help, rho2*PD->beta); */
-
-/*   VecView(dg_help,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-  //VecShift(dg_help, PD->beta*rho2*shift2);
-
   VecAXPY(dg,1.0, dg_help);
-
-
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1);  */
-
 }
 
 
