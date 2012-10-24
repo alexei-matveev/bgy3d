@@ -952,7 +952,6 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
   PetscScalar dga_norm, dgb_norm, dgab_norm;
 
   PetscScalar dgba_norm;
-  PetscViewer viewer;
 
   assert(g_ini == PETSC_NULL);
 
@@ -1010,37 +1009,6 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   VecSet(dgba,0.0);
-
-/*   PetscOptionsHasName(PETSC_NULL,"-loadpair",&load_flag); */
-/*   if(load_flag) */
-/*     { */
-/*       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"veca.m", */
-/* 			    FILE_MODE_READ,&viewer); */
-/*       VecLoad(viewer,VECMPI, &dgb); */
-/*       PetscViewerDestroy(viewer); */
-/*       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecb.m", */
-/* 			    FILE_MODE_READ,&viewer); */
-/*       VecLoad(viewer,VECMPI, &dga); */
-/*       PetscViewerDestroy(viewer); */
-/*       PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m", */
-/* 			    FILE_MODE_READ,&viewer); */
-/*       VecLoad(viewer,VECMPI, &dgab); */
-/*       PetscViewerDestroy(viewer); */
-/*     } */
-
-
-/*   VecView(v,PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);   */
-
-
-/*   VecSum(g0a, &dga_norm); */
-/*   VecScale(g0a, 1./(BDD->norm_const*dga_norm)); */
-/*   VecSum(g0b, &dgb_norm); */
-/*   VecScale(g0b, 1./(BDD->norm_const*dgb_norm)); */
-/*   VecSum(g0ab, &dgab_norm); */
-/*   VecScale(g0ab, 1./(BDD->norm_const*dgab_norm)); */
-//  BDD->c_ab = 0.95;//dga_norm/dgb_norm;
-//  BDD->c_aab = 0.98;//dga_norm/dgab_norm;
 
   /* g=g0+exp(-dg) */
   ComputeDiatomicAB_g( ga, g0a, dga);
@@ -1158,87 +1126,12 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
       if(dga_norm<=norm_tol &&  dgb_norm<=norm_tol && dgab_norm<=norm_tol &&
 	 dgba_norm<=norm_tol)
 	break;
-
-/*       VecSum(ga, &dga_norm); */
-/*       VecSum(gb, &dgb_norm); */
-/*       VecSum(gab, &dgab_norm); */
-/*       PetscPrintf(PETSC_COMM_WORLD," %e %e %e ll %e %e\n",  */
-/* 		  dga_norm*h, dgb_norm*h, dgab_norm*h, */
-/* 		  dga_norm/dgb_norm, dgb_norm/dga_norm); */
-
-
-
     }
-/*   VecSet(dg_new,0.0); */
-/*   Compute_dg_Pair_intra(BDD, BDD->fa, ga, gb, dg_new, f); */
-/*   VecCopy(dg_new, gab); */
-/*   VecSet(dg_new,0.0); */
-/*   Compute_dg_Pair_intra(BDD, BDD->fb, gb, ga, dg_new, f); */
-/*   VecCopy(dg_new, gba); */
 
-
-/*   Compute_dg_Pair_inter(BDD, BDD->fa, ga, gba, BDD->fab, gba, gb,  */
-/* 	  			dgab, f); */
-/*   ComputeDiatomicAB_g(BDD, gab, g0ab, dgab); */
-/*   Compute_dg_Pair_inter(BDD, BDD->fb, gb, gab, BDD->fab, gab, ga,  */
-/* 				dgba, f); */
-/*   ComputeDiatomicAB_g(BDD, gba, g0ab, dgba); */
-/*   Compute_dg_Pair_intra(BDD, BDD->fab, gab, gab, dg_new, f); */
-/*   PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecdg.m",&viewer); */
-/*   PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB); */
-/*   VecView(dg_new,viewer); */
-/*   PetscViewerDestroy(viewer); */
-
-  /* g=g0*exp(-dg) */
-/*   ComputeDiatomicAB_g(BDD, ga, g0a, dga); */
-/*   ComputeDiatomicAB_g(BDD, gb, g0b, dgb); */
-/*   ComputeDiatomicAB_g(BDD, gab, g0ab, dgab); */
-  //VecCopy(dg, g);
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-  if (0)                        /* && kflg is pointless */
-    {
-      PetscViewerBinaryOpen(PETSC_COMM_WORLD,"g2_new.bin",
-			    FILE_MODE_WRITE,&viewer);
-      VecCopy(ga,dga);
-      //ShiftVec(BDD->da, dga, BDD->v[0], PD->N);
-      VecView(dga,viewer);
-      PetscViewerDestroy(viewer);
-      PetscPrintf(PETSC_COMM_WORLD,"g2 vector written to file \"g2_new.bin\".\n");
-    }
-  /*************************************/
   /* output */
-  /* g_a */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"veca.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"veca.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(ga,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_b */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecb.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecb.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(gb,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_ab */
-  PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecab.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m",FILE_MODE_WRITE,&viewer);
-  PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  VecView(gab,viewer);
-  PetscViewerDestroy(viewer);
-  /* g_ba */
-  //PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vecba.m",&viewer);
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m",FILE_MODE_WRITE,&viewer);
-  //PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB);
-  //VecView(gba,viewer);
-  //PetscViewerDestroy(viewer);
-  /************************************/
-/*   Compute_dg_Pair_normalization(BDD, ga, gab, dg_new, f); */
-/*   PetscViewerASCIIOpen(PETSC_COMM_WORLD,"vec.m",&viewer); */
-  //PetscViewerBinaryOpen(PETSC_COMM_WORLD,"vecab.m",FILE_MODE_WRITE,&viewer);
-/*   PetscViewerSetFormat(viewer,PETSC_VIEWER_ASCII_MATLAB); */
-/*   VecView(dg_new,viewer); */
-/*   PetscViewerDestroy(viewer); */
-
+  bgy3d_save_vec ("g00.bin", ga);
+  bgy3d_save_vec ("g11.bin", gb);
+  bgy3d_save_vec ("g01.bin", gab);
 
   VecDestroy(ga);
   VecDestroy(gb);
@@ -1259,9 +1152,7 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
 
   // ExtractAxis(BDD, g, 0);
 
-
   BGY3dDiatomicABData_free(BDD);
-
 
   return PETSC_NULL;
 }
