@@ -8,8 +8,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3dH2OS.h"          /* for this */
 #include "bgy3dH2O.h"
-#include "bgy3d-fftw.h"
-#include "bgy3d-fft.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3dH2OSNewton.h"
 
 typedef struct H2OSdg
