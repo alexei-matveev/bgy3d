@@ -1428,7 +1428,7 @@ static void normalization_intra (const State *BHD,
   /* Get local portion of the grid */
   DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  struct {PetscScalar re, im;} ***g_fft_, ***work_;
+  complex ***g_fft_, ***work_;
   DAVecGetArray (BHD->dc, g_fft, &g_fft_);
   DAVecGetArray (BHD->dc, work, &work_);
 
@@ -1446,29 +1446,22 @@ static void normalization_intra (const State *BHD,
             }
 
           /* Get g(k): */
-          real re = g_fft_[i[2]][i[1]][i[0]].re;
-          real im = g_fft_[i[2]][i[1]][i[0]].im;
+          complex gk = g_fft_[i[2]][i[1]][i[0]];
 
           /* Scale by ω(k): */
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            {
-              re *= h3;         /* sinc(0) = 1 */
-              im = 0.0;         /* zero anyway? */
-            }
+            gk *= h3;         /* sinc(0) = 1 */
           else
             {
               const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
               const real k = 2.0 * M_PI * sqrt(k2) * rab / L;
-              const real sinc = sin(k) / k;
 
               /* + hier richtig !! */
-              re *= h3 * sinc;
-              im *= h3 * sinc;
+              gk *= h3 * (sin(k) / k);
             }
 
           /* Set ĝ(k): */
-          work_[i[2]][i[1]][i[0]].re = re;
-          work_[i[2]][i[1]][i[0]].im = im;
+          work_[i[2]][i[1]][i[0]] = gk;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
   DAVecRestoreArray (BHD->dc, work, &work_);
