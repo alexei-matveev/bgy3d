@@ -3,10 +3,6 @@
 fftw_complex *bgy3d_fft_malloc (DA da);
 void bgy3d_fft_free (fftw_complex *ptr);
 
-/* Deprecated. FIXME: implementation is in bgy3d-fftw.c: */
-void ComputeFFTfromVec_fftw (Mat fft_mat, Vec g, fftw_complex *g_fft);
-void ComputeVecfromFFT_fftw (Mat fft_mat, Vec g, fftw_complex *g_fft);
-
 #ifdef WITH_EXTRA_SOLVERS
 /* Deprecated.   Used only  in  the older  solvers.   Relies on  fft3d
    implementation in ./fft: */
