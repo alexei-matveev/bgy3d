@@ -158,25 +158,25 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
      corresponds to the current grid point with indices i[]. */
 
   /* Get local portion of the grid */
-  int x[3], n[3], i[3];
+  int x[3], n[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+  for (int k = x[2]; k < x[2] + n[2]; k++)
+    for (int j = x[1]; j < x[1] + n[1]; j++)
+      for (int i = x[0]; i < x[0] + n[0]; i++)
         {
           MatStencil row;
           /* This  is the  point  on the  diagonal  of the  N^3 x  N^3
              matrix: */
-          row.i = i[0];
-          row.j = i[1];
-          row.k = i[2];
+          row.i = i;
+          row.j = j;
+          row.k = k;
 
           /* Boundary */
-          if (i[0] <= border || i[0] >= N[0] - border ||
-              i[1] <= border || i[1] >= N[1] - border ||
-              i[2] <= border || i[2] >= N[2] - border)
+          if (i <= border || i >= N[0] - border ||
+              j <= border || j >= N[1] - border ||
+              k <= border || k >= N[2] - border)
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
