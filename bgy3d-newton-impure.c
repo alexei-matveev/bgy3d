@@ -9,6 +9,7 @@
 #include "bgy3d-impure.h"       /* for this */
 #include "bgy3d-pure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
+#include "bgy3d-poisson.h"      /* laplace staff */
 #include "bgy3d-newton-impure.h"
 
 typedef struct H2OSdg
