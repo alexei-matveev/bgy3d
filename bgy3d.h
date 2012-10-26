@@ -33,10 +33,53 @@
 #define SQR(a)   ((a)*(a))
 #define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
-/* One Bohr is 0.53 Angstrom.  Bohrs, or rather atomic units, are used
-   in QM codes. This  code uses angstroms, historically.  This literal
-   value is used in PG, an alternative is 0.52917725750691647. */
+/*
+  Distances are  measured in Angstroms  in this code. Site  charges in
+  natural units e. The energies appear to be measured in kcal / mol so
+  that, for example, the room temperature
+
+    T = 298.15 K = 0.0256 eV = 0.592 kcal [/ mol]
+
+  corresponds to
+                           -1
+    β = 1 / T = 1.6878 kcal    [* mol]
+
+  FIXME: the file bgy3d-solvents.h quotes 1.6889 instead.
+
+  The interaction energy of two unit charges separated by 1 A is
+                   -1
+    E = 1 * 1 / 1 A   = 0.529 au = 332 kcal [/ mol]
+
+  The next parameter  appears to have the meaning  of this interaction
+  energy of such two unit charges:
+
+  EPSILON0INV = 1 / 4 π ε₀
+
+  and is used to  covert electrostatic interaction energies to working
+  units.  It  has to be  consistent with other force  field parameters
+  defined in bgy3d-solvents.h, notably with Lennard-Jones parameters σ
+  and  ε  (FIXME:  so  maybe  it  was  not a  good  idea  to  move  it
+  here). These are the original comments:
+
+    You have: e^2/4/pi/epsilon0/angstrom, you want: kcal/avogadro/mol
+
+    => 331.84164
+
+  FIXME: why the value 332.067 I obtain by multiplying 0.52917706 au *
+  27.211658 eV  / au  * 23.0605376  kcal / eV  differs already  in the
+  third digit?
+*/
+#define EPSILON0INV 331.84164 //331.84164
+
+/*
+  One Bohr is 0.529 Angstrom.  Bohrs, or rather atomic units, are used
+  in QM  codes. This code uses angstroms,  historically.  This literal
+  value is used in PG, an alternative is 0.52917725750691647. You will
+  NOT need this constant unless  your data comes from external sources
+  in atomic units.
+*/
 #define BOHR 0.52917706
+
 #define CUTOFF 1.0e+8
 #define SHIFT 0.0
 

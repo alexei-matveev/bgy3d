@@ -26,10 +26,6 @@
 #define r_HH  -1
 #define r_HO  1.1
 
-
-
-#define EPSILON0INV 331.84164 //331.84164
-
 /* smoothing parameter */
 #define G   1.2 //1.2
 
@@ -54,8 +50,6 @@
 
 #define r_HH -1
 #define r_HO  1.257 //1.3
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   1.2 //1.2
@@ -85,11 +79,6 @@
 /* density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3 */
 /* temperature : T= 298,15 K (25 C) => 0.5921 , => beta =1.6889 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 0.4 //2.5 //0.4 //0.400
 #define eH 0.046 //0.046
 #define qH 0.417
@@ -99,8 +88,6 @@
 
 #define r_HH  1.5139
 #define r_HO  0.9572
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   1.2 //1.2
@@ -121,11 +108,6 @@
 /* temperature : T= 298,15 K (25 C) => 0.5921 , => beta =1.6889 */
 /* temperature : T= 360 K (? C) => 0.7149 , => beta =1.3988 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 3.520
 #define eH 0.39500
 #define qH 0.154
@@ -135,8 +117,6 @@
 
 #define r_HH  3.12
 #define r_HO  1.56
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   0.8 //1.2
@@ -157,11 +137,6 @@
 /* density = 1.263 g cm^-3 =  0.76059653 u/A^3 => 0.010007924 / A^3 */
 /* temperature : T= 298,15 K (25 C) => 0.5921 , => beta =1.6889 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 3.520
 #define eH 0.36341
 #define qH 0.0
@@ -171,8 +146,6 @@
 
 #define r_HH  3.14
 #define r_HO  1.57
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   0.8 //1.2
@@ -193,11 +166,6 @@
 /* density = 0.5077 kg/L =  0.3011071 u/A^3 => 0.0068418038 /A^3 */
 /* temperature : T= 200 K  => 0.3971755 , => beta =2.5178 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 3.75
 #define eH 0.194616
 #define qH 0.0
@@ -207,8 +175,6 @@
 
 #define r_HH  2.5831
 #define r_HO  1.54
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   0.8 //1.2
@@ -234,11 +200,6 @@
 /* density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3 */
 /* temperature : T= 298,15 K (25 C) => 0.5921 , => beta =1.6889 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 0.4 //0.400
 #define eH 0.046 //0.046
 #define qH 0.350
@@ -250,8 +211,6 @@
 #define r_OO  1.453
 #define r_HO  0.988
 #define r_HO2
-
-#define EPSILON0INV 331.84164 //331.84164
 
 /* smoothing parameter */
 #define G   1.2 //1.2

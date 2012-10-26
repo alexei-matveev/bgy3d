@@ -4,7 +4,6 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-#include "bgy3d-solvents.h"     /* FIXME: EPSILON0INV only */
 #include "bgy3d-poisson.h"
 
 /*

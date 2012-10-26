@@ -27,11 +27,6 @@ typedef struct H2Odg
 /* density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3 */
 /* temperature : T= 298,15 K (25 C) => 0.5921 , => beta =1.6889 */
 
-/* EPSILON0INV */
-/* You have: e^2/4/pi/epsilon0/angstrom */
-/* You want: kcal/avogadro/mol */
-/* => 331.84164 */
-
 #define sH 0.4 //0.400
 #define eH 0.15 //0.046 //0.046
 #define qH 0.417
@@ -41,9 +36,6 @@ typedef struct H2Odg
 
 #define r_HH  1.5139
 #define r_HO  0.9572
-
-#define EPSILON0INV 331.84164 //331.84164
-
 
 static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 {
