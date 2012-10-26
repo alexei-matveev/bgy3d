@@ -4,64 +4,56 @@
 /*==========================================================*/
 
 #include <assert.h>
-#include <fftw_mpi.h>           /* FIXME: get rid of fftw_complex! */
 
 #ifdef WITH_EXTRA_SOLVERS
+#include <fftw_mpi.h>           /* to get FFT_DATA set */
 #include "fft_3d.h"             /* FFT_DATA */
 #endif
 
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
+#include <complex.h>            /* after fftw.h */
 
 #ifdef WITH_EXTRA_SOLVERS
-static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
+static void unpack (DA da, Vec g, complex *restrict g_fft)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
-  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
+  int i0, j0, k0, ni, nj, nk;
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
-  DAVecGetArray(da, g, &g_);
+  DAVecGetArray (da, g, &g_);
 
   /* loop over local portion of grid */
-  /* Attention: order of indices is not variable */
   int ijk = 0;
   for (int k = k0; k < k0 + nk; k++)
     for (int j = j0; j < j0 + nj; j++)
       for (int i = i0; i < i0 + ni; i++)
-        {
-          g_fft[ijk].re = g_[k][j][i];
-          g_fft[ijk].im = 0;  /* Vec g is real */
-          ijk++;
-        }
-  DAVecRestoreArray(da, g, &g_);
+        g_fft[ijk++] = g_[k][j][i]; /* Vec g is real */
+
+  DAVecRestoreArray (da, g, &g_);
 }
 
-static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
+/* NOTE: this  is subtle,  we are packing  complex vector into  a real
+   array. Imaginary part gets ignored: */
+static void pack (DA da, Vec g, const complex *restrict g_fft)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
-  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
+  int i0, j0, k0, ni, nj, nk;
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
-  DAVecGetArray(da, g, &g_);
+  DAVecGetArray (da, g, &g_);
 
   /* loop over local portion of grid */
-  /* Attention: order of indices is not variable */
   int ijk = 0;
   for (int k = k0; k < k0 + nk; k++)
     for (int j = j0; j < j0 + nj; j++)
       for (int i = i0; i < i0 + ni; i++)
-        {
-          /* FIXME: this is subtle, we are packing complex vector into
-             a real array. Imaginary part gets ignored: */
-          g_[k][j][i] = g_fft[ijk].re;
-          ijk++;
-        }
-  DAVecRestoreArray(da, g, &g_);
+        g_[k][j][i] = g_fft[ijk++]; /* drops imaginary part */
+
+  DAVecRestoreArray (da, g, &g_);
 }
 
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
@@ -76,7 +68,7 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
     g_fft = (FFT_DATA*) calloc(n[0] * n[1] * n[2], sizeof(*g_fft));
 
   /* Real Vec into complex array: */
-  unpack (da, g, g_fft);
+  unpack (da, g, (complex*) g_fft);
 
   /* forward fft */
   fft_3d(g_fft, g_fft, 1, fft_plan);
@@ -95,7 +87,7 @@ void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
 
   /* Pack a  complex vector with (hopefully)  vanishing imaginary part
      into a real Vec: */
-  pack (da, g, g_fft);
+  pack (da, g, (complex*) g_fft);
 }
 #endif
 
