@@ -1061,8 +1061,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
              laplacian equation  and substrate from g0.   State BHD is
              not modified  by these calls. Note that  t_vec appears to
              be intent(out) in these calls, the value is ignored. */
-      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.x_lapl[0], zpad, NULL);
-      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.x_lapl[1], zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.x_lapl[0], zpad);
+      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.x_lapl[1], zpad);
 
       /* XXX: then correct g0 with boundary condition again. State BHD
               is not modified by these calls: */
@@ -1178,7 +1178,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               VecAXPY(dg_acc, solvent[i].charge, uc);
 
               /* Vec t_vec is intent(out) here: */
-              ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad, NULL);
+              ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad);
               Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
 
               /*
@@ -1499,8 +1499,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < 2; i++)
         VecScale (BHD.g_ini[i], BHD.PD->beta);
 
-      ImposeLaplaceBoundary(&BHD, g0H, tH, BHD.x_lapl[0], zpad, NULL);
-      ImposeLaplaceBoundary(&BHD, g0O, tH, BHD.x_lapl[1], zpad, NULL);
+      ImposeLaplaceBoundary (&BHD, g0H, tH, BHD.x_lapl[0], zpad);
+      ImposeLaplaceBoundary (&BHD, g0O, tH, BHD.x_lapl[1], zpad);
       Zeropad_Function(&BHD, g0O, zpad, 0.0);
       Zeropad_Function(&BHD, g0H, zpad, 0.0);
       /* g=g0*exp(-dg) */
@@ -1550,14 +1550,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
 
-          {
-            int iteri;
-            double start = MPI_Wtime();
-            ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[0], zpad, &iteri);
-            double stop = MPI_Wtime();
-
-            PetscPrintf (PETSC_COMM_WORLD,"%e %d ", stop - start, iteri);
-          }
+          ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[0], zpad);
 
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
 
@@ -1588,14 +1581,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
 
-          {
-            int iteri;
-            double start = MPI_Wtime();
-            ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[1], zpad, &iteri);
-            double stop = MPI_Wtime();
-
-            PetscPrintf (PETSC_COMM_WORLD,"%e %d ", stop - start, iteri);
-          }
+          ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[1], zpad);
 
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
 

@@ -337,19 +337,23 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
 }
 
 
-void ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+void ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad)
 {
   assert (zpad == BHD->PD->zpad);
 
   /* Get boundary of g */
   CopyBoundary (BHD, g, b);
-  //VecSet(x, 0.0);
 
   /* Solve Laplace */
   KSPSolve (BHD->ksp, b, x);
 
-  if (iter != NULL)
-    KSPGetIterationNumber (BHD->ksp, iter);
+  /*
+    If you think you need to  know how many iteration were required to
+    solve the equation do this:
+
+    int iter;
+    KSPGetIterationNumber (BHD->ksp, &iter);
+  */
 
   /* subtract solution from g */
   VecAXPY (g, -1.0, x);

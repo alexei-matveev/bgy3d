@@ -452,7 +452,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gHO_end:
-  ImposeLaplaceBoundary(BHD, dgHO,BHD->v[0], BHD->v[1], zpad, NULL);
+  ImposeLaplaceBoundary (BHD, dgHO,BHD->v[0], BHD->v[1], zpad);
   Zeropad_Function(BHD, dgHO, zpad, 0.0);
   VecAYPX(dgHO, -1.0, help);
   /***********************************************************/
@@ -507,7 +507,7 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gH_end:
-  ImposeLaplaceBoundary(BHD, dgH,BHD->v[0], BHD->v[1], zpad, NULL);
+  ImposeLaplaceBoundary (BHD, dgH,BHD->v[0], BHD->v[1], zpad);
   Zeropad_Function(BHD, dgH, zpad, 0.0);
   VecAYPX(dgH, -1.0, help);
   /***********************************************************/
@@ -546,24 +546,11 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gO_end:
-  ImposeLaplaceBoundary(BHD, dgO,BHD->v[0], BHD->v[1], zpad, NULL);
+  ImposeLaplaceBoundary (BHD, dgO,BHD->v[0], BHD->v[1], zpad);
   Zeropad_Function(BHD, dgO, zpad, 0.0);
   VecAYPX(dgO, -1.0, help);
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, " done.\n");
-
-
-/*   Smooth_Function(BHD, dgHO, SL, SR, 0.0); */
-/*   Smooth_Function(BHD, dgH, SL, SR, 0.0); */
-/*   Smooth_Function(BHD, dgO, SL, SR, 0.0); */
-
-
-/*   ImposeLaplaceBoundary(BHD, dgH, BHD->v[0], BHD->v[1], zpad); */
-/*   ImposeLaplaceBoundary(BHD, dgO, BHD->v[0], BHD->v[1], zpad); */
-/*   ImposeLaplaceBoundary(BHD, dgHO,BHD->v[0], BHD->v[1], zpad); */
-/*   Zeropad_Function(BHD, dgHO, zpad, 0.0); */
-/*   Zeropad_Function(BHD, dgO, zpad, 0.0); */
-/*   Zeropad_Function(BHD, dgH, zpad, 0.0); */
 
   /* Get arrays from PETSC Vectors */
   DAVecGetArray(BHD->da, dgH , &dgH_vec);
@@ -778,9 +765,9 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
 /*       Zeropad_Function(BHD, BHD->gHO_ini, zpad, 0.0); */
 /*       Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0); */
 /*       Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0); */
-      ImposeLaplaceBoundary(BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad, NULL);
-      ImposeLaplaceBoundary(BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad, NULL);
-      ImposeLaplaceBoundary(BHD, BHD->gHO_ini,BHD->v[0], BHD->v[1], zpad, NULL);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad);
+      ImposeLaplaceBoundary (BHD, BHD->gHO_ini,BHD->v[0], BHD->v[1], zpad);
       Zeropad_Function(BHD, BHD->gHO_ini, zpad, 0.0);
       Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
       Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
