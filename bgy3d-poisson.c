@@ -310,7 +310,7 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
 
   VecSet (gto, 0.0);
 
-  const int border = 1 + (int) ceil ((L - 2. * zpad) / h[0] / 2.);
+  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   {
     /* Get local portion of the grid */
