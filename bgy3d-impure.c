@@ -101,8 +101,6 @@ static State initialize_state (const ProblemData *PD)
 
 
 #ifdef L_BOUNDARY
-   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &BHD.M);
   DACreateGlobalVector(da, &BHD.x_lapl[0]);
   DACreateGlobalVector(da, &BHD.x_lapl[1]);
   VecSet(BHD.x_lapl[0], 0.0);
@@ -222,8 +220,9 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
   assert (BHD->pre == PETSC_NULL); /* used for newton solver */
+
 #ifdef L_BOUNDARY
-  MatDestroy(BHD->M);
+  MatDestroy (BHD->M);
   KSPDestroy(BHD->ksp);
   VecDestroy(BHD->x_lapl[1]);
   VecDestroy(BHD->x_lapl[0]);
@@ -860,7 +859,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(&BHD, zpad);
+  InitializeLaplaceMatrix (BHD.da, BHD.PD, &BHD.M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD.M, &BHD.ksp);
@@ -1413,7 +1412,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(&BHD, zpad);
+  InitializeLaplaceMatrix (BHD.da, BHD.PD, &BHD.M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD.M, &BHD.ksp);

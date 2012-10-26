@@ -126,21 +126,24 @@ static int mod (int a, int b)
 }
 
 
-/* Initialize M-Matrix with appropriate stencil. FIXME: this should be
-   probably implemented using matrix free facilities of Petsc. */
-void InitializeLaplaceMatrix (const State *BHD, real zpad)
+/*
+  Create    and   initialize    Laplace   matrix    with   appropriate
+  stencil.  FIXME: this  should be  probably implemented  using matrix
+  free facilities of Petsc.
+*/
+void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
 {
   const PetscScalar one = 1.0;
+  const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
+  const real zpad = PD->zpad;
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
-  const DA da = BHD->da;
-  const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
+  /* Create Matrix with appropriate non-zero structure */
+  DAGetMatrix (da, MATMPIAIJ, M);
 
-  Mat M = BHD->M;
-  MatZeroEntries(M);
+  MatZeroEntries (*M);
 
   const real size = PD->interval[1] - PD->interval[0];
   const int border = 1 + (int) ceil ((size - 2.0 * zpad) / h[0] / 2.0);
@@ -177,7 +180,7 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
-              MatSetValuesStencil (M, 1, &row, 1, &row, &one, ADD_VALUES);
+              MatSetValuesStencil (*M, 1, &row, 1, &row, &one, ADD_VALUES);
             }
           else
             {
@@ -252,13 +255,13 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
                   const real h2 = SQR (h[dim]);
                   const PetscScalar v[3] = {1.0 / h2, -2.0 / h2, 1.0 / h2};
 
-                  MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
+                  MatSetValuesStencil (*M, 1, &row, 3, col, v, ADD_VALUES);
                 }
             }
         }
 
-  MatAssemblyBegin (M, MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd (M, MAT_FINAL_ASSEMBLY);
+  MatAssemblyBegin (*M, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd (*M, MAT_FINAL_ASSEMBLY);
 
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }

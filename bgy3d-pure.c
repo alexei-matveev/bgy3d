@@ -116,8 +116,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
     }
 
 #ifdef L_BOUNDARY
-  /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &BHD->M);
   DACreateGlobalVector(da, &BHD->x_lapl[0]);
   DACreateGlobalVector(da, &BHD->x_lapl[1]);
   DACreateGlobalVector(da, &BHD->xHO);
@@ -183,7 +181,7 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy (BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
-  MatDestroy(BHD->M);
+  MatDestroy (BHD->M);
   KSPDestroy(BHD->ksp);
   VecDestroy(BHD->x_lapl[0]);
   VecDestroy(BHD->xHO);
@@ -1652,7 +1650,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD->M, &BHD->ksp);
@@ -2248,7 +2246,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD->M, &BHD->ksp);

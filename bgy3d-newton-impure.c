@@ -92,11 +92,6 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
   const DA da = BHD->da;
 
-#ifdef L_BOUNDARY
-   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix( da, MATMPIAIJ, &(BHD->M));
-#endif
-
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Create  Petsc  Distributed  Array   with  3  degrees  of  freedom
@@ -859,7 +854,7 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD->M, &BHD->ksp);
@@ -972,7 +967,7 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix(BHD, zpad);
+  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
 
   /* Create KSP environment */
   InitializeKSPSolver (BHD->M, &BHD->ksp);

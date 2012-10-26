@@ -3,7 +3,7 @@
 void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q);
 
 #ifdef L_BOUNDARY
-void InitializeLaplaceMatrix (const State *BHD, real zpad);
+void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M);
 void InitializeKSPSolver (Mat M, KSP *ksp);
 real ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter);
 #endif
