@@ -337,13 +337,9 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
 }
 
 
-double ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+void ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
   assert (zpad == BHD->PD->zpad);
-
-  /* computation time measurement start point */
-  MPI_Barrier (PETSC_COMM_WORLD);
-  const double mpi_start = MPI_Wtime();
 
   /* Get boundary of g */
   CopyBoundary (BHD, g, b);
@@ -356,13 +352,7 @@ double ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, 
     KSPGetIterationNumber (BHD->ksp, iter);
 
   /* subtract solution from g */
-  VecAXPY(g, -1.0, x);
-
-  /* computation time measurement stop point */
-  MPI_Barrier( PETSC_COMM_WORLD);
-  const double mpi_stop = MPI_Wtime();
-
-  return mpi_stop - mpi_start;
+  VecAXPY (g, -1.0, x);
 }
 #endif
 

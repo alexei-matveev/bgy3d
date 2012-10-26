@@ -1373,8 +1373,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   real dgH_old, dgO_old;
   int mycount=0, upwards, namecount=0;
   char nameH[20], nameO[20];
-  real ti;
-  int iteri;
 
   Vec dg_histO, dg_histH;
 
@@ -1552,10 +1550,17 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
 
-          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[0], zpad, &iteri);
+          {
+            int iteri;
+            double start = MPI_Wtime();
+            ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[0], zpad, &iteri);
+            double stop = MPI_Wtime();
+
+            PetscPrintf (PETSC_COMM_WORLD,"%e %d ", stop - start, iteri);
+          }
+
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
 
-          PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
           VecCopy(dg_new, dg_newH);
 
@@ -1583,10 +1588,16 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
 
-          ti=ImposeLaplaceBoundary(&BHD, dg_new, tH, BHD.x_lapl[1], zpad, &iteri);
+          {
+            int iteri;
+            double start = MPI_Wtime();
+            ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[1], zpad, &iteri);
+            double stop = MPI_Wtime();
+
+            PetscPrintf (PETSC_COMM_WORLD,"%e %d ", stop - start, iteri);
+          }
+
           Zeropad_Function(&BHD, dg_new, zpad, 0.0);
-          //Smooth_Function(&BHD, dg_new, zpad-1, zpad, 0.0);
-          PetscPrintf(PETSC_COMM_WORLD,"%e %d ", ti, iteri);
 
           VecCopy(dg_new, dg_newO);
 
