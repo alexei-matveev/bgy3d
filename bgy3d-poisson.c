@@ -131,7 +131,7 @@ static int mod (int a, int b)
   stencil.  FIXME: this  should be  probably implemented  using matrix
   free facilities of Petsc.
 */
-void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
+static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
 {
   const PetscScalar one = 1.0;
   const int *N = PD->N;         /* N[3] */
@@ -267,7 +267,7 @@ void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
 }
 
 
-void InitializeKSPSolver (Mat M, KSP *ksp)
+static void InitializeKSPSolver (Mat M, KSP *ksp)
 {
   PC pc;
 
@@ -287,6 +287,15 @@ void InitializeKSPSolver (Mat M, KSP *ksp)
 
   /* runtime options will override default parameters */
   //KSPSetFromOptions(BHD->ksp);
+}
+
+
+/* Assemble Laplacian matrix and create KSP environment: */
+void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
+{
+  InitializeLaplaceMatrix (da, PD, M);
+
+  InitializeKSPSolver (*M, ksp);
 }
 
 

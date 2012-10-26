@@ -858,11 +858,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   const real beta = PD->beta;
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix (BHD.da, BHD.PD, &BHD.M);
-
-  /* Create KSP environment */
-  InitializeKSPSolver (BHD.M, &BHD.ksp);
+  /* Assemble Laplacian matrix and create KSP environment: */
+  bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
 #endif
 #ifdef L_BOUNDARY_MG
   InitializeDMMGSolver(&BHD);
@@ -1411,11 +1408,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   const real zpad = PD->zpad;
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix (BHD.da, BHD.PD, &BHD.M);
-
-  /* Create KSP environment */
-  InitializeKSPSolver (BHD.M, &BHD.ksp);
+  /* Assemble Laplacian matrix and create KSP environment: */
+  bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
 #endif
 #ifdef L_BOUNDARY_MG
   /* Create KSP environment */

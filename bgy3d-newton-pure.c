@@ -719,11 +719,8 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da_newton, &v2);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
-
-  /* Create KSP environment */
-  InitializeKSPSolver (BHD->M, &BHD->ksp);
+  /* Assemble Laplacian matrix and create KSP environment: */
+  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
 #endif
 
   /* Create SNES environment */

@@ -1649,11 +1649,8 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &tOH);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
-
-  /* Create KSP environment */
-  InitializeKSPSolver (BHD->M, &BHD->ksp);
+  /* Assemble Laplacian matrix and create KSP environment: */
+  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
 #endif
 
   g0H=BHD->g_ini[0];
@@ -2245,11 +2242,8 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &tOH);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix */
-  InitializeLaplaceMatrix (BHD->da, BHD->PD, &BHD->M);
-
-  /* Create KSP environment */
-  InitializeKSPSolver (BHD->M, &BHD->ksp);
+  /* Assemble Laplacian matrix and create KSP environment: */
+  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
 #endif
 
   g0H=BHD->g_ini[0];
