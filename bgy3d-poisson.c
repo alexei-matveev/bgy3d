@@ -357,6 +357,8 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
 
 double ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
+  assert (zpad == BHD->PD->zpad);
+
   /* computation time measurement start point */
   MPI_Barrier (PETSC_COMM_WORLD);
   const double mpi_start = MPI_Wtime();
