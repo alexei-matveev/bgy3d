@@ -136,6 +136,7 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
   const PetscScalar one = 1.0;
   const int *N = PD->N;         /* N[3] */
   const real *h = PD->h;        /* h[3] */
+  const real L = PD->interval[1] - PD->interval[0];
   const real zpad = PD->zpad;
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
@@ -145,8 +146,7 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
 
   MatZeroEntries (*M);
 
-  const real size = PD->interval[1] - PD->interval[0];
-  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / h[0] / 2.0);
+  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   /* This code constructs (a compact  representation of) the N^3 x N^3
      matrix  M.  An identity  or another  diagonal matrix  will always

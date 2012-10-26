@@ -421,9 +421,9 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
+  const real L = PD->interval[1] - PD->interval[0];
 
-  const real size = PD->interval[1] - PD->interval[0];
-  const int border = 1 + (int) ceil ((size - 2.0 * zpad) / PD->h[0] / 2.0);
+  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / PD->h[0] / 2.0);
 
   /* Holds for all regression tests! */
   /* assert (border == 1); */
