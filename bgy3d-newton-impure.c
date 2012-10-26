@@ -860,8 +860,9 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(BHD, zpad);
+
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver (BHD->M, &BHD->ksp);
 #endif
 
   /* Create SNES environment */
@@ -972,8 +973,9 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(BHD, zpad);
+
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver (BHD->M, &BHD->ksp);
 #endif
 
   /* Create SNES environment */

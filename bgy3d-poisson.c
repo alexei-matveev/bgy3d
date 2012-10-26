@@ -264,28 +264,26 @@ void InitializeLaplaceMatrix (const State *BHD, real zpad)
 }
 
 
-void InitializeKSPSolver(State *BHD)
+void InitializeKSPSolver (Mat M, KSP *ksp)
 {
   PC pc;
 
-
-
   /* Create ksp environment */
-  KSPCreate( PETSC_COMM_WORLD, &BHD->ksp);
-  KSPGetPC(BHD->ksp, &pc);
-  KSPSetTolerances(BHD->ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
+  KSPCreate (PETSC_COMM_WORLD, ksp);
+  KSPGetPC (*ksp, &pc);
+  KSPSetTolerances (*ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
 
   /* Set Matrix */
-  //KSPSetOperators( BHD->ksp, BHD->M, BHD->M, SAME_NONZERO_PATTERN);
-  KSPSetOperators( BHD->ksp, BHD->M, BHD->M, SAME_PRECONDITIONER);
-  /* Set preconditioner */
-  PCSetType( pc, PCBJACOBI);
+  //KSPSetOperators (*ksp, M, M, SAME_NONZERO_PATTERN);
+  KSPSetOperators (*ksp, M, M, SAME_PRECONDITIONER);
 
-  KSPSetInitialGuessNonzero(BHD->ksp, PETSC_TRUE);
+  /* Set preconditioner */
+  PCSetType (pc, PCBJACOBI);
+
+  KSPSetInitialGuessNonzero (*ksp, PETSC_TRUE);
 
   /* runtime options will override default parameters */
   //KSPSetFromOptions(BHD->ksp);
-
 }
 
 

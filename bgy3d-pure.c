@@ -1653,8 +1653,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(BHD, zpad);
+
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver (BHD->M, &BHD->ksp);
 #endif
 
   g0H=BHD->g_ini[0];
@@ -2248,8 +2249,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix */
   InitializeLaplaceMatrix(BHD, zpad);
+
   /* Create KSP environment */
-  InitializeKSPSolver(BHD);
+  InitializeKSPSolver (BHD->M, &BHD->ksp);
 #endif
 
   g0H=BHD->g_ini[0];
