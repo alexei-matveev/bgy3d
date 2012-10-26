@@ -9,11 +9,7 @@
 #include <fftw_mpi.h>
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
-
-#ifndef c_re
-#define c_re(c) ((c)[0])
-#define c_im(c) ((c)[1])
-#endif
+#include <complex.h>            /* after fftw.h */
 
 typedef struct {
   /* Array  descriptors for real  and complex  vectors that  share the
@@ -43,21 +39,18 @@ static void unpack_real (DA da, Vec g, fftw_complex *restrict doubl)
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
-  fftw_complex (*const view)[nk][nj][ni] = (fftw_complex (*)[nk][nj][ni]) doubl;
+  complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
 
   /* loop over local portion of grid */
   {
     PetscScalar ***g_;
     DAVecGetArray (da, g, &g_);
 
-    /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
-          {
-            c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i];
-            c_im ((*view)[k][j][i]) = 0.0;
-          }
+          (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i]; /* im <- 0 */
+
     DAVecRestoreArray (da, g, &g_);
   }
 }
@@ -72,7 +65,7 @@ static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
-  fftw_complex (*const view)[nk][nj][ni] = (fftw_complex (*)[nk][nj][ni]) doubl;
+  complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
 
   /* loop over local portion of grid */
   {
@@ -82,7 +75,7 @@ static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
-            g_[k0 + k][j0 + j][i0 + i] = c_re ((*view)[k][j][i]);
+          g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i]; /* drops im */
 
     DAVecRestoreArray (da, g, &g_);
   }
@@ -98,20 +91,18 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
-  fftw_complex (*const view)[nk][nj][ni] = (fftw_complex (*)[nk][nj][ni]) cmplx;
+  complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_;
+    complex ***g_;
     DAVecGetArray (da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
-          {
-            g_[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
-            g_[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
-          }
+          g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
+
     DAVecRestoreArray (da, g, &g_);
   }
 }
@@ -126,20 +117,18 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
-  fftw_complex (*const view)[nk][nj][ni] = (fftw_complex (*)[nk][nj][ni]) cmplx;
+  complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_;
+    complex ***g_;
     DAVecGetArray (da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
-          {
-            c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].re;
-            c_im ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].im;
-          }
+          (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
+
     DAVecRestoreArray (da, g, &g_);
   }
 }
