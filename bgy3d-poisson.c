@@ -405,12 +405,10 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
     for (int k = x[2]; k < x[2] + n[2]; k++)
       for (int j = x[1]; j < x[1] + n[1]; j++)
         for (int i = x[0]; i < x[0] + n[0]; i++)
-          {
-            if (i <= border || i >= N[0] - border ||
-                j <= border || j >= N[1] - border ||
-                k <= border || k >= N[2] - border)
-              g_[k][j][i] = shift;
-          }
+          if (i <= border || i >= N[0] - border ||
+              j <= border || j >= N[1] - border ||
+              k <= border || k >= N[2] - border)
+            g_[k][j][i] = shift;
     DAVecRestoreArray (BHD->da, g, &g_);
   }
 }
