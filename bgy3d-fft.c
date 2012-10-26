@@ -4,10 +4,14 @@
 /*==========================================================*/
 
 #include <assert.h>
-#include <fftw_mpi.h>
+#include <fftw_mpi.h>           /* FIXME: get rid of fftw_complex! */
+
+#ifdef WITH_EXTRA_SOLVERS
 #include "fft_3d.h"             /* FFT_DATA */
+#endif
+
 #include "petscda.h"            /* DA, Vec */
-#include "bgy3d-fftw.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
 
 #ifdef WITH_EXTRA_SOLVERS
@@ -59,9 +63,7 @@ static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
         }
   DAVecRestoreArray(da, g, &g_vec);
 }
-#endif
 
-#ifdef WITH_EXTRA_SOLVERS
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
 			    FFT_DATA *g_fft)
 {
