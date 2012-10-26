@@ -298,8 +298,9 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
   InitializeKSPSolver (*M, ksp);
 }
 
-
-static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
+/* Copies the values of Vec g at a boundary to Vec b.  The rest of Vec
+   b is zeroed. A linear, but not invertible operaton. */
+static void CopyBoundary (const State *BHD, Vec g, Vec b)
 {
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
@@ -308,7 +309,7 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
   const real L = PD->interval[1] - PD->interval[0];
   const real zpad = PD->zpad;
 
-  VecSet (gto, 0.0);
+  VecSet (b, 0.0);
 
   const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
@@ -317,9 +318,9 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
     int x[3], n[3];
     DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    PetscScalar ***gfrom_, ***gto_;
-    DAVecGetArray (da, gfrom, &gfrom_);
-    DAVecGetArray (da, gto, &gto_);
+    PetscScalar ***g_, ***b_;
+    DAVecGetArray (da, g, &g_);
+    DAVecGetArray (da, b, &b_);
 
     /* loop over local portion of grid */
     for (int k = x[2]; k < x[2] + n[2]; k++)
@@ -328,10 +329,10 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
           if (i <= border || i >= N[0] - border ||
               j <= border || j >= N[1] - border ||
               k <= border || k >= N[2] - border)
-            gto_[k][j][i] = gfrom_[k][j][i];
+            b_[k][j][i] = g_[k][j][i];
 
-    DAVecRestoreArray (da, gfrom, &gfrom_);
-    DAVecRestoreArray (da, gto, &gto_);
+    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (da, b, &b_);
   }
 }
 
