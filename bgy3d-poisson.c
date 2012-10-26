@@ -310,7 +310,7 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
 
   VecSet (gto, 0.0);
 
-  const int border = (int) ceil ((L - 2. * zpad) / h[0] / 2.);
+  const int border = 1 + (int) ceil ((L - 2. * zpad) / h[0] / 2.);
 
   {
     /* Get local portion of the grid */
@@ -325,9 +325,9 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
         for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-          if (i[0] <= border + 1 || i[0] >= N[0] -1 - border ||
-              i[1] <= border + 1 || i[1] >= N[1] -1 - border ||
-              i[2] <= border + 1 || i[2] >= N[2] -1 - border)
+          if (i[0] <= border || i[0] >= N[0] - border ||
+              i[1] <= border || i[1] >= N[1] - border ||
+              i[2] <= border || i[2] >= N[2] - border)
             gto_[i[2]][i[1]][i[0]] = gfrom_[i[2]][i[1]][i[0]];
 
     DAVecRestoreArray (da, gfrom, &gfrom_);
