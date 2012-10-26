@@ -376,17 +376,18 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
   const real L = PD->interval[1] - PD->interval[0];
   assert (zpad == PD->zpad);
 
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / PD->h[0] / 2.0);
+  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   /* Holds for all regression tests! */
   assert (border == 1);
 
   /* Loop over local portion of grid: */
   {
-    int x[3], n[3], i[3];
+    int x[3], n[3];
     PetscScalar ***g_vec;
 
     /* Get local portion of the grid */
@@ -397,18 +398,18 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
     /*
       The condition in the body of the loop is the opposite of:
 
-      border < i[0] < N[0] - border
-      border < i[1] < N[1] - border
-      border < i[2] < N[2] - border
+      border < i < N[0] - border
+      border < j < N[1] - border
+      border < k < N[2] - border
     */
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+    for (int k = x[2]; k < x[2] + n[2]; k++)
+      for (int j = x[1]; j < x[1] + n[1]; j++)
+        for (int i = x[0]; i < x[0] + n[0]; i++)
           {
-            if (i[0] <= border || i[0] >= N[0] - border ||
-                i[1] <= border || i[1] >= N[1] - border ||
-                i[2] <= border || i[2] >= N[2] - border)
-              g_vec[i[2]][i[1]][i[0]] = shift;
+            if (i <= border || i >= N[0] - border ||
+                j <= border || j >= N[1] - border ||
+                k <= border || k >= N[2] - border)
+              g_vec[k][j][i] = shift;
           }
     DAVecRestoreArray (BHD->da, g, &g_vec);
   }
