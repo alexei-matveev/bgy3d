@@ -412,51 +412,6 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
   DAVecRestoreArray(da, g, &g_vec);
 }
 
-/* This function appears to set  everything in the 3d-array g[:, :, :]
-   outside of the central section g[i, j, k] with b < i < N - b, (same
-   for  j, and  k) to  the value  "shift" (typically  0.0,  less often
-   1.0). With the value of zpad equal to the (half) the box size L the
-   value of the local variable "border" is 1. */
-void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
-{
-  const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / PD->h[0] / 2.0);
-
-  /* Holds for all regression tests! */
-  /* assert (border == 1); */
-
-  /* Loop over local portion of grid: */
-  {
-    int x[3], n[3], i[3];
-    PetscScalar ***g_vec;
-
-    /* Get local portion of the grid */
-    DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-    DAVecGetArray (BHD->da, g, &g_vec);
-
-    /*
-      The condition in the body of the loop is the opposite of:
-
-      border < i[0] < N[0] - border
-      border < i[1] < N[1] - border
-      border < i[2] < N[2] - border
-    */
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-          {
-            if (i[0] <= border || i[0] >= N[0] - border ||
-                i[1] <= border || i[1] >= N[1] - border ||
-                i[2] <= border || i[2] >= N[2] - border)
-              g_vec[i[2]][i[1]][i[0]] = shift;
-          }
-    DAVecRestoreArray (BHD->da, g, &g_vec);
-  }
-}
 
 /*
   Long range  pair potential Vec uc  is intent(out) here,  same as its

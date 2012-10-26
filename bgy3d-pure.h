@@ -8,8 +8,6 @@ real Coulomb_long_grad (real r, real rx, real q2);
 real Coulomb (real r, real q2);
 real Coulomb_grad (real r, real rx, real q2);
 
-void Zeropad_Function (const State *BHD, Vec g, real ZP, real shift);
-
 void ComputeH2O_g (Vec g, Vec g0, Vec dg);
 
 void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);

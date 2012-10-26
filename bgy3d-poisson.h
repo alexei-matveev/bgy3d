@@ -1,5 +1,7 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
 
+void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift);
+
 void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q);
 
 #ifdef L_BOUNDARY
