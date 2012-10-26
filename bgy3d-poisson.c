@@ -387,13 +387,12 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
 
   /* Loop over local portion of grid: */
   {
-    int x[3], n[3];
-    PetscScalar ***g_vec;
-
     /* Get local portion of the grid */
+    int x[3], n[3];
     DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    DAVecGetArray (BHD->da, g, &g_vec);
+    PetscScalar ***g_;
+    DAVecGetArray (BHD->da, g, &g_);
 
     /*
       The condition in the body of the loop is the opposite of:
@@ -409,8 +408,8 @@ void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
             if (i <= border || i >= N[0] - border ||
                 j <= border || j >= N[1] - border ||
                 k <= border || k >= N[2] - border)
-              g_vec[k][j][i] = shift;
+              g_[k][j][i] = shift;
           }
-    DAVecRestoreArray (BHD->da, g, &g_vec);
+    DAVecRestoreArray (BHD->da, g, &g_);
   }
 }
