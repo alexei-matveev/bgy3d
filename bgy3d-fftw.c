@@ -47,18 +47,18 @@ static void unpack_real (DA da, Vec g, fftw_complex *restrict doubl)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_vec;
-    DAVecGetArray (da, g, &g_vec);
+    PetscScalar ***g_;
+    DAVecGetArray (da, g, &g_);
 
     /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           {
-            c_re ((*view)[k][j][i]) = g_vec[k0 + k][j0 + j][i0 + i];
+            c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i];
             c_im ((*view)[k][j][i]) = 0.0;
           }
-    DAVecRestoreArray (da, g, &g_vec);
+    DAVecRestoreArray (da, g, &g_);
   }
 }
 
@@ -76,15 +76,15 @@ static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_vec;
-    DAVecGetArray (da, g, &g_vec);
+    PetscScalar ***g_;
+    DAVecGetArray (da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
-            g_vec[k0 + k][j0 + j][i0 + i] = c_re ((*view)[k][j][i]);
+            g_[k0 + k][j0 + j][i0 + i] = c_re ((*view)[k][j][i]);
 
-    DAVecRestoreArray (da, g, &g_vec);
+    DAVecRestoreArray (da, g, &g_);
   }
 }
 
@@ -102,17 +102,17 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_vec;
-    DAVecGetArray (da, g, &g_vec);
+    struct {PetscScalar re, im;} ***g_;
+    DAVecGetArray (da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           {
-            g_vec[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
-            g_vec[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
+            g_[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
+            g_[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
           }
-    DAVecRestoreArray (da, g, &g_vec);
+    DAVecRestoreArray (da, g, &g_);
   }
 }
 
@@ -130,17 +130,17 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_vec;
-    DAVecGetArray (da, g, &g_vec);
+    struct {PetscScalar re, im;} ***g_;
+    DAVecGetArray (da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           {
-            c_re ((*view)[k][j][i]) = g_vec[k0 + k][j0 + j][i0 + i].re;
-            c_im ((*view)[k][j][i]) = g_vec[k0 + k][j0 + j][i0 + i].im;
+            c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].re;
+            c_im ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].im;
           }
-    DAVecRestoreArray (da, g, &g_vec);
+    DAVecRestoreArray (da, g, &g_);
   }
 }
 
