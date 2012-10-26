@@ -33,9 +33,8 @@ static const int debug = 0;
 /* doubl := Vec, for forward FFT */
 static void unpack_real (DA da, Vec g, fftw_complex *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
@@ -59,9 +58,8 @@ static void unpack_real (DA da, Vec g, fftw_complex *restrict doubl)
 /* Vec := doubl, for inverse FFT */
 static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
@@ -85,9 +83,8 @@ static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
 /* Vec := cmplx, for forward FFT */
 static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
@@ -111,9 +108,8 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 /* cmplx := Vec, for inverse FFT */
 static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk;
-
   /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
