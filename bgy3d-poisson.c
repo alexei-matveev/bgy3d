@@ -343,40 +343,29 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
 }
 
 
-real ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
+double ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, int *iter)
 {
-  real mpi_start, mpi_stop;
-  static int count=0;
-
-  count++;
-
   /* computation time measurement start point */
-  MPI_Barrier( PETSC_COMM_WORLD);
-  mpi_start = MPI_Wtime();
+  MPI_Barrier (PETSC_COMM_WORLD);
+  const double mpi_start = MPI_Wtime();
 
   /* Get boundary of g */
-  CopyBoundary(BHD, g, b, zpad);
+  CopyBoundary (BHD, g, b, zpad);
   //VecSet(x, 0.0);
 
-
   /* Solve Laplace */
-  KSPSolve(BHD->ksp, b, x);
+  KSPSolve (BHD->ksp, b, x);
 
-  if(iter!=NULL)
-    KSPGetIterationNumber(BHD->ksp, iter);
-
+  if (iter != NULL)
+    KSPGetIterationNumber (BHD->ksp, iter);
 
   /* subtract solution from g */
   VecAXPY(g, -1.0, x);
 
   /* computation time measurement stop point */
   MPI_Barrier( PETSC_COMM_WORLD);
-  mpi_stop = MPI_Wtime();
+  const double mpi_stop = MPI_Wtime();
 
-  return mpi_stop-mpi_start;
-
-  /*  VecView(b,PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);  */
-
+  return mpi_stop - mpi_start;
 }
 #endif
