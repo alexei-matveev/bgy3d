@@ -10,21 +10,6 @@
 #include "bgy3d-fftw.h"
 #include "bgy3d-fft.h"
 
-fftw_complex *bgy3d_fft_malloc (DA da)
-{
-  int x[3], n[3];
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  return (fftw_complex*) malloc(n[0] * n[1] * n[2] * sizeof(fftw_complex));
-}
-
-void bgy3d_fft_free (fftw_complex *ptr)
-{
-  free(ptr);
-}
-
 #ifdef WITH_EXTRA_SOLVERS
 static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
 {
