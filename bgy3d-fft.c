@@ -17,51 +17,51 @@
 #ifdef WITH_EXTRA_SOLVERS
 static void unpack (DA da, Vec g, fftw_complex *restrict g_fft)
 {
-  int index, i0, j0, k0, ni, nj, nk;
-  PetscScalar ***g_vec;
+  int i0, j0, k0, ni, nj, nk;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  DAVecGetArray(da, g, &g_vec);
+  PetscScalar ***g_;
+  DAVecGetArray(da, g, &g_);
 
   /* loop over local portion of grid */
   /* Attention: order of indices is not variable */
-  index = 0;
+  int ijk = 0;
   for (int k = k0; k < k0 + nk; k++)
     for (int j = j0; j < j0 + nj; j++)
       for (int i = i0; i < i0 + ni; i++)
         {
-          g_fft[index].re = g_vec[k][j][i];
-          g_fft[index].im = 0;  /* Vec g is real */
-          index++;
+          g_fft[ijk].re = g_[k][j][i];
+          g_fft[ijk].im = 0;  /* Vec g is real */
+          ijk++;
         }
-  DAVecRestoreArray(da, g, &g_vec);
+  DAVecRestoreArray(da, g, &g_);
 }
 
 static void pack (DA da, Vec g, const fftw_complex *restrict g_fft)
 {
-  int index, i0, j0, k0, ni, nj, nk;
-  PetscScalar ***g_vec;
+  int i0, j0, k0, ni, nj, nk;
 
   /* Get local portion of the grid */
   DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  DAVecGetArray(da, g, &g_vec);
+  PetscScalar ***g_;
+  DAVecGetArray(da, g, &g_);
 
   /* loop over local portion of grid */
   /* Attention: order of indices is not variable */
-  index = 0;
+  int ijk = 0;
   for (int k = k0; k < k0 + nk; k++)
     for (int j = j0; j < j0 + nj; j++)
       for (int i = i0; i < i0 + ni; i++)
         {
           /* FIXME: this is subtle, we are packing complex vector into
              a real array. Imaginary part gets ignored: */
-          g_vec[k][j][i] = g_fft[index].re;
-          index++;
+          g_[k][j][i] = g_fft[ijk].re;
+          ijk++;
         }
-  DAVecRestoreArray(da, g, &g_vec);
+  DAVecRestoreArray(da, g, &g_);
 }
 
 FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
