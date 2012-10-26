@@ -314,7 +314,7 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
 
   {
     /* Get local portion of the grid */
-    int x[3], n[3], i[3];
+    int x[3], n[3];
     DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     PetscScalar ***gfrom_, ***gto_;
@@ -322,13 +322,13 @@ static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
     DAVecGetArray (da, gto, &gto_);
 
     /* loop over local portion of grid */
-    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-          if (i[0] <= border || i[0] >= N[0] - border ||
-              i[1] <= border || i[1] >= N[1] - border ||
-              i[2] <= border || i[2] >= N[2] - border)
-            gto_[i[2]][i[1]][i[0]] = gfrom_[i[2]][i[1]][i[0]];
+    for (int k = x[2]; k < x[2] + n[2]; k++)
+      for (int j = x[1]; j < x[1] + n[1]; j++)
+        for (int i = x[0]; i < x[0] + n[0]; i++)
+          if (i <= border || i >= N[0] - border ||
+              j <= border || j >= N[1] - border ||
+              k <= border || k >= N[2] - border)
+            gto_[k][j][i] = gfrom_[k][j][i];
 
     DAVecRestoreArray (da, gfrom, &gfrom_);
     DAVecRestoreArray (da, gto, &gto_);
