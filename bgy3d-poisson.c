@@ -299,59 +299,40 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
 }
 
 
-static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto, real zpad)
+static void CopyBoundary (const State *BHD, Vec gfrom, Vec gto)
 {
-  DA da;
-  int x[3], n[3], i[3], N[3], border; // ic[3], k;
-  PetscScalar ***gfrom_vec, ***gto_vec;
-
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
-  FOR_DIM
-    N[dim] = PD->N[dim];
+  const DA da = BHD->da;
+  const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
+  const real L = PD->interval[1] - PD->interval[0];
+  const real zpad = PD->zpad;
 
-  VecSet(gto, 0.0);
+  VecSet (gto, 0.0);
 
-  border = (int) ceil( ((PD->interval[1]-PD->interval[0])-(2.*zpad))/PD->h[0]/2. );
+  const int border = (int) ceil ((L - 2. * zpad) / h[0] / 2.);
 
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  {
+    /* Get local portion of the grid */
+    int x[3], n[3], i[3];
+    DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DAVecGetArray(da, gfrom, &gfrom_vec);
-  DAVecGetArray(da, gto, &gto_vec);
+    PetscScalar ***gfrom_, ***gto_;
+    DAVecGetArray (da, gfrom, &gfrom_);
+    DAVecGetArray (da, gto, &gto_);
 
+    /* loop over local portion of grid */
+    for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+      for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+        for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+          if (i[0] <= border + 1 || i[0] >= N[0] -1 - border ||
+              i[1] <= border + 1 || i[1] >= N[1] -1 - border ||
+              i[2] <= border + 1 || i[2] >= N[2] -1 - border)
+            gto_[i[2]][i[1]][i[0]] = gfrom_[i[2]][i[1]][i[0]];
 
-/*   FOR_DIM */
-/*     { */
-/*       ic[0]=dim; */
-/*       ic[1]=(dim+1)%3; */
-/*       ic[2]=(dim+2)%3; */
-/*       i[ic[0]] = 0; */
-/*       if( x[ic[0]] == 0 )  */
-/*      for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
-/*        for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
-/*          gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
-/*       i[ic[0]] = N[ic[0]]-1; */
-/*       if( x[ic[0]]+n[ic[0]] == N[ic[0]] )  */
-/*      for( i[ic[1]]=x[ic[1]]; i[ic[1]]<x[ic[1]]+n[ic[1]]; i[ic[1]]++) */
-/*        for( i[ic[2]]=x[ic[2]]; i[ic[2]]<x[ic[2]]+n[ic[2]]; i[ic[2]]++) */
-/*          gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]]; */
-/*     } */
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-          if( ( i[0]<=border+1 || i[0]>=N[0]-1-border) ||
-              ( i[1]<=border+1 || i[1]>=N[1]-1-border) ||
-              ( i[2]<=border+1 || i[2]>=N[2]-1-border) )
-            gto_vec[i[2]][i[1]][i[0]] = gfrom_vec[i[2]][i[1]][i[0]];
-        }
-
-
-  DAVecRestoreArray(da, gfrom, &gfrom_vec);
-  DAVecRestoreArray(da, gto, &gto_vec);
+    DAVecRestoreArray (da, gfrom, &gfrom_);
+    DAVecRestoreArray (da, gto, &gto_);
+  }
 }
 
 
@@ -364,7 +345,7 @@ double ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad, 
   const double mpi_start = MPI_Wtime();
 
   /* Get boundary of g */
-  CopyBoundary (BHD, g, b, zpad);
+  CopyBoundary (BHD, g, b);
   //VecSet(x, 0.0);
 
   /* Solve Laplace */
