@@ -166,4 +166,7 @@ include $(libbgy3d.a:.o=.d)
 TAGS: $(OBJECTS:.o=.c) $(libbgy3d.a:.o=.c)
 	etags $(^)
 
+tags: $(OBJECTS:.o=.c) $(libbgy3d.a:.o=.c)
+	ctags $(^)
+
 #---End of Makefile---
