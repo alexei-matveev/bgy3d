@@ -5,69 +5,14 @@ import numpy as np
 
 def m2dat(path):
     '''
-    Convert vec*.m file to plain txt data file, defaulted new filename is vec*.dat.
+    Load .txt file containing PETSC vector and reshape it
 
     '''
 
     if os.path.isfile(path):
-        # Get the file name, by removing the directory prefix
-        filename = path.split(os.sep)[-1]
-
-        # Remove the suffix of filename
-        fileprefix = filename.split(".")[-2]
-
-        # Default newfilename
-        newfile = fileprefix + ".dat"
-        # Check whether file with the same name exists
-        if os.path.isfile(newfile):
-            print "file '" + newfile + "' already exists"
-            print "overwrite/continue to use/write to new? (o/c/n)"
-            try:
-                opt = raw_input()
-                inputting = True
-                while inputting:
-                    if opt == 'o':
-                        inputting = False
-                        # Remove the first and last line of the .m file
-                        # redirect the content to the new file.
-                        # cmdstring = "sed -e '1d; $d' " + path + " > " + newfile
-                        # os.system(cmdstring)
-                        continue
-                    elif opt == 'n':
-                        try:
-                            newfile = raw_input("Enter a new file name:")
-                            inputting = False
-                        except KeyboardInterrupt:
-                            print "\nUser terminated."
-                        except EOFError:
-                            print "\nunexpected EOF."
-                        except:
-                            print '\nSome error/exception occurred.'
-                    elif opt == 'c':
-                        inputting = False
-                    elif opt == 'q':
-                        inputting = False
-                        exit()
-                    else:
-                        opt = raw_input("Unknown options, enter 'y' or 'n' ('q' to quit)")
-
-
-            except KeyboardInterrupt:
-                print "\nUser terminated."
-                exit()
-            except EOFError:
-                print "\nunexpected EOF."
-                exit()
-            #except:
-            #    print '\nSome error/exception occurred.'
-
-        # Remove the first and last line of the .m file
-        # redirect the content to the new file.
-        cmdstring = "sed -e '1d; $d' " + path + " > " + newfile
-        os.system(cmdstring)
 
         # Load the plain txt file
-        f = file(newfile,'r')
+        f = file(path,'r')
         vec = np.loadtxt(f)
         f.close()
 
@@ -76,8 +21,6 @@ def m2dat(path):
         vec.shape = (n, n, n)
 
         return vec
-
-
 
     else:
         print "'" + path + "' not exist."
