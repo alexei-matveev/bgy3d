@@ -26,8 +26,8 @@
  (gridatom (nrad 30) (nang 131))
  (xc_control (xc "pbe"))
  (ecp "nwchem" "O" "crenbl_ecp" "ahlrichs_coulomb_fitting")
- (basis "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting")
- (basis "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting")
+ (bas "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting")
+ (bas "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting")
  (properties
   (plot_orbitals #t))
  (orbital_plot

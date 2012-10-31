@@ -25,7 +25,6 @@
  (gridatom (nrad 30) (nang 131))
  (gridatom (nrad 30) (nang 131))
  (xc_control (xc "pbe"))
- ;; (basis "nwchem" "C" "lanl2dz_ecp" "ahlrichs_coulomb_fitting")
  (ecp "nwchem" "C" "crenbl_ecp" "ahlrichs_coulomb_fitting")
  (ecp "nwchem" "S" "crenbl_ecp" "ahlrichs_coulomb_fitting")
  (ecp "nwchem" "S" "crenbl_ecp" "ahlrichs_coulomb_fitting")
