@@ -282,8 +282,6 @@ computes the sum of all vector elements."
 ;;;
 (define (bgy3d-run name sites funptr)
   "To be called from QM code."
-  (or (equal? name "bgy3d")             ; only when called by PG
-      (error "Only for use from QM!" name sites funptr))
   (let ((settings bgy3d-settings)
         (solute (make-solute name
                              (update-sites name
