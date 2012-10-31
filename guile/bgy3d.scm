@@ -55,6 +55,8 @@
       (damp-start . 1.0)                ; scaling factor?
       (lambda . 0.02)))))               ; not the scheme lambda
 
+(define *g1-file-names* '("g0.bin" "g1.bin"))
+
 ;;;
 ;;; Find a solute in a database or die:
 ;;;
@@ -311,6 +313,10 @@ computes the sum of all vector elements."
     ;;
     (let ((g1 (bgy3d-run-solute solute settings))) ; reads g??.bin
       ;;
+      ;; Save g1-files to disk:
+      ;;
+      (map bgy3d-vec-save *g1-file-names* g1)
+      ;;
       ;; Use g1 vectors to produce a *.pun file for visualization:
       ;;
       (let ((path (if (zero? (bgy3d-rank))
@@ -339,6 +345,8 @@ computes the sum of all vector elements."
 (define option-spec-new
   (quasiquote
    ((solvent
+     (value #f))
+    (save-binary
      (value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
@@ -396,7 +404,7 @@ computes the sum of all vector elements."
       (let ((name (option-ref opts 'solute "hydrogen chloride")))
         (let ((g1 (bgy3d-run-solute (find-solute name)
                                     '()))) ; Use defaults and Petsc env
-          (map bgy3d-vec-save (list "g0.bin" "g1.bin") g1)
+          (map bgy3d-vec-save *g1-file-names* g1)
           (map bgy3d-vec-destroy g1)))) ; dont forget to destroy them
      ;;
      ;; Fall through to the new variant:
@@ -409,9 +417,12 @@ computes the sum of all vector elements."
 ;;; a pure solvent then all the solute calculations:
 ;;;
 (define (new-main argv)
-  (let ((options (getopt-long argv option-spec-new)))
+  (let ((options
+         (getopt-long argv option-spec-new)))
     (let ((args                  ; positional arguments (solute names)
            (option-ref options '() '()))
+          (save-binary
+           (option-ref options 'save-binary #f))
           (settings               ; defaults updated from command line
            (update-settings bgy3d-settings options)))
       ;;
@@ -427,5 +438,16 @@ computes the sum of all vector elements."
             (bgy3d-run-solvent settings))
         (map (lambda (solute)
                (let ((g1 (bgy3d-run-solute solute settings)))
+                 ;;
+                 ;; Save distributions if requested from command
+                 ;; line. FIXME: the file names do not relate to
+                 ;; solute, so that when processing more than one
+                 ;; solute in a row files will get overwritten:
+                 ;;
+                 (if save-binary
+                     (map bgy3d-vec-save *g1-file-names* g1))
+                 ;;
+                 ;; Dont forget to destroy them:
+                 ;;
                  (map bgy3d-vec-destroy g1)))
              solutes)))))
