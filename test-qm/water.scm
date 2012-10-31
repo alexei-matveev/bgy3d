@@ -11,9 +11,10 @@
   (relativistic "false")                ; This is an ECP calculation
   (spin_restricted #t))                 ; H2O is closed shell
  (geo
-  ("O" (-0.55350093974217249704 0.0 0.0))
-  ("OH" (0.55350093974217249704 1.43052308427731164310 0.0) (z 1))
-  ("OH" (0.55350093974217249704 -1.43052308427731164310 0.0) (z 1)))
+  (units angstrom)
+  ("O" (-0.2929 0.0 0.0))
+  ("OH" (0.2929 0.757 0.0) (z 1))
+  ("OH" (0.2929 -0.757 0.0) (z 1)))
  (mixing (chmix 0.5) (start_after_cycle 5))
  (grid (sym_reduce #t) (weight_grads #t))
  (rep 3 (gridatom (nrad 30) (nang 131)))

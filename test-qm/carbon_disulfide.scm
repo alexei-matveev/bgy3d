@@ -11,9 +11,10 @@
   (relativistic "false")                ; This is an ECP calculation
   (spin_restricted #t))                 ; CS2 is closed shell
  (geo
+  (units angstrom)
   ("C" (0.0 0.0 0.0))
-  ("S1" (2.94797359507609796993 0.0 0.0) (z 16))
-  ("S2" (-2.94797359507609796993 0.0 0.0) (z 16)))
+  ("S1" (1.56 0.0 0.0) (z 16))         ; FIXME!
+  ("S2" (-1.56 0.0 0.0) (z 16)))
  (mixing (chmix 0.5) (start_after_cycle 5))
  (grid (sym_reduce #t) (weight_grads #t))
  (rep 3 (gridatom (nrad 30) (nang 131)))
