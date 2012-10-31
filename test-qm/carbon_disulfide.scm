@@ -35,3 +35,10 @@
   (n_input_lines 0)
   (density_plot #t)
   (density_tot #t)))
+
+;;;
+;;; BGY3d input  follows. The parameter solute specifies  the table to
+;;; take the  site-specific force field  parameters. The names  of the
+;;; sites are those specified in PG input above:
+;;;
+((solute "carbon disulfide"))
