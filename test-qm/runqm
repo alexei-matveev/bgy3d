@@ -1,0 +1,65 @@
+#!/home/matveev/darcs/ttfs-mac/guile-qm
+;;; -*- mode: scheme; -*- vim: set syntax=scheme:
+!#
+;;;
+;;; This script uses both PG  and BGY3d functionality, so set the path
+;;; accordingly and use the proper interpreter in the shebang line.
+;;;
+(set! %load-path (cons "/home/matveev/darcs/bgy3d" %load-path))
+(set! %load-path (cons "/home/matveev/darcs/ttfs-mac" %load-path))
+
+;;;
+;;; FIXME: can we make PG to look up the names in a specific module to
+;;; avoid importing staff that is not immediately used:
+;;;
+(use-modules (srfi srfi-1)
+             (ice-9 pretty-print)
+             ((guile paragauss)
+              #:select (qm-main
+                        qm-add-hook!
+                        qm-run-hooks))
+             ;;
+             ;; This one is called from se_scheduling_module to
+             ;; convert MPTS problem on behalf of the blocked
+             ;; egiensolver.
+             ;;
+             ((guile scheduling)
+              #:select (qm-mpts->npts))
+             ;;
+             ;; BGY3d functionality:
+             ;;
+             ((guile bgy3d)
+              #:select (bgy3d-run)))
+
+;;;
+;;; The   input  file   is  supposed   to  contain   (at   least)  two
+;;; s-expressions. The  first one is the  usual PG input as  a list of
+;;; forms  (namelists).  The second  one is  intended for  BGY3d.  The
+;;; format and content of the latter is to be defined yet.
+;;;
+;;; Let it  be a list of  forms, for the moment.  The (solute "table")
+;;; form  specifies   the  dictionary  to  look   up  the  force-field
+;;; parameters for the sites used in QM calculation, e.g.:
+;;;
+;;;   ((solute "hydrogen chloride"))
+;;;
+;;; Note the extra pair of parens, it should be a *list* of forms.
+;;;
+(let* ((argv (command-line))
+       (path (second argv))            ; first arg is the program name
+       (opts (with-input-from-file path
+               (lambda ()
+                 (read)                 ; skip PG input
+                 (read))))              ; return BGY3d input
+       (table (second (assoc 'solute opts))))
+  (pretty-print opts)
+  (pretty-print table)
+  ;;
+  ;; PG calls the hook relevant for us with "bgy3d" as the first
+  ;; argument. In this case we call bgy3d-run with a name of the table
+  ;; read from the input:
+  ;;
+  (qm-add-hook! (lambda (hook . rest)
+                  (if (equal? hook "bgy3d")
+                      (apply bgy3d-run table rest))))
+  (qm-main argv))
