@@ -12,8 +12,8 @@
   (spin_restricted #t))                 ; HCl is closed shell
  (geo
   (units angstrom)
-  ("H" (0.0 0.0 0.0))
-  ("Cl" (-1.257 0.0 0.0)))              ; FIXME!
+  ("H" (0.6285 0.0 0.0))
+  ("Cl" (-0.6285 0.0 0.0)))
  (mixing (chmix 0.5) (start_after_cycle 5))
  (grid (sym_reduce #t) (weight_grads #t))
  (rep 2 (gridatom (nrad 30) (nang 131)))
