@@ -362,7 +362,7 @@ computes the sum of all vector elements."
      (value #f))
     (BGYM2Site                          ; solute + solvent run
      (value #f))
-    (unquote-splicing option-spec-new)))) ; new and common
+    (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
 ;;; Returns  new   settings  with   updated  fields  taken   from  the

@@ -10,7 +10,8 @@
 ;;;
 (set! %load-path (cons "/users/alexei/darcs/bgy3d" %load-path))
 
-(use-modules ((guile bgy3d)
+(use-modules (ice-9 match)
+             ((guile bgy3d)
               #:select
               (old-main)))
 
@@ -18,4 +19,10 @@
 ;;; We are  trying to  emulate behaviour of  old executable  unless we
 ;;; find a better interface:
 ;;;
-(old-main (command-line))
+(let ((argv (command-line)))
+  (match argv
+    ((_ "new-main" . args)
+     (new-main (cons "new-main" args)))
+    (_
+     (old-main argv))))
+
