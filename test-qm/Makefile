@@ -57,7 +57,7 @@ moments = python ../python/moments.py
 # To produce a *.g2 or *.g1 summary file execute BGY3d and examine the
 # resulting distributions:
 #
-%.g1:
+%.g1: %.scm
 	$(EXE) $(*).scm
 	$(moments) g0.bin g1.bin > $(@)
 	rm -f *.info
