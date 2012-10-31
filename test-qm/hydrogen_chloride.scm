@@ -6,7 +6,6 @@
   (operations_integral #t)
   (operations_scf #t)
   (operations_properties #t))
- ;; (tasks (task "Gradients"))
  (main_options
   (integrals_on_file #f)                ; This is faster
   (relativistic "false")                ; This is an ECP calculation
