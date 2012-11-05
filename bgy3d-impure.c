@@ -1420,9 +1420,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  /* Zeropad */
-  const real zpad = PD->zpad;
-
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
@@ -1553,12 +1550,12 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], g[0], BHD.u2_fft[0][0], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HH, g[0], tH , dg_new2, work, zpad);
+          Solve_NormalizationH2O_smallII (&BHD, g[0], r_HH, g[0], tH , dg_new2, work);
 
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2);
           VecCopy (dg_new2, work); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
-          Solve_NormalizationH2O_smallII( &BHD, g[0], r_HO, g[1], tO , dg_new2, work, zpad);
+          Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], tO , dg_new2, work);
 
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2);
           VecCopy (dg_new2, work); /* FIXME: need that? */
@@ -1589,7 +1586,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[0], BHD.u2_fft[0][1], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_smallII( &BHD, g[1], r_HO, g[0], tH , dg_new2, work, zpad);
+          Solve_NormalizationH2O_smallII (&BHD, g[1], r_HO, g[0], tH , dg_new2, work);
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2);
           VecCopy (dg_new2, work); /* FIXME: need that? */
 

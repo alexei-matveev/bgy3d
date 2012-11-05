@@ -44,7 +44,7 @@ typedef struct H2OSdgF
 #define r_HH  1.5139
 #define r_HO  0.9572
 
-static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad);
+static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ);
 
 static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
 {
@@ -299,7 +299,6 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   tO  =  BHD->f4;
   tH  =  BHD->f4;
   ff = BHD->f;
-  const real zpad = BHD->PD->zpad;
 
   /* Get arrays from PETSC Vectors */
   DAVecGetArray(BHD->da, dgH, &dgH_vec);
@@ -349,11 +348,11 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /* intra molecular part */
   /************************************************************/
   //goto gH_end;
-  Solve_NormalizationH2O_small( BHD, gH, r_HH, gH, tH , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gH, r_HH, gH, tH , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
-  Solve_NormalizationH2O_small( BHD, gH, r_HO, gO, tO , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gH, r_HO, gO, tO , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
@@ -387,7 +386,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /* intra molecular part */
   /************************************************************/
   //goto gO_end;
-  Solve_NormalizationH2O_small( BHD, gO, r_HO, gH, tH , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gO, r_HO, gH, tH , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgO, 2.0, help2);
@@ -474,7 +473,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   tO  =  BHD->f4;
   tH  =  BHD->f4;
   ff = BHD->f;
-  const real zpad = BHD->PD->zpad;
+
   Vec uO_fft = BHD->wHO_fft;
   Vec uH_fft = BHD->wHH_fft;
 
@@ -537,11 +536,11 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /* intra molecular part */
   /************************************************************/
   //goto gH_end;
-  Solve_NormalizationH2O_small( BHD, gH, r_HH, gH, tH , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gH, r_HH, gH, tH , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tH, r_HH, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
-  Solve_NormalizationH2O_small( BHD, gH, r_HO, gO, tO , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gH, r_HO, gO, tO , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tO, r_HO, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgH, 1.0, help2);
@@ -573,7 +572,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /* intra molecular part */
   /************************************************************/
   //goto gO_end;
-  Solve_NormalizationH2O_small( BHD, gO, r_HO, gH, tH , help2, ff, zpad);
+  Solve_NormalizationH2O_small (BHD, gO, r_HO, gH, tH , help2, ff);
   Compute_dg_H2O_intra_ln(BHD, tH, r_HO, help2);
   VecCopy (help2, ff);          /* FIXME: need that? */
   VecAXPY(dgO, 2.0, help2);
@@ -827,9 +826,6 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   /* Get damp_start from command line*/
   const real damp_start = PD->damp;
 
-  /* Zeropad */
-  const real zpad = PD->zpad;
-
   DACreateGlobalVector(BHD->da_newton, &f);
   DACreateGlobalVector(BHD->da_newton, &u);
   DACreateGlobalVector(BHD->da_newton, &b);
@@ -879,7 +875,7 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
     {
 
       RecomputeInitialFFTs(BHD, (damp), 1.0);
-      RecomputeInitialSoluteData(BHD, (damp), 1.0, zpad);
+      RecomputeInitialSoluteData(BHD, (damp), 1.0);
       ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
       Zeropad_Function (BHD, BHD->g_ini[0], 0.0);
@@ -939,9 +935,6 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   /* Get damp_start from command line*/
   const real damp_start = PD->damp;
 
-  /* Zeropad */
-  const real zpad = PD->zpad;
-
   DACreateGlobalVector(BHD->da_newtonF, &f);
   DACreateGlobalVector(BHD->da_newtonF, &u);
   DACreateGlobalVector(BHD->da_newtonF, &b);
@@ -989,7 +982,7 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
     {
 
       RecomputeInitialFFTs(BHD, SQR(damp), 1.0);
-      RecomputeInitialSoluteData(BHD, SQR(damp), 1.0, zpad);
+      RecomputeInitialSoluteData(BHD, SQR(damp), 1.0);
       ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
       Zeropad_Function(BHD, BHD->g_ini[0], 0.0);
@@ -1026,7 +1019,7 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   return PETSC_NULL;
 }
 
-static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real zpad)
+static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ)
 {
   DA da;
   PetscScalar ***gHini_vec, ***gOini_vec;
@@ -1157,22 +1150,4 @@ static void RecomputeInitialSoluteData(State *BHD, real damp, real damp_LJ, real
 /*   DAVecRestoreArray(da, BHD->u2[1][1], &ucO_vec); */
 
   VecCopy( BHD->u2[0][1], BHD->u2[1][1]);
-
-/*   ComputeFFTSoluteII(BHD, BHD->u2[0][0] , BHD->u2[0][1], BHD->LJ_paramsHO, damp, zpad); */
-/*   VecScale(BHD->u2[0][0], beta); */
-/*   VecAXPY( BHD->g_ini[0], beta, BHD->u2[0][1]); */
-
-/*   ComputeFFTSoluteII(BHD, BHD->u2[1][1] , BHD->u2[0][1], BHD->LJ_paramsO,  damp, zpad); */
-/*   VecAXPY( BHD->g_ini[1], beta, BHD->u2[0][1]); */
-/*   VecScale(BHD->u2[1][1], beta); */
-
-  /* Shift uc's */
-/*   VecSum(BHD->u2[0][0], &fac); */
-/*   VecShift(BHD->u2[0][0], -fac/N[0]/N[1]/N[2]); */
-/*   VecSum(BHD->u2[1][1], &fac); */
-/*   VecShift(BHD->u2[1][1], -fac/N[0]/N[1]/N[2]); */
-
-/*   VecView(BHD->g_ini[0],PETSC_VIEWER_STDERR_WORLD); */
-/*   exit(1); */
-
 }
