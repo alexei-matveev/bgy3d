@@ -401,7 +401,8 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
     again. State BHD  is not modified by this  call. Historically, the
     call  to bgy3d_impose_laplace_boundary() was  followed immediately
     by bgy3d_boundary_set()  at many places  in the code.  So  do this
-    here instead:
+    here instead. Commenting this  call changes results only slightly,
+    most probably due to finite convergence thresholds in KSPSolve():
   */
   bgy3d_boundary_set (BHD, v, 0.0);
 
