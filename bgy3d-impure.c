@@ -912,10 +912,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   DACreateGlobalVector(BHD.da, &uc);    /* common for all sites */
   DACreateGlobalVector(BHD.da, &ge);    /* solvent electrostatic potential field */
 
-  /* XXX: Here g0 = beta  * (VM_LJ + VM_coulomb_short) actually.  See:
-          (5.106) and (5.108) in Jager's thesis. It is not filled with
-          data yet, I assume. */
-  Vec *g0 = BHD.g_ini;          /* FIXME: aliasing! */
+  /*
+    Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
+    actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
+    filled with data yet, I assume.
+  */
+  Vec *u0 = BHD.g_ini;          /* FIXME: aliasing! */
 
   /* set initial guess*/
   VecSet(dg[0],0);
@@ -923,8 +925,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   if (bgy3d_getopt_test ("--from-g2"))
     {
-      ComputedgFromg (dg[0], g0[0], BHD.g2[0][1]);
-      ComputedgFromg (dg[1], g0[1], BHD.g2[1][1]);
+      ComputedgFromg (dg[0], u0[0], BHD.g2[0][1]);
+      ComputedgFromg (dg[1], u0[1], BHD.g2[1][1]);
     }
 
   /* load initial configuration from file ??? */
@@ -1036,12 +1038,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
           VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
 
-      /* Fill g0[0], g0[1] (alias BHD.g_ini[], also see the definition
+      /* Fill u0[0], u0[1] (alias BHD.g_ini[], also see the definition
          above) and  uc with VM_Coulomb_long.  No other  fields of the
          struct State except those passed explicitly are modified: */
       bgy3d_solute_field (&BHD,
                           2, solvent,
-                          g0, uc, /* intent(out) */
+                          u0, uc, /* intent(out) */
                           n, solute,
                           density, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
@@ -1049,36 +1051,30 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /* Historically short-range  potential is scaled  by the inverse
          temperature: */
       for (int i = 0; i < 2; i++)
-        VecScale (g0[i], beta);
+        VecScale (u0[i], beta);
 
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
-
-      //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
-      //Smooth_Function(&BHD, g0[0], zpad-1, zpad, 0.0);
 
       /*
         See  pp.  116-177  in  thesis: boundary  conditions (5.107)  -
         (5.110): first impose boundary condistion then solve laplacian
-        equation and substrate from g0.   State BHD is not modified by
+        equation and substrate from u0.   State BHD is not modified by
         these  calls.  Note  that Vec  t_vec, formally  intent(out) in
         these calls, is a work array. Its value is ignored.
       */
-      ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.x_lapl[0], zpad);
-      ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.x_lapl[1], zpad);
+      ImposeLaplaceBoundary (&BHD, u0[0], t_vec, BHD.x_lapl[0], zpad);
+      ImposeLaplaceBoundary (&BHD, u0[1], t_vec, BHD.x_lapl[1], zpad);
 
       /*
-        Then  correct  g0  with  boundary  condition  again,  formally
+        Then  correct  u0  with  boundary  condition  again,  formally
         redundant. State BHD is not modified by these calls:
       */
-      Zeropad_Function (&BHD, g0[1], zpad, 0.0);
-      Zeropad_Function (&BHD, g0[0], zpad, 0.0);
+      Zeropad_Function (&BHD, u0[1], zpad, 0.0);
+      Zeropad_Function (&BHD, u0[0], zpad, 0.0);
 
-      /*
-        g :=  exp[-(g0 + dg)].   Note that the  name g0 is  a misnomer
-        here as it suggests this: g = g0 * exp(-dg) instead.
-      */
-      ComputeH2O_g (g[0], g0[0], dg[0]);
-      ComputeH2O_g (g[1], g0[1], dg[1]);
+      /* g :=  exp[-(u0 + dg)] = g0 * exp(-dg) */
+      ComputeH2O_g (g[0], u0[0], dg[0]);
+      ComputeH2O_g (g[1], u0[1], dg[1]);
 
       real dg_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
                                            value is right.  */
@@ -1209,9 +1205,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             } /* over sites i */
 
           /* Now that dg[] has bee computed one can safely update g[].
-             Compute g := exp[-(g0 + dg)], with a sanity check: */
+             Compute g := exp[-(u0 + dg)], with a sanity check: */
           for (int i = 0; i < 2; i++)
-            ComputeH2O_g (g[i], g0[i], dg[i]);
+            ComputeH2O_g (g[i], u0[i], dg[i]);
 
           /*
            * Fancy step size control.
