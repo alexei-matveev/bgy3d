@@ -119,7 +119,10 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
     int lz[np];
 
     assert (0);                 /* FIXME: untested, n[0]? */
-    MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+    {
+      int err = MPI_Allgather (&n[0], 1, MPI_INT, lz, 1, MPI_INT, PETSC_COMM_WORLD);
+      assert (!err);
+    }
 
     {
       PetscInt dim, M, N, P, m, n, p, dof, s;
