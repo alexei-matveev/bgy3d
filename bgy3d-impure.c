@@ -858,6 +858,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Inverse temperature: */
   const real beta = PD->beta;
 
+  PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
+
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
@@ -1049,33 +1051,34 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                           density, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* Historically short-range  potential is scaled  by the inverse
-         temperature: */
       for (int i = 0; i < 2; i++)
-        VecScale (u0[i], beta);
+        {
+          /*
+            Historically  short-range  potential   is  scaled  by  the
+            inverse  temperature and  the  code operates  with u(x)  =
+            βv(x) insead of potential itself at many places:
+          */
+          VecScale (u0[i], beta);
 
-      PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
+          /*
+            See pp.  116-177 in  thesis: boundary conditions (5.107) -
+            (5.110):  first  impose  boundary  condistion  then  solve
+            laplacian equation  and substrate  from u0.  State  BHD is
+            not  modified  by  these  calls.   Note  that  Vec  t_vec,
+            formally intent(out) in these  calls, is a work array. Its
+            value is ignored.
+          */
+          ImposeLaplaceBoundary (&BHD, u0[i], t_vec, BHD.x_lapl[i], zpad);
 
-      /*
-        See  pp.  116-177  in  thesis: boundary  conditions (5.107)  -
-        (5.110): first impose boundary condistion then solve laplacian
-        equation and substrate from u0.   State BHD is not modified by
-        these  calls.  Note  that Vec  t_vec, formally  intent(out) in
-        these calls, is a work array. Its value is ignored.
-      */
-      ImposeLaplaceBoundary (&BHD, u0[0], t_vec, BHD.x_lapl[0], zpad);
-      ImposeLaplaceBoundary (&BHD, u0[1], t_vec, BHD.x_lapl[1], zpad);
+          /*
+            Then  correct u0 with  boundary condition  again, formally
+            redundant. State BHD is not modified by these calls:
+          */
+          Zeropad_Function (&BHD, u0[i], zpad, 0.0);
 
-      /*
-        Then  correct  u0  with  boundary  condition  again,  formally
-        redundant. State BHD is not modified by these calls:
-      */
-      Zeropad_Function (&BHD, u0[1], zpad, 0.0);
-      Zeropad_Function (&BHD, u0[0], zpad, 0.0);
-
-      /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
-      ComputeH2O_g (g[0], u0[0], du[0]);
-      ComputeH2O_g (g[1], u0[1], du[1]);
+          /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
+          ComputeH2O_g (g[i], u0[i], du[i]);
+        }
 
       real du_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
                                            value is right.  */
