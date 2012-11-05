@@ -1025,7 +1025,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* FIXME:  avoid  storing  vectors  fg2XY* on  the  grid  across
+      /* FIXME: avoid storing vectors  f[sl]_g2_fft on the grid across
          iterations. Only a scalar kernel is needed: */
       kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][0], NULL, ker_fft_S[0][0]);
       kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
@@ -1062,7 +1062,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /*
             See pp.  116-177 in  thesis: boundary conditions (5.107) -
-            (5.110):  first  impose  boundary  condistion  then  solve
+            (5.110):  first  impose   boundary  condition  then  solve
             laplacian equation  and substrate  from u0.  State  BHD is
             not  modified  by  these  calls.   Note  that  Vec  t_vec,
             formally intent(out) in these  calls, is a work array. Its
@@ -1200,16 +1200,19 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               Zeropad_Function (&BHD, du_acc, zpad, 0.0);
 
               /*
-               * Mix du and du_new with a fixed ration "a":
-               *
-               *     du' = a * du_new + (1 - a) * du
-               *     norm = |du_new - du|
+                Mix du and du_new with a fixed ration "a":
+
+                  du' = a * du_new + (1 - a) * du
+                  norm = |du_new - du|
                */
               du_norm[i] = mix (du[i], du_acc, a, work); /* last arg is a temp */
             } /* over sites i */
 
-          /* Now that du[] has bee computed one can safely update g[].
-             Compute g := exp[-(u0 + du)], with a sanity check: */
+          /*
+            Now that du[] has been  computed using g[] of the previous
+            iteration  one  can  safely  update  g[].   Compute  g  :=
+            exp[-(u0 + du)], with a sanity check:
+          */
           for (int i = 0; i < 2; i++)
             ComputeH2O_g (g[i], u0[i], du[i]);
 
