@@ -334,8 +334,7 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   elements which is the main reason for the padding, actually.
 */
 static int fftw_mpi_init_called = 0;
-PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
-                                     DA *da, DA *dc)
+void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 {
   /* FIXME: find a better place: */
   if (!fftw_mpi_init_called)
@@ -490,6 +489,4 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
      the user can create them: */
   *da = fft->da;
   *dc = fft->dc;
-
-  return 0;
 }

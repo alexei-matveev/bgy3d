@@ -332,8 +332,7 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   2  * (N/2 +  1).  The  corresponding complex  arrays will  have NP/2
   elements which is the main reason for the padding, actually.
 */
-PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
-                                     DA *da, DA *dc)
+void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 {
   /* Allocates storage for an FFT struct: */
   FFT *fft = malloc (sizeof *fft);
@@ -482,6 +481,4 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
      the user can create them: */
   *da = fft->da;
   *dc = fft->dc;
-
-  return 0;
 }

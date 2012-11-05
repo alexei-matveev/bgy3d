@@ -242,8 +242,7 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   arrays is also the "major" dimension so that both FFTW and Petsc are
   consistent in that respect.
 */
-PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
-                                     DA *da, DA *dc)
+void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 {
   /* Allocates storage for an FFT struct: */
   FFT *fft = malloc (sizeof *fft);
@@ -388,7 +387,5 @@ PetscErrorCode bgy3d_fft_mat_create (const int N[3], Mat *A,
      the user can create them: */
   *da = fft->da;
   *dc = fft->dc;
-
-  return 0;
 }
 
