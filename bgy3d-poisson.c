@@ -474,6 +474,7 @@ void bgy3d_boundary_set (const State *BHD, Vec g, real value)
         for (int i = x[0]; i < x[0] + n[0]; i++)
           if (!inside_boundary (&vol, i, j, k))
             g_[k][j][i] = value;
+
     DAVecRestoreArray (BHD->da, g, &g_);
   }
 }
