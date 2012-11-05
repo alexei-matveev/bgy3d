@@ -3,6 +3,7 @@
 /*  $Id: bgy3dH2O_solutes.c,v 1.3 2007-08-03 15:59:50 jager Exp $ */
 /*==========================================================*/
 
+#include <stdbool.h>
 #include "bgy3d.h"
 #include "bgy3d-poisson.h"
 
@@ -118,6 +119,49 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 
 
 #ifdef L_BOUNDARY
+
+typedef struct Boundary {
+  const int border;
+  const int *N;                 /* N[3] => PD->N[3] */
+} Boundary;
+
+/* Returns true iff the point (i, j, k) is inside the volume described
+   by the boundary: */
+static bool inside_boundary (const Boundary *b, int i, int j, int k)
+{
+  /*
+    With current boundary definition return true iff:
+
+    border < i < N[0] - border
+    border < j < N[1] - border
+    border < k < N[2] - border
+  */
+  const int *N = b->N;          /* N[3] */
+  const int border = b->border;
+
+  return \
+    border < i && i < N[0] - border &&
+    border < j && j < N[1] - border &&
+    border < k && k < N[2] - border;
+}
+
+/* Returns   a   description   of    the   boundary   for   use   with
+   inside_boundary(): */
+static Boundary make_boundary (const ProblemData *PD)
+{
+  const int *N = PD->N;         /* N[3] */
+  const real *h = PD->h;        /* h[3] */
+  const real L = PD->interval[1] - PD->interval[0];
+  const real zpad = PD->zpad;
+  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
+
+  /* Holds for all regression tests! */
+  assert (border == 1);
+
+  const Boundary boundary = {border, N};
+  return boundary;
+}
+
 /* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
    work for b <= 0: */
 static int mod (int a, int b)
@@ -136,8 +180,7 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
   const PetscScalar one = 1.0;
   const int *N = PD->N;         /* N[3] */
   const real *h = PD->h;        /* h[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-  const real zpad = PD->zpad;
+  const Boundary vol = make_boundary (PD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
@@ -145,8 +188,6 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
   DAGetMatrix (da, MATMPIAIJ, M);
 
   MatZeroEntries (*M);
-
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   /*
     This code constructs  (a compact representation of) the  N^3 x N^3
@@ -176,9 +217,7 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
           row.k = k;
 
           /* Boundary */
-          if (i <= border || i >= N[0] - border ||
-              j <= border || j >= N[1] - border ||
-              k <= border || k >= N[2] - border)
+          if (!inside_boundary (&vol, i, j, k))
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
@@ -304,16 +343,10 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
    b is zeroed. A linear, but not invertible operaton. */
 static void CopyBoundary (const State *BHD, Vec g, Vec b)
 {
-  const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-  const real zpad = PD->zpad;
+  const Boundary vol = make_boundary (BHD->PD);
 
   VecSet (b, 0.0);
-
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   {
     /* Get local portion of the grid */
@@ -328,9 +361,7 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
     for (int k = x[2]; k < x[2] + n[2]; k++)
       for (int j = x[1]; j < x[1] + n[1]; j++)
         for (int i = x[0]; i < x[0] + n[0]; i++)
-          if (i <= border || i >= N[0] - border ||
-              j <= border || j >= N[1] - border ||
-              k <= border || k >= N[2] - border)
+          if (!inside_boundary (&vol, i, j, k))
             b_[k][j][i] = g_[k][j][i];
 
     DAVecRestoreArray (da, g, &g_);
@@ -420,16 +451,7 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 */
 void bgy3d_boundary_set (const State *BHD, Vec g, real value)
 {
-  const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-  const real zpad = PD->zpad;
-
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
-
-  /* Holds for all regression tests! */
-  assert (border == 1);
+  const Boundary vol = make_boundary (BHD->PD);
 
   /* Loop over local portion of grid: */
   {
@@ -450,9 +472,7 @@ void bgy3d_boundary_set (const State *BHD, Vec g, real value)
     for (int k = x[2]; k < x[2] + n[2]; k++)
       for (int j = x[1]; j < x[1] + n[1]; j++)
         for (int i = x[0]; i < x[0] + n[0]; i++)
-          if (i <= border || i >= N[0] - border ||
-              j <= border || j >= N[1] - border ||
-              k <= border || k >= N[2] - border)
+          if (!inside_boundary (&vol, i, j, k))
             g_[k][j][i] = value;
     DAVecRestoreArray (BHD->da, g, &g_);
   }
