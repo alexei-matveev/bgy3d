@@ -323,8 +323,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
 
   /* Compute g's from dg's */
-  Zeropad_Function(BHD, dgO, zpad, 0.0);
-  Zeropad_Function(BHD, dgH, zpad, 0.0);
+  Zeropad_Function (BHD, dgO, 0.0);
+  Zeropad_Function (BHD, dgH, 0.0);
   ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
   ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
@@ -364,8 +364,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
-  ImposeLaplaceBoundary (BHD, dgH, BHD->v[0], BHD->v[1], zpad);
-  Zeropad_Function(BHD, dgH, zpad, 0.0);
+  ImposeLaplaceBoundary (BHD, dgH, BHD->v[0], BHD->v[1]);
+  Zeropad_Function (BHD, dgH, 0.0);
 
   VecAYPX(dgH, -1.0, help);
   //VecPointwiseMult( dgH, dgH, BHD->g_ini[0]);
@@ -397,8 +397,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
-  ImposeLaplaceBoundary (BHD, dgO, BHD->v[0], BHD->v[1], zpad);
-  Zeropad_Function(BHD, dgO, zpad, 0.0);
+  ImposeLaplaceBoundary (BHD, dgO, BHD->v[0], BHD->v[1]);
+  Zeropad_Function (BHD, dgO, 0.0);
 
   VecAYPX(dgO, -1.0, help);
   //VecPointwiseMult( dgO, dgO, BHD->g_ini[1]);
@@ -512,8 +512,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
-  Zeropad_Function(BHD, dgO, zpad, 0.0);
-  Zeropad_Function(BHD, dgH, zpad, 0.0);
+  Zeropad_Function (BHD, dgO, 0.0);
+  Zeropad_Function (BHD, dgH, 0.0);
   ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
   ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
@@ -552,8 +552,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
-  ImposeLaplaceBoundary (BHD, dgH, BHD->v[0], BHD->v[1], zpad);
-  Zeropad_Function(BHD, dgH, zpad, 0.0);
+  ImposeLaplaceBoundary (BHD, dgH, BHD->v[0], BHD->v[1]);
+  Zeropad_Function (BHD, dgH, 0.0);
 
   VecAYPX(dgH, -1.0, help);
   //VecPointwiseMult( dgH, dgH, BHD->g_ini[0]);
@@ -583,8 +583,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
-  ImposeLaplaceBoundary (BHD, dgO, BHD->v[0], BHD->v[1], zpad);
-  Zeropad_Function(BHD, dgO, zpad, 0.0);
+  ImposeLaplaceBoundary (BHD, dgO, BHD->v[0], BHD->v[1]);
+  Zeropad_Function (BHD, dgO, 0.0);
 
   VecAYPX(dgO, -1.0, help);
   //VecPointwiseMult( dgO, dgO, BHD->g_ini[1]);
@@ -880,10 +880,10 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
 
       RecomputeInitialFFTs(BHD, (damp), 1.0);
       RecomputeInitialSoluteData(BHD, (damp), 1.0, zpad);
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad);
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad);
-      Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
-      Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
+      Zeropad_Function (BHD, BHD->g_ini[0], 0.0);
+      Zeropad_Function (BHD, BHD->g_ini[1], 0.0);
       InitializePreconditioner( BHD);
 
       /* solve problem */
@@ -990,10 +990,10 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
 
       RecomputeInitialFFTs(BHD, SQR(damp), 1.0);
       RecomputeInitialSoluteData(BHD, SQR(damp), 1.0, zpad);
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1], zpad);
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1], zpad);
-      Zeropad_Function(BHD, BHD->g_ini[0], zpad, 0.0);
-      Zeropad_Function(BHD, BHD->g_ini[1], zpad, 0.0);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
+      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
+      Zeropad_Function(BHD, BHD->g_ini[0], 0.0);
+      Zeropad_Function(BHD, BHD->g_ini[1], 0.0);
       InitializePreconditioner( BHD);
 
       /* solve problem */

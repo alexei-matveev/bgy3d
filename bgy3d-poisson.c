@@ -363,10 +363,8 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
 
   Vec v, x are intent(inout), Vec b is a work array.
  */
-void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x, real zpad)
+void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x)
 {
-  assert (zpad == BHD->PD->zpad);
-
   /*
     Get boundary b of v:
 
@@ -410,13 +408,13 @@ void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x, real zpad)
   1.0). With the value of zpad equal  to the (half) the box size L the
   value of the local variable "border" is 1.
 */
-void Zeropad_Function (const State *BHD, Vec g, real zpad, real shift)
+void Zeropad_Function (const State *BHD, Vec g, real shift)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
   const real *h = PD->h;        /* h[3] */
   const real L = PD->interval[1] - PD->interval[0];
-  assert (zpad == PD->zpad);
+  const real zpad = PD->zpad;
 
   const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
