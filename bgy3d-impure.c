@@ -1099,8 +1099,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             those passed explicitly.
 
             Same     holds    for    Solve_NormalizationH2O_smallII(),
-            ImposeLaplaceBoundary() and Zeropad_Function() to the best
-            of my (limited) knowledge.
+            bgy3d_impose_laplace_boundary()   to   the   best  of   my
+            (limited) knowledge.
           */
 
           /* Compute FFT of g[] for all sites: */

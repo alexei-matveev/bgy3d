@@ -1516,7 +1516,7 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
      commented code used VecPointwiseDivide(t, g, dg). */
   safe_pointwise_divide (t, g, dg, NORM_REG2);
 
-  Zeropad_Function (BHD, dg, 1.0);
+  bgy3d_boundary_set (BHD, dg, 1.0);
 }
 
 void bgy3d_solve_normalization (const State *BHD,

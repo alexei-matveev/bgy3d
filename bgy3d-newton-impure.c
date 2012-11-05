@@ -322,8 +322,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
 
   /* Compute g's from dg's */
-  Zeropad_Function (BHD, dgO, 0.0);
-  Zeropad_Function (BHD, dgH, 0.0);
+  bgy3d_boundary_set (BHD, dgO, 0.0);
+  bgy3d_boundary_set (BHD, dgH, 0.0);
   ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
   ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
 
@@ -509,8 +509,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   VecScale(dgO, 1.0/N3);
   VecScale(dgH, 1.0/N3);
 
-  Zeropad_Function (BHD, dgO, 0.0);
-  Zeropad_Function (BHD, dgH, 0.0);
+  bgy3d_boundary_set (BHD, dgO, 0.0);
+  bgy3d_boundary_set (BHD, dgH, 0.0);
   ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
   ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);

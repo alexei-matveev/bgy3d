@@ -399,11 +399,11 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
   /*
     FIXME:  formally  redundant.   Set  v  to  zero  at  the  boundary
     again. State BHD  is not modified by this  call. Historically, the
-    call  to  ImposeLaplaceBoundary()   was  followed  immediately  by
-    Zeropad_Function() at  many places  in the code.  So do  this here
-    instead:
+    call  to bgy3d_impose_laplace_boundary() was  followed immediately
+    by bgy3d_boundary_set()  at many places  in the code.  So  do this
+    here instead:
   */
-  Zeropad_Function (BHD, v, 0.0);
+  bgy3d_boundary_set (BHD, v, 0.0);
 
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */
@@ -413,11 +413,11 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 /*
   This function appears  to set everything in the  3d-array g[:, :, :]
   outside of the central section g[i, j, k]  with b < i < N - b, (same
-  for  j, and  k)  to the  value  "shift" (typically  0.0, less  often
+  for  j, and  k)  to the  value  "value" (typically  0.0, less  often
   1.0). With the value of zpad equal  to the (half) the box size L the
   value of the local variable "border" is 1.
 */
-void Zeropad_Function (const State *BHD, Vec g, real shift)
+void bgy3d_boundary_set (const State *BHD, Vec g, real value)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
@@ -452,7 +452,7 @@ void Zeropad_Function (const State *BHD, Vec g, real shift)
           if (i <= border || i >= N[0] - border ||
               j <= border || j >= N[1] - border ||
               k <= border || k >= N[2] - border)
-            g_[k][j][i] = shift;
+            g_[k][j][i] = value;
     DAVecRestoreArray (BHD->da, g, &g_);
   }
 }
