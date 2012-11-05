@@ -1056,20 +1056,27 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       //Smooth_Function(&BHD, g0[1], zpad-1, zpad, 0.0);
       //Smooth_Function(&BHD, g0[0], zpad-1, zpad, 0.0);
 
-      /* XXX: See  p116-177 in thesis:  Boundary Conditions  (5.107) -
-             (5.110):  first  impose  boundary condistion  then  solve
-             laplacian equation  and substrate from g0.   State BHD is
-             not modified  by these calls. Note that  t_vec appears to
-             be intent(out) in these calls, the value is ignored. */
+      /*
+        See  pp.  116-177  in  thesis: boundary  conditions (5.107)  -
+        (5.110): first impose boundary condistion then solve laplacian
+        equation and substrate from g0.   State BHD is not modified by
+        these  calls.  Note  that Vec  t_vec, formally  intent(out) in
+        these calls, is a work array. Its value is ignored.
+      */
       ImposeLaplaceBoundary (&BHD, g0[0], t_vec, BHD.x_lapl[0], zpad);
       ImposeLaplaceBoundary (&BHD, g0[1], t_vec, BHD.x_lapl[1], zpad);
 
-      /* XXX: then correct g0 with boundary condition again. State BHD
-              is not modified by these calls: */
+      /*
+        Then  correct  g0  with  boundary  condition  again,  formally
+        redundant. State BHD is not modified by these calls:
+      */
       Zeropad_Function (&BHD, g0[1], zpad, 0.0);
       Zeropad_Function (&BHD, g0[0], zpad, 0.0);
-      /* g=g0*exp(-dg) */
 
+      /*
+        g :=  exp[-(g0 + dg)].   Note that the  name g0 is  a misnomer
+        here as it suggests this: g = g0 * exp(-dg) instead.
+      */
       ComputeH2O_g (g[0], g0[0], dg[0]);
       ComputeH2O_g (g[1], g0[1], dg[1]);
 
@@ -1175,11 +1182,22 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 Add Coulomb field uc scaled  by the site charge to the
                 accumulator:
               */
-              VecAXPY(dg_acc, solvent[i].charge, uc);
+              VecAXPY (dg_acc, solvent[i].charge, uc);
 
-              /* Vec t_vec is intent(out) here: */
-              ImposeLaplaceBoundary(&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad);
-              Zeropad_Function(&BHD, dg_acc, zpad, 0.0);
+              /*
+                Vec   dg_acc  and   BHD.x_lapl[i]   are  intent(inout)
+                here. Try  to preserve  the values of  x_lapl[] across
+                iterations to save time  in the iterative solver.  Vec
+                t_vec is used as a work array.
+              */
+              ImposeLaplaceBoundary (&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad);
+
+              /*
+                Ideally, when solving the boundary problem is accurate
+                enough, setting dg_acc to  zero at the boundary should
+                be redundant:
+              */
+              Zeropad_Function (&BHD, dg_acc, zpad, 0.0);
 
               /*
                * Mix dg and dg_new with a fixed ration "a":
