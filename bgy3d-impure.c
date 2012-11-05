@@ -1065,13 +1065,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             formally intent(out) in these  calls, is a work array. Its
             value is ignored.
           */
-          ImposeLaplaceBoundary (&BHD, u0[i], t_vec, BHD.x_lapl[i]);
-
-          /*
-            Then  correct u0 with  boundary condition  again, formally
-            redundant. State BHD is not modified by these calls:
-          */
-          Zeropad_Function (&BHD, u0[i], 0.0);
+          bgy3d_impose_laplace_boundary (&BHD, u0[i], t_vec, BHD.x_lapl[i]);
 
           /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
           ComputeH2O_g (g[i], u0[i], du[i]);
@@ -1187,14 +1181,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 iterations to save time  in the iterative solver.  Vec
                 t_vec is used as a work array.
               */
-              ImposeLaplaceBoundary (&BHD, du_acc, t_vec, BHD.x_lapl[i]);
-
-              /*
-                Ideally, when solving the boundary problem is accurate
-                enough, setting du_acc to  zero at the boundary should
-                be redundant:
-              */
-              Zeropad_Function (&BHD, du_acc, 0.0);
+              bgy3d_impose_laplace_boundary (&BHD, du_acc, t_vec, BHD.x_lapl[i]);
 
               /*
                 Mix du and du_new with a fixed ration "a":
@@ -1514,12 +1501,10 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < 2; i++)
         VecScale (BHD.g_ini[i], BHD.PD->beta);
 
-      ImposeLaplaceBoundary (&BHD, g0H, tH, BHD.x_lapl[0]);
-      ImposeLaplaceBoundary (&BHD, g0O, tH, BHD.x_lapl[1]);
-      Zeropad_Function(&BHD, g0O, 0.0);
-      Zeropad_Function(&BHD, g0H, 0.0);
-      /* g=g0*exp(-dg) */
+      bgy3d_impose_laplace_boundary (&BHD, g0H, tH, BHD.x_lapl[0]);
+      bgy3d_impose_laplace_boundary (&BHD, g0O, tH, BHD.x_lapl[1]);
 
+      /* g=g0*exp(-dg) */
       ComputeH2O_g( g[0], g0H, dgH);
       ComputeH2O_g( g[1], g0O, dgO);
 
@@ -1565,10 +1550,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
 
-          ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[0]);
-
-          Zeropad_Function(&BHD, dg_new, 0.0);
-
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, BHD.x_lapl[0]);
 
           VecCopy(dg_new, dg_newH);
 
@@ -1596,9 +1578,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
 
-          ImposeLaplaceBoundary (&BHD, dg_new, tH, BHD.x_lapl[1]);
-
-          Zeropad_Function(&BHD, dg_new, 0.0);
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, BHD.x_lapl[1]);
 
           VecCopy(dg_new, dg_newO);
 

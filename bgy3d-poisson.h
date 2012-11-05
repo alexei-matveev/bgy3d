@@ -6,5 +6,5 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q);
 
 #ifdef L_BOUNDARY
 void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp);
-void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x);
+void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x);
 #endif

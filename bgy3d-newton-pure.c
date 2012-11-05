@@ -454,8 +454,8 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gHO_end:
-  ImposeLaplaceBoundary (BHD, dgHO,BHD->v[0], BHD->v[1]);
-  Zeropad_Function (BHD, dgHO, 0.0);
+  bgy3d_impose_laplace_boundary (BHD, dgHO, BHD->v[0], BHD->v[1]);
+
   VecAYPX(dgHO, -1.0, help);
   /***********************************************************/
   /* gH */
@@ -509,8 +509,8 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gH_end:
-  ImposeLaplaceBoundary (BHD, dgH,BHD->v[0], BHD->v[1]);
-  Zeropad_Function (BHD, dgH, 0.0);
+  bgy3d_impose_laplace_boundary (BHD, dgH, BHD->v[0], BHD->v[1]);
+
   VecAYPX(dgH, -1.0, help);
   /***********************************************************/
   /* gO */
@@ -548,8 +548,8 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #endif
   /***********************************************************/
   //gO_end:
-  ImposeLaplaceBoundary (BHD, dgO,BHD->v[0], BHD->v[1]);
-  Zeropad_Function (BHD, dgO, 0.0);
+  bgy3d_impose_laplace_boundary (BHD, dgO, BHD->v[0], BHD->v[1]);
+
   VecAYPX(dgO, -1.0, help);
   if( verbosity>0)
     PetscPrintf(PETSC_COMM_WORLD, " done.\n");
@@ -761,12 +761,10 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
 /*       Smooth_Function(BHD, BHD->gHO_ini, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, BHD->g_ini[0], SL, SR, 0.0); */
 /*       Smooth_Function(BHD, BHD->g_ini[1], SL, SR, 0.0); */
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
-      ImposeLaplaceBoundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
-      ImposeLaplaceBoundary (BHD, BHD->gHO_ini,BHD->v[0], BHD->v[1]);
-      Zeropad_Function (BHD, BHD->gHO_ini, 0.0);
-      Zeropad_Function (BHD, BHD->g_ini[0], 0.0);
-      Zeropad_Function (BHD, BHD->g_ini[1], 0.0);
+      bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
+      bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
+      bgy3d_impose_laplace_boundary (BHD, BHD->gHO_ini, BHD->v[0], BHD->v[1]);
+
       /* solve problem */
       SNESSolve(snes, PETSC_NULL, u);
 

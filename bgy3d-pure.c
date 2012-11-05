@@ -1671,14 +1671,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*       Smooth_Function(BHD, g0HO, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0O, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0H, SL, SR, 0.0); */
-      ImposeLaplaceBoundary (BHD, g0H, tH, BHD->x_lapl[0]);
-      ImposeLaplaceBoundary (BHD, g0O, tH, BHD->x_lapl[1]);
-      ImposeLaplaceBoundary (BHD, g0HO, tH, BHD->xHO);
-      Zeropad_Function (BHD, g0HO, 0.0);
-      Zeropad_Function (BHD, g0O, 0.0);
-      Zeropad_Function (BHD, g0H, 0.0);
-      /* g=g0*exp(-dg) */
+      bgy3d_impose_laplace_boundary (BHD, g0H, tH, BHD->x_lapl[0]);
+      bgy3d_impose_laplace_boundary (BHD, g0O, tH, BHD->x_lapl[1]);
+      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, BHD->xHO);
 
+      /* g=g0*exp(-dg) */
       ComputeH2O_g( gHO, g0HO, dgHO);
       ComputeH2O_g( gH, g0H, dgH);
       ComputeH2O_g( gO, g0O, dgO);
@@ -1777,10 +1774,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->xHO);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -1844,10 +1838,8 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->xHO);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
 
@@ -1925,10 +1917,8 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->x_lapl[0]);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[0]);
+
           VecCopy(dgH, f);
           //VecAXPBY(dgH, a, (1-a), dg_new);
           VecAXPBY(dgH, aH, (1-aH), dg_new);
@@ -1985,10 +1975,8 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->x_lapl[1]);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[1]);
+
           VecCopy(dgO, f);
           //VecAXPBY(dgO, a, (1-a), dg_new);
           VecAXPBY(dgO, aO, (1-aO), dg_new);
@@ -2248,14 +2236,11 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*       Smooth_Function(BHD, g0HO, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0O, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0H, SL, SR, 0.0); */
-      ImposeLaplaceBoundary (BHD, g0H, tH, BHD->x_lapl[0]);
-      ImposeLaplaceBoundary (BHD, g0O, tH, BHD->x_lapl[1]);
-      ImposeLaplaceBoundary (BHD, g0HO, tH, BHD->xHO);
-      Zeropad_Function (BHD, g0HO, 0.0);
-      Zeropad_Function (BHD, g0O, 0.0);
-      Zeropad_Function (BHD, g0H, 0.0);
-      /* g=g0*exp(-dg) */
+      bgy3d_impose_laplace_boundary (BHD, g0H, tH, BHD->x_lapl[0]);
+      bgy3d_impose_laplace_boundary (BHD, g0O, tH, BHD->x_lapl[1]);
+      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, BHD->xHO);
 
+      /* g=g0*exp(-dg) */
       ComputeH2O_g( gHO, g0HO, dgHO);
       ComputeH2O_g( gH, g0H, dgH);
       ComputeH2O_g( gO, g0O, dgO);
@@ -2373,10 +2358,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->xHO);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -2453,10 +2435,8 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->xHO);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
 
@@ -2545,10 +2525,8 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->x_lapl[0]);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[0]);
+
           VecCopy(dgH, f);
           //VecAXPBY(dgH, a, (1-a), dg_new);
           VecAXPBY(dgH, aH, (1-aH), dg_new);
@@ -2608,10 +2586,8 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            {
-              ImposeLaplaceBoundary (BHD, dg_new, tH, BHD->x_lapl[1]);
-              Zeropad_Function (BHD, dg_new, 0.0);
-            }
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[1]);
+
           VecCopy(dgO, f);
           //VecAXPBY(dgO, a, (1-a), dg_new);
           VecAXPBY(dgO, aO, (1-aO), dg_new);

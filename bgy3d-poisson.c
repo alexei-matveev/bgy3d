@@ -363,7 +363,7 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
 
   Vec v, x are intent(inout), Vec b is a work array.
  */
-void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x)
+void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 {
   /*
     Get boundary b of v:
@@ -395,6 +395,15 @@ void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x)
     v := [1 - (KSP  *  P)] * v
   */
   VecAXPY (v, -1.0, x);
+
+  /*
+    FIXME:  formally  redundant.   Set  v  to  zero  at  the  boundary
+    again. State BHD  is not modified by this  call. Historically, the
+    call  to  ImposeLaplaceBoundary()   was  followed  immediately  by
+    Zeropad_Function() at  many places  in the code.  So do  this here
+    instead:
+  */
+  Zeropad_Function (BHD, v, 0.0);
 
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */
