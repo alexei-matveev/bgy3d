@@ -823,8 +823,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 {
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
-  Vec dg[2], dg_acc, work, ge;  /* ge for solvent electrostaic potential field */
-  PetscScalar dg_norm[2];
+  Vec du[2], du_acc, work;
+  Vec ge;            /* ge for solvent electrostaic potential field */
+  PetscScalar du_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
 
@@ -876,7 +877,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     {
       DACreateGlobalVector (BHD.dc, &g_fft[i]); /* complex */
 
-      DACreateGlobalVector (BHD.da, &dg[i]); /* real */
+      DACreateGlobalVector (BHD.da, &du[i]); /* real */
 
       /* Here the storage for the output is allocated, the caller will
          have to destroy them: */
@@ -903,10 +904,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     momentum space back, accumulate them on the k-grid in this complex
     Vec:
   */
-  Vec dg_acc_fft;
-  DACreateGlobalVector (BHD.dc, &dg_acc_fft); /* complex */
+  Vec du_acc_fft;
+  DACreateGlobalVector (BHD.dc, &du_acc_fft); /* complex */
 
-  DACreateGlobalVector(BHD.da, &dg_acc);
+  DACreateGlobalVector(BHD.da, &du_acc);
   DACreateGlobalVector(BHD.da, &work);
   DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
   DACreateGlobalVector(BHD.da, &uc);    /* common for all sites */
@@ -920,21 +921,21 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec *u0 = BHD.g_ini;          /* FIXME: aliasing! */
 
   /* set initial guess*/
-  VecSet(dg[0],0);
-  VecSet(dg[1],0);
+  VecSet (du[0], 0.0);
+  VecSet (du[1], 0.0);
 
   if (bgy3d_getopt_test ("--from-g2"))
     {
-      ComputedgFromg (dg[0], u0[0], BHD.g2[0][1]);
-      ComputedgFromg (dg[1], u0[1], BHD.g2[1][1]);
+      ComputedgFromg (du[0], u0[0], BHD.g2[0][1]);
+      ComputedgFromg (du[1], u0[1], BHD.g2[1][1]);
     }
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
-      dg[0] = bgy3d_load_vec ("dg0.bin"); /* dgH */
-      dg[1] = bgy3d_load_vec ("dg1.bin"); /* dgO */
+      du[0] = bgy3d_load_vec ("du0.bin"); /* duH */
+      du[1] = bgy3d_load_vec ("du1.bin"); /* duO */
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
     }
 
@@ -1072,11 +1073,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       Zeropad_Function (&BHD, u0[1], zpad, 0.0);
       Zeropad_Function (&BHD, u0[0], zpad, 0.0);
 
-      /* g :=  exp[-(u0 + dg)] = g0 * exp(-dg) */
-      ComputeH2O_g (g[0], u0[0], dg[0]);
-      ComputeH2O_g (g[1], u0[1], dg[1]);
+      /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
+      ComputeH2O_g (g[0], u0[0], du[0]);
+      ComputeH2O_g (g[1], u0[1], du[1]);
 
-      real dg_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
+      real du_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
                                            value is right.  */
 
       real a1 = a0;             /* loop-local variable */
@@ -1120,17 +1121,17 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 range  Coulomb, and  a so  called strange  addition is
                 accounted for in the kernel.  First clear accumulator:
               */
-              VecSet (dg_acc_fft, 0.0);
+              VecSet (du_acc_fft, 0.0);
 
               for (int j = 0; j < 2; j++) /* This increments the accumulator: */
-                apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], dg_acc_fft);
+                apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], du_acc_fft);
 
               /*
-                Compute IFFT of dg_acc_fft for the current site. Other
-                contributions  are  added  to  the real  space  dg_acc
+                Compute IFFT of du_acc_fft for the current site. Other
+                contributions  are  added  to  the real  space  du_acc
                 below:
               */
-              MatMultTranspose (BHD.fft_mat, dg_acc_fft, dg_acc);
+              MatMultTranspose (BHD.fft_mat, du_acc_fft, du_acc);
 
               /*
                 In the following the sum is  over all sites j /= i. It
@@ -1170,44 +1171,44 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                   */
                   Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
 
-                  /* Add the contrinution of site j /= i to dg[i]: */
-                  VecAXPY (dg_acc, 1.0, work);
+                  /* Add the contrinution of site j /= i to du[i]: */
+                  VecAXPY (du_acc, 1.0, work);
                 }
 
               /*
                 Add Coulomb field uc scaled  by the site charge to the
                 accumulator:
               */
-              VecAXPY (dg_acc, solvent[i].charge, uc);
+              VecAXPY (du_acc, solvent[i].charge, uc);
 
               /*
-                Vec   dg_acc  and   BHD.x_lapl[i]   are  intent(inout)
+                Vec   du_acc  and   BHD.x_lapl[i]   are  intent(inout)
                 here. Try  to preserve  the values of  x_lapl[] across
                 iterations to save time  in the iterative solver.  Vec
                 t_vec is used as a work array.
               */
-              ImposeLaplaceBoundary (&BHD, dg_acc, t_vec, BHD.x_lapl[i], zpad);
+              ImposeLaplaceBoundary (&BHD, du_acc, t_vec, BHD.x_lapl[i], zpad);
 
               /*
                 Ideally, when solving the boundary problem is accurate
-                enough, setting dg_acc to  zero at the boundary should
+                enough, setting du_acc to  zero at the boundary should
                 be redundant:
               */
-              Zeropad_Function (&BHD, dg_acc, zpad, 0.0);
+              Zeropad_Function (&BHD, du_acc, zpad, 0.0);
 
               /*
-               * Mix dg and dg_new with a fixed ration "a":
+               * Mix du and du_new with a fixed ration "a":
                *
-               *     dg' = a * dg_new + (1 - a) * dg
-               *     norm = |dg_new - dg|
+               *     du' = a * du_new + (1 - a) * du
+               *     norm = |du_new - du|
                */
-              dg_norm[i] = mix (dg[i], dg_acc, a, work); /* last arg is a temp */
+              du_norm[i] = mix (du[i], du_acc, a, work); /* last arg is a temp */
             } /* over sites i */
 
-          /* Now that dg[] has bee computed one can safely update g[].
-             Compute g := exp[-(u0 + dg)], with a sanity check: */
+          /* Now that du[] has bee computed one can safely update g[].
+             Compute g := exp[-(u0 + du)], with a sanity check: */
           for (int i = 0; i < 2; i++)
-            ComputeH2O_g (g[i], u0[i], dg[i]);
+            ComputeH2O_g (g[i], u0[i], du[i]);
 
           /*
            * Fancy step size control.
@@ -1218,21 +1219,21 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            * coefficient  "a1"   depending  on  iteration   count  and
            * convergence.    Everytime  "mycount"   becomes   >20  the
            * coefficient "a1" is  changed. The compiler is complaining
-           * that upwards  and dg_nomr_old[] maybe  used uninitialized
+           * that upwards  and du_nomr_old[] maybe  used uninitialized
            * here. At the moment I  am not able to confirm/reject that
            * claim.
            */
 
-          /* Infinity (max-abs) norm of dg[] over all site indices: */
-          real norm8 = maxval (2, dg_norm);
+          /* Infinity (max-abs) norm of du[] over all site indices: */
+          real norm8 = maxval (2, du_norm);
 
           mycount++;
 
-          if ((iter - 1) % 10 && (dg_norm_old[0] < dg_norm[0] ||
-                                  dg_norm_old[1] < dg_norm[1]))
+          if ((iter - 1) % 10 && (du_norm_old[0] < du_norm[0] ||
+                                  du_norm_old[1] < du_norm[1]))
             upwards = 1;
           else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-                  (dg_norm_old[0] < dg_norm[0] || dg_norm_old[1] < dg_norm[1]))
+                  (du_norm_old[0] < du_norm[0] || du_norm_old[1] < du_norm[1]))
             {
               a1 /= 2.0;
               if (a1 < a0)
@@ -1255,12 +1256,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           /* otherwise leave "a1" and "mycount" unchanged */
 
           for (int i = 0; i < 2; i++)
-            dg_norm_old[i] = dg_norm[i];
+            du_norm_old[i] = du_norm[i];
 
           PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
           PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
-          PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0]);
-          PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1]);
+          PetscPrintf (PETSC_COMM_WORLD, "H=%e ", du_norm[0]);
+          PetscPrintf (PETSC_COMM_WORLD, "O=%e ", du_norm[1]);
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
@@ -1270,7 +1271,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                        mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-          /* Exit  when any  of  dg[]  does not  change  by more  than
+          /* Exit  when any  of  du[]  does not  change  by more  than
              norm_tol: */
           if (norm8 <= norm_tol)
             {
@@ -1300,25 +1301,25 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       bgy3d_solvent_efield (PD, 2, solvent, g, ge);
       bgy3d_save_vec_ascii ("vec-ge.m", ge);
 
-      /* Save dg to binary file. FIXME: Why dg and not g? */
+      /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
         {
           PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
-          bgy3d_save_vec ("dg0.bin", dg[0]); /* dgH */
-          bgy3d_save_vec ("dg1.bin", dg[1]); /* dgO */
+          bgy3d_save_vec ("du0.bin", du[0]); /* duH */
+          bgy3d_save_vec ("du1.bin", du[1]); /* duO */
           PetscPrintf (PETSC_COMM_WORLD, "done.\n");
         }
     } /* damp loop */
 
   /* Clean up and exit ... */
-  VecDestroy (dg_acc_fft);
+  VecDestroy (du_acc_fft);
 
   for (int i = 0; i < 2; i++)
     {
       /* Delegated to the caller:
          VecDestroy (g[i]); */
 
-      VecDestroy (dg[i]);
+      VecDestroy (du[i]);
       VecDestroy (g_fft[i]);
 
       for (int j = 0; j <= i; j++)
@@ -1328,7 +1329,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         }
     }
 
-  VecDestroy (dg_acc);
+  VecDestroy (du_acc);
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
