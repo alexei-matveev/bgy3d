@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "bgy3d.h"
 #include "bgy3d-poisson.h"
+#include <complex.h>            /* after fftw.h */
 
 /*
   Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
@@ -73,7 +74,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     int x[3], n[3], i[3], ic[3];
     DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    struct {PetscScalar re, im;} ***work_;
+    complex ***work_;
     DAVecGetArray (BHD->dc, work, &work_);
 
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -93,8 +94,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
             if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
               {
                 /* The gamma point, k = 0, we cannot divide by 0: */
-                work_[i[2]][i[1]][i[0]].re = 0.0;
-                work_[i[2]][i[1]][i[0]].im = 0.0;
+                work_[i[2]][i[1]][i[0]] = 0.0; /* complex */
               }
             else
               {
@@ -104,8 +104,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 
                 /* Here we compute in place: uc(kx, ky, kz) := scale *
                    rho(kx, ky, kz) / k^2 */
-                work_[i[2]][i[1]][i[0]].re *= fac;
-                work_[i[2]][i[1]][i[0]].im *= fac;
+                work_[i[2]][i[1]][i[0]] *= fac; /* complex */
               }
           }
     DAVecRestoreArray (BHD->dc, work, &work_);
