@@ -338,15 +338,48 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
   }
 }
 
+/*
+  This solves the Dirichlet problem Δx  = 0, x(∂Ω) = v(∂Ω) in order to
+  build v' =  v - x that  vanishes at the boundary: v'(∂Ω)  = 0.  More
+  specifically, a linear equation for x is solved first:
 
-void ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad)
+    KSP * x = P * v
+
+  an then v is being updated:
+                         -1
+    v := v - x = [1 - KSP   *  P] * v
+
+  with KSP being  the Laplace boundary problem matrix  and P being the
+  projector onto the boundary. That is b = P * v constructs a vector b
+  that is equal to v at the boundary and zero everywhere else.
+
+  Laplace equation is solved iteratively, so that, I assume, the input
+  value for  x, does  matter. At the  later stages of  iterations when
+  potential v is  only slightly changing at the  boundary preserving x
+  across invocations should save some time. So is the theory.
+
+  See tratment of the boundary  conditions in the thesis: pp.  116-177
+  Eqs.  (5.107) - (5.110).
+
+  Vec v, x are intent(inout), Vec b is a work array.
+ */
+void ImposeLaplaceBoundary (const State *BHD, Vec v, Vec b, Vec x, real zpad)
 {
   assert (zpad == BHD->PD->zpad);
 
-  /* Get boundary of g */
-  CopyBoundary (BHD, g, b);
+  /*
+    Get boundary b of v:
 
-  /* Solve Laplace */
+    b := P * v
+  */
+  CopyBoundary (BHD, v, b);
+
+  /*
+    Solve Laplace  equation, update  x iteratively.  Ideally  from the
+    state of the previous iteration:
+            -1
+    x := KSP   *  b
+  */
   KSPSolve (BHD->ksp, b, x);
 
   /*
@@ -357,8 +390,16 @@ void ImposeLaplaceBoundary (const State *BHD, Vec g, Vec b, Vec x, real zpad)
     KSPGetIterationNumber (BHD->ksp, &iter);
   */
 
-  /* subtract solution from g */
-  VecAXPY (g, -1.0, x);
+  /*
+    Subtract  solution  from  v.  The  whole is  in  effect  a  linear
+    operation:
+                  -1
+    v := [1 - (KSP  *  P)] * v
+  */
+  VecAXPY (v, -1.0, x);
+
+  /* If you preserve the value of  x until the next call the iterative
+     solver will re-use it as initial approximation for the next x. */
 }
 #endif
 
