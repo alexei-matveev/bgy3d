@@ -13,7 +13,8 @@
 (use-modules (ice-9 match)
              ((guile bgy3d)
               #:select
-              (old-main)))
+              (old-main
+               new-main)))
 
 ;;;
 ;;; We are  trying to  emulate behaviour of  old executable  unless we
