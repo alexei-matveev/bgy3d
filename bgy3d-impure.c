@@ -1061,11 +1061,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             See pp.  116-177 in  thesis: boundary conditions (5.107) -
             (5.110):  first  impose   boundary  condition  then  solve
             laplacian equation  and substrate  from u0.  State  BHD is
-            not  modified  by  these  calls.   Note  that  Vec  t_vec,
-            formally intent(out) in these  calls, is a work array. Its
+            not   modified  by  these   calls.   Vec   work,  formally
+            intent(out) in  these calls, is,  well, a work  array. Its
             value is ignored.
           */
-          bgy3d_impose_laplace_boundary (&BHD, u0[i], t_vec, BHD.x_lapl[i]);
+          bgy3d_impose_laplace_boundary (&BHD, u0[i], work, BHD.x_lapl[i]);
 
           /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
           ComputeH2O_g (g[i], u0[i], du[i]);
