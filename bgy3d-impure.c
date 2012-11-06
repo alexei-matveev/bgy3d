@@ -560,9 +560,9 @@ static void kernel (const DA dc,
           */
           complex sum = 0.0;
           for (int p = 0; p < 3; p++)
-            sum += -I * ic[p] * fg_[p][i[2]][i[1]][i[0]];
+            sum += ic[p] * fg_[p][i[2]][i[1]][i[0]];
 
-          dfg_[i[2]][i[1]][i[0]] = k_fac * sum;
+          dfg_[i[2]][i[1]][i[0]] = k_fac * (-I * sum);
 
           /*
            * FIXME: Origin of  this occasional addition needs some
