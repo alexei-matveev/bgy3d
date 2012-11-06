@@ -43,17 +43,16 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   /*
     Solving Poisson Equation (SI units) with FFT and IFFT:
 
-        - ΔU (x, y, z) = (1 / ε₀) ρ(x, y, z)
-            c
+        - Δu(x, y, z) = (1 / ε₀) ρ(x, y, z)
 
-    because of x = i h, y = j h, and z = k h, with grid spacing h =
-    L/n:
+    because of x = ih, y = jh, and z = kh, with grid spacing h = L/n:
 
-        - n² / L²  Δuc(i, j, k) = (1 / ε₀) ρ(i, j, k)
+        - n² / L²  Δu(i, j, k) = (1 / ε₀) ρ(i, j, k)
 
-    FFT (see FFTW manual "What FFTW Really Computes"):
+    In Fourier  space the relation  between FFT images  of ρ and  u is
+    (see FFTW manual "What FFTW Really Computes"):
 
-    fft_uc(kx, ky, kz) = 1 / [4 π²  ε₀ k²  / L² ] fft_rho(kx, ky, kz)
+        u(kx, ky, kz) = 1 / (4 π² ε₀ k² / L²) ρ(kx, ky, kz)
 
     with
 
@@ -61,9 +60,9 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 
     IFFT (see FFTW manual "What FFTW Really Computes"):
 
-    because: IFFT(fft_uc(kx, ky, kz)) = n³ * uc(i, j, k)
+    because: IFFT(u(kx, ky, kz)) = n³ * u(i, j, k)
 
-    uc(i, j, k) = h³ / L³  * IFFT(fft_uc(kx, ky, kz))
+        u(i, j, k) = h³ / L³  * IFFT(u(kx, ky, kz))
   */
 
   /* EPSILON0INV = 1 / 4 π ε₀: */
@@ -81,7 +80,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
         for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
           {
-            /* FIXME: what is we  change the complex vectors to remove
+            /* FIXME: what if we  change the complex vectors to remove
                the redundnacy? */
             FOR_DIM
               {
@@ -314,6 +313,8 @@ static void InitializeKSPSolver (Mat M, KSP *ksp)
   /* Create ksp environment */
   KSPCreate (PETSC_COMM_WORLD, ksp);
   KSPGetPC (*ksp, &pc);
+
+  /* FIXME: literal tolerances here: */
   KSPSetTolerances (*ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
 
   /* Set Matrix */
