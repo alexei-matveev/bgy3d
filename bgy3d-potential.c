@@ -19,7 +19,7 @@ struct Context {
 /*
   Put the memory  allocation here.  This has be to  called from C side
   since  we don't  want to  allocate  memory for  vector from  fortran
-  return the void pointer to context after memory allocation.
+  return the pointer to context after memory allocation.
 */
 Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
@@ -67,7 +67,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   pcontext->counter = m;
   pcontext->nmax = m;
 
-  return (void *)pcontext;
+  return pcontext;
 }
 
 /* Value fetch interface */
