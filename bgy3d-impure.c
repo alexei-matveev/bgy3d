@@ -782,27 +782,51 @@ static double maxval (size_t n, const double x[n])
 }
 
 /*
- * Function to generate solvent electrostatic potential field
- *
- */
-static void bgy3d_solvent_efield (const ProblemData *PD,
+  Function to  generate solvent field that  is supposed to  act on the
+  solute  electrons. At  the moment  only the  electrostatic  field is
+  computed.  This  "reaction"  field  should be  consistent  with  the
+  "action" of  the solute electrons  on the solvent sites  computed in
+  bgy3d-solvent.c that is also pure electrostatics:
+*/
+static void bgy3d_solvent_field (const State *BHD,      /* intent(in) */
                            int m, const Site solvent[m], /* m == 2*/
                            Vec g[m], /* intent(in) */
-                           Vec ge) /* intent(out) */
+                           Vec ve) /* intent(out) */
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Generating solvent electrostatic potential field ...\n");
-
-  /* FIXME: assuming PD->rho for all solvent particles */
-  /* not scaled yet */
-  const real rho = PD->rho;
+  /* FIXME: this  code assumes  the same density  rho for  all solvent
+     particles. */
 
   /* Reset its value to zero */
-  VecSet (ge, 0.0);
+  VecSet (ve, 0.0);
 
   for (int i = 0; i < m; i++)
-    {
-      VecAXPY (ge, solvent[i].charge, g[i]);
-    }
+    VecAXPY (ve, solvent[i].charge, g[i]);
+
+  /* Solve Poisson  equation in place. Note that  the output potential
+     is in kcals as all energies in this code are: */
+  bgy3d_poisson (BHD, ve, ve, BHD->PD->rho); /* aliasing */
+
+  /*
+   Solving Poisson  equation by  FFT results in  a potential  with the
+   mean value zero over the whole volume. That is how the ve(k) is set
+   for k = 0. The following code adds a correction to that field which
+   ensures  that  the  potential   is  zero  at  the  boundary.   This
+   corresponds  to  a  boundary  as  a grounded  metallic  cage.   The
+   corrected potential  is, in effect, a superposition  of the solvent
+   electrostatic field and a surface charge on that metallic cage:
+  */
+  {
+    Vec x, work;
+    DACreateGlobalVector (BHD->da, &x);
+    DACreateGlobalVector (BHD->da, &work);
+
+    bgy3d_impose_laplace_boundary (BHD, ve, work, x);
+
+    VecDestroy (x);
+    VecDestroy (work);
+  }
+
+  bgy3d_save_vec ("ve.bin", ve); /* for debugging only */
 }
 
 
@@ -824,7 +848,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
   Vec du[2], du_acc, work;
-  Vec ge;            /* ge for solvent electrostaic potential field */
+  Vec ve;            /* ve for solvent electrostaic potential field */
   PetscScalar du_norm[2];
   int namecount = 0;
   char nameH[20], nameO[20];
@@ -906,11 +930,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec du_acc_fft;
   DACreateGlobalVector (BHD.dc, &du_acc_fft); /* complex */
 
-  DACreateGlobalVector(BHD.da, &du_acc);
-  DACreateGlobalVector(BHD.da, &work);
-  DACreateGlobalVector(BHD.da, &t_vec); /* used for all sites */
-  DACreateGlobalVector(BHD.da, &uc);    /* common for all sites */
-  DACreateGlobalVector(BHD.da, &ge);    /* solvent electrostatic potential field */
+  DACreateGlobalVector (BHD.da, &du_acc);
+  DACreateGlobalVector (BHD.da, &work);
+  DACreateGlobalVector (BHD.da, &t_vec); /* used for all sites */
+  DACreateGlobalVector (BHD.da, &uc);    /* common for all sites */
+  DACreateGlobalVector (BHD.da, &ve); /* solvent electrostatic potential */
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -1287,9 +1311,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
 
-      /* Test for solvent electrostatic potential field */
-      bgy3d_solvent_efield (PD, 2, solvent, g, ge);
-      bgy3d_save_vec_ascii ("vec-ge.m", ge);
+      /* Test for solvent electrostatic potential: */
+      bgy3d_solvent_field (&BHD, 2, solvent, g, ve);
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
@@ -1323,7 +1346,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
-  VecDestroy (ge);
+  VecDestroy (ve);
 
   finalize_state (&BHD);
 }
