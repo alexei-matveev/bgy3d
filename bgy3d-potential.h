@@ -1,5 +1,5 @@
 
-/* Details of the struct are implementation details: */
+/* Details of the struct are left to implementation: */
 typedef struct Context Context;
 
 Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v);
