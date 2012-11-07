@@ -3,20 +3,25 @@
 #include "bgy3d.h"
 #include "bgy3d-potential.h"
 
-/* Context to mask the explicit form of PETSC stuff */
-typedef struct Context {
+/*
+  Context to mask the explicit form of PETSC stuff.  The corresponding
+  typedef struct Context Context is in the header file.
+*/
+struct Context {
   Vec v;    /* vector storing potential values */
-  real (*x)[3]; /* (huge)  array for  coordinates. FIXME:  maybe  also use
-               vector? */
+  real (*x)[3]; /* (huge) array for coordinates. FIXME: maybe also use
+                   vector? */
   int counter;              /* counter indicating how many are left */
   int nmax; /* length  of vector and  array, better  save it  than use
                VecGetSize() from time to time */
-} Context;
+};
 
-/* Put the memory allocation here.  This  has be to called from C side
- since we don't want to allocate memory for vector from fortran return the void
- pointer to context after memory allocation */
-void* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
+/*
+  Put the memory  allocation here.  This has be to  called from C side
+  since  we don't  want to  allocate  memory for  vector from  fortran
+  return the void pointer to context after memory allocation.
+*/
+Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
   int i0, j0, k0;
   int ni, nj, nk;
@@ -66,21 +71,18 @@ void* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 }
 
 /* Value fetch interface */
-int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
+int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
-  /* type cast */
-  Context *pct = (Context *)s;
-
   /* head index for context->v and context->x */
-  const int nstart = pct->nmax - pct->counter;
+  const int nstart = s->nmax - s->counter;
 
   /* number of values that would be actually fetched */
-  const int nact = MIN(n, pct->counter);
+  const int nact = MIN(n, s->counter);
 
   /* fill context->x */
   for (int i = 0; i < nact; i++)
     for (int j = 0; j < 3; j++)
-      x[i][j] = pct->x[nstart + i][j];
+      x[i][j] = s->x[nstart + i][j];
 
   /* array storing indices that would be fetched from context->v */
   int idx[nact];
@@ -88,37 +90,34 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
     idx[i] = nstart + i;
 
   /* Get values from context->v[nstart : nstart + nact] */
-  PetscErrorCode ierr = VecGetValues(pct->v, nact, idx, v);
+  PetscErrorCode ierr = VecGetValues(s->v, nact, idx, v);
   assert (!ierr);
 
   /* update counter */
-  pct->counter -= nact;
+  s->counter -= nact;
 
   /* reset counter to original point once we fetched all the values */
   if (nact == 0)
-    pct->counter = pct->nmax;
+    s->counter = s->nmax;
 
   return nact;
 }
 
 /* clean up the memory for public *pcontext */
-void bgy3d_pot_destroy (void* s)
+void bgy3d_pot_destroy (Context *s)
 {
-  /* type cast, again? */
-  Context *pct = (Context *)s;
-
   /* free the dynamically allocated context->x */
-  free(pct->x);
+  free (s->x);
 
   /* free context->v */
-  VecDestroy (pct->v);
+  VecDestroy (s->v);
 
   /* free the whole context */
-  free(pct);
+  free (s);
 }
 
 /* Test for interface */
-void bgy3d_pot_test (void *s)
+void bgy3d_pot_test (Context *s)
 {
   const int chunk_size = 120;
   real v[chunk_size];
