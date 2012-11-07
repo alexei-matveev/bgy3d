@@ -81,6 +81,7 @@ libbgy3d.a = \
 	bgy3d-poisson.o \
 	bgy3d-fft.o \
 	bgy3d-fftw.o \
+	bgy3d-potential.o
 
 ifeq ($(WITH_GUILE),1)
 	libbgy3d.a += bgy3d-guile.o
