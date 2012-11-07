@@ -23,7 +23,7 @@ void* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-  int m = ni * nj * nk;
+  const int m = ni * nj * nk;
 
   /* memory for context pointer */
   Context *pcontext = malloc(sizeof *pcontext);
@@ -72,14 +72,14 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
   Context *pct = (Context *)s;
 
   /* head index for context->v and context->x */
-  int nstart = pct->nmax - pct->counter;
+  const int nstart = pct->nmax - pct->counter;
 
   /* number of values that would be actually fetched */
-  int nact = MIN(n, pct->counter);
+  const int nact = MIN(n, pct->counter);
 
   /* fill context->x */
   for (int i = 0; i < nact; i++)
-    for ( int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; j++)
       x[i][j] = pct->x[nstart + i][j];
 
   /* array storing indices that would be fetched from context->v */
