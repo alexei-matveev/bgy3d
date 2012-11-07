@@ -14,8 +14,8 @@ typedef struct Context {
 } Context;
 
 /* Put the memory allocation here.  This  has be to called from C side
- * since we don't want to allocate memory for vector from fortran */
-/* return the void pointer to context after memory allocation */
+ since we don't want to allocate memory for vector from fortran return the void
+ pointer to context after memory allocation */
 void* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
   int i0, j0, k0;
@@ -94,8 +94,7 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
   /* update counter */
   pct->counter -= nact;
 
-  /* reset counter to original point
-   * once we fetched all the values */
+  /* reset counter to original point once we fetched all the values */
   if (nact == 0)
     pct->counter = pct->nmax;
 
