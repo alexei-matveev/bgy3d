@@ -144,7 +144,7 @@ void bgy3d_pot_destroy (void* s)
 /* Test for interface */
 void bgy3d_pot_test (void)
 {
-    const int chunk_size = 128;
+    const int chunk_size = 120;
     real v[chunk_size];
     real x[chunk_size][3];
     int nact;
@@ -158,7 +158,7 @@ void bgy3d_pot_test (void)
     real mz = 0.0;
     while ((nact = bgy3d_pot_get_value (pfake_vec, chunk_size, x, v))) {
 	/* calculate moments for tests: */
-	for (int i = 0; i < chunk_size; i++) {
+	for (int i = 0; i < nact; i++) {
 	    real h = 1.0 - v[i];
 	    m0 += h;
 	    mx += x[i][0] * h;
