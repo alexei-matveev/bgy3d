@@ -1,4 +1,4 @@
-/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 real Coulomb_short (real r, real SQRq);
 real Coulomb_short_grad (real r, real rx, real SQRq);
 

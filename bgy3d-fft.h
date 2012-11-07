@@ -1,4 +1,4 @@
-/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 
 #ifdef WITH_EXTRA_SOLVERS
 /* Deprecated.   Used only  in  the older  solvers.   Relies on  fft3d
