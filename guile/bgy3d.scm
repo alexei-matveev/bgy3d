@@ -172,6 +172,26 @@ computes the sum of all vector elements."
                 (+ 1 i))
           knil))))
 
+(define (vec-for-each f vec)
+  (vec-fold
+   (lambda (x seed) (f x))              ; seed not used
+   (if #f #f)                           ; seed is #<unspecified>
+   vec))
+
+;;
+;; FIXME: Guile has problems with denormal numbers, replace small ones
+;; by zeros. Otherwise Guile will show #.# when printing it:
+;;
+(define (normalize x)
+  (if (> (abs x) 1.0e-308)
+      x
+      0.0))
+
+(define (vec-print v)
+  (vec-for-each
+   (lambda (x) (format #t "~a\n" (normalize x)))
+   v))
+
 ;;;
 ;;; BGY3d code  operates in  angstroms, QM codes  use atomic  units by
 ;;; convention:
@@ -271,9 +291,9 @@ computes the sum of all vector elements."
           (header `((block . grid_data)
                     (records . (unquote len))
                     (elements . 1)))
-          (vec-fold (lambda (x seed) (format #t "~a\n" (- x 1.0)))
-                    #f
-                    vec)
+          (vec-for-each
+           (lambda (x) (format #t "~a\n" (- x 1.0)))
+           vec)
           (loop (cdr vecs)
                 (+ 1 vec-id))))))
 
@@ -342,9 +362,7 @@ computes the sum of all vector elements."
 
 (define option-spec-new
   (quasiquote
-   ((solvent
-     (value #f))
-    (save-binary
+   ((save-binary
      (value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
@@ -411,41 +429,56 @@ computes the sum of all vector elements."
       (new-main argv)))))
 
 ;;;
-;;; Interpretes each argument as the name of the solute and runs first
-;;; a pure solvent then all the solute calculations:
+;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
+;;; "solutes" interprete each argument as the name of the solute. Note
+;;; that you may  need to first run a solvent  calculation with cmd ==
+;;; "solvent":
 ;;;
 (define (new-main argv)
-  (let ((options
-         (getopt-long argv option-spec-new)))
+  (let ((cmd		(car argv))     ; should be non-empty
+        (options	(getopt-long argv option-spec-new)))
     (let ((args                  ; positional arguments (solute names)
            (option-ref options '() '()))
           (save-binary
            (option-ref options 'save-binary #f))
           (settings               ; defaults updated from command line
            (update-settings bgy3d-settings options)))
-      ;;
-      ;; Check  if we can find  the solutes by names  early, typos are
-      ;; common:
-      ;;
-      (let ((solutes (map find-solute args)))
+      (match cmd
+        ("solvent"
+         ;;
+         ;; Only then run pure solvent, if --solvent was present in the
+         ;; command line:
+         ;;
+         (bgy3d-run-solvent settings))
         ;;
-        ;; Only then run pure solvent, if --solvent was present in the
-        ;; command line:
+        ((or "solute" "solutes")
+         ;;
+         ;; Check  if we can find  the solutes by names  early, typos are
+         ;; common:
+         ;;
+         (let ((solutes (map find-solute args)))
+           (map (lambda (solute)
+                  (let ((g1 (bgy3d-run-solute solute settings)))
+                    ;;
+                    ;; Save distributions if requested from command
+                    ;; line. FIXME: the file names do not relate to
+                    ;; solute, so that when processing more than one
+                    ;; solute in a row files will get overwritten:
+                    ;;
+                    (if save-binary
+                        (map bgy3d-vec-save *g1-file-names* g1))
+                    ;;
+                    ;; Dont forget to destroy them:
+                    ;;
+                    (map bgy3d-vec-destroy g1)))
+                solutes)))
         ;;
-        (if (option-ref options 'solvent #f)
-            (bgy3d-run-solvent settings))
-        (map (lambda (solute)
-               (let ((g1 (bgy3d-run-solute solute settings)))
-                 ;;
-                 ;; Save distributions if requested from command
-                 ;; line. FIXME: the file names do not relate to
-                 ;; solute, so that when processing more than one
-                 ;; solute in a row files will get overwritten:
-                 ;;
-                 (if save-binary
-                     (map bgy3d-vec-save *g1-file-names* g1))
-                 ;;
-                 ;; Dont forget to destroy them:
-                 ;;
-                 (map bgy3d-vec-destroy g1)))
-             solutes)))))
+        ("dump"
+         ;;
+         ;; Dump each Vec from a *.bin file to tty:
+         ;;
+         (for-each (lambda (path)
+                     (let ((v (bgy3d-vec-load path)))
+                       (vec-print v)
+                       (bgy3d-vec-destroy v)))
+                   args))))))

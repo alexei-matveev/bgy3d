@@ -10,8 +10,7 @@
 ;;;
 (set! %load-path (cons "/users/alexei/darcs/bgy3d" %load-path))
 
-(use-modules (ice-9 match)
-             ((guile bgy3d)
+(use-modules ((guile bgy3d)
               #:select
               (old-main
                new-main)))
@@ -21,9 +20,8 @@
 ;;; find a better interface:
 ;;;
 (let ((argv (command-line)))
-  (match argv
-    ((_ "new-main" . args)
-     (new-main (cons "new-main" args)))
-    (_
-     (old-main argv))))
+  (if (string-prefix? "--" (cadr argv)) ; what if no options supplied?
+      (old-main argv)
+      (new-main (cdr argv)))) ; otherwise the first argument should be
+                              ; a subcommand
 
