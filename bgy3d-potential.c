@@ -1,3 +1,5 @@
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 et sta ai: */
+
 #include "bgy3d.h"
 #include "bgy3d-potential.h"
 
