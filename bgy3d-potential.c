@@ -13,12 +13,10 @@ typedef struct Context {
                VecGetSize() from time to time */
 } Context;
 
-/* FIXME: context declared as global, any better way? */
-static Context *pcontext;
-
 /* Put the memory allocation here.  This  has be to called from C side
  * since we don't want to allocate memory for vector from fortran */
-void bgy3d_pot_alloc (DA da, const ProblemData *PD, Vec v)
+/* return the void pointer to context after memory allocation */
+void* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
   int i0, j0, k0;
   int ni, nj, nk;
@@ -28,7 +26,7 @@ void bgy3d_pot_alloc (DA da, const ProblemData *PD, Vec v)
   int m = ni * nj * nk;
 
   /* memory for context pointer */
-  pcontext = malloc(sizeof *pcontext);
+  Context *pcontext = malloc(sizeof *pcontext);
 
   /* allocate memory for coordinate member in context */
   pcontext->x = malloc(m * 3 * sizeof(real));
@@ -63,15 +61,6 @@ void bgy3d_pot_alloc (DA da, const ProblemData *PD, Vec v)
   /* set counter number and save vector length */
   pcontext->counter = m;
   pcontext->nmax = m;
-
-}
-
-/* Initialization interface  simply return the void  pointer if memory
- * for pcontext has been allocated */
-void* bgy3d_pot_ini (void)
-{
-  /* check whether allocated memory */
-  assert (pcontext != PETSC_NULL);
 
   return (void *)pcontext;
 }
@@ -130,22 +119,20 @@ void bgy3d_pot_destroy (void* s)
 }
 
 /* Test for interface */
-void bgy3d_pot_test (void)
+void bgy3d_pot_test (void *s)
 {
   const int chunk_size = 120;
   real v[chunk_size];
   real x[chunk_size][3];
   int nact;
 
-  /* make sure bgy3d_pot_alloc() has been called outside */
-  void *pfake_vec = bgy3d_pot_ini();
 
   /* calculate moments for tests: */
   real m0 = 0.0;
   real mx = 0.0;
   real my = 0.0;
   real mz = 0.0;
-  while ((nact = bgy3d_pot_get_value (pfake_vec, chunk_size, x, v)))
+  while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
     for (int i = 0; i < nact; i++)
       {
         real h = 1.0 - v[i];
@@ -161,6 +148,4 @@ void bgy3d_pot_test (void)
   PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", my / m0);
   PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", mz / m0);
 
-  /* remember to free memory */
-  bgy3d_pot_destroy(pfake_vec);
 }
