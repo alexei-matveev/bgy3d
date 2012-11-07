@@ -6,13 +6,13 @@
 /* Context to mask the explicit form
  * of PETSC stuff */
 typedef struct Context {
-    Vec v;	/* vector storing potential values */
-    real **x;	/* (huge) array for coordinates. FIXME: maybe also use vector? */
-    int counter;/* counter indicating how many are left */
-    int nmax;	/* length of vector and array, better save it than use VecGetSize() from time to time */
+  Vec v;	/* vector storing potential values */
+  real **x;	/* (huge) array for coordinates. FIXME: maybe also use vector? */
+  int counter;/* counter indicating how many are left */
+  int nmax;	/* length of vector and array, better save it than use VecGetSize() from time to time */
 } Context;
 
-/* FIXME: context declared as public, any better way? */
+/* FIXME: context declared as global, any better way? */
 Context *pcontext;
 
 /* Put the memory allocation here */
@@ -21,52 +21,53 @@ Context *pcontext;
  * from fortran */
 void bgy3d_pot_alloc (DA da, const ProblemData *PD, Vec v)
 {
-    int i0, j0, k0;
-    int ni, nj, nk;
+  int i0, j0, k0;
+  int ni, nj, nk;
 
-    /* Get local portion of the grid */
-    DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-    int m = ni * nj * nk;
+  /* Get local portion of the grid */
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  int m = ni * nj * nk;
 
-    /* memory for context pointer */
-    pcontext = malloc(sizeof *pcontext);
+  /* memory for context pointer */
+  pcontext = malloc(sizeof *pcontext);
 
-    /* allocate memory for coordinate member in context */
-    pcontext->x = malloc(m * sizeof(real *));
-    for (int i = 0; i < m; i++) {
-	pcontext->x[i] = malloc(3 * sizeof(real *));
-    }
+  /* allocate memory for coordinate member in context */
+  pcontext->x = malloc(m * sizeof(real *));
+  for (int i = 0; i < m; i++)
+  {
+    pcontext->x[i] = malloc(3 * sizeof(real *));
+  }
 
-    /* Get coordinates of the local grid portion: */
-    {
-    int ijk = 0;
-    for (int k = k0; k < k0 + nk; k++)
-      for (int j = j0; j < j0 + nj; j++)
-	for (int i = i0; i < i0 + ni; i++)
-	  {
-	    /* coordinates */
-	    /* pcontext->x[ijk][0] = i * PD->h[0] + PD->interval[0];
-	    pcontext->x[ijk][1] = j * PD->h[1] + PD->interval[0];
-	    pcontext->x[ijk][2] = k * PD->h[2] + PD->interval[0]; */
+  /* Get coordinates of the local grid portion: */
+  {
+  int ijk = 0;
+  for (int k = k0; k < k0 + nk; k++)
+    for (int j = j0; j < j0 + nj; j++)
+      for (int i = i0; i < i0 + ni; i++)
+	{
+	  /* coordinates */
+	  /* pcontext->x[ijk][0] = i * PD->h[0] + PD->interval[0];
+	  pcontext->x[ijk][1] = j * PD->h[1] + PD->interval[0];
+	  pcontext->x[ijk][2] = k * PD->h[2] + PD->interval[0]; */
 
-	    /* use grid index for test only */
-	    pcontext->x[ijk][0] = i;
-	    pcontext->x[ijk][1] = j;
-	    pcontext->x[ijk][2] = k;
-	    ijk++;
-	  }
-    assert (ijk == m);
-    }
+	  /* use grid index for test only */
+	  pcontext->x[ijk][0] = i;
+	  pcontext->x[ijk][1] = j;
+	  pcontext->x[ijk][2] = k;
+	  ijk++;
+	}
+  assert (ijk == m);
+  }
 
-    /* create vector member in context */
-    DACreateGlobalVector (da, &pcontext->v);
+  /* create vector member in context */
+  DACreateGlobalVector (da, &pcontext->v);
 
-    /* Copy the value from input vector */
-    VecCopy (v, pcontext->v);
+  /* Copy the value from input vector */
+  VecCopy (v, pcontext->v);
 
-    /* set counter number and save vector length */
-    pcontext->counter = m;
-    pcontext->nmax = m;
+  /* set counter number and save vector length */
+  pcontext->counter = m;
+  pcontext->nmax = m;
 
 }
 
@@ -95,16 +96,17 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
     int nact = MIN(n, pct->counter);
 
     /* fill context->x */
-    for (int i = 0; i < nact; i++) {
-	for ( int j = 0; j < 3; j++) {
-	    x[i][j] = pct->x[nstart + i][j];
-	}
-    }
+    for (int i = 0; i < nact; i++)
+      for ( int j = 0; j < 3; j++)
+      {
+	x[i][j] = pct->x[nstart + i][j];
+      }
 
     /* array storing indices that would be fetched from context->v */
     int idx[nact];
-    for (int i = 0; i < nact; i++) {
-	idx[i] = nstart + i;
+    for (int i = 0; i < nact; i++)
+    {
+      idx[i] = nstart + i;
     }
 
     /* Get values from context->v[nstart : nstart + nact] */
@@ -116,7 +118,8 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
 
     /* reset counter to original point
      * once we fetched all the values */
-    if (nact == 0) {
+    if (nact == 0)
+    {
 	pct->counter = pct->nmax;
     }
 
@@ -126,55 +129,58 @@ int bgy3d_pot_get_value (void *s, int n, real x[n][3], real v[n])
 /* clean up the memory for public *pcontext */
 void bgy3d_pot_destroy (void* s)
 {
-    /* type cast, again? */
-    Context *pct = (Context *)s;
+  /* type cast, again? */
+  Context *pct = (Context *)s;
 
-    /* free the dynamically allocated context->x */
-    for (int i = 0; i < pct->nmax; i++) {
-	free(pct->x[i]);
-    }
-    free(pct->x);
+  /* free the dynamically allocated context->x */
+  for (int i = 0; i < pct->nmax; i++)
+  {
+    free(pct->x[i]);
+  }
+  free(pct->x);
 
-    /* free context->v */
-    VecDestroy (pct->v);
+  /* free context->v */
+  VecDestroy (pct->v);
 
-    /* free the whole context */
-    free(pct);
+  /* free the whole context */
+  free(pct);
 
 }
 
 /* Test for interface */
 void bgy3d_pot_test (void)
 {
-    const int chunk_size = 120;
-    real v[chunk_size];
-    real x[chunk_size][3];
-    int nact;
+  const int chunk_size = 120;
+  real v[chunk_size];
+  real x[chunk_size][3];
+  int nact;
 
-    /* make sure bgy3d_pot_alloc() has been called outside */
-    void *pfake_vec = bgy3d_pot_ini();
+  /* make sure bgy3d_pot_alloc() has been called outside */
+  void *pfake_vec = bgy3d_pot_ini();
 
-    real m0 = 0.0;
-    real mx = 0.0;
-    real my = 0.0;
-    real mz = 0.0;
-    while ((nact = bgy3d_pot_get_value (pfake_vec, chunk_size, x, v))) {
-	/* calculate moments for tests: */
-	for (int i = 0; i < nact; i++) {
-	    real h = 1.0 - v[i];
-	    m0 += h;
-	    mx += x[i][0] * h;
-	    my += x[i][1] * h;
-	    mz += x[i][2] * h;
-	}
+  real m0 = 0.0;
+  real mx = 0.0;
+  real my = 0.0;
+  real mz = 0.0;
+  while ((nact = bgy3d_pot_get_value (pfake_vec, chunk_size, x, v)))
+  {
+    /* calculate moments for tests: */
+    for (int i = 0; i < nact; i++)
+    {
+      real h = 1.0 - v[i];
+      m0 += h;
+      mx += x[i][0] * h;
+      my += x[i][1] * h;
+      mz += x[i][2] * h;
     }
+  }
 
-    PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
-    PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
-    PetscPrintf (PETSC_COMM_WORLD, "mx = %lf\n", mx / m0);
-    PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", my / m0);
-    PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", mz / m0);
+  PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
+  PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
+  PetscPrintf (PETSC_COMM_WORLD, "mx = %lf\n", mx / m0);
+  PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", my / m0);
+  PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", mz / m0);
 
-    /* remember to free memory */
-    bgy3d_pot_destroy(pfake_vec);
+  /* remember to free memory */
+  bgy3d_pot_destroy(pfake_vec);
 }
