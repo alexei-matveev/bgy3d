@@ -6,7 +6,7 @@
 /* Context to mask the explicit form of PETSC stuff */
 typedef struct Context {
   Vec v;    /* vector storing potential values */
-  real **x; /* (huge)  array for  coordinates. FIXME:  maybe  also use
+  real (*x)[3]; /* (huge)  array for  coordinates. FIXME:  maybe  also use
                vector? */
   int counter;              /* counter indicating how many are left */
   int nmax; /* length  of vector and  array, better  save it  than use
@@ -31,9 +31,7 @@ void bgy3d_pot_alloc (DA da, const ProblemData *PD, Vec v)
   pcontext = malloc(sizeof *pcontext);
 
   /* allocate memory for coordinate member in context */
-  pcontext->x = malloc(m * sizeof(real *));
-  for (int i = 0; i < m; i++)
-    pcontext->x[i] = malloc(3 * sizeof(real *));
+  pcontext->x = malloc(m * 3 * sizeof(real));
 
   /* Get coordinates of the local grid portion: */
   {
@@ -122,9 +120,6 @@ void bgy3d_pot_destroy (void* s)
   Context *pct = (Context *)s;
 
   /* free the dynamically allocated context->x */
-  for (int i = 0; i < pct->nmax; i++)
-    free(pct->x[i]);
-
   free(pct->x);
 
   /* free context->v */
