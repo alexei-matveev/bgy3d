@@ -788,10 +788,10 @@ static double maxval (size_t n, const double x[n])
   "action" of  the solute electrons  on the solvent sites  computed in
   bgy3d-solvent.c that is also pure electrostatics:
 */
-static void bgy3d_solvent_field (const State *BHD,      /* intent(in) */
-                           int m, const Site solvent[m], /* m == 2*/
-                           Vec g[m], /* intent(in) */
-                           Vec ve) /* intent(out) */
+static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
+                                 int m, const Site solvent[m], /* m == 2*/
+                                 Vec g[m], /* intent(in) */
+                                 Vec ve)   /* intent(out) */
 {
   /* FIXME: this  code assumes  the same density  rho for  all solvent
      particles. */
