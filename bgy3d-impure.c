@@ -34,6 +34,13 @@ static const Site solvent[] =
   {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
    {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
+#undef sH
+#undef eH
+#undef qH
+#undef sO
+#undef eO
+#undef qO
+
 static void load (const State *BHD, Vec g2[2][2]);
 
 static State initialize_state (const ProblemData *PD)
