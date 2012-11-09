@@ -9,11 +9,12 @@
 */
 struct Context {
   Vec v;    /* vector storing potential values */
-  real (*x)[3]; /* (huge) array for coordinates. FIXME: maybe also use
-                   vector? */
   int counter;              /* counter indicating how many are left */
   int nmax; /* length  of vector and  array, better  save it  than use
                VecGetSize() from time to time */
+  int N[3];
+  real h[3];
+  real interval[2];
 };
 
 static void rectangle (const int n, const int N, int* j, int* i);
@@ -35,30 +36,6 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   /* memory for context pointer */
   Context *pcontext = malloc(sizeof *pcontext);
 
-  /* allocate memory for coordinate member in context */
-  pcontext->x = malloc(m * 3 * sizeof(real));
-
-  /* Get coordinates of the local grid portion: */
-  {
-    int ijk = 0;
-    for (int k = k0; k < k0 + nk; k++)
-      for (int j = j0; j < j0 + nj; j++)
-        for (int i = i0; i < i0 + ni; i++)
-          {
-            /* coordinates */
-            /* pcontext->x[ijk][0] = i * PD->h[0] + PD->interval[0];
-               pcontext->x[ijk][1] = j * PD->h[1] + PD->interval[0];
-               pcontext->x[ijk][2] = k * PD->h[2] + PD->interval[0]; */
-
-            /* use grid index for test only */
-            pcontext->x[ijk][0] = i;
-            pcontext->x[ijk][1] = j;
-            pcontext->x[ijk][2] = k;
-            ijk++;
-          }
-    assert (ijk == m);
-  }
-
   /* create vector member in context */
   DACreateGlobalVector (da, &pcontext->v);
 
@@ -68,6 +45,17 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   /* set counter number and save vector length */
   pcontext->counter = m;
   pcontext->nmax = m;
+
+  /* copy N3 and h3 from PD */
+  FOR_DIM
+    {
+      pcontext->N[dim] = PD->N[dim];
+      pcontext->h[dim] = PD->h[dim];
+    }
+
+  /* copy interval */
+  pcontext->interval[0] = PD->interval[0];
+  pcontext->interval[1] = PD->interval[1];
 
   return pcontext;
 }
@@ -81,15 +69,29 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
   /* number of values that would be actually fetched */
   const int nact = MIN(n, s->counter);
 
-  /* fill context->x */
-  for (int i = 0; i < nact; i++)
-    for (int j = 0; j < 3; j++)
-      x[i][j] = s->x[nstart + i][j];
-
   /* array storing indices that would be fetched from context->v */
   int idx[nact];
+
+  /* generating coordinates */
   for (int i = 0; i < nact; i++)
-    idx[i] = nstart + i;
+    {
+      int ijk = nstart + i;
+      int ij, ix, iy, iz;
+
+      /* ijk = iz * Nx * Ny + ij
+       * ij = iy * Nx + ix */
+      rectangle (ijk, s->N[0] * s->N[1], &iz, &ij);
+      rectangle (ij, s->N[0], &iy, &ix);
+
+      /* apply 'real' coordinates */
+      x[i][0] = ix * s->h[0] + s->interval[0];
+      x[i][1] = iy * s->h[1] + s->interval[0];
+      x[i][2] = iz * s->h[2] + s->interval[0];
+
+      /* save ijk to indicies array for usage later */
+      idx[i] = ijk;
+    }
+
 
   /* Get values from context->v[nstart : nstart + nact] */
   PetscErrorCode ierr = VecGetValues(s->v, nact, idx, v);
@@ -108,8 +110,6 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 /* clean up the memory for public *pcontext */
 void bgy3d_pot_destroy (Context *s)
 {
-  /* free the dynamically allocated context->x */
-  free (s->x);
 
   /* free context->v */
   VecDestroy (s->v);
