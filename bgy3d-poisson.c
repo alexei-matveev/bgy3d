@@ -251,7 +251,7 @@ static int mod (int a, int b)
   free facilities of Petsc.
 */
 static void lap_mat_create (const DA da, const real h[3],
-                            const Boundary *vol,
+                            const Boundary *const vol,
                             Mat *M) /* intent(out) */
 {
   const PetscScalar one = 1.0;
@@ -309,8 +309,9 @@ static void lap_mat_create (const DA da, const real h[3],
           row.j = j;
           row.k = k;
 
-          /* Boundary */
-          if (unlikely (!inside_boundary (vol, i, j, k)))
+          /* Boundary,  if not  NULL. Otherwise  it will  be  a sparse
+             representation of the plain Laplace operator: */
+          if (vol && unlikely (!inside_boundary (vol, i, j, k)))
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
@@ -586,15 +587,21 @@ static void lap_mat_create (const DA da, const real h[3],
     lap->h[i] = h[i];
 
   /* This is used to copy  over the boundary values: */
-  lap->vol = *vol;
+  if (vol)
+    lap->vol = *vol;
 
   /* Create  matrix shell  with  proper dimensions  and associate  the
      context with it: */
   mat_create_shell (da, lap, A);
 
-  /* Set matrix operations: */
-  MatShellSetOperation (*A, MATOP_MULT,
-                        (void (*)(void)) mat_mult_bnd);
+  /* Set matrix operations. If vol  is NULL, the resulting operator is
+     plain Laplace: */
+  if (vol)
+    MatShellSetOperation (*A, MATOP_MULT,
+                          (void (*)(void)) mat_mult_bnd);
+  else
+    MatShellSetOperation (*A, MATOP_MULT,
+                          (void (*)(void)) mat_mult_lap);
 
   MatShellSetOperation (*A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy);
@@ -727,3 +734,8 @@ void bgy3d_boundary_set (const State *BHD, Vec g, real value)
   set_boundary (BHD->da, &vol, g, value);
 }
 
+/* Laplace matrix, no boundary: */
+void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
+{
+  lap_mat_create (da, h, NULL, A);
+}
