@@ -228,6 +228,15 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   DAVecRestoreArray (da, g, &g_);
 }
 
+/*
+  The  alternative works  on a  single CPU  too. Again  the regression
+  tests  "fail"  with 3-4  digits  the  same  as before.   The  bigger
+  difference  appears  to be  that  the matrix  in  AIJ  format has  a
+  dedicated  solver for  linear equations.   The  algorithm KSPSolve()
+  uses with matrix free implementation  appears to be slower and fails
+  for more than one CPU.
+*/
+#ifndef MATRIX_FREE_LAPLACE
 /* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
    work for b <= 0: */
 static int mod (int a, int b)
@@ -390,7 +399,207 @@ static void InitializeLaplaceMatrix (const DA da, const real h[3],
 
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
+#else
+/*
+  For a  plain laplacian only the  grid dimensions and  mesh sizes are
+  necessary. For a Laplacian with boundary also the third field is set
+  and used:
+*/
+typedef struct Lap {
+  DA da;                        /* array descriptor */
+  real h[3];                    /* grid spacing */
+  Boundary vol;                 /* for boundary problem */
+} Lap;
 
+
+static Lap* context (Mat A)
+{
+  Lap *lap;
+  MatShellGetContext (A, (void**) &lap);
+  return lap;
+}
+
+
+/* Does y = A * x = Δx. Laplace operator by finite differences: */
+static PetscErrorCode mat_mult_lap (Mat A, Vec x, Vec y)
+{
+  /* Only  matrices  constructed   by  mat_create_lap()  are  accepted
+     here: */
+  const Lap *lap = context (A);
+
+  const real *h = lap->h;       /* h[3] */
+
+  assert (h[0] == h[1]);
+  assert (h[0] == h[2]);
+
+  const real h2 = SQR (h[0]);
+
+  /* loop over local portion of grid */
+  {
+    /*
+      This will be a local  vector with ghost points.  Apparently the
+      distinction between local and  global are the ghost points, and
+      not what you may have thought.
+    */
+    Vec w;
+
+    /*
+      There is  a Pets infrastracture to get  temporary local vectors.
+      Still  this may  lead to  allocations that  are only  freed upon
+      destruction of the array descriptor:
+    */
+    DAGetLocalVector (lap->da, &w);
+
+    /*
+      This initiates  communication and  waits for its  completion ---
+      ghost points  need to  be scattared to  the "neighbors".  Do not
+      attempt to VecCopy (x, w), you naive Petsc user!
+    */
+    DAGlobalToLocalBegin (lap->da, x, INSERT_VALUES, w);
+    DAGlobalToLocalEnd (lap->da, x, INSERT_VALUES, w);
+
+    real ***w_, ***y_;
+    DAVecGetArray (lap->da, w, &w_);
+    DAVecGetArray (lap->da, y, &y_);
+
+    /* Get local portion of the grid */
+    int i0, j0, k0, ni, nj, nk;
+    DAGetCorners (lap->da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+    // printf ("LOCAL: x = %d %d %d, n = %d %d %d\n", i0, j0, k0, ni, nj, nk);
+    // DAGetGhostCorners (lap->da, &i0, &j0, &k0, &ni, &nj, &nk);
+    // printf ("GHOST: x = %d %d %d, n = %d %d %d\n", i0, j0, k0, ni, nj, nk);
+
+    /* This  may only  work with  periodic Petsc  vectors  and stencil
+       width >= 1: */
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            /* One of 7 stencil points, the center: */
+            const real w_kji = w_[k][j][i];
+
+            /*
+              The  indices into the  ghosted array  may appear  out of
+              bounds   and   even    negative,   but   this   is   the
+              intention. Parens,  though redundant mathematically, are
+              intended to reduce the loss of precision:
+            */
+            y_[k][j][i] = (1.0 / h2) *          \
+              (((w_[k][j][i + 1] - w_kji) +
+                (w_[k][j][i - 1] - w_kji)) +
+               ((w_[k][j + 1][i] - w_kji) +
+                (w_[k][j - 1][i] - w_kji)) +
+               ((w_[k + 1][j][i] - w_kji) +
+                (w_[k - 1][j][i] - w_kji)));
+          }
+    DAVecRestoreArray (lap->da, w, &w_);
+    DAVecRestoreArray (lap->da, y, &y_);
+
+    /* The  counterpart to  DAGetLocalVector(), do  not  destroy, just
+       give it back: */
+    DARestoreLocalVector (lap->da, &w);
+  }
+
+  return 0;
+}
+
+
+/* This is what is actually used: */
+static PetscErrorCode mat_mult_bnd (Mat A, Vec x, Vec y)
+{
+  mat_mult_lap (A, x, y);       /* y := Δx */
+
+  Lap *lap = context (A);
+
+  /* Untill  now we compute  plain-old Δx,  now the  boundary specific
+     staff. Copy the values at the boundary from x to y as is: */
+  copy_boundary (lap->da, &lap->vol, x, y);
+
+  return 0;
+}
+
+static PetscErrorCode mat_destroy (Mat A)
+{
+  /* Only  matrices  constructed   by  lap_mat_create()  are  accepted
+     here: */
+  free (context (A));
+
+  return 0;
+}
+
+/* Creates a matix  shell, but does not associate  any operations with
+   it: */
+static void mat_create_shell (const DA da, void *ctx, Mat *A)
+{
+  /* Get dimensions and other vector properties: */
+  int x[3], n[3], N[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Get grid dimensions N[3], sanity checks: */
+  {
+    int dim, dof, sw;
+    DAPeriodicType wrap;
+    DAStencilType st;
+    DAGetInfo (da, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, &sw, &wrap, &st);
+
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 1);               /* degrees of freedom */
+    assert (sw >= 1);                /* stencil width */
+    assert (st == DA_STENCIL_STAR);  /* stencil type */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
+
+  /*
+    Create the matrix  itself. First, set total and  local size of the
+    matrix (section).
+  */
+  const int N3 = N[2] * N[1] * N[0];
+  const int n3 = n[2] * n[1] * n[0];
+
+  /* Also puts internals (Lap struct) into the matrix: */
+  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, A);
+}
+
+
+/* Creates Laplacian matrix: */
+static void InitializeLaplaceMatrix (const DA da, const real h[3],
+                                     const Boundary *vol,
+                                     Mat *A)    /* intent(out) */
+{
+  /* Allocates storage for  a Lap struct. Make sure to  it is freed in
+     mat_destroy(): */
+  Lap *lap = malloc (sizeof *lap);
+
+  /*
+    That is all we need  for the Laplace operator, dimensions and mesh
+    sizes.   Copy contents,  the  there are  no  guarantees about  the
+    life-time of the object pointed to:
+  */
+  lap->da = da;
+  for (int i = 0; i < 3; i ++)
+    lap->h[i] = h[i];
+
+  /* This is used to copy  over the boundary values: */
+  lap->vol = *vol;
+
+  /* Create  matrix shell  with  proper dimensions  and associate  the
+     context with it: */
+  mat_create_shell (da, lap, A);
+
+  /* Set matrix operations: */
+  MatShellSetOperation (*A, MATOP_MULT,
+                        (void (*)(void)) mat_mult_bnd);
+
+  MatShellSetOperation (*A, MATOP_DESTROY,
+                        (void (*)(void)) mat_destroy);
+}
+#endif
 
 static void InitializeKSPSolver (Mat M, KSP *ksp)
 {
