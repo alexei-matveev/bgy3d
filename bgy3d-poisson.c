@@ -8,6 +8,15 @@
 #include "bgy3d-poisson.h"
 #include <complex.h>            /* after fftw.h */
 
+/* GCC extensions: */
+#if __GNUC__ >= 3
+#define likely(x)    __builtin_expect (!!(x), 1)
+#define unlikely(x)  __builtin_expect (!!(x), 0)
+#else
+#define likely(x)    (x)
+#define unlikely(x)  (x)
+#endif
+
 /*
   Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
   potential by inverse FFT.
@@ -119,7 +128,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 #ifdef L_BOUNDARY
 
 typedef struct Boundary {
-  const int border;
+  int border;
   const int *N;                 /* N[3] => PD->N[3] */
 } Boundary;
 
@@ -138,9 +147,9 @@ static bool inside_boundary (const Boundary *b, int i, int j, int k)
   const int border = b->border;
 
   return \
-    border < i && i < N[0] - border &&
-    border < j && j < N[1] - border &&
-    border < k && k < N[2] - border;
+    likely (border < i) && likely (i < N[0] - border) &&
+    likely (border < j) && likely (j < N[1] - border) &&
+    likely (border < k) && likely (k < N[2] - border);
 }
 
 /* Returns   a   description   of    the   boundary   for   use   with
@@ -160,6 +169,31 @@ static Boundary make_boundary (const ProblemData *PD)
   return boundary;
 }
 
+
+/* Copies the values of Vec g at a boundary to Vec b.  The rest of Vec
+   b is NOT changed! */
+static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
+{
+  /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  PetscScalar ***g_, ***b_;
+  DAVecGetArray (da, g, &g_);
+  DAVecGetArray (da, b, &b_);
+
+  /* loop over local portion of grid */
+  for (int k = k0; k < k0 + nk; k++)
+    for (int j = j0; j < j0 + nj; j++)
+      for (int i = i0; i < i0 + ni; i++)
+        if (unlikely (!inside_boundary (vol, i, j, k)))
+          b_[k][j][i] = g_[k][j][i];
+
+  DAVecRestoreArray (da, g, &g_);
+  DAVecRestoreArray (da, b, &b_);
+}
+
+
 /* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
    work for b <= 0: */
 static int mod (int a, int b)
@@ -173,12 +207,11 @@ static int mod (int a, int b)
   stencil.  FIXME: this  should be  probably implemented  using matrix
   free facilities of Petsc.
 */
-static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
+static void InitializeLaplaceMatrix (const DA da, const real h[3],
+                                     const Boundary *vol,
+                                     Mat *M) /* intent(out) */
 {
   const PetscScalar one = 1.0;
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
-  const Boundary vol = make_boundary (PD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
@@ -199,8 +232,27 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
   */
 
   /* Get local portion of the grid */
-  int x[3], n[3];
+  int x[3], n[3], N[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Get grid dimensions N[3], sanity checks: */
+  {
+    int dim, dof, sw;
+    DAPeriodicType wrap;
+    DAStencilType st;
+    DAGetInfo (da, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, &sw, &wrap, &st);
+
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 1);               /* degrees of freedom */
+    assert (sw >= 1);                /* stencil width */
+    assert (st == DA_STENCIL_STAR);  /* stencil type */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
 
   /* Loop over local portion of grid: */
   for (int k = x[2]; k < x[2] + n[2]; k++)
@@ -215,7 +267,7 @@ static void InitializeLaplaceMatrix (const DA da, const ProblemData *PD, Mat *M)
           row.k = k;
 
           /* Boundary */
-          if (!inside_boundary (&vol, i, j, k))
+          if (unlikely (!inside_boundary (vol, i, j, k)))
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
@@ -334,39 +386,11 @@ static void InitializeKSPSolver (Mat M, KSP *ksp)
 /* Assemble Laplacian matrix and create KSP environment: */
 void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
 {
-  InitializeLaplaceMatrix (da, PD, M);
+  const Boundary vol = make_boundary (PD);
+
+  InitializeLaplaceMatrix (da, PD->h, &vol, M);
 
   InitializeKSPSolver (*M, ksp);
-}
-
-/* Copies the values of Vec g at a boundary to Vec b.  The rest of Vec
-   b is zeroed. A linear, but not invertible operaton. */
-static void CopyBoundary (const State *BHD, Vec g, Vec b)
-{
-  const DA da = BHD->da;
-  const Boundary vol = make_boundary (BHD->PD);
-
-  VecSet (b, 0.0);
-
-  {
-    /* Get local portion of the grid */
-    int x[3], n[3];
-    DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-    PetscScalar ***g_, ***b_;
-    DAVecGetArray (da, g, &g_);
-    DAVecGetArray (da, b, &b_);
-
-    /* loop over local portion of grid */
-    for (int k = x[2]; k < x[2] + n[2]; k++)
-      for (int j = x[1]; j < x[1] + n[1]; j++)
-        for (int i = x[0]; i < x[0] + n[0]; i++)
-          if (!inside_boundary (&vol, i, j, k))
-            b_[k][j][i] = g_[k][j][i];
-
-    DAVecRestoreArray (da, g, &g_);
-    DAVecRestoreArray (da, b, &b_);
-  }
 }
 
 /*
@@ -396,12 +420,16 @@ static void CopyBoundary (const State *BHD, Vec g, Vec b)
  */
 void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 {
+  const Boundary vol = make_boundary (BHD->PD);
+
   /*
-    Get boundary b of v:
+    Get boundary b of v, the rest  of b is set to zero. Together it is
+    a linear, albeit not invertible projection operation:
 
     b := P * v
   */
-  CopyBoundary (BHD, v, b);
+  VecSet (b, 0.0);
+  copy_boundary (BHD->da, &vol, v, b);
 
   /*
     Solve Laplace  equation, update  x iteratively.  Ideally  from the
@@ -472,9 +500,10 @@ void bgy3d_boundary_set (const State *BHD, Vec g, real value)
     for (int k = x[2]; k < x[2] + n[2]; k++)
       for (int j = x[1]; j < x[1] + n[1]; j++)
         for (int i = x[0]; i < x[0] + n[0]; i++)
-          if (!inside_boundary (&vol, i, j, k))
+          if (unlikely (!inside_boundary (&vol, i, j, k)))
             g_[k][j][i] = value;
 
     DAVecRestoreArray (BHD->da, g, &g_);
   }
 }
+
