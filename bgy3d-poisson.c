@@ -250,9 +250,9 @@ static int mod (int a, int b)
   stencil.  FIXME: this  should be  probably implemented  using matrix
   free facilities of Petsc.
 */
-static void InitializeLaplaceMatrix (const DA da, const real h[3],
-                                     const Boundary *vol,
-                                     Mat *M) /* intent(out) */
+static void lap_mat_create (const DA da, const real h[3],
+                            const Boundary *vol,
+                            Mat *M) /* intent(out) */
 {
   const PetscScalar one = 1.0;
 
@@ -568,9 +568,9 @@ static void mat_create_shell (const DA da, void *ctx, Mat *A)
 
 
 /* Creates Laplacian matrix: */
-static void InitializeLaplaceMatrix (const DA da, const real h[3],
-                                     const Boundary *vol,
-                                     Mat *A)    /* intent(out) */
+static void lap_mat_create (const DA da, const real h[3],
+                            const Boundary *vol,
+                            Mat *A)    /* intent(out) */
 {
   /* Allocates storage for  a Lap struct. Make sure to  it is freed in
      mat_destroy(): */
@@ -631,7 +631,7 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
 {
   const Boundary vol = make_boundary (PD);
 
-  InitializeLaplaceMatrix (da, PD->h, &vol, M);
+  lap_mat_create (da, PD->h, &vol, M);
 
   InitializeKSPSolver (*M, ksp);
 }
