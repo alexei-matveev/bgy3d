@@ -16,6 +16,8 @@ struct Context {
                VecGetSize() from time to time */
 };
 
+static void rectangle (const int n, const int N, int* j, int* i);
+
 /*
   Put the memory  allocation here.  This has be to  called from C side
   since  we don't  want to  allocate  memory for  vector from  fortran
@@ -114,6 +116,13 @@ void bgy3d_pot_destroy (Context *s)
 
   /* free the whole context */
   free (s);
+}
+
+/* n = N * j + i, return i and j */
+static void rectangle (const int n, const int N, int* j, int* i)
+{
+  *j = n / N;
+  *i = n % N;
 }
 
 /* Test for interface */
