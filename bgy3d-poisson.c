@@ -160,6 +160,22 @@ static Boundary make_boundary (const ProblemData *PD)
   const real *h = PD->h;        /* h[3] */
   const real L = PD->interval[1] - PD->interval[0];
   const real zpad = PD->zpad;
+
+  /*
+    FIXME:  With  this definition  and  the  default  zpad =  L/2  the
+    variable "border" comes out equal 1.  For the actual boundary, see
+    inside_boundary(), this means the planes with i = 0, i = 1 and i =
+    N - 1 are  all part of the boundary (the same  holds for for j and
+    k,  of  course). Given  the  periodicity,  one  can think  of  the
+    boundary as the planes i = -1, 0, 1.  Thus the default boundary is
+    three layers "thick"! I am not sure that this was the intention.
+
+    Now that the boundary definition is localized one could switch the
+    default boundary to just one layer by omitting +1 in the following
+    expression. The code appears  to still work, though the regression
+    tests fail though with deviations  in the third or fourth digit of
+    the moments.
+  */
   const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
 
   /* Holds for all regression tests! */
