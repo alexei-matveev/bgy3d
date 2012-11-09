@@ -209,6 +209,24 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
   DAVecRestoreArray (da, b, &b_);
 }
 
+static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
+{
+  /* Get local portion of the grid */
+  int i0, j0, k0, ni, nj, nk;
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  PetscScalar ***g_;
+  DAVecGetArray (da, g, &g_);
+
+  /* loop over local portion of grid */
+  for (int k = k0; k < k0 + nk; k++)
+    for (int j = j0; j < j0 + nj; j++)
+      for (int i = i0; i < i0 + ni; i++)
+        if (unlikely (!inside_boundary (vol, i, j, k)))
+          g_[k][j][i] = value;
+
+  DAVecRestoreArray (da, g, &g_);
+}
 
 /* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
    work for b <= 0: */
@@ -479,7 +497,7 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
     here instead. Commenting this  call changes results only slightly,
     most probably due to finite convergence thresholds in KSPSolve():
   */
-  bgy3d_boundary_set (BHD, v, 0.0);
+  set_boundary (BHD->da, &vol, v, 0.0);
 
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */
@@ -497,29 +515,6 @@ void bgy3d_boundary_set (const State *BHD, Vec g, real value)
 {
   const Boundary vol = make_boundary (BHD->PD);
 
-  /* Loop over local portion of grid: */
-  {
-    /* Get local portion of the grid */
-    int x[3], n[3];
-    DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-    PetscScalar ***g_;
-    DAVecGetArray (BHD->da, g, &g_);
-
-    /*
-      The condition in the body of the loop is the opposite of:
-
-      border < i < N[0] - border
-      border < j < N[1] - border
-      border < k < N[2] - border
-    */
-    for (int k = x[2]; k < x[2] + n[2]; k++)
-      for (int j = x[1]; j < x[1] + n[1]; j++)
-        for (int i = x[0]; i < x[0] + n[0]; i++)
-          if (unlikely (!inside_boundary (&vol, i, j, k)))
-            g_[k][j][i] = value;
-
-    DAVecRestoreArray (BHD->da, g, &g_);
-  }
+  set_boundary (BHD->da, &vol, g, value);
 }
 
