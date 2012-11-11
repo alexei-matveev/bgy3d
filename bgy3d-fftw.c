@@ -187,13 +187,12 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   /*
     Since  bgy3d_fft_mat_create()  returns  DA  for real  and  complex
     vectors  to the caller,  it is  his/her responsibility  to destroy
-    them after use.   Otherwise she may be left  with dangling pointer
-    if we do it here. Of course  it is not advisable to use the matrix
-    after that.
-
-    DADestroy (fft->da);
-    DADestroy (fft->dc);
+    them after  use.  We  do this  here too. To  not let  him/her with
+    dangling pointers we should have incremented the reference counter
+    on these two objects in bgy3d_fft_mat_create().
   */
+  DADestroy (fft->da);
+  DADestroy (fft->dc);
 
   fftwnd_mpi_destroy_plan (fft->fw);
   fftwnd_mpi_destroy_plan (fft->bw);
@@ -383,8 +382,16 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
   MatShellSetOperation (*A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy_fft);
 
-  /* Also return DA  descriptors for real and complex  vectors so that
-     the user can create them: */
+  /*
+    Also return  DA descriptors for  real and complex vectors  so that
+    the user can create them.   But first increase the reference count
+    on  these  two objects  because  the  FFT  struct refers  to  them
+    too. The  user code  is still responsible  to call  DADestroy() on
+    both objects.  Otherwise the refcount will never reach zero:
+  */
+  PetscObjectReference ((PetscObject) fft->da);
+  PetscObjectReference ((PetscObject) fft->dc);
+
   *da = fft->da;
   *dc = fft->dc;
 }
