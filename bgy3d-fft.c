@@ -110,6 +110,14 @@ double bgy3d_fft_test (int m, int n, int p)
   /* This one is complex, note use of another array descriptor: */
   DACreateGlobalVector (dc, &y);
 
+  /*
+    To  test  if  reference  counting  works, let  us  destroy  array
+    descriptors right away. They are  still referenced by and used by
+    FFT matrix:
+  */
+  DADestroy (da);
+  DADestroy (dc);
+
   VecSetRandom (x, NULL);
   /* VecSet (x, 1.0); */
 
@@ -135,12 +143,12 @@ double bgy3d_fft_test (int m, int n, int p)
   VecDestroy (y);
   VecDestroy (z);
 
-  /* FIXME:  Also  destroys array  descriptors  for  real and  complex
-     vectors: */
+  /*
+    Also   destroys   array   descriptors   for  real   and   complex
+    vectors.  With proper reference  counting the  finalization order
+    should not matter:
+  */
   MatDestroy (A);
-
-  DADestroy (da);
-  DADestroy (dc);
 
   return norm;
 }
