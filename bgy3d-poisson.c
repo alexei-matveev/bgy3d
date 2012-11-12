@@ -524,7 +524,11 @@ static PetscErrorCode mat_destroy (Mat A)
 {
   /* Only  matrices  constructed   by  lap_mat_create()  are  accepted
      here: */
-  free (context (A));
+  Lap *lap = context (A);
+
+  DADestroy (lap->da);          /* destroys or decrements refcount */
+
+  free (lap);
 
   return 0;
 }
@@ -585,6 +589,10 @@ static void lap_mat_create (const DA da, const real h[3],
   lap->da = da;
   for (int i = 0; i < 3; i ++)
     lap->h[i] = h[i];
+
+  /* We will  DADestroy() it in  mat_destroy(), but it came  from user
+     space, so increment the refcount: */
+  PetscObjectReference ((PetscObject) lap->da);
 
   /* This is used to copy  over the boundary values: */
   if (vol)
