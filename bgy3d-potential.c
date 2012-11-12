@@ -19,7 +19,7 @@ struct Context {
 };
 
 /* n = N * j + i, return i and j */
-static void divmode (const int n, const int N, int* j, int* i)
+static void divmod (const int n, const int N, int* j, int* i)
 {
   *j = n / N;
   *i = n % N;
@@ -106,8 +106,8 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 
       /* ijk = iz * Nx * Ny + ij
        * ij = iy * Nx + ix */
-      divmode (ijk, s->ni * s->nj, &k1, &ij);
-      divmode (ij, s->ni, &j1, &i1);
+      divmod (ijk, s->ni * s->nj, &k1, &ij);
+      divmod (ij, s->ni, &j1, &i1);
 
       x[i][0] = i1;
       x[i][1] = j1;
