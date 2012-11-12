@@ -12,9 +12,10 @@ struct Context {
   int counter;          /* counter indicating how many are left */
   int nmax; /* length  of vector and  array, better  save it  than use
                VecGetSize() from time to time */
-  int N[3];
   real h[3];
   real interval[2];
+  int i0, j0, k0;
+  int ni, nj, nk;
 };
 
 /* n = N * j + i, return i and j */
@@ -56,10 +57,17 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   pcontext->counter = m;
   pcontext->nmax = m;
 
+  /* save local corner of DA to context */
+  pcontext->i0 = i0;
+  pcontext->j0 = j0;
+  pcontext->k0 = k0;
+  pcontext->ni = ni;
+  pcontext->nj = nj;
+  pcontext->nk = nk;
+
   /* copy N3 and h3 from PD */
   FOR_DIM
     {
-      pcontext->N[dim] = PD->N[dim];
       pcontext->h[dim] = PD->h[dim];
     }
 
@@ -73,7 +81,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 /* Value fetch interface */
 int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
-  /* head index for context->v and context->x */
+  /* how many elements would be skipped */
   const int nstart = s->nmax - s->counter;
 
   /* number of values that would be actually fetched */
@@ -82,28 +90,40 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
   /* array storing indices that would be fetched from context->v */
   int idx[nact];
 
+  /* vector content distributed to each worker starts with 'lo' and
+   * end with 'hi' */
+  PetscInt lo, hi;
+  VecGetOwnershipRange (s->v, &lo, &hi);
+
+  /* get 'real' index in the total vector index range */
+  int ijk = lo + nstart;
+  assert (ijk <= hi);
+
   /* generating coordinates */
   for (int i = 0; i < nact; i++)
     {
-      int ijk = nstart + i;
-      int ij, ix, iy, iz;
+      int ij, i1, j1, k1;
 
       /* ijk = iz * Nx * Ny + ij
        * ij = iy * Nx + ix */
       divmode (ijk, s->ni * s->nj, &k1, &ij);
       divmode (ij, s->ni, &j1, &i1);
 
-      /* apply 'real' coordinates */
-      x[i][0] = ix * s->h[0] + s->interval[0];
-      x[i][1] = iy * s->h[1] + s->interval[0];
-      x[i][2] = iz * s->h[2] + s->interval[0];
+      x[i][0] = i1;
+      x[i][1] = j1;
+      x[i][2] = k1;
+      // /* apply 'real' coordinates */
+      // x[i][0] = i1 * s->h[0] + s->interval[0];
+      // x[i][1] = j1 * s->h[1] + s->interval[0];
+      // x[i][2] = k1 * s->h[2] + s->interval[0];
 
       /* save ijk to indicies array for usage later */
       idx[i] = ijk;
+
+      ijk++;
     }
 
-
-  /* Get values from context->v[nstart : nstart + nact] */
+  /* Get values from context->v[ijk : ijk + nact] */
   PetscErrorCode ierr = VecGetValues(s->v, nact, idx, v);
   assert (!ierr);
 
@@ -128,36 +148,43 @@ void bgy3d_pot_destroy (Context *s)
   free (s);
 }
 
-/* n = N * j + i, return i and j */
-static void rectangle (const int n, const int N, int* j, int* i)
-{
-  *j = n / N;
-  *i = n % N;
-}
-
-/* Test for interface */
+/* Test for interface, to call this test function:
+ * 1. create the context pointer:
+ *  Context *pcontext = bgy3d_pot_create (da, PD, vec);
+ * 2. call the test function to check whether it prints out the
+ * 'right' results:
+ *  bgy3d_pot_test (pcontext);
+ * 3. remember to clean the memory:
+ *  bgy3d_pot_destroy (pcontext); */
 void bgy3d_pot_test (Context *s)
 {
   const int chunk_size = 120;
   real v[chunk_size];
   real x[chunk_size][3];
   int nact;
-
+  real m0, mx, my, mz; /* total sums */
 
   /* calculate moments for tests: */
-  real m0 = 0.0;
-  real mx = 0.0;
-  real my = 0.0;
-  real mz = 0.0;
+  /* initializing local sums */
+  real lm0 = 0.0;
+  real lmx = 0.0;
+  real lmy = 0.0;
+  real lmz = 0.0;
   while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
     for (int i = 0; i < nact; i++)
       {
         real h = 1.0 - v[i];
-        m0 += h;
-        mx += x[i][0] * h;
-        my += x[i][1] * h;
-        mz += x[i][2] * h;
+        lm0 += h;
+        lmx += x[i][0] * h;
+        lmy += x[i][1] * h;
+        lmz += x[i][2] * h;
       }
+
+  /* broadcast results of each worker to total sums */
+  MPI_Allreduce (&lm0, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (&lmx, &mx, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (&lmy, &my, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (&lmz, &mz, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
   PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
