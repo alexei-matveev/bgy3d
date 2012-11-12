@@ -53,7 +53,7 @@
   The next parameter  appears to have the meaning  of this interaction
   energy of such two unit charges:
 
-  EPSILON0INV = 1 / 4 π ε₀
+    EPSILON0INV = 1 / ε₀
 
   and is used to  covert electrostatic interaction energies to working
   units.  It  has to be  consistent with other force  field parameters
