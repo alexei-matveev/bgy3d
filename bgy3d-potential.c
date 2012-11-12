@@ -148,14 +148,22 @@ void bgy3d_pot_destroy (Context *s)
   free (s);
 }
 
-/* Test for interface, to call this test function:
- * 1. create the context pointer:
- *  Context *pcontext = bgy3d_pot_create (da, PD, vec);
- * 2. call the test function to check whether it prints out the
- * 'right' results:
- *  bgy3d_pot_test (pcontext);
- * 3. remember to clean the memory:
- *  bgy3d_pot_destroy (pcontext); */
+/*
+ * Test for interface, to call this test function:
+ *
+ * 1. Create the context pointer:
+ *
+ *    Context *pcontext = bgy3d_pot_create (da, PD, vec);
+ *
+ * 2. Call the test function to check whether it prints out the right
+ *    results:
+ *
+ *     bgy3d_pot_test (pcontext);
+ *
+ * 3. Remember to clean the memory:
+ *
+ *    bgy3d_pot_destroy (pcontext);
+ */
 void bgy3d_pot_test (Context *s)
 {
   const int chunk_size = 120;
