@@ -17,7 +17,13 @@ struct Context {
   real interval[2];
 };
 
-static void rectangle (const int n, const int N, int* j, int* i);
+/* n = N * j + i, return i and j */
+static void divmode (const int n, const int N, int* j, int* i)
+{
+  *j = n / N;
+  *i = n % N;
+}
+
 
 /*
   Put the memory  allocation here.  This has be to  called from C side
@@ -84,8 +90,8 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 
       /* ijk = iz * Nx * Ny + ij
        * ij = iy * Nx + ix */
-      rectangle (ijk, s->N[0] * s->N[1], &iz, &ij);
-      rectangle (ij, s->N[0], &iy, &ix);
+      divmode (ijk, s->ni * s->nj, &k1, &ij);
+      divmode (ij, s->ni, &j1, &i1);
 
       /* apply 'real' coordinates */
       x[i][0] = ix * s->h[0] + s->interval[0];
