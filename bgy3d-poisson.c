@@ -3,6 +3,64 @@
 /*  $Id: bgy3dH2O_solutes.c,v 1.3 2007-08-03 15:59:50 jager Exp $ */
 /*==========================================================*/
 
+/*
+  There are  as many ways to  solve the Poisson equation  as there are
+  ways  to construct  a discrete  representation of  Laplace operator.
+  The FFTW  convention for the  inverse FFT expressing the  real space
+  u(x) via the momentum space ũ(k) is:
+
+                kx              2πi/n
+    u  = Σ  ũ  ω  ,   with ω = e
+     x    k  k
+
+  where the summation is over 0 <= k < n. Thus, the forward difference
+
+                      kx   k
+    u   - u  = Σ  ũ  ω   (ω - 1)
+     x+1   x    k  k
+
+  and the backward difference is
+
+                      kx       -k
+    u - u    = Σ  ũ  ω   (1 - ω  ).
+     x   x-1    k  k
+
+  The second-order difference is thus
+
+                              kx   k        -k
+    u   - 2u  + u    = Σ  ũ  ω   (ω  - 2 + ω  )
+     x+1    x    x-1    k  k
+
+                                  kx    2
+                     = - 4 Σ  ũ  ω   sin (πk/n).
+                            k  k
+
+  Note that a plane wave  ω^kx is an eigenfunction of the second-order
+  difference operator with an eigenvalue
+
+    2 cos(2πk/n) - 2 =  -4 sin^2 (πk/n).
+
+  The eigenvalues for k and k' = n - k are equal. For small ratios k/n
+  the eigenvalues  are indeed  approximately proportional to  k^2. For
+  the higher-order O(h^4) stencil
+
+    (- u    + 16u    - 30u  + 16u    - u   ) / 12
+        x+2      x+1      x      x-1    x-2
+
+  The corresponding eigenvalues would have been
+
+    (-2 cos(4πk/n) + 32 cos(2πk/n) - 30) / 12
+
+  which has  a similar quadratic shape  for small k/n but  a lower and
+  sharper minimum at around k  = n/2.  This similarity is probably the
+  reason the original code uses the spectral representation of Laplace
+  operator with eigenvalues proportional to k^2 for k <= n/2 and to (n
+  - k)^2 otherwise thus  having a "casp" at k =  n/2.  Such a spectrum
+  will correspond  to a non-compact  stencil in real space,  I assume.
+  What are the arguments in favor of and against a particular approach
+  is not quite clear.
+*/
+
 #include <stdbool.h>
 #include "bgy3d.h"
 #include "bgy3d-poisson.h"
