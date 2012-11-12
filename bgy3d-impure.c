@@ -809,9 +809,13 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   for (int i = 0; i < m; i++)
     VecAXPY (ve, solvent[i].charge, g[i]);
 
-  /* Solve Poisson  equation in place. Note that  the output potential
-     is in kcals as all energies in this code are: */
-  bgy3d_poisson (BHD, ve, ve, BHD->PD->rho); /* aliasing */
+  /*
+    Solve Poisson  equation in place. Note that  the output potential
+    is in kcals (see the definiton of EPSILON0INV) as all energies in
+    this code are:
+  */
+  bgy3d_poisson (BHD, ve, ve,   /* aliasing */
+                 -4 * M_PI * EPSILON0INV * BHD->PD->rho);
 
   /*
    Solving Poisson  equation by  FFT results in  a potential  with the

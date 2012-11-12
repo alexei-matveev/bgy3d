@@ -317,10 +317,11 @@ void bgy3d_solute_field (const State *BHD,
     }
 
   /*
-   * 2. Solve  the Poisson equation "in-place" by  specifying the same
-   * Vec uc as input and output:
+   * 2.  Solve  the Poisson  equation,  Δu  =  -4πρ/ε₀, "in-place"  by
+   * specifying the same Vec uc as input and output:
    */
-  bgy3d_poisson (BHD, uc, uc, 1.0 * damp); /* NOTE: argument aliasing! */
+  bgy3d_poisson (BHD, uc, uc,   /* NOTE: argument aliasing! */
+                 -4 * M_PI * EPSILON0INV * damp);
 }
 
 /*

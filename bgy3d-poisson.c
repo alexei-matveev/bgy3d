@@ -25,6 +25,9 @@
   Vec rho is intent(in).
   real q is the overall factor.
 
+  To get the potential in kcal/mol as used in the rest of the code you
+  need to supply q = -4π/ε₀ that is -4 * M_PI * EPSILON0INV.
+
   As a  matter of  fact, it  appears that one  could provide  the same
   factual parameter  for rho and  uc to effectively solve  the Poisson
   equation "in place".
@@ -35,11 +38,14 @@
 void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
   const real *interval = BHD->PD->interval; /* [2] */
-  const real *h = BHD->PD->h;   /* h[3] */
   const int *N = BHD->PD->N;    /* N[3] */
 
+  /* Otherwise needs some work: */
+  assert (N[0] == N[1]);
+  assert (N[0] == N[2]);
+
   const real L = interval[1] - interval[0];
-  const real h3 = h[0] * h[1] * h[2];
+  const int NNN = N[0] * N[1] * N[2];
 
   /* Scratch complex vector: */
   Vec work;
@@ -50,32 +56,33 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   MatMult (BHD->fft_mat, rho, work);
 
   /*
-    Solving Poisson Equation (SI units) with FFT and IFFT:
+    Solving Poisson Equation (note the  absence of -4π factor) with FFT
+    and IFFT:
 
-        - Δu(x, y, z) = (1 / ε₀) ρ(x, y, z)
+        Δu(x, y, z) = ρ(x, y, z)
 
     because of x = ih, y = jh, and z = kh, with grid spacing h = L/n:
 
-        - n² / L²  Δu(i, j, k) = (1 / ε₀) ρ(i, j, k)
+        n² / L²  Δu(i, j, k) = ρ(i, j, k)
 
     In Fourier  space the relation  between FFT images  of ρ and  u is
     (see FFTW manual "What FFTW Really Computes"):
 
-        u(kx, ky, kz) = 1 / (4 π² ε₀ k² / L²) ρ(kx, ky, kz)
+        u(kx, ky, kz) = ρ(kx, ky, kz) / (4 π² k² / L²)
 
     with
 
         k² = kx² + ky² + kz²
 
-    IFFT (see FFTW manual "What FFTW Really Computes"):
+    being the  sum of  squared integers.  Finally  do the  inverse FFT
+    (see  FFTW manual "What  FFTW Really  Computes").  Because  of the
+    normalization IFFT(FFT(f)) = n³ * f we have:
 
-    because: IFFT(u(kx, ky, kz)) = n³ * u(i, j, k)
-
-        u(i, j, k) = h³ / L³  * IFFT(u(kx, ky, kz))
+        u(i, j, k) = 1 / n³  * IFFT(u(kx, ky, kz))
   */
 
-  /* EPSILON0INV = 1 / 4 π ε₀: */
-  const real scale = q * EPSILON0INV / M_PI * h3 / (L * L * L);
+  /* With q = -4π/ε₀ you would get the potential: */
+  const real scale = - q / NNN / 4;
 
   /* Loop over local portion of the k-grid */
   {
@@ -106,7 +113,11 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
               }
             else
               {
-                const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+                /* For  i, j,  and k  less than  or equal  to  N/2 and
+                   uniform box of size  L this expression evaluates to
+                   (π/L)² (i² + j² + k²) */
+                const real k2 = SQR (M_PI / L) *
+                  (SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]));
 
                 const real fac = scale / k2;
 
@@ -118,7 +129,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     DAVecRestoreArray (BHD->dc, work, &work_);
   }
 
-  /* uc := IFFT(uc(kx, ky, kz)) */
+  /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
   MatMultTranspose (BHD->fft_mat, work, uc);
 
   VecDestroy (work);
