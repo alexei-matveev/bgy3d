@@ -184,8 +184,14 @@ void bgy3d_pot_test (Context *s)
       }
 
   /* broadcast results of each worker to total sums */
-  MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-  MPI_Allreduce (MPI_IN_PLACE, m1, 3 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  {
+    int err;
+    err = MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+    assert (err == MPI_SUCCESS);
+
+    err = MPI_Allreduce (MPI_IN_PLACE, m1, 3 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+    assert (err == MPI_SUCCESS);
+  }
 
   PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
   PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
