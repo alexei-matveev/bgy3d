@@ -162,29 +162,27 @@ void bgy3d_pot_test (Context *s)
   real v[chunk_size];
   real x[chunk_size][3];
   int nact;
-  real m0, mx, my, mz; /* total sums */
 
-  /* calculate moments for tests: */
-  /* initializing local sums */
-  real lm0 = 0.0;
-  real lmx = 0.0;
-  real lmy = 0.0;
-  real lmz = 0.0;
+  /* Calculate moments for tests. First initializing local sums: */
+  real m0 = 0.0;
+  real mx = 0.0;
+  real my = 0.0;
+  real mz = 0.0;
   while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
     for (int i = 0; i < nact; i++)
       {
         real h = 1.0 - v[i];
-        lm0 += h;
-        lmx += x[i][0] * h;
-        lmy += x[i][1] * h;
-        lmz += x[i][2] * h;
+        m0 += h;
+        mx += x[i][0] * h;
+        my += x[i][1] * h;
+        mz += x[i][2] * h;
       }
 
   /* broadcast results of each worker to total sums */
-  MPI_Allreduce (&lm0, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-  MPI_Allreduce (&lmx, &mx, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-  MPI_Allreduce (&lmy, &my, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-  MPI_Allreduce (&lmz, &mz, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (MPI_IN_PLACE, &mx, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (MPI_IN_PLACE, &my, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  MPI_Allreduce (MPI_IN_PLACE, &mz, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
   PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
