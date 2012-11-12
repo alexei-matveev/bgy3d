@@ -8,8 +8,8 @@
   typedef struct Context Context is in the header file.
 */
 struct Context {
-  Vec v;    /* vector storing potential values */
-  int counter;              /* counter indicating how many are left */
+  Vec v;                /* ref to a vector storing potential values */
+  int counter;          /* counter indicating how many are left */
   int nmax; /* length  of vector and  array, better  save it  than use
                VecGetSize() from time to time */
   int N[3];
@@ -23,6 +23,11 @@ static void rectangle (const int n, const int N, int* j, int* i);
   Put the memory  allocation here.  This has be to  called from C side
   since  we don't  want to  allocate  memory for  vector from  fortran
   return the pointer to context after memory allocation.
+
+  Vec v is saved in the returned iterator context by reference, not by
+  copying.  User  code should  not change the  contents of  the vector
+  while  iterating over  it.  It  may though  VecDestroy()  the vector
+  right after calling this function as we will increment the refcount.
 */
 Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
@@ -36,11 +41,10 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   /* memory for context pointer */
   Context *pcontext = malloc(sizeof *pcontext);
 
-  /* create vector member in context */
-  DACreateGlobalVector (da, &pcontext->v);
-
-  /* Copy the value from input vector */
-  VecCopy (v, pcontext->v);
+  /* Do not copy the input  vector, save a reference instead, but also
+     increment the refcount. We will have to VecDestroy() it too: */
+  pcontext->v = v;
+  PetscObjectReference ((PetscObject) pcontext->v);
 
   /* set counter number and save vector length */
   pcontext->counter = m;
@@ -110,8 +114,8 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 /* clean up the memory for public *pcontext */
 void bgy3d_pot_destroy (Context *s)
 {
-
-  /* free context->v */
+  /* Decrement refcount and destroy the vector if the refcount reached
+     zero: */
   VecDestroy (s->v);
 
   /* free the whole context */
