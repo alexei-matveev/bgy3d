@@ -156,33 +156,37 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
   real x[chunk_size][3];
   int nact;
 
-  /* Calculate moments for tests. First initializing local sums: */
-  real m0 = 0.0;
-  real m1[3] = {0.0, 0.0, 0.0};
-  while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
-    for (int i = 0; i < nact; i++)
+  /* Iterate several times to test wrap-around: */
+  for (int times = 0; times < 3; times++)
+    {
+      /* Calculate moments for tests. First initializing local sums: */
+      real m0 = 0.0;
+      real m1[3] = {0.0, 0.0, 0.0};
+      while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
+        for (int i = 0; i < nact; i++)
+          {
+            real h = 1.0 - v[i];
+            m0 += h;
+            for (int j = 0; j < 3; j++)
+              m1[j] += x[i][j] * h;
+          }
+
+      /* broadcast results of each worker to total sums */
       {
-        real h = 1.0 - v[i];
-        m0 += h;
-        for (int j = 0; j < 3; j++)
-          m1[j] += x[i][j] * h;
+        int err;
+        err = MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+        assert (err == MPI_SUCCESS);
+
+        err = MPI_Allreduce (MPI_IN_PLACE, m1, 3 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+        assert (err == MPI_SUCCESS);
       }
 
-  /* broadcast results of each worker to total sums */
-  {
-    int err;
-    err = MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-    assert (err == MPI_SUCCESS);
-
-    err = MPI_Allreduce (MPI_IN_PLACE, m1, 3 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-    assert (err == MPI_SUCCESS);
-  }
-
-  PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
-  PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
-  PetscPrintf (PETSC_COMM_WORLD, "mx = %lf\n", m1[0] / m0);
-  PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", m1[1] / m0);
-  PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", m1[2] / m0);
+      PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
+      PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
+      PetscPrintf (PETSC_COMM_WORLD, "mx = %lf\n", m1[0] / m0);
+      PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", m1[1] / m0);
+      PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", m1[2] / m0);
+    }
 
   bgy3d_pot_destroy (s);
 }
