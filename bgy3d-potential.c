@@ -144,8 +144,13 @@ void bgy3d_pot_destroy (Context *s)
  *
  *    bgy3d_pot_destroy (pcontext);
  */
-void bgy3d_pot_test (Context *s)
+void bgy3d_pot_test (const State *BHD, Vec vec)
 {
+  PetscPrintf (PETSC_COMM_WORLD, "Test to potential interface\n");
+
+  /* Make an iterator: */
+  Context *s = bgy3d_pot_create (BHD->da, BHD->PD, vec);
+
   const int chunk_size = 120;
   real v[chunk_size];
   real x[chunk_size][3];
@@ -179,4 +184,5 @@ void bgy3d_pot_test (Context *s)
   PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", m1[1] / m0);
   PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", m1[2] / m0);
 
+  bgy3d_pot_destroy (s);
 }
