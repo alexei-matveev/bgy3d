@@ -43,7 +43,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 
   /* Get local portion of the grid */
   DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-  const int m = ni * nj * nk;
+  const int local_size = ni * nj * nk;
 
   /* memory for context pointer */
   Context *s = malloc (sizeof *s);
@@ -54,8 +54,8 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   PetscObjectReference ((PetscObject) s->v);
 
   /* set counter number and save vector length */
-  s->counter = m;
-  s->local_size = m;
+  s->counter = local_size;
+  s->local_size = local_size;
 
   /* save local corner of DA to context */
   s->i0 = i0;
