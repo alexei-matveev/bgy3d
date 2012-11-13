@@ -1,5 +1,29 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 
+/*
+  To use this interface for iterating over the field Vec vec:
+
+  1. Create the context pointer:
+
+     Context *iter = bgy3d_pot_create (da, PD, vec);
+
+  2. Iterate  over the grid  doing something usefull with  the values,
+     eg. computing the integral:
+
+       while ((n = bgy3d_pot_get_value (iter, chunk_size, x, v)))
+         for (int i = 0; i < n; i++)
+           ... do something with coordinates x[i] and values v[i] ...
+
+     Note that the values from Vec  vec in v[] are sacaled by h^3, the
+     grid weight.
+
+  3. Remember to clean the memory:
+
+     bgy3d_pot_destroy (iter);
+
+  Vec vec does  not be a potential,  it can be any field  on the grid.
+*/
+
 #include "bgy3d.h"
 #include "bgy3d-potential.h"
 
@@ -131,22 +155,7 @@ void bgy3d_pot_destroy (Context *s)
   free (s);
 }
 
-/*
- * Test for interface, to call this test function:
- *
- * 1. Create the context pointer:
- *
- *    Context *pcontext = bgy3d_pot_create (da, PD, vec);
- *
- * 2. Call the test function to check whether it prints out the right
- *    results:
- *
- *     bgy3d_pot_test (pcontext);
- *
- * 3. Remember to clean the memory:
- *
- *    bgy3d_pot_destroy (pcontext);
- */
+/* Example usage: */
 void bgy3d_pot_test (const State *BHD, Vec vec)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Test to potential interface\n");
