@@ -73,6 +73,8 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 /* Value fetch interface */
 int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
+  assert (n != 0);            /* need to decide how to handle that! */
+
   /* How many elements we have: */
   const int local_size = s->ni * s->nj * s->nk;
   const real dV = s->h[0] * s->h[1] * s->h[2];
