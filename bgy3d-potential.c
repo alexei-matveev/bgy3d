@@ -8,7 +8,9 @@
   typedef struct Context Context is in the header file.
 */
 struct Context {
+  DA da;                /* array descriptor */
   Vec v;                /* ref to a vector storing potential values */
+  PetscScalar ***v_;    /* v_[k][j][i] points to the real data */
   int counter;          /* counter indicating how many are left */
   int local_size; /* length of  vector and array, better  save it than
                      use VecGetSize() from time to time */
@@ -38,32 +40,27 @@ static void divmod (const int n, const int N, int* j, int* i)
 */
 Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 {
-  int i0, j0, k0;
-  int ni, nj, nk;
-
-  /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-  const int local_size = ni * nj * nk;
-
   /* memory for context pointer */
   Context *s = malloc (sizeof *s);
+
+  s->da = da;
+  PetscObjectReference ((PetscObject) s->da); /* DADestroy() it! */
 
   /* Do not copy the input  vector, save a reference instead, but also
      increment the refcount. We will have to VecDestroy() it too: */
   s->v = v;
   PetscObjectReference ((PetscObject) s->v);
 
-  /* set counter number and save vector length */
-  s->counter = local_size;
-  s->local_size = local_size;
+  /* From  now  on  v_[k][j][i]  can   be  used  to  access  a  vector
+     element: */
+  DAVecGetArray (da, s->v, &s->v_);
 
-  /* save local corner of DA to context */
-  s->i0 = i0;
-  s->j0 = j0;
-  s->k0 = k0;
-  s->ni = ni;
-  s->nj = nj;
-  s->nk = nk;
+  /* Get local portion of the grid */
+  DAGetCorners (da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
+
+  /* Set counter number and save redundant vector length: */
+  s->local_size = s->ni * s->nj * s->nk;
+  s->counter = s->local_size;
 
   /* copy N3 and h3 from PD */
   FOR_DIM
@@ -85,45 +82,37 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
   /* number of values that would be actually fetched */
   const int nact = MIN(n, s->counter);
 
-  /* array storing indices that would be fetched from context->v */
-  int idx[nact];
-
-  /* vector content distributed to each worker starts with 'lo' and
-   * end with 'hi' */
-  PetscInt lo, hi;
-  VecGetOwnershipRange (s->v, &lo, &hi);
-
-  /* get 'real' index in the total vector index range */
-  int ijk = lo + nstart;
-  assert (ijk <= hi);
-
   /* generating coordinates */
-  for (int i = 0; i < nact; i++)
+  int p = 0;
+  for (int ijk = nstart; ijk < nstart + nact; ijk++)
     {
-      int ij, i1, j1, k1;
+      int ij, i, j, k;
 
-      /* ijk = iz * Nx * Ny + ij
-       * ij = iy * Nx + ix */
-      divmod (ijk, s->ni * s->nj, &k1, &ij);
-      divmod (ij, s->ni, &j1, &i1);
+      /*
+        Get coordinatens i, j, and k within the local block:
 
-      x[i][0] = i1;
-      x[i][1] = j1;
-      x[i][2] = k1;
+        ijk = k * NI * NJ + ij
+        ij = j * NI + i
+      */
+      divmod (ijk, s->ni * s->nj, &k, &ij);
+      divmod (ij, s->ni, &j, &i);
+
+      /* Add corner coordinates: */
+      i += s->i0;
+      j += s->j0;
+      k += s->k0;
+
+      x[p][0] = i;
+      x[p][1] = j;
+      x[p][2] = k;
+      v[p] = s->v_[k][j][i];
       // /* apply 'real' coordinates */
       // x[i][0] = i1 * s->h[0] + s->interval[0];
       // x[i][1] = j1 * s->h[1] + s->interval[0];
       // x[i][2] = k1 * s->h[2] + s->interval[0];
-
-      /* save ijk to indicies array for usage later */
-      idx[i] = ijk;
-
-      ijk++;
+      p++;
     }
-
-  /* Get values from context->v[ijk : ijk + nact] */
-  PetscErrorCode ierr = VecGetValues(s->v, nact, idx, v);
-  assert (!ierr);
+  assert (p == nact);
 
   /* update counter */
   s->counter -= nact;
@@ -138,8 +127,12 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 /* clean up the memory for public *pcontext */
 void bgy3d_pot_destroy (Context *s)
 {
-  /* Decrement refcount and destroy the vector if the refcount reached
+  /* Required complement of DAVecGetArray(): */
+  DAVecRestoreArray (s->da, s->v, &s->v_);
+
+  /* Decrement  refcounts and  destroy  them if  the refcount  reached
      zero: */
+  DADestroy (s->da);
   VecDestroy (s->v);
 
   /* free the whole context */
