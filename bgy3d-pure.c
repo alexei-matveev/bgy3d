@@ -98,14 +98,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   DACreateGlobalVector(da, &BHD->cHO);
   FOR_DIM
     {
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F[0][0][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F[1][1][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F[0][1][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[0][0][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[1][1][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->F_l[0][1][dim]); */
-/*       VecDuplicate(BHD->g_ini[0], &BHD->v[dim]); */
-
       DACreateGlobalVector(da, &BHD->F[0][0][dim]);
       DACreateGlobalVector(da, &BHD->F[1][1][dim]);
       DACreateGlobalVector(da, &BHD->F[0][1][dim]);
@@ -718,17 +710,6 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
       DAVecRestoreArray(da, BHD->F_l[1][1][dim], &fOl_vec[dim]);
       DAVecRestoreArray(da, BHD->F_l[0][1][dim], &fHOl_vec[dim]);
     }
-
-
-
-
-
-/*   VecAXPY(BHD->g_ini[0], damp*beta , BHD->u2[0][0]); */
-/*   VecAXPY(BHD->g_ini[1], damp*beta , BHD->u2[1][1]); */
-
-/*   VecView(BHD->F[0][1][0],PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
 }
 
 /* All vectors are complex here. No side effects. */
