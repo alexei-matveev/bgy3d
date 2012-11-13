@@ -145,8 +145,6 @@ static State initialize_state (const ProblemData *PD)
   BHD.LJ_paramsHO[2] = -1;
 
   BHD.gfg2_fft = NULL;
-  BHD.x_lapl[0] = NULL;
-  BHD.x_lapl[1] = NULL;
 
   /* FIXME: broken, see the comments inside the function itself: */
   load (&BHD, BHD.g2);

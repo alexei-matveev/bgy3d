@@ -196,7 +196,6 @@ typedef struct State
 #ifdef L_BOUNDARY
   Mat M;
   KSP ksp;
-  Vec x_lapl[2], xHO;           /* solutions of the Laplace */
 #endif
 
 #ifdef L_BOUNDARY_MG
