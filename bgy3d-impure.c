@@ -106,14 +106,6 @@ static State initialize_state (const ProblemData *PD)
   FOR_DIM
     DACreateGlobalVector (da, &BHD.v[dim]);
 
-
-#ifdef L_BOUNDARY
-  DACreateGlobalVector(da, &BHD.x_lapl[0]);
-  DACreateGlobalVector(da, &BHD.x_lapl[1]);
-  VecSet(BHD.x_lapl[0], 0.0);
-  VecSet(BHD.x_lapl[1], 0.0);
-#endif
-
   /* Allocate memory for fft */
   FOR_DIM
     {
@@ -141,8 +133,6 @@ static State initialize_state (const ProblemData *PD)
         BHD.u2_fft[j][i] = BHD.u2_fft[i][j];
       }
 
-  BHD.gfg2_fft = NULL;          /* not used with impurities */
-
   /* Not used with impurities: */
   BHD.LJ_paramsH[0] = -1;
   BHD.LJ_paramsH[1] = -1;
@@ -153,6 +143,10 @@ static State initialize_state (const ProblemData *PD)
   BHD.LJ_paramsHO[0] = -1;
   BHD.LJ_paramsHO[1] = -1;
   BHD.LJ_paramsHO[2] = -1;
+
+  BHD.gfg2_fft = NULL;
+  BHD.x_lapl[0] = NULL;
+  BHD.x_lapl[1] = NULL;
 
   /* FIXME: broken, see the comments inside the function itself: */
   load (&BHD, BHD.g2);
@@ -231,9 +225,8 @@ static void finalize_state (State *BHD)
 #ifdef L_BOUNDARY
   MatDestroy (BHD->M);
   KSPDestroy(BHD->ksp);
-  VecDestroy(BHD->x_lapl[1]);
-  VecDestroy(BHD->x_lapl[0]);
 #endif
+
 #ifdef L_BOUNDARY_MG
   DMMGDestroy(BHD->dmmg);
 #endif
@@ -895,8 +888,23 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
+
+  /*
+    These  will be  used to  store solutions  of the  Laplace boundary
+    problem  across iterations. Though  by now  I am  not sure  if KSP
+    solver  really uses  them as  initial guess  as opposed  to always
+    starting iterations from zero:
+  */
+  Vec x_lapl[2];                /* real */
+  for (int i = 0; i < 2; i ++)
+    {
+      DACreateGlobalVector (BHD.da, &x_lapl[i]);
+      VecSet (x_lapl[i], 0.0);
+    }
 #endif
+
 #ifdef L_BOUNDARY_MG
+  /* Create KSP environment */
   InitializeDMMGSolver(&BHD);
 #endif
 
@@ -1100,7 +1108,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             intent(out) in  these calls, is,  well, a work  array. Its
             value is ignored.
           */
-          bgy3d_impose_laplace_boundary (&BHD, u0[i], work, BHD.x_lapl[i]);
+          bgy3d_impose_laplace_boundary (&BHD, u0[i], work, x_lapl[i]);
 
           /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
           ComputeH2O_g (g[i], u0[i], du[i]);
@@ -1211,12 +1219,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               VecAXPY (du_acc, solvent[i].charge, uc);
 
               /*
-                Vec   du_acc  and   BHD.x_lapl[i]   are  intent(inout)
-                here. Try  to preserve  the values of  x_lapl[] across
-                iterations to save time  in the iterative solver.  Vec
-                t_vec is used as a work array.
+                Vec du_acc  and x_lapl[i] are  intent(inout) here. Try
+                to preserve  the values of  x_lapl[] across iterations
+                to save  time in the  iterative solver.  Vec  t_vec is
+                used as a work array.
               */
-              bgy3d_impose_laplace_boundary (&BHD, du_acc, t_vec, BHD.x_lapl[i]);
+              bgy3d_impose_laplace_boundary (&BHD, du_acc, t_vec, x_lapl[i]);
 
               /*
                 Mix du and du_new with a fixed ration "a":
@@ -1345,6 +1353,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       VecDestroy (du[i]);
       VecDestroy (g_fft[i]);
+      VecDestroy (x_lapl[i]);
 
       for (int j = 0; j <= i; j++)
         {
@@ -1444,7 +1453,21 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
+
+  /*
+    These  will be  used to  store solutions  of the  Laplace boundary
+    problem  across iterations. Though  by now  I am  not sure  if KSP
+    solver  really uses  them as  initial guess  as opposed  to always
+    starting iterations from zero:
+  */
+  Vec x_lapl[2];                /* real */
+  for (int i = 0; i < 2; i ++)
+    {
+      DACreateGlobalVector (BHD.da, &x_lapl[i]);
+      VecSet (x_lapl[i], 0.0);
+    }
 #endif
+
 #ifdef L_BOUNDARY_MG
   /* Create KSP environment */
   InitializeDMMGSolver(&BHD);
@@ -1535,8 +1558,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < 2; i++)
         VecScale (BHD.g_ini[i], BHD.PD->beta);
 
-      bgy3d_impose_laplace_boundary (&BHD, g0H, tH, BHD.x_lapl[0]);
-      bgy3d_impose_laplace_boundary (&BHD, g0O, tH, BHD.x_lapl[1]);
+      bgy3d_impose_laplace_boundary (&BHD, g0H, tH, x_lapl[0]);
+      bgy3d_impose_laplace_boundary (&BHD, g0O, tH, x_lapl[1]);
 
       /* g=g0*exp(-dg) */
       ComputeH2O_g( g[0], g0H, dgH);
@@ -1584,7 +1607,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
 
-          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, BHD.x_lapl[0]);
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, x_lapl[0]);
 
           VecCopy(dg_new, dg_newH);
 
@@ -1612,7 +1635,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
 
-          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, BHD.x_lapl[1]);
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, x_lapl[1]);
 
           VecCopy(dg_new, dg_newO);
 
