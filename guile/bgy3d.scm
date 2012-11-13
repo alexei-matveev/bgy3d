@@ -4,6 +4,7 @@
 ;;;
 (define-module (guile bgy3d)
   #:use-module (srfi srfi-1)            ; list manipulation
+  #:use-module (srfi srfi-11)           ; let-values
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (ice-9 getopt-long)
@@ -26,6 +27,7 @@
 ;;;
 ;;;   bgy3d-run-solvent
 ;;;   bgy3d-run-solute
+;;;   bgy3d-pot-destroy
 ;;;   bgy3d-vec-destroy
 ;;;   bgy3d-vec-save
 ;;;   bgy3d-vec-load
@@ -329,7 +331,8 @@ computes the sum of all vector elements."
     ;; Vecs in a list, it is the callers responsibility to destroy
     ;; them:
     ;;
-    (let ((g1 (bgy3d-run-solute solute settings))) ; reads g??.bin
+    (let-values (((g1 ve) (bgy3d-run-solute solute settings))) ; reads g??.bin
+      (bgy3d-pot-destroy ve)            ; not yet used
       ;;
       ;; Save g1-files to disk:
       ;;
@@ -418,8 +421,9 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'BGYM2Site #f)
       (let ((name (option-ref opts 'solute "hydrogen chloride")))
-        (let ((g1 (bgy3d-run-solute (find-solute name)
-                                    '()))) ; Use defaults and Petsc env
+        (let-values (((g1 ve) (bgy3d-run-solute (find-solute name)
+                                                '()))) ; Use defaults and Petsc env
+          (bgy3d-pot-destroy ve)                       ; not yet used
           (map bgy3d-vec-save *g1-file-names* g1)
           (map bgy3d-vec-destroy g1)))) ; dont forget to destroy them
      ;;
@@ -458,7 +462,8 @@ computes the sum of all vector elements."
          ;;
          (let ((solutes (map find-solute args)))
            (map (lambda (solute)
-                  (let ((g1 (bgy3d-run-solute solute settings)))
+                  (let-values (((g1 ve) (bgy3d-run-solute solute settings)))
+                    (bgy3d-pot-destroy ve) ; not yet used
                     ;;
                     ;; Save distributions if requested from command
                     ;; line. FIXME: the file names do not relate to

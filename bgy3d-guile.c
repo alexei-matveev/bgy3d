@@ -229,20 +229,35 @@ static SCM guile_run_solute (SCM solute, SCM settings)
 
   // printf ("qm-density=%p\n", qm_density); /* print funptr in hex */
 
-  /* This  takes part  of the  input  from the  disk, returns  solvent
-     distribution in  Vec g[]  (dont forget to  destroy them).   If no
-     additional charge distribution is associated with the solute pass
-     NULL as the function pointer: */
-  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g, NULL);
+  /*
+    This  takes part  of  the  input from  the  disk, returns  solvent
+    distribution  in Vec  g[] (dont  forget to  destroy them).   If no
+    additional charge distribution is  associated with the solute pass
+    NULL as  the function  pointer. Similarly, if  you do not  want an
+    iterator over the solvent potential pass NULL:
+  */
+  Context *iter;
+  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g, &iter);
 
   free (name);
   free (sites);
 
   /* Caller, dont forget to destroy them! */
-  return scm_list_2 (scmx_ptr (g[0]), scmx_ptr (g[1]));
+  SCM gs = scm_list_2 (scmx_ptr (g[0]), scmx_ptr (g[1]));
+  SCM v = scmx_ptr (iter);
+
+  /* Return multiple values: */
+  return scm_values (scm_list_2 (gs, v));
 }
 
 
+
+static SCM guile_pot_destroy (SCM iter)
+{
+  bgy3d_pot_destroy (void_ptr (iter));
+
+  return scm_from_int (0);
+}
 
 static SCM guile_vec_destroy (SCM vec)
 {
@@ -364,6 +379,7 @@ static SCM guile_bgy3d_module_init (void)
      module itself or by an explicit (use-modules ...): */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
   scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
