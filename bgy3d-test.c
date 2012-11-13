@@ -169,8 +169,9 @@ static void ComputeError(Vec gmax, BGY3dFourierData BDDmax, int Nmax, Vec g, BGY
 }
 
 
-Vec BGY3dDiv_test(const ProblemData *PD, Vec g_ini)
+Vec BGY3dDiv_test (const ProblemData *PD, Vec g_ini)
 {
+  (void) g_ini;                 /* FIXME: interface obligation! */
   BGY3dDivData BDD;
   Vec g,  f, rhs;
   Mat SM;
@@ -233,8 +234,9 @@ Vec BGY3dDiv_test(const ProblemData *PD, Vec g_ini)
 
 }
 
-Vec BGY3dDivFourier_test(ProblemData *PD, Vec g_ini)
+Vec BGY3dDivFourier_test (ProblemData *PD, Vec g_ini)
 {
+  (void) g_ini;                 /* FIXME: interface obligation! */
   BGY3dDivData BDD;
   Vec g,  f, rhs;
   PetscScalar sigma_g=1.0, sigma_K=1.0, f_norm_l2, f_norm_max;
@@ -553,8 +555,9 @@ void InitializeConvolutionData(BGY3dFourierData BDD, real sigma_g1, real sigma_g
 }
 
 
-Vec BGY3d_Convolution_Test(const ProblemData *PD, Vec g_ini)
+Vec BGY3d_Convolution_Test (const ProblemData *PD, Vec g_ini)
 {
+  (void) g_ini;                 /* FIXME: interface obligation! */
   BGY3dFourierData BDD;
   Vec sol,  f, gg;
   PetscScalar sigma_g1=1.0, sigma_g2=1.0, f_norm_l2, f_norm_max;
