@@ -332,7 +332,6 @@ computes the sum of all vector elements."
     ;; them:
     ;;
     (let-values (((g1 ve) (bgy3d-run-solute solute settings))) ; reads g??.bin
-      (bgy3d-pot-destroy ve)            ; not yet used
       ;;
       ;; Save g1-files to disk:
       ;;
@@ -348,7 +347,8 @@ computes the sum of all vector elements."
       ;;
       ;; Dont forget to destroy them after use:
       ;;
-      (map bgy3d-vec-destroy g1))))
+      (map bgy3d-vec-destroy g1)
+      ve)))       ; return iterator, caller must bgy3d-pot-destroy it!
 
 ;;;
 ;;; Specifications of command line  flags common for old- and new-main

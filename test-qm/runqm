@@ -29,7 +29,8 @@
              ;; BGY3d functionality:
              ;;
              ((guile bgy3d)
-              #:select (bgy3d-run)))
+              #:select (bgy3d-run
+                        bgy3d-pot-destroy)))
 
 ;;;
 ;;; The   input  file   is  supposed   to  contain   (at   least)  two
@@ -61,5 +62,6 @@
   ;;
   (qm-add-hook! (lambda (hook . rest)
                   (if (equal? hook "bgy3d")
-                      (apply bgy3d-run table rest))))
+                      (let ((ve (apply bgy3d-run table rest)))
+                        (bgy3d-pot-destroy ve)))))
   (qm-main argv))
