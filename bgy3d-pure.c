@@ -15,11 +15,6 @@
 
 #define R_r  9
 #define R_l  7
-#define ITERTOL_DOWN 0.9
-#define ITERTOL_UP   5.0e-1
-
-
-#define ZEROPAD 5
 
 #define SL 16.0
 #define SR 16.0
@@ -64,8 +59,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
   BHD->PD = PD;
 
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
-  //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
   PetscPrintf(PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG= %e\n", NORM_REG);
   PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
@@ -634,11 +627,6 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
 /*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
 /*          damp * beta* Coulomb( r_s, BHD->LJ_paramsHO); */
 
-          /* Zero padding for force vectors */
-/*        if( r[0] < ZEROPAD && r[0] >= -ZEROPAD && */
-/*            r[1] < ZEROPAD && r[1] >= -ZEROPAD && */
-/*            r[2] < ZEROPAD && r[2] >= -ZEROPAD ) */
-            {
            FOR_DIM
             {
               /* Lennard-Jones */
@@ -688,9 +676,6 @@ void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
                 exp(-beta* LJ_repulsive( r_s, epsilonO, sigmaO));
               cHO_vec[i[2]][i[1]][i[0]] =
                 exp(-beta* LJ_repulsive( r_s, epsilonHO, sigmaHO));
-
-
-            }
             }
             }
         }
@@ -2631,53 +2616,6 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
       dgHO_old = dgHO_norm/aHO;
       /*********************************/
 
-       //a = a0 * ( 1.0 + 0.5 * (0.5-(rand()/(real)RAND_MAX)));
-
-      /* Set a */
-/*       dgHO_norm /= a; */
-/*       dgH_norm /= a; */
-/*       dgO_norm /= a; */
-/*       if(iter>0) */
-/*      {  */
-/*        if( dgH_norm/dgH_old > ITERTOL_DOWN && dgO_norm/dgO_old > ITERTOL_DOWN && */
-/*            dgHO_norm/dgHO_old > ITERTOL_DOWN && a<0.5) */
-/*          a *= 1.1; */
-/*        if ( (dgH_norm > dgH_old || dgO_norm > dgO_old || dgHO_norm > dgHO_old ) && a>0.01) */
-/*          a /=2; */
-/*        PetscPrintf(PETSC_COMM_WORLD,"\tNew lambda= %f", a);  */
-
-/*      } */
-/*       dgHO_old = dgHO_norm; */
-/*       dgH_old = dgH_norm; */
-/*       dgO_old = dgO_norm; */
-
-      /* Set as */
-/*       dgHO_norm /= aHO; */
-/*       dgH_norm /= aH; */
-/*       dgO_norm /= aO; */
-/*       if(iter>0) */
-/*      {  */
-/*        if( dgH_norm/dgH_old > ITERTOL_DOWN && dgH_norm/dgH_old <1 && aH<0.5 ) */
-/*          aH *= 1.1; */
-/*        if (dgH_norm > dgH_old&& aH>a ) */
-/*          aH /= 2; */
-/*        if(  dgO_norm/dgO_old > ITERTOL_DOWN && dgO_norm/dgO_old <1 && aO<0.5) */
-/*          aO *= 1.1; */
-/*        if (dgO_norm > dgO_old && aO>a) */
-/*          aO /= 2; */
-/*        if(  dgHO_norm/dgHO_old > ITERTOL_DOWN && dgHO_norm/dgHO_old <1 && aHO<0.5) */
-/*          aHO *= 1.1; */
-/*        if (dgHO_norm > dgHO_old && aHO>a) */
-/*          aHO /= 2;      */
-/*        PetscPrintf(PETSC_COMM_WORLD,"aHO= %f \taH= %f \taO= %f\n", aHO, aH, aO);  */
-/*      } */
-/*       dgHO_old = dgHO_norm; */
-/*       dgH_old = dgH_norm; */
-/*       dgO_old = dgO_norm; */
-
-/*       if(dgH_norm/a<=norm_tol &&  dgO_norm/a<=norm_tol && dgHO_norm/a<=norm_tol &&  */
-/*       dgOH_norm/a<=norm_tol) */
-/*      break; */
       if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol)
         break;
 
