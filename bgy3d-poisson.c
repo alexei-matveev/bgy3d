@@ -56,7 +56,16 @@
   reason the original code uses the spectral representation of Laplace
   operator with eigenvalues proportional to k^2 for k <= n/2 and to (n
   - k)^2 otherwise thus  having a "casp" at k =  n/2.  Such a spectrum
-  will correspond  to a non-compact  stencil in real space,  I assume.
+  will correspond to a non-compact stencil in real space. Here are the
+  first 6 elements of this (even) stencil:
+
+    -3.289868 2.000000 -0.500000 0.222222 -0.125000 0.080000 ...
+
+  Computed by the octave code for a large even n:
+
+    a = [0:n/2, n/2-1:-1:1];
+    b = real (ifft (-4 * ((pi / n) * a) .^ 2));
+
   What are the arguments in favor of and against a particular approach
   is not quite clear.
 */
