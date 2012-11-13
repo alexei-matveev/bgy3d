@@ -115,15 +115,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
       DACreateGlobalVector(da, &BHD->v[dim]);
     }
 
-#ifdef L_BOUNDARY
-  DACreateGlobalVector(da, &BHD->x_lapl[0]);
-  DACreateGlobalVector(da, &BHD->x_lapl[1]);
-  DACreateGlobalVector(da, &BHD->xHO);
-  VecSet(BHD->x_lapl[0], 0.0);
-  VecSet(BHD->x_lapl[1], 0.0);
-  VecSet(BHD->xHO, 0.0);
-#endif
-
   /* Allocate memory for fft */
   FOR_DIM
     DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]);
@@ -183,9 +174,6 @@ static void BGY3dH2OData_free(State *BHD)
 #ifdef L_BOUNDARY
   MatDestroy (BHD->M);
   KSPDestroy(BHD->ksp);
-  VecDestroy(BHD->x_lapl[0]);
-  VecDestroy(BHD->xHO);
-  VecDestroy(BHD->x_lapl[1]);
 #endif
 
   DADestroy (BHD->da);
@@ -1600,6 +1588,21 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
+
+  /*
+    These  will be  used to  store solutions  of the  Laplace boundary
+    problem  across iterations. Though  by now  I am  not sure  if KSP
+    solver  really uses  them as  initial guess  as opposed  to always
+    starting iterations from zero:
+  */
+  Vec x_lapl[2][2];             /* real */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD->da, &x_lapl[i][j]);
+        VecSet (x_lapl[i][j], 0.0);
+        x_lapl[j][i] = x_lapl[i][j]; /* pairwise property */
+      }
 #endif
 
   g0H=BHD->g_ini[0];
@@ -1671,9 +1674,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 /*       Smooth_Function(BHD, g0HO, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0O, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0H, SL, SR, 0.0); */
-      bgy3d_impose_laplace_boundary (BHD, g0H, tH, BHD->x_lapl[0]);
-      bgy3d_impose_laplace_boundary (BHD, g0O, tH, BHD->x_lapl[1]);
-      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, BHD->xHO);
+      bgy3d_impose_laplace_boundary (BHD, g0H, tH, x_lapl[0][0]);
+      bgy3d_impose_laplace_boundary (BHD, g0O, tH, x_lapl[1][1]);
+      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, x_lapl[0][1]);
 
       /* g=g0*exp(-dg) */
       ComputeH2O_g( gHO, g0HO, dgHO);
@@ -1774,7 +1777,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -1838,7 +1841,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -1917,7 +1920,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[0]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][0]);
 
           VecCopy(dgH, f);
           //VecAXPBY(dgH, a, (1-a), dg_new);
@@ -1975,7 +1978,7 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[1][1]);
 
           VecCopy(dgO, f);
           //VecAXPBY(dgO, a, (1-a), dg_new);
@@ -2074,7 +2077,9 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
     }
 
-
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (x_lapl[i][j]);
 
   VecDestroy(gH);
   VecDestroy(gO);
@@ -2165,6 +2170,21 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
   bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
+
+  /*
+    These  will be  used to  store solutions  of the  Laplace boundary
+    problem  across iterations. Though  by now  I am  not sure  if KSP
+    solver  really uses  them as  initial guess  as opposed  to always
+    starting iterations from zero:
+  */
+  Vec x_lapl[2][2];             /* real */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD->da, &x_lapl[i][j]);
+        VecSet (x_lapl[i][j], 0.0);
+        x_lapl[j][i] = x_lapl[i][j]; /* pairwise property */
+      }
 #endif
 
   g0H=BHD->g_ini[0];
@@ -2236,9 +2256,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 /*       Smooth_Function(BHD, g0HO, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0O, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, g0H, SL, SR, 0.0); */
-      bgy3d_impose_laplace_boundary (BHD, g0H, tH, BHD->x_lapl[0]);
-      bgy3d_impose_laplace_boundary (BHD, g0O, tH, BHD->x_lapl[1]);
-      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, BHD->xHO);
+      bgy3d_impose_laplace_boundary (BHD, g0H, tH, x_lapl[0][0]);
+      bgy3d_impose_laplace_boundary (BHD, g0O, tH, x_lapl[1][1]);
+      bgy3d_impose_laplace_boundary (BHD, g0HO, tH, x_lapl[0][1]);
 
       /* g=g0*exp(-dg) */
       ComputeH2O_g( gHO, g0HO, dgHO);
@@ -2358,7 +2378,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -2435,7 +2455,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->xHO);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
 /*        VecNorm(dg_new, NORM_2, &norm); */
 /*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
@@ -2525,7 +2545,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[0]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][0]);
 
           VecCopy(dgH, f);
           //VecAXPBY(dgH, a, (1-a), dg_new);
@@ -2586,7 +2606,7 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
           //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, BHD->x_lapl[1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[1][1]);
 
           VecCopy(dgO, f);
           //VecAXPBY(dgO, a, (1-a), dg_new);
@@ -2760,7 +2780,9 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
     }
 
-
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (x_lapl[i][j]);
 
   VecDestroy(gH);
   VecDestroy(gO);
