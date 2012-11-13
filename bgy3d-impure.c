@@ -896,7 +896,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     starting iterations from zero:
   */
   Vec x_lapl[2];                /* real */
-  for (int i = 0; i < 2; i ++)
+  for (int i = 0; i < 2; i++)
     {
       DACreateGlobalVector (BHD.da, &x_lapl[i]);
       VecSet (x_lapl[i], 0.0);
@@ -1461,7 +1461,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
     starting iterations from zero:
   */
   Vec x_lapl[2];                /* real */
-  for (int i = 0; i < 2; i ++)
+  for (int i = 0; i < 2; i++)
     {
       DACreateGlobalVector (BHD.da, &x_lapl[i]);
       VecSet (x_lapl[i], 0.0);
