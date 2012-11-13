@@ -677,7 +677,7 @@ PetscErrorCode MatMult_MFFD(Mat mat,Vec a,Vec y);
 PetscErrorCode PETSCSNES_DLLEXPORT MatCreate_MFFD(Mat A);
 */
 
-Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
+Vec BGY3d_SolveNewton_H2O (const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
   KSP ksp;
@@ -757,7 +757,7 @@ Vec BGY3d_SolveNewton_H2O(const ProblemData *PD, Vec g_ini)
   for(damp=damp_start; damp<=1; damp+= 0.01)
     {
 
-      RecomputeInitialData(BHD, (damp), 1.0);
+      RecomputeInitialData (BHD, (damp), 1.0);
 /*       Smooth_Function(BHD, BHD->gHO_ini, SL, SR, 0.0); */
 /*       Smooth_Function(BHD, BHD->g_ini[0], SL, SR, 0.0); */
 /*       Smooth_Function(BHD, BHD->g_ini[1], SL, SR, 0.0); */

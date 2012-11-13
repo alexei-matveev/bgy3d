@@ -28,7 +28,7 @@ static void normalization_intra (const State *BHD,
                                  Vec work, /* complex, work */
                                  Vec dg);  /* real, out */
 
-static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
+static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
 {
   State *BHD;
 
@@ -115,9 +115,6 @@ static State *BGY3dH2OData_Pair_malloc(const ProblemData *PD)
         DACreateGlobalVector (BHD->dc, &BHD->u2_fft[i][j]);
         BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
       }
-
-   /* Compute initial data */
-  RecomputeInitialData(BHD, 1.0, 1.0);
 
   return BHD;
 }
@@ -474,7 +471,7 @@ void ComputeFFTfromCoulomb (State *BHD,
 }
 
 
-void RecomputeInitialData(State *BHD, real damp, real damp_LJ)
+void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
 {
   DA da;
   PetscScalar ***gHini_vec, ***gOini_vec, ***gHOini_vec;
@@ -1513,9 +1510,13 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = BGY3dH2OData_Pair_malloc(PD);
+  BHD = BGY3dH2OData_Pair_malloc (PD);
+
   if (r_HH > 0)
-    PetscPrintf(PETSC_COMM_WORLD,"WARNING: Solvent not a 2-Site model!\n");
+    PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
+
+  /* Compute initial data */
+  RecomputeInitialData (BHD, 1.0, 1.0);
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -1605,14 +1606,14 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
         {
           damp_LJ=0;
           //a0=0.4;
-          RecomputeInitialData(BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
         {
           damp_LJ=1.0;
           //a0=0.5;
-          RecomputeInitialData(BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
@@ -1622,12 +1623,12 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
           count+=1.0;
           //a0 = 0.1/4./count;
           //a0 = 0.1/count;
-          RecomputeInitialData(BHD, (damp), 1.0);
+          RecomputeInitialData (BHD, (damp), 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
 
 /*       damp=0.05; */
-/*       RecomputeInitialData(BHD, damp, 1.0); */
+/*       RecomputeInitialData (BHD, damp, 1.0); */
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
@@ -2075,12 +2076,18 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = BGY3dH2OData_Pair_malloc(PD);
+  BHD = BGY3dH2OData_Pair_malloc (PD);
+
+  if (r_HH < 0)
+    {
+      PetscPrintf (PETSC_COMM_WORLD, "Solvent not a 3-Site model!\n");
+      exit(1);
+    }
+
+  /* Compute initial data */
+  RecomputeInitialData (BHD, 1.0, 1.0);
+
   BHD->rhos[0] = 2.*BHD->rhos[0];
-  if (r_HH < 0) {
-    PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
-    exit(1);
-  }
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -2170,14 +2177,14 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
         {
           damp_LJ=0;
           //a0=0.4;
-          RecomputeInitialData(BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
         {
           damp_LJ=1.0;
           //a0=0.5;
-          RecomputeInitialData(BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
@@ -2187,12 +2194,12 @@ Vec BGY3d_solve_3site(const ProblemData *PD, Vec g_ini)
           count+=1.0;
           //a0 = 0.1/4./count;
           //a0 = 0.1/count;
-          RecomputeInitialData(BHD, (damp), 1.0);
+          RecomputeInitialData (BHD, (damp), 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
 
 /*       damp=0.05; */
-/*       RecomputeInitialData(BHD, damp, 1.0); */
+/*       RecomputeInitialData (BHD, damp, 1.0); */
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
