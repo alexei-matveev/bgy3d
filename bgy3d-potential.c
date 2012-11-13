@@ -44,7 +44,7 @@ struct Context {
 };
 
 /* n = N * j + i, return i and j */
-static void divmod (const int n, const int N, int* j, int* i)
+static void divmod (const int n, const int N, int *j, int *i)
 {
   *j = n / N;
   *i = n % N;
