@@ -9,15 +9,13 @@
 */
 struct Context {
   DA da;                /* array descriptor */
-  Vec v;                /* ref to a vector storing potential values */
+  Vec v;                /* ref to a vector */
   PetscScalar ***v_;    /* v_[k][j][i] points to the real data */
-  int counter;          /* counter indicating how many are left */
-  int local_size; /* length of  vector and array, better  save it than
-                     use VecGetSize() from time to time */
-  real h[3];
-  real interval[2];
-  int i0, j0, k0;
-  int ni, nj, nk;
+  int ijk;              /* linarized index for local (k, j, i) */
+  real h[3];            /* mesh sizes */
+  real interval[2];     /* ? */
+  int i0, j0, k0;       /* corner of local grid */
+  int ni, nj, nk;       /* local grid shape */
 };
 
 /* n = N * j + i, return i and j */
@@ -58,10 +56,6 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   /* Get local portion of the grid */
   DAGetCorners (da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
 
-  /* Set counter number and save redundant vector length: */
-  s->local_size = s->ni * s->nj * s->nk;
-  s->counter = s->local_size;
-
   /* copy N3 and h3 from PD */
   FOR_DIM
     s->h[dim] = PD->h[dim];
@@ -70,31 +64,30 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   s->interval[0] = PD->interval[0];
   s->interval[1] = PD->interval[1];
 
+  /* Initalize counter: */
+  s->ijk = 0;
+
   return s;
 }
 
 /* Value fetch interface */
 int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
-  /* how many elements would be skipped */
-  const int nstart = s->local_size - s->counter;
-
-  /* number of values that would be actually fetched */
-  const int nact = MIN(n, s->counter);
+  /* How many elements we have: */
+  const int local_size = s->ni * s->nj * s->nk;
 
   /* generating coordinates */
   int p = 0;
-  for (int ijk = nstart; ijk < nstart + nact; ijk++)
+  while (p < n && s->ijk < local_size)
     {
-      int ij, i, j, k;
-
       /*
         Get coordinatens i, j, and k within the local block:
 
         ijk = k * NI * NJ + ij
         ij = j * NI + i
       */
-      divmod (ijk, s->ni * s->nj, &k, &ij);
+      int ij, i, j, k;
+      divmod (s->ijk, s->ni * s->nj, &k, &ij);
       divmod (ij, s->ni, &j, &i);
 
       /* Add corner coordinates: */
@@ -106,22 +99,18 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
       x[p][1] = j;
       x[p][2] = k;
       v[p] = s->v_[k][j][i];
-      // /* apply 'real' coordinates */
-      // x[i][0] = i1 * s->h[0] + s->interval[0];
-      // x[i][1] = j1 * s->h[1] + s->interval[0];
-      // x[i][2] = k1 * s->h[2] + s->interval[0];
+
+      /* update counters */
+      s->ijk++;
       p++;
     }
-  assert (p == nact);
 
-  /* update counter */
-  s->counter -= nact;
+  /* Reset  counter  to  original   point  once  we  fetched  all  the
+     values. FIXME: What if the user supplies n == 0? */
+  if (p == 0)
+    s->ijk = 0;
 
-  /* reset counter to original point once we fetched all the values */
-  if (nact == 0)
-    s->counter = s->local_size;
-
-  return nact;
+  return p;
 }
 
 /* clean up the memory for public *pcontext */
