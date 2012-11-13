@@ -388,14 +388,6 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   for more than one CPU.
 */
 #ifndef MATRIX_FREE_LAPLACE
-/* Returns a  non-negative number,  e.g. mod(-1, 10)  -> 9.   Does not
-   work for b <= 0: */
-static int mod (int a, int b)
-{
-  return ((a % b) + b) % b;
-}
-
-
 /*
   Create    and   initialize    Laplace   matrix    with   appropriate
   stencil.  FIXME: this  should be  probably implemented  using matrix
@@ -480,61 +472,56 @@ static void lap_mat_create (const DA da, const real h[3],
               /*
                 Other two  points of the  stencil offset by 1  in -dim
                 and +dim, respectively are  set in the switch statment
-                inside  the loop  over dim.   FIXME: we  might  have a
-                problem for parallel runs here as the manual says:
+                inside the loop over dim. The manual says:
 
                   The columns  and rows in  the stencil passed  in [to
                   MatSetValuesStencil()] MUST  be contained within the
                   ghost  region  of  the  given process  as  set  with
                   DMDACreateXXX() or MatSetStencil().
 
-                See  call to  DACreate3d() in  bgy3d-fft.c, especially
-                the periodicity and stencil options there.
+                See  asserts  above an  the  call  to DACreate3d()  in
+                bgy3d-fftw.c,  especially the periodicity  and stencil
+                options there.
+
+                If you wrap the  indices modulo N, Petsc will complain
+                that  they are not  in the  (local) range  in parallel
+                runs with  NULL boundary.  With  NULL boundary indices
+                may appear  out of range  and even negative.   I guess
+                this is the intention.
               */
               FOR_DIM
                 {
                   switch (dim)
                     {
                     case 0:
-                      col[0].i = mod (row.i - 1, N[0]);
+                      col[0].i = row.i - 1;
                       col[0].j = row.j;
                       col[0].k = row.k;
 
-                      col[2].i = mod (row.i + 1, N[0]);
+                      col[2].i = row.i + 1;
                       col[2].j = row.j;
                       col[2].k = row.k;
                       break;
 
                     case 1:
                       col[0].i = row.i;
-                      col[0].j = mod (row.j - 1, N[1]);
+                      col[0].j = row.j - 1;
                       col[0].k = row.k;
 
                       col[2].i = row.i;
-                      col[2].j = mod (row.j + 1, N[1]);
+                      col[2].j = row.j + 1;
                       col[2].k = row.k;
                       break;
 
                     case 2:
                       col[0].i = row.i;
                       col[0].j = row.j;
-                      col[0].k = mod (row.k - 1, N[2]);
+                      col[0].k = row.k - 1;
 
                       col[2].i = row.i;
                       col[2].j = row.j;
-                      col[2].k = mod (row.k + 1, N[2]);
+                      col[2].k = row.k + 1;
                       break;
-                    }
-
-                  /* Sanity check: */
-                  for (int p = 0; p < 3; p++)
-                    {
-                      assert (col[p].i >= 0);
-                      assert (col[p].j >= 0);
-                      assert (col[p].k >= 0);
-                      assert (col[p].i < N[0]);
-                      assert (col[p].j < N[1]);
-                      assert (col[p].k < N[2]);
                     }
 
                   /* Values to enter for the Laplacian stencil: */
