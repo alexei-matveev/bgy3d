@@ -75,6 +75,9 @@
 #define unlikely(x)  (x)
 #endif
 
+/* The alternative  works as well,  though the regression test  do not
+   survive with more thatn 3-4 digits: */
+#ifndef POISSON_AS_INVERSE_LAPLACE
 /*
   Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
   potential by inverse FFT.
@@ -192,7 +195,77 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 
   VecDestroy (work);
 }
+#else
+/*
+  This solves the  equation Δu = qρ with  Laplacian defined by 7-point
+  stencil and  periodic boundary  conditions.  Thus with  q = 1  it is
+  exactly the pseudo-inverse of  the Laplacian operator implemented by
+  7-point  stencil.   Given  the  periodicity the  pseudo-inverse  may
+  differ by at most a constant.
 
+  To get the potential in kcal/mol as used in the rest of the code you
+  need to supply q = -4π/ε₀ that is -4 * M_PI * EPSILON0INV.
+*/
+void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
+{
+  const real *h = BHD->PD->h;   /* h[3] */
+  const int *N = BHD->PD->N;    /* N[3] */
+
+  const int NNN = N[0] * N[1] * N[2];
+
+  /* Scratch complex vector: */
+  Vec work;
+  DACreateGlobalVector (BHD->dc, &work);
+
+  /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
+     complex work: */
+  MatMult (BHD->fft_mat, rho, work);
+
+  /* With q = -4π/ε₀ you would get the potential: */
+  const real scale = - q / NNN / 4;
+
+  /* Loop over local portion of the k-grid */
+  {
+    int i0, j0, k0, ni, nj, nk;
+    DAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
+
+    complex ***work_;
+    DAVecGetArray (BHD->dc, work, &work_);
+
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            /*
+              For small  i, j, and k  and uniform box of  size L this
+              expression approximates to (π/L)² (i² + j² + k²).
+
+              FIXME: SQR() macro evaluates the argument twice!
+            */
+            const real k2 =                             \
+              SQR (sin (M_PI * i / N[0]) / h[0]) +
+              SQR (sin (M_PI * j / N[1]) / h[1]) +
+              SQR (sin (M_PI * k / N[2]) / h[2]);
+
+            real fac;
+            if (likely (k2 != 0.0))
+              fac = scale / k2;
+            else
+              fac = 0.0;        /* gamma-point */
+
+            /* Here we compute in place: u(kx, ky, kz) := scale *
+               rho(kx, ky, kz) / k^2 */
+            work_[k][j][i] *= fac; /* complex */
+          }
+    DAVecRestoreArray (BHD->dc, work, &work_);
+  }
+
+  /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
+  MatMultTranspose (BHD->fft_mat, work, uc);
+
+  VecDestroy (work);
+}
+#endif
 
 #ifdef L_BOUNDARY
 
