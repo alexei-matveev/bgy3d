@@ -75,6 +75,7 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
   /* How many elements we have: */
   const int local_size = s->ni * s->nj * s->nk;
+  const real dV = s->h[0] * s->h[1] * s->h[2];
 
   /* generating coordinates */
   int p = 0;
@@ -95,10 +96,10 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
       j += s->j0;
       k += s->k0;
 
-      x[p][0] = i * s->h[0] + s->interval[0];
-      x[p][1] = j * s->h[1] + s->interval[0];
-      x[p][2] = k * s->h[2] + s->interval[0];
-      v[p] = s->v_[k][j][i];
+      x[p][0] = i * s->h[0] + s->interval[0]; /* x */
+      x[p][1] = j * s->h[1] + s->interval[0]; /* y */
+      x[p][2] = k * s->h[2] + s->interval[0]; /* z */
+      v[p] = s->v_[k][j][i] * dV;             /* value * weight */
 
       /* update counters */
       s->ijk++;
@@ -165,10 +166,9 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
         for (int i = 0; i < nact; i++)
           {
-            real h = 1.0 - v[i];
-            m0 += h;
+            m0 += v[i];
             for (int j = 0; j < 3; j++)
-              m1[j] += x[i][j] * h;
+              m1[j] += x[i][j] * v[i];
           }
 
       /* broadcast results of each worker to total sums */
@@ -181,11 +181,13 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
         assert (err == MPI_SUCCESS);
       }
 
-      PetscPrintf (PETSC_COMM_WORLD, "Print moments for tests: \n");
-      PetscPrintf (PETSC_COMM_WORLD, "m0 = %lf\n", m0);
-      PetscPrintf (PETSC_COMM_WORLD, "mx = %lf\n", m1[0] / m0);
-      PetscPrintf (PETSC_COMM_WORLD, "my = %lf\n", m1[1] / m0);
-      PetscPrintf (PETSC_COMM_WORLD, "mz = %lf\n", m1[2] / m0);
+      const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
+      const real V = L * L * L;
+      PetscPrintf (PETSC_COMM_WORLD, "Moments divided by cell volume V = %lf: \n", V);
+      PetscPrintf (PETSC_COMM_WORLD, "<1 * v> = %lf\n", m0 / V);
+      PetscPrintf (PETSC_COMM_WORLD, "<x * v> = %lf\n", m1[0] / V);
+      PetscPrintf (PETSC_COMM_WORLD, "<y * v> = %lf\n", m1[1] / V);
+      PetscPrintf (PETSC_COMM_WORLD, "<z * v> = %lf\n", m1[2] / V);
     }
 
   bgy3d_pot_destroy (s);
