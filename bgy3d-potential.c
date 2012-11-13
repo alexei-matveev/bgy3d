@@ -21,7 +21,8 @@
 
      bgy3d_pot_destroy (iter);
 
-  Vec vec does  not be a potential,  it can be any field  on the grid.
+  Vec vec does not need to be  a potential, it can be any field on the
+  grid.
 */
 
 #include "bgy3d.h"
