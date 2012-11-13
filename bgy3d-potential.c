@@ -95,9 +95,9 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
       j += s->j0;
       k += s->k0;
 
-      x[p][0] = i;
-      x[p][1] = j;
-      x[p][2] = k;
+      x[p][0] = i * s->h[0] + s->interval[0];
+      x[p][1] = j * s->h[1] + s->interval[0];
+      x[p][2] = k * s->h[2] + s->interval[0];
       v[p] = s->v_[k][j][i];
 
       /* update counters */
