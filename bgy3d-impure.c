@@ -71,9 +71,6 @@ static State initialize_state (const ProblemData *PD)
   const DA da = BHD.da;         /* shorter alias */
 
   /* Create global vectors */
-  DACreateGlobalVector (da, &BHD.g_ini[0]);
-  DACreateGlobalVector (da, &BHD.g_ini[1]);
-
   BHD.gHO_ini = PETSC_NULL;     /* unused with impurities */
 
   DACreateGlobalVector (da, &BHD.u2[0][0]);
@@ -144,6 +141,8 @@ static State initialize_state (const ProblemData *PD)
   BHD.LJ_paramsHO[1] = -1;
   BHD.LJ_paramsHO[2] = -1;
 
+  BHD.g_ini[0] = NULL;
+  BHD.g_ini[1] = NULL;
   BHD.gfg2_fft = NULL;
 
   /* FIXME: broken, see the comments inside the function itself: */
@@ -212,8 +211,6 @@ static void finalize_state (State *BHD)
 
   VecDestroy (BHD->fft_scratch);
 
-  VecDestroy(BHD->g_ini[0]);
-  VecDestroy(BHD->g_ini[1]);
   assert (BHD->gHO_ini == PETSC_NULL); /* unused for impurities */
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
@@ -958,11 +955,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
     filled with data yet, I assume.
   */
-  Vec *u0 = BHD.g_ini;          /* FIXME: aliasing! */
+  Vec u0[2];                    /* real */
+  for (int i = 0; i < 2; i++)
+    {
+      DACreateGlobalVector (BHD.da, &u0[i]);
 
-  /* set initial guess*/
-  VecSet (du[0], 0.0);
-  VecSet (du[1], 0.0);
+      /* set initial guess*/
+      VecSet (du[i], 0.0);
+    }
 
   if (bgy3d_getopt_test ("--from-g2"))
     {
@@ -1079,9 +1079,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
           VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
 
-      /* Fill u0[0], u0[1] (alias BHD.g_ini[], also see the definition
-         above) and  uc with VM_Coulomb_long.  No other  fields of the
-         struct State except those passed explicitly are modified: */
+      /*
+        Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
+        VM_Coulomb_long.  No  other fields of the  struct State except
+        those passed explicitly are modified:
+      */
       bgy3d_solute_field (&BHD,
                           2, solvent,
                           u0, uc, /* intent(out) */
@@ -1349,6 +1351,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /* Delegated to the caller:
          VecDestroy (g[i]); */
 
+      VecDestroy (u0[i]);
       VecDestroy (du[i]);
       VecDestroy (g_fft[i]);
       VecDestroy (x_lapl[i]);
@@ -1410,7 +1413,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   real a1, a, damp, damp_LJ;
   real count = 0.0;
   int iter;
-  Vec g0H, g0O, dgH, dgO,  dg_new, dg_new2;
+  Vec dgH, dgO,  dg_new, dg_new2;
   Vec work;
   Vec g[2];
   Vec tH, tO, dg_newH, dg_newO;
@@ -1492,8 +1495,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
-  g0H=BHD.g_ini[0];
-  g0O=BHD.g_ini[1];
+  Vec g0[2];
+  for (int i = 0; i < 2; i++)
+    DACreateGlobalVector (BHD.da, &g0[i]);
 
   /* set initial guess*/
   VecSet(dgH,0);
@@ -1501,8 +1505,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   if (bgy3d_getopt_test ("--from-g2")) {
-      ComputedgFromg (dgH, g0H, BHD.g2[0][1]);
-      ComputedgFromg (dgO, g0O, BHD.g2[1][1]);
+      ComputedgFromg (dgH, g0[0], BHD.g2[0][1]);
+      ComputedgFromg (dgO, g0[1], BHD.g2[1][1]);
   }
 
   /* load initial configuration from file ??? */
@@ -1543,7 +1547,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         /* This does the real work: */
         bgy3d_solute_field (&BHD,
                             2, solvent,
-                            BHD.g_ini, uc, /* intent(out) */
+                            g0, uc, /* intent(out) */
                             n, sites,
                             NULL, /* void (*density)(...) */
                             (damp > 0.0 ? damp : 0.0), damp_LJ);
@@ -1554,14 +1558,14 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       /* Historically   short-range  potential   is   stored  with   a
          factor: */
       for (int i = 0; i < 2; i++)
-        VecScale (BHD.g_ini[i], BHD.PD->beta);
+        VecScale (g0[i], BHD.PD->beta);
 
-      bgy3d_impose_laplace_boundary (&BHD, g0H, tH, x_lapl[0]);
-      bgy3d_impose_laplace_boundary (&BHD, g0O, tH, x_lapl[1]);
+      bgy3d_impose_laplace_boundary (&BHD, g0[0], tH, x_lapl[0]);
+      bgy3d_impose_laplace_boundary (&BHD, g0[1], tH, x_lapl[1]);
 
       /* g=g0*exp(-dg) */
-      ComputeH2O_g( g[0], g0H, dgH);
-      ComputeH2O_g( g[1], g0O, dgO);
+      ComputeH2O_g( g[0], g0[0], dgH);
+      ComputeH2O_g( g[1], g0[1], dgO);
 
       a=a0;
       a1=a0;
@@ -1654,8 +1658,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
               VecNorm(work, NORM_INFINITY, &dgO_norm);
               PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
             }
-          ComputeH2O_g( g[0], g0H, dgH);
-          ComputeH2O_g( g[1], g0O, dgO);
+          ComputeH2O_g( g[0], g0[0], dgH);
+          ComputeH2O_g( g[1], g0[1], dgO);
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
@@ -1718,8 +1722,11 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       }
     }
 
-  VecDestroy(g[0]);
-  VecDestroy(g[1]);
+  for (int i = 0; i < 2; i++)
+    {
+      VecDestroy(g[i]);
+      VecDestroy(g0[i]);
+    }
   VecDestroy(dgH);
   VecDestroy(dgO);
   VecDestroy(dg_new);
