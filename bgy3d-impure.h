@@ -14,7 +14,8 @@
 void bgy3d_solve_with_solute (const ProblemData *PD,
                               int n, const Site solute[n],
                               void (*density)(int k, const real x[k][3], real rho[k]),
-                              Vec g[2]);
+                              Vec g[2],
+                              Context **v);
 
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);

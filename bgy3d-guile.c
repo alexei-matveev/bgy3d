@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-pure.h"
+#include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
 #include "bgy3d-getopt.h"       /* bgy3d_save_vec, bgy3d_load_vec */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
@@ -232,7 +233,7 @@ static SCM guile_run_solute (SCM solute, SCM settings)
      distribution in  Vec g[]  (dont forget to  destroy them).   If no
      additional charge distribution is associated with the solute pass
      NULL as the function pointer: */
-  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g);
+  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g, NULL);
 
   free (name);
   free (sites);

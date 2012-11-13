@@ -11,6 +11,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-poisson.h"      /* laplace staff */
+#include "bgy3d-potential.h"    /* Context, etc. */
 #include "bgy3d-impure.h"
 
 #ifndef L_BOUNDARY_MG
@@ -838,11 +839,18 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   are  initialized as global  distributed arrays  and filled  with the
   solvent site  distributions. It is the responsibility  of the caller
   to destroy them when no more needed.
- */
+
+  Context **v, inent(out);
+
+  Is set to  an iterator over the solvent  potential field. The caller
+  is responsible  for calling bgy3d_pot_destroy() when it  is not more
+  needed.
+*/
 void bgy3d_solve_with_solute (const ProblemData *PD,
                               int n, const Site solute[n],
                               void (*density)(int k, const real x[k][3], real rho[k]),
-                              Vec g[2])
+                              Vec g[2],    /* intent(out) */
+                              Context **v) /* intent(out) */
 {
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
@@ -1343,6 +1351,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         }
     } /* damp loop */
 
+
+  /* Optionally, return the iterator over the solvent field: */
+  if (v)
+    *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
+
   /* Clean up and exit ... */
   VecDestroy (du_acc_fft);
 
@@ -1367,7 +1380,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
-  VecDestroy (ve);
+  VecDestroy (ve);              /* yes, we do! */
 
   finalize_state (&BHD);
 }
@@ -1394,7 +1407,7 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   /* This does the  real work. Vec g[2] is  intent(out) in all senses,
      dont  forget   to  destroy   them.  Here  no   additional  charge
      distribution, so supply NULL for the function pointer: */
-  bgy3d_solve_with_solute (PD, n, sites, NULL, g);
+  bgy3d_solve_with_solute (PD, n, sites, NULL, g, NULL);
 
   /* Save final distribution, use binary format: */
   bgy3d_save_vec ("g0.bin", g[0]); /* gH */
