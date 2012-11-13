@@ -10,8 +10,8 @@
 struct Context {
   Vec v;                /* ref to a vector storing potential values */
   int counter;          /* counter indicating how many are left */
-  int nmax; /* length  of vector and  array, better  save it  than use
-               VecGetSize() from time to time */
+  int local_size; /* length of  vector and array, better  save it than
+                     use VecGetSize() from time to time */
   real h[3];
   real interval[2];
   int i0, j0, k0;
@@ -55,7 +55,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 
   /* set counter number and save vector length */
   s->counter = m;
-  s->nmax = m;
+  s->local_size = m;
 
   /* save local corner of DA to context */
   s->i0 = i0;
@@ -80,7 +80,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 {
   /* how many elements would be skipped */
-  const int nstart = s->nmax - s->counter;
+  const int nstart = s->local_size - s->counter;
 
   /* number of values that would be actually fetched */
   const int nact = MIN(n, s->counter);
@@ -130,7 +130,7 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
 
   /* reset counter to original point once we fetched all the values */
   if (nact == 0)
-    s->counter = s->nmax;
+    s->counter = s->local_size;
 
   return nact;
 }
