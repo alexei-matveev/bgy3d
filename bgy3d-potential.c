@@ -46,36 +46,34 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   const int m = ni * nj * nk;
 
   /* memory for context pointer */
-  Context *pcontext = malloc(sizeof *pcontext);
+  Context *s = malloc (sizeof *s);
 
   /* Do not copy the input  vector, save a reference instead, but also
      increment the refcount. We will have to VecDestroy() it too: */
-  pcontext->v = v;
-  PetscObjectReference ((PetscObject) pcontext->v);
+  s->v = v;
+  PetscObjectReference ((PetscObject) s->v);
 
   /* set counter number and save vector length */
-  pcontext->counter = m;
-  pcontext->nmax = m;
+  s->counter = m;
+  s->nmax = m;
 
   /* save local corner of DA to context */
-  pcontext->i0 = i0;
-  pcontext->j0 = j0;
-  pcontext->k0 = k0;
-  pcontext->ni = ni;
-  pcontext->nj = nj;
-  pcontext->nk = nk;
+  s->i0 = i0;
+  s->j0 = j0;
+  s->k0 = k0;
+  s->ni = ni;
+  s->nj = nj;
+  s->nk = nk;
 
   /* copy N3 and h3 from PD */
   FOR_DIM
-    {
-      pcontext->h[dim] = PD->h[dim];
-    }
+    s->h[dim] = PD->h[dim];
 
   /* copy interval */
-  pcontext->interval[0] = PD->interval[0];
-  pcontext->interval[1] = PD->interval[1];
+  s->interval[0] = PD->interval[0];
+  s->interval[1] = PD->interval[1];
 
-  return pcontext;
+  return s;
 }
 
 /* Value fetch interface */
