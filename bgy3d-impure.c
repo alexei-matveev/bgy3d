@@ -153,6 +153,32 @@ static State initialize_state (const ProblemData *PD)
 }
 
 
+static void save_all (int m, const Vec g[m], const char *format)
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
+  for (int i = 0; i < m; i++)
+    {
+      char name[20];
+      snprintf (name, sizeof name, format, i);
+      bgy3d_save_vec (name, g[i]);
+    }
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+
+static void load_all (int m, Vec g[m], const char *format)
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
+  for (int i = 0; i < m; i++)
+    {
+      char name[20];
+      snprintf (name, sizeof name, format, i);
+      g[i] = bgy3d_load_vec (name); /* bgy3d_read_vec? */
+    }
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+
 /* This fills  an array of preallocated Vecs  with solven-solvent pair
    distributions:  */
 static void load (const State *BHD, Vec g2[2][2])
@@ -982,16 +1008,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    {
-      PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
-      for (int i = 0; i < m; i++)
-        {
-          char name[20];
-          snprintf (name, sizeof name, "du%d.bin", i);
-          du[i] = bgy3d_load_vec (name);
-        }
-      PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-    }
+    load_all (m, du, "du%d.bin");
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
@@ -1357,16 +1374,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
-        {
-          PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
-          for (int i = 0; i < m; i++)
-            {
-              char name[20];
-              snprintf (name, sizeof name, "du%d.bin", i);
-              bgy3d_save_vec (name, du[i]);
-            }
-          PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-        }
+        save_all (m, du, "du%d.bin");
+
     } /* damp loop */
 
 
