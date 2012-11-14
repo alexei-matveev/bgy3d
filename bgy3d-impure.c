@@ -1000,12 +1000,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       VecSet (du[i], 0.0);
     }
 
-  if (bgy3d_getopt_test ("--from-g2"))
-    {
-      ComputedgFromg (du[0], u0[0], BHD.g2[0][1]);
-      ComputedgFromg (du[1], u0[1], BHD.g2[1][1]);
-    }
-
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
     load_all (m, du, "du%d.bin");
@@ -1543,11 +1537,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dgH,0);
   VecSet(dgO,0);
   VecSet(dg_new,0.0);
-
-  if (bgy3d_getopt_test ("--from-g2")) {
-      ComputedgFromg (dgH, g0[0], BHD.g2[0][1]);
-      ComputedgFromg (dgO, g0[1], BHD.g2[1][1]);
-  }
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
