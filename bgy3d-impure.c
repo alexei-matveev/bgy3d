@@ -1072,23 +1072,27 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialFFTs (&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
 
-      /* FIXME: avoid storing vectors  f[sl]_g2_fft on the grid across
-         iterations. Only a scalar kernel is needed: */
-      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][0], NULL, ker_fft_S[0][0]);
-      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[0][1], NULL, ker_fft_S[0][1]); /* == [1][0] */
-      kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[1][1], NULL, ker_fft_S[1][1]);
-
-      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][0], BHD.u2_fft[0][0], ker_fft_L[0][0]);
-      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[0][1], BHD.u2_fft[0][1], ker_fft_L[0][1]); /* == [1][0] */
-      kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[1][1], BHD.u2_fft[1][1], ker_fft_L[1][1]);
-
-      /* FIXME: what is  the point to split the  kernel in two pieces?
-         Redefine S := S + L and forget about L */
       for (int i = 0; i < m; i++)
-        for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
-          VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
+        for (int j = 0; j <= i; j++)
+          {
+            /* FIXME: avoid storing vectors  f[sl]_g2_fft on the grid across
+               iterations. Only a scalar kernel is needed: */
+            kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[i][j], NULL,
+                    ker_fft_S[i][j]);
+
+            kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[i][j], BHD.u2_fft[i][j],
+                    ker_fft_L[i][j]);
+
+            /*
+              FIXME:  what is  the point  to split  the kernel  in two
+              pieces?  Redefine S := S + L and forget about L:
+
+              S := damp * L + damp_LJ * S
+            */
+            VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
+          }
 
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
