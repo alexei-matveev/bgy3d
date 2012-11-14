@@ -731,31 +731,6 @@ static real ComputeCharge (const ProblemData *PD,
   return total;
 }
 
-static void ComputedgFromg (Vec dg, Vec g0, Vec g)
-{
-  int local_size, i;
-  PetscScalar *dg_vec, *g_vec, *g0_vec;
-  real k;
-
-  VecGetLocalSize(dg, &local_size);
-
-  VecGetArray(dg, &dg_vec);
-  VecGetArray(g0, &g0_vec);
-  VecGetArray(g, &g_vec);
-  for(i=0; i<local_size; i++)
-    {
-      k = g_vec[i];
-      if(k<1.0e-8)
-        k=1.0e-8;
-      dg_vec[i] = -g0_vec[i] - log(k);
-
-    }
-
-  VecRestoreArray(dg, &dg_vec);
-  VecRestoreArray(g0, &g0_vec);
-  VecRestoreArray(g, &g_vec);
-}
-
 /*
  * Does the mixing:
  *
