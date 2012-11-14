@@ -852,11 +852,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                               Vec g[2],    /* intent(out) */
                               Context **v) /* intent(out) */
 {
+  /* Number of solvent sites: */
+  const int m = sizeof (solvent) / sizeof (Site);
+
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
-  Vec du[2], du_acc, work;
+  Vec du[m], du_acc, work;
   Vec ve;            /* ve for solvent electrostaic potential field */
-  PetscScalar du_norm[2];
+  PetscScalar du_norm[m];
   int namecount = 0;
   char nameH[20], nameO[20];
 
@@ -898,8 +901,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     solver  really uses  them as  initial guess  as opposed  to always
     starting iterations from zero:
   */
-  Vec x_lapl[2];                /* real */
-  for (int i = 0; i < 2; i++)
+  Vec x_lapl[m];                /* real */
+  for (int i = 0; i < m; i++)
     {
       DACreateGlobalVector (BHD.da, &x_lapl[i]);
       VecSet (x_lapl[i], 0.0);
@@ -916,9 +919,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     enough to  hold a  local portion  of the grid  and free  after the
     loop.
   */
-  Vec g_fft[2];
+  Vec g_fft[m];
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     {
       DACreateGlobalVector (BHD.dc, &g_fft[i]); /* complex */
 
@@ -931,10 +934,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
      vectors in momentum space.  Note that HO = OH. */
-  Vec ker_fft_S[2][2];
-  Vec ker_fft_L[2][2];
+  Vec ker_fft_S[m][m];
+  Vec ker_fft_L[m][m];
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
         DACreateGlobalVector (BHD.dc, &ker_fft_S[i][j]); /* complex */
@@ -963,8 +966,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
     filled with data yet, I assume.
   */
-  Vec u0[2];                    /* real */
-  for (int i = 0; i < 2; i++)
+  Vec u0[m];                    /* real */
+  for (int i = 0; i < m; i++)
     {
       DACreateGlobalVector (BHD.da, &u0[i]);
 
@@ -1083,7 +1086,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* FIXME: what is  the point to split the  kernel in two pieces?
          Redefine S := S + L and forget about L */
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++) /* S := damp * L + damp_LJ * S */
           VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
 
@@ -1093,13 +1096,13 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         those passed explicitly are modified:
       */
       bgy3d_solute_field (&BHD,
-                          2, solvent,
+                          m, solvent,
                           u0, uc, /* intent(out) */
                           n, solute,
                           density, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
 
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < m; i++)
         {
           /*
             Historically  short-range  potential   is  scaled  by  the
@@ -1122,8 +1125,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           ComputeH2O_g (g[i], u0[i], du[i]);
         }
 
-      real du_norm_old[2] = {0.0, 0.0}; /* Not sure if 0.0 as inital
-                                           value is right.  */
+      /* Not sure if 0.0 as inital value is right. */
+      real du_norm_old[m];
+      for (int i = 0; i < m; i++)
+        du_norm_old[i] = 0.0;
 
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
@@ -1155,11 +1160,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           */
 
           /* Compute FFT of g[] for all sites: */
-          for (int i = 0; i < 2; i++)
+          for (int i = 0; i < m; i++)
             MatMult (BHD.fft_mat, g[i], g_fft[i]);
 
           /* for H, O in that order ... */
-          for (int i = 0; i < 2; i++)
+          for (int i = 0; i < m; i++)
             {
               /*
                 ... sum over H, O  in that order.  LJ, short- and long
@@ -1168,7 +1173,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               */
               VecSet (du_acc_fft, 0.0);
 
-              for (int j = 0; j < 2; j++) /* This increments the accumulator: */
+              for (int j = 0; j < m; j++) /* This increments the accumulator: */
                 apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], du_acc_fft);
 
               /*
@@ -1184,7 +1189,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 correlation  of the  solvent  sites due  to the  rigid
                 bonds.  See e.g. Eq. (4.114), Jager Diss:
               */
-              for (int j = 0; j < 2; j++)
+              for (int j = 0; j < m; j++)
                 {
                   if (j == i) continue;
                   /*
@@ -1248,7 +1253,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             iteration  one  can  safely  update  g[].   Compute  g  :=
             exp[-(u0 + du)], with a sanity check:
           */
-          for (int i = 0; i < 2; i++)
+          for (int i = 0; i < m; i++)
             ComputeH2O_g (g[i], u0[i], du[i]);
 
           /*
@@ -1266,7 +1271,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            */
 
           /* Infinity (max-abs) norm of du[] over all site indices: */
-          real norm8 = maxval (2, du_norm);
+          real norm8 = maxval (m, du_norm);
 
           mycount++;
 
@@ -1296,7 +1301,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             }
           /* otherwise leave "a1" and "mycount" unchanged */
 
-          for (int i = 0; i < 2; i++)
+          for (int i = 0; i < m; i++)
             du_norm_old[i] = du_norm[i];
 
           PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
@@ -1306,7 +1311,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, 2, solvent, g, work));
+                       ComputeCharge (PD, m, solvent, g, work));
 
           PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
                        mycount, upwards);
@@ -1339,7 +1344,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /************************************/
 
       /* Test for solvent electrostatic potential: */
-      bgy3d_solvent_field (&BHD, 2, solvent, g, ve);
+      bgy3d_solvent_field (&BHD, m, solvent, g, ve);
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
@@ -1359,7 +1364,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Clean up and exit ... */
   VecDestroy (du_acc_fft);
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     {
       /* Delegated to the caller:
          VecDestroy (g[i]); */
