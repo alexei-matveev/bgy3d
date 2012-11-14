@@ -984,8 +984,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   if (bgy3d_getopt_test ("--load-H2O"))
     {
       PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
-      du[0] = bgy3d_load_vec ("du0.bin"); /* duH */
-      du[1] = bgy3d_load_vec ("du1.bin"); /* duO */
+      for (int i = 0; i < m; i++)
+        {
+          char name[20];
+          snprintf (name, sizeof name, "du%d.bin", i);
+          du[i] = bgy3d_load_vec (name);
+        }
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
     }
 
@@ -1355,8 +1359,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       if (bgy3d_getopt_test ("--save-H2O"))
         {
           PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
-          bgy3d_save_vec ("du0.bin", du[0]); /* duH */
-          bgy3d_save_vec ("du1.bin", du[1]); /* duO */
+          for (int i = 0; i < m; i++)
+            {
+              char name[20];
+              snprintf (name, sizeof name, "du%d.bin", i);
+              bgy3d_save_vec (name, du[i]);
+            }
           PetscPrintf (PETSC_COMM_WORLD, "done.\n");
         }
     } /* damp loop */
