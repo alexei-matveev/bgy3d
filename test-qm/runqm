@@ -15,9 +15,7 @@
 (use-modules (srfi srfi-1)
              (ice-9 pretty-print)
              ((guile paragauss)
-              #:select (qm-main
-                        qm-add-hook!
-                        qm-run-hooks))
+              #:select (qm-main))
              ;;
              ;; This one is called from se_scheduling_module to
              ;; convert MPTS problem on behalf of the blocked
@@ -29,8 +27,13 @@
              ;; BGY3d functionality:
              ;;
              ((guile bgy3d)
-              #:select (bgy3d-run
-                        bgy3d-pot-destroy)))
+              #:select (bgy3d-run)))
+
+;;;
+;;; ParaGauss looks up this name in the top-level environment. We bind
+;;; it to a procedure later:
+;;;
+(define bgy3d-hook (if #f #f))          ; unspecified yet
 
 ;;;
 ;;; The   input  file   is  supposed   to  contain   (at   least)  two
@@ -56,12 +59,12 @@
   (pretty-print opts)
   (pretty-print table)
   ;;
-  ;; PG calls the hook relevant for us with "bgy3d" as the first
-  ;; argument. In this case we call bgy3d-run with a name of the table
-  ;; read from the input:
+  ;; PG  calls bgy3d-hook with  solute sites (having fake  force field
+  ;; parameters) and a pointer to a function returning the density. In
+  ;; this  case we call bgy3d-run with  a name of the  table read from
+  ;; the input prepended to the list of arguments:
   ;;
-  (qm-add-hook! (lambda (hook . rest)
-                  (if (equal? hook "bgy3d")
-                      (let ((ve (apply bgy3d-run table rest)))
-                        (bgy3d-pot-destroy ve)))))
+  (set! bgy3d-hook
+        (lambda args
+          (apply bgy3d-run table args))) ; returns potential
   (qm-main argv))
