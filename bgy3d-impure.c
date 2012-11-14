@@ -861,7 +861,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec ve;            /* ve for solvent electrostaic potential field */
   PetscScalar du_norm[m];
   int namecount = 0;
-  char nameH[20], nameO[20];
 
   PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
@@ -1338,12 +1337,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
          overall  scale  factors  damp/damp_LJ.  Remove when  no  more
          needed. */
       namecount++;
-      sprintf(nameH, "vec0-%d.m", namecount-1);
-      sprintf(nameO, "vec1-%d.m", namecount-1);
 
       PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-      bgy3d_save_vec_ascii (nameH, g[0]); /* g_H */
-      bgy3d_save_vec_ascii (nameO, g[1]); /* g_O */
+      for (int i = 0; i < m; i++)
+        {
+          char name[20];
+          snprintf (name, sizeof name, "vec%d-%d.m", i, namecount - 1);
+          bgy3d_save_vec_ascii (name, g[i]);
+        }
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
 
