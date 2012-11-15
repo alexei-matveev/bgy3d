@@ -363,6 +363,10 @@ static void  pair (State *BHD,
     scaling factor  q[i] * q[j].  FIXME: why  keeping O(m^2) versions,
     with m being number of solvent sites, of almost the same field and
     repeating unnecessary FFTs?
+
+    Side effects: fills BHD->fg2_fft[3] with FFT of long range Coulomb
+    force.  Though it  does  not appear  to  be used  further in  this
+    branch.
   */
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
 
