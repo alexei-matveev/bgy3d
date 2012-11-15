@@ -867,7 +867,13 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   for(damp=damp_start; damp<=1; damp+= 0.01)
     {
 
-      RecomputeInitialFFTs (BHD);
+      RecomputeInitialFFTs (BHD, 2,
+                            BHD->g2,        /* real, in */
+                            BHD->fs_g2_fft, /* complex, out */
+                            BHD->fl_g2_fft, /* complex, out */
+                            BHD->u2,        /* real, out */
+                            BHD->u2_fft);   /* complex, out */
+
       RecomputeInitialSoluteData(BHD, (damp), 1.0);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
@@ -973,7 +979,13 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   for(damp=damp_start; damp<=1; damp+= 0.1)
     {
 
-      RecomputeInitialFFTs (BHD);
+      RecomputeInitialFFTs (BHD, 2,
+                            BHD->g2,        /* real, in */
+                            BHD->fs_g2_fft, /* complex, out */
+                            BHD->fl_g2_fft, /* complex, out */
+                            BHD->u2,        /* real, out */
+                            BHD->u2_fft);   /* complex, out */
+
       RecomputeInitialSoluteData(BHD, SQR(damp), 1.0);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);

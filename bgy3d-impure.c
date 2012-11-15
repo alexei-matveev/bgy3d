@@ -438,8 +438,22 @@ static void  pair (State *BHD,
     }
 }
 
-void RecomputeInitialFFTs (State *BHD)
+/*
+  Given  pairwise  distributions g2[][]  compute  weighted forces  and
+  coulomb interction.
+
+  Side  effects:  by  way  of  pair() uses  BHD->fg2_fft[3]  as  work
+  arrays.
+*/
+void RecomputeInitialFFTs (State *BHD,
+                           int m,
+                           Vec g2[m][m],        /* real, in */
+                           Vec fs_g2_fft[m][m][3], /* complex, out */
+                           Vec fl_g2_fft[m][m][3], /* complex, out */
+                           Vec u2[m][m],     /* real, out */
+                           Vec u2_fft[m][m]) /* complex, out */
 {
+  assert (m == 2);              /* FIXME: uses global solvent[2] */
   real ff_params[3];
 
   PetscPrintf (PETSC_COMM_WORLD, "Recomputing FFT data\n");
@@ -455,7 +469,7 @@ void RecomputeInitialFFTs (State *BHD)
 
 
   /* Over all distinct solvent site pairs: */
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
         /* Pair interaction parameters: */
@@ -465,10 +479,10 @@ void RecomputeInitialFFTs (State *BHD)
 
         /* Does real work: */
         pair (BHD, ff_params,
-              BHD->g2[i][j],
+              g2[i][j],
               force_short, force_long, /* work vectors*/
-              BHD->fs_g2_fft[i][j], BHD->fl_g2_fft[i][j],
-              BHD->u2[i][j], BHD->u2_fft[i][j]); /* ij = ji */
+              fs_g2_fft[i][j], fl_g2_fft[i][j],
+              u2[i][j], u2_fft[i][j]); /* ij = ji */
       }
 
   /* Clean up and exit: */
@@ -1051,7 +1065,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      RecomputeInitialFFTs (&BHD);
+      RecomputeInitialFFTs (&BHD, m,
+                            BHD.g2,        /* real, in */
+                            BHD.fs_g2_fft, /* complex, out */
+                            BHD.fl_g2_fft, /* complex, out */
+                            BHD.u2,        /* real, out */
+                            BHD.u2_fft);   /* complex, out */
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
@@ -1527,7 +1546,13 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           a0 = 0.1 / (count + 5.0);
         }
 
-      RecomputeInitialFFTs (&BHD);
+      RecomputeInitialFFTs (&BHD, 2,
+                            BHD.g2,        /* real, in */
+                            BHD.fs_g2_fft, /* complex, out */
+                            BHD.fl_g2_fft, /* complex, out */
+                            BHD.u2,        /* real, out */
+                            BHD.u2_fft);   /* complex, out */
+
 
       /* Compute solute field in this block:*/
       {
