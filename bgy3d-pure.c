@@ -388,6 +388,11 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
   Long range  pair potential Vec uc  is intent(out) here,  same as its
   FFT transform  uc_fft.  Vec f_l[]  is filled with  the corresponding
   force derived by means of FFT from the potential uc.
+
+  Side effects:  fills BHD->fg2_fft[3] with FFT of  long range Coulomb
+  force. The  real-space force  is returned in  f_l[l]. However  as of
+  now, I am  not sure if BHD->fg2_fft[3] is used as  work arrays or if
+  it is a part of the output.
 */
 void ComputeFFTfromCoulomb (State *BHD,
                             Vec uc,     /* intent(out) */
@@ -406,7 +411,7 @@ void ComputeFFTfromCoulomb (State *BHD,
   /* Get local portion of the grid */
   DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  struct {PetscScalar re, im;} ***uc_fft_, ***fg_fft_[3];
+  complex ***uc_fft_, ***fg_fft_[3];
   DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg_fft[dim], &fg_fft_[dim]);
@@ -426,13 +431,9 @@ void ComputeFFTfromCoulomb (State *BHD,
 
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
-              uc_fft_[i[2]][i[1]][i[0]].re = 0;
-              uc_fft_[i[2]][i[1]][i[0]].im = 0;
+              uc_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
               FOR_DIM
-                {
-                  fg_fft_[dim][i[2]][i[1]][i[0]].re = 0;
-                  fg_fft_[dim][i[2]][i[1]][i[0]].im = 0;
-                }
+                fg_fft_[dim][i[2]][i[1]][i[0]] = 0; /* complex */
             }
           else
             {
@@ -440,16 +441,12 @@ void ComputeFFTfromCoulomb (State *BHD,
               const real fac = EPSILON0INV / M_PI / k2;
               const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
-              /* potential */
-              uc_fft_[i[2]][i[1]][i[0]].re = factor * sign * fac * exp(- k2 * SQR(M_PI) / SQR(G));
-              uc_fft_[i[2]][i[1]][i[0]].im = 0.0;
+              /* Potential, complex with zero imaginary part: */
+              uc_fft_[i[2]][i[1]][i[0]] = factor * sign * fac * exp(- k2 * SQR(M_PI) / SQR(G));
 
-              /* force */
+              /* Force, imaginary: */
               FOR_DIM
-                {
-                  fg_fft_[dim][i[2]][i[1]][i[0]].re = 0;
-                  fg_fft_[dim][i[2]][i[1]][i[0]].im = 2. * M_PI * ic[dim] / L * uc_fft_[i[2]][i[1]][i[0]].re;
-                }
+                fg_fft_[dim][i[2]][i[1]][i[0]] = 2.0 * M_PI * ic[dim] / L * (I * uc_fft_[i[2]][i[1]][i[0]]);
             }
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
