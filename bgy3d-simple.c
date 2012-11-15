@@ -64,12 +64,10 @@ static void ConvolutionTest(BGY3dParameter *params);
 #ifdef MATPRECOND
 static MatPrecond MatPrecond_malloc(BGY3dParameter *params);
 static void MatPrecond_free(MatPrecond MP);
-static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y);
 static void TestPreconditioner(MatPrecond MP, Vec x, Vec y);
 #endif
 
 static PetscErrorCode Compute_F(SNES snes, Vec g, Vec f, void *pa);
-static PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y);
 
 static BGY3dParameter *BGY3dParameter_malloc(const ProblemData *PD, int vdim)
 {
@@ -499,6 +497,52 @@ static void ComputeMatrixStencil(const ProblemData *PD, DA da, Mat M, int vdim)
 
 }
 
+#if PETSC_VERSION_MAJOR > 2
+static PetscErrorCode Compute_Preconditioner (PC pc, Vec x, Vec y)
+{
+  BGY3dParameter *params;
+  PCShellGetContext (pc, (void**) &params);
+
+  PetscErrorCode ierr = VecPointwiseMult (y, params->pre, x);
+
+  return ierr;
+}
+#else
+static PetscErrorCode Compute_Preconditioner (void *pa, Vec x, Vec y)
+{
+  BGY3dParameter *params;
+  params = (BGY3dParameter*) pa;
+
+  PetscErrorCode ierr = VecPointwiseMult (y, params->pre, x);
+
+  return ierr;
+}
+#endif
+
+#ifdef MATPRECOND
+static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
+{
+  BGY3dParameter *params;
+  MatPrecond MP;
+  PetscErrorCode ierr;
+
+  params = (BGY3dParameter*) pa;
+  MP = params->MP;
+
+/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
+/*   exit(1);  */
+
+  ierr = KSPSolve(MP->ksp, x, y);
+
+
+  //VecView(params->pre,PETSC_VIEWER_STDERR_WORLD);
+  //exit(1);
+
+  return ierr;
+}
+#endif
+
+
 Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
 {
   SNES snes;
@@ -539,11 +583,11 @@ Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
 
   if (bgy3d_getopt_test ("--user-precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
+    ierr = PCSetType (pc, PCSHELL);
     assert (!ierr);
-    ierr = PCShellSetApply(pc,Compute_Preconditioner); // CHKERRQ(ierr);
+    ierr = PCShellSetContext (pc, params);
     assert (!ierr);
-    ierr = PCShellSetContext(pc,params); // CHKERRQ(ierr);
+    ierr = PCShellSetApply (pc, Compute_Preconditioner);
     assert (!ierr);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
@@ -552,11 +596,11 @@ Vec BGY3d_solve(const ProblemData *PD, Vec g_ini)
 #ifdef MATPRECOND
   if (bgy3d_getopt_test ("--mat-precond")) { /* user-defined precond */
     /* Set user defined preconditioner */
-    ierr = PCSetType(pc,PCSHELL); // CHKERRQ(ierr);
+    ierr = PCSetType (pc, PCSHELL);
     assert (!ierr);
-    ierr = PCShellSetApply(pc,Compute_Preconditioner_Mat); // CHKERRQ(ierr);
+    ierr = PCShellSetContext (pc, params);
     assert (!ierr);
-    ierr = PCShellSetContext(pc,params); // CHKERRQ(ierr);
+    ierr = PCShellSetApply (pc, Compute_Preconditioner_Mat);
     assert (!ierr);
   }
 #endif
@@ -1120,47 +1164,6 @@ static PetscErrorCode Compute_F_Kirkwood(SNES snes, Vec g, Vec f, void *pa)
   return 0;
 }
 
-
-
-
-
-static PetscErrorCode Compute_Preconditioner(void *pa,Vec x,Vec y)
-{
-  BGY3dParameter *params;
-  PetscErrorCode ierr;
-
-  params = (BGY3dParameter*) pa;
-  ierr=VecPointwiseMult(y,params->pre,x);
-
-
-/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
-  return ierr;
-}
-
-#ifdef MATPRECOND
-static PetscErrorCode Compute_Preconditioner_Mat(void *pa,Vec x,Vec y)
-{
-  BGY3dParameter *params;
-  MatPrecond MP;
-  PetscErrorCode ierr;
-
-  params = (BGY3dParameter*) pa;
-  MP = params->MP;
-
-/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
-
-  ierr = KSPSolve(MP->ksp, x, y);
-
-
-  //VecView(params->pre,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-
-  return ierr;
-}
-#endif
 
 static void ConvolutionTest(BGY3dParameter *params)
 {
