@@ -769,30 +769,32 @@ static void WriteH2OSNewtonSolution(State *BHD, Vec u)
 
 }
 
-
-
-
-
-
-
-/* apply preconditioner matrix: diagonal scaling */
-static PetscErrorCode ComputePreconditioner_H2OS(void *data, Vec x, Vec y)
+#if PETSC_VERSION_MAJOR > 2
+/* Apply preconditioner matrix: diagonal scaling: */
+static PetscErrorCode ComputePreconditioner_H2OS (PC pc, Vec x, Vec y)
 {
   State *BHD;
-  PetscErrorCode ierr;
+  PCShellGetContext (pc, (void**) &BHD);
 
-  BHD = (State*) data;
-  //ierr=VecPointwiseMult(y,BHD->pre,x);
-
-  VecAbs(BHD->pre);
-  VecShift(BHD->pre, 1.0);
-  ierr = VecPointwiseDivide(y, x, BHD->pre);
-
-/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
+  VecAbs (BHD->pre);
+  VecShift (BHD->pre, 1.0);
+  PetscErrorCode ierr = VecPointwiseDivide (y, x, BHD->pre);
 
   return ierr;
 }
+#else
+static PetscErrorCode ComputePreconditioner_H2OS (void *data, Vec x, Vec y)
+{
+  State *BHD;
+  BHD = (State*) data;
+
+  VecAbs (BHD->pre);
+  VecShift (BHD->pre, 1.0);
+  PetscErrorCode ierr = VecPointwiseDivide (y, x, BHD->pre);
+
+  return ierr;
+}
+#endif
 
 #include "petscmat.h"
 
@@ -842,9 +844,9 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    PCSetType(pc,PCSHELL);
-    PCShellSetApply(pc,ComputePreconditioner_H2OS);
-    PCShellSetContext(pc,BHD);
+    PCSetType (pc, PCSHELL);
+    PCShellSetContext (pc, BHD);
+    PCShellSetApply (pc, ComputePreconditioner_H2OS);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
@@ -948,9 +950,9 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    PCSetType(pc,PCSHELL);
-    PCShellSetApply(pc,ComputePreconditioner_H2OS);
-    PCShellSetContext(pc,BHD);
+    PCSetType (pc, PCSHELL);
+    PCShellSetContext (pc, BHD);
+    PCShellSetApply (pc, ComputePreconditioner_H2OS);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
