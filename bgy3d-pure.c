@@ -386,18 +386,15 @@ void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
 
 /*
   Long range  pair potential Vec uc  is intent(out) here,  same as its
-  FFT transform  uc_fft.  Vec f_l[]  is filled with  the corresponding
+  FFT  transform uc_fft.  Vec  fc[] is  filled with  the corresponding
   force derived by means of FFT from the potential uc.
 
-  Side effects:  fills BHD->fg2_fft[3] with FFT of  long range Coulomb
-  force. The  real-space force  is returned in  f_l[l]. However  as of
-  now, I am  not sure if BHD->fg2_fft[3] is used as  work arrays or if
-  it is a part of the output.
+  No side effects.
 */
 void ComputeFFTfromCoulomb (State *BHD,
-                            Vec uc,     /* intent(out) */
-                            Vec f_l[3], /* intent(out) */
-                            Vec uc_fft, /* complex, intent(out) */
+                            Vec uc, Vec fc[3], /* intent(out) */
+                            Vec uc_fft,    /* complex, intent(out) */
+                            Vec fc_fft[3], /* complex, intent(out) */
                             real factor)
 {
   int x[3], n[3], i[3], ic[3];
@@ -406,15 +403,13 @@ void ComputeFFTfromCoulomb (State *BHD,
   const int *N = PD->N;         /* N[3] */
   const real L = PD->interval[1] - PD->interval[0];
 
-  Vec *fg_fft = BHD->fg2_fft;   /* fg_fft[3] */
-
   /* Get local portion of the grid */
   DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  complex ***uc_fft_, ***fg_fft_[3];
+  complex ***uc_fft_, ***fc_fft_[3];
   DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
-    DAVecGetArray (BHD->dc, fg_fft[dim], &fg_fft_[dim]);
+    DAVecGetArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
 
    /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -433,7 +428,7 @@ void ComputeFFTfromCoulomb (State *BHD,
             {
               uc_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
               FOR_DIM
-                fg_fft_[dim][i[2]][i[1]][i[0]] = 0; /* complex */
+                fc_fft_[dim][i[2]][i[1]][i[0]] = 0; /* complex */
             }
           else
             {
@@ -446,23 +441,23 @@ void ComputeFFTfromCoulomb (State *BHD,
 
               /* Force, imaginary: */
               FOR_DIM
-                fg_fft_[dim][i[2]][i[1]][i[0]] = 2.0 * M_PI * ic[dim] / L * (I * uc_fft_[i[2]][i[1]][i[0]]);
+                fc_fft_[dim][i[2]][i[1]][i[0]] = 2.0 * M_PI * ic[dim] / L * (I * uc_fft_[i[2]][i[1]][i[0]]);
             }
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg_fft[dim], &fg_fft_[dim]);
+    DAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
 
   /* FFT potential */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
   VecScale (uc, 1./L/L/L);
 
   /* FFT force, seems to be always requested: */
-  assert (f_l != NULL);
+  assert (fc != NULL);
   FOR_DIM
     {
-      MatMultTranspose (BHD->fft_mat, fg_fft[dim], f_l[dim]);
-      VecScale (f_l[dim], 1./L/L/L);
+      MatMultTranspose (BHD->fft_mat, fc_fft[dim], fc[dim]);
+      VecScale (fc[dim], 1./L/L/L);
     }
 }
 
@@ -537,12 +532,18 @@ void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
   /*********************************************/
   /* Compute fft from Coulomb potential (long) */
   /********************************************/
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-                        q2HO * damp);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-                        q2H * damp);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-                        q2O * damp);
+
+  /* FFT image of Coulomb long  force in BHD->fg2_fft[3] appears to be
+     ignored since overwritten. So here these are work arrays: */
+  ComputeFFTfromCoulomb (BHD, BHD->u2[0][1], BHD->F_l[0][1],
+                         BHD->u2_fft[0][1], BHD->fg2_fft,
+                         q2HO * damp);
+  ComputeFFTfromCoulomb (BHD, BHD->u2[0][0], BHD->F_l[0][0],
+                         BHD->u2_fft[0][0], BHD->fg2_fft,
+                         q2H * damp);
+  ComputeFFTfromCoulomb (BHD, BHD->u2[1][1], BHD->F_l[1][1],
+                         BHD->u2_fft[1][1], BHD->fg2_fft,
+                         q2O * damp);
 
   FOR_DIM
     {

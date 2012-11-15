@@ -368,7 +368,7 @@ static void  pair (State *BHD,
     force.  Though it  does  not appear  to  be used  further in  this
     branch.
   */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, q2);
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->fg2_fft, q2);
 
   /*
     Sort-range  potential/force is  specific  for each  pair, on  the

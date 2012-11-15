@@ -324,13 +324,20 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
         BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
       }
 
-  /* Compute fft from Coulomb potential (long) */
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-                        q2HO);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-                        q2H);
-  ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-                        q2O);
+  /*
+    Compute fft  from Coulomb potential (long). FFT  image of Coulomb
+    long  force  in  BHD->fg2_fft[3]  appears  to  be  ignored  since
+    overwritten. So here these are work arrays:
+  */
+  ComputeFFTfromCoulomb (BHD, BHD->u2[0][1], BHD->F_l[0][1],
+                         BHD->u2_fft[0][1], BHD->fg2_fft,
+                         q2HO);
+  ComputeFFTfromCoulomb (BHD, BHD->u2[0][0], BHD->F_l[0][0],
+                         BHD->u2_fft[0][0], BHD->fg2_fft,
+                         q2H);
+  ComputeFFTfromCoulomb (BHD, BHD->u2[1][1], BHD->F_l[1][1],
+                         BHD->u2_fft[1][1], BHD->fg2_fft,
+                         q2O);
 
   FOR_DIM
     {

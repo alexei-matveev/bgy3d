@@ -12,7 +12,12 @@ void ComputeH2O_g (Vec g, Vec g0, Vec dg);
 
 void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);
 
-void ComputeFFTfromCoulomb (State *BHD, Vec uc, Vec f_l[3], Vec uc_fft, real factor);
+void ComputeFFTfromCoulomb (State *BHD,
+                            Vec uc, Vec fc[3], /* intent(out) */
+                            Vec uc_fft,    /* complex, intent(out) */
+                            Vec fc_fft[3], /* complex, intent(out) */
+                            real factor);
+
 
 void RecomputeInitialData (State *BHD, real damp, real damp_LJ);
 
