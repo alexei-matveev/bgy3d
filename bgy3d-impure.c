@@ -455,18 +455,6 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* For   debug  only,   check   the  symmetry   of  the   pair
-           quantities: */
-        if (1)
-          {
-            assert (BHD->g2[j][i] == BHD->g2[i][j]);
-            FOR_DIM
-              {
-                assert (BHD->fs_g2_fft[j][i][dim] == BHD->fs_g2_fft[i][j][dim]);
-                assert (BHD->fl_g2_fft[j][i][dim] == BHD->fl_g2_fft[i][j][dim]);
-              }
-          }
-
         /* Pair interaction parameters: */
         ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
         ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
