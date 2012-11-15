@@ -659,23 +659,29 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
 
 }
 
-
-
-/* apply preconditioner matrix: diagonal scaling */
-static PetscErrorCode ComputePreconditioner_H2O(void *data, Vec x, Vec y)
+#if PETSC_VERSION_MAJOR > 2
+/* Apply preconditioner matrix: diagonal scaling: */
+static PetscErrorCode ComputePreconditioner_H2O (PC pc, Vec x, Vec y)
 {
+  /* In fact only BHD->pre is used below: */
   State *BHD;
-  PetscErrorCode ierr;
+  PCShellGetContext (pc, (void**) &BHD);
 
-  BHD = (State*) data;
-  ierr=VecPointwiseMult(y,BHD->pre,x);
-
-
-/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
+  PetscErrorCode ierr = VecPointwiseMult (y, BHD->pre, x);
 
   return ierr;
 }
+#else
+static PetscErrorCode ComputePreconditioner_H2O (void *data, Vec x, Vec y)
+{
+  State *BHD;
+
+  BHD = (State*) data;
+  PetscErrorCode ierr = VecPointwiseMult (y, BHD->pre, x);
+
+  return ierr;
+}
+#endif
 
 /*#include "petscksp.h"
 #include "/opt/packages/petsc/src/snes/snesimpl.h"
@@ -730,9 +736,9 @@ Vec BGY3d_SolveNewton_H2O (const ProblemData *PD, Vec g_ini)
   flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    PCSetType(pc,PCSHELL);
-    PCShellSetApply(pc,ComputePreconditioner_H2O);
-    PCShellSetContext(pc,BHD);
+    PCSetType (pc, PCSHELL);
+    PCShellSetContext (pc, BHD);
+    PCShellSetApply (pc, ComputePreconditioner_H2O);
   } else
     /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
     PCSetType( pc, PCJACOBI);
