@@ -25,7 +25,6 @@
   grid.
 */
 
-#include <stdbool.h>            /* bool, true, false */
 #include "bgy3d.h"
 #include "bgy3d-potential.h"
 

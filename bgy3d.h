@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fftw_mpi.h>
+#include <stdbool.h>            /* bool, true, false */
 
 #include "petscsnes.h"
 #include "petscda.h"
