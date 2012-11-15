@@ -25,6 +25,7 @@
   grid.
 */
 
+#include <stdbool.h>            /* bool, true, false */
 #include "bgy3d.h"
 #include "bgy3d-potential.h"
 
@@ -95,8 +96,9 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   return s;
 }
 
-/* Value fetch interface */
-_Bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *p)
+/* Value fetch interface. Returns  number of actually delivered points
+   in *np <= n. Returns false on termination. */
+bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *np)
 {
   assert (n != 0);            /* need to decide how to handle that! */
 
@@ -105,8 +107,8 @@ _Bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *p)
   const real dV = s->h[0] * s->h[1] * s->h[2];
 
   /* generating coordinates */
-  *p = 0;
-  while (*p < n && s->ijk < local_size)
+  int p = 0;
+  while (p < n && s->ijk < local_size)
     {
       /*
         Get coordinatens i, j, and k within the local block:
@@ -123,25 +125,26 @@ _Bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *p)
       j += s->j0;
       k += s->k0;
 
-      x[*p][0] = i * s->h[0] + s->interval[0]; /* x */
-      x[*p][1] = j * s->h[1] + s->interval[0]; /* y */
-      x[*p][2] = k * s->h[2] + s->interval[0]; /* z */
-      v[*p] = s->v_[k][j][i] * dV;             /* value * weight */
+      x[p][0] = i * s->h[0] + s->interval[0]; /* x */
+      x[p][1] = j * s->h[1] + s->interval[0]; /* y */
+      x[p][2] = k * s->h[2] + s->interval[0]; /* z */
+      v[p] = s->v_[k][j][i] * dV;             /* value * weight */
 
       /* update counters */
       s->ijk++;
-      (*p)++;
+      p++;
     }
 
   /* Reset  counter  to  original   point  once  we  fetched  all  the
      values. FIXME: What if the user supplies n == 0? */
-  if (*p == 0)
-    {
-      s->ijk = 0;
-      return 0;
-    }
-  else
-    return 1;
+  if (p == 0)
+    s->ijk = 0;
+
+  /* Also  return   the  number  of  points  and   a  flag  indicating
+     termination: */
+  *np = p;
+
+  return p > 0;
 }
 
 /* clean up the memory for public *pcontext */
