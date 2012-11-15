@@ -411,7 +411,6 @@ void ComputeFFTfromCoulomb (State *BHD,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg_fft[dim], &fg_fft_[dim]);
 
-  int ijk = 0;
    /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -452,7 +451,6 @@ void ComputeFFTfromCoulomb (State *BHD,
                   fg_fft_[dim][i[2]][i[1]][i[0]].im = 2. * M_PI * ic[dim] / L * uc_fft_[i[2]][i[1]][i[0]].re;
                 }
             }
-          ijk++;
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
