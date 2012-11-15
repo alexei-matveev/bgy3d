@@ -181,7 +181,7 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       /* Calculate moments for tests. First initializing local sums: */
       real m0 = 0.0;
       real m1[3] = {0.0, 0.0, 0.0};
-      while ((bgy3d_pot_get_value (s, chunk_size, x, v, &nact)))
+      while (bgy3d_pot_get_value (s, chunk_size, x, v, &nact))
         for (int i = 0; i < nact; i++)
           {
             m0 += v[i];
