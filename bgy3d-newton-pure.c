@@ -203,91 +203,91 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* set force vectors */
+        {
+          /* set force vectors */
 
-	  FOR_DIM
-	    r[dim] = i[dim]*h[dim]+interval[0];
-
-
-	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-	  /* Lennard-Jones */
-	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, epsilonH, sigmaH);
-	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, epsilonO, sigmaO);
-	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
-
-	  /* Coulomb short */
-	  gHini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, q2H);
-	  gOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, q2O);
-	  gHOini_vec[i[2]][i[1]][i[0]] +=
-	    beta* Coulomb_short( r_s, q2HO);
-
-	  /* Coulomb long */
-/* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
-/* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
-/* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
+          FOR_DIM
+            r[dim] = i[dim]*h[dim]+interval[0];
 
 
-	   /* Coulomb */
-/* 	  gHini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb( r_s, BHD->LJ_paramsH); */
-/* 	  gOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb( r_s, BHD->LJ_paramsO); */
-/* 	  gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/* 	    beta* Coulomb( r_s, BHD->LJ_paramsHO); */
+          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
-	   FOR_DIM
-	    {
-	      /* Lennard-Jones */
-	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
-	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
-	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
+          /* Lennard-Jones */
+          gHini_vec[i[2]][i[1]][i[0]] +=
+            beta* Lennard_Jones( r_s, epsilonH, sigmaH);
+          gOini_vec[i[2]][i[1]][i[0]] +=
+            beta* Lennard_Jones( r_s, epsilonO, sigmaO);
+          gHOini_vec[i[2]][i[1]][i[0]] +=
+            beta* Lennard_Jones( r_s, epsilonHO, sigmaHO);
 
- 	      /* Coulomb short */
-	      fH_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], q2H);
-	      fO_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], q2O);
-	      fHO_vec[dim][i[2]][i[1]][i[0]] +=
-		Coulomb_short_grad( r_s, r[dim], q2HO);
+          /* Coulomb short */
+          gHini_vec[i[2]][i[1]][i[0]] +=
+            beta* Coulomb_short( r_s, q2H);
+          gOini_vec[i[2]][i[1]][i[0]] +=
+            beta* Coulomb_short( r_s, q2O);
+          gHOini_vec[i[2]][i[1]][i[0]] +=
+            beta* Coulomb_short( r_s, q2HO);
 
-	      /* Coulomb long */
-/*  	      fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/* 	      fOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/* 	      fHOl_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-	      /* Coulomb */
-/* 	      fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/* 	      fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/* 	      fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/* 		Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+          /* Coulomb long */
+/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
+/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
+/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
 
 
-	    }
+           /* Coulomb */
+/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb( r_s, BHD->LJ_paramsH); */
+/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb( r_s, BHD->LJ_paramsO); */
+/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
+/*          beta* Coulomb( r_s, BHD->LJ_paramsHO); */
 
-	   /* set Preconditioner */
-	   pre_vec[i[2]][i[1]][i[0]].dgHO = exp(-gHOini_vec[i[2]][i[1]][i[0]]);
-	   pre_vec[i[2]][i[1]][i[0]].dgH = exp(-gHini_vec[i[2]][i[1]][i[0]]);
-	   pre_vec[i[2]][i[1]][i[0]].dgO = exp(-gOini_vec[i[2]][i[1]][i[0]]);
+           FOR_DIM
+            {
+              /* Lennard-Jones */
+              fH_vec[dim][i[2]][i[1]][i[0]] +=
+                Lennard_Jones_grad( r_s, r[dim], epsilonH, sigmaH);
+              fO_vec[dim][i[2]][i[1]][i[0]] +=
+                Lennard_Jones_grad( r_s, r[dim], epsilonO, sigmaO);
+              fHO_vec[dim][i[2]][i[1]][i[0]] +=
+                Lennard_Jones_grad( r_s, r[dim], epsilonHO, sigmaHO);
 
-	}
+              /* Coulomb short */
+              fH_vec[dim][i[2]][i[1]][i[0]] +=
+                Coulomb_short_grad( r_s, r[dim], q2H);
+              fO_vec[dim][i[2]][i[1]][i[0]] +=
+                Coulomb_short_grad( r_s, r[dim], q2O);
+              fHO_vec[dim][i[2]][i[1]][i[0]] +=
+                Coulomb_short_grad( r_s, r[dim], q2HO);
+
+              /* Coulomb long */
+/*            fHl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
+/*            fOl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
+/*            fHOl_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+
+              /* Coulomb */
+/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
+/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
+/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
+/*              Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
+
+
+            }
+
+           /* set Preconditioner */
+           pre_vec[i[2]][i[1]][i[0]].dgHO = exp(-gHOini_vec[i[2]][i[1]][i[0]]);
+           pre_vec[i[2]][i[1]][i[0]].dgH = exp(-gHini_vec[i[2]][i[1]][i[0]]);
+           pre_vec[i[2]][i[1]][i[0]].dgO = exp(-gOini_vec[i[2]][i[1]][i[0]]);
+
+        }
 
 
 
@@ -326,18 +326,18 @@ static State *BGY3dH2OData_Pair_Newton_malloc(const ProblemData *PD)
 
   /* Compute fft from Coulomb potential (long) */
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][1], BHD->F_l[0][1], BHD->u2_fft[0][1],
-			q2HO);
+                        q2HO);
   ComputeFFTfromCoulomb(BHD, BHD->u2[0][0], BHD->F_l[0][0], BHD->u2_fft[0][0],
-			q2H);
+                        q2H);
   ComputeFFTfromCoulomb(BHD, BHD->u2[1][1], BHD->F_l[1][1], BHD->u2_fft[1][1],
-			q2O);
+                        q2O);
 
   FOR_DIM
     {
       VecAXPY(BHD->F[0][1][dim], 1.0, BHD->F_l[0][1][dim]);
       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->F_l[0][0][dim]);
       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]);
-	}
+        }
 
   return BHD;
 }
@@ -386,12 +386,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* Copy from u to single Vectors */
-	  dgHO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgHO;
-	  dgH_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgH;
-	  dgO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgO;
-	}
+        {
+          /* Copy from u to single Vectors */
+          dgHO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgHO;
+          dgH_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgH;
+          dgO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgO;
+        }
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da, dgH, &dgH_vec);
   DAVecRestoreArray(BHD->da, dgHO, &dgHO_vec);
@@ -415,11 +415,11 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "Computing dgHO, ");
   VecCopy(dgHO, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
-		       BHD->u2_fft[1][1], BHD->rhos[1],
-		       BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
-		       BHD->u2_fft[0][1], BHD->rhos[0],
-		       dgHO, BHD->f);
+                       BHD->F[1][1], BHD->F_l[1][1], gO, gHO,
+                       BHD->u2_fft[1][1], BHD->rhos[1],
+                       BHD->F[0][1], BHD->F_l[0][1], gHO, gH,
+                       BHD->u2_fft[0][1], BHD->rhos[0],
+                       dgHO, BHD->f);
   VecAXPY(dgHO, BHD->PD->beta, BHD->u2[0][1]);
   /************************************************************/
   /* intra molecular part */
@@ -432,12 +432,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII (BHD, gHO, r_HH, gHO, tHO , help2, BHD->f);
   Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-		       BHD->u2_fft[0][1], r_HH, help2, BHD->f);
+                       BHD->u2_fft[0][1], r_HH, help2, BHD->f);
   Solve_NormalizationH2O_small (BHD, gHO, r_HH, help2, help2 , tHO, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
   Solve_NormalizationH2O_smallII (BHD, gHO, r_HO, gO, tO , help2, BHD->f);
   Compute_dg_H2O_intra(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, PETSC_NULL,
-		       BHD->u2_fft[1][1], r_HO, help2, BHD->f);
+                       BHD->u2_fft[1][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small (BHD, gO, r_HO, help2, help2 , tHO, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
 #else
@@ -445,12 +445,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   Solve_NormalizationH2O_smallII (BHD, gHO, r_HH, gHO, tO , help2, BHD->f);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HH, tHO, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tO, tHO,
-			 BHD->u2_fft[0][1], r_HH, help2, BHD->f);
+                         BHD->u2_fft[0][1], r_HH, help2, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
   Compute_dg_H2O_normalization_intra( BHD, gO, r_HO, tHO, BHD->f);
   Solve_NormalizationH2O_smallII (BHD, gHO, r_HO, gO, tO , help2, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[1][1], BHD->F_l[1][1], tO, tHO,
-			 BHD->u2_fft[1][1], r_HO, help2, BHD->f);
+                         BHD->u2_fft[1][1], r_HO, help2, BHD->f);
   VecAXPY(dgHO, 1.0, help2);
 #endif
   /***********************************************************/
@@ -465,11 +465,11 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgH, ");
   VecCopy(dgH, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-		       BHD->u2_fft[0][1], BHD->rhos[1],
-		       BHD->F[0][0], BHD->F_l[0][0], gH, gH,
-		       BHD->u2_fft[0][0], BHD->rhos[0],
-		       dgH, BHD->f);
+                       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
+                       BHD->u2_fft[0][1], BHD->rhos[1],
+                       BHD->F[0][0], BHD->F_l[0][0], gH, gH,
+                       BHD->u2_fft[0][0], BHD->rhos[0],
+                       dgH, BHD->f);
   VecAXPY(dgH, BHD->PD->beta, BHD->u2[0][0]);
   /************************************************************/
   /* intra molecular part */
@@ -487,12 +487,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII (BHD, gH, r_HH, gH, tH , help2, BHD->f);
   Compute_dg_H2O_intra(BHD, BHD->F[0][0], BHD->F_l[0][0], tH, PETSC_NULL,
-		       BHD->u2_fft[0][0], r_HH, help2, BHD->f);
+                       BHD->u2_fft[0][0], r_HH, help2, BHD->f);
   Solve_NormalizationH2O_small (BHD, gH, r_HH, help2, help2 , tH, BHD->f);
   VecAXPY(dgH, 1.0, help2);
   Solve_NormalizationH2O_smallII (BHD, gH, r_HO, gHO, tHO , help2, BHD->f);
   Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-		       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
+                       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small (BHD, gHO, r_HO, help2, help2 , tH, BHD->f);
   VecAXPY(dgH, 1.0, help2);
 #else
@@ -500,12 +500,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   Solve_NormalizationH2O_smallII (BHD, gH, r_HH, gH, tO , help2, BHD->f);
   Compute_dg_H2O_normalization_intra( BHD, gH, r_HH, tH, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[0][0], BHD->F_l[0][0], tO, tH,
-			 BHD->u2_fft[0][0], r_HH, help2, BHD->f);
+                         BHD->u2_fft[0][0], r_HH, help2, BHD->f);
   VecAXPY(dgH, 1.0, help2);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tH, BHD->f);
   Solve_NormalizationH2O_smallII (BHD, gH, r_HO, gHO, tHO , help2, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tH,
-			 BHD->u2_fft[0][1], r_HO, help2, BHD->f);
+                         BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   VecAXPY(dgH, 1.0, help2);
 #endif
   /***********************************************************/
@@ -520,11 +520,11 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
     PetscPrintf(PETSC_COMM_WORLD, "dgO... ");
   VecCopy(dgO, help);
   Compute_dg_H2O_inter(BHD,
-		       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
-		       BHD->u2_fft[0][1], BHD->rhos[0],
-		       BHD->F[1][1], BHD->F_l[1][1], gO, gO,
-		       BHD->u2_fft[1][1], BHD->rhos[1],
-		       dgO, BHD->f);
+                       BHD->F[0][1], BHD->F_l[0][1], gHO, gHO,
+                       BHD->u2_fft[0][1], BHD->rhos[0],
+                       BHD->F[1][1], BHD->F_l[1][1], gO, gO,
+                       BHD->u2_fft[1][1], BHD->rhos[1],
+                       dgO, BHD->f);
   VecAXPY(dgO, BHD->PD->beta, BHD->u2[1][1]);
   /************************************************************/
   /* intra molecular part */
@@ -537,14 +537,14 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
 #ifdef INTRA1
   Solve_NormalizationH2O_smallII (BHD, gHO, r_HO, gHO, tHO , help2, BHD->f);
   Compute_dg_H2O_intra(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, PETSC_NULL,
-		       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
+                       BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   Solve_NormalizationH2O_small (BHD, gHO, r_HO, help2, help2 , tO, BHD->f);
   VecAXPY(dgO, 2.0, help2);
 #else
   Solve_NormalizationH2O_smallII (BHD, gO, r_HO, gHO, tHO , help2, BHD->f);
   Compute_dg_H2O_normalization_intra( BHD, gHO, r_HO, tO, BHD->f);
   Compute_dg_H2O_intraIII(BHD, BHD->F[0][1], BHD->F_l[0][1], tHO, tO,
-			 BHD->u2_fft[0][1], r_HO, help2, BHD->f);
+                         BHD->u2_fft[0][1], r_HO, help2, BHD->f);
   VecAXPY(dgO, 2.0, help2);
 #endif
   /***********************************************************/
@@ -566,12 +566,12 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* Copy from single Vectors to f */
-	  dg_struct[i[2]][i[1]][i[0]].dgHO= dgHO_vec[i[2]][i[1]][i[0]];
-	  dg_struct[i[2]][i[1]][i[0]].dgH= dgH_vec[i[2]][i[1]][i[0]];
-	  dg_struct[i[2]][i[1]][i[0]].dgO= dgO_vec[i[2]][i[1]][i[0]];
-	}
+        {
+          /* Copy from single Vectors to f */
+          dg_struct[i[2]][i[1]][i[0]].dgHO= dgHO_vec[i[2]][i[1]][i[0]];
+          dg_struct[i[2]][i[1]][i[0]].dgH= dgH_vec[i[2]][i[1]][i[0]];
+          dg_struct[i[2]][i[1]][i[0]].dgO= dgO_vec[i[2]][i[1]][i[0]];
+        }
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da, dgH , &dgH_vec);
   DAVecRestoreArray(BHD->da, dgHO, &dgHO_vec);
@@ -619,12 +619,12 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* Copy from u to single Vectors */
-	  dgHO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgHO;
-	  dgH_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgH;
-	  dgO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgO;
-	}
+        {
+          /* Copy from u to single Vectors */
+          dgHO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgHO;
+          dgH_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgH;
+          dgO_vec[i[2]][i[1]][i[0]] = dg_struct[i[2]][i[1]][i[0]].dgO;
+        }
   /* Restore arrays from PETSC Vectors */
   DAVecRestoreArray(BHD->da, dgH, &dgH_vec);
   DAVecRestoreArray(BHD->da, dgHO, &dgHO_vec);
