@@ -221,12 +221,6 @@ static State *BGY3dH2OData_Newton_malloc(const ProblemData *PD)
   ReadPairDistribution(BHD, "g2_HH", BHD->g2[0][0]);
   ReadPairDistribution(BHD, "g2_HO", BHD->g2[0][1]);
 
-  /* Compute initial data */
-  //RecomputeInitialFFTs(BHD, 1.0, 1.0);
-
-  /* Compute Solute dependent initial data */
-  //RecomputeInitialSoluteData(BHD, 1.0, 1.0);
-
   return BHD;
 }
 
@@ -871,7 +865,7 @@ Vec BGY3d_SolveNewton_H2OS(const ProblemData *PD, Vec g_ini)
   for(damp=damp_start; damp<=1; damp+= 0.01)
     {
 
-      RecomputeInitialFFTs(BHD, (damp), 1.0);
+      RecomputeInitialFFTs (BHD);
       RecomputeInitialSoluteData(BHD, (damp), 1.0);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);
@@ -977,7 +971,7 @@ Vec BGY3d_SolveNewton_H2OSF(const ProblemData *PD, Vec g_ini)
   for(damp=damp_start; damp<=1; damp+= 0.1)
     {
 
-      RecomputeInitialFFTs(BHD, SQR(damp), 1.0);
+      RecomputeInitialFFTs (BHD);
       RecomputeInitialSoluteData(BHD, SQR(damp), 1.0);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[0], BHD->v[0], BHD->v[1]);
       bgy3d_impose_laplace_boundary (BHD, BHD->g_ini[1], BHD->v[0], BHD->v[1]);

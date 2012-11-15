@@ -342,8 +342,7 @@ static void  pair (State *BHD,
                    Vec f_short[3], Vec f_long[3], /* work arrays */
                    Vec fs_g2_fft[3],              /* intent(out) */
                    Vec fl_g2_fft[3],              /* intent(out) */
-                   Vec u2, Vec u2_fft,            /* intent(out) */
-                   real damp, real damp_LJ)
+                   Vec u2, Vec u2_fft)            /* intent(out) */
 {
   const real epsilon = LJ_params[0]; /* geometric average of two */
   const real sigma = LJ_params[1];   /* arithmetic average of two */
@@ -394,8 +393,8 @@ static void  pair (State *BHD,
           /* Lennard-Jones + Coulomb short */
           FOR_DIM
             fs_vec[dim][i[2]][i[1]][i[0]] =
-            damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
-            damp * Coulomb_short_grad (r_s, r[dim], q2);
+            Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
+            Coulomb_short_grad (r_s, r[dim], q2);
         }
 
   FOR_DIM
@@ -433,13 +432,11 @@ static void  pair (State *BHD,
     }
 }
 
-void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
+void RecomputeInitialFFTs (State *BHD)
 {
   real ff_params[3];
 
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Recomputing FFT data with damping factor %f (damp_LJ=%f)\n",
-               damp, damp_LJ);
+  PetscPrintf (PETSC_COMM_WORLD, "Recomputing FFT data\n");
 
   /* FIXME: maybe use BHD->v[3] for one of them? */
   Vec force_short[3];           /* work vectors for pair() */
@@ -465,8 +462,7 @@ void RecomputeInitialFFTs (State *BHD, real damp, real damp_LJ)
               BHD->g2[i][j],
               force_short, force_long, /* work vectors*/
               BHD->fs_g2_fft[i][j], BHD->fl_g2_fft[i][j],
-              BHD->u2[j][i], BHD->u2_fft[j][i], /* FIXME: ij ji */
-              damp, damp_LJ);
+              BHD->u2[j][i], BHD->u2_fft[j][i]); /* FIXME: ij ji */
       }
 
   /* Clean up and exit: */
@@ -1049,7 +1045,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      RecomputeInitialFFTs (&BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialFFTs (&BHD);
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
@@ -1525,7 +1521,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           a0 = 0.1 / (count + 5.0);
         }
 
-      RecomputeInitialFFTs(&BHD, (damp > 0.0 ? damp : 0.0), damp_LJ);
+      RecomputeInitialFFTs (&BHD);
 
       /* Compute solute field in this block:*/
       {
