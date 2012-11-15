@@ -656,6 +656,44 @@ static void apply (const DA dc,
   DAVecRestoreArray (dc, g, &g_);
 }
 
+static void solvent_kernel (State *BHD, int m, const Site solvent[m],
+                            Vec g2[m][m], /* real, in */
+                            Vec ker_fft[m][m]) /* complex, out */
+{
+  (void) solvent;               /* not used yet */
+  RecomputeInitialFFTs (BHD, m,
+                        g2,             /* real, in */
+                        BHD->fs_g2_fft, /* complex, out */
+                        BHD->fl_g2_fft, /* complex, out */
+                        BHD->u2,        /* real, out */
+                        BHD->u2_fft);   /* complex, out */
+
+  Vec work_fft;                              /* complex */
+  DACreateGlobalVector (BHD->dc, &work_fft); /* complex */
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* FIXME:  avoid  storing  vectors  f[sl]_g2_fft on  the  grid
+           across iterations. Only a scalar kernel is needed: */
+        kernel (BHD->dc, BHD->PD, BHD->fs_g2_fft[i][j], NULL,
+                ker_fft[i][j]);
+
+        kernel (BHD->dc, BHD->PD, BHD->fl_g2_fft[i][j], BHD->u2_fft[i][j],
+                work_fft);
+
+        /*
+          FIXME:  what is  the point  to split  the kernel  in two
+          pieces?  Redefine S := S + L and forget about L:
+
+          ker = ker_l + ker_s
+        */
+        VecAXPBY (ker_fft[i][j], 1.0, 1.0, work_fft);
+      }
+
+  VecDestroy (work_fft);
+}
+
 /*
  * Side effects: none, but consider efficiency.
  */
@@ -938,17 +976,13 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
      vectors in momentum space.  Note that HO = OH. */
-  Vec ker_fft_S[m][m];
-  Vec ker_fft_L[m][m];
+  Vec ker_fft[m][m];
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        DACreateGlobalVector (BHD.dc, &ker_fft_S[i][j]); /* complex */
-        ker_fft_S[j][i] = ker_fft_S[i][j];
-
-        DACreateGlobalVector (BHD.dc, &ker_fft_L[i][j]); /* complex */
-        ker_fft_L[j][i] = ker_fft_L[i][j];
+        DACreateGlobalVector (BHD.dc, &ker_fft[i][j]); /* complex */
+        ker_fft[j][i] = ker_fft[i][j];
       }
 
   /*
@@ -985,14 +1019,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
-
-      /*
-        FIXME: I guess the logic with damping factors can be made more
-        straightforward:
-      */
-      real damp_LJ = (damp >= 0 ? 1.0 : 0.0); /* yes, >=, so the
-                                                 original */
-
       /*
         Return F  * g2.  Note the  calculation of F is  divided due to
         long range Coulomb interation.   See comments in the function.
@@ -1065,32 +1091,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      RecomputeInitialFFTs (&BHD, m,
-                            BHD.g2,        /* real, in */
-                            BHD.fs_g2_fft, /* complex, out */
-                            BHD.fl_g2_fft, /* complex, out */
-                            BHD.u2,        /* real, out */
-                            BHD.u2_fft);   /* complex, out */
-
-      for (int i = 0; i < m; i++)
-        for (int j = 0; j <= i; j++)
-          {
-            /* FIXME: avoid storing vectors  f[sl]_g2_fft on the grid across
-               iterations. Only a scalar kernel is needed: */
-            kernel (BHD.dc, BHD.PD, BHD.fs_g2_fft[i][j], NULL,
-                    ker_fft_S[i][j]);
-
-            kernel (BHD.dc, BHD.PD, BHD.fl_g2_fft[i][j], BHD.u2_fft[i][j],
-                    ker_fft_L[i][j]);
-
-            /*
-              FIXME:  what is  the point  to split  the kernel  in two
-              pieces?  Redefine S := S + L and forget about L:
-
-              S := damp * L + damp_LJ * S
-            */
-            VecAXPBY (ker_fft_S[i][j], damp, damp_LJ, ker_fft_L[i][j]);
-          }
+      solvent_kernel (&BHD, m, solvent, BHD.g2, ker_fft);
 
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
@@ -1176,7 +1177,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               VecSet (du_acc_fft, 0.0);
 
               for (int j = 0; j < m; j++) /* This increments the accumulator: */
-                apply (BHD.dc, ker_fft_S[i][j], g_fft[j], beta * BHD.rhos[j], du_acc_fft);
+                apply (BHD.dc, ker_fft[i][j], g_fft[j], beta * BHD.rhos[j],
+                       du_acc_fft); /* incremented! */
 
               /*
                 Compute IFFT of du_acc_fft for the current site. Other
@@ -1333,8 +1335,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       /*************************************/
 
       /* FIXME:  Debug  output  from  every iteration  with  different
-         overall  scale  factors  damp/damp_LJ.  Remove when  no  more
-         needed. */
+         overall scale factors damp.  Remove when no more needed. */
       namecount++;
 
       PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
@@ -1374,10 +1375,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       VecDestroy (x_lapl[i]);
 
       for (int j = 0; j <= i; j++)
-        {
-          VecDestroy (ker_fft_S[i][j]);
-          VecDestroy (ker_fft_L[i][j]);
-        }
+        VecDestroy (ker_fft[i][j]);
     }
 
   VecDestroy (du_acc);
