@@ -71,12 +71,9 @@ static State initialize_state (const ProblemData *PD)
 
   const DA da = BHD.da;         /* shorter alias */
 
-  /* Create global vectors */
-  BHD.gHO_ini = PETSC_NULL;     /* unused with impurities */
-
-  DACreateGlobalVector (da, &BHD.u2[0][0]);
-  DACreateGlobalVector (da, &BHD.u2[1][1]);
-  DACreateGlobalVector (da, &BHD.u2[0][1]);
+  /*
+   * Create global vectors
+   */
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
@@ -88,6 +85,10 @@ static State initialize_state (const ProblemData *PD)
         DACreateGlobalVector (da, &BHD.g2[i][j]);
         BHD.g2[j][i] = BHD.g2[i][j];
 
+        /* Long-range site-site Coulomb, differs by factors only: */
+        DACreateGlobalVector (da, &BHD.u2[i][j]);
+        BHD.u2[j][i] = BHD.u2[i][j]; /* ij = ji */
+
         /* Used with pure solvent only: */
         FOR_DIM
           {
@@ -98,8 +99,6 @@ static State initialize_state (const ProblemData *PD)
             BHD.F_l[j][i][dim] = PETSC_NULL;
           }
       }
-
-  BHD.pre = PETSC_NULL;         /* used for newton solver only */
 
   FOR_DIM
     DACreateGlobalVector (da, &BHD.v[dim]);
@@ -128,7 +127,7 @@ static State initialize_state (const ProblemData *PD)
     for (int j = 0; j <= i; j++)
       {
         DACreateGlobalVector (BHD.dc, &BHD.u2_fft[i][j]);
-        BHD.u2_fft[j][i] = BHD.u2_fft[i][j];
+        BHD.u2_fft[j][i] = BHD.u2_fft[i][j]; /* ij = ji */
       }
 
   /* Not used with impurities: */
@@ -142,6 +141,8 @@ static State initialize_state (const ProblemData *PD)
   BHD.LJ_paramsHO[1] = -1;
   BHD.LJ_paramsHO[2] = -1;
 
+  BHD.pre = NULL;               /* used for newton solver only */
+  BHD.gHO_ini = NULL;
   BHD.g_ini[0] = NULL;
   BHD.g_ini[1] = NULL;
   BHD.gfg2_fft = NULL;
@@ -336,6 +337,7 @@ void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
   free(g);
 }
 
+/* Side effects: uses BHD->fg2_fft[3] as work arrays. */
 static void  pair (State *BHD,
                    const real LJ_params[3],
                    const Vec g2,
@@ -466,7 +468,7 @@ void RecomputeInitialFFTs (State *BHD)
               BHD->g2[i][j],
               force_short, force_long, /* work vectors*/
               BHD->fs_g2_fft[i][j], BHD->fl_g2_fft[i][j],
-              BHD->u2[j][i], BHD->u2_fft[j][i]); /* FIXME: ij ji */
+              BHD->u2[i][j], BHD->u2_fft[i][j]); /* ij = ji */
       }
 
   /* Clean up and exit: */
