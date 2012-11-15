@@ -714,20 +714,27 @@ static PetscErrorCode ComputeHNC_F(SNES snes, Vec g, Vec f, void *pa)
   return 0;
 }
 
-static PetscErrorCode ComputeHNC_Preconditioner(void *pa,Vec x,Vec y)
+#if PETSC_VERSION_MAJOR > 2
+static PetscErrorCode ComputeHNC_Preconditioner (PC pc, Vec x, Vec y)
 {
   HNC3dNewtonData HD;
-  PetscErrorCode ierr;
+  PCShellGetContext (pc, (void**) &HD);
 
-  HD = (HNC3dNewtonData) pa;
-  ierr = VecPointwiseMult(y,HD->pre,x);
-
-
-/*   VecView(x,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);  */
+  PetscErrorCode ierr = VecPointwiseMult (y, HD->pre, x);
 
   return ierr;
 }
+#else
+static PetscErrorCode ComputeHNC_Preconditioner (void *pa, Vec x, Vec y)
+{
+  HNC3dNewtonData HD;
+  HD = (HNC3dNewtonData) pa;
+
+  PetscErrorCode ierr = VecPointwiseMult (y, HD->pre, x);
+
+  return ierr;
+}
+#endif
 
 static Vec Compute_gfromhc(HNC3dNewtonData HD, Vec hc)
 {
@@ -851,9 +858,9 @@ static Vec UNUSED_HNC3dNewton_solve(ProblemData *PD, Vec g_ini)
   flg = bgy3d_getopt_test ("--user-precond");
   if (flg) { /* user-defined precond */
     /* Set user defined preconditioner */
-    PCSetType(pc,PCSHELL);
-    PCShellSetApply(pc,ComputeHNC_Preconditioner);
-    PCShellSetContext(pc,HD);
+    PCSetType (pc, PCSHELL);
+    PCShellSetContext (pc, HD);
+    PCShellSetApply (pc, ComputeHNC_Preconditioner);
   } else
   /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
   PCSetType( pc, PCLU);
