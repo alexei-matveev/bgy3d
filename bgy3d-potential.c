@@ -96,7 +96,7 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
 }
 
 /* Value fetch interface */
-int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
+_Bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *p)
 {
   assert (n != 0);            /* need to decide how to handle that! */
 
@@ -105,8 +105,8 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
   const real dV = s->h[0] * s->h[1] * s->h[2];
 
   /* generating coordinates */
-  int p = 0;
-  while (p < n && s->ijk < local_size)
+  *p = 0;
+  while (*p < n && s->ijk < local_size)
     {
       /*
         Get coordinatens i, j, and k within the local block:
@@ -123,22 +123,25 @@ int bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n])
       j += s->j0;
       k += s->k0;
 
-      x[p][0] = i * s->h[0] + s->interval[0]; /* x */
-      x[p][1] = j * s->h[1] + s->interval[0]; /* y */
-      x[p][2] = k * s->h[2] + s->interval[0]; /* z */
-      v[p] = s->v_[k][j][i] * dV;             /* value * weight */
+      x[*p][0] = i * s->h[0] + s->interval[0]; /* x */
+      x[*p][1] = j * s->h[1] + s->interval[0]; /* y */
+      x[*p][2] = k * s->h[2] + s->interval[0]; /* z */
+      v[*p] = s->v_[k][j][i] * dV;             /* value * weight */
 
       /* update counters */
       s->ijk++;
-      p++;
+      (*p)++;
     }
 
   /* Reset  counter  to  original   point  once  we  fetched  all  the
      values. FIXME: What if the user supplies n == 0? */
-  if (p == 0)
-    s->ijk = 0;
-
-  return p;
+  if (*p == 0)
+    {
+      s->ijk = 0;
+      return 0;
+    }
+  else
+    return 1;
 }
 
 /* clean up the memory for public *pcontext */
@@ -175,7 +178,7 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       /* Calculate moments for tests. First initializing local sums: */
       real m0 = 0.0;
       real m1[3] = {0.0, 0.0, 0.0};
-      while ((nact = bgy3d_pot_get_value (s, chunk_size, x, v)))
+      while ((bgy3d_pot_get_value (s, chunk_size, x, v, &nact)))
         for (int i = 0; i < nact; i++)
           {
             m0 += v[i];
