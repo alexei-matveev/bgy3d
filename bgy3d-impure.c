@@ -1338,15 +1338,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
 
-      /* Test for solvent electrostatic potential: */
-      bgy3d_solvent_field (&BHD, m, solvent, g, ve);
-
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
         save_all (m, du, "du%d.bin");
 
     } /* damp loop */
 
+  /* This fills Vec ve with solvent electrostatic potential: */
+  bgy3d_solvent_field (&BHD, m, solvent, g, ve);
 
   /* Optionally, return the iterator over the solvent field: */
   if (v)
