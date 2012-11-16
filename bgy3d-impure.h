@@ -27,8 +27,10 @@ void RecomputeInitialFFTs (State *BHD,
                            Vec fs_g2_fft[m][m][3], /* complex, out */
                            Vec fl_g2_fft[m][m][3], /* complex, out */
                            Vec u2[m][m],     /* real, out */
-                           Vec u2_fft[m][m]); /* complex, out */
+                           Vec u2_fft[m][m]) /* complex, out */
+  __attribute__ ((deprecated));
 
 void Compute_H2O_interS (const State *BHD,
-                         Vec fg2_fft[3], Vec g, real rho, Vec dg_help);
+                         Vec fg2_fft[3], Vec g, real rho, Vec dg_help)
+  __attribute__ ((deprecated));
 
