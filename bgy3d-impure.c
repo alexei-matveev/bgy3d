@@ -84,20 +84,6 @@ static State initialize_state (const ProblemData *PD)
            g2 vecs? */
         DACreateGlobalVector (da, &BHD.g2[i][j]);
         BHD.g2[j][i] = BHD.g2[i][j];
-
-        /* Long-range site-site Coulomb, differs by factors only: */
-        DACreateGlobalVector (da, &BHD.u2[i][j]);
-        BHD.u2[j][i] = BHD.u2[i][j]; /* ij = ji */
-
-        /* Used with pure solvent only: */
-        FOR_DIM
-          {
-            BHD.F[i][j][dim] = PETSC_NULL;
-            BHD.F[j][i][dim] = PETSC_NULL;
-
-            BHD.F_l[i][j][dim] = PETSC_NULL;
-            BHD.F_l[j][i][dim] = PETSC_NULL;
-          }
       }
 
   FOR_DIM
@@ -109,30 +95,6 @@ static State initialize_state (const ProblemData *PD)
 
   /* Complex scratch vector: */
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
-
-  /* FIXME: these probably differ only by factors: */
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD.dc, &BHD.u2_fft[i][j]);
-        BHD.u2_fft[j][i] = BHD.u2_fft[i][j]; /* ij = ji */
-      }
-
-  /* Not used with impurities: */
-  BHD.LJ_paramsH[0] = -1;
-  BHD.LJ_paramsH[1] = -1;
-  BHD.LJ_paramsH[2] = -1;
-  BHD.LJ_paramsO[0] = -1;
-  BHD.LJ_paramsO[1] = -1;
-  BHD.LJ_paramsO[2] = -1;
-  BHD.LJ_paramsHO[0] = -1;
-  BHD.LJ_paramsHO[1] = -1;
-  BHD.LJ_paramsHO[2] = -1;
-
-  BHD.gHO_ini = NULL;
-  BHD.g_ini[0] = NULL;
-  BHD.g_ini[1] = NULL;
-  BHD.gfg2_fft = NULL;
 
   /* FIXME: broken, see the comments inside the function itself: */
   load (&BHD, BHD.g2);
@@ -206,18 +168,7 @@ static void finalize_state (State *BHD)
       VecDestroy (BHD->fg2_fft[dim]);
     }
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      VecDestroy (BHD->u2_fft[i][j]);
-
-  assert (BHD->gfg2_fft == NULL); /* not used with impurities */
-
   VecDestroy (BHD->fft_scratch);
-
-  assert (BHD->gHO_ini == PETSC_NULL); /* unused for impurities */
-  VecDestroy(BHD->u2[0][0]);
-  VecDestroy(BHD->u2[1][1]);
-  VecDestroy(BHD->u2[0][1]);
 
 #ifdef L_BOUNDARY
   MatDestroy (BHD->M);
