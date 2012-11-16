@@ -1412,8 +1412,7 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_solve_with_solute (PD, n, sites, NULL, g, NULL);
 
   /* Save final distribution, use binary format: */
-  bgy3d_save_vec ("g0.bin", g[0]); /* gH */
-  bgy3d_save_vec ("g1.bin", g[1]); /* gO */
+  save_all (2, g, "g%d.bin");
 
   for (int i = 0; i < 2; i++)
     VecDestroy (g[i]);
