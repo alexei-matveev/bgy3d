@@ -439,67 +439,6 @@ static void  pair (State *BHD,
 }
 
 /*
-  Deprecated!
-
-  Convert   the   solvers  to   use   the   kernel   as  prepared   by
-  solvent_kernel() and  applied by apply(), instead  of using weighted
-  forces.
-
-  Given  pairwise  distributions g2[][]  compute  weighted forces  and
-  coulomb interction.
-
-  Side  effects:  by  way  of  pair() uses  BHD->fg2_fft[3]  as  work
-  arrays.
-*/
-void RecomputeInitialFFTs (State *BHD,
-                           int m,
-                           Vec g2[m][m],        /* real, in */
-                           Vec fs_g2_fft[m][m][3], /* complex, out */
-                           Vec fl_g2_fft[m][m][3], /* complex, out */
-                           Vec u2[m][m],     /* real, out */
-                           Vec u2_fft[m][m]) /* complex, out */
-{
-  assert (m == 2);              /* FIXME: uses global solvent[2] */
-  real ff_params[3];
-
-  PetscPrintf (PETSC_COMM_WORLD, "Recomputing FFT data\n");
-
-  /* FIXME: maybe use BHD->v[3] for one of them? */
-  Vec force_short[3];           /* work vectors for pair() */
-  Vec force_long[3];            /* work vectors for pair() */
-  FOR_DIM
-    {
-      DACreateGlobalVector (BHD->da, &force_short[dim]);
-      DACreateGlobalVector (BHD->da, &force_long[dim]);
-    }
-
-
-  /* Over all distinct solvent site pairs: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        /* Pair interaction parameters: */
-        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
-        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
-        ff_params[2] = solvent[i].charge * solvent[j].charge;
-
-        /* Does real work: */
-        pair (BHD, ff_params,
-              g2[i][j],
-              force_short, force_long, /* work vectors*/
-              fs_g2_fft[i][j], fl_g2_fft[i][j],
-              u2[i][j], u2_fft[i][j]); /* ij = ji */
-      }
-
-  /* Clean up and exit: */
-  FOR_DIM
-    {
-      VecDestroy (force_short[dim]);
-      VecDestroy (force_long[dim]);
-    }
-}
-
-/*
  * This is supposed to compute the k-grid representation of the BGY3dM
  * equation:
  *
@@ -738,76 +677,6 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
       VecDestroy (fl_g2_fft[dim]);
     }
   VecDestroy (kl_fft);
-}
-
-/*
-  Deprecated!
-
-  Convert   the   solvers  to   use   the   kernel   as  prepared   by
-  solvent_kernel() and  applied by apply(), instead  of using weighted
-  forces.
-
-  Side effects: none, but consider efficiency.
- */
-static void Compute_H2O_interS_C (const State *BHD,
-                                  Vec fg2_fft[3], /* complex, intent(in) */
-                                  Vec g,        /* real, intent(in) */
-                                  Vec coul_fft, /* complex, intent(in) */
-                                  real rho, Vec dg)
-{
-  /* Avoid separate VecScale at the end: */
-  const real scale = rho * BHD->PD->beta;
-
-  /************************************************/
-  /* rho*F*g^2 g*/
-  /************************************************/
-
-  /* FIXME: move allocations out of the loop: */
-  Vec ker_fft, g_fft, dg_fft;
-  DACreateGlobalVector (BHD->dc, &ker_fft);
-  DACreateGlobalVector (BHD->dc, &g_fft);
-  DACreateGlobalVector (BHD->dc, &dg_fft);
-
-  /*
-    FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
-    iterations.   Here we put  the fft  of the  kernel into  local Vec
-    ker_fft:
-  */
-  kernel (BHD->dc, BHD->PD, fg2_fft, coul_fft,
-          ker_fft);    /* result */
-
-  /* fft(g) */
-  MatMult (BHD->fft_mat, g, g_fft);
-
-  /* Will be incremented: */
-  VecSet (dg_fft, 0.0);
-
-  /* Apply the kernel, Put result into the complex temp Vec dg_fft: */
-  apply (BHD->dc, ker_fft, g_fft, scale, dg_fft);
-
-  /* ifft(dg) */
-  MatMultTranspose (BHD->fft_mat, dg_fft, dg);
-
-  VecDestroy (ker_fft);
-  VecDestroy (g_fft);
-  VecDestroy (dg_fft);
-}
-
-/*
-  Deprecated!
-
-  Convert   the   solvers  to   use   the   kernel   as  prepared   by
-  solvent_kernel() and  applied by apply(), instead  of using weighted
-  forces.
-
-  Side effects: none, but see Compute_H2O_interS_C().
- */
-void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
-                         Vec fg2_fft[3],   /* complex, intent(in) */
-                         Vec g,            /* real, intent(in) */
-                         real rho, Vec dg_help)
-{
-    Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
 }
 
 static real ComputeCharge (const ProblemData *PD,
@@ -1478,6 +1347,138 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   return PETSC_NULL;            /* fake, interface obligation */
 }
 
+#ifdef WITH_EXTRA_SOLVERS
+/*
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
+  Given  pairwise  distributions g2[][]  compute  weighted forces  and
+  coulomb interction.
+
+  Side  effects:  by  way  of  pair() uses  BHD->fg2_fft[3]  as  work
+  arrays.
+*/
+void RecomputeInitialFFTs (State *BHD,
+                           int m,
+                           Vec g2[m][m],        /* real, in */
+                           Vec fs_g2_fft[m][m][3], /* complex, out */
+                           Vec fl_g2_fft[m][m][3], /* complex, out */
+                           Vec u2[m][m],     /* real, out */
+                           Vec u2_fft[m][m]) /* complex, out */
+{
+  assert (m == 2);              /* FIXME: uses global solvent[2] */
+  real ff_params[3];
+
+  PetscPrintf (PETSC_COMM_WORLD, "Recomputing FFT data\n");
+
+  /* FIXME: maybe use BHD->v[3] for one of them? */
+  Vec force_short[3];           /* work vectors for pair() */
+  Vec force_long[3];            /* work vectors for pair() */
+  FOR_DIM
+    {
+      DACreateGlobalVector (BHD->da, &force_short[dim]);
+      DACreateGlobalVector (BHD->da, &force_long[dim]);
+    }
+
+
+  /* Over all distinct solvent site pairs: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* Pair interaction parameters: */
+        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
+        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
+        ff_params[2] = solvent[i].charge * solvent[j].charge;
+
+        /* Does real work: */
+        pair (BHD, ff_params,
+              g2[i][j],
+              force_short, force_long, /* work vectors*/
+              fs_g2_fft[i][j], fl_g2_fft[i][j],
+              u2[i][j], u2_fft[i][j]); /* ij = ji */
+      }
+
+  /* Clean up and exit: */
+  FOR_DIM
+    {
+      VecDestroy (force_short[dim]);
+      VecDestroy (force_long[dim]);
+    }
+}
+
+/*
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
+  Side effects: none, but consider efficiency.
+ */
+static void Compute_H2O_interS_C (const State *BHD,
+                                  Vec fg2_fft[3], /* complex, intent(in) */
+                                  Vec g,        /* real, intent(in) */
+                                  Vec coul_fft, /* complex, intent(in) */
+                                  real rho, Vec dg)
+{
+  /* Avoid separate VecScale at the end: */
+  const real scale = rho * BHD->PD->beta;
+
+  /************************************************/
+  /* rho*F*g^2 g*/
+  /************************************************/
+
+  /* FIXME: move allocations out of the loop: */
+  Vec ker_fft, g_fft, dg_fft;
+  DACreateGlobalVector (BHD->dc, &ker_fft);
+  DACreateGlobalVector (BHD->dc, &g_fft);
+  DACreateGlobalVector (BHD->dc, &dg_fft);
+
+  /*
+    FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
+    iterations.   Here we put  the fft  of the  kernel into  local Vec
+    ker_fft:
+  */
+  kernel (BHD->dc, BHD->PD, fg2_fft, coul_fft,
+          ker_fft);    /* result */
+
+  /* fft(g) */
+  MatMult (BHD->fft_mat, g, g_fft);
+
+  /* Will be incremented: */
+  VecSet (dg_fft, 0.0);
+
+  /* Apply the kernel, Put result into the complex temp Vec dg_fft: */
+  apply (BHD->dc, ker_fft, g_fft, scale, dg_fft);
+
+  /* ifft(dg) */
+  MatMultTranspose (BHD->fft_mat, dg_fft, dg);
+
+  VecDestroy (ker_fft);
+  VecDestroy (g_fft);
+  VecDestroy (dg_fft);
+}
+
+/*
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
+  Side effects: none, but see Compute_H2O_interS_C().
+ */
+void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
+                         Vec fg2_fft[3],   /* complex, intent(in) */
+                         Vec g,            /* real, intent(in) */
+                         real rho, Vec dg_help)
+{
+    Compute_H2O_interS_C(BHD, fg2_fft, g, NULL, rho, dg_help);
+}
+
 /*
   In the  original code these  were the essential  differences between
   BGY3dM_solve_H2O_2site()  and BGY3dM_solve_H2O_3site().   First, the
@@ -1855,3 +1856,4 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   return PETSC_NULL;
 }
+#endif
