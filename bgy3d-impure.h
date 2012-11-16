@@ -18,9 +18,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                               Context **v);
 
 void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
-Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
 
+#ifdef WITH_EXTRA_SOLVERS
+Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);
 void RecomputeInitialFFTs (State *BHD,
                            int m,
                            Vec g2[m][m],        /* real, in */
@@ -33,4 +34,5 @@ void RecomputeInitialFFTs (State *BHD,
 void Compute_H2O_interS (const State *BHD,
                          Vec fg2_fft[3], Vec g, real rho, Vec dg_help)
   __attribute__ ((deprecated));
+#endif
 
