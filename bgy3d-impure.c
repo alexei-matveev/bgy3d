@@ -103,6 +103,38 @@ static State initialize_state (const ProblemData *PD)
 }
 
 
+static void finalize_state (State *BHD)
+{
+  MPI_Barrier (PETSC_COMM_WORLD);
+
+  /* Pair quantities here: */
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (BHD->g2[i][j]);
+
+  FOR_DIM
+    {
+      VecDestroy (BHD->v[dim]);
+      VecDestroy (BHD->fg2_fft[dim]);
+    }
+
+  VecDestroy (BHD->fft_scratch);
+
+#ifdef L_BOUNDARY
+  MatDestroy (BHD->M);
+  KSPDestroy (BHD->ksp);
+#endif
+
+#ifdef L_BOUNDARY_MG
+  DMMGDestroy (BHD->dmmg);
+#endif
+
+  DADestroy (BHD->da);
+  DADestroy (BHD->dc);
+  MatDestroy (BHD->fft_mat);
+}
+
+
 static void save_all (int m, const Vec g[m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
@@ -150,38 +182,6 @@ static void load (const State *BHD, Vec g2[2][2])
   bgy3d_read_vec ("g11.bin", g2[1][1]);
 #endif
   assert (g2[1][0] == g2[0][1]);
-}
-
-
-static void finalize_state (State *BHD)
-{
-  MPI_Barrier( PETSC_COMM_WORLD);
-
-  /* Pair quantities here: */
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      VecDestroy (BHD->g2[i][j]);
-
-  FOR_DIM
-    {
-      VecDestroy (BHD->v[dim]);
-      VecDestroy (BHD->fg2_fft[dim]);
-    }
-
-  VecDestroy (BHD->fft_scratch);
-
-#ifdef L_BOUNDARY
-  MatDestroy (BHD->M);
-  KSPDestroy(BHD->ksp);
-#endif
-
-#ifdef L_BOUNDARY_MG
-  DMMGDestroy(BHD->dmmg);
-#endif
-
-  DADestroy (BHD->da);
-  DADestroy (BHD->dc);
-  MatDestroy (BHD->fft_mat);
 }
 
 
