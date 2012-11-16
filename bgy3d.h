@@ -189,11 +189,6 @@ typedef struct State
   Vec fg2_fft[3];               /* complex */
   Vec gfg2_fft;                 /* complex */
 
-  /* BGY3dM stuff.   These are vector field quantities  indexed by two
-     site indices */
-  Vec fs_g2_fft[2][2][3];       /* complex */
-  Vec fl_g2_fft[2][2][3];       /* complex */
-
 #ifdef L_BOUNDARY
   Mat M;
   KSP ksp;
@@ -204,6 +199,13 @@ typedef struct State
   DA da_dmmg;
 #endif
 
+#ifdef WITH_EXTRA_SOLVERS
+  /* BGY3dM 3-site  stuff.  These are vector  field quantities indexed
+     by  two site  indices. FIXME:  get rid  of them,  see  the 2-site
+     version. */
+  Vec fs_g2_fft[2][2][3];       /* complex */
+  Vec fl_g2_fft[2][2][3];       /* complex */
+
   /* Newton stuff */
   Vec wHO_fft, wHH_fft;         /* complex */
 
@@ -212,6 +214,7 @@ typedef struct State
   Vec dgH, dgHO, dgO;
   Vec f, f2, f3, f4;
   Vec pre;
+#endif
 } State;
 
 #endif  /* ifndef BGY3d_H */

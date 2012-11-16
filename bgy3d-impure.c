@@ -105,19 +105,7 @@ static State initialize_state (const ProblemData *PD)
 
   /* Allocate memory for fft */
   FOR_DIM
-    {
-      for (int i = 0; i < 2; i++)
-        for (int j = 0; j <= i; j++)
-          {
-            DACreateGlobalVector (BHD.dc, &BHD.fs_g2_fft[i][j][dim]);
-            BHD.fs_g2_fft[j][i][dim] = BHD.fs_g2_fft[i][j][dim];
-
-            DACreateGlobalVector (BHD.dc, &BHD.fl_g2_fft[i][j][dim]);
-            BHD.fl_g2_fft[j][i][dim] = BHD.fl_g2_fft[i][j][dim];
-          }
-
-      DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* used by ComputeFFTfromCoulomb() */
-    }
+    DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* used by ComputeFFTfromCoulomb() */
 
   /* Complex scratch vector: */
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
@@ -141,7 +129,6 @@ static State initialize_state (const ProblemData *PD)
   BHD.LJ_paramsHO[1] = -1;
   BHD.LJ_paramsHO[2] = -1;
 
-  BHD.pre = NULL;               /* used for newton solver only */
   BHD.gHO_ini = NULL;
   BHD.g_ini[0] = NULL;
   BHD.g_ini[1] = NULL;
@@ -211,19 +198,7 @@ static void finalize_state (State *BHD)
   /* Pair quantities here: */
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      {
-        VecDestroy (BHD->g2[i][j]);
-
-        FOR_DIM
-          {
-            /* Used with pure solvent only: */
-            assert (BHD->F[i][j][dim] == PETSC_NULL);
-            assert (BHD->F_l[i][j][dim] == PETSC_NULL);
-
-            VecDestroy (BHD->fs_g2_fft[i][j][dim]);
-            VecDestroy (BHD->fl_g2_fft[i][j][dim]);
-          }
-      }
+      VecDestroy (BHD->g2[i][j]);
 
   FOR_DIM
     {
@@ -243,7 +218,6 @@ static void finalize_state (State *BHD)
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
-  assert (BHD->pre == PETSC_NULL); /* used for newton solver */
 
 #ifdef L_BOUNDARY
   MatDestroy (BHD->M);
