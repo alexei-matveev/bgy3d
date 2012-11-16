@@ -33,7 +33,7 @@ WITH_GUILE = 0
 # WITH_EXTRA_SOLVERS = 1  by default to minimize bit  rotting of those
 # solvers:
 #
-WITH_EXTRA_SOLVERS = 1
+WITH_EXTRA_SOLVERS = 0
 
 USERFLAGS = -DFFT_FFTW
 ifeq ($(WITH_EXTRA_SOLVERS),1)
