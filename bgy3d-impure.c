@@ -655,31 +655,62 @@ static void apply (const DA dc,
   DAVecRestoreArray (dc, g, &g_);
 }
 
+/*
+  Given  the  solvent  description  and  pair  distribution  functions
+  compute the multiplicative  complex momentum-space representation of
+  kernel to be applied every iteration.
+
+  Side  effects:  by  way  of  pair() uses  BHD->fg2_fft[3]  as  work
+  arrays.
+*/
 static void solvent_kernel (State *BHD, int m, const Site solvent[m],
-                            Vec g2[m][m], /* real, in */
+                            Vec g2[m][m],      /* real, in */
                             Vec ker_fft[m][m]) /* complex, out */
 {
-  (void) solvent;               /* not used yet */
-  RecomputeInitialFFTs (BHD, m,
-                        g2,             /* real, in */
-                        BHD->fs_g2_fft, /* complex, out */
-                        BHD->fl_g2_fft, /* complex, out */
-                        BHD->u2,        /* real, out */
-                        BHD->u2_fft);   /* complex, out */
+  /* Real  work  vectors,  re-used   for  all  m(m+1)/2  solvent  site
+     pairs. */
+  Vec u2, fs[3], fl[3];
 
-  Vec work_fft;                              /* complex */
-  DACreateGlobalVector (BHD->dc, &work_fft); /* complex */
+  DACreateGlobalVector (BHD->da, &u2);
+  FOR_DIM
+    {
+      DACreateGlobalVector (BHD->da, &fs[dim]);
+      DACreateGlobalVector (BHD->da, &fl[dim]);
+    }
 
+  /* Complex work vectors, re-used for all pairs: */
+  Vec kl_fft, u2_fft, fs_g2_fft[3], fl_g2_fft[3];
+
+  DACreateGlobalVector (BHD->dc, &kl_fft);
+  DACreateGlobalVector (BHD->dc, &u2_fft);
+  FOR_DIM
+    {
+      DACreateGlobalVector (BHD->dc, &fs_g2_fft[dim]);
+      DACreateGlobalVector (BHD->dc, &fl_g2_fft[dim]);
+    }
+
+  /* Over all pairs: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* FIXME:  avoid  storing  vectors  f[sl]_g2_fft on  the  grid
-           across iterations. Only a scalar kernel is needed: */
-        kernel (BHD->dc, BHD->PD, BHD->fs_g2_fft[i][j], NULL,
-                ker_fft[i][j]);
+        /* Pair interaction parameters: */
+        real ff_params[3];
+        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
+        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
+        ff_params[2] = solvent[i].charge * solvent[j].charge;
 
-        kernel (BHD->dc, BHD->PD, BHD->fl_g2_fft[i][j], BHD->u2_fft[i][j],
-                work_fft);
+        /* Does real work: */
+        pair (BHD, ff_params, g2[i][j],
+              fs, fl, /* work vectors*/
+              fs_g2_fft, fl_g2_fft, u2, u2_fft);
+
+        /* Kernel term originating from the the short-range (weighted)
+           forces: */
+        kernel (BHD->dc, BHD->PD, fs_g2_fft, NULL, ker_fft[i][j]);
+
+        /* This used to be  the long-range contribution, we compute it
+           separately, but later add to the total kernel: */
+        kernel (BHD->dc, BHD->PD, fl_g2_fft, u2_fft, kl_fft);
 
         /*
           FIXME:  what is  the point  to split  the kernel  in two
@@ -687,10 +718,20 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 
           ker = ker_l + ker_s
         */
-        VecAXPBY (ker_fft[i][j], 1.0, 1.0, work_fft);
+        VecAXPBY (ker_fft[i][j], 1.0, 1.0, kl_fft);
       }
 
-  VecDestroy (work_fft);
+  /* Clean up and exit: */
+  VecDestroy (u2);
+  VecDestroy (u2_fft);
+  FOR_DIM
+    {
+      VecDestroy (fs[dim]);
+      VecDestroy (fl[dim]);
+      VecDestroy (fs_g2_fft[dim]);
+      VecDestroy (fl_g2_fft[dim]);
+    }
+  VecDestroy (kl_fft);
 }
 
 /*
