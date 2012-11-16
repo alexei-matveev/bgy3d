@@ -1501,7 +1501,6 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm;
-  PetscScalar dgH_old, dgHO_old, dgO_old;
 
   assert(g_ini == PETSC_NULL);
 
@@ -1635,6 +1634,11 @@ Vec BGY3d_solve_2site(const ProblemData *PD, Vec g_ini)
       ComputeH2O_g (gHO, g0[0][1], dgHO);
       ComputeH2O_g (gH, g0[0][0], dgH);
       ComputeH2O_g (gO, g0[1][1], dgO);
+
+      /* Not sure if 0.0 as inital value is right. */
+      real dgH_old = 0.0;
+      real dgO_old = 0.0;
+      real dgHO_old = 0.0;
 
       a1=a0;
       a=a0;
