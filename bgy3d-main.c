@@ -135,10 +135,10 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("--BGYM2Site"))
     solver =  BGY3dM_solve_H2O_2site;
 
+#ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("--BGYM3Site"))
     solver =  BGY3dM_solve_H2O_3site;
 
-#ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("--BGY-H2O-NEWTON"))
     solver = BGY3d_SolveNewton_H2O;
 
