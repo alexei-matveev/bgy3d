@@ -1420,6 +1420,33 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   return PETSC_NULL;            /* fake, interface obligation */
 }
 
+/*
+  In the  original code these  were the essential  differences between
+  BGY3dM_solve_H2O_2site()  and BGY3dM_solve_H2O_3site().   First, the
+  density of the H-sites was doubled:
+
+  > BHD->rho_H = 2.0 * BHD->rho_H;
+
+  Second,  there was an  additional "normalization"  term for  the H-H
+  pair added to the δu accumulator for gH (called dg_new here):
+
+  > Solve_NormalizationH2O_smallII (BHD, gH, r_HH, gH, tH , dg_new2, f, zpad);
+  > Compute_dg_H2O_intra_ln (BHD, tH, r_HH, dg_new2, f);
+  > VecAXPY (dg_new, 1.0, dg_new2);
+
+  Third, the  corresponding O-H "normalization" term was  added to the
+  δu accumulator for gO with a factor 2.0 as opposed to 1.0:
+
+  < VecAXPY(dg_new, 1.0, dg_new2);
+  ---
+  > VecAXPY(dg_new, 2.0, dg_new2);
+
+  Otherwise the code pf BGY3dM_solve_H2O_3site() appeared to be a copy
+  of BGY3dM_solve_H2O_2site() with  a few inessential differences like
+  using  a   different  default  solute  (butanoic   acid  for  3-site
+  vs. hexane  for two-site) and  a different definition of  the mixing
+  factor a0 = 0.1/(count+5.0) in the damp-loop.
+*/
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
   (void) g_ini;                 /* FIXME: interface obligation */
@@ -1442,7 +1469,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (3-site) equation ...\n");
 
   State BHD = initialize_state (PD);
-  BHD.rhos[0] = 2.*BHD.rhos[0];
+  BHD.rhos[0] = 2.0 * BHD.rhos[0]; /* specific to H2O */
 
   if (r_HH < 0.0) {
     PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
@@ -1609,11 +1636,14 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], g[0], BHD.u2_fft[0][0], damp * BHD.rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
+          /* Specific to H2O: */
           Solve_NormalizationH2O_smallII (&BHD, g[0], r_HH, g[0], tH , dg_new2, work);
 
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HH, dg_new2);
           VecCopy (dg_new2, work); /* FIXME: need that? */
           VecAXPY(dg_new, 1.0, dg_new2);
+          /* end specific */
+
           Solve_NormalizationH2O_smallII (&BHD, g[0], r_HO, g[1], tO , dg_new2, work);
 
           Compute_dg_H2O_intra_ln(&BHD, tO, r_HO, dg_new2);
@@ -1646,7 +1676,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           Compute_dg_H2O_intra_ln(&BHD, tH, r_HO, dg_new2);
           VecCopy (dg_new2, work); /* FIXME: need that? */
 
-          VecAXPY(dg_new, 2.0, dg_new2);
+          VecAXPY(dg_new, 2.0, dg_new2); /* factor 2.0 specific to H2O */
 
           /* Copy  the electrostatic potential  scaled by  the solvent
              site charges into predefined locations: */
