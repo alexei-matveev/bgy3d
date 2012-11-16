@@ -1445,6 +1445,11 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   using  a   different  default  solute  (butanoic   acid  for  3-site
   vs. hexane  for two-site) and  a different definition of  the mixing
   factor a0 = 0.1/(count+5.0) in the damp-loop.
+
+  This approach appears to assume that the distributions of the H1 and
+  H2  sites  around the  solute  is  the  same.  Probably  a  naturall
+  assumption given  the symmetry. There is nothing  that would enforce
+  this symmetry if treating the two sites idependently.
 */
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 {
