@@ -635,22 +635,21 @@ static void apply (const DA dc,
   DAVecGetArray (dc, dg, &dg_);
   DAVecGetArray (dc, g, &g_);
 
-  /* loop over local portion of grid */
+  /*
+    Retrive the  precomuted Fourier transform of of  the divergence of
+    the  "weighted  force"  vector  div   (F  g)  which  serves  as  a
+    convolution  kernel in  BGY3dM equations.   The  additional factor
+    -k^(-2) effectively  included in  the kernel recovers  the Fourier
+    transform of the corresponding Poisson solution.  The factor scale
+    = βρ is not included, on the other hand. See kernel() for details:
+
+    Loop over local portion of grid:
+  */
   for (int k = x[2]; k < x[2] + n[2]; k++)
     for (int j = x[1]; j < x[1] + n[1]; j++)
       for (int i = x[0]; i < x[0] + n[0]; i++)
-        {
-          /*
-           Retrive  the   precomuted  Fourier  transform   of  of  the
-           divergence of  the "weighted force" vector div  (F g) which
-           serves as  a convolution  kernel in BGY3dM  equations.  The
-           additional  factor  -k^(-2)  effectively  included  in  the
-           kernel recovers the  Fourier transform of the corresponding
-           Poisson solution.   The factor scale = βρ  is not included,
-           on the other hand. See kernel() for details:
-           */
-          dg_[k][j][i] += scale * (ker_[k][j][i] * g_[k][j][i]); /* complex */
-        }
+        dg_[k][j][i] += scale * (ker_[k][j][i] * g_[k][j][i]); /* complex */
+
   DAVecRestoreArray (dc, ker, &ker_);
   DAVecRestoreArray (dc, dg, &dg_);
   DAVecRestoreArray (dc, g, &g_);
