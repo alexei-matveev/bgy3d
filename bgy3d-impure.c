@@ -439,6 +439,12 @@ static void  pair (State *BHD,
 }
 
 /*
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
   Given  pairwise  distributions g2[][]  compute  weighted forces  and
   coulomb interction.
 
@@ -735,7 +741,13 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 }
 
 /*
- * Side effects: none, but consider efficiency.
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
+  Side effects: none, but consider efficiency.
  */
 static void Compute_H2O_interS_C (const State *BHD,
                                   Vec fg2_fft[3], /* complex, intent(in) */
@@ -782,7 +794,13 @@ static void Compute_H2O_interS_C (const State *BHD,
 }
 
 /*
- * Side effects: none, but see Compute_H2O_interS_C().
+  Deprecated!
+
+  Convert   the   solvers  to   use   the   kernel   as  prepared   by
+  solvent_kernel() and  applied by apply(), instead  of using weighted
+  forces.
+
+  Side effects: none, but see Compute_H2O_interS_C().
  */
 void Compute_H2O_interS (const State *BHD, /* NOTE: modifies BHD->fft dynamic arrays */
                          Vec fg2_fft[3],   /* complex, intent(in) */
