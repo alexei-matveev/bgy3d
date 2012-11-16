@@ -1761,7 +1761,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_save_vec ("dg0.bin", dgH); /* dgH */
-          bgy3d_save_vec ("dg1.bin", dgH); /* dgO */
+          bgy3d_save_vec ("dg1.bin", dgO); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }
