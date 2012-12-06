@@ -17,7 +17,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                               Vec g[2],
                               Context **v);
 
-void ReadPairDistribution (const State *BHD, const char *filename, Vec g2);
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
 
 #ifdef WITH_EXTRA_SOLVERS

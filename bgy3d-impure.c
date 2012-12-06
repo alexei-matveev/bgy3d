@@ -42,8 +42,6 @@ static const Site solvent[] =
 #undef eO
 #undef qO
 
-static void load (const State *BHD, Vec g2[2][2]);
-
 static State initialize_state (const ProblemData *PD)
 {
   State BHD;
@@ -96,9 +94,6 @@ static State initialize_state (const ProblemData *PD)
   /* Complex scratch vector: */
   DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
 
-  /* FIXME: broken, see the comments inside the function itself: */
-  load (&BHD, BHD.g2);
-
   return BHD;
 }
 
@@ -134,133 +129,6 @@ static void finalize_state (State *BHD)
   MatDestroy (BHD->fft_mat);
 }
 
-
-static void save_all (int m, const Vec g[m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Writing binary files...");
-  for (int i = 0; i < m; i++)
-    {
-      char name[20];
-      snprintf (name, sizeof name, format, i);
-      bgy3d_save_vec (name, g[i]);
-    }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-
-static void load_all (int m, Vec g[m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
-  for (int i = 0; i < m; i++)
-    {
-      char name[20];
-      snprintf (name, sizeof name, format, i);
-      g[i] = bgy3d_load_vec (name); /* bgy3d_read_vec? */
-    }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-
-/* This fills  an array of preallocated Vecs  with solven-solvent pair
-   distributions:  */
-static void load (const State *BHD, Vec g2[2][2])
-{
-#ifdef CS2
-  ReadPairDistribution (BHD, "g11.txt", g2[1][1]);
-  ReadPairDistribution (BHD, "g00.txt", g2[0][0]);
-  ReadPairDistribution (BHD, "g01.txt", g2[0][1]);
-#else
-  (void) BHD;                   /* unused */
-  /* Read  g^2 from  file  into a  pre-allocated global  (distributed)
-   * vector.   Note in  bgy3d_load_vec(), a  new 'local'  Vec  will be
-   * created  but the  new local  vec  isn't derived  from the  global
-   * vector  here.  Since  global vectors  are used  in this  code, we
-   * might  simply retain  operating  with global  vectors instead  of
-   * converting and assembling between global and local vectors? */
-  bgy3d_read_vec ("g00.bin", g2[0][0]);
-  bgy3d_read_vec ("g01.bin", g2[0][1]);
-  bgy3d_read_vec ("g11.bin", g2[1][1]);
-#endif
-  assert (g2[1][0] == g2[0][1]);
-}
-
-
-/* Fills Vec  g2 with  3D distribution derived  from the 1D  g(r) data
-   from the disk.  Here g2 should be a valid allocated vector. */
-void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
-{
-  DA da;
-  FILE *fp;
-  real *xg, *g;
-  real r[3], r_s, h[3], interval[2];
-  int index=0;
-  int x[3], n[3], i[3], k;
-  PetscScalar ***g2_vec;
-
-  da = BHD->da;
-  const ProblemData *PD = BHD->PD;
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
-
-  /* read file */
-  fp = fopen(filename, "r");
-  if(fp==NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Could not open file %s.\n", filename);
-      exit(1);
-    }
-  xg= (real*) malloc(sizeof(*xg));
-  g= (real*) malloc(sizeof(*g));
-
-  while( fscanf(fp,"%lf %lf", &xg[index], &g[index]) == 2)
-    {
-      index++;
-      xg= (real*) realloc(xg, (index+1)*sizeof(*xg));
-      g= (real*) realloc(g, (index+1)*sizeof(*g));
-    }
-  index--;
-  PetscPrintf(PETSC_COMM_WORLD,"Read %d lines from file %s, x=[%f,%f]\n", index+1, filename,
-              xg[0], xg[index]);
-  fclose(fp);
-
-
-  /* interpolate to 3d grid */
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  DAVecGetArray(da, g2, &g2_vec);
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-          FOR_DIM
-            r[dim] = i[dim]*h[dim]+interval[0];
-          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-          /* find x in array */
-          for(k=0; k<=index; k++)
-            if(r_s<xg[k])
-              break;
-          if(k==0)
-            g2_vec[i[2]][i[1]][i[0]] = 0;
-          else if(k>=index)
-            g2_vec[i[2]][i[1]][i[0]] = 1.0;
-          else
-            g2_vec[i[2]][i[1]][i[0]] = g[k] + (r_s-xg[k])*(g[k+1]-g[k])/(xg[k+1]-xg[k]);
-          if(g2_vec[i[2]][i[1]][i[0]]<0)
-            g2_vec[i[2]][i[1]][i[0]]=0;
-        }
-  DAVecRestoreArray(da, g2, &g2_vec);
-
-  free(xg);
-  free(g);
-}
 
 /* Side effects: uses BHD->fg2_fft[3] as work arrays. */
 static void  pair (State *BHD,
@@ -764,6 +632,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
 
+  /* Get g2[][] e.g. from  a previous pure solvent calculation. FIXME:
+     literal 2: */
+  bgy3d_load_g2 (&BHD, 2, BHD.g2, "g%d%d.bin");
+
   /*
    * Extract BGY3d specific things from supplied input:
    */
@@ -867,7 +739,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    load_all (m, du, "du%d.bin");
+    bgy3d_load_g1 (m, du, "du%d.bin");
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
@@ -1202,7 +1074,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
-        save_all (m, du, "du%d.bin");
+        bgy3d_save_g1 (m, du, "du%d.bin");
 
     } /* damp loop */
 
@@ -1264,7 +1136,7 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_solve_with_solute (PD, n, sites, NULL, g, NULL);
 
   /* Save final distribution, use binary format: */
-  save_all (2, g, "g%d.bin");
+  bgy3d_save_g1 (2, g, "g%d.bin");
 
   for (int i = 0; i < 2; i++)
     VecDestroy (g[i]);
