@@ -1495,7 +1495,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   State *BHD;
   Vec dgH, dgO, dgHO, dg_new, dg_new2, f;
   Vec g0[2][2], g[2][2];        /* pair distributions, ij = ji */
-  Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ;
   real aH, aHO, aO, a1=0.5, count=0.0;
@@ -1545,9 +1544,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &dg_new2);
   DACreateGlobalVector(BHD->da, &f);
 
-  DACreateGlobalVector(BHD->da, &dgOH);
-  DACreateGlobalVector(BHD->da, &gOH);
-
   DACreateGlobalVector(BHD->da, &tH);
   DACreateGlobalVector(BHD->da, &tO);
   DACreateGlobalVector(BHD->da, &tHO);
@@ -1581,8 +1577,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecSet(dgH,0);
   VecSet(dgO,0);
   VecSet(dgHO,0);
-  VecSet(dgOH,0.0);
-
 
 /*   VecSetRandom_H2O(dgH,1.0); */
 /*   VecSetRandom_H2O(dgO,1.0); */
@@ -2051,8 +2045,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy(dg_new2);
   VecDestroy(f);
 
-  VecDestroy(dgOH);
-  VecDestroy(gOH);
   VecDestroy(tH);
   VecDestroy(tO);
   VecDestroy(tHO);
@@ -2074,7 +2066,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   State *BHD;
   Vec dgH, dgO, dgHO, dg_new, dg_new2, f;
   Vec g0[2][2], g[2][2];        /* pair distributions, ij = ji */
-  Vec dgOH, gOH;
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ;
   real aH, aHO, aO, a1=0.5, count=0.0;
@@ -2130,9 +2121,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &dg_new2);
   DACreateGlobalVector(BHD->da, &f);
 
-  DACreateGlobalVector(BHD->da, &dgOH);
-  DACreateGlobalVector(BHD->da, &gOH);
-
   DACreateGlobalVector(BHD->da, &tH);
   DACreateGlobalVector(BHD->da, &tO);
   DACreateGlobalVector(BHD->da, &tHO);
@@ -2166,8 +2154,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecSet(dgH,0);
   VecSet(dgO,0);
   VecSet(dgHO,0);
-  VecSet(dgOH,0.0);
-
 
 /*   VecSetRandom_H2O(dgH,1.0); */
 /*   VecSetRandom_H2O(dgO,1.0); */
@@ -2706,8 +2692,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy(dg_new2);
   VecDestroy(f);
 
-  VecDestroy(dgOH);
-  VecDestroy(gOH);
   VecDestroy(tH);
   VecDestroy(tO);
   VecDestroy(tHO);
