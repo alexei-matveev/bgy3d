@@ -502,25 +502,25 @@ static real ComputeCharge (const ProblemData *PD,
  */
 static real mix (Vec dg, Vec dg_new, real a, Vec work)
 {
-    real norm;
+  real norm;
 
-    /* Move dg */
-    VecCopy(dg, work);
+  /* Move dg */
+  VecCopy(dg, work);
 
-    /* dg' = a * dg_new + (1 - a) * dg */
-    VecAXPBY(dg, a, (1-a), dg_new);
+  /* dg' = a * dg_new + (1 - a) * dg */
+  VecAXPBY(dg, a, (1-a), dg_new);
 
-    /* work = dg - dg' = a * (dg - dg_new)
+  /* work = dg - dg' = a * (dg - dg_new)
 
-       That is why the divison by "a" below */
-    VecAXPY(work, -1.0, dg);
+     That is why the divison by "a" below */
+  VecAXPY(work, -1.0, dg);
 
-    /* Norm of the change: */
-    VecNorm(work, NORM_INFINITY, &norm);
+  /* Norm of the change: */
+  VecNorm(work, NORM_INFINITY, &norm);
 
-    /* FIXME: why not computing |dg_new - dg| directly? Would be valid
-       also for a == 0: */
-    return norm / a;
+  /* FIXME: why not computing |dg_new - dg| directly? Would be valid
+     also for a == 0: */
+  return norm / a;
 }
 
 /* Returns most  negative number for  zero sized arrays.   Will return
