@@ -1531,10 +1531,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  DACreateGlobalVector(BHD->da, &g[0][0]);
-  DACreateGlobalVector(BHD->da, &g[1][1]);
-  DACreateGlobalVector(BHD->da, &g[0][1]);
-  g[1][0] = g[0][1];
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD->da, &g[i][j]);
+        g[j][i] = g[i][j];
+      }
 
   DACreateGlobalVector(BHD->da, &dgH);
   DACreateGlobalVector(BHD->da, &dgO);
@@ -2037,11 +2039,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      VecDestroy (x_lapl[i][j]);
+      {
+        VecDestroy (g[i][j]);
+        VecDestroy (x_lapl[i][j]);
+      }
 
-  VecDestroy(g[0][0]);
-  VecDestroy(g[1][1]);
-  VecDestroy(g[0][1]);
   VecDestroy(dgH);
   VecDestroy(dgO);
   VecDestroy(dgHO);
@@ -2114,10 +2116,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  DACreateGlobalVector(BHD->da, &g[0][0]);
-  DACreateGlobalVector(BHD->da, &g[1][1]);
-  DACreateGlobalVector(BHD->da, &g[0][1]);
-  g[1][0] = g[0][1];
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD->da, &g[i][j]);
+        g[j][i] = g[i][j];
+      }
 
   DACreateGlobalVector(BHD->da, &dgH);
   DACreateGlobalVector(BHD->da, &dgO);
@@ -2690,11 +2694,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      VecDestroy (x_lapl[i][j]);
+      {
+        VecDestroy (g[i][j]);
+        VecDestroy (x_lapl[i][j]);
+      }
 
-  VecDestroy(g[0][0]);
-  VecDestroy(g[1][1]);
-  VecDestroy(g[0][1]);
   VecDestroy(dgH);
   VecDestroy(dgO);
   VecDestroy(dgHO);
