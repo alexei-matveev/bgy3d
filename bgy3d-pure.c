@@ -1432,8 +1432,8 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
   }
 
   VecRestoreArray (w, &w_vec);
-  VecRestoreArray (x, &x_vec);   /* required? */
-  VecRestoreArray (y, &y_vec);   /* required? */
+  VecRestoreArray (x, &x_vec);
+  VecRestoreArray (y, &y_vec);
 }
 
 
