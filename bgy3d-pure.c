@@ -456,7 +456,7 @@ void ComputeFFTfromCoulomb (State *BHD,
 }
 
 
-void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
+static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
 {
   DA da;
   PetscScalar ***gHini_vec, ***gOini_vec, ***gHOini_vec;
@@ -757,12 +757,12 @@ static void kapply (const State *BHD,
   Side effects:  uses BHD->{fft_scratch, fg2_fft[],  gfg2_fft} as work
   Vecs. Does 2 * (4 + 1) FFTs. Two inverse ones
 */
-void Compute_dg_H2O_inter (State *BHD,
-                           Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                           Vec coul1_fft, real rho1,
-                           Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                           Vec coul2_fft, real rho2,
-                           Vec dg, Vec dg_help)
+static void Compute_dg_H2O_inter (State *BHD,
+                                  Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
+                                  Vec coul1_fft, real rho1,
+                                  Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
+                                  Vec coul2_fft, real rho2,
+                                  Vec dg, Vec dg_help)
 {
   const ProblemData *PD = BHD->PD;
   const real L = PD->interval[1] - PD->interval[0];
@@ -826,8 +826,8 @@ void Compute_dg_H2O_inter (State *BHD,
 
 
 /* Compute  intramolecular  part. */
-void Compute_dg_H2O_intraIII(State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
-                            Vec coul_fft, real rab, Vec dg, Vec dg_help)
+static void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
+                                     Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], ic[3], local_size;
   real k_fac, k;
@@ -1272,8 +1272,8 @@ static void normalization_intra (const State *BHD,
  *
  * Side effects: uses BHD->fft_scratch as work Vec.
  */
-void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
-                                         Vec dg) /* intent(out) */
+static void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
+                                                Vec dg) /* intent(out) */
 {
   /* fft(g/t) */
   MatMult (BHD->fft_mat, g, BHD->fft_scratch);

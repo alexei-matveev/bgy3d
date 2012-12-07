@@ -19,28 +19,7 @@ void ComputeFFTfromCoulomb (State *BHD,
                             real factor);
 
 
-void RecomputeInitialData (State *BHD, real damp, real damp_LJ);
-
-void Compute_dg_H2O_inter (State *BHD,
-                           Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                           Vec coul1_fft, real rho1,
-                           Vec f2[3], Vec f2_l[3], Vec g2a, Vec g2b,
-                           Vec coul2_fft, real rho2,
-                           Vec dg, Vec dg_help);
-
-#ifdef INTRA1
-/* This build seems to be broken: */
-void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec g2,
-                           Vec coul_fft, real rab, Vec dg, Vec dg_help);
-#else
-void Compute_dg_H2O_intraIII (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
-                             Vec coul_fft, real rab, Vec dg, Vec dg_help);
-#endif
-
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
-
-void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
-                                         Vec dg);
 
 void bgy3d_solve_normalization (const State *BHD,
                                 Vec gc_fft, /* complex, intent(in) */
