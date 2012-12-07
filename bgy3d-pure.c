@@ -754,12 +754,12 @@ static void kapply (const State *BHD,
 }
 
 /*
-  Side effects:  uses BHD->{fft_scratch, fg2_fft[],  gfg2_fft} as work
-  Vecs. Does (4 + 1) FFTs. One inverse.
+  Side effects:  uses BHD->{v[], fft_scratch,  fg2_fft[], gfg2_fft} as
+  work Vecs. Does (4 + 1) FFTs. One inverse.
 */
 static void Compute_dg_inter (State *BHD,
-                              Vec f1[3], Vec f1_l[3], Vec g1a, Vec g1b,
-                              Vec coul1_fft, real rho1,
+                              Vec fs[3], Vec fl[3], Vec ga, Vec gb,
+                              Vec coul_fft, real rho,
                               Vec dg) /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
@@ -770,28 +770,28 @@ static void Compute_dg_inter (State *BHD,
   Vec dg_fft = BHD->gfg2_fft;
 
   /************************************************/
-  /* rho1 * F1*g1a g1b */
+  /* rho * FS*ga gb */
   /************************************************/
 
   /* fft(f*g) */
   FOR_DIM
     {
-      VecPointwiseMult (BHD->v[dim], g1a, f1[dim]);
+      VecPointwiseMult (BHD->v[dim], ga, fs[dim]);
 
       /* special treatment: Coulomb long */
-      VecAXPY (BHD->v[dim], -1.0, f1_l[dim]);
+      VecAXPY (BHD->v[dim], -1.0, fl[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
   /* fft(g) */
-  MatMult (BHD->fft_mat, g1b, g_fft);
+  MatMult (BHD->fft_mat, gb, g_fft);
 
-  kapply (BHD, fg2_fft, g_fft, coul1_fft, dg_fft);
+  kapply (BHD, fg2_fft, g_fft, coul_fft, dg_fft);
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  VecScale (dg, rho1 * PD->beta/L/L/L);
+  VecScale (dg, rho * PD->beta/L/L/L);
 }
 
 
