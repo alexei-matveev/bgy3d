@@ -73,15 +73,6 @@ static State initialize_state (const ProblemData *PD)
    * Create global vectors
    */
 
-  /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
-     and work: */
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (da, &BHD.g2[i][j]);
-        BHD.g2[j][i] = BHD.g2[i][j];
-      }
-
   FOR_DIM
     DACreateGlobalVector (da, &BHD.v[dim]);
 
@@ -99,11 +90,6 @@ static State initialize_state (const ProblemData *PD)
 static void finalize_state (State *BHD)
 {
   MPI_Barrier (PETSC_COMM_WORLD);
-
-  /* Pair quantities here: */
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      VecDestroy (BHD->g2[i][j]);
 
   FOR_DIM
     {
@@ -629,17 +615,26 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
 
+  /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
+     and work: */
+  Vec g2[m][m];               /* solvent-solvent pair distributions */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (BHD.da, &g2[i][j]);
+        g2[j][i] = g2[i][j];
+      }
+
   /*
     Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
     the original version hard-coded  reading the pair distributions as
     radial functions  from the  text files named  g2C, g2S,  and g2CS.
-    This version  uses g00.txt,  g11.txt, and g01.txt  instead. FIXME:
-    literal 2:
+    This version uses g00.txt, g11.txt, and g01.txt instead.
   */
   if (bgy3d_getopt_test ("--from-radial-g2"))
-    bgy3d_read_g2_radial (&BHD, 2, BHD.g2, "g%d%d.txt");
+    bgy3d_read_g2_radial (&BHD, m, g2, "g%d%d.txt");
   else
-    bgy3d_read_g2 (2, BHD.g2, "g%d%d.bin");
+    bgy3d_read_g2 (m, g2, "g%d%d.bin");
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -819,7 +814,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      solvent_kernel (&BHD, m, solvent, BHD.g2, ker_fft);
+      solvent_kernel (&BHD, m, solvent, g2, ker_fft);
 
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
@@ -1114,8 +1109,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       VecDestroy (g_fft[i]);
       VecDestroy (x_lapl[i]);
 
+      /* Pair quantities here: */
       for (int j = 0; j <= i; j++)
-        VecDestroy (ker_fft[i][j]);
+        {
+          VecDestroy (g2[i][j]);
+          VecDestroy (ker_fft[i][j]);
+        }
     }
 
   VecDestroy (du_acc);
@@ -1447,7 +1446,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         }
 
       RecomputeInitialFFTs (&BHD, 2,
-                            BHD.g2,        /* real, in */
+                            g2,            /* real, in */
                             BHD.fs_g2_fft, /* complex, out */
                             BHD.fl_g2_fft, /* complex, out */
                             BHD.u2,        /* real, out */

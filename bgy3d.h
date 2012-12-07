@@ -149,8 +149,6 @@ typedef struct State
   Vec F[2][2][3];               /* sort range pair force */
   Vec F_l[2][2][3];             /* long range pair force, redundant */
   Vec v[3];                     /* work vectors */
-  Vec g2[2][2];                 /* Site-site  distributions. Used only
-                                   in the solute-solvent solvers. */
 
   /* Long-range Coulomb interaction for solvent site pairs. So far the
      pairs differ only by a factor q[i] * q[j]. Maybe we should rather
