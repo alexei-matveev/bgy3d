@@ -1589,30 +1589,22 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       if(damp==-0.01)
         {
           damp_LJ=0;
-          //a0=0.4;
           RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
         {
           damp_LJ=1.0;
-          //a0=0.5;
           RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
         {
           damp_LJ=1.0;
-          //a0=0.0002/damp;
           count+=1.0;
-          //a0 = 0.1/4./count;
-          //a0 = 0.1/count;
           RecomputeInitialData (BHD, (damp), 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
-
-/*       damp=0.05; */
-/*       RecomputeInitialData (BHD, damp, 1.0); */
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
@@ -1642,23 +1634,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       if( !(iter%10) && iter>0 )
         {
           a=a1;
-          //PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);
           aH=a;
           aO=a;
           aHO=a;
         }
       else if( iter==20)
         {
-/*        a=0.1;  */
-/*        PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);  */
           aH=a;
           aO=a;
           aHO=a;
         }
       else
         {
-          //a=0.01;
-          //PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);
           a=a0;
           aH=a;
           aO=a;
@@ -1669,11 +1656,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       /* f=integral(g) */
       if (1)                    /* kflg was set with -pair */
         {
-/*        Compute_dg_H2O_normalization_inter( BHD, g[0][0], g[0][0], tHO, f); */
-
-/*        VecView(BHD->cHO,PETSC_VIEWER_STDERR_WORLD);          */
-/*        exit(1);     */
-
           //if(iter < 50) goto gH;
 
           goto gOH;
@@ -1687,7 +1669,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
-          //VecSet(dg_new,0.0);
           VecPointwiseMult(dg_new, dg_new, BHD->cHO);
 
 
@@ -1695,11 +1676,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[1][1], tO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[1][1], tO, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[1][1], tO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[0][0], tH , dg_new2, f);
@@ -1715,30 +1692,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);    */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
+
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
-/*        VecNorm(dg_new, NORM_2, &norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
-
           VecCopy(dg[0][1], f);
-          //VecAXPBY(dg[0][1], a, (1-a), dg_new);
           VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
           VecAXPY(f, -1.0, dg[0][1]);
           VecNorm(f, NORM_INFINITY, &dgHO_norm);
           PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
 
-/*        for(in_iter=0; in_iter<0; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-
-/*        Solve_NormalizationH2O(BHD, g[0][0],  g[1][1], g[0][1],  gOH, */
-/*                               tH, tO, tHO, tOH, dg_new2, f); */
           goto gH;
         gOH:
           //goto gH;
@@ -1758,13 +1723,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[0][0], tH , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tH, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][0], tH, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[0][0], tH, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);    */
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[1][1], tO , dg_new2, f);
@@ -1780,39 +1739,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);   */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
-/*        VecNorm(dg_new, NORM_2, &norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
-
           VecCopy(dg[0][1], f);
-          //VecAXPBY(dg[0][1], a, (1-a), dg_new);
           VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
           VecAXPY(f, -1.0, dg[0][1]);
           VecNorm(f, NORM_INFINITY, &dgHO_norm);
           PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
-
-          //VecView(dg[0][1],PETSC_VIEWER_STDERR_WORLD);
-          //exit(1);
-
-          //if(iter==max_iter-1) VecCopy(f, dg[0][1]);
-/*        } */
-          /*****************************************/
-/*        Solve_NormalizationH2O( BHD,  g[0][0],  g[1][1],  g[0][1], gOH, tH, tO, tHO, tOH, dg_new, f,  */
-/*                         norm_tol); */
-          /*****************************************/
-/*        for(in_iter=0; in_iter<0; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-/*        VecCopy(dg[0][1], dg[1][1]); */
-/*        VecCopy(dg[0][1], dg[0][0]); */
-/*        goto ende; */
 
         gH:
           //goto ende;
@@ -1827,22 +1763,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
-          //VecScale(dg_new, 0.5);
           VecPointwiseMult(dg_new, dg_new, BHD->cH);
-
-
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
-
 
           Solve_NormalizationH2O_smallII (BHD, g[0][0], r_HO, g[0][1], tHO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][1], tHO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][0], r_HO, g[0][1], tHO , dg_new2, f);
@@ -1858,13 +1784,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
-
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
-
 
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][0]);
@@ -1876,15 +1796,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecNorm(f, NORM_INFINITY, &dgH_norm);
           PetscPrintf(PETSC_COMM_WORLD,"H= %e  (%f)  ", dgH_norm/aH, aH);
 
-          //if(iter<50 )goto ende;
-          //if(iter==max_iter-1) VecCopy(f, dg[0][0]);
-          //ComputeH2O_Renormalization(BHD, g[0][0]);
-/*        } */
-/*        for(in_iter=0; in_iter<300; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-          /* LABEL: gO: */
-          /* g_O */
-          //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                                g[0][1],
@@ -1899,12 +1810,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           Solve_NormalizationH2O_smallII (BHD, g[1][1], r_HO, g[0][1], tHO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][1], tHO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[1][1], r_HO, g[0][1], tHO , dg_new2, f);
@@ -1920,16 +1826,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
-/*        exit(1);  */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[1][1]);
 
           VecCopy(dg[1][1], f);
-          //VecAXPBY(dg[1][1], a, (1-a), dg_new);
           VecAXPBY(dg[1][1], aO, (1-aO), dg_new);
           VecAXPY(f, -1.0,  dg[1][1]);
           VecNorm(f, NORM_INFINITY, &dgO_norm);
@@ -1943,8 +1844,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else {
         // nothing
       }
-
-      //PetscPrintf(PETSC_COMM_WORLD,"\n");
 
       /* (fancy) step size control */
       mycount++;
@@ -1988,10 +1887,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           break;
     }
 
-
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-
-  /*************************************/
   /* output */
   namecount++;
   sprintf(nameH, "vec00-%d.m", namecount-1);
@@ -2003,7 +1898,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_save_vec_ascii (nameO, g[1][1]); /* g_O */
   bgy3d_save_vec_ascii (nameHO, g[0][1]); /* g_HO */
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-  /************************************/
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
@@ -2031,11 +1925,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tHO);
   VecDestroy(tOH);
 
-  // ExtractAxis(BHD, g, 0);
-
-
   BGY3dH2OData_free(BHD);
-
 
   return PETSC_NULL;
 }
@@ -2147,30 +2037,22 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       if(damp==-0.01)
         {
           damp_LJ=0;
-          //a0=0.4;
           RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else if(damp==0.0)
         {
           damp_LJ=1.0;
-          //a0=0.5;
           RecomputeInitialData (BHD, 0, 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
         {
           damp_LJ=1.0;
-          //a0=0.0002/damp;
           count+=1.0;
-          //a0 = 0.1/4./count;
-          //a0 = 0.1/count;
           RecomputeInitialData (BHD, (damp), 1.0);
           PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
-
-/*       damp=0.05; */
-/*       RecomputeInitialData (BHD, damp, 1.0); */
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
@@ -2189,44 +2071,21 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   for(iter=0; iter<max_iter; iter++)
     {
-
-/*       Compute_dg_H2O_inter(BHD,  */
-/*                         BHD->F[0][1], BHD->F_l[0][1], g[0][1],
- *                         g[0][1],  */
-/*                         BHD->u2_fft[0][1], BHD->rhos[0],  */
-/*                         BHD->F[1][1], BHD->F_l[1][1], g[1][1],
- *                         g[1][1],  */
-/*                         BHD->u2_fft[1][1], BHD->rhos[1],  */
-/*                         dg_new, f); */
-/*       Compute_dg_H2O_inter(BHD, BHD->F[0][0], BHD->F_l[0][0],
- *       g[0][0],
- *       g[0][1],  */
-/*                         BHD->u2_fft[0][0], BHD->rhos[0],  */
-/*                         BHD->F[0][1], BHD->F_l[0][1], g[0][1],
- *                         g[1][1],  */
-/*                         BHD->u2_fft[0][1], BHD->rhos[1],  */
-/*                         dg_new, f); */
-
       if( !(iter%10) && iter>0 )
         {
           a=a1;
-          //PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);
           aH=a;
           aO=a;
           aHO=a;
         }
       else if( iter==20)
         {
-/*        a=0.1;  */
-/*        PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);  */
           aH=a;
           aO=a;
           aHO=a;
         }
       else
         {
-          //a=0.01;
-          //PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a);
           a=a0;
           aH=a;
           aO=a;
@@ -2237,13 +2096,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       /* f=integral(g) */
       if (1)                    /* kflg was set when with -pair */
         {
-/*        Compute_dg_H2O_normalization_inter( BHD, g[0][0], g[0][0], tHO, f); */
-
-/*        VecView(tHO,PETSC_VIEWER_STDERR_WORLD);          */
-/*        exit(1);     */
-
           //if(iter < 50) goto gH;
-
           goto gOH;
           /* g_HO */
           Compute_dg_H2O_inter(BHD,
@@ -2255,25 +2108,15 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
-          //VecSet(dg_new,0.0);
-
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);          */
-/*        exit(1);     */
 
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[1][1], tO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[1][1], tO, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[1][1], tO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HH, g[0][1], tHO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HH, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][1], tHO, r_HH, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[0][1], tHO, r_HH, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[0][0], tH , dg_new2, f);
@@ -2289,30 +2132,18 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 2.0, dg_new2);
 #endif
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);    */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
+
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
-/*        VecNorm(dg_new, NORM_2, &norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
-
           VecCopy(dg[0][1], f);
-          //VecAXPBY(dg[0][1], a, (1-a), dg_new);
           VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
           VecAXPY(f, -1.0, dg[0][1]);
           VecNorm(f, NORM_INFINITY, &dgHO_norm);
           PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
 
-/*        for(in_iter=0; in_iter<0; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-
-/*        Solve_NormalizationH2O(BHD, g[0][0],  g[1][1], g[0][1],  gOH, */
-/*                               tH, tO, tHO, tOH, dg_new2, f); */
           goto gH;
         gOH:
           //goto gH;
@@ -2327,18 +2158,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);          */
-/*        exit(1);     */
-
-
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HO, g[0][0], tH , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tH, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][0], tH, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[0][0], tH, r_HO, dg_new2, f);
           VecAXPY(dg_new, 2.0, dg_new2);
-
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][1], r_HH, g[0][1], tHO , dg_new2, f);
@@ -2367,36 +2190,17 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);   */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
 
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][1]);
 
-/*        VecNorm(dg_new, NORM_2, &norm); */
-/*        PetscPrintf(PETSC_COMM_WORLD,"nrom=%e  ",norm); */
-
           VecCopy(dg[0][1], f);
-          //VecAXPBY(dg[0][1], a, (1-a), dg_new);
           VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
           VecAXPY(f, -1.0, dg[0][1]);
           VecNorm(f, NORM_INFINITY, &dgHO_norm);
           PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
 
-          //VecView(dg[0][1],PETSC_VIEWER_STDERR_WORLD);
-          //exit(1);
-
-          //if(iter==max_iter-1) VecCopy(f, dg[0][1]);
-/*        } */
-          /*****************************************/
-/*        Solve_NormalizationH2O( BHD,  g[0][0],  g[1][1],  g[0][1], gOH, tH, tO, tHO, tOH, dg_new, f,  */
-/*                         norm_tol); */
-          /*****************************************/
-/*        for(in_iter=0; in_iter<0; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
         gH:
           //goto ende;
           //if(damp==0.0 && iter<50) goto ende;
@@ -2410,25 +2214,16 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                                BHD->u2_fft[0][0], BHD->rhos[0],
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
-          //VecScale(dg_new, 0.5);
-
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
 
           Solve_NormalizationH2O_smallII (BHD, g[0][0], r_HH, g[0][0], tH , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tH, r_HH, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][0], tH, r_HH, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII (BHD, g[0][0], r_HO, g[0][1], tHO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][1], tHO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 1.0, dg_new2);
-
-
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[0][0], r_HH, g[0][0], tH , dg_new2, f);
@@ -2456,33 +2251,17 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 1.0, dg_new2);
 #endif
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
-
-
           VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
-
 
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[0][0]);
 
           VecCopy(dg[0][0], f);
-          //VecAXPBY(dg[0][0], a, (1-a), dg_new);
           VecAXPBY(dg[0][0], aH, (1-aH), dg_new);
           VecAXPY(f, -1.0, dg[0][0]);
           VecNorm(f, NORM_INFINITY, &dgH_norm);
           PetscPrintf(PETSC_COMM_WORLD,"H= %e  (%f)  ", dgH_norm/aH, aH);
 
-          //if(iter<50 )goto ende;
-          //if(iter==max_iter-1) VecCopy(f, dg[0][0]);
-          //ComputeH2O_Renormalization(BHD, g[0][0]);
-/*        } */
-/*        for(in_iter=0; in_iter<300; in_iter++) { */
-/*          PetscPrintf(PETSC_COMM_WORLD,"in_iter %d= ",in_iter); */
-          /* LABEL: gO: */
-          /* g_O */
-          //goto ende;
           Compute_dg_H2O_inter(BHD,
                                BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                                g[0][1],
@@ -2493,19 +2272,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                                dg_new, f);
           VecScale(dg_new,damp_LJ);
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);         */
-/*        exit(1);    */
-
           Solve_NormalizationH2O_smallII (BHD, g[1][1], r_HO, g[0][1], tHO , dg_new2, f);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
           VecCopy (dg_new2, f); /* FIXME: need that? */
-          //Compute_dg_H2O_intra_lnII(BHD, g[0][1], tHO, r_HO, dg_new2, f);
-          //Compute_dg_H2O_intra_lnIII(BHD, g[0][1], tHO, r_HO, dg_new2, f);
           VecAXPY(dg_new, 2.0, dg_new2);
-
-/*        VecView(dg_new2,PETSC_VIEWER_STDERR_WORLD);        */
-/*        exit(1);   */
-
 
 #ifdef INTRA1
           Solve_NormalizationH2O_smallII (BHD, g[1][1], r_HO, g[0][1], tHO , dg_new2, f);
@@ -2521,16 +2291,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, 2.0, dg_new2);
 #endif
 
-/*        VecView(dg_new,PETSC_VIEWER_STDERR_WORLD);       */
-/*        exit(1);  */
-
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
-          //Smooth_Function(BHD, dg_new, SL, SR, 0.0);
+
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, tH, x_lapl[1][1]);
 
           VecCopy(dg[1][1], f);
-          //VecAXPBY(dg[1][1], a, (1-a), dg_new);
           VecAXPBY(dg[1][1], aO, (1-aO), dg_new);
           VecAXPY(f, -1.0,  dg[1][1]);
           VecNorm(f, NORM_INFINITY, &dgO_norm);
@@ -2540,38 +2306,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
           ComputeH2O_g (g[0][0], g0[0][0], dg[0][0]);
           ComputeH2O_g (g[1][1], g0[1][1], dg[1][1]);
-
-/*        CheckMax(g[0][1], "HO", 4.0); */
-/*        CheckMax(g[0][0], "H", 4.0); */
-/*        CheckMax(g[1][1], "O", 4.0); */
-
-          //if(iter==max_iter-1) VecCopy(f, dg[1][1]);
-          //ComputeH2O_Renormalization(BHD, g[1][1]);
-/*        } */
-
-/*        real max; */
-/*        PetscScalar *f_vec; */
-/*        VecGetArray(f, &f_vec); */
-/*        max =0; */
-/*        for(in_iter=0; in_iter<PD->N[0]*PD->N[1]*PD->N[2]; in_iter++) */
-/*          { */
-/*            if( fabs(f_vec[in_iter]) > max) */
-/*              { */
-/*                max = fabs(f_vec[in_iter]); */
-/*                max_iter=in_iter; */
-/*              } */
-/*          } */
-/*        PetscPrintf(PETSC_COMM_WORLD,"max at %d :%e %e ||",max_iter, max, f_vec[max_iter]); */
-/*        VecRestoreArray(f, &f_vec); */
-
-
-
         }
       else {
         // nothing
       }
-
-      //PetscPrintf(PETSC_COMM_WORLD,"\n");
 
       /* (fancy) step size control */
       mycount++;
@@ -2610,17 +2348,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol)
         break;
 
-/*       VecSum(dg[0][1], &dgHO_norm); */
-/*       VecSum(dg[1][1], &dgO_norm); */
-/*       VecSum(dg[0][0], &dgH_norm); */
-/*       PetscPrintf(PETSC_COMM_WORLD,"\t norms: dgHO= %e, dgH= %e, dgO= %e", dgHO_norm, dgH_norm, dgO_norm); */
       PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
-
-/*   VecView(dg,PETSC_VIEWER_STDERR_WORLD); */
-
-  /*************************************/
   /* output */
   namecount++;
   sprintf(nameH, "vec00-%d.m", namecount-1);
@@ -2659,11 +2389,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tHO);
   VecDestroy(tOH);
 
-  // ExtractAxis(BHD, g, 0);
-
-
   BGY3dH2OData_free(BHD);
-
 
   return PETSC_NULL;
 }
