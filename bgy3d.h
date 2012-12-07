@@ -160,7 +160,8 @@ typedef struct State
   Vec u2_fft[2][2];             /* The  fourier transform of  u2.  The
                                    same redundancy. Complex Vecs. */
 
-  Vec cH, cHO, cO;
+  Vec c2[2][2];                 /* exp(-  beta  * LJ_repulsive(i,  j),
+                                   used only for pure solvent. */
 
   /* Pair  interaction parameters.  Not used  with  impurities.  Array
      entries are: sigma, epsilon and charge product. */

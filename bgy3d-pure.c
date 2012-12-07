@@ -78,12 +78,17 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
   DACreateGlobalVector(da, &BHD->g_ini[0]);
   DACreateGlobalVector(da, &BHD->g_ini[1]);
   DACreateGlobalVector(da, &BHD->gHO_ini);
+
   DACreateGlobalVector(da, &BHD->u2[0][0]);
   DACreateGlobalVector(da, &BHD->u2[1][1]);
   DACreateGlobalVector(da, &BHD->u2[0][1]);
-  DACreateGlobalVector(da, &BHD->cH);
-  DACreateGlobalVector(da, &BHD->cO);
-  DACreateGlobalVector(da, &BHD->cHO);
+  BHD->u2[1][0] = BHD->u2[0][1];
+
+  DACreateGlobalVector(da, &BHD->c2[0][0]);
+  DACreateGlobalVector(da, &BHD->c2[1][1]);
+  DACreateGlobalVector(da, &BHD->c2[0][1]);
+  BHD->c2[1][0] = BHD->c2[0][1];
+
   FOR_DIM
     {
       DACreateGlobalVector(da, &BHD->F[0][0][dim]);
@@ -143,9 +148,9 @@ static void BGY3dH2OData_free(State *BHD)
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
-  VecDestroy(BHD->cH);
-  VecDestroy(BHD->cO);
-  VecDestroy(BHD->cHO);
+  VecDestroy(BHD->c2[0][0]);
+  VecDestroy(BHD->c2[1][1]);
+  VecDestroy(BHD->c2[0][1]);
   VecDestroy (BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
@@ -551,9 +556,9 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
   DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
-  DAVecGetArray(da, BHD->cH, &cH_vec);
-  DAVecGetArray(da, BHD->cO, &cO_vec);
-  DAVecGetArray(da, BHD->cHO, &cHO_vec);
+  DAVecGetArray(da, BHD->c2[0][0], &cH_vec);
+  DAVecGetArray(da, BHD->c2[1][1], &cO_vec);
+  DAVecGetArray(da, BHD->c2[0][1], &cHO_vec);
   FOR_DIM
     {
       DAVecGetArray(da, BHD->F[0][0][dim], &fH_vec[dim]);
@@ -671,9 +676,9 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
   DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
   DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
   DAVecRestoreArray(da, BHD->gHO_ini, &gHOini_vec);
-  DAVecRestoreArray(da, BHD->cH, &cH_vec);
-  DAVecRestoreArray(da, BHD->cO, &cO_vec);
-  DAVecRestoreArray(da, BHD->cHO, &cHO_vec);
+  DAVecRestoreArray(da, BHD->c2[0][0], &cH_vec);
+  DAVecRestoreArray(da, BHD->c2[1][1], &cO_vec);
+  DAVecRestoreArray(da, BHD->c2[0][1], &cHO_vec);
   FOR_DIM
     {
       DAVecRestoreArray(da, BHD->F[0][0][dim], &fH_vec[dim]);
@@ -1510,7 +1515,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          VecPointwiseMult(dg_new, dg_new, BHD->cHO);
+          VecPointwiseMult(dg_new, dg_new, BHD->c2[0][1]);
 
 
           Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[0][0], tH , dg_new2);
@@ -1551,7 +1556,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          VecPointwiseMult(dg_new, dg_new, BHD->cH);
+          VecPointwiseMult(dg_new, dg_new, BHD->c2[0][0]);
 
           Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1], tHO , dg_new2);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
@@ -1591,7 +1596,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          VecPointwiseMult(dg_new, dg_new, BHD->cO);
+          VecPointwiseMult(dg_new, dg_new, BHD->c2[1][1]);
 
           Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1], tHO , dg_new2);
           Compute_dg_H2O_intra_ln(BHD, tHO, r_HO, dg_new2);
