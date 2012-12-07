@@ -14,12 +14,6 @@
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */
 
-#define R_r  9
-#define R_l  7
-
-#define SL 16.0
-#define SR 16.0
-
 static real NORM_REG=1.0e-1;
 static real NORM_REG2=1.0e-2;
 
@@ -1488,7 +1482,6 @@ void bgy3d_solve_normalization (const State *BHD,
 }
 
 
-#define DAMPO 1.0
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
