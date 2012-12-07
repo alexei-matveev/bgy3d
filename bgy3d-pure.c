@@ -514,8 +514,6 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
                        {0,L,L},{0,-L,L},{0,L,-L},{0,-L,-L},
                        {L,0,L},{-L,0,L},{L,0,-L},{-L,0,-L}};
 
-
-
   /* Get local portion of the grid */
   DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
@@ -555,8 +553,6 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
       VecAXPY(BHD->F[0][0][dim], 1.0, BHD->F_l[0][0][dim]);
       VecAXPY(BHD->F[1][1][dim], 1.0, BHD->F_l[1][1][dim]);
     }
-
-  /**********************************************/
 
   DAVecGetArray (da, BHD->u_ini[0][0], &gHini_vec);
   DAVecGetArray (da, BHD->u_ini[1][1], &gOini_vec);
@@ -609,22 +605,6 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
           gHOini_vec[i[2]][i[1]][i[0]] +=
             damp*beta* Coulomb_short( r_s, q2HO);
 
-          /* Coulomb long */
-/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsH); */
-/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsO); */
-/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb_long( r_s, BHD->LJ_paramsHO); */
-
-           /* Coulomb */
-/*        gHini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsH); */
-/*        gOini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsO); */
-/*        gHOini_vec[i[2]][i[1]][i[0]] +=  */
-/*          damp * beta* Coulomb( r_s, BHD->LJ_paramsHO); */
-
            FOR_DIM
             {
               /* Lennard-Jones */
@@ -642,30 +622,6 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
                 damp * Coulomb_short_grad( r_s, r[dim], q2O);
               fHO_vec[dim][i[2]][i[1]][i[0]] +=
                 damp * Coulomb_short_grad( r_s, r[dim], q2HO);
-
-              /* Coulomb long */
-/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-              /* Coulomb long */
-/*            fHl_vec[dim][i[2]][i[1]][i[0]] =  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fOl_vec[dim][i[2]][i[1]][i[0]] =  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHOl_vec[dim][i[2]][i[1]][i[0]] =  */
-/*              damp * Coulomb_long_grad( r_s, r[dim], BHD->LJ_paramsHO); */
-
-              /* Coulomb */
-/*            fH_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsH); */
-/*            fO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsO); */
-/*            fHO_vec[dim][i[2]][i[1]][i[0]] +=  */
-/*              damp * Coulomb_grad( r_s, r[dim], BHD->LJ_paramsHO); */
 
               /* deterministic correction */
               cH_vec[i[2]][i[1]][i[0]] =
