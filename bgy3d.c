@@ -290,32 +290,11 @@ static void ReadPairDistribution (const State *BHD, const char *filename, Vec g2
 }
 
 
-/*
-  Read  solvent-solvent pair  distributions  g2[][] from  disk into  a
-  pre-allocated   global   (distributed)   vectors.   Note   that   in
-  bgy3d_load_vec(), the  type of  the Vec will  depend on  the on-disk
-  data  which may  or  may not  be  compatible to  ones  used in  this
-  run. That is why we use bgy3d_read_vec() here instead.
-
-  Format is e.g. "g%d%d.bin"
-
-  FIXME: assymetry in argument number with bgy3d_save_g2().
-*/
-void bgy3d_load_g2 (const State *BHD, int m, Vec g2[m][m],
-                    const char *format)
+/* Was used for CS2 where the g2 comes from MM simulations: */
+void bgy3d_load_g2_radial (const State *BHD,
+                           int m, Vec g2[m][m], const char *format)
 {
-  /* Was used for CS2 where the g2 comes from MM simulations: */
-#ifdef CS2
-  const bool from_radial = true;
-#else
-  const bool from_radial = bgy3d_getopt_test ("--from-radial-g2");
-#endif
-
-  if (from_radial)
-    PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...");
-  else
-    PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
-
+  PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
@@ -324,10 +303,32 @@ void bgy3d_load_g2 (const State *BHD, int m, Vec g2[m][m],
         char name[20];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
-        if (from_radial)
-          ReadPairDistribution (BHD, name, g2[i][j]);
-        else
-          bgy3d_read_vec (name, g2[i][j]);
+        ReadPairDistribution (BHD, name, g2[i][j]);
+      }
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+/*
+  Read  solvent-solvent pair  distributions  g2[][] from  disk into  a
+  pre-allocated   global   (distributed)   vectors.   Note   that   in
+  bgy3d_load_vec(), the  type of  the Vec will  depend on  the on-disk
+  data  which may  or  may not  be  compatible to  ones  used in  this
+  run. That is why we use bgy3d_read_vec() here instead.
+
+  Format is e.g. "g%d%d.bin"
+*/
+void bgy3d_load_g2 (int m, Vec g2[m][m], const char *format)
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        assert (g2[j][i] == g2[i][j]);
+
+        char name[20];
+        snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
+
+        bgy3d_read_vec (name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
@@ -367,6 +368,7 @@ void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
 
 void bgy3d_load_g1 (int m, Vec g[m], const char *format)
 {
+  assert (0);                   /* FIXME: use bgy3d_read_vec()? */
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
   for (int i = 0; i < m; i++)
     {

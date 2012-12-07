@@ -632,9 +632,17 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
 
-  /* Get g2[][] e.g. from  a previous pure solvent calculation. FIXME:
-     literal 2: */
-  bgy3d_load_g2 (&BHD, 2, BHD.g2, "g%d%d.bin");
+  /*
+    Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
+    the original version hard-coded  reading the pair distributions as
+    radial functions  from the  text files named  g2C, g2S,  and g2CS.
+    This version  uses g00.txt,  g11.txt, and g01.txt  instead. FIXME:
+    literal 2:
+  */
+  if (bgy3d_getopt_test ("--from-radial-g2"))
+    bgy3d_load_g2_radial (&BHD, 2, BHD.g2, "g%d%d.txt");
+  else
+    bgy3d_load_g2 (2, BHD.g2, "g%d%d.bin");
 
   /*
    * Extract BGY3d specific things from supplied input:
