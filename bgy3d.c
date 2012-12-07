@@ -370,7 +370,7 @@ void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
 }
 
 
-void bgy3d_read_g1 (int m, Vec g[m], const char *format)
+void bgy3d_read_g1 (int m, const Vec g[m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
   for (int i = 0; i < m; i++)
