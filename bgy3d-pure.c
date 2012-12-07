@@ -1426,22 +1426,23 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
 }
 
 
-void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g,
-                                   Vec t,
-                                   Vec dg)
+#ifdef INTRA1
+/*
+  Vec t is intent(out).
+  Vec dg is intent(out).
+*/
+static void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g,
+                                          Vec t,
+                                          Vec dg)
 {
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg);
 
   safe_pointwise_divide (t, g, dg, NORM_REG);
 }
-
-/*
-  Vec t is intent(out).
-  Vec dg is intent(out).
-*/
-void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
-                                     Vec t,       /* intent(out) */
-                                     Vec dg)      /* intent(out) */
+#else
+static void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
+                                            Vec t,  /* intent(out) */
+                                            Vec dg) /* intent(out) */
 {
   /* Vec dg, isintent(out) here: */
   Compute_dg_H2O_normalization_intra (BHD, gc, rc, dg);
@@ -1452,6 +1453,7 @@ void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g,
 
   bgy3d_boundary_set (BHD, dg, 1.0);
 }
+#endif
 
 void bgy3d_solve_normalization (const State *BHD,
                                 Vec gc_fft, /* intent(in) */

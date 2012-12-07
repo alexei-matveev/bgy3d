@@ -42,11 +42,6 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
 void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
                                          Vec dg);
 
-void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g, Vec t,
-                                   Vec dg);
-void Solve_NormalizationH2O_smallII (const State *BHD, Vec gc, real rc, Vec g, Vec t,
-                                     Vec dg);
-
 void bgy3d_solve_normalization (const State *BHD,
                                 Vec gc_fft, /* complex, intent(in) */
                                 real rc,
