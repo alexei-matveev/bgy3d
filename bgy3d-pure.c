@@ -326,7 +326,7 @@ void ComputeH2O_g (Vec g, Vec g0, Vec dg)
     }
 
   VecRestoreArray (g, &g_vec);
-  VecRestoreArray (g, &g0_vec);
+  VecRestoreArray (g0, &g0_vec);
   VecRestoreArray (dg, &dg_vec);
 }
 
