@@ -306,29 +306,33 @@ real Coulomb_grad( real r, real rx, real q2)
     return re;
 }
 
-/* g := exp[-(g0 + dg)], with a sanity check: */
-void ComputeH2O_g (Vec g, Vec g0, Vec dg)
+/* g := exp[-(u0 + du)], with a sanity check: */
+void ComputeH2O_g (Vec g, Vec u0, Vec du)
 {
   int local_size;
-  PetscScalar *g_vec, *dg_vec, *g0_vec;
+  PetscScalar *g_, *du_, *u0_;
 
-  VecGetArray (g, &g_vec);
-  VecGetArray (g0, &g0_vec);
-  VecGetArray (dg, &dg_vec);
+  VecGetArray (g, &g_);
+  VecGetArray (u0, &u0_);
+  VecGetArray (du, &du_);
 
   VecGetLocalSize (g, &local_size);
 
   for (int i = 0; i < local_size; i++)
     {
-      real k = - g0_vec[i] - dg_vec[i];
-      g_vec[i] = exp(k);
+      real u_i = u0_[i] + du_[i];
+      real g_i = exp(-u_i);
 
-      assert(!isinf(g_vec[i]) && !isnan(g_vec[i]));
+      assert (g_i >= 0.0);
+      assert (!isinf (g_i));
+      assert (!isnan (g_i));
+
+      g_[i] = g_i;
     }
 
-  VecRestoreArray (g, &g_vec);
-  VecRestoreArray (g0, &g0_vec);
-  VecRestoreArray (dg, &dg_vec);
+  VecRestoreArray (g, &g_);
+  VecRestoreArray (u0, &u0_);
+  VecRestoreArray (du, &du_);
 }
 
 void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
