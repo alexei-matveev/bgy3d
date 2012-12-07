@@ -165,21 +165,17 @@ typedef struct State
      entries are: sigma, epsilon and charge product. */
   real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3];
 
-  /*
-   * The solute  field for  each of the  two solvent sites  (scaled by
-   * inverse  temperature beta)  is initially  put into  the following
-   * array:
-   */
-  Vec g_ini[2];                 /* Short-range  force   field  of  the
-                                   solute   for  H   and  O   in  that
-                                   order. */
-
   real rhos[2];                 /* Site specific density.  Computed as
                                    a solvent  density rho times number
                                    of   sites  of   that  type   in  a
                                    solvent. */
 
-  Vec gHO_ini;                  /* used for pure solvent only */
+  /*
+   The short-range solvent site-site  potentials for each pair (scaled
+   by inverse  temperature beta) is  initially put into  the following
+   array:
+   */
+  Vec u_ini[2][2];              /* used for pure solvent only */
 
   /*
     Parallel FFT.  These are the complex vectors to store FFT images:

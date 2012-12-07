@@ -75,9 +75,10 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
   const DA da = BHD->da;         /* shorter alias */
 
   /* Create global vectors */
-  DACreateGlobalVector(da, &BHD->g_ini[0]);
-  DACreateGlobalVector(da, &BHD->g_ini[1]);
-  DACreateGlobalVector(da, &BHD->gHO_ini);
+  DACreateGlobalVector (da, &BHD->u_ini[0][0]);
+  DACreateGlobalVector (da, &BHD->u_ini[1][1]);
+  DACreateGlobalVector (da, &BHD->u_ini[0][1]);
+  BHD->u_ini[1][0] = BHD->u_ini[0][1];
 
   DACreateGlobalVector(da, &BHD->u2[0][0]);
   DACreateGlobalVector(da, &BHD->u2[1][1]);
@@ -142,9 +143,9 @@ static void BGY3dH2OData_free(State *BHD)
     for (int j = 0; j <= i; j++)
       VecDestroy (BHD->u2_fft[i][j]);
 
-  VecDestroy(BHD->g_ini[0]);
-  VecDestroy(BHD->g_ini[1]);
-  VecDestroy(BHD->gHO_ini);
+  VecDestroy (BHD->u_ini[0][0]);
+  VecDestroy (BHD->u_ini[1][1]);
+  VecDestroy (BHD->u_ini[0][1]);
   VecDestroy(BHD->u2[0][0]);
   VecDestroy(BHD->u2[1][1]);
   VecDestroy(BHD->u2[0][1]);
@@ -524,9 +525,9 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
       VecSet(BHD->F_l[1][1][dim],0.0);
       VecSet(BHD->F_l[0][1][dim],0.0);
     }
-  VecSet(BHD->g_ini[0], 0.0);
-  VecSet(BHD->g_ini[1], 0.0);
-  VecSet(BHD->gHO_ini, 0.0);
+  VecSet (BHD->u_ini[0][0], 0.0);
+  VecSet (BHD->u_ini[1][1], 0.0);
+  VecSet (BHD->u_ini[0][1], 0.0);
 
   /*********************************************/
   /* Compute fft from Coulomb potential (long) */
@@ -553,9 +554,9 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
 
   /**********************************************/
 
-  DAVecGetArray(da, BHD->g_ini[0], &gHini_vec);
-  DAVecGetArray(da, BHD->g_ini[1], &gOini_vec);
-  DAVecGetArray(da, BHD->gHO_ini, &gHOini_vec);
+  DAVecGetArray (da, BHD->u_ini[0][0], &gHini_vec);
+  DAVecGetArray (da, BHD->u_ini[1][1], &gOini_vec);
+  DAVecGetArray (da, BHD->u_ini[0][1], &gHOini_vec);
   DAVecGetArray(da, BHD->c2[0][0], &cH_vec);
   DAVecGetArray(da, BHD->c2[1][1], &cO_vec);
   DAVecGetArray(da, BHD->c2[0][1], &cHO_vec);
@@ -673,9 +674,9 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
             }
         }
 
-  DAVecRestoreArray(da, BHD->g_ini[0], &gHini_vec);
-  DAVecRestoreArray(da, BHD->g_ini[1], &gOini_vec);
-  DAVecRestoreArray(da, BHD->gHO_ini, &gHOini_vec);
+  DAVecRestoreArray (da, BHD->u_ini[0][0], &gHini_vec);
+  DAVecRestoreArray (da, BHD->u_ini[1][1], &gOini_vec);
+  DAVecRestoreArray (da, BHD->u_ini[0][1], &gHOini_vec);
   DAVecRestoreArray(da, BHD->c2[0][0], &cH_vec);
   DAVecRestoreArray(da, BHD->c2[1][1], &cO_vec);
   DAVecRestoreArray(da, BHD->c2[0][1], &cHO_vec);
@@ -1412,9 +1413,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       }
 #endif
 
-  g0[0][0] = BHD->g_ini[0];
-  g0[1][1] = BHD->g_ini[1];
-  g0[0][1] = BHD->gHO_ini;
+  g0[0][0] = BHD->u_ini[0][0];
+  g0[1][1] = BHD->u_ini[1][1];
+  g0[0][1] = BHD->u_ini[0][1];
 
   /* set initial guess*/
   VecSet(dg[0][0],0);
@@ -1798,9 +1799,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       }
 #endif
 
-  g0[0][0] = BHD->g_ini[0];
-  g0[1][1] = BHD->g_ini[1];
-  g0[0][1] = BHD->gHO_ini;
+  g0[0][0] = BHD->u_ini[0][0];
+  g0[1][1] = BHD->u_ini[1][1];
+  g0[0][1] = BHD->u_ini[0][1];
 
   /* set initial guess*/
   VecSet(dg[0][0],0);
