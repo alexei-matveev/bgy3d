@@ -2016,15 +2016,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
 
-  /* save g to binary file */
+  /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-      bgy3d_save_vec ("dg00.bin", dg[0][0]);
-      bgy3d_save_vec ("dg11.bin", dg[1][1]);
-      bgy3d_save_vec ("dg01.bin", dg[0][1]);
-      PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-    }
+    bgy3d_save_g2 (2, dg, "dg%d%d.bin");
 
   /* Save g2[][] to binary files: */
   bgy3d_save_g2 (2, g, "g%d%d.bin");
@@ -2661,15 +2655,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   bgy3d_save_vec_ascii (nameHO, g[0][1]);
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
-  /* save g to binary file */
+  /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-      bgy3d_save_vec ("dg00.bin", dg[0][0]);
-      bgy3d_save_vec ("dg11.bin", dg[1][1]);
-      bgy3d_save_vec ("dg01.bin", dg[0][1]);
-      PetscPrintf(PETSC_COMM_WORLD,"done.\n");
-    }
+    bgy3d_save_g2 (2, dg, "dg%d%d.bin");
 
   /* Save g2[][] to binary files: */
   bgy3d_save_g2 (2, g, "g%d%d.bin");
