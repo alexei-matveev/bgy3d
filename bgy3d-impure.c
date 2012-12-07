@@ -619,7 +619,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
   Vec du[m], du_acc, work;
-  Vec ve;            /* ve for solvent electrostaic potential field */
   PetscScalar du_norm[m];
   int namecount = 0;
 
@@ -727,7 +726,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   DACreateGlobalVector (BHD.da, &work);
   DACreateGlobalVector (BHD.da, &t_vec); /* used for all sites */
   DACreateGlobalVector (BHD.da, &uc);    /* common for all sites */
-  DACreateGlobalVector (BHD.da, &ve); /* solvent electrostatic potential */
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -1084,12 +1082,24 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
     } /* damp loop */
 
-  /* This fills Vec ve with solvent electrostatic potential: */
-  bgy3d_solvent_field (&BHD, m, solvent, g, ve);
+  /*
+    Compute, and eveutually  (when Context** v is not  NULL) return to
+    the  caller  the  iterator  over electrostatic  potential  of  the
+    solvent:
+  */
+  {
+    Vec ve;                 /* solvent electrostaic potential field */
+    DACreateGlobalVector (BHD.da, &ve);
 
-  /* Optionally, return the iterator over the solvent field: */
-  if (v)
-    *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
+    /* This fills Vec ve with solvent electrostatic potential: */
+    bgy3d_solvent_field (&BHD, m, solvent, g, ve);
+
+    /* Optionally, return the iterator over the solvent field: */
+    if (v)
+      *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
+
+    VecDestroy (ve);            /* yes, we do! */
+  }
 
   /* Clean up and exit ... */
   VecDestroy (du_acc_fft);
@@ -1112,7 +1122,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
-  VecDestroy (ve);              /* yes, we do! */
 
   finalize_state (&BHD);
 }
