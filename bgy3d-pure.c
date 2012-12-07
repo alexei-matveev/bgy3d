@@ -1578,11 +1578,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecSet(dg[1][1],0);
   VecSet(dg[0][1],0);
 
-/*   VecSetRandom_H2O(dg[0][0],1.0); */
-/*   VecSetRandom_H2O(dg[1][1],1.0); */
-/*   VecSetRandom_H2O(dg[0][1],1.0); */
-
-
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
     {
@@ -2146,11 +2141,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecSet(dg[0][0],0);
   VecSet(dg[1][1],0);
   VecSet(dg[0][1],0);
-
-/*   VecSetRandom_H2O(dg[0][0],1.0); */
-/*   VecSetRandom_H2O(dg[1][1],1.0); */
-/*   VecSetRandom_H2O(dg[0][1],1.0); */
-
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
