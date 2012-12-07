@@ -290,8 +290,12 @@ static void ReadPairDistribution (const State *BHD, const char *filename, Vec g2
 }
 
 
-/* Was used for CS2 where the g2 comes from MM simulations: */
-void bgy3d_load_g2_radial (const State *BHD,
+/*
+  Was  used  for CS2  where  the g2  comes  from  MM simulations.   By
+  convention bgy3d_read_*  expects the storage  for the vectors  to be
+  allocated.
+*/
+void bgy3d_read_g2_radial (const State *BHD,
                            int m, Vec g2[m][m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...");
@@ -317,7 +321,7 @@ void bgy3d_load_g2_radial (const State *BHD,
 
   Format is e.g. "g%d%d.bin"
 */
-void bgy3d_load_g2 (int m, Vec g2[m][m], const char *format)
+void bgy3d_read_g2 (int m, Vec g2[m][m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
   for (int i = 0; i < m; i++)
@@ -366,15 +370,14 @@ void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
 }
 
 
-void bgy3d_load_g1 (int m, Vec g[m], const char *format)
+void bgy3d_read_g1 (int m, Vec g[m], const char *format)
 {
-  assert (0);                   /* FIXME: use bgy3d_read_vec()? */
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
   for (int i = 0; i < m; i++)
     {
       char name[20];
       snprintf (name, sizeof name, format, i);
-      g[i] = bgy3d_load_vec (name); /* bgy3d_read_vec? */
+      bgy3d_read_vec (name, g[i]);
     }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }

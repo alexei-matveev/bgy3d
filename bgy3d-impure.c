@@ -78,8 +78,6 @@ static State initialize_state (const ProblemData *PD)
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* FIXME: see bgy3d_load_vec below, arent we overwriting these
-           g2 vecs? */
         DACreateGlobalVector (da, &BHD.g2[i][j]);
         BHD.g2[j][i] = BHD.g2[i][j];
       }
@@ -640,9 +638,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     literal 2:
   */
   if (bgy3d_getopt_test ("--from-radial-g2"))
-    bgy3d_load_g2_radial (&BHD, 2, BHD.g2, "g%d%d.txt");
+    bgy3d_read_g2_radial (&BHD, 2, BHD.g2, "g%d%d.txt");
   else
-    bgy3d_load_g2 (2, BHD.g2, "g%d%d.bin");
+    bgy3d_read_g2 (2, BHD.g2, "g%d%d.bin");
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -747,7 +745,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_load_g1 (m, du, "du%d.bin");
+    bgy3d_read_g1 (m, du, "du%d.bin");
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
