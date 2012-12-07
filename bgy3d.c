@@ -296,7 +296,7 @@ static void ReadPairDistribution (const State *BHD, const char *filename, Vec g2
   allocated.
 */
 void bgy3d_read_g2_radial (const State *BHD,
-                           int m, Vec g2[m][m], const char *format)
+                           int m, /* const */ Vec g2[m][m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...");
   for (int i = 0; i < m; i++)
@@ -321,7 +321,7 @@ void bgy3d_read_g2_radial (const State *BHD,
 
   Format is e.g. "g%d%d.bin"
 */
-void bgy3d_read_g2 (int m, Vec g2[m][m], const char *format)
+void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
   for (int i = 0; i < m; i++)
@@ -340,7 +340,7 @@ void bgy3d_read_g2 (int m, Vec g2[m][m], const char *format)
 
 /* Save  solvent-solvent  pair  distributions  g2[][]  to  disk.   See
    bgy3d_load_g2(). */
-void bgy3d_save_g2 (int m, Vec g2[m][m], const char *format)
+void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format)
 {
   PetscPrintf (PETSC_COMM_WORLD, "Writing binary g2 files...");
   for (int i = 0; i < m; i++)

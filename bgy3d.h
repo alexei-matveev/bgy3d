@@ -217,10 +217,10 @@ typedef struct State
 } State;
 
 void bgy3d_read_g2_radial (const State *BHD,
-                           int m, Vec g2[m][m], const char *format);
+                           int m, /* const */ Vec g2[m][m], const char *format);
 
-void bgy3d_save_g2 (int m, Vec g2[m][m], const char *format);
-void bgy3d_read_g2 (int m, Vec g2[m][m], const char *format);
+void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format);
+void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format);
 void bgy3d_save_g1 (int m, const Vec g[m], const char *format);
 void bgy3d_read_g1 (int m, const Vec g[m], const char *format);
 
