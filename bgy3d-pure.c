@@ -4,8 +4,8 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-#include "bgy3d-solvents.h"
 #include "bgy3d-solutes.h"      /* struct Site */
+#include "bgy3d-solvents.h"     /* needs Site */
 #include "bgy3d-getopt.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"

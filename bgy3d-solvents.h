@@ -216,3 +216,5 @@
 #define G   1.2 //1.2
 
 #endif
+
+void bgy3d_solvent_get (/* const char *name */ int *n, const Site **sites);

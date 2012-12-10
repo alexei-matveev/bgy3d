@@ -4,10 +4,9 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-
-#include "bgy3d-solvents.h"
+#include "bgy3d-solutes.h"      /* struct Site */
+#include "bgy3d-solvents.h"     /* needs Site */
 #include "bgy3d-getopt.h"
-#include "bgy3d-solutes.h"
 #include "bgy3d-pure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-poisson.h"      /* laplace staff */
@@ -22,19 +21,7 @@
 #include <stdbool.h>            /* bool */
 #include <complex.h>            /* after fftw.h */
 
-/*
- * These are  the two  solvent sites.  Coordinates  will not  be used.
- * Respective parameters are #defined  elsewhere. Also do not take the
- * names  of the  sites  literally.   The same  structure  is used  to
- * represent all (2-site) solvents, such as HCl.
- *
- * FIXME:  at many places  it is  assumed that  the number  of solvent
- * sites is exactly two:
- */
-static const Site solvent[] =
-  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH below */
-   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
-
+/* FIXME: bgy3d-solvents.h pollutes the namespace: */
 #undef sH
 #undef eH
 #undef qH
@@ -599,8 +586,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                               Vec g[2],    /* intent(out) */
                               Context **v) /* intent(out) */
 {
-  /* Number of solvent sites: */
-  const int m = sizeof (solvent) / sizeof (Site);
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
+
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent);
 
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */

@@ -16,11 +16,11 @@
  */
 
 #include "bgy3d.h"
-#include "bgy3d-solvents.h"
 #include "bgy3d-pure.h"         /* Coulomb_short() */
 #include "bgy3d-getopt.h"
 #include "bgy3d-poisson.h"      /* bgy3d_poisson() */
-#include "bgy3d-solutes.h"
+#include "bgy3d-solutes.h"      /* struct Site */
+#include "bgy3d-solvents.h"     /* #define G for gf_density() */
 
 /* Solute is  isomorphic to an  array of sites.  Consider  handling it
    like that in the code.   Structs with flexible array members may be
