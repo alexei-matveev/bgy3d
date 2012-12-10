@@ -161,10 +161,6 @@ typedef struct State
   Vec c2[2][2];                 /* exp(-  beta  * LJ_repulsive(i,  j),
                                    used only for pure solvent. */
 
-  /* Pair  interaction parameters.  Not used  with  impurities.  Array
-     entries are: sigma, epsilon and charge product. */
-  real LJ_paramsH[3], LJ_paramsO[3], LJ_paramsHO[3];
-
   real rhos[2];                 /* Site specific density.  Computed as
                                    a solvent  density rho times number
                                    of   sites  of   that  type   in  a

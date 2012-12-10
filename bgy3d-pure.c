@@ -29,28 +29,6 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
 
   BHD = (State*) malloc(sizeof(*BHD));
 
-  /****************************************************/
-  /* set Lennard-Jones and Coulomb parameters */
-  /****************************************************/
-
-  /* water hydrogen */
-  BHD->LJ_paramsH[0] = eH;  /* epsilon  */
-  BHD->LJ_paramsH[1] = sH;  /* sigma    */
-  BHD->LJ_paramsH[2] = SQR(qH); /* charge product */
-
-  /* water oxygen */
-  BHD->LJ_paramsO[0] = eO;  /* epsilon  */
-  BHD->LJ_paramsO[1] = sO;  /* sigma    */
-  BHD->LJ_paramsO[2] = SQR(qO); /* charge product */
-
-  /* water O-H mixed parameters */
-  BHD->LJ_paramsHO[0] = sqrt(eH*eO);  /* epsilon  */
-  BHD->LJ_paramsHO[1] = 0.5*(sH+sO);  /* sigma    */
-  BHD->LJ_paramsHO[2] = qH*qO; /* charge product */
-
-  /****************************************************/
-
-
   BHD->PD = PD;
 
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
