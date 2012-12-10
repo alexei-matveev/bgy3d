@@ -502,40 +502,37 @@ static void pair (State *BHD,
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          /* set force vectors */
+        for (int k = 0; k < 1; k++) /* FIXME: one of 27 unit cells */
+          {
+            /* set force vectors */
+            FOR_DIM
+              r[dim] = i[dim] * h[dim] + interval[0] + periodic[k][dim];
 
-          for (int k = 0; k < 1; k++)
-            {
-              FOR_DIM
-                r[dim] = i[dim] * h[dim] + interval[0] + periodic[k][dim];
+            r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-              r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
+            /* Lennard-Jones */
+            u_ini_[i[2]][i[1]][i[0]] +=
+              damp_LJ * beta * Lennard_Jones (r_s, epsilon, sigma);
 
-              /* Lennard-Jones */
-              u_ini_[i[2]][i[1]][i[0]] +=
-                damp_LJ * beta * Lennard_Jones (r_s, epsilon, sigma);
+            /* Coulomb short */
+            u_ini_[i[2]][i[1]][i[0]] +=
+              damp * beta * Coulomb_short (r_s, q2);
 
-              /* Coulomb short */
-              u_ini_[i[2]][i[1]][i[0]] +=
-                damp * beta * Coulomb_short (r_s, q2);
+            FOR_DIM
+              {
+                /* Lennard-Jones */
+                f_short_[dim][i[2]][i[1]][i[0]] +=
+                  damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma);
 
-              FOR_DIM
-                {
-                  /* Lennard-Jones */
-                  f_short_[dim][i[2]][i[1]][i[0]] +=
-                    damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma);
+                /* Coulomb short */
+                f_short_[dim][i[2]][i[1]][i[0]] +=
+                  damp * Coulomb_short_grad (r_s, r[dim], q2);
 
-                  /* Coulomb short */
-                  f_short_[dim][i[2]][i[1]][i[0]] +=
-                    damp * Coulomb_short_grad (r_s, r[dim], q2);
-
-                  /* deterministic correction */
-                  c2_[i[2]][i[1]][i[0]] =
-                    exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
-                }
-            }
-        }
+                /* deterministic correction */
+                c2_[i[2]][i[1]][i[0]] =
+                  exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
+              }
+          }
 
   DAVecRestoreArray (da, u_ini, &u_ini_);
   DAVecRestoreArray (da, c2, &c2_);
