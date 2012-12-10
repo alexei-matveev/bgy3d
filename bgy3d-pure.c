@@ -1277,9 +1277,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   if (r_HH > 0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
 
-  /* Compute initial data */
-  RecomputeInitialData (BHD, 1.0, 1.0);
-
   /*
    * Extract BGY3d specific things from supplied input:
    */
@@ -1350,27 +1347,25 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   VecSet(dg_new,0.0);
 
-  for( damp=damp_start; damp <=1; damp+=0.1)
+  for (damp = damp_start; damp <= 1; damp += 0.1)
     {
-      if(damp==-0.01)
+      if (damp == -0.01)
         {
-          damp_LJ=0;
+          damp_LJ = 0.0;
           RecomputeInitialData (BHD, 0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
-      else if(damp==0.0)
+      else if (damp == 0.0)
         {
-          damp_LJ=1.0;
+          damp_LJ = 1.0;
           RecomputeInitialData (BHD, 0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
         {
-          damp_LJ=1.0;
-          count+=1.0;
+          damp_LJ = 1.0;
+          count += 1.0;
           RecomputeInitialData (BHD, (damp), 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
+      PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
@@ -1661,9 +1656,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       exit(1);
     }
 
-  /* Compute initial data */
-  RecomputeInitialData (BHD, 1.0, 1.0);
-
   BHD->rhos[0] = 2.*BHD->rhos[0];
 
   /*
@@ -1736,27 +1728,25 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   VecSet(dg_new,0.0);
 
-  for( damp=damp_start; damp <=damp_start; damp+=0.1)
+  for (damp = damp_start; damp <= damp_start; damp += 0.1)
     {
-      if(damp==-0.01)
+      if (damp == -0.01)
         {
-          damp_LJ=0;
+          damp_LJ = 0.0;
           RecomputeInitialData (BHD, 0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
-      else if(damp==0.0)
+      else if (damp == 0.0)
         {
-          damp_LJ=1.0;
+          damp_LJ = 1.0;
           RecomputeInitialData (BHD, 0, 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
       else
         {
-          damp_LJ=1.0;
-          count+=1.0;
+          damp_LJ = 1.0;
+          count += 1.0;
           RecomputeInitialData (BHD, (damp), 1.0);
-          PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
         }
+      PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
       bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
