@@ -55,21 +55,16 @@ static State initialize_state (const ProblemData *PD)
 #error "Need BHD.da_dmmg"
 #endif
 
-  const DA da = BHD.da;         /* shorter alias */
-
-  /*
-   * Create global vectors
-   */
-
+  /* Create global scratch vectors: */
   FOR_DIM
-    DACreateGlobalVector (da, &BHD.v[dim]);
+    DACreateGlobalVector (BHD.da, &BHD.v[dim]); /* real */
 
-  /* Allocate memory for fft */
+  /* Complex  vectors for  k-space representations.   These  three are
+     used by ComputeFFTfromCoulomb(): */
   FOR_DIM
-    DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* used by ComputeFFTfromCoulomb() */
+    DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* complex */
 
-  /* Complex scratch vector: */
-  DACreateGlobalVector (BHD.dc, &BHD.fft_scratch);
+  DACreateGlobalVector (BHD.dc, &BHD.fft_scratch); /* complex */
 
   return BHD;
 }
