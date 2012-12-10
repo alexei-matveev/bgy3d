@@ -140,9 +140,9 @@ static void  pair (State *BHD,
     Sort-range  potential/force is  specific  for each  pair, on  the
     other hand:
   */
-  PetscScalar ***fs_vec[3];
+  PetscScalar ***f_short_[3];
   FOR_DIM
-    DAVecGetArray (da, f_short[dim], &fs_vec[dim]);
+    DAVecGetArray (da, f_short[dim], &f_short_[dim]);
 
   /* Get local portion of the grid */
   int x[3], n[3], i[3];
@@ -162,13 +162,13 @@ static void  pair (State *BHD,
 
           /* Lennard-Jones + Coulomb short */
           FOR_DIM
-            fs_vec[dim][i[2]][i[1]][i[0]] =
+            f_short_[dim][i[2]][i[1]][i[0]] =
             Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
             Coulomb_short_grad (r_s, r[dim], q2);
         }
 
   FOR_DIM
-    DAVecRestoreArray (da, f_short[dim], &fs_vec[dim]);
+    DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
 
   /*
     Compute FFT(F * g^2).
