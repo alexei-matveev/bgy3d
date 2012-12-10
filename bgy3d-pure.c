@@ -1352,17 +1352,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       if (damp == -0.01)
         {
           damp_LJ = 0.0;
-          RecomputeInitialData (BHD, 0, 1.0);
-        }
-      else if (damp == 0.0)
-        {
-          damp_LJ = 1.0;
-          RecomputeInitialData (BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0.0, 1.0);
         }
       else
         {
           damp_LJ = 1.0;
-          RecomputeInitialData (BHD, (damp), 1.0);
+          RecomputeInitialData (BHD, damp, 1.0);
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
@@ -1732,17 +1727,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       if (damp == -0.01)
         {
           damp_LJ = 0.0;
-          RecomputeInitialData (BHD, 0, 1.0);
-        }
-      else if (damp == 0.0)
-        {
-          damp_LJ = 1.0;
-          RecomputeInitialData (BHD, 0, 1.0);
+          RecomputeInitialData (BHD, 0.0, 1.0);
         }
       else
         {
           damp_LJ = 1.0;
-          RecomputeInitialData (BHD, (damp), 1.0);
+          RecomputeInitialData (BHD, damp, 1.0);
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
