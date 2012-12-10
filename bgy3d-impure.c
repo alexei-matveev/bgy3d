@@ -28,6 +28,7 @@
 #undef sO
 #undef eO
 #undef qO
+#undef G
 
 static State initialize_state (const ProblemData *PD)
 {
