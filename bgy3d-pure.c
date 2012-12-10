@@ -1263,7 +1263,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ;
-  real aH, aHO, aO, a1=0.5, count=0.0;
+  real aH, aHO, aO, a1=0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm;
@@ -1362,7 +1362,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else
         {
           damp_LJ = 1.0;
-          count += 1.0;
           RecomputeInitialData (BHD, (damp), 1.0);
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
@@ -1638,7 +1637,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
   Vec tH, tO, tHO, tOH;
   real a=0.9, damp, damp_LJ;
-  real aH, aHO, aO, a1=0.5, count=0.0;
+  real aH, aHO, aO, a1=0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
   PetscScalar dgH_norm, dgO_norm, dgHO_norm;
@@ -1743,7 +1742,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       else
         {
           damp_LJ = 1.0;
-          count += 1.0;
           RecomputeInitialData (BHD, (damp), 1.0);
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
