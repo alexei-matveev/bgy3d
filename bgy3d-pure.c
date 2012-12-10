@@ -554,8 +554,8 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
   assert (m == 2);
 
   /* Over all pairs: */
-  for (int j = 0; j < m; j++)
-    for (int i = 0; i <= j; i++) /* FIXME: ij <=> ji */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
       {
         /* Pair interaction parameters: */
         real ff_params[3];
