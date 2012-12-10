@@ -25,9 +25,7 @@ static void normalization_intra (const State *BHD,
 
 static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
 {
-  State *BHD;
-
-  BHD = (State*) malloc(sizeof(*BHD));
+  State *BHD = (State*) malloc (sizeof (*BHD));
 
   BHD->PD = PD;
 
@@ -50,50 +48,43 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
      other arguments are intent(out): */
   bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
 
-  const DA da = BHD->da;         /* shorter alias */
-
   /* Create global vectors */
-  DACreateGlobalVector (da, &BHD->u_ini[0][0]);
-  DACreateGlobalVector (da, &BHD->u_ini[1][1]);
-  DACreateGlobalVector (da, &BHD->u_ini[0][1]);
-  BHD->u_ini[1][0] = BHD->u_ini[0][1];
-
-  DACreateGlobalVector(da, &BHD->u2[0][0]);
-  DACreateGlobalVector(da, &BHD->u2[1][1]);
-  DACreateGlobalVector(da, &BHD->u2[0][1]);
-  BHD->u2[1][0] = BHD->u2[0][1];
-
-  DACreateGlobalVector(da, &BHD->c2[0][0]);
-  DACreateGlobalVector(da, &BHD->c2[1][1]);
-  DACreateGlobalVector(da, &BHD->c2[0][1]);
-  BHD->c2[1][0] = BHD->c2[0][1];
-
-  FOR_DIM
-    {
-      DACreateGlobalVector(da, &BHD->F[0][0][dim]);
-      DACreateGlobalVector(da, &BHD->F[1][1][dim]);
-      DACreateGlobalVector(da, &BHD->F[0][1][dim]);
-      DACreateGlobalVector(da, &BHD->F_l[0][0][dim]);
-      DACreateGlobalVector(da, &BHD->F_l[1][1][dim]);
-      DACreateGlobalVector(da, &BHD->F_l[0][1][dim]);
-      DACreateGlobalVector(da, &BHD->v[dim]);
-    }
-
-  /* Allocate memory for fft */
-  FOR_DIM
-    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]);
-
-  /* Complex scratch vector. FIXME: is it used in pure code? */
-  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch);
-  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);
-
-  /* FIXME: these probably differ only by factors: */
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
       {
-        DACreateGlobalVector (BHD->dc, &BHD->u2_fft[i][j]);
+        /* FIXME: u2, u2_fft probably differ only by factors: */
+        DACreateGlobalVector (BHD->da, &BHD->u2[i][j]);
+        BHD->u2[j][i] = BHD->u2[i][j];
+
+        DACreateGlobalVector (BHD->dc, &BHD->u2_fft[i][j]); /* complex */
         BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
+
+        DACreateGlobalVector (BHD->da, &BHD->c2[i][j]);
+        BHD->c2[j][i] = BHD->c2[i][j];
+
+        DACreateGlobalVector (BHD->da, &BHD->u_ini[i][j]);
+        BHD->u_ini[j][i] = BHD->u_ini[i][j];
+
+        FOR_DIM
+          {
+            DACreateGlobalVector(BHD->da, &BHD->F[i][j][dim]);
+            BHD->F[j][i][dim] = BHD->F[i][j][dim];
+
+            DACreateGlobalVector (BHD->da, &BHD->F_l[i][j][dim]);
+            BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim];
+          }
       }
+
+  FOR_DIM
+    DACreateGlobalVector (BHD->da, &BHD->v[dim]);
+
+  /* Allocate memory for fft */
+  FOR_DIM
+    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]); /* complex */
+
+  /* Complex scratch vector. FIXME: is it used in pure code? */
+  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch); /* complex */
+  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);    /* complex */
 
   return BHD;
 }
@@ -106,42 +97,38 @@ static void BGY3dH2OData_free(State *BHD)
 
   FOR_DIM
     {
-      VecDestroy(BHD->F[0][0][dim]);
-      VecDestroy(BHD->F[1][1][dim]);
-      VecDestroy(BHD->F[0][1][dim]);
-      VecDestroy(BHD->F_l[0][0][dim]);
-      VecDestroy(BHD->F_l[1][1][dim]);
-      VecDestroy(BHD->F_l[0][1][dim]);
-      VecDestroy(BHD->v[dim]);
+      VecDestroy (BHD->v[dim]);
       VecDestroy (BHD->fg2_fft[dim]);
     }
   VecDestroy (BHD->gfg2_fft);
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      VecDestroy (BHD->u2_fft[i][j]);
+      {
+        VecDestroy (BHD->u2[i][j]);
+        VecDestroy (BHD->u2_fft[i][j]);
+        VecDestroy (BHD->u_ini[i][j]);
+        VecDestroy (BHD->c2[i][j]);
 
-  VecDestroy (BHD->u_ini[0][0]);
-  VecDestroy (BHD->u_ini[1][1]);
-  VecDestroy (BHD->u_ini[0][1]);
-  VecDestroy(BHD->u2[0][0]);
-  VecDestroy(BHD->u2[1][1]);
-  VecDestroy(BHD->u2[0][1]);
-  VecDestroy(BHD->c2[0][0]);
-  VecDestroy(BHD->c2[1][1]);
-  VecDestroy(BHD->c2[0][1]);
+        FOR_DIM
+          {
+            VecDestroy (BHD->F[i][j][dim]);
+            VecDestroy (BHD->F_l[i][j][dim]);
+          }
+      }
+
   VecDestroy (BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
   MatDestroy (BHD->M);
-  KSPDestroy(BHD->ksp);
+  KSPDestroy (BHD->ksp);
 #endif
 
   DADestroy (BHD->da);
   DADestroy (BHD->dc);
   MatDestroy (BHD->fft_mat);
 
-  free(BHD);
+  free (BHD);
 }
 
 static real LJ_repulsive(real r, real epsilon, real sigma)
