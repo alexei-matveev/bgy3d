@@ -36,12 +36,10 @@ static State initialize_state (const ProblemData *PD)
 
   BHD.PD = PD;
 
-  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  //PetscPrintf(PETSC_COMM_WORLD, "Boundary smoothing parameters : SL= %f  SR= %f\n", SL, SR);
-  //PetscPrintf(PETSC_COMM_WORLD, "ZEROPAD= %f\n", ZEROPAD);
-  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
-  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
-  /******************************/
+  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
+  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
+
   BHD.rhos[0] = PD->rho;
   BHD.rhos[1] = PD->rho;
 
@@ -587,6 +585,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
+
+  /* Show solvent/solute parameters: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+  bgy3d_sites_show ("Solute", n, solute);
 
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
