@@ -14,8 +14,8 @@
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */
 
-static real NORM_REG=1.0e-1;
-static real NORM_REG2=1.0e-2;
+static real NORM_REG = 1.0e-1;
+static real NORM_REG2 = 1.0e-2;
 
 static void normalization_intra (const State *BHD,
                                  Vec g_fft, /* complex, in */
@@ -479,7 +479,7 @@ static void pair (State *BHD,
   PetscScalar ***(f_short_[3]);
   PetscScalar ***c2_;
   real r[3], r_s, h[3], interval[2], beta, L;
-  int x[3], n[3], i[3], k;
+  int x[3], n[3], i[3];
 
   /* LJ parameters of pair interaction and charge product: */
   const real epsilon = LJ_params[0];
@@ -496,15 +496,18 @@ static void pair (State *BHD,
   L = PD->interval[1]-PD->interval[0];
   beta = PD->beta;
 
-  real periodic[27][3]={{0,0,0},{L,0,0},{-L,0,0},{0,L,0},{0,-L,0},{0,0,L},{0,0,-L},
-                       {L,L,0},{-L,L,0},{L,-L,0},{-L,-L,0},
-                       {L,L,L},{-L,L,L},{L,-L,L},{-L,-L,L},
-                       {L,L,-L},{-L,L,-L},{L,-L,-L},{-L,-L,-L},
-                       {0,L,L},{0,-L,L},{0,L,-L},{0,-L,-L},
-                       {L,0,L},{-L,0,L},{L,0,-L},{-L,0,-L}};
+  /* FIXME: only periodic[0] == {0.0, 0.0, 0.0} appears to be used: */
+  real periodic[27][3] = \
+    {{0, 0, 0},
+     {L, 0, 0}, {-L, 0, 0}, {0, L, 0}, {0, -L, 0}, {0, 0, L}, {0, 0, -L},
+     {L, L, 0}, {-L, L, 0}, {L, -L, 0}, {-L, -L, 0},
+     {L, L, L}, {-L, L, L}, {L, -L, L}, {-L, -L, L},
+     {L, L, -L}, {-L, L, -L}, {L, -L, -L}, {-L, -L, -L},
+     {0, L, L}, {0, -L, L}, {0, L, -L}, {0, -L, -L},
+     {L, 0, L}, {-L, 0, L}, {L, 0, -L}, {-L, 0, -L}};
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
    FOR_DIM
@@ -523,56 +526,49 @@ static void pair (State *BHD,
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->fg2_fft, q2 * damp);
 
   FOR_DIM
-    {
-      VecAXPY(f_short[dim], 1.0, f_long[dim]);
-    }
+    VecAXPY (f_short[dim], 1.0, f_long[dim]);
 
   DAVecGetArray (da, u_ini, &u_ini_);
-  DAVecGetArray(da, c2, &c2_);
+  DAVecGetArray (da, c2, &c2_);
   FOR_DIM
-    {
-      DAVecGetArray(da, f_short[dim], &f_short_[dim]);
-    }
+    DAVecGetArray (da, f_short[dim], &f_short_[dim]);
 
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
           /* set force vectors */
 
-          for(k=0; k<1; k++)
+          for (int k = 0; k < 1; k++)
             {
+              FOR_DIM
+                r[dim] = i[dim] * h[dim] + interval[0] + periodic[k][dim];
 
-          FOR_DIM
-            r[dim] = i[dim]*h[dim]+interval[0]+periodic[k][dim];
+              r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-
-          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-
-          /* Lennard-Jones */
-          u_ini_[i[2]][i[1]][i[0]] +=
-            damp_LJ * beta* Lennard_Jones( r_s, epsilon, sigma);
-
-          /* Coulomb short */
-          u_ini_[i[2]][i[1]][i[0]] +=
-            damp*beta* Coulomb_short( r_s, q2);
-
-           FOR_DIM
-            {
               /* Lennard-Jones */
-              f_short_[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad( r_s, r[dim], epsilon, sigma);
+              u_ini_[i[2]][i[1]][i[0]] +=
+                damp_LJ * beta * Lennard_Jones (r_s, epsilon, sigma);
 
               /* Coulomb short */
-              f_short_[dim][i[2]][i[1]][i[0]] +=
-                damp * Coulomb_short_grad( r_s, r[dim], q2);
+              u_ini_[i[2]][i[1]][i[0]] +=
+                damp * beta * Coulomb_short (r_s, q2);
 
-              /* deterministic correction */
-              c2_[i[2]][i[1]][i[0]] =
-                exp(-beta* LJ_repulsive( r_s, epsilon, sigma));
-            }
+              FOR_DIM
+                {
+                  /* Lennard-Jones */
+                  f_short_[dim][i[2]][i[1]][i[0]] +=
+                    damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma);
+
+                  /* Coulomb short */
+                  f_short_[dim][i[2]][i[1]][i[0]] +=
+                    damp * Coulomb_short_grad (r_s, r[dim], q2);
+
+                  /* deterministic correction */
+                  c2_[i[2]][i[1]][i[0]] =
+                    exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
+                }
             }
         }
 
