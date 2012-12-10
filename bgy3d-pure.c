@@ -583,30 +583,30 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
   PetscPrintf (PETSC_COMM_WORLD,
                "Recomputing initial data with damping factor %f (damp_LJ=%f)\n",
                damp, damp_LJ);
-  int i, j;
-  i = 0;
-  j = 1;
-  pair (BHD, BHD->LJ_paramsHO,
-        BHD->F[i][j], BHD->F_l[i][j],
-        BHD->u_ini[i][j], BHD->c2[i][j],
-        BHD->u2[i][j], BHD->u2_fft[i][j],
-        damp, damp_LJ);
 
-  i = 0;
-  j = 0;
-  pair (BHD, BHD->LJ_paramsH,
-        BHD->F[i][j], BHD->F_l[i][j],
-        BHD->u_ini[i][j], BHD->c2[i][j],
-        BHD->u2[i][j], BHD->u2_fft[i][j],
-        damp, damp_LJ);
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
 
-  i = 1;
-  j = 1;
-  pair (BHD, BHD->LJ_paramsO,
-        BHD->F[i][j], BHD->F_l[i][j],
-        BHD->u_ini[i][j], BHD->c2[i][j],
-        BHD->u2[i][j], BHD->u2_fft[i][j],
-        damp, damp_LJ);
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent);
+  assert (m == 2);
+
+  /* Over all pairs: */
+  for (int j = 0; j < m; j++)
+    for (int i = 0; i <= j; i++) /* FIXME: ij <=> ji */
+      {
+        /* Pair interaction parameters: */
+        real ff_params[3];
+        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
+        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
+        ff_params[2] = solvent[i].charge * solvent[j].charge;
+
+        pair (BHD, ff_params,
+              BHD->F[i][j], BHD->F_l[i][j],
+              BHD->u_ini[i][j], BHD->c2[i][j],
+              BHD->u2[i][j], BHD->u2_fft[i][j],
+              damp, damp_LJ);
+      }
 }
 
 /* All vectors are complex here. No side effects. */
