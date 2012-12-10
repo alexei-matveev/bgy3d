@@ -218,3 +218,4 @@
 #endif
 
 void bgy3d_solvent_get (/* const char *name */ int *n, const Site **sites);
+void bgy3d_sites_show (const char *name, int m, const Site sites[m]);

@@ -35,3 +35,26 @@ void bgy3d_solvent_get (/* const char *name */ int *n, const Site **sites)
   *n = sizeof (solvent) / sizeof (Site);
   *sites = solvent;
 }
+
+/*
+  Prints a table like this:
+
+Solvent:
+#       site    ε               σ                q
+1       h       0.039710        2.735000         0.200000
+2       o       0.514340        3.353000        -0.200000
+*/
+void bgy3d_sites_show (const char *name, int m, const Site sites[m])
+{
+  PetscPrintf (PETSC_COMM_WORLD, "%s:\n", name);
+  PetscPrintf (PETSC_COMM_WORLD, "#\tsite\tε       \tσ       \t q\n"); /* unicode here! */
+  for (int i = 0; i < m; i++)
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "%d\t%-4s\t%f\t%f\t% f\n",
+                 i + 1,
+                 sites[i].name,
+                 sites[i].epsilon,
+                 sites[i].sigma,
+                 sites[i].charge);
+}
+
