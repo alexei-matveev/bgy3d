@@ -17,6 +17,14 @@
 static real NORM_REG = 1.0e-1;
 static real NORM_REG2 = 1.0e-2;
 
+/* FIXME: bgy3d-solvents.h pollutes the namespace: */
+#undef sH
+#undef eH
+#undef qH
+#undef sO
+#undef eO
+#undef qO
+
 static void normalization_intra (const State *BHD,
                                  Vec g_fft, /* complex, in */
                                  real rab,
@@ -29,16 +37,10 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
 
   BHD->PD = PD;
 
-  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  PetscPrintf(PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG= %e\n", NORM_REG);
-  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
-  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
-  /******************************/
-  PetscPrintf(PETSC_COMM_WORLD,"--------------------------------\n");
-  PetscPrintf(PETSC_COMM_WORLD,"eps1= %f \t eps2= %f\n", eH, eO);
-  PetscPrintf(PETSC_COMM_WORLD,"sig1= %f \t sig2= %f\n", sH, sO);
-  PetscPrintf(PETSC_COMM_WORLD,"q1  = %f \t q2  = %f\n", qH, qO);
-  PetscPrintf(PETSC_COMM_WORLD,"--------------------------------\n");
+  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG= %e\n", NORM_REG);
+  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
+  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
   BHD->rhos[0] = PD->rho; //2.*PD->rho;
   BHD->rhos[1] = PD->rho;
@@ -551,7 +553,11 @@ static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
 
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
-  assert (m == 2);
+
+  /* Original code used to print solvent params: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+
+  assert (m == 2);          /* FIXME: State was allocated for m = 2 */
 
   /* Over all pairs: */
   for (int i = 0; i < m; i++)
