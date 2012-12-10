@@ -502,11 +502,11 @@ static void pair (State *BHD,
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        for (int k = 0; k < 1; k++) /* FIXME: one of 27 unit cells */
+        for (int cell = 0; cell < 1; cell++) /* FIXME: one of 27 unit cells */
           {
             /* set force vectors */
             FOR_DIM
-              r[dim] = i[dim] * h[dim] + interval[0] + periodic[k][dim];
+              r[dim] = i[dim] * h[dim] + interval[0] + periodic[cell][dim];
 
             r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
