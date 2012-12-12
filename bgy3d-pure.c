@@ -31,7 +31,7 @@ static void normalization_intra (const State *BHD,
                                  Vec work, /* complex, work */
                                  Vec dg);  /* real, out */
 
-static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
+static State* initialize_state (const ProblemData *PD)
 {
   State *BHD = (State*) malloc (sizeof (*BHD));
 
@@ -93,7 +93,7 @@ static State *BGY3dH2OData_Pair_malloc (const ProblemData *PD)
 
 
 
-static void BGY3dH2OData_free(State *BHD)
+static void finalize_state (State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
@@ -1236,7 +1236,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = BGY3dH2OData_Pair_malloc (PD);
+  BHD = initialize_state (PD);
 
   if (r_HH > 0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
@@ -1582,7 +1582,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tHO);
   VecDestroy(tOH);
 
-  BGY3dH2OData_free(BHD);
+  finalize_state (BHD);
 
   return PETSC_NULL;
 }
@@ -1606,7 +1606,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = BGY3dH2OData_Pair_malloc (PD);
+  BHD = initialize_state (PD);
 
   if (r_HH < 0)
     {
@@ -1960,7 +1960,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tHO);
   VecDestroy(tOH);
 
-  BGY3dH2OData_free(BHD);
+  finalize_state (BHD);
 
   return PETSC_NULL;
 }
