@@ -458,36 +458,6 @@ static real ComputeCharge (const ProblemData *PD,
   return total;
 }
 
-/*
- * Does the mixing:
- *
- *     dg := a * dg_new + (1 - a) * dg
- *
- * Returns the norm of the difference |dg_new - dg|.
- */
-static real mix (Vec dg, Vec dg_new, real a, Vec work)
-{
-  real norm;
-
-  /* Move dg */
-  VecCopy(dg, work);
-
-  /* dg' = a * dg_new + (1 - a) * dg */
-  VecAXPBY(dg, a, (1-a), dg_new);
-
-  /* work = dg - dg' = a * (dg - dg_new)
-
-     That is why the divison by "a" below */
-  VecAXPY(work, -1.0, dg);
-
-  /* Norm of the change: */
-  VecNorm(work, NORM_INFINITY, &norm);
-
-  /* FIXME: why not computing |dg_new - dg| directly? Would be valid
-     also for a == 0: */
-  return norm / a;
-}
-
 /* Returns most  negative number for  zero sized arrays.   Will return
    NaN if there is any in the array. */
 static double maxval (size_t n, const double x[n])
@@ -955,12 +925,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               bgy3d_impose_laplace_boundary (&BHD, du_acc, t_vec, x_lapl[i]);
 
               /*
-                Mix du and du_new with a fixed ration "a":
+                Mix du and du_new with a fixed ratio "a":
 
                   du' = a * du_new + (1 - a) * du
                   norm = |du_new - du|
-               */
-              du_norm[i] = mix (du[i], du_acc, a, work); /* last arg is a temp */
+
+                last arg is a temp
+              */
+              du_norm[i] = bgy3d_vec_mix (du[i], du_acc, a, work);
             } /* over sites i */
 
           /*
