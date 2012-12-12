@@ -302,58 +302,6 @@ void ComputeH2O_g (Vec g, Vec u0, Vec du)
   VecRestoreArray (du, &du_);
 }
 
-void Smooth_Function(State *BHD, Vec g, real RL, real RR, real shift)
-{
-  DA da;
-  int x[3], n[3], i[3];
-  PetscScalar ***g_vec;
-  real r[3], r_s, h[3], interval[2], s, r_rl_2, rr_rl_2r, rr_rl_3;
-
-  const ProblemData *PD = BHD->PD;
-  da = BHD->da;
-
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  interval[0] = PD->interval[0];
-
-  /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-
-  DAVecGetArray(da, g, &g_vec);
-   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-        {
-
-/*        if(i[2]==0 || i[2]==n[2]-1 || i[1]==0 || i[1]==n[1]-1 ||  */
-/*           i[0]==0 || i[0]==n[0]-1) */
-/*          g_vec[i[2]][i[1]][i[0]]=0; */
-
-          FOR_DIM
-            r[dim] = i[dim]*h[dim]+interval[0];
-          r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-
-          if( r_s > RR)
-            s=0;
-          else if ( r_s > RL)
-            {
-              r_rl_2 = SQR(r_s-RL);
-              rr_rl_2r = (3.*RR-RL-2.*r_s);
-              rr_rl_3 = pow(RR-RL,3);
-
-              s= 1. - r_rl_2*rr_rl_2r/rr_rl_3;
-
-            }
-          else
-            s=1;
-          g_vec[i[2]][i[1]][i[0]] = s* (g_vec[i[2]][i[1]][i[0]]-shift) + shift;
-        }
-  DAVecRestoreArray(da, g, &g_vec);
-}
-
 
 /*
   Long range  pair potential Vec uc  is intent(out) here,  same as its

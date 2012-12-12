@@ -10,8 +10,6 @@ real Coulomb_grad (real r, real rx, real q2);
 
 void ComputeH2O_g (Vec g, Vec g0, Vec dg);
 
-void Smooth_Function (State *BHD, Vec g, real RL, real RR, real shift);
-
 void ComputeFFTfromCoulomb (State *BHD,
                             Vec uc, Vec fc[3], /* intent(out) */
                             Vec uc_fft,    /* complex, intent(out) */
