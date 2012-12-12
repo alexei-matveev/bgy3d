@@ -1240,9 +1240,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
-      bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
-      bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
-      bgy3d_impose_laplace_boundary (BHD, g0[0][1], tH, x_lapl[0][1]);
+      /* Vec work is used as a temporary here: */
+      bgy3d_impose_laplace_boundary (BHD, g0[0][0], work, x_lapl[0][0]);
+      bgy3d_impose_laplace_boundary (BHD, g0[1][1], work, x_lapl[1][1]);
+      bgy3d_impose_laplace_boundary (BHD, g0[0][1], work, x_lapl[0][1]);
 
       /* g=g0*exp(-dg) */
       ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
@@ -1612,9 +1613,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
-      bgy3d_impose_laplace_boundary (BHD, g0[0][0], tH, x_lapl[0][0]);
-      bgy3d_impose_laplace_boundary (BHD, g0[1][1], tH, x_lapl[1][1]);
-      bgy3d_impose_laplace_boundary (BHD, g0[0][1], tH, x_lapl[0][1]);
+      /* Vec work is used as a temporary here: */
+      bgy3d_impose_laplace_boundary (BHD, g0[0][0], work, x_lapl[0][0]);
+      bgy3d_impose_laplace_boundary (BHD, g0[1][1], work, x_lapl[1][1]);
+      bgy3d_impose_laplace_boundary (BHD, g0[0][1], work, x_lapl[0][1]);
 
       /* g=g0*exp(-dg) */
       ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
