@@ -1359,11 +1359,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
 
-          VecCopy (dg[0][1], work);
-          VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
-          VecAXPY (work, -1.0, dg[0][1]);
-          VecNorm (work, NORM_INFINITY, &dgHO_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
+          dgHO_norm = bgy3d_vec_mix (dg[0][1], dg_new, aHO, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ",  dgHO_norm, aHO);
 
           /* g_H */
           VecSet (dg_new, 0.0);
@@ -1402,11 +1400,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
 
-          VecCopy (dg[0][0], work);
-          VecAXPBY(dg[0][0], aH, (1-aH), dg_new);
-          VecAXPY (work, -1.0, dg[0][0]);
-          VecNorm (work, NORM_INFINITY, &dgH_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"H= %e  (%f)  ", dgH_norm/aH, aH);
+          dgH_norm = bgy3d_vec_mix (dg[0][0], dg_new, aH, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dgH_norm, aH);
 
           /* g_O */
           VecSet (dg_new, 0.0);
@@ -1445,11 +1441,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
 
-          VecCopy (dg[1][1], work);
-          VecAXPBY(dg[1][1], aO, (1-aO), dg_new);
-          VecAXPY (work, -1.0,  dg[1][1]);
-          VecNorm (work, NORM_INFINITY, &dgO_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"O= %e  (%f)  ", dgO_norm/aO, aO);
+          dgO_norm = bgy3d_vec_mix (dg[1][1], dg_new, aO, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dgO_norm, aO);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
@@ -1459,13 +1453,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       /* (fancy) step size control */
       mycount++;
-      if( ((iter-1)%10) &&
-          (dgH_old<dgH_norm/aH || dgO_old<dgO_norm/aO || dgHO_old<dgHO_norm/aHO) )
+      if (((iter-1)%10) &&
+          (dgH_old < dgH_norm || dgO_old < dgO_norm || dgHO_old < dgHO_norm))
         {
           upwards=1;
         }
-      else if(iter>20 && !((iter-1)%10) && upwards==0 &&
-              (dgH_old<dgH_norm/aH || dgO_old<dgO_norm/aO || dgHO_old<dgHO_norm/aHO) )
+      else if (iter>20 && !((iter-1)%10) && upwards==0 &&
+               (dgH_old < dgH_norm || dgO_old < dgO_norm || dgHO_old < dgHO_norm))
         {
           a1 /=2.;
           if(a1<a0)
@@ -1486,16 +1480,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           mycount=0;
         }
       PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-      dgH_old = dgH_norm/aH;
-      dgO_old = dgO_norm/aO;
-      dgHO_old = dgHO_norm/aHO;
+      dgH_old = dgH_norm;
+      dgO_old = dgO_norm;
+      dgHO_old = dgHO_norm;
       /*********************************/
 
 
       /* Last print didnt CR LF: */
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-      if (dgH_norm / aH<=norm_tol && dgO_norm / aO <= norm_tol && dgHO_norm / aHO <= norm_tol)
+      if (dgH_norm <= norm_tol && dgO_norm <= norm_tol && dgHO_norm <= norm_tol)
           break;
     }
 
@@ -1741,11 +1735,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
 
-          VecCopy (dg[0][1], work);
-          VecAXPBY(dg[0][1], aHO, (1-aHO), dg_new);
-          VecAXPY (work, -1.0, dg[0][1]);
-          VecNorm (work, NORM_INFINITY, &dgHO_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"HO= %e  (%f)  ",  dgHO_norm/aHO, aHO);
+          dgHO_norm = bgy3d_vec_mix (dg[0][1], dg_new, aHO, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ",  dgHO_norm, aHO);
 
           /* g_H */
           VecSet (dg_new, 0.0);
@@ -1797,11 +1789,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
 
-          VecCopy (dg[0][0], work);
-          VecAXPBY(dg[0][0], aH, (1-aH), dg_new);
-          VecAXPY (work, -1.0, dg[0][0]);
-          VecNorm (work, NORM_INFINITY, &dgH_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"H= %e  (%f)  ", dgH_norm/aH, aH);
+          dgH_norm = bgy3d_vec_mix (dg[0][0], dg_new, aH, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dgH_norm, aH);
 
           /* g_O */
           VecSet (dg_new, 0.0);
@@ -1839,11 +1829,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
 
-          VecCopy (dg[1][1], work);
-          VecAXPBY(dg[1][1], aO, (1-aO), dg_new);
-          VecAXPY (work, -1.0,  dg[1][1]);
-          VecNorm (work, NORM_INFINITY, &dgO_norm);
-          PetscPrintf(PETSC_COMM_WORLD,"O= %e  (%f)  ", dgO_norm/aO, aO);
+          dgO_norm = bgy3d_vec_mix (dg[1][1], dg_new, aO, work);
+
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dgO_norm, aO);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
@@ -1853,13 +1841,13 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
       /* (fancy) step size control */
       mycount++;
-      if( ((iter-1)%10) &&
-          (dgH_old<dgH_norm/aH || dgO_old<dgO_norm/aO || dgHO_old<dgHO_norm/aHO) )
+      if (((iter-1)%10) &&
+          (dgH_old < dgH_norm || dgO_old < dgO_norm || dgHO_old < dgHO_norm))
         {
           upwards=1;
         }
-      else if(iter>20 && !((iter-1)%10) && upwards==0 &&
-              (dgH_old<dgH_norm/aH || dgO_old<dgO_norm/aO || dgHO_old<dgHO_norm/aHO) )
+      else if (iter>20 && !((iter-1)%10) && upwards==0 &&
+               (dgH_old < dgH_norm || dgO_old < dgO_norm || dgHO_old < dgHO_norm))
         {
           a1 /=2.;
           if(a1<a0)
@@ -1880,12 +1868,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           mycount=0;
         }
       PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-      dgH_old = dgH_norm/aH;
-      dgO_old = dgO_norm/aO;
-      dgHO_old = dgHO_norm/aHO;
+      dgH_old = dgH_norm;
+      dgO_old = dgO_norm;
+      dgHO_old = dgHO_norm;
       /*********************************/
 
-      if(dgH_norm/aH<=norm_tol &&  dgO_norm/aO<=norm_tol && dgHO_norm/aHO<=norm_tol)
+      if(dgH_norm <= norm_tol &&  dgO_norm <= norm_tol && dgHO_norm <= norm_tol)
         break;
 
       PetscPrintf(PETSC_COMM_WORLD,"\n");
