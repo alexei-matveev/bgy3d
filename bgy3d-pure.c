@@ -1140,7 +1140,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   State *BHD;
   Vec dg_new, dg_new2, work;
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
-  Vec tH, tO, tHO, tOH;
+  Vec tH, tO, tHO;
   real a=0.9, damp, damp_LJ;
   real aH, aHO, aO, a1=0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1189,7 +1189,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &tH);
   DACreateGlobalVector(BHD->da, &tO);
   DACreateGlobalVector(BHD->da, &tHO);
-  DACreateGlobalVector(BHD->da, &tOH);
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
@@ -1493,7 +1492,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tH);
   VecDestroy(tO);
   VecDestroy(tHO);
-  VecDestroy(tOH);
 
   finalize_state (BHD);
 
@@ -1507,7 +1505,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   State *BHD;
   Vec dg_new, dg_new2, work;
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
-  Vec tH, tO, tHO, tOH;
+  Vec tH, tO, tHO;
   real a=0.9, damp, damp_LJ;
   real aH, aHO, aO, a1=0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1562,7 +1560,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector(BHD->da, &tH);
   DACreateGlobalVector(BHD->da, &tO);
   DACreateGlobalVector(BHD->da, &tHO);
-  DACreateGlobalVector(BHD->da, &tOH);
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
@@ -1868,7 +1865,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy(tH);
   VecDestroy(tO);
   VecDestroy(tHO);
-  VecDestroy(tOH);
 
   finalize_state (BHD);
 
