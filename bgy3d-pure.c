@@ -919,20 +919,20 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 
   /* ln(g) */
   {
-    PetscScalar *g_vec;
+    PetscScalar *dg_;
     int local_size;
 
-    VecGetArray (dg, &g_vec);
+    VecGetArray (dg, &dg_);
     VecGetLocalSize (dg, &local_size);
 
     for (int i = 0; i < local_size; i++)
       {
-        real g_i = g_vec[i];
+        real g_i = dg_[i];
         assert (g_i >= 1.0e-8);  /* See normalization_intra() */
 
-        g_vec[i] = -log(g_i);
+        dg_[i] = -log (g_i);
       }
-    VecRestoreArray(dg, &g_vec);
+    VecRestoreArray (dg, &dg_);
   }
 
   /* Ensure normalization condition int(u)=0 */
@@ -1018,21 +1018,21 @@ static void normalization_intra (const State *BHD,
 
   /* g >= 0 ?? */
   {
-    PetscScalar *g_vec;
+    PetscScalar *dg_;
     int local_size;
 
-    VecGetArray (dg, &g_vec);
+    VecGetArray (dg, &dg_);
     VecGetLocalSize (dg, &local_size);
 
     for (int i = 0; i < local_size; i++)
       {
-        real g_i = g_vec[i];
+        real g_i = dg_[i];
         if (g_i < 1.0e-8)
           g_i = 1.0e-8;
 
-        g_vec[i] = g_i;
+        dg_[i] = g_i;
       }
-    VecRestoreArray (dg, &g_vec);
+    VecRestoreArray (dg, &dg_);
   }
 }
 
@@ -1072,25 +1072,25 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
                                    real thresh)
 {
   int local_size;
-  PetscScalar *w_vec, *x_vec, *y_vec;
+  PetscScalar *w_, *x_, *y_;
 
   VecGetLocalSize (w, &local_size);
 
-  VecGetArray (w, &w_vec);
-  VecGetArray (x, &x_vec);
-  VecGetArray (y, &y_vec);
+  VecGetArray (w, &w_);
+  VecGetArray (x, &x_);
+  VecGetArray (y, &y_);
 
   for (int i = 0; i < local_size; i++) {
-      real y_i = y_vec[i];
+      real y_i = y_[i];
       if (y_i < thresh)
-          w_vec[i] = x_vec[i] / thresh;
+          w_[i] = x_[i] / thresh;
       else
-          w_vec[i] = x_vec[i] / y_i;
+          w_[i] = x_[i] / y_i;
   }
 
-  VecRestoreArray (w, &w_vec);
-  VecRestoreArray (x, &x_vec);
-  VecRestoreArray (y, &y_vec);
+  VecRestoreArray (w, &w_);
+  VecRestoreArray (x, &x_);
+  VecRestoreArray (y, &y_);
 }
 
 
