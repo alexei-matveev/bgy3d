@@ -1342,15 +1342,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                    dg_new2);           /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[1][1],
-                                        t[1][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[1][1], r_HO,
-                                              t[0][1]);
-          Compute_dg_H2O_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
-                                t[1][1], t[0][1],
-                                BHD->u2_fft[1][1], r_HO, dg_new2, work);
-          VecAXPY (dg_new, 1.0, dg_new2);
+          {                     /* INTRA2 */
+            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[1][1],
+                                          t[1][1]); /* intent(out) */
+            Compute_dg_H2O_normalization_intra (BHD, g[1][1], r_HO,
+                                                t[0][1]);
+            Compute_dg_H2O_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
+                                  t[1][1], t[0][1],
+                                  BHD->u2_fft[1][1], r_HO, dg_new2, work);
+            VecAXPY (dg_new, 1.0, dg_new2);
+          }
 
+          /* Long-range Coulomb: */
           VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
@@ -1382,15 +1385,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                    dg_new2); /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                              t[0][0]);
-          Compute_dg_H2O_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
-                                t[0][1], t[0][0],
-                                BHD->u2_fft[0][1], r_HO, dg_new2, work);
-          VecAXPY (dg_new, 1.0, dg_new2);
+          {                     /* INTRA2 */
+            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
+                                          t[0][1]); /* intent(out) */
+            Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
+                                                t[0][0]);
+            Compute_dg_H2O_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
+                                  t[0][1], t[0][0],
+                                  BHD->u2_fft[0][1], r_HO, dg_new2, work);
+            VecAXPY (dg_new, 1.0, dg_new2);
+          }
 
+          /* Long-range Coulomb: */
           VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
@@ -1422,15 +1428,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                    dg_new2); /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                              t[1][1]);
-          Compute_dg_H2O_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
-                                t[0][1], t[1][1],
-                                BHD->u2_fft[0][1], r_HO, dg_new2, work);
-          VecAXPY (dg_new, 1.0, dg_new2);
+          {                     /* INTRA2 */
+            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
+                                          t[0][1]); /* intent(out) */
+            Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
+                                                t[1][1]);
+            Compute_dg_H2O_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
+                                  t[0][1], t[1][1],
+                                  BHD->u2_fft[0][1], r_HO, dg_new2, work);
+            VecAXPY (dg_new, 1.0, dg_new2);
+          }
 
+          /* Long-range Coulomb: */
           VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
