@@ -739,29 +739,10 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
       for (int index=0; index < local_size; index++)
         {
           k = tg_vec[index];
-          if( k<NORM_REG)
+          if (k < NORM_REG)
             v_vec[index] = v_vec[index] / NORM_REG;
-          else v_vec[index] = v_vec[index] / k;
-
-/*        if( v_vec[index]<0) */
-/*          { */
-/*            if( fabs(k) <= 0.8) */
-/*              v_vec[index] = v_vec[index] / 0.8; */
-/*            else */
-/*              v_vec[index] = v_vec[index] / k;         */
-
-/*          } */
-
-/*        else */
-/*          { */
-/*            if( fabs(k) <= 1.0e-4) */
-/*              v_vec[index] = v_vec[index] / 1.0e-4 ; */
-/*            else */
-/*              v_vec[index] = v_vec[index] / k; */
-/*            if( v_vec[index] > 20.) */
-/*              v_vec[index]=20.0; */
-/*          } */
-
+          else
+            v_vec[index] = v_vec[index] / k;
         }
       VecRestoreArray( BHD->v[dim], &v_vec);
 
@@ -834,26 +815,10 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
         {
 
           k = tg_vec[index];
-          if( k<NORM_REG)
+          if (k < NORM_REG)
             v_vec[index] = v_vec[index] / NORM_REG;
-          else v_vec[index] = v_vec[index] / k;
-/*        if( v_vec[index]<0) */
-/*          { */
-/*            if( fabs(k) <= 0.8) */
-/*              v_vec[index] = v_vec[index] / 0.8 ; */
-/*            else */
-/*              v_vec[index] = v_vec[index] / k; */
-/*          } */
-/*        else */
-/*          { */
-/*            if( fabs(k) <= 1.0e-4) */
-/*              v_vec[index] = v_vec[index] / 1.0e-4 ; */
-/*            else */
-/*              v_vec[index] = v_vec[index] / k; */
-/*            if( v_vec[index] > 20.) */
-/*              v_vec[index]=20.0; */
-/*          } */
-
+          else
+            v_vec[index] = v_vec[index] / k;
         }
       VecRestoreArray( BHD->v[dim], &v_vec);
 
