@@ -1172,8 +1172,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   Vec dg_new, dg_new2, work;
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
   Vec t[2][2];
-  real a=0.9, damp, damp_LJ;
-  real aH, aHO, aO, a1=0.5;
+  real a = 0.9, damp, damp_LJ;
+  real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
   real dg_norm[2][2];
@@ -1286,37 +1286,23 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       dg_norm_old[1][1] = 0.0;
       dg_norm_old[0][1] = 0.0;
 
-      a1=a0;
-      a=a0;
-      aH=a;
-      aO=a;
-      aHO=a;
+      a1 = a0;
+      a = a0;
 
-  for(iter=0; iter<max_iter; iter++)
+  for (iter = 0; iter < max_iter; iter++)
     {
-
-
-
-      if( !(iter%10) && iter>0 )
+      if (!(iter % 10) && iter > 0)
+        a = a1;
+      else if (iter == 20)
         {
-          a=a1;
-          aH=a;
-          aO=a;
-          aHO=a;
-        }
-      else if( iter==20)
-        {
-          aH=a;
-          aO=a;
-          aHO=a;
+          /* nothing? */
         }
       else
-        {
-          a=a0;
-          aH=a;
-          aO=a;
-          aHO=a;
-        }
+        a = a0;
+
+      const real aH = a;
+      const real aO = a;
+      const real aHO = a;
 
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       /* f=integral(g) */
@@ -1550,8 +1536,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   Vec dg_new, dg_new2, work;
   Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
   Vec t[2][2];
-  real a=0.9, damp, damp_LJ;
-  real aH, aHO, aO, a1=0.5;
+  real a = 0.9, damp, damp_LJ;
+  real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
   real dg_norm[2][2];
@@ -1664,34 +1650,23 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       ComputeH2O_g (g[0][0], g0[0][0], dg[0][0]);
       ComputeH2O_g (g[1][1], g0[1][1], dg[1][1]);
 
-      a1=a0;
-      a=a0;
-      aH=a;
-      aO=a;
-      aHO=a;
+      a1 = a0;
+      a = a0;
 
-  for(iter=0; iter<max_iter; iter++)
+  for (iter = 0; iter < max_iter; iter++)
     {
-      if( !(iter%10) && iter>0 )
+      if (!(iter % 10) && iter > 0)
+        a = a1;
+      else if (iter == 20)
         {
-          a=a1;
-          aH=a;
-          aO=a;
-          aHO=a;
-        }
-      else if( iter==20)
-        {
-          aH=a;
-          aO=a;
-          aHO=a;
+          /* nothing? */
         }
       else
-        {
-          a=a0;
-          aH=a;
-          aO=a;
-          aHO=a;
-        }
+        a = a0;
+
+      const real aH = a;
+      const real aO = a;
+      const real aHO = a;
 
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
       /* f=integral(g) */
