@@ -678,11 +678,16 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
   Output y(k)  is the  convolution of x(k)  with ω(x)  = δ(|x| -  r) /
   4πr².  This function takes momentum  space x(k) as input and returns
   momentum space y(k).
+
+  NOTE: appears to work for in-place transformation with x == y.
+
+  FIXME: sinc(0) should be always 1, even at war times!
 */
 static void omega (const ProblemData *PD, const DA dc,
                    Vec x_fft,   /* intent(in) */
                    real rab,
-                   Vec y_fft)   /* intent(out) */
+                   Vec y_fft,   /* intent(out) */
+                   real sinc0)
 {
   int x[3], n[3], i[3], ic[3];
 
@@ -713,7 +718,7 @@ static void omega (const ProblemData *PD, const DA dc,
 
           /* Scale by ω(k): */
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            xk *= h3;         /* sinc(0) = 1 */
+            xk *= h3 * sinc0;   /* sinc(0) = 1, but see call sites */
           else
             {
               const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
@@ -764,39 +769,16 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
       VecAXPY(BHD->v[dim], -1.0, f_l[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
+
+      /*
+        Apply  omega()  in-place,   note  argument  aliasing.   FIXME:
+        pretends  that sinc(0)  ==  0,  so the  original  code. Is  it
+        possible to claim that the  k = 0 component of weighted forces
+        vanishes? Because then, formally, zero or one would not make a
+        difference here:
+      */
+      omega (BHD->PD, BHD->dc, fg2_fft[dim], rab, fg2_fft[dim], 0.0);
     }
-
-
-  complex ***fg2_fft_[3];
-  FOR_DIM
-    DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
-
-  /* Compute int(F*g*omega) */
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
-
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            FOR_DIM
-              fg2_fft_[dim][i[2]][i[1]][i[0]] = 0.0; /* complex */
-          else
-            {
-              k = SQR (ic[2]) + SQR (ic[1]) + SQR(ic[0]);
-              k = 2.0 * M_PI * sqrt(k) * rab / L;
-
-              FOR_DIM
-                fg2_fft_[dim][i[2]][i[1]][i[0]] *= h3 * sin(k) / k;
-            }
-        }
-  FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* int(..)/tg */
   /* Laplace^-1 * divergence */
@@ -824,6 +806,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
 
   /*******************************************/
   complex ***dg_fft_, ***coul_fft_;
+  complex ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
@@ -999,7 +982,7 @@ static void normalization_intra (const State *BHD,
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
   /* Set ĝ(k) := ω(k) * g(k), put result into Vec work: */
-  omega (BHD->PD, BHD->dc, g_fft, rab, work);
+  omega (BHD->PD, BHD->dc, g_fft, rab, work, 1.0);
 
   /* Inverse FFT, ĝ(k) -> ĝ(x): */
   MatMultTranspose (BHD->fft_mat, work, dg);
