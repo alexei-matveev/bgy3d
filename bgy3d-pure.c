@@ -645,13 +645,41 @@ static void Compute_dg_inter (State *BHD,
 }
 
 
+/* w := x / max(y, thresh), essentially: */
+static void safe_pointwise_divide (Vec w, /* intent(out) */
+                                   Vec x, /* intent(in) */
+                                   Vec y, /* intent(in) */
+                                   real thresh)
+{
+  int local_size;
+  PetscScalar *w_, *x_, *y_;
+
+  VecGetLocalSize (w, &local_size);
+
+  VecGetArray (w, &w_);
+  VecGetArray (x, &x_);
+  VecGetArray (y, &y_);
+
+  for (int i = 0; i < local_size; i++) {
+      real y_i = y_[i];
+      if (y_i < thresh)
+          w_[i] = x_[i] / thresh;
+      else
+          w_[i] = x_[i] / y_i;
+  }
+
+  VecRestoreArray (w, &w_);
+  VecRestoreArray (x, &x_);
+  VecRestoreArray (y, &y_);
+}
+
+
 /* Compute  intramolecular  part. */
 static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                                   Vec coul_fft, real rab, Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3], ic[3], local_size;
+  int x[3], n[3], i[3], ic[3];
   real k_fac, k;
-  PetscScalar *v_vec, *tg_vec;
 
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
@@ -729,28 +757,17 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
   /*******************************************/
   /*    int/tg  */
   /*******************************************/
-  VecGetArray( tg, &tg_vec);
   FOR_DIM
     {
-      VecGetLocalSize(BHD->v[dim], &local_size);
-      VecGetArray( BHD->v[dim] , &v_vec);
+      /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
+         BHD->v[dim], tg);
 
-
-      for (int index=0; index < local_size; index++)
-        {
-          k = tg_vec[index];
-          if (k < NORM_REG)
-            v_vec[index] = v_vec[index] / NORM_REG;
-          else
-            v_vec[index] = v_vec[index] / k;
-        }
-      VecRestoreArray( BHD->v[dim], &v_vec);
-
-      //VecPointwiseDivide( BHD->v[dim], BHD->v[dim], tg);
+         v[dim] := v[dim] / tg, essentially:
+      */
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], tg, NORM_REG);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
-  VecRestoreArray (tg, &tg_vec);
 
   /*******************************************/
   complex ***dg_fft_, ***coul_fft_;
@@ -800,33 +817,22 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
 
   VecScale(dg_help, PD->beta/L/L/L);
 
-  /* back transformation of coulomb part, divide by tg and forward transfromation */
-  VecGetArray( tg, &tg_vec);
+  /* Back  transformation of coulomb  part, divide  by tg  and forward
+     transfromation */
   FOR_DIM
     {
       MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
       VecScale(BHD->v[dim], 1./L/L/L);
 
-     VecGetLocalSize(BHD->v[dim], &local_size);
-     VecGetArray( BHD->v[dim] , &v_vec);
+      /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
+         BHD->v[dim], tg);
 
-
-      for (int index=0; index < local_size; index++)
-        {
-
-          k = tg_vec[index];
-          if (k < NORM_REG)
-            v_vec[index] = v_vec[index] / NORM_REG;
-          else
-            v_vec[index] = v_vec[index] / k;
-        }
-      VecRestoreArray( BHD->v[dim], &v_vec);
-
-      //VecPointwiseDivide(BHD->v[dim], BHD->v[dim], tg);
+         v[dim] := v[dim] / tg, essentially:
+      */
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], tg, NORM_REG);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
-  VecRestoreArray( tg, &tg_vec);
 
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
@@ -1037,35 +1043,6 @@ static void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real ra
   */
   normalization_intra (BHD, BHD->fft_scratch, rab, BHD->fft_scratch,
                        dg); /* dg is intent(out) */
-}
-
-
-/* w := x / max(y, thresh), essentially: */
-static void safe_pointwise_divide (Vec w, /* intent(out) */
-                                   Vec x, /* intent(in) */
-                                   Vec y, /* intent(in) */
-                                   real thresh)
-{
-  int local_size;
-  PetscScalar *w_, *x_, *y_;
-
-  VecGetLocalSize (w, &local_size);
-
-  VecGetArray (w, &w_);
-  VecGetArray (x, &x_);
-  VecGetArray (y, &y_);
-
-  for (int i = 0; i < local_size; i++) {
-      real y_i = y_[i];
-      if (y_i < thresh)
-          w_[i] = x_[i] / thresh;
-      else
-          w_[i] = x_[i] / y_i;
-  }
-
-  VecRestoreArray (w, &w_);
-  VecRestoreArray (x, &x_);
-  VecRestoreArray (y, &y_);
 }
 
 
