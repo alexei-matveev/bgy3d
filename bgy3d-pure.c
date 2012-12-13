@@ -1340,7 +1340,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][1]);
 
           dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
 
@@ -1381,7 +1381,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][0]);
 
           dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
 
@@ -1422,7 +1422,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[1][1]);
 
           dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
 
@@ -1707,7 +1707,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][1]);
 
           dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
 
@@ -1761,7 +1761,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][0]);
 
           dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
 
@@ -1801,7 +1801,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[1][1]);
 
           dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
 
