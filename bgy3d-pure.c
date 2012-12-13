@@ -598,40 +598,50 @@ static void kapply (const State *BHD,
   work Vecs. Does (4 + 1) FFTs. One inverse.
 */
 static void Compute_dg_inter (State *BHD,
-                              Vec fs[3], Vec fl[3], Vec ga, Vec gb,
-                              Vec coul_fft, real rho,
-                              Vec dg) /* intent(out) */
+                              Vec fab_s[3], Vec fab_l[3], Vec gab,
+                              Vec gb,
+                              Vec cab_fft, /* long range coulomb */
+                              real rhob,
+                              Vec dua) /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
   const real L = PD->interval[1] - PD->interval[0];
 
-  Vec g_fft = BHD->fft_scratch;
+  Vec gb_fft = BHD->fft_scratch;
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
-  Vec dg_fft = BHD->gfg2_fft;
+  Vec dua_fft = BHD->gfg2_fft;
 
   /************************************************/
-  /* rho * FS*ga gb */
+  /* rhob * FS*gab gb */
   /************************************************/
 
-  /* fft(f*g) */
+  /*
+    This computes the k-space representation of the weighted force fft
+    (f_ab  g_ab).  This  force  is the  precursor  to the  convolution
+    kernel K_ab. Again the long-range part is treated separately.
+  */
   FOR_DIM
     {
-      VecPointwiseMult (BHD->v[dim], ga, fs[dim]);
+      VecPointwiseMult (BHD->v[dim], gab, fab_s[dim]);
 
       /* special treatment: Coulomb long */
-      VecAXPY (BHD->v[dim], -1.0, fl[dim]);
+      VecAXPY (BHD->v[dim], -1.0, fab_l[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
-  /* fft(g) */
-  MatMult (BHD->fft_mat, gb, g_fft);
+  /* The  convolution will  be  computed in  momentum  space, so  also
+     compute fft (g_b): */
+  MatMult (BHD->fft_mat, gb, gb_fft);
 
-  kapply (BHD, fg2_fft, g_fft, coul_fft, dg_fft);
+  /* This  effectively applies  K_ab  to g_b  in  k-space and  returns
+     k-space du_a: */
+  kapply (BHD, fg2_fft, gb_fft, cab_fft, dua_fft);
 
-  MatMultTranspose (BHD->fft_mat, dg_fft, dg);
+  /* Transform the result of the convolution to real space du_a: */
+  MatMultTranspose (BHD->fft_mat, dua_fft, dua);
 
-  VecScale (dg, rho * PD->beta/L/L/L);
+  VecScale (dua, rhob * PD->beta/L/L/L);
 }
 
 
