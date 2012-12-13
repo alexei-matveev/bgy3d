@@ -686,7 +686,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
   const int *N = PD->N;         /* N[3] */
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
 
-  const real h = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* siehe oben ... */
@@ -735,7 +735,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
               k = 2.0 * M_PI * sqrt(k) * rab / L;
 
               FOR_DIM
-                fg2_fft_[dim][i[2]][i[1]][i[0]] *= h * sin(k) / k;
+                fg2_fft_[dim][i[2]][i[1]][i[0]] *= h3 * sin(k) / k;
             }
         }
   FOR_DIM
@@ -798,7 +798,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
               k = 2.0 * M_PI * sqrt(k) * rab / L;
 
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
+                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
 
               FOR_DIM
                 fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / fac * (I * coul_fft_[i[2]][i[1]][i[0]]) * sin(k) / k;
@@ -855,7 +855,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
               k_fac = fac / k;
 
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
+                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
             }
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
