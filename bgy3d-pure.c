@@ -741,24 +741,20 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  FOR_DIM
-    {
-      MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
-      VecScale(BHD->v[dim], 1./L/L/L);
-    }
-
-
-
-
   /* int(..)/tg */
   /* Laplace^-1 * divergence */
-
 
   /*******************************************/
   /*    int/tg  */
   /*******************************************/
+
+  /* Back  transformation of coulomb  part, divide  by tg  and forward
+     transfromation */
   FOR_DIM
     {
+      MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
+      VecScale (BHD->v[dim], 1./L/L/L);
+
       /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
          BHD->v[dim], tg);
 
@@ -822,7 +818,7 @@ static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec 
   FOR_DIM
     {
       MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
-      VecScale(BHD->v[dim], 1./L/L/L);
+      VecScale (BHD->v[dim], 1./L/L/L);
 
       /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
          BHD->v[dim], tg);
