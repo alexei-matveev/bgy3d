@@ -674,6 +674,63 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
 }
 
 
+/*
+  Output y(k)  is the  convolution of x(k)  with ω(x)  = δ(|x| -  r) /
+  4πr².  This function takes momentum  space x(k) as input and returns
+  momentum space y(k).
+*/
+static void omega (const ProblemData *PD, const DA dc,
+                   Vec x_fft,   /* intent(in) */
+                   real rab,
+                   Vec y_fft)   /* intent(out) */
+{
+  int x[3], n[3], i[3], ic[3];
+
+  const int *N = PD->N;         /* N[3] */
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
+
+  /* Get local portion of the grid */
+  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  complex ***x_fft_, ***y_fft_;
+  DAVecGetArray (dc, x_fft, &x_fft_);
+  DAVecGetArray (dc, y_fft, &y_fft_);
+
+  /* loop over local portion of grid */
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+        {
+          FOR_DIM
+            if (i[dim] <= N[dim] / 2)
+              ic[dim] = i[dim];
+            else
+              ic[dim] = i[dim] - N[dim];
+
+          /* Get x(k): */
+          complex xk = x_fft_[i[2]][i[1]][i[0]];
+
+          /* Scale by ω(k): */
+          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+            xk *= h3;         /* sinc(0) = 1 */
+          else
+            {
+              const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+              const real k = 2.0 * M_PI * sqrt(k2) * rab / L;
+
+              /* + hier richtig !! */
+              xk *= h3 * (sin(k) / k);
+            }
+
+          /* Set y(k): */
+          y_fft_[i[2]][i[1]][i[0]] = xk;
+        }
+  DAVecRestoreArray (dc, x_fft, &x_fft_);
+  DAVecRestoreArray (dc, y_fft, &y_fft_);
+}
+
+
 /* Compute  intramolecular  part. */
 static void Compute_dg_H2O_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                                   Vec coul_fft, real rab, Vec dg, Vec dg_help)
@@ -939,54 +996,10 @@ static void normalization_intra (const State *BHD,
                                  Vec work, /* complex work Vec */
                                  Vec dg)   /* ĝ(x), intent(out) */
 {
-  int x[3], n[3], i[3], ic[3];
+  const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-
-  /* Get local portion of the grid */
-  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  complex ***g_fft_, ***work_;
-  DAVecGetArray (BHD->dc, g_fft, &g_fft_);
-  DAVecGetArray (BHD->dc, work, &work_);
-
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          FOR_DIM
-            {
-              if (i[dim] <= N[dim] / 2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
-
-          /* Get g(k): */
-          complex gk = g_fft_[i[2]][i[1]][i[0]];
-
-          /* Scale by ω(k): */
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            gk *= h3;         /* sinc(0) = 1 */
-          else
-            {
-              const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              const real k = 2.0 * M_PI * sqrt(k2) * rab / L;
-
-              /* + hier richtig !! */
-              gk *= h3 * (sin(k) / k);
-            }
-
-          /* Set ĝ(k): */
-          work_[i[2]][i[1]][i[0]] = gk;
-        }
-  DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
-  DAVecRestoreArray (BHD->dc, work, &work_);
+  /* Set ĝ(k) := ω(k) * g(k), put result into Vec work: */
+  omega (BHD->PD, BHD->dc, g_fft, rab, work);
 
   /* Inverse FFT, ĝ(k) -> ĝ(x): */
   MatMultTranspose (BHD->fft_mat, work, dg);
