@@ -1337,12 +1337,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[0][0],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][0],
                                         t[0][0] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[1][1],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[1][1],
                                         t[1][1] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_normalization_intra( BHD, g[1][1], r_HO,
                                               t[0][1]);
@@ -1351,14 +1351,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                 BHD->u2_fft[1][1], r_HO, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
+          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
-          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
+          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], a);
+          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[i][j], a);
 
           /* g_HH */
           i = 0; j = 0;
@@ -1376,12 +1376,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                         t[0][1] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                         t[0][1] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_normalization_intra( BHD, g[0][1], r_HO,
                                               t[0][0]);
@@ -1390,14 +1390,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                 BHD->u2_fft[0][1], r_HO, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
+          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][0]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
-          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
+          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], a);
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[i][j], a);
 
           /* g_OO */
           i = 1; j = 1;
@@ -1415,12 +1415,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                         t[0][1] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1],
+          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                         t[0][1] , dg_new2); /* both intent(out) */
           Compute_dg_H2O_normalization_intra( BHD, g[0][1], r_HO,
                                               t[1][1]);
@@ -1429,14 +1429,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                 BHD->u2_fft[0][1], r_HO, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
+          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[1][1]);
+            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
-          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
+          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], a);
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[i][j], a);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
