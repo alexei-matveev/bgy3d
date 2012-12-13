@@ -1300,10 +1300,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
-      const real aH = a;
-      const real aO = a;
-      const real aHO = a;
-
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       /* f=integral(g) */
       if (1)                    /* kflg was set with -pair */
@@ -1346,9 +1342,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
 
-          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, aHO, work);
+          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], aHO);
+          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], a);
 
           /* g_H */
           VecSet (dg_new, 0.0);
@@ -1387,9 +1383,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
 
-          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, aH, work);
+          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], aH);
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], a);
 
           /* g_O */
           VecSet (dg_new, 0.0);
@@ -1428,9 +1424,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
 
-          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, aO, work);
+          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], aO);
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], a);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
@@ -1664,10 +1660,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
-      const real aH = a;
-      const real aO = a;
-      const real aHO = a;
-
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
       /* f=integral(g) */
       if (1)                    /* kflg was set when with -pair */
@@ -1717,9 +1709,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][1]);
 
-          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, aHO, work);
+          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], aHO);
+          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], a);
 
           /* g_H */
           VecSet (dg_new, 0.0);
@@ -1771,9 +1763,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[0][0]);
 
-          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, aH, work);
+          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], aH);
+          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], a);
 
           /* g_O */
           VecSet (dg_new, 0.0);
@@ -1811,9 +1803,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, dg_new, t[0][0], x_lapl[1][1]);
 
-          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, aO, work);
+          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], aO);
+          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], a);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
