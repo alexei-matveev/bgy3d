@@ -30,7 +30,6 @@
 #ifndef BGY3d_H
 #define BGY3d_H
 
-#define real double
 #define SQR(a)   ((a)*(a))
 #define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
@@ -88,6 +87,13 @@
 #define COSSIGN(i)  (((i)%2)?-1:1)
 
 extern int verbosity;
+
+/*
+  Much of the code uses "real" to define floating point numbers. There
+  is no  guarantee that everything  will work for real  being anything
+  else than double.   Was a #define real double  in the original code:
+*/
+typedef double real;
 
 typedef struct ProblemData
 {
