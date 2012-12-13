@@ -360,6 +360,13 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
   DAVecRestoreArray (da, b, &b_);
 }
 
+/*
+  This function sets everything in  the 3d-array g[:, :, :] outside of
+  the central section g[i, j, k] with b  < i < N - b, (same for j, and
+  k) to  the value "value" (typically  0.0, less often  1.0). With the
+  value of zpad equal  to the (half) the box size L  the value of b is
+  1.
+*/
 static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
 {
   /* Get local portion of the grid */
@@ -853,11 +860,11 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 
   /*
     FIXME:  formally  redundant.   Set  v  to  zero  at  the  boundary
-    again. State BHD  is not modified by this  call. Historically, the
-    call  to bgy3d_impose_laplace_boundary() was  followed immediately
-    by bgy3d_boundary_set()  at many places  in the code.  So  do this
-    here instead. Commenting this  call changes results only slightly,
-    most probably due to finite convergence thresholds in KSPSolve():
+    again.  Historically, the call  to bgy3d_impose_laplace_boundary()
+    was  followed immediately  by an  equivalent of  set_boundary() at
+    many places in the code.  So do this here instead. Commenting this
+    call changes  results only slightly,  most probably due  to finite
+    convergence thresholds in KSPSolve():
   */
   set_boundary (BHD->da, &vol, v, 0.0);
 
@@ -866,19 +873,6 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 }
 #endif
 
-/*
-  This function appears  to set everything in the  3d-array g[:, :, :]
-  outside of the central section g[i, j, k]  with b < i < N - b, (same
-  for  j, and  k)  to the  value  "value" (typically  0.0, less  often
-  1.0). With the value of zpad equal  to the (half) the box size L the
-  value of the local variable "border" is 1.
-*/
-void bgy3d_boundary_set (const State *BHD, Vec g, real value)
-{
-  const Boundary vol = make_boundary (BHD->PD);
-
-  set_boundary (BHD->da, &vol, g, value);
-}
 
 /* Laplace matrix, no boundary: */
 void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
