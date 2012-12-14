@@ -767,8 +767,9 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
 
   VecScale (nab, 1./L/L/L);
 
-  /* FIXME:  make n(x)  n >  0, because  it will  appear later  in the
-     denominator. */
+  /* FIXME:  make  n(x) >  0,  because it  will  appear  later in  the
+     denominator. Note that the same redundant precautions are made at
+     other places too. */
   {
     PetscScalar *nab_;
     int local_size;
