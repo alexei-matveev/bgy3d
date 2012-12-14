@@ -1024,8 +1024,8 @@ static void Compute_dg_normalization_intra (const State *BHD, Vec g, real rab,
 /*
   Vec t is intent(out).
 */
-static void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec g,
-                                          Vec t) /* intent(out) */
+static void Solve_Normalization_small (const State *BHD, Vec gc, real rc, Vec g,
+                                       Vec t) /* intent(out) */
 {
   /* ĝ(x) goes into Vec t which is is intent(out) here: */
   Compute_dg_normalization_intra (BHD, gc, rc, t);
@@ -1252,15 +1252,15 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][0],
-                                        t[0][0]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][0],
+                                     t[0][0]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, /* intent(in) */
                                    dg_new2);           /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
           {                     /* INTRA2 */
-            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[1][1],
-                                          t[1][1]); /* intent(out) */
+            Solve_Normalization_small (BHD, g[i][j], r_HO, g[1][1],
+                                       t[1][1]); /* intent(out) */
             Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
                                             t[0][1]);
             Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
@@ -1293,15 +1293,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          /* This is the sum over k /= 0 */
+          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, /* intent(in) */
                                    dg_new2); /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
           {                     /* INTRA2 */
-            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                          t[0][1]); /* intent(out) */
+            Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
+                                       t[0][1]); /* intent(out) */
             Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
                                             t[0][0]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
@@ -1334,15 +1335,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          /* This is the sum over k /= 1 */
+          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, /* intent(in) */
                                    dg_new2); /* intent(out) */
           VecAXPY (dg_new, 1.0, dg_new2);
 
           {                     /* INTRA2 */
-            Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
-                                          t[0][1]); /* intent(out) */
+            Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
+                                       t[0][1]); /* intent(out) */
             Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
                                             t[1][1]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
@@ -1614,14 +1616,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[0][0],
-                                        t[0][0]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][1], r_HO, g[0][0],
+                                     t[0][0]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
           /* tO = gHO/int(gHO wHH) */
-          Solve_NormalizationH2O_small (BHD, g[0][1], r_HH, g[0][1],
-                                        t[1][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][1], r_HH, g[0][1],
+                                     t[1][1]); /* intent(out) */
           Compute_dg_normalization_intra (BHD, g[0][1], r_HH,
                                           t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
@@ -1629,8 +1631,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[1][1],
-                                        t[1][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][1], r_HO, g[1][1],
+                                     t[1][1]); /* intent(out) */
           Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
                                           t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
@@ -1663,19 +1665,19 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HH, g[0][0],
-                                        t[0][0]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][0], r_HH, g[0][0],
+                                     t[0][0]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][0], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* tO = gH/int(gH wHH) */
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HH, g[0][0],
-                                        t[1][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][0], r_HH, g[0][0],
+                                     t[1][1]); /* intent(out) */
           Compute_dg_normalization_intra (BHD, g[0][0], r_HH,
                                           t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
@@ -1683,8 +1685,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[0][0], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
                                           t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
@@ -1718,13 +1720,13 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
 
-          Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[1][1], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
-          Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1],
-                                        t[0][1]); /* intent(out) */
+          Solve_Normalization_small (BHD, g[1][1], r_HO, g[0][1],
+                                     t[0][1]); /* intent(out) */
           Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
                                           t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
