@@ -1278,14 +1278,15 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           /* This is the sum over k /= j */
           for (int k = 0; k < 2; k++)
             {
-              if (k == j) continue; /* k == 0 in the body: */
+              if (k != j)       /* k == 0 in the body: */
+                {
+                  /* Here t is intent(out): */
+                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
 
-              /* Here t is intent(out): */
-              nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
-
-              /* Compute dg_new2 term and add to the accumulator: */
-              Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
-              VecAXPY (dg_new, 1.0, dg_new2);
+                  /* Compute dg_new2 term and add to the accumulator: */
+                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+                  VecAXPY (dg_new, 1.0, dg_new2);
+                }
             }
 
           {                     /* INTRA2 */
@@ -1324,14 +1325,15 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           /* This is the sum over k /= j */
           for (int k = 0; k < 2; k++)
             {
-              if (k == j) continue; /* k == 1 in the body: */
+              if (k != j)       /* k == 1 in the body: */
+                {
+                  /* Here t is intent(out): */
+                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
 
-              /* Here t is intent(out): */
-              nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
-
-              /* Compute dg_new2 term and add to the accumulator: */
-              Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
-              VecAXPY (dg_new, 1.0, dg_new2);
+                  /* Compute dg_new2 term and add to the accumulator: */
+                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+                  VecAXPY (dg_new, 1.0, dg_new2);
+                }
             }
 
           {                     /* INTRA2 */
@@ -1370,14 +1372,15 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           /* This is the sum over k /= j */
           for (int k = 0; k < 2; k++)
             {
-              if (k == j) continue; /* k == 0 in the body: */
+              if (k != j)       /* k == 0 in the body: */
+                {
+                  /* Here t is intent(out): */
+                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
 
-              /* Here t is intent(out): */
-              nssa_gamma_cond (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
-
-              /* Compute dg_new2 term and add to the accumulator: */
-              Compute_dg_H2O_intra_ln (BHD, t[k][i], r_HO, dg_new2);
-              VecAXPY (dg_new, 1.0, dg_new2);
+                  /* Compute dg_new2 term and add to the accumulator: */
+                  Compute_dg_H2O_intra_ln (BHD, t[k][i], r_HO, dg_new2);
+                  VecAXPY (dg_new, 1.0, dg_new2);
+                }
             }
 
           {                     /* INTRA2 */
