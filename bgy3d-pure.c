@@ -1138,15 +1138,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
         DACreateGlobalVector(BHD->da, &dg[i][j]);
         dg[j][i] = dg[i][j];
+
+        DACreateGlobalVector (BHD->da, &t[i][j]);
+        t[j][i] = t[i][j];
       }
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
   DACreateGlobalVector (BHD->da, &work);
-
-  DACreateGlobalVector (BHD->da, &t[0][0]);
-  DACreateGlobalVector (BHD->da, &t[1][1]);
-  DACreateGlobalVector (BHD->da, &t[0][1]);
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
@@ -1443,6 +1442,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     for (int j = 0; j <= i; j++)
       {
         VecDestroy (g[i][j]);
+        VecDestroy (t[i][j]);
         VecDestroy (dg[i][j]);
         VecDestroy (x_lapl[i][j]);
       }
@@ -1450,10 +1450,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
   VecDestroy (work);
-
-  VecDestroy (t[0][0]);
-  VecDestroy (t[1][1]);
-  VecDestroy (t[0][1]);
 
   finalize_state (BHD);
 
@@ -1513,15 +1509,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
         DACreateGlobalVector (BHD->da, &dg[i][j]);
         dg[j][i] = dg[i][j];
+
+        DACreateGlobalVector (BHD->da, &t[i][j]);
+        t[j][i] = t[i][j];
       }
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
   DACreateGlobalVector (BHD->da, &work);
-
-  DACreateGlobalVector (BHD->da, &t[0][0]);
-  DACreateGlobalVector (BHD->da, &t[1][1]);
-  DACreateGlobalVector (BHD->da, &t[0][1]);
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
@@ -1820,6 +1815,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
     for (int j = 0; j <= i; j++)
       {
         VecDestroy (g[i][j]);
+        VecDestroy (t[i][j]);
         VecDestroy (dg[i][j]);
         VecDestroy (x_lapl[i][j]);
       }
@@ -1827,10 +1823,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
   VecDestroy (work);
-
-  VecDestroy (t[0][0]);
-  VecDestroy (t[1][1]);
-  VecDestroy (t[0][1]);
 
   finalize_state (BHD);
 
