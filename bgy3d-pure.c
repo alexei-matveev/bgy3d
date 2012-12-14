@@ -1005,8 +1005,8 @@ static void normalization_intra (const State *BHD,
  *
  * Side effects: uses BHD->fft_scratch as work Vec.
  */
-static void Compute_dg_H2O_normalization_intra (const State *BHD, Vec g, real rab,
-                                                Vec dg) /* intent(out) */
+static void Compute_dg_normalization_intra (const State *BHD, Vec g, real rab,
+                                            Vec dg) /* intent(out) */
 {
   /* fft(g/t) */
   MatMult (BHD->fft_mat, g, BHD->fft_scratch);
@@ -1028,7 +1028,7 @@ static void Solve_NormalizationH2O_small (const State *BHD, Vec gc, real rc, Vec
                                           Vec t) /* intent(out) */
 {
   /* ĝ(x) goes into Vec t which is is intent(out) here: */
-  Compute_dg_H2O_normalization_intra (BHD, gc, rc, t);
+  Compute_dg_normalization_intra (BHD, gc, rc, t);
 
   /*
     t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
@@ -1261,8 +1261,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[1][1],
                                           t[1][1]); /* intent(out) */
-            Compute_dg_H2O_normalization_intra (BHD, g[1][1], r_HO,
-                                                t[0][1]);
+            Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
+                                            t[0][1]);
             Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                               t[1][1], t[0][1],
                               BHD->u2_fft[1][1], r_HO, dg_new2, work);
@@ -1302,8 +1302,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                           t[0][1]); /* intent(out) */
-            Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                                t[0][0]);
+            Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
+                                            t[0][0]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[0][0],
                               BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1343,8 +1343,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_NormalizationH2O_small (BHD, g[i][j], r_HO, g[0][1],
                                           t[0][1]); /* intent(out) */
-            Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                                t[1][1]);
+            Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
+                                            t[1][1]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[1][1],
                               BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1622,8 +1622,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           /* tO = gHO/int(gHO wHH) */
           Solve_NormalizationH2O_small (BHD, g[0][1], r_HH, g[0][1],
                                         t[1][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HH,
-                                              t[0][1]);
+          Compute_dg_normalization_intra (BHD, g[0][1], r_HH,
+                                          t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
@@ -1631,8 +1631,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_small (BHD, g[0][1], r_HO, g[1][1],
                                         t[1][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[1][1], r_HO,
-                                              t[0][1]);
+          Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
+                                          t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[1][1], r_HO, dg_new2, work);
@@ -1676,8 +1676,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           /* tO = gH/int(gH wHH) */
           Solve_NormalizationH2O_small (BHD, g[0][0], r_HH, g[0][0],
                                         t[1][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][0], r_HH,
-                                              t[0][0]);
+          Compute_dg_normalization_intra (BHD, g[0][0], r_HH,
+                                          t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
@@ -1685,8 +1685,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_small (BHD, g[0][0], r_HO, g[0][1],
                                         t[0][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                              t[0][0]);
+          Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
+                                          t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1725,8 +1725,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_NormalizationH2O_small (BHD, g[1][1], r_HO, g[0][1],
                                         t[0][1]); /* intent(out) */
-          Compute_dg_H2O_normalization_intra (BHD, g[0][1], r_HO,
-                                              t[1][1]);
+          Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
+                                          t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
