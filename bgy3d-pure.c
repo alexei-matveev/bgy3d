@@ -1100,7 +1100,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
   State *BHD;
   Vec dg_new, dg_new2, work;
-  Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
+  Vec g[2][2], dg[2][2];        /* pair distributions, ij = ji */
   Vec t[2][2];
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
@@ -1160,9 +1160,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       VecSet (x_lapl[i][j], 0.0);
 #endif
 
-  g0[0][0] = BHD->u_ini[0][0];
-  g0[1][1] = BHD->u_ini[1][1];
-  g0[0][1] = BHD->u_ini[0][1];
+  /* FIXME: g0[2][2] is a misnomer. Rename to u0[][]: */
+  Vec (*g0)[2] = BHD->u_ini;        /* FIXME: alias! */
 
   /* set initial guess*/
   VecSet(dg[0][0],0);
