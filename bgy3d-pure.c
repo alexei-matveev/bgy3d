@@ -25,12 +25,6 @@ static real NORM_REG2 = 1.0e-2;
 #undef eO
 #undef qO
 
-static void normalization_intra (const State *BHD,
-                                 Vec g_fft, /* complex, in */
-                                 real rab,
-                                 Vec work, /* complex, work */
-                                 Vec dg);  /* real, out */
-
 static State* initialize_state (const ProblemData *PD)
 {
   State *BHD = (State*) malloc (sizeof (*BHD));
@@ -719,6 +713,58 @@ static void omega (const ProblemData *PD, const DA dc,
 }
 
 
+/*
+  Compute normalization condition.  Output  is the convolution of g(x)
+  with ω(x)  = δ(|x| - r)  / 4πr². This function  takes momentum space
+  g(k)  as  input.   The  convolution  result is  manipulated  in  the
+  real-space  rep, unfortunately.  Though this  manipulation  is plain
+  screening of the too small (negative) values.
+
+  Vec dg is  intent(out).
+
+  Needs a complex  work vector. As a matter of fact,  the work Vec and
+  the  input  Vec  g_fft  may  be  aliased. Then  the  input  will  be
+  destroyed, of course.
+
+  FIXME: compare the code to Compute_dg_H2O_intra_ln().
+ */
+static void normalization_intra (const State *BHD,
+                                 Vec g_fft, /* g(k), intent(in) */
+                                 real rab,
+                                 Vec work, /* complex work Vec */
+                                 Vec dg)   /* ĝ(x), intent(out) */
+{
+  const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
+
+  /* Set ĝ(k) := ω(k) * g(k), put result into Vec work: */
+  omega (BHD->PD, BHD->dc, g_fft, rab, work, 1.0);
+
+  /* Inverse FFT, ĝ(k) -> ĝ(x): */
+  MatMultTranspose (BHD->fft_mat, work, dg);
+
+  VecScale (dg, 1./L/L/L);
+
+  /* g >= 0 ?? */
+  {
+    PetscScalar *dg_;
+    int local_size;
+
+    VecGetArray (dg, &dg_);
+    VecGetLocalSize (dg, &local_size);
+
+    for (int i = 0; i < local_size; i++)
+      {
+        real g_i = dg_[i];
+        if (g_i < 1.0e-8)
+          g_i = 1.0e-8;
+
+        dg_[i] = g_i;
+      }
+    VecRestoreArray (dg, &dg_);
+  }
+}
+
+
 /* Compute  intramolecular  part. */
 static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
                               Vec coul_fft, real rab, Vec dg, Vec dg_help)
@@ -940,57 +986,6 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
   /* VecShift (dg, -k/N[0]/N[1]/N[2]); */
 }
 
-
-/*
-  Compute normalization condition.  Output  is the convolution of g(x)
-  with ω(x)  = δ(|x| - r)  / 4πr². This function  takes momentum space
-  g(k)  as  input.   The  convolution  result is  manipulated  in  the
-  real-space  rep, unfortunately.  Though this  manipulation  is plain
-  screening of the too small (negative) values.
-
-  Vec dg is  intent(out).
-
-  Needs a complex  work vector. As a matter of fact,  the work Vec and
-  the  input  Vec  g_fft  may  be  aliased. Then  the  input  will  be
-  destroyed, of course.
-
-  FIXME: compare the code to Compute_dg_H2O_intra_ln().
- */
-static void normalization_intra (const State *BHD,
-                                 Vec g_fft, /* g(k), intent(in) */
-                                 real rab,
-                                 Vec work, /* complex work Vec */
-                                 Vec dg)   /* ĝ(x), intent(out) */
-{
-  const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
-
-  /* Set ĝ(k) := ω(k) * g(k), put result into Vec work: */
-  omega (BHD->PD, BHD->dc, g_fft, rab, work, 1.0);
-
-  /* Inverse FFT, ĝ(k) -> ĝ(x): */
-  MatMultTranspose (BHD->fft_mat, work, dg);
-
-  VecScale (dg, 1./L/L/L);
-
-  /* g >= 0 ?? */
-  {
-    PetscScalar *dg_;
-    int local_size;
-
-    VecGetArray (dg, &dg_);
-    VecGetLocalSize (dg, &local_size);
-
-    for (int i = 0; i < local_size; i++)
-      {
-        real g_i = dg_[i];
-        if (g_i < 1.0e-8)
-          g_i = 1.0e-8;
-
-        dg_[i] = g_i;
-      }
-    VecRestoreArray (dg, &dg_);
-  }
-}
 
 /*
  * FIXME: consider using normalization_intra() instead.
