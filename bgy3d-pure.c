@@ -1039,20 +1039,38 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, real rbc, Vec dg)
 
 
 /*
-  Vec t is intent(out).
+  Approximate auxilary function
+
+     c        ~ (2)              c
+    Γ  (x) ~  g      = g  (x) / n  (x)
+     ab        ab;c     ab       ab
+
+  used to represent three-body distribution
+
+                   c   b
+    g    ~  g    Γ    Γ
+     abc     bc   ab   ac
+
+  in  normalized site-site superposition  approximation for  the mixed
+  triplet distributions.   Of three sites the  two b, and  c belong to
+  the  same rigid  species so  that their  pair distribution  is fully
+  characterised by  the distance  r only.  See  e.g.  Eqs.   (4.102) -
+  (4.106) on p. 75 of Jager thesis.
+
+  Vec tab is real, intent(out).
 */
-static void Solve_Normalization_small (const State *BHD, Vec gc, real rc, Vec g,
-                                       Vec t) /* intent(out) */
+static void nssa_gamma_cond (const State *BHD, Vec gac, real rbc, Vec gab,
+                             Vec tab) /* intent(out) */
 {
-  /* ĝ(x) goes into Vec t which is is intent(out) here: */
-  nssa_norm_intra_x (BHD, gc, rc, t);
+  /* n(x) goes into Vec tab which is is intent(out) here: */
+  nssa_norm_intra_x (BHD, gac, rbc, tab);
 
   /*
-    t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
+    t(x) =  g(x) / n(x)  (or rather t(x)  = g(x) / t(x)  with argument
     aliasing) avoiding small denominators.  Some of the commented code
     used VecPointwiseDivide() instead.
   */
-  safe_pointwise_divide (t, g, t, NORM_REG2); /* argument aliasing */
+  safe_pointwise_divide (tab, gab, tab, NORM_REG2); /* argument aliasing */
 }
 
 
@@ -1263,7 +1281,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k == j) continue; /* k == 0 in the body: */
 
               /* Here t is intent(out): */
-              Solve_Normalization_small (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+              nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
 
               /* Compute dg_new2 term and add to the accumulator: */
               Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
@@ -1271,8 +1289,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             }
 
           {                     /* INTRA2 */
-            Solve_Normalization_small (BHD, g[i][j], r_HO, g[1][1],
-                                       t[1][1]); /* intent(out) */
+            nssa_gamma_cond (BHD, g[i][j], r_HO, g[1][1], t[1][1]);
             nssa_norm_intra_x (BHD, g[1][1], r_HO, t[0][1]);
             Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                               t[1][1], t[0][1],
@@ -1310,7 +1327,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k == j) continue; /* k == 1 in the body: */
 
               /* Here t is intent(out): */
-              Solve_Normalization_small (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+              nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
 
               /* Compute dg_new2 term and add to the accumulator: */
               Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
@@ -1318,8 +1335,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             }
 
           {                     /* INTRA2 */
-            Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
-                                       t[0][1]); /* intent(out) */
+            nssa_gamma_cond (BHD, g[i][j], r_HO, g[0][1], t[0][1]);
             nssa_norm_intra_x (BHD, g[0][1], r_HO, t[0][0]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[0][0],
@@ -1357,7 +1373,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k == j) continue; /* k == 0 in the body: */
 
               /* Here t is intent(out): */
-              Solve_Normalization_small (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
+              nssa_gamma_cond (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
 
               /* Compute dg_new2 term and add to the accumulator: */
               Compute_dg_H2O_intra_ln (BHD, t[k][i], r_HO, dg_new2);
@@ -1365,8 +1381,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             }
 
           {                     /* INTRA2 */
-            Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
-                                       t[0][1]); /* intent(out) */
+            nssa_gamma_cond (BHD, g[i][j], r_HO, g[0][1], t[0][1]);
             nssa_norm_intra_x (BHD, g[0][1], r_HO, t[1][1]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[1][1],
@@ -1622,22 +1637,19 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          Solve_Normalization_small (BHD, g[0][1], r_HO, g[0][0],
-                                     t[0][0]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][1], r_HO, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
           /* tO = gHO/int(gHO wHH) */
-          Solve_Normalization_small (BHD, g[0][1], r_HH, g[0][1],
-                                     t[1][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][1], r_HH, g[0][1], t[1][1]);
           nssa_norm_intra_x (BHD, g[0][1], r_HH, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_Normalization_small (BHD, g[0][1], r_HO, g[1][1],
-                                     t[1][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][1], r_HO, g[1][1], t[1][1]);
           nssa_norm_intra_x (BHD, g[1][1], r_HO, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
@@ -1669,27 +1681,23 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          Solve_Normalization_small (BHD, g[0][0], r_HH, g[0][0],
-                                     t[0][0]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][0], r_HH, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_Normalization_small (BHD, g[0][0], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][0], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* tO = gH/int(gH wHH) */
-          Solve_Normalization_small (BHD, g[0][0], r_HH, g[0][0],
-                                     t[1][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][0], r_HH, g[0][0], t[1][1]);
           nssa_norm_intra_x (BHD, g[0][0], r_HH, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          Solve_Normalization_small (BHD, g[0][0], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[0][0], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra_x (BHD, g[0][1], r_HO, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
@@ -1722,13 +1730,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
 
-          Solve_Normalization_small (BHD, g[1][1], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[1][1], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
-          Solve_Normalization_small (BHD, g[1][1], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
+          nssa_gamma_cond (BHD, g[1][1], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra_x (BHD, g[0][1], r_HO, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
