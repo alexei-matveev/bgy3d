@@ -39,7 +39,7 @@ static State* initialize_state (const ProblemData *PD)
 
   PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
-  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG);
+  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
