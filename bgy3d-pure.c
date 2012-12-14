@@ -1235,6 +1235,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       a1 = a0;
       a = a0;
 
+      /* FIXME:   hardwired   distance   matrix.   Zeros   are   never
+         referenced: */
+      const real r[2][2] = {{0.0, r_HO},
+                            {r_HO, 0.0}};
+
   for (iter = 0; iter < max_iter; iter++)
     {
       if (!(iter % 10) && iter > 0)
@@ -1281,10 +1286,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k != j)       /* k == 0 in the body: */
                 {
                   /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
 
                   /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
                   VecAXPY (dg_new, 1.0, dg_new2);
                 }
             }
@@ -1328,10 +1333,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k != j)       /* k == 1 in the body: */
                 {
                   /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
 
                   /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
                   VecAXPY (dg_new, 1.0, dg_new2);
                 }
             }
@@ -1375,10 +1380,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if (k != j)       /* k == 0 in the body: */
                 {
                   /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
+                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[k][i], t[k][i]);
 
                   /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[k][i], r_HO, dg_new2);
+                  Compute_dg_H2O_intra_ln (BHD, t[k][i], r[k][j], dg_new2);
                   VecAXPY (dg_new, 1.0, dg_new2);
                 }
             }
