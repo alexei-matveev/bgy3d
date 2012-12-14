@@ -723,54 +723,95 @@ static void omega (const ProblemData *PD, const DA dc,
 
 
 /*
-  Compute normalization condition.  Output  is the convolution of g(x)
-  with ω(x)  = δ(|x| - r)  / 4πr². This function  takes momentum space
-  g(k)  as  input.   The  convolution  result is  manipulated  in  the
-  real-space  rep, unfortunately.  Though this  manipulation  is plain
-  screening of the too small (negative) values.
+  Compute normalization function:
 
-  Vec dg is  intent(out).
+     c
+    n  (x) = ∫ g  (y)  g  (x - y) dy
+     ab         ac      bc
 
-  Needs a complex  work vector. As a matter of fact,  the work Vec and
-  the  input  Vec  g_fft  may  be  aliased. Then  the  input  will  be
-  destroyed, of course.
+  where  one   of  the   convoluted  distributions  is   a  simplified
+  "rigid-bond" distribution:  ω(x) = δ(|x|  - r) / 4πr².   This latter
+  distribution is fully  characterized by the distance r  which is the
+  only  input parameter. Another  distribution is  supplied as  a grid
+  data.    NSSA   stays   for  "normalized   site-site   superposition
+  approximation"  that  is   applied  to  triple  distributions.   See
+  e.g. Eq. (4.106) on p. 75 of Jager thesis.
+
+                                      c
+  Thus, given g   and r   it returns n  .
+               ac      bc             ab
+
+  This function  takes momentum space g(k) as  input.  The convolution
+  result is manipulated in  the real-space rep, unfortunately.  Though
+  this  manipulation is plain  screening of  the too  small (negative)
+  values.
+
+  Vec work is a complex work vector.
+  Vec n is intent(out).
+
+  As a matter of  fact, the Vec work and the input  Vec gac_fft may be
+  aliased. Then the input will be destroyed, of course.
 
   FIXME: compare the code to Compute_dg_H2O_intra_ln().
  */
-static void normalization_intra (const State *BHD,
-                                 Vec g_fft, /* g(k), intent(in) */
-                                 real rab,
-                                 Vec work, /* complex work Vec */
-                                 Vec dg)   /* ĝ(x), intent(out) */
+static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
+                             Vec work, Vec nab)
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  /* Set ĝ(k) := ω(k) * g(k), put result into Vec work: */
-  omega (BHD->PD, BHD->dc, g_fft, rab, work, 1.0);
+  /* Set n(k) := ω(k) * g(k), put result into Vec work: */
+  omega (BHD->PD, BHD->dc, gac_fft, rbc, work, 1.0);
 
-  /* Inverse FFT, ĝ(k) -> ĝ(x): */
-  MatMultTranspose (BHD->fft_mat, work, dg);
+  /* Inverse FFT, n(k) -> n(x): */
+  MatMultTranspose (BHD->fft_mat, work, nab);
 
-  VecScale (dg, 1./L/L/L);
+  VecScale (nab, 1./L/L/L);
 
-  /* g >= 0 ?? */
+  /* FIXME:  make n(x)  n >  0, because  it will  appear later  in the
+     denominator. */
   {
-    PetscScalar *dg_;
+    PetscScalar *nab_;
     int local_size;
 
-    VecGetArray (dg, &dg_);
-    VecGetLocalSize (dg, &local_size);
+    VecGetArray (nab, &nab_);
+    VecGetLocalSize (nab, &local_size);
 
     for (int i = 0; i < local_size; i++)
       {
-        real g_i = dg_[i];
-        if (g_i < 1.0e-8)
-          g_i = 1.0e-8;
+        real nab_i = nab_[i];
+        if (nab_i < 1.0e-8)
+          nab_i = 1.0e-8;
 
-        dg_[i] = g_i;
+        nab_[i] = nab_i;
       }
-    VecRestoreArray (dg, &dg_);
+    VecRestoreArray (nab, &nab_);
   }
+}
+
+/*
+  FIXME: consider using nssa_norm_intra() instead.
+
+  Almost the same  as nssa_norm_intra(), but starts with  a real space
+  g(x).   The real  space g(x)  is FFTed  into g(k)  for the  rest see
+  above.
+
+  Vec gac is real, intent(in).
+  Vec nab is real, intent(out).
+
+  Side effects: uses BHD->fft_scratch as work Vec.
+ */
+static void nssa_norm_intra_x (const State *BHD, Vec gac, real rbc,
+                               Vec nab) /* intent(out) */
+{
+  /* fft(g/t) */
+  MatMult (BHD->fft_mat, gac, BHD->fft_scratch);
+
+  /*
+    FIXME: argument aliasing! BHD->fft_scratch is used as input and as
+    work array here.  Gets  overwritten as the result.  Huge potential
+    for confusion:
+  */
+  nssa_norm_intra (BHD, BHD->fft_scratch, rbc, BHD->fft_scratch, nab);
 }
 
 
@@ -953,24 +994,24 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   transforming g(x) -> g(k). The real space representation g(x) is not
   otherwise used.
 
-  Vec g is intent(in).
+  Vec gac is intent(in).
   Vec dg is intent(out).
 
   Side effects: uses BHD->fft_scratch as temp Vec.
 
-  FIXME: compare the code to normalization_intra().
+  FIXME: compare the code to nssa_norm_intra().
 */
-void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
+void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, real rbc, Vec dg)
 {
   /* g(x) -> g(k): */
-  MatMult (BHD->fft_mat, g, BHD->fft_scratch);
+  MatMult (BHD->fft_mat, gac, BHD->fft_scratch);
 
   /*
     FIXME:  argument aliasing!   BHD->fft_scratch is  the  input alias
     work  array.  Its  contents  is  destroyed on  return.  Vec dg  is
     intent(out) here:
   */
-  normalization_intra (BHD, BHD->fft_scratch, rab, BHD->fft_scratch, dg);
+  nssa_norm_intra (BHD, BHD->fft_scratch, rbc, BHD->fft_scratch, dg);
 
   /* ln(g) */
   {
@@ -983,7 +1024,7 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
     for (int i = 0; i < local_size; i++)
       {
         real g_i = dg_[i];
-        assert (g_i >= 1.0e-8);  /* See normalization_intra() */
+        assert (g_i >= 1.0e-8);  /* See nssa_norm_intra() */
 
         dg_[i] = -log (g_i);
       }
@@ -997,42 +1038,13 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg)
 
 
 /*
- * FIXME: consider using normalization_intra() instead.
- *
- * Compute  normalization  condition. This  function  appears to  take
- * g(x), FFT it into g(k) and operate with the latter exclusively. The
- * result is manipulated in  the real-space rep, unfortunately. Though
- * this manipulation  is plain screening  of the too  small (negative)
- * values.
- *
- * Vec dg is  intent(out).
- *
- * Side effects: uses BHD->fft_scratch as work Vec.
- */
-static void Compute_dg_normalization_intra (const State *BHD, Vec g, real rab,
-                                            Vec dg) /* intent(out) */
-{
-  /* fft(g/t) */
-  MatMult (BHD->fft_mat, g, BHD->fft_scratch);
-
-  /*
-    FIXME: argument aliasing! BHD->fft_scratch is used as input and as
-    work array here.  Gets  overwritten as the result.  Huge potential
-    for confusion:
-  */
-  normalization_intra (BHD, BHD->fft_scratch, rab, BHD->fft_scratch,
-                       dg); /* dg is intent(out) */
-}
-
-
-/*
   Vec t is intent(out).
 */
 static void Solve_Normalization_small (const State *BHD, Vec gc, real rc, Vec g,
                                        Vec t) /* intent(out) */
 {
   /* ĝ(x) goes into Vec t which is is intent(out) here: */
-  Compute_dg_normalization_intra (BHD, gc, rc, t);
+  nssa_norm_intra_x (BHD, gc, rc, t);
 
   /*
     t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
@@ -1053,7 +1065,7 @@ void bgy3d_solve_normalization (const State *BHD,
     ĝ(x) goes into Vec t  which is is intent(out) here, fft_scratch is
     a work array:
   */
-  normalization_intra (BHD, gc_fft, rc, BHD->fft_scratch, t);
+  nssa_norm_intra (BHD, gc_fft, rc, BHD->fft_scratch, t);
 
   /*
     t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
@@ -1260,8 +1272,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[1][1],
                                        t[1][1]); /* intent(out) */
-            Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
-                                            t[0][1]);
+            nssa_norm_intra_x (BHD, g[1][1], r_HO, t[0][1]);
             Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                               t[1][1], t[0][1],
                               BHD->u2_fft[1][1], r_HO, dg_new2, work);
@@ -1308,8 +1319,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
                                        t[0][1]); /* intent(out) */
-            Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
-                                            t[0][0]);
+            nssa_norm_intra_x (BHD, g[0][1], r_HO, t[0][0]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[0][0],
                               BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1356,8 +1366,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
                                        t[0][1]); /* intent(out) */
-            Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
-                                            t[1][1]);
+            nssa_norm_intra_x (BHD, g[0][1], r_HO, t[1][1]);
             Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                               t[0][1], t[1][1],
                               BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1620,8 +1629,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           /* tO = gHO/int(gHO wHH) */
           Solve_Normalization_small (BHD, g[0][1], r_HH, g[0][1],
                                      t[1][1]); /* intent(out) */
-          Compute_dg_normalization_intra (BHD, g[0][1], r_HH,
-                                          t[0][1]);
+          nssa_norm_intra_x (BHD, g[0][1], r_HH, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
@@ -1629,8 +1637,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_Normalization_small (BHD, g[0][1], r_HO, g[1][1],
                                      t[1][1]); /* intent(out) */
-          Compute_dg_normalization_intra (BHD, g[1][1], r_HO,
-                                          t[0][1]);
+          nssa_norm_intra_x (BHD, g[1][1], r_HO, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[1][1], r_HO, dg_new2, work);
@@ -1674,8 +1681,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           /* tO = gH/int(gH wHH) */
           Solve_Normalization_small (BHD, g[0][0], r_HH, g[0][0],
                                      t[1][1]); /* intent(out) */
-          Compute_dg_normalization_intra (BHD, g[0][0], r_HH,
-                                          t[0][0]);
+          nssa_norm_intra_x (BHD, g[0][0], r_HH, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
@@ -1683,8 +1689,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_Normalization_small (BHD, g[0][0], r_HO, g[0][1],
                                      t[0][1]); /* intent(out) */
-          Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
-                                          t[0][0]);
+          nssa_norm_intra_x (BHD, g[0][1], r_HO, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1723,8 +1728,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           Solve_Normalization_small (BHD, g[1][1], r_HO, g[0][1],
                                      t[0][1]); /* intent(out) */
-          Compute_dg_normalization_intra (BHD, g[0][1], r_HO,
-                                          t[1][1]);
+          nssa_norm_intra_x (BHD, g[0][1], r_HO, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
