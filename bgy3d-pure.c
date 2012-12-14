@@ -25,6 +25,18 @@ static real NORM_REG2 = 1.0e-2;
 #undef eO
 #undef qO
 
+/* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
+static void create_g2 (const DA da, int m, Vec g[m][m])
+{
+  /* Create global vectors */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (da, &g[i][j]);
+        g[j][i] = g[i][j];
+      }
+}
+
 static State* initialize_state (const ProblemData *PD)
 {
   State *BHD = (State*) malloc (sizeof (*BHD));
@@ -45,32 +57,23 @@ static State* initialize_state (const ProblemData *PD)
      other arguments are intent(out): */
   bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
 
-  /* Create global vectors */
+  /* Create global vectors. FIXME:  u2, u2_fft probably differ only by
+     factors: */
+  create_g2 (BHD->da, 2, BHD->u2);
+  create_g2 (BHD->dc, 2, BHD->u2_fft); /* complex */
+  create_g2 (BHD->da, 2, BHD->c2);
+  create_g2 (BHD->da, 2, BHD->u_ini);
+
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      {
-        /* FIXME: u2, u2_fft probably differ only by factors: */
-        DACreateGlobalVector (BHD->da, &BHD->u2[i][j]);
-        BHD->u2[j][i] = BHD->u2[i][j];
+      FOR_DIM
+        {
+          DACreateGlobalVector (BHD->da, &BHD->F[i][j][dim]);
+          BHD->F[j][i][dim] = BHD->F[i][j][dim];
 
-        DACreateGlobalVector (BHD->dc, &BHD->u2_fft[i][j]); /* complex */
-        BHD->u2_fft[j][i] = BHD->u2_fft[i][j];
-
-        DACreateGlobalVector (BHD->da, &BHD->c2[i][j]);
-        BHD->c2[j][i] = BHD->c2[i][j];
-
-        DACreateGlobalVector (BHD->da, &BHD->u_ini[i][j]);
-        BHD->u_ini[j][i] = BHD->u_ini[i][j];
-
-        FOR_DIM
-          {
-            DACreateGlobalVector(BHD->da, &BHD->F[i][j][dim]);
-            BHD->F[j][i][dim] = BHD->F[i][j][dim];
-
-            DACreateGlobalVector (BHD->da, &BHD->F_l[i][j][dim]);
-            BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim];
-          }
-      }
+          DACreateGlobalVector (BHD->da, &BHD->F_l[i][j][dim]);
+          BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim];
+        }
 
   FOR_DIM
     DACreateGlobalVector (BHD->da, &BHD->v[dim]);
@@ -1125,18 +1128,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->da, &g[i][j]);
-        g[j][i] = g[i][j];
-
-        DACreateGlobalVector(BHD->da, &dg[i][j]);
-        dg[j][i] = dg[i][j];
-
-        DACreateGlobalVector (BHD->da, &t[i][j]);
-        t[j][i] = t[i][j];
-      }
+  create_g2 (BHD->da, 2, g);
+  create_g2 (BHD->da, 2, dg);
+  create_g2 (BHD->da, 2, t);
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
@@ -1153,13 +1147,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     starting iterations from zero:
   */
   Vec x_lapl[2][2];             /* real */
+  create_g2 (BHD->da, 2, x_lapl);
+
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->da, &x_lapl[i][j]);
-        VecSet (x_lapl[i][j], 0.0);
-        x_lapl[j][i] = x_lapl[i][j]; /* pairwise property */
-      }
+      VecSet (x_lapl[i][j], 0.0);
 #endif
 
   g0[0][0] = BHD->u_ini[0][0];
@@ -1496,18 +1488,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->da, &g[i][j]);
-        g[j][i] = g[i][j];
-
-        DACreateGlobalVector (BHD->da, &dg[i][j]);
-        dg[j][i] = dg[i][j];
-
-        DACreateGlobalVector (BHD->da, &t[i][j]);
-        t[j][i] = t[i][j];
-      }
+  create_g2 (BHD->da, 2, g);
+  create_g2 (BHD->da, 2, dg);
+  create_g2 (BHD->da, 2, t);
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
@@ -1524,13 +1507,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
     starting iterations from zero:
   */
   Vec x_lapl[2][2];             /* real */
+  create_g2 (BHD->da, 2, x_lapl);
+
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->da, &x_lapl[i][j]);
-        VecSet (x_lapl[i][j], 0.0);
-        x_lapl[j][i] = x_lapl[i][j]; /* pairwise property */
-      }
+      VecSet (x_lapl[i][j], 0.0);
 #endif
 
   g0[0][0] = BHD->u_ini[0][0];
