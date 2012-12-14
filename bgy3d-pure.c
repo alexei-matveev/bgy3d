@@ -1221,6 +1221,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           int i, j;
 
           /*
+            See e.g. Eq. (4.91), p.  72 of the Jager Thesis. Also note
+            that most of the pair quantities are symmetric:
+
             u   = Σ  ρ  K   g
              ij    k  k  kj  ik
            */
@@ -1241,11 +1244,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][0],
-                                     t[0][0]); /* intent(out) */
-          Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, /* intent(in) */
-                                   dg_new2);           /* intent(out) */
-          VecAXPY (dg_new, 1.0, dg_new2);
+          /* This is the sum over k /= j */
+          for (int k = 0; k < 2; k++)
+            {
+              if (k == j) continue; /* k == 0 in the body: */
+
+              /* Here t is intent(out): */
+              Solve_Normalization_small (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+
+              /* Compute dg_new2 term and add to the accumulator: */
+              Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+              VecAXPY (dg_new, 1.0, dg_new2);
+            }
 
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[1][1],
@@ -1282,12 +1292,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          /* This is the sum over k /= 0 */
-          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
-          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, /* intent(in) */
-                                   dg_new2); /* intent(out) */
-          VecAXPY (dg_new, 1.0, dg_new2);
+          /* This is the sum over k /= j */
+          for (int k = 0; k < 2; k++)
+            {
+              if (k == j) continue; /* k == 1 in the body: */
+
+              /* Here t is intent(out): */
+              Solve_Normalization_small (BHD, g[i][j], r_HO, g[i][k], t[i][k]);
+
+              /* Compute dg_new2 term and add to the accumulator: */
+              Compute_dg_H2O_intra_ln (BHD, t[i][k], r_HO, dg_new2);
+              VecAXPY (dg_new, 1.0, dg_new2);
+            }
 
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
@@ -1324,12 +1340,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          /* This is the sum over k /= 1 */
-          Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
-                                     t[0][1]); /* intent(out) */
-          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, /* intent(in) */
-                                   dg_new2); /* intent(out) */
-          VecAXPY (dg_new, 1.0, dg_new2);
+          /* This is the sum over k /= j */
+          for (int k = 0; k < 2; k++)
+            {
+              if (k == j) continue; /* k == 0 in the body: */
+
+              /* Here t is intent(out): */
+              Solve_Normalization_small (BHD, g[i][j], r_HO, g[k][i], t[k][i]);
+
+              /* Compute dg_new2 term and add to the accumulator: */
+              Compute_dg_H2O_intra_ln (BHD, t[k][i], r_HO, dg_new2);
+              VecAXPY (dg_new, 1.0, dg_new2);
+            }
 
           {                     /* INTRA2 */
             Solve_Normalization_small (BHD, g[i][j], r_HO, g[0][1],
