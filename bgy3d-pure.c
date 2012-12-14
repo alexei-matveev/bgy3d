@@ -816,9 +816,26 @@ static void nssa_norm_intra_x (const State *BHD, Vec gac, real rbc,
 }
 
 
-/* Compute  intramolecular  part. */
-static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
-                              Vec coul_fft, real rab, Vec dg, Vec dg_help)
+/*
+  Compute the so-called third  term of the intramolecular part.  Given
+  the input consisting of
+
+         ~ b   c
+    F  , g  , n  , and ω   represented by r
+     ac   ac   ab       bc                 bc
+
+  compute the divergence term to be added to
+
+    u
+     ab
+
+  See line 3 of Eq. (4.118) p. 79 of Jager thesis.
+*/
+static void Compute_dg_intra (State *BHD,
+                              Vec fac[3], Vec fac_l[3],
+                              Vec gac, Vec nab, Vec cac_fft,
+                              real rbc,
+                              Vec dg, Vec dg_help)
 {
   int x[3], n[3], i[3], ic[3];
   real k_fac, k;
@@ -831,7 +848,7 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
-  const real fac = L / (2. * M_PI); /* siehe oben ... */
+  const real scale = L / (2. * M_PI); /* siehe oben ... */
 
 
   /* Get local portion of the grid */
@@ -841,12 +858,12 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
   /* Fa*ga ga*/
   /************************************************/
 
-  /* fft(f1*g1) */
+  /* fft(f1*gac) */
   FOR_DIM
     {
-      VecPointwiseMult(BHD->v[dim], g1, f[dim]);
+      VecPointwiseMult (BHD->v[dim], gac, fac[dim]);
       /* special treatment: Coulomb long */
-      VecAXPY(BHD->v[dim], -1.0, f_l[dim]);
+      VecAXPY (BHD->v[dim], -1.0, fac_l[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
 
@@ -857,17 +874,17 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
         vanishes? Because then, formally, zero or one would not make a
         difference here:
       */
-      omega (BHD->PD, BHD->dc, fg2_fft[dim], rab, fg2_fft[dim], 0.0);
+      omega (BHD->PD, BHD->dc, fg2_fft[dim], rbc, fg2_fft[dim], 0.0);
     }
 
-  /* int(..)/tg */
+  /* int(..)/nab */
   /* Laplace^-1 * divergence */
 
   /*******************************************/
-  /*    int/tg  */
+  /*    int/nab  */
   /*******************************************/
 
-  /* Back  transformation of coulomb  part, divide  by tg  and forward
+  /* Back  transformation of coulomb  part, divide  by nab  and forward
      transfromation */
   FOR_DIM
     {
@@ -875,20 +892,20 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
       VecScale (BHD->v[dim], 1./L/L/L);
 
       /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
-         BHD->v[dim], tg);
+         BHD->v[dim], nab);
 
-         v[dim] := v[dim] / tg, essentially:
+         v[dim] := v[dim] / nab, essentially:
       */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], tg, NORM_REG);
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab, NORM_REG);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
   /*******************************************/
-  complex ***dg_fft_, ***coul_fft_;
+  complex ***dg_fft_, ***cac_fft_;
   complex ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
+  DAVecGetArray (BHD->dc, cac_fft, &cac_fft_);
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
@@ -914,18 +931,18 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
           else
             {
               k = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              k_fac = fac / k;
-              k = 2.0 * M_PI * sqrt(k) * rab / L;
+              k_fac = scale / k;
+              k = 2.0 * M_PI * sqrt(k) * rbc / L;
 
               FOR_DIM
                 dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
 
               FOR_DIM
-                fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / fac * (I * coul_fft_[i[2]][i[1]][i[0]]) * sin(k) / k;
+                fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sin(k) / k;
             }
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
+  DAVecRestoreArray (BHD->dc, cac_fft, &cac_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
@@ -933,7 +950,7 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
 
   VecScale(dg_help, PD->beta/L/L/L);
 
-  /* Back  transformation of coulomb  part, divide  by tg  and forward
+  /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
   FOR_DIM
     {
@@ -941,11 +958,11 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
       VecScale (BHD->v[dim], 1./L/L/L);
 
       /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
-         BHD->v[dim], tg);
+         BHD->v[dim], nab);
 
-         v[dim] := v[dim] / tg, essentially:
+         v[dim] := v[dim] / nab, essentially:
       */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], tg, NORM_REG);
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab, NORM_REG);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
@@ -972,7 +989,7 @@ static void Compute_dg_intra (State *BHD, Vec f[3], Vec f_l[3], Vec g1, Vec tg,
           else
             {
               k = SQR (ic[2]) + SQR (ic[1]) + SQR(ic[0]);
-              k_fac = fac / k;
+              k_fac = scale / k;
 
               FOR_DIM
                 dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
