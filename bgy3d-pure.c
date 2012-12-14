@@ -1140,8 +1140,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         dg[j][i] = dg[i][j];
       }
 
-  DACreateGlobalVector(BHD->da, &dg_new);
-  DACreateGlobalVector(BHD->da, &dg_new2);
+  DACreateGlobalVector (BHD->da, &dg_new);
+  DACreateGlobalVector (BHD->da, &dg_new2);
   DACreateGlobalVector (BHD->da, &work);
 
   DACreateGlobalVector (BHD->da, &t[0][0]);
@@ -1447,8 +1447,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         VecDestroy (x_lapl[i][j]);
       }
 
-  VecDestroy(dg_new);
-  VecDestroy(dg_new2);
+  VecDestroy (dg_new);
+  VecDestroy (dg_new2);
   VecDestroy (work);
 
   VecDestroy (t[0][0]);
@@ -1515,8 +1515,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
         dg[j][i] = dg[i][j];
       }
 
-  DACreateGlobalVector(BHD->da, &dg_new);
-  DACreateGlobalVector(BHD->da, &dg_new2);
+  DACreateGlobalVector (BHD->da, &dg_new);
+  DACreateGlobalVector (BHD->da, &dg_new2);
   DACreateGlobalVector (BHD->da, &work);
 
   DACreateGlobalVector (BHD->da, &t[0][0]);
@@ -1824,8 +1824,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
         VecDestroy (x_lapl[i][j]);
       }
 
-  VecDestroy(dg_new);
-  VecDestroy(dg_new2);
+  VecDestroy (dg_new);
+  VecDestroy (dg_new2);
   VecDestroy (work);
 
   VecDestroy (t[0][0]);
