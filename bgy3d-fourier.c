@@ -537,7 +537,7 @@ void ExtractAxis(BGY3dFourierData BDD, Vec g, int axis)
   fprintf(stderr,"end\n");
 }
 
-void Compute_g(BGY3dFourierData BDD, Vec g, Vec g0, Vec dg)
+static void Compute_g(BGY3dFourierData BDD, Vec g, Vec g0, Vec dg)
 {
   DA da;
   int x[3], n[3], i[3];
