@@ -38,7 +38,8 @@ static State* initialize_state (const ProblemData *PD)
   BHD->PD = PD;
 
   PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG= %e\n", NORM_REG);
+  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
+  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
@@ -1225,7 +1226,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms: %e %e ", iter+1, NORM_REG, NORM_REG2);
       /* f=integral(g) */
       if (1)                    /* kflg was set with -pair */
         {
@@ -1277,8 +1277,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[i][j], a);
-
           /* g_HH */
           i = 0; j = 0;
 
@@ -1319,8 +1317,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
           dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[i][j], a);
 
           /* g_OO */
           i = 1; j = 1;
@@ -1363,8 +1359,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
           dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[i][j], a);
-
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
           ComputeH2O_g (g[0][0], g0[0][0], dg[0][0]);
@@ -1403,14 +1397,17 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           a1=1.0;
           mycount=0;
         }
-      PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
+
       dg_norm_old[0][0] = dg_norm[0][0];
       dg_norm_old[1][1] = dg_norm[1][1];
       dg_norm_old[0][1] = dg_norm[0][1];
-      /*********************************/
 
-
-      /* Last print didnt CR LF: */
+      PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
+      PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
+      PetscPrintf (PETSC_COMM_WORLD, "HO=%e ", dg_norm[0][1]);
+      PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0][0]);
+      PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1][1]);
+      PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
       if (dg_norm[0][0] <= norm_tol &&
