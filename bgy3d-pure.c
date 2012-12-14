@@ -1164,9 +1164,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   Vec (*g0)[2] = BHD->u_ini;        /* FIXME: alias! */
 
   /* set initial guess*/
-  VecSet(dg[0][0],0);
-  VecSet(dg[1][1],0);
-  VecSet(dg[0][1],0);
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      VecSet (dg[i][j], 0.0);
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
@@ -1188,20 +1188,18 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
-      /* Vec work is used as a temporary here: */
-      bgy3d_impose_laplace_boundary (BHD, g0[0][0], work, x_lapl[0][0]);
-      bgy3d_impose_laplace_boundary (BHD, g0[1][1], work, x_lapl[1][1]);
-      bgy3d_impose_laplace_boundary (BHD, g0[0][1], work, x_lapl[0][1]);
+      for (int i = 0; i < 2; i++)
+        for (int j = 0; j <= i; j++)
+          {
+            /* Vec work is used as a temporary here: */
+            bgy3d_impose_laplace_boundary (BHD, g0[i][j], work, x_lapl[i][j]);
 
-      /* g=g0*exp(-dg) */
-      ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
-      ComputeH2O_g (g[0][0], g0[0][0], dg[0][0]);
-      ComputeH2O_g (g[1][1], g0[1][1], dg[1][1]);
+            /* g = g0 * exp(-dg) */
+            ComputeH2O_g (g[i][j], g0[i][j], dg[i][j]);
 
-      /* Not sure if 0.0 as inital value is right. */
-      dg_norm_old[0][0] = 0.0;
-      dg_norm_old[1][1] = 0.0;
-      dg_norm_old[0][1] = 0.0;
+            /* Not sure if 0.0 as inital value is right. */
+            dg_norm_old[i][j] = 0.0;
+          }
 
       a1 = a0;
       a = a0;
@@ -1351,12 +1349,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
           dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-
-          /* ende: */
-          ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
-          ComputeH2O_g (g[0][0], g0[0][0], dg[0][0]);
-          ComputeH2O_g (g[1][1], g0[1][1], dg[1][1]);
         } /* of if (1) */
+
+      /*
+        Now  that du[]  has been  computed using  g[] of  the previous
+        iteration one can safely update  g[].  Compute g := exp[-(u0 +
+        du)], with a sanity check:
+      */
+      for (int i = 0; i < 2; i++)
+        for (int j = 0; j <= i; j++)
+          ComputeH2O_g (g[i][j], g0[i][j], dg[i][j]);
 
       /* (fancy) step size control */
       mycount++;
