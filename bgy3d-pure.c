@@ -817,8 +817,8 @@ static void nssa_norm_intra_x (const State *BHD, Vec gac, real rbc,
 
 
 /*
-  Compute the so-called third  term of the intramolecular part.  Given
-  the input consisting of
+  Compute  the  so-called  third,  "challenging",  term  of  the  NSSA
+  expansion.  Given the input consisting of
 
          ~ b   c
     F  , g  , n  , and ω   represented by r
@@ -828,6 +828,9 @@ static void nssa_norm_intra_x (const State *BHD, Vec gac, real rbc,
 
     u
      ab
+
+  Long-range Coulomb is again  treated specially, thus the presence of
+  the extra arguments: the long-range force fac_l and cab_fft.
 
   See line 3 of Eq. (4.118) p. 79 of Jager thesis.
 */
