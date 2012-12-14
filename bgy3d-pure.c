@@ -37,6 +37,14 @@ static void create_g2 (const DA da, int m, Vec g[m][m])
       }
 }
 
+static void destroy_g2 (int m, Vec g[m][m])
+{
+  /* Destroy global vectors */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (g[i][j]);
+}
+
 static State* initialize_state (const ProblemData *PD)
 {
   State *BHD = (State*) malloc (sizeof (*BHD));
@@ -95,27 +103,25 @@ static void finalize_state (State *BHD)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
+  destroy_g2 (2, BHD->u2);
+  destroy_g2 (2, BHD->u2_fft);
+  destroy_g2 (2, BHD->u_ini);
+  destroy_g2 (2, BHD->c2);
+
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j <= i; j++)
+      FOR_DIM
+        {
+          VecDestroy (BHD->F[i][j][dim]);
+          VecDestroy (BHD->F_l[i][j][dim]);
+        }
+
   FOR_DIM
     {
       VecDestroy (BHD->v[dim]);
       VecDestroy (BHD->fg2_fft[dim]);
     }
   VecDestroy (BHD->gfg2_fft);
-
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        VecDestroy (BHD->u2[i][j]);
-        VecDestroy (BHD->u2_fft[i][j]);
-        VecDestroy (BHD->u_ini[i][j]);
-        VecDestroy (BHD->c2[i][j]);
-
-        FOR_DIM
-          {
-            VecDestroy (BHD->F[i][j][dim]);
-            VecDestroy (BHD->F_l[i][j][dim]);
-          }
-      }
 
   VecDestroy (BHD->fft_scratch);
 
@@ -1425,14 +1431,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
     }
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        VecDestroy (g[i][j]);
-        VecDestroy (t[i][j]);
-        VecDestroy (dg[i][j]);
-        VecDestroy (x_lapl[i][j]);
-      }
+  destroy_g2 (2, g);
+  destroy_g2 (2, t);
+  destroy_g2 (2, dg);
+  destroy_g2 (2, x_lapl);
 
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
@@ -1787,14 +1789,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
     }
 
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        VecDestroy (g[i][j]);
-        VecDestroy (t[i][j]);
-        VecDestroy (dg[i][j]);
-        VecDestroy (x_lapl[i][j]);
-      }
+  destroy_g2 (2, g);
+  destroy_g2 (2, t);
+  destroy_g2 (2, dg);
+  destroy_g2 (2, x_lapl);
 
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
