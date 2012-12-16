@@ -1272,161 +1272,63 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         a = a0;
 
       /* f=integral(g) */
-      if (1)                    /* kflg was set with -pair */
-        {
-          int i, j;
-
-          /*
-            See e.g. Eq. (4.91), p.  72 of the Jager Thesis. Also note
-            that most of the pair quantities are symmetric:
+      /*
+        See e.g.  Eq. (4.91),  p.  72 of  the Jager Thesis.  Also note
+        that most of the pair quantities are symmetric:
 
             u   = Σ  ρ  K   g
              ij    k  k  kj  ik
-           */
+      */
 
-          /* g_OH */
-          i = 0; j = 1;
+      /* g_HH, g_HO, g_OO: */
+      for (int j = 0; j < 2; j++)
+        for (int i = 0; i <= j; i++) /* FIXME: ji <=> ij */
+          {
+            VecSet (dg_new, 0.0);
+            for (int k = 0; k < 2; k++)
+              {
+                Compute_dg_inter (BHD,
+                                  BHD->F[k][j], BHD->F_l[k][j], g[k][j],
+                                  g[i][k],
+                                  BHD->u2_fft[k][j], BHD->rhos[k],
+                                  dg_new2);
+                VecAXPY (dg_new, damp_LJ, dg_new2);
+              }
 
-          VecSet (dg_new, 0.0);
-          for (int k = 0; k < 2; k++)
-            {
-              Compute_dg_inter (BHD,
-                                BHD->F[k][j], BHD->F_l[k][j], g[k][j],
-                                g[i][k],
-                                BHD->u2_fft[k][j], BHD->rhos[k],
-                                dg_new2);
-              VecAXPY (dg_new, damp_LJ, dg_new2);
-            }
+            VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-          VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
+            /* These are two sums over k /= j and k /= i: */
+            for (int k = 0; k < 2; k++)
+              {
+                if (k != j)
+                  {
+                    /* Here t is intent(out): */
+                    nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
 
-          /* These are two sums over k /= j and k /= i: */
-          for (int k = 0; k < 2; k++)
-            {
-              if (k != j)       /* k == 0 in the body: */
-                {
-                  /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
+                    /* Compute dg_new2 term and add to the accumulator: */
+                    Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
+                    VecAXPY (dg_new, 1.0, dg_new2);
+                  }
+                if (k != i)
+                  {               /* INTRA2 */
+                    /* FIXME: redundant computation for i == j: */
+                    nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
+                    nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
+                    Compute_dg_intra (BHD, BHD->F[k][j], BHD->F_l[k][j],
+                                      t[k][j], t[i][j],
+                                      BHD->u2_fft[k][j], r[i][k], dg_new2, work);
+                    VecAXPY (dg_new, 1.0, dg_new2);
+                  }
+              }
 
-                  /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-              if (k != i)       /* k == 1 in the body: */
-                {               /* INTRA2 */
-                  nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
-                  nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
-                  Compute_dg_intra (BHD, BHD->F[k][j], BHD->F_l[k][j],
-                                    t[k][j], t[i][j],
-                                    BHD->u2_fft[k][j], r[i][k], dg_new2, work);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-            }
+            /* Long-range Coulomb: */
+            VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
-          /* Long-range Coulomb: */
-          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
+            if (iter >= 0)
+              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
-          if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
-
-          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-
-          /* g_HH */
-          i = 0; j = 0;
-
-          VecSet (dg_new, 0.0);
-          for (int k = 0; k < 2; k++)
-            {
-              Compute_dg_inter (BHD,
-                                BHD->F[j][k], BHD->F_l[j][k], g[j][k],
-                                g[i][k],
-                                BHD->u2_fft[j][k], BHD->rhos[k],
-                                dg_new2);
-              VecAXPY (dg_new, damp_LJ, dg_new2);
-            }
-
-          VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
-
-          /* These are two sums over k /= j and k /= i: */
-          for (int k = 0; k < 2; k++)
-            {
-              if (k != j)       /* k == 1 in the body: */
-                {
-                  /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
-
-                  /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-              if (k != i)       /* k == 1 in the body: */
-                {               /* INTRA2 */
-                  /* FIXME: t[j][k] is recomputed, for i == j: */
-                  nssa_gamma_cond (BHD, g[i][j], r[i][k], g[j][k], t[j][k]);
-                  nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
-                  Compute_dg_intra (BHD, BHD->F[j][k], BHD->F_l[j][k],
-                                    t[j][k], t[i][j],
-                                    BHD->u2_fft[j][k], r[i][k], dg_new2, work);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-            }
-
-          /* Long-range Coulomb: */
-          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
-
-          if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
-
-          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-
-          /* g_OO */
-          i = 1; j = 1;
-
-          VecSet (dg_new, 0.0);
-          for (int k = 0; k < 2; k++)
-            {
-              Compute_dg_inter (BHD,
-                                BHD->F[k][j], BHD->F_l[k][j], g[k][j],
-                                g[k][i],
-                                BHD->u2_fft[k][j], BHD->rhos[k],
-                                dg_new2);
-              VecAXPY (dg_new, damp_LJ, dg_new2);
-            }
-
-          VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
-
-          /* These are two sums over k /= j and k /= i: */
-          for (int k = 0; k < 2; k++)
-            {
-              if (k != j)       /* k == 0 in the body: */
-                {
-                  /* Here t is intent(out): */
-                  nssa_gamma_cond (BHD, g[i][j], r[k][j], g[k][i], t[k][i]);
-
-                  /* Compute dg_new2 term and add to the accumulator: */
-                  Compute_dg_H2O_intra_ln (BHD, t[k][i], r[k][j], dg_new2);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-              if (k != i)       /* k == 0 in the body: */
-                {               /* INTRA2 */
-                  /* FIXME: t[k][j] is recomputed, for i == j: */
-                  nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
-                  nssa_norm_intra_x (BHD, g[k][j], r[i][k], t[i][j]);
-                  Compute_dg_intra (BHD, BHD->F[k][j], BHD->F_l[k][j],
-                                    t[k][j], t[i][j],
-                                    BHD->u2_fft[k][j], r[i][k], dg_new2, work);
-                  VecAXPY (dg_new, 1.0, dg_new2);
-                }
-            }
-
-          /* Long-range Coulomb: */
-          VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
-
-          if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
-
-          dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-        } /* of if (1) */
+            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
+          }
 
       /*
         Now  that du[]  has been  computed using  g[] of  the previous
