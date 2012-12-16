@@ -1314,9 +1314,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     /* FIXME: redundant computation for i == j: */
                     nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
                     nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
-                    Compute_dg_intra (BHD, BHD->F[k][j], BHD->F_l[k][j],
-                                      t[k][j], t[i][j],
-                                      BHD->u2_fft[k][j], r[i][k], dg_new2, work);
+                    Compute_dg_intra (BHD,
+                                      BHD->F[k][j], BHD->F_l[k][j], t[k][j],
+                                      t[i][j],
+                                      BHD->u2_fft[k][j], r[i][k],
+                                      dg_new2, work);
                     VecAXPY (dg_new, 1.0, dg_new2);
                   }
               }
