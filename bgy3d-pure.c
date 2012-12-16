@@ -1379,8 +1379,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
       PetscPrintf (PETSC_COMM_WORLD, "HO=%e ", dg_norm[0][1]);
-      PetscPrintf (PETSC_COMM_WORLD, "H=%e ", dg_norm[0][0]);
-      PetscPrintf (PETSC_COMM_WORLD, "O=%e ", dg_norm[1][1]);
+      PetscPrintf (PETSC_COMM_WORLD, "HH=%e ", dg_norm[0][0]);
+      PetscPrintf (PETSC_COMM_WORLD, "OO=%e ", dg_norm[1][1]);
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
