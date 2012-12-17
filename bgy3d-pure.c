@@ -519,7 +519,7 @@ static void kapply (const State *BHD,
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
-  const real h = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
   const real fac = L / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
 
@@ -553,19 +553,22 @@ static void kapply (const State *BHD,
           complex div = 0.0;    /* complex */
           if (likely (k2 != 0))
             {
-              const real k_fac = (h * h * fac) / k2;
+              FOR_DIM
+                div += ic[dim] * fg2_fft_[dim][i[2]][i[1]][i[0]];
 
-              /* phase shift factor for x=x+L/2 */
-              const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+              const real k_fac = (h3 * fac) / k2;
 
               /* "I" is an imaginary unit here: */
-              FOR_DIM
-                div += ic[dim] * k_fac * sign *
-                (-I * fg2_fft_[dim][i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
+              div *= -I * k_fac;
 
               /* Long  range  Coulomb part.  Note  there  is not  "-I"
                  factor here: */
-              div += h * sign * (coul_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
+              div += coul_fft_[i[2]][i[1]][i[0]];
+
+              /* phase shift factor for x = x + L/2 */
+              const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+
+              div *=  (h3 * sign) * g_fft_[i[2]][i[1]][i[0]];
             }
           dg_fft_[i[2]][i[1]][i[0]] = div;
         }
