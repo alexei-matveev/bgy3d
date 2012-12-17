@@ -1288,7 +1288,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if I werent afraid of over-generalizations):
 
                 Δu   = βρ  Σ  div (F   g  ) * g
-                  ij     S  k       ki  ki     jk
+                  ij     S  k       ik  ik     jk
 
               The site  density common for all sites  is replaced here
               by site-specific, but so far equal, density rho[k]. Note
@@ -1301,9 +1301,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             for (int k = 0; k < 2; k++)
               {
                 Compute_dg_inter (BHD,
-                                  BHD->F[k][i], BHD->F_l[k][i], g[k][i],
+                                  BHD->F[i][k], BHD->F_l[i][k], g[i][k],
                                   g[j][k],
-                                  BHD->u2_fft[k][i], BHD->rhos[k],
+                                  BHD->u2_fft[i][k], BHD->rhos[k],
                                   dg_new2);
                 VecAXPY (dg_new, damp_LJ, dg_new2);
               }
