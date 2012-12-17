@@ -1347,6 +1347,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 */
                 if (k != i)
                   {               /* INTRA2 */
+                    /* We  need  two  distinct  temporaries  to  store
+                       intermediates. These two qualify as k != i: */
+                    assert (t[k][j] != t[i][j]);
+
                     /* FIXME: redundant computation for i == j: */
                     nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
                     nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
