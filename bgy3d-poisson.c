@@ -75,15 +75,6 @@
 #include "bgy3d-poisson.h"
 #include <complex.h>            /* after fftw.h */
 
-/* GCC extensions: */
-#if __GNUC__ >= 3
-#define likely(x)    __builtin_expect (!!(x), 1)
-#define unlikely(x)  __builtin_expect (!!(x), 0)
-#else
-#define likely(x)    (x)
-#define unlikely(x)  (x)
-#endif
-
 /* The alternative  works as well,  though the regression test  do not
    survive with more thatn 3-4 digits: */
 #ifndef POISSON_AS_INVERSE_LAPLACE
