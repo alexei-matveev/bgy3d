@@ -1250,6 +1250,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
             /* Not sure if 0.0 as inital value is right. */
             dg_norm_old[i][j] = 0.0;
+            dg_norm_old[j][i] = 0.0;
           }
 
       a1 = a0;
@@ -1378,6 +1379,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               last arg is a temp
             */
             dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
+            dg_norm[j][i] = dg_norm[i][j];
           }
 
       /*
@@ -1422,9 +1424,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           mycount=0;
         }
 
-      dg_norm_old[0][0] = dg_norm[0][0];
-      dg_norm_old[1][1] = dg_norm[1][1];
-      dg_norm_old[0][1] = dg_norm[0][1];
+      for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++) /* Yes, full range! */
+          dg_norm_old[i][j] = dg_norm[i][j];
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
