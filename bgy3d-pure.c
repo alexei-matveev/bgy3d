@@ -747,7 +747,7 @@ static void omega (const ProblemData *PD, const DA dc,
   values.
 
   Vec work is a complex work vector.
-  Vec n is intent(out).
+  Vec nab is real, intent(out).
 
   As a matter of  fact, the Vec work and the input  Vec gac_fft may be
   aliased. Then the input will be destroyed, of course.
@@ -787,32 +787,6 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
       }
     VecRestoreArray (nab, &nab_);
   }
-}
-
-/*
-  FIXME: consider using nssa_norm_intra() instead.
-
-  Almost the same  as nssa_norm_intra(), but starts with  a real space
-  g(x).   The real  space g(x)  is FFTed  into g(k)  for the  rest see
-  above.
-
-  Vec gac is real, intent(in).
-  Vec nab is real, intent(out).
-
-  Side effects: uses BHD->fft_scratch as work Vec.
- */
-static void nssa_norm_intra_x (const State *BHD, Vec gac, real rbc,
-                               Vec nab) /* intent(out) */
-{
-  /* fft(g/t) */
-  MatMult (BHD->fft_mat, gac, BHD->fft_scratch);
-
-  /*
-    FIXME: argument aliasing! BHD->fft_scratch is used as input and as
-    work array here.  Gets  overwritten as the result.  Huge potential
-    for confusion:
-  */
-  nssa_norm_intra (BHD, BHD->fft_scratch, rbc, BHD->fft_scratch, nab);
 }
 
 
@@ -1078,12 +1052,14 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, real rbc, Vec dg)
   (4.106) on p. 75 of Jager thesis.
 
   Vec tab is real, intent(out).
+
+  Side effects: used BHD->fft_scratch as work array!
 */
-static void nssa_gamma_cond (const State *BHD, Vec gac, real rbc, Vec gab,
+static void nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
                              Vec tab) /* intent(out) */
 {
   /* n(x) goes into Vec tab which is is intent(out) here: */
-  nssa_norm_intra_x (BHD, gac, rbc, tab);
+  nssa_norm_intra (BHD, gac_fft, rbc, BHD->fft_scratch, tab);
 
   /*
     t(x) =  g(x) / n(x)  (or rather t(x)  = g(x) / t(x)  with argument
@@ -1152,8 +1128,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   const int m = 2;              /* FIXME: hardwired number of sites */
   State *BHD;
   Vec dg_new, dg_new2, work;
-  Vec g[m][m], dg[m][m];        /* pair distributions, ij = ji */
-  Vec t[m][m];
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1186,7 +1160,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
+  Vec g[m][m], dg[m][m], t[m][m]; /* real, ij = ji */
+  Vec g_fft[m][m];                /* complex, ij = ji */
   create_g2 (BHD->da, m, g);
+  create_g2 (BHD->dc, m, g_fft); /* complex */
   create_g2 (BHD->da, m, dg);
   create_g2 (BHD->da, m, t);
 
@@ -1275,6 +1252,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
+      /* Compute FFT of g[][] for all site pairs: */
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          MatMult (BHD->fft_mat, g[i][j], g_fft[i][j]);
+
       /* For each site pair  ij (HH, HO, and OO) compute du  in g = g0
          exp(-du): */
       for (int i = 0; i < m; i++)
@@ -1334,7 +1316,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 if (k != i)
                   {
                     /* Here t is intent(out): */
-                    nssa_gamma_cond (BHD, g[i][j], r[k][i], g[j][k], t[j][k]);
+                    nssa_gamma_cond (BHD, g_fft[i][j], r[k][i], g[j][k], t[j][k]);
 
                     /* Compute dg_new2 term and add to the accumulator: */
                     Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i], dg_new2);
@@ -1364,8 +1346,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     assert (t[i][k] != t[i][j]);
 
                     /* FIXME: redundant computation for j == i: */
-                    nssa_gamma_cond (BHD, g[i][j], r[j][k], g[i][k], t[i][k]);
-                    nssa_norm_intra_x (BHD, g[i][k], r[j][k], t[i][j]);
+                    nssa_gamma_cond (BHD, g_fft[i][j], r[j][k], g[i][k], t[i][k]);
+                    nssa_norm_intra (BHD, g_fft[i][k], r[j][k], BHD->fft_scratch, t[i][j]);
                     Compute_dg_intra (BHD,
                                       BHD->F[i][k], BHD->F_l[i][k], t[i][k],
                                       t[i][j],
@@ -1481,6 +1463,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     }
 
   destroy_g2 (m, g);
+  destroy_g2 (m, g_fft);
   destroy_g2 (m, t);
   destroy_g2 (m, dg);
   destroy_g2 (m, x_lapl);
@@ -1498,10 +1481,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 /* solve with product ansatz g=g0*dg */
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 {
+  const int m = 2; /* FIXME: hardwired number of inequivalent sites */
   State *BHD;
   Vec dg_new, dg_new2, work;
-  Vec g0[2][2], g[2][2], dg[2][2]; /* pair distributions, ij = ji */
-  Vec t[2][2];
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1539,9 +1521,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  create_g2 (BHD->da, 2, g);
-  create_g2 (BHD->da, 2, dg);
-  create_g2 (BHD->da, 2, t);
+  Vec g[m][m], dg[m][m], t[m][m]; /* real, ij = ji */
+  Vec g_fft[m][m];                /* complex, ij = ji */
+  create_g2 (BHD->da, m, g);
+  create_g2 (BHD->dc, m, g_fft); /* complex */
+  create_g2 (BHD->da, m, dg);
+  create_g2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
@@ -1565,6 +1550,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       VecSet (x_lapl[i][j], 0.0);
 #endif
 
+  Vec g0[m][m];
   g0[0][0] = BHD->u_ini[0][0];
   g0[1][1] = BHD->u_ini[1][1];
   g0[0][1] = BHD->u_ini[0][1];
@@ -1619,6 +1605,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
         a = a0;
 
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
+
+      /* Compute FFT of g[][] for all site pairs: */
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          MatMult (BHD->fft_mat, g[i][j], g_fft[i][j]);
+
       /* f=integral(g) */
       if (1)                    /* kflg was set when with -pair */
         {
@@ -1638,20 +1630,20 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          nssa_gamma_cond (BHD, g[0][1], r_HO, g[0][0], t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
           /* tO = gHO/int(gHO wHH) */
-          nssa_gamma_cond (BHD, g[0][1], r_HH, g[0][1], t[1][1]);
-          nssa_norm_intra_x (BHD, g[0][1], r_HH, t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[0][1], r_HH, g[0][1], t[1][1]);
+          nssa_norm_intra (BHD, g_fft[0][1], r_HH, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g[0][1], r_HO, g[1][1], t[1][1]);
-          nssa_norm_intra_x (BHD, g[1][1], r_HO, t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[1][1], t[1][1]);
+          nssa_norm_intra (BHD, g_fft[1][1], r_HO, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[1][1], r_HO, dg_new2, work);
@@ -1682,24 +1674,24 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          nssa_gamma_cond (BHD, g[0][0], r_HH, g[0][0], t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g[0][0], r_HO, g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* tO = gH/int(gH wHH) */
-          nssa_gamma_cond (BHD, g[0][0], r_HH, g[0][0], t[1][1]);
-          nssa_norm_intra_x (BHD, g[0][0], r_HH, t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[1][1]);
+          nssa_norm_intra (BHD, g_fft[0][0], r_HH, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g[0][0], r_HO, g[0][1], t[0][1]);
-          nssa_norm_intra_x (BHD, g[0][1], r_HO, t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
+          nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1731,12 +1723,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
 
-          nssa_gamma_cond (BHD, g[1][1], r_HO, g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g[1][1], r_HO, g[0][1], t[0][1]);
-          nssa_norm_intra_x (BHD, g[0][1], r_HO, t[1][1]);
+          nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
+          nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
                             BHD->u2_fft[0][1], r_HO, dg_new2, work);
@@ -1824,10 +1816,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
     }
 
-  destroy_g2 (2, g);
-  destroy_g2 (2, t);
-  destroy_g2 (2, dg);
-  destroy_g2 (2, x_lapl);
+  destroy_g2 (m, g);
+  destroy_g2 (m, g_fft);
+  destroy_g2 (m, t);
+  destroy_g2 (m, dg);
+  destroy_g2 (m, x_lapl);
 
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
