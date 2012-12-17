@@ -302,7 +302,7 @@ void ComputeFFTfromCoulomb (State *BHD,
                             Vec fc_fft[3], /* complex, intent(out) */
                             real factor)
 {
-  int x[3], n[3], i[3], ic[3];
+  int x[3], n[3], i[3];
 
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
@@ -321,13 +321,13 @@ void ComputeFFTfromCoulomb (State *BHD,
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          int ic[3];
+
           FOR_DIM
-            {
-              if (i[dim] <= N[dim] / 2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
+            if (i[dim] <= N[dim] / 2)
+              ic[dim] = i[dim];
+            else
+              ic[dim] = i[dim] - N[dim];
 
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
@@ -531,46 +531,43 @@ static void kapply (const State *BHD,
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* Get local portion of the grid */
-  int x[3], n[3], i[3], ic[3];
+  int x[3], n[3], i[3];
   DAGetCorners(BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex zero */
+          int ic[3];
 
           FOR_DIM
-            {
-              if (i[dim] <= N[dim] / 2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
+            if (i[dim] <= N[dim] / 2)
+              ic[dim] = i[dim];
+            else
+              ic[dim] = i[dim] - N[dim];
 
-          if( ic[0]==0 && ic[1]==0 && ic[2]==0)
+          /* FIXME: integer sum of squares will overflow for N >> 20000! */
+          const int k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+
+          complex div = 0.0;    /* complex */
+          if (likely (k2 != 0))
             {
-              dg_fft_[i[2]][i[1]][i[0]] = 0.0; // coul1_fft[0].re*h*(g_fft[0].re-N[0]*N[1]*N[2]);
-            }
-          else
-            {
-              const real k = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              const real k_fac = h * h * fac / k;
+              const real k_fac = (h * h * fac) / k2;
 
               /* phase shift factor for x=x+L/2 */
               const real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /* "I" is an imaginary unit here: */
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * sign *
+                div += ic[dim] * k_fac * sign *
                 (-I * fg2_fft_[dim][i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
 
               /* Long  range  Coulomb part.  Note  there  is not  "-I"
                  factor here: */
-              dg_fft_[i[2]][i[1]][i[0]] += h * sign *
-                (coul_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
+              div += h * sign * (coul_fft_[i[2]][i[1]][i[0]] * g_fft_[i[2]][i[1]][i[0]]);
             }
+          dg_fft_[i[2]][i[1]][i[0]] = div;
         }
   DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
@@ -671,11 +668,11 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
 */
 static void omega (const ProblemData *PD, const DA dc,
                    Vec x_fft,   /* intent(in) */
-                   real rab,
+                   const real rab,
                    Vec y_fft,   /* intent(out) */
                    real sinc0)
 {
-  int x[3], n[3], i[3], ic[3];
+  int x[3], n[3], i[3];
 
   const int *N = PD->N;         /* N[3] */
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
@@ -693,25 +690,29 @@ static void omega (const ProblemData *PD, const DA dc,
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          int ic[3];
+
           FOR_DIM
             if (i[dim] <= N[dim] / 2)
               ic[dim] = i[dim];
             else
               ic[dim] = i[dim] - N[dim];
 
+          /* FIXME: integer sum of squares will overflow for N >> 20000! */
+          const int k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+
           /* Get x(k): */
           complex xk = x_fft_[i[2]][i[1]][i[0]];
 
           /* Scale by ω(k): */
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+          if (unlikely (k2 == 0))
             xk *= h3 * sinc0;   /* sinc(0) = 1, but see call sites */
           else
             {
-              const real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              const real k = 2.0 * M_PI * sqrt(k2) * rab / L;
+              const real k = (2.0 * M_PI * rab / L) * sqrt (k2);
 
               /* + hier richtig !! */
-              xk *= h3 * (sin(k) / k);
+              xk *= h3 * (sin (k) / k);
             }
 
           /* Set y(k): */
@@ -814,8 +815,7 @@ static void Compute_dg_intra (State *BHD,
                               real rbc,
                               Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3], ic[3];
-  real k_fac, k;
+  int x[3], n[3], i[3];
 
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
@@ -891,6 +891,8 @@ static void Compute_dg_intra (State *BHD,
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
+          int ic[3];
+
           dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
 
           FOR_DIM
@@ -899,7 +901,10 @@ static void Compute_dg_intra (State *BHD,
             else
               ic[dim] = i[dim] - N[dim];
 
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+          /* FIXME: integer sum of squares will overflow for N >> 20000! */
+          const int k2 = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+
+          if (unlikely (k2 == 0))
             {
               dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
               FOR_DIM
@@ -907,9 +912,8 @@ static void Compute_dg_intra (State *BHD,
             }
           else
             {
-              k = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-              k_fac = scale / k;
-              k = 2.0 * M_PI * sqrt(k) * rbc / L;
+              const real k_fac = scale / k2;
+              const real k = 2.0 * M_PI * sqrt (k2) * rbc / L;
 
               FOR_DIM
                 dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
@@ -953,7 +957,7 @@ static void Compute_dg_intra (State *BHD,
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
+          int ic[3];
 
           FOR_DIM
             if (i[dim] <= N[dim] / 2)
@@ -961,16 +965,19 @@ static void Compute_dg_intra (State *BHD,
             else
               ic[dim] = i[dim] - N[dim];
 
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-          else
+          /* FIXME: integer sum of squares will overflow for N >> 20000! */
+          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
+
+          complex div = 0.0;    /* divergence */
+          if (likely (k2 != 0))
             {
-              k = SQR (ic[2]) + SQR (ic[1]) + SQR(ic[0]);
-              k_fac = scale / k;
+              const real k_fac = scale / k2;
 
               FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
+                div += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
             }
+
+          dg_fft_[i[2]][i[1]][i[0]] = div;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
