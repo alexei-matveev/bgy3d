@@ -1271,20 +1271,32 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
-      /* f=integral(g) */
-      /*
-        See e.g.  Eq. (4.91),  p.  72 of  the Jager Thesis.  Also note
-        that most of the pair quantities are symmetric:
-
-            u   = Σ  ρ  K   g
-             ij    k  k  kj  ik
-      */
-
-      /* g_HH, g_HO, g_OO: */
+      /* For each site pair  ij (HH, HO, and OO) compute du  in g = g0
+         exp(-du): */
       for (int j = 0; j < 2; j++)
         for (int i = 0; i <= j; i++) /* FIXME: ji <=> ij */
           {
+            /* Clear accumulator, terms will be added here: */
             VecSet (dg_new, 0.0);
+
+            /*
+              Sum over  the third site k.   See the first  line of Eq.
+              (4.118), p.  79 of  the Jager thesis.  This is so-called
+              inter-molecular contribution. Also note that most of the
+              pair quantities  are symmetric (I would say  all of them
+              if I werent afraid of over-generalizations):
+
+                Δu   = βρ  Σ  div (F   g  ) * g
+                  ij     S  k       kj  kj     ik
+
+              The site  density common for all sites  is replaced here
+              by site-specific, but so far equal, density rho[k]. Note
+              that in the 3-site code the sum over equivalent sites is
+              treated  by scaling  the  density rho[k]  appropriately:
+              e.g.  factor 2 for  H-site in H2O.  Equivalent sites are
+              by  definition those  whose distributions  densities are
+              equal.
+            */
             for (int k = 0; k < 2; k++)
               {
                 Compute_dg_inter (BHD,
@@ -1295,11 +1307,26 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 VecAXPY (dg_new, damp_LJ, dg_new2);
               }
 
+            /* FIXME: 3-site code does not do this: */
             VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
-            /* These are two sums over k /= j and k /= i: */
+            /*
+              These are two sums  over k /= j and k /=  i. See lines 2
+              and 3 of Eq. (4.118), p. 79 of Jager thesis:
+            */
             for (int k = 0; k < 2; k++)
               {
+                /*
+                  Line 2  of Eq.  (4.118),  p.  79 Jager  thesis. Here
+                  sites k  and j belong  to the same  solvent species.
+                  Intra-molecular  correlation is  fully  described by
+                  the distance r[k][j] in the rigid solvent model.
+
+                  Note that the site density rho[k] does not enter the
+                  equation explicitly.   Instead the 3-site  code used
+                  the literal  factor 2 when  incrementing accumulator
+                  in a call to VecAXPY():
+                */
                 if (k != j)
                   {
                     /* Here t is intent(out): */
@@ -1309,6 +1336,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
                     VecAXPY (dg_new, 1.0, dg_new2);
                   }
+
+                /*
+                  Line  3 of Eq.   (4.118), p.   79 Jager  thesis. The
+                  so-called "numerically challenging" term. Here sites
+                  k  and  i  belong   to  the  same  solvent  species.
+                  Intra-molecular  correlation is  fully  described by
+                  the distance r[i][k] in the rigid solvent model:
+                */
                 if (k != i)
                   {               /* INTRA2 */
                     /* FIXME: redundant computation for i == j: */
@@ -1326,9 +1361,22 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             /* Long-range Coulomb: */
             VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
+            /*
+              Add  an  effective  Coulomb  field of  boundary  surface
+              charge  to  make  the  "potential" du  at  the  boundary
+              vanish:
+            */
             if (iter >= 0)
               bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
+            /*
+              Mix du and du_new with a fixed ratio "a":
+
+                du' = a * du_new + (1 - a) * du
+                norm = |du_new - du|
+
+              last arg is a temp
+            */
             dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
           }
 
