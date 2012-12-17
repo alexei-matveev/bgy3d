@@ -1309,7 +1309,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               }
 
             /* FIXME: 3-site code does not do this: */
-            VecPointwiseMult (dg_new, dg_new, BHD->c2[j][i]);
+            VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
 
             /*
               These are two sums  over k /= i and k /=  j. See lines 2
@@ -1331,7 +1331,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 if (k != i)
                   {
                     /* Here t is intent(out): */
-                    nssa_gamma_cond (BHD, g[j][i], r[k][i], g[j][k], t[j][k]);
+                    nssa_gamma_cond (BHD, g[i][j], r[k][i], g[j][k], t[j][k]);
 
                     /* Compute dg_new2 term and add to the accumulator: */
                     Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i], dg_new2);
@@ -1352,7 +1352,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     assert (t[k][i] != t[j][i]);
 
                     /* FIXME: redundant computation for j == i: */
-                    nssa_gamma_cond (BHD, g[j][i], r[j][k], g[k][i], t[k][i]);
+                    nssa_gamma_cond (BHD, g[i][j], r[j][k], g[k][i], t[k][i]);
                     nssa_norm_intra_x (BHD, g[i][k], r[j][k], t[j][i]);
                     Compute_dg_intra (BHD,
                                       BHD->F[k][i], BHD->F_l[k][i], t[k][i],
@@ -1364,7 +1364,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               }
 
             /* Long-range Coulomb: */
-            VecAXPY (dg_new, PD->beta, BHD->u2[j][i]);
+            VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
 
             /*
               Add  an  effective  Coulomb  field of  boundary  surface
@@ -1372,7 +1372,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               vanish:
             */
             if (iter >= 0)
-              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[j][i]);
+              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
 
             /*
               Mix du and du_new with a fixed ratio "a":
@@ -1382,8 +1382,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
               last arg is a temp
             */
-            dg_norm[j][i] = bgy3d_vec_mix (dg[j][i], dg_new, a, work);
-            dg_norm[i][j] = dg_norm[j][i];
+            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
+            dg_norm[j][i] = dg_norm[i][j];
           }
 
       /*
