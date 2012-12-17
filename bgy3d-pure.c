@@ -1274,8 +1274,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       /* For each site pair  ij (HH, HO, and OO) compute du  in g = g0
          exp(-du): */
-      for (int j = 0; j < 2; j++)
-        for (int i = 0; i <= j; i++) /* FIXME: ji <=> ij */
+      for (int i = 0; i < 2; i++)
+        for (int j = 0; j <= i; j++)
           {
             /* Clear accumulator, terms will be added here: */
             VecSet (dg_new, 0.0);
@@ -1288,7 +1288,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               if I werent afraid of over-generalizations):
 
                 Δu   = βρ  Σ  div (F   g  ) * g
-                  ij     S  k       kj  kj     ik
+                  ij     S  k       ki  ki     jk
 
               The site  density common for all sites  is replaced here
               by site-specific, but so far equal, density rho[k]. Note
@@ -1301,70 +1301,70 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             for (int k = 0; k < 2; k++)
               {
                 Compute_dg_inter (BHD,
-                                  BHD->F[k][j], BHD->F_l[k][j], g[k][j],
-                                  g[i][k],
-                                  BHD->u2_fft[k][j], BHD->rhos[k],
+                                  BHD->F[k][i], BHD->F_l[k][i], g[k][i],
+                                  g[j][k],
+                                  BHD->u2_fft[k][i], BHD->rhos[k],
                                   dg_new2);
                 VecAXPY (dg_new, damp_LJ, dg_new2);
               }
 
             /* FIXME: 3-site code does not do this: */
-            VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
+            VecPointwiseMult (dg_new, dg_new, BHD->c2[j][i]);
 
             /*
-              These are two sums  over k /= j and k /=  i. See lines 2
+              These are two sums  over k /= i and k /=  j. See lines 2
               and 3 of Eq. (4.118), p. 79 of Jager thesis:
             */
             for (int k = 0; k < 2; k++)
               {
                 /*
                   Line 2  of Eq.  (4.118),  p.  79 Jager  thesis. Here
-                  sites k  and j belong  to the same  solvent species.
+                  sites k  and i belong  to the same  solvent species.
                   Intra-molecular  correlation is  fully  described by
-                  the distance r[k][j] in the rigid solvent model.
+                  the distance r[k][i] in the rigid solvent model.
 
                   Note that the site density rho[k] does not enter the
                   equation explicitly.   Instead the 3-site  code used
                   the literal  factor 2 when  incrementing accumulator
                   in a call to VecAXPY():
                 */
-                if (k != j)
+                if (k != i)
                   {
                     /* Here t is intent(out): */
-                    nssa_gamma_cond (BHD, g[i][j], r[k][j], g[i][k], t[i][k]);
+                    nssa_gamma_cond (BHD, g[j][i], r[k][i], g[j][k], t[j][k]);
 
                     /* Compute dg_new2 term and add to the accumulator: */
-                    Compute_dg_H2O_intra_ln (BHD, t[i][k], r[k][j], dg_new2);
+                    Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i], dg_new2);
                     VecAXPY (dg_new, 1.0, dg_new2);
                   }
 
                 /*
                   Line  3 of Eq.   (4.118), p.   79 Jager  thesis. The
                   so-called "numerically challenging" term. Here sites
-                  k  and  i  belong   to  the  same  solvent  species.
+                  k  and  j  belong   to  the  same  solvent  species.
                   Intra-molecular  correlation is  fully  described by
-                  the distance r[i][k] in the rigid solvent model:
+                  the distance r[j][k] in the rigid solvent model:
                 */
-                if (k != i)
+                if (k != j)
                   {               /* INTRA2 */
                     /* We  need  two  distinct  temporaries  to  store
-                       intermediates. These two qualify as k != i: */
-                    assert (t[k][j] != t[i][j]);
+                       intermediates. These two qualify as k != j: */
+                    assert (t[k][i] != t[j][i]);
 
-                    /* FIXME: redundant computation for i == j: */
-                    nssa_gamma_cond (BHD, g[i][j], r[i][k], g[k][j], t[k][j]);
-                    nssa_norm_intra_x (BHD, g[j][k], r[i][k], t[i][j]);
+                    /* FIXME: redundant computation for j == i: */
+                    nssa_gamma_cond (BHD, g[j][i], r[j][k], g[k][i], t[k][i]);
+                    nssa_norm_intra_x (BHD, g[i][k], r[j][k], t[j][i]);
                     Compute_dg_intra (BHD,
-                                      BHD->F[k][j], BHD->F_l[k][j], t[k][j],
-                                      t[i][j],
-                                      BHD->u2_fft[k][j], r[i][k],
+                                      BHD->F[k][i], BHD->F_l[k][i], t[k][i],
+                                      t[j][i],
+                                      BHD->u2_fft[k][i], r[j][k],
                                       dg_new2, work);
                     VecAXPY (dg_new, 1.0, dg_new2);
                   }
               }
 
             /* Long-range Coulomb: */
-            VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
+            VecAXPY (dg_new, PD->beta, BHD->u2[j][i]);
 
             /*
               Add  an  effective  Coulomb  field of  boundary  surface
@@ -1372,7 +1372,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               vanish:
             */
             if (iter >= 0)
-              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
+              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[j][i]);
 
             /*
               Mix du and du_new with a fixed ratio "a":
@@ -1382,8 +1382,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
               last arg is a temp
             */
-            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
-            dg_norm[j][i] = dg_norm[i][j];
+            dg_norm[j][i] = bgy3d_vec_mix (dg[j][i], dg_new, a, work);
+            dg_norm[i][j] = dg_norm[j][i];
           }
 
       /*
