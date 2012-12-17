@@ -14,8 +14,8 @@
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */
 
-static real NORM_REG = 1.0e-1;
-static real NORM_REG2 = 1.0e-2;
+static const real NORM_REG = 1.0e-1;
+static const real NORM_REG2 = 1.0e-2;
 
 /* FIXME: bgy3d-solvents.h pollutes the namespace: */
 #undef sH
