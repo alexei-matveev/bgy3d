@@ -892,7 +892,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     a work  vector to  pass the result  further.  Pass
                     the g(k), not g(x). Does one FFT^-1.
                   */
-                  bgy3d_solve_normalization (&BHD, g_fft[i], r_HO, g[j], t_vec);
+                  bgy3d_nssa_gamma_cond (&BHD, g_fft[i], r_HO, g[j], t_vec);
 
                   /*
                     The   next  step  is   to  use   the  "conditional

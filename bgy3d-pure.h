@@ -19,11 +19,8 @@ void ComputeFFTfromCoulomb (State *BHD,
 
 void Compute_dg_H2O_intra_ln (State *BHD, Vec g, real rab, Vec dg);
 
-void bgy3d_solve_normalization (const State *BHD,
-                                Vec gc_fft, /* complex, intent(in) */
-                                real rc,
-                                Vec g,  /* real, intent(in) */
-                                Vec t); /* real, intent(out) */
+void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
+                            Vec tab); /* intent(out) */
 
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini);
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini);

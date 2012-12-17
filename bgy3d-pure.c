@@ -1055,8 +1055,8 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, real rbc, Vec dg)
 
   Side effects: used BHD->fft_scratch as work array!
 */
-static void nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
-                             Vec tab) /* intent(out) */
+void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
+                            Vec tab) /* intent(out) */
 {
   /* n(x) goes into Vec tab which is is intent(out) here: */
   nssa_norm_intra (BHD, gac_fft, rbc, BHD->fft_scratch, tab);
@@ -1067,27 +1067,6 @@ static void nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
     used VecPointwiseDivide() instead.
   */
   safe_pointwise_divide (tab, gab, tab, NORM_REG2); /* argument aliasing */
-}
-
-
-void bgy3d_solve_normalization (const State *BHD,
-                                Vec gc_fft, /* intent(in) */
-                                real rc,
-                                Vec g,     /* intent(in) */
-                                Vec t)     /* intent(out) */
-{
-  /*
-    ĝ(x) goes into Vec t  which is is intent(out) here, fft_scratch is
-    a work array:
-  */
-  nssa_norm_intra (BHD, gc_fft, rc, BHD->fft_scratch, t);
-
-  /*
-    t(x) =  g(x) / ĝ(x)  (or rather t(x)  = g(x) / t(x)  with argument
-    aliasing) avoiding small denominators.  Some of the commented code
-    used VecPointwiseDivide() instead.
-  */
-  safe_pointwise_divide (t, g, t, NORM_REG2); /* argument aliasing */
 }
 
 
@@ -1316,7 +1295,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 if (k != i)
                   {
                     /* Here t is intent(out): */
-                    nssa_gamma_cond (BHD, g_fft[i][j], r[k][i], g[j][k], t[j][k]);
+                    bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], r[k][i], g[j][k], t[j][k]);
 
                     /* Compute dg_new2 term and add to the accumulator: */
                     Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i], dg_new2);
@@ -1346,7 +1325,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     assert (t[i][k] != t[i][j]);
 
                     /* FIXME: redundant computation for j == i: */
-                    nssa_gamma_cond (BHD, g_fft[i][j], r[j][k], g[i][k], t[i][k]);
+                    bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], r[j][k], g[i][k], t[i][k]);
                     nssa_norm_intra (BHD, g_fft[i][k], r[j][k], BHD->fft_scratch, t[i][j]);
                     Compute_dg_intra (BHD,
                                       BHD->F[i][k], BHD->F_l[i][k], t[i][k],
@@ -1630,19 +1609,19 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[0][0], t[0][0]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
           /* tO = gHO/int(gHO wHH) */
-          nssa_gamma_cond (BHD, g_fft[0][1], r_HH, g[0][1], t[1][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HH, g[0][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HH, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[1][1], t[1][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[1][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[1][1], r_HO, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
@@ -1674,23 +1653,23 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             dg_new2);
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[0][0]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* tO = gH/int(gH wHH) */
-          nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[1][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][0], r_HH, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], r_HH, dg_new2, work);
           VecAXPY(dg_new, 1.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
@@ -1723,11 +1702,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY (dg_new, damp_LJ, dg_new2);
 
 
-          nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
           VecAXPY(dg_new, 2.0, dg_new2);
 
-          nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
+          bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
