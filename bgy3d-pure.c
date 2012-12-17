@@ -1347,17 +1347,26 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 */
                 if (k != j)
                   {               /* INTRA2 */
-                    /* We  need  two  distinct  temporaries  to  store
-                       intermediates. These two qualify as k != j: */
-                    assert (t[k][i] != t[j][i]);
+                    /*
+                      We  need  two   distinct  temporaries  to  store
+                      intermediates
+
+                       ~ (2)        k
+                       g      and  n  .
+                        ik;j        ij
+
+                      These two  qualify as k  != j in the  context of
+                      this summation:
+                    */
+                    assert (t[i][k] != t[i][j]);
 
                     /* FIXME: redundant computation for j == i: */
-                    nssa_gamma_cond (BHD, g[i][j], r[j][k], g[k][i], t[k][i]);
-                    nssa_norm_intra_x (BHD, g[i][k], r[j][k], t[j][i]);
+                    nssa_gamma_cond (BHD, g[i][j], r[j][k], g[i][k], t[i][k]);
+                    nssa_norm_intra_x (BHD, g[i][k], r[j][k], t[i][j]);
                     Compute_dg_intra (BHD,
-                                      BHD->F[k][i], BHD->F_l[k][i], t[k][i],
-                                      t[j][i],
-                                      BHD->u2_fft[k][i], r[j][k],
+                                      BHD->F[i][k], BHD->F_l[i][k], t[i][k],
+                                      t[i][j],
+                                      BHD->u2_fft[i][k], r[j][k],
                                       dg_new2, work);
                     VecAXPY (dg_new, 1.0, dg_new2);
                   }
