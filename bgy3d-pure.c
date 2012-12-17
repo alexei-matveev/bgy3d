@@ -1149,16 +1149,17 @@ real bgy3d_vec_mix (Vec dg, Vec dg_new, real a, Vec work)
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
+  const int m = 2;              /* FIXME: hardwired number of sites */
   State *BHD;
   Vec dg_new, dg_new2, work;
-  Vec g[2][2], dg[2][2];        /* pair distributions, ij = ji */
-  Vec t[2][2];
+  Vec g[m][m], dg[m][m];        /* pair distributions, ij = ji */
+  Vec t[m][m];
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   char nameO[20], nameH[20], nameHO[20];
-  real dg_norm[2][2];
-  real dg_norm_old[2][2];
+  real dg_norm[m][m];
+  real dg_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
@@ -1185,9 +1186,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  create_g2 (BHD->da, 2, g);
-  create_g2 (BHD->da, 2, dg);
-  create_g2 (BHD->da, 2, t);
+  create_g2 (BHD->da, m, g);
+  create_g2 (BHD->da, m, dg);
+  create_g2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &dg_new);
   DACreateGlobalVector (BHD->da, &dg_new2);
@@ -1203,25 +1204,26 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     solver  really uses  them as  initial guess  as opposed  to always
     starting iterations from zero:
   */
-  Vec x_lapl[2][2];             /* real */
-  create_g2 (BHD->da, 2, x_lapl);
+  Vec x_lapl[m][m];             /* real */
+  create_g2 (BHD->da, m, x_lapl);
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       VecSet (x_lapl[i][j], 0.0);
 #endif
 
-  /* FIXME: g0[2][2] is a misnomer. Rename to u0[][]: */
-  Vec (*g0)[2] = BHD->u_ini;        /* FIXME: alias! */
+  /* FIXME: g0[][] is a misnomer. Rename to u0[][]: */
+  assert (m == 2);
+  Vec (*g0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
   /* set initial guess*/
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       VecSet (dg[i][j], 0.0);
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_read_g2 (2, dg, "dg%d%d.bin");
+    bgy3d_read_g2 (m, dg, "dg%d%d.bin");
 
   VecSet(dg_new,0.0);
 
@@ -1239,7 +1241,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         }
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           {
             /* Vec work is used as a temporary here: */
@@ -1258,6 +1260,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       /* FIXME:   hardwired   distance   matrix.   Zeros   are   never
          referenced: */
+      assert (m == 2);
       const real r[2][2] = {{0.0, r_HO},
                             {r_HO, 0.0}};
 
@@ -1274,7 +1277,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       /* For each site pair  ij (HH, HO, and OO) compute du  in g = g0
          exp(-du): */
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           {
             /* Clear accumulator, terms will be added here: */
@@ -1298,7 +1301,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               by  definition those  whose distributions  densities are
               equal.
             */
-            for (int k = 0; k < 2; k++)
+            for (int k = 0; k < m; k++)
               {
                 Compute_dg_inter (BHD,
                                   BHD->F[i][k], BHD->F_l[i][k], g[i][k],
@@ -1315,7 +1318,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               These are two sums  over k /= i and k /=  j. See lines 2
               and 3 of Eq. (4.118), p. 79 of Jager thesis:
             */
-            for (int k = 0; k < 2; k++)
+            for (int k = 0; k < m; k++)
               {
                 /*
                   Line 2  of Eq.  (4.118),  p.  79 Jager  thesis. Here
@@ -1400,11 +1403,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         iteration one can safely update  g[].  Compute g := exp[-(u0 +
         du)], with a sanity check:
       */
-      for (int i = 0; i < 2; i++)
+      for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           ComputeH2O_g (g[i][j], g0[i][j], dg[i][j]);
 
       /* (fancy) step size control */
+      assert (m == 2);
       mycount++;
       if (((iter-1)%10) &&
           (dg_norm_old[0][0] < dg_norm[0][0] ||
@@ -1437,8 +1441,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           mycount=0;
         }
 
-      for (int i = 0; i < 2; i++)
-        for (int j = 0; j < 2; j++) /* Yes, full range! */
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++) /* Yes, full range! */
           dg_norm_old[i][j] = dg_norm[i][j];
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
@@ -1469,17 +1473,17 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    bgy3d_save_g2 (2, dg, "dg%d%d.bin");
+    bgy3d_save_g2 (m, dg, "dg%d%d.bin");
 
   /* Save g2[][] to binary files: */
-  bgy3d_save_g2 (2, g, "g%d%d.bin");
+  bgy3d_save_g2 (m, g, "g%d%d.bin");
 
     }
 
-  destroy_g2 (2, g);
-  destroy_g2 (2, t);
-  destroy_g2 (2, dg);
-  destroy_g2 (2, x_lapl);
+  destroy_g2 (m, g);
+  destroy_g2 (m, t);
+  destroy_g2 (m, dg);
+  destroy_g2 (m, x_lapl);
 
   VecDestroy (dg_new);
   VecDestroy (dg_new2);
