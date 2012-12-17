@@ -660,16 +660,18 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
 /*
   Output y(k)  is the  convolution of x(k)  with ω(x)  = δ(|x| -  r) /
   4πr².  This function takes momentum  space x(k) as input and returns
-  momentum space y(k).
+  momentum space y(k).  As it  appears that time to compute sinc(k) is
+  measurable, this  function operates of  array of Vecs.  These arrays
+  are either of length 1 or 3, in practice.
 
   NOTE: appears to work for in-place transformation with x == y.
 
   FIXME: sinc(0) should be always 1, even at war times!
 */
 static void omega (const ProblemData *PD, const DA dc,
-                   Vec x_fft,   /* intent(in) */
+                   int d, Vec x_fft[d], /* intent(in) */
                    const real rab,
-                   Vec y_fft,   /* intent(out) */
+                   Vec y_fft[d],       /* intent(out) */
                    real sinc0)
 {
   int x[3], n[3], i[3];
@@ -681,9 +683,12 @@ static void omega (const ProblemData *PD, const DA dc,
   /* Get local portion of the grid */
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  complex ***x_fft_, ***y_fft_;
-  DAVecGetArray (dc, x_fft, &x_fft_);
-  DAVecGetArray (dc, y_fft, &y_fft_);
+  complex ***x_fft_[d], ***y_fft_[d];
+  for (int p = 0; p < d; p++)
+    {
+      DAVecGetArray (dc, x_fft[p], &x_fft_[p]);
+      DAVecGetArray (dc, y_fft[p], &y_fft_[p]);
+    }
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -701,25 +706,28 @@ static void omega (const ProblemData *PD, const DA dc,
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
 
-          /* Get x(k): */
-          complex xk = x_fft_[i[2]][i[1]][i[0]];
-
-          /* Scale by ω(k): */
+          /* Compute ω(k): */
+          real wk;
           if (unlikely (k2 == 0))
-            xk *= h3 * sinc0;   /* sinc(0) = 1, but see call sites */
+            wk = h3 * sinc0;    /* sinc(0) = 1, but see call sites */
           else
             {
               const real k = (2.0 * M_PI * rab / L) * sqrt (k2);
 
               /* + hier richtig !! */
-              xk *= h3 * (sin (k) / k);
+              wk = h3 * (sin (k) / k);
             }
 
-          /* Set y(k): */
-          y_fft_[i[2]][i[1]][i[0]] = xk;
+          /* Set y(k) = wk * x(k): */
+          for (int p = 0; p < d; p++)
+            y_fft_[p][i[2]][i[1]][i[0]] = wk * x_fft_[p][i[2]][i[1]][i[0]];
         }
-  DAVecRestoreArray (dc, x_fft, &x_fft_);
-  DAVecRestoreArray (dc, y_fft, &y_fft_);
+
+  for (int p = 0; p < d; p++)
+    {
+      DAVecRestoreArray (dc, x_fft[p], &x_fft_[p]);
+      DAVecRestoreArray (dc, y_fft[p], &y_fft_[p]);
+    }
 }
 
 
@@ -760,8 +768,9 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  /* Set n(k) := ω(k) * g(k), put result into Vec work: */
-  omega (BHD->PD, BHD->dc, gac_fft, rbc, work, 1.0);
+  /* Set n(k)  := ω(k) *  g(k), put result  into Vec work.   Pass both
+     gac_fft and work as arrays of length 1 to omega(): */
+  omega (BHD->PD, BHD->dc, 1, &gac_fft, rbc, &work, 1.0);
 
   /* Inverse FFT, n(k) -> n(x): */
   MatMultTranspose (BHD->fft_mat, work, nab);
@@ -843,16 +852,15 @@ static void Compute_dg_intra (State *BHD,
       VecAXPY (BHD->v[dim], -1.0, fac_l[dim]);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-
-      /*
-        Apply  omega()  in-place,   note  argument  aliasing.   FIXME:
-        pretends  that sinc(0)  ==  0,  so the  original  code. Is  it
-        possible to claim that the  k = 0 component of weighted forces
-        vanishes? Because then, formally, zero or one would not make a
-        difference here:
-      */
-      omega (BHD->PD, BHD->dc, fg2_fft[dim], rbc, fg2_fft[dim], 0.0);
     }
+
+  /*
+    Apply omega()  in-place, note argument  aliasing.  FIXME: pretends
+    that sinc(0) ==  0, so the original code. Is  it possible to claim
+    that  the k  = 0  component of  weighted forces  vanishes? Because
+    then, formally, zero or one would not make a difference here:
+  */
+  omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft, 0.0);
 
   /* int(..)/nab */
   /* Laplace^-1 * divergence */
