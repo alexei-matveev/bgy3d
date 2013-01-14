@@ -257,7 +257,7 @@ static void kernel (const DA dc,
             }
 
           /* phase shift factor for x=x+L/2 */
-          real sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+          const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
           real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
 
