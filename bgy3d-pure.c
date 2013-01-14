@@ -661,6 +661,15 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
 }
 
 
+static double pure sinc (double x)
+{
+  if (unlikely (x == 0.0))
+    return 1.0;
+  else
+    return sin (x) / x;
+}
+
+
 /*
   Output y(k)  is the  convolution of x(k)  with ω(x)  = δ(|x| -  r) /
   4πr².  This function takes momentum  space x(k) as input and returns
@@ -709,18 +718,16 @@ static void omega (const ProblemData *PD, const DA dc,
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
+          const real k = (2.0 * M_PI * rab / L) * sqrt (k2);
 
           /* Compute ω(k): */
-          real wk;
-          if (unlikely (k2 == 0))
-            wk = h3 * sinc0;    /* sinc(0) = 1, but see call sites */
+          real sinc_k;
+          if (unlikely (k == 0.0))
+            sinc_k = sinc0; /* FIXME: sinc(0) = 1, but see call sites */
           else
-            {
-              const real k = (2.0 * M_PI * rab / L) * sqrt (k2);
+            sinc_k = sinc (k);
 
-              /* + hier richtig !! */
-              wk = h3 * (sin (k) / k);
-            }
+          const real wk = h3 * sinc_k;
 
           /* Set y(k) = wk * x(k): */
           for (int p = 0; p < d; p++)
@@ -904,8 +911,6 @@ static void Compute_dg_intra (State *BHD,
         {
           int ic[3];
 
-          dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-
           FOR_DIM
             if (i[dim] <= N[dim] / 2)
               ic[dim] = i[dim];
@@ -914,24 +919,29 @@ static void Compute_dg_intra (State *BHD,
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+          const real k = (2.0 * M_PI  * rbc / L) * sqrt (k2);
 
-          if (unlikely (k2 == 0))
-            {
-              dg_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-              FOR_DIM
-                fg2_fft_[dim][i[2]][i[1]][i[0]] = 0.0; /* complex */
-            }
+          /* Use fg2_fft: */
+          complex div = 0.0;    /* complex */
+          FOR_DIM
+            div += ic[dim] * fg2_fft_[dim][i[2]][i[1]][i[0]];
+
+          if (unlikely (k == 0.0))
+            div *= 0.0;         /* 1/k2 is undefined */
           else
-            {
-              const real k_fac = scale / k2;
-              const real k = 2.0 * M_PI * sqrt (k2) * rbc / L;
+            div *= -I * ((h3 * scale) / k2);
 
-              FOR_DIM
-                dg_fft_[i[2]][i[1]][i[0]] += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
+          dg_fft_[i[2]][i[1]][i[0]] = div; /* complex */
 
-              FOR_DIM
-                fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sin(k) / k;
-            }
+          real sinc_k;
+          if (unlikely (k == 0.0))
+            sinc_k = 0.0; /* FIXME: sinc(0) == 1, but so the original */
+          else
+            sinc_k = sinc (k);
+
+          /* Overwrite fg2_fft: */
+          FOR_DIM
+            fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sinc_k;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, cac_fft, &cac_fft_);
@@ -980,13 +990,13 @@ static void Compute_dg_intra (State *BHD,
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
 
           complex div = 0.0;    /* divergence */
-          if (likely (k2 != 0))
-            {
-              const real k_fac = scale / k2;
+          FOR_DIM
+            div += ic[dim] * fg2_fft_[dim][i[2]][i[1]][i[0]];
 
-              FOR_DIM
-                div += ic[dim] * k_fac * h3 * (-I * fg2_fft_[dim][i[2]][i[1]][i[0]]);
-            }
+          if (unlikely (k2 == 0))
+            div *= 0.0;         /* 1/k2 is undefined */
+          else
+            div *= -I * ((h3 * scale) / k2);
 
           dg_fft_[i[2]][i[1]][i[0]] = div;
         }
