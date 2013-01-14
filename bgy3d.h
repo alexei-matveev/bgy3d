@@ -84,7 +84,9 @@
 #define SHIFT 0.0
 
 
-#define COSSIGN(i)  (((i)%2)?-1:1)
+/* Returns (-1)^n, that is 1 for even  and -1 for odd n. NOTE: it also
+   needs to work as intended for negative n: */
+#define COSSIGN(n)  (((n) % 2) ? -1 : 1)
 
 /* GCC extensions: */
 #if __GNUC__ >= 3
