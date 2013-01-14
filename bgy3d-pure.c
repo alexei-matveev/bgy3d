@@ -646,13 +646,14 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
   VecGetArray (x, &x_);
   VecGetArray (y, &y_);
 
-  for (int i = 0; i < local_size; i++) {
-      real y_i = y_[i];
+  for (int i = 0; i < local_size; i++)
+    {
+      const real y_i = y_[i];
       if (y_i < thresh)
-          w_[i] = x_[i] / thresh;
+        w_[i] = x_[i] / thresh;
       else
-          w_[i] = x_[i] / y_i;
-  }
+        w_[i] = x_[i] / y_i;
+    }
 
   VecRestoreArray (w, &w_);
   VecRestoreArray (x, &x_);
