@@ -92,9 +92,11 @@
 #if __GNUC__ >= 3
 #define likely(x)    __builtin_expect (!!(x), 1)
 #define unlikely(x)  __builtin_expect (!!(x), 0)
+#define pure         __attribute__((const))
 #else
 #define likely(x)    (x)
 #define unlikely(x)  (x)
+#define pure                    /* pure */
 #endif
 
 extern int verbosity;
