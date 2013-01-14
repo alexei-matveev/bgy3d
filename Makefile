@@ -53,8 +53,7 @@ USERFLAGS += -DHCl
 srcdir = .
 
 # Compiler and compiler options
-CC       = gcc 
-CPPFLAGS = 
+CC       = gcc
 CFLAGS   = -std=c99 -Wall -Wextra -Ofast $(USERFLAGS)
 LDFLAGS  =
 
