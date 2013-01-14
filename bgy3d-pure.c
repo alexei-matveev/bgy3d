@@ -840,9 +840,8 @@ static void Compute_dg_intra (State *BHD,
   const real L = PD->interval[1] - PD->interval[0];
   const real scale = L / (2. * M_PI); /* siehe oben ... */
 
-
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -899,9 +898,9 @@ static void Compute_dg_intra (State *BHD,
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
           int ic[3];
 
@@ -941,7 +940,7 @@ static void Compute_dg_intra (State *BHD,
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
-  VecScale(dg_help, PD->beta/L/L/L);
+  VecScale (dg_help, PD->beta/L/L/L);
 
   /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
@@ -997,9 +996,9 @@ static void Compute_dg_intra (State *BHD,
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  VecScale(dg, PD->beta/L/L/L);
+  VecScale (dg, PD->beta/L/L/L);
 
-  VecAXPY(dg, 1.0, dg_help);
+  VecAXPY (dg, 1.0, dg_help);
 }
 
 
