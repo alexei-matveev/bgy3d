@@ -548,7 +548,7 @@ static void kapply (const State *BHD,
               ic[dim] = i[dim] - N[dim];
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
-          const int k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
 
           complex div = 0.0;    /* complex */
           if (likely (k2 != 0))
@@ -708,7 +708,7 @@ static void omega (const ProblemData *PD, const DA dc,
               ic[dim] = i[dim] - N[dim];
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
-          const int k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
+          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
 
           /* Compute ω(k): */
           real wk;
