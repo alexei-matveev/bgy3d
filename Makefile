@@ -13,8 +13,8 @@
 #
 all: bgy3d
 
-include ${PETSC_DIR}/bmake/common/base
-# include ${PETSC_DIR}/conf/base # on Ubuntu 12.04 LTS
+include $(PETSC_DIR)/bmake/common/base
+# include $(PETSC_DIR)/conf/base # on Ubuntu 12.04 LTS
 
 # Shell
 SHELL = /bin/sh
@@ -59,11 +59,11 @@ LDFLAGS  =
 
 
 
-INCDIRS = ${PETSC_INCLUDE} -I./fft
+INCDIRS = $(PETSC_INCLUDE) -I./fft
 fftw3-libs = -lfftw3_mpi -lfftw3
 fftw2-libs = -lfftw_mpi -lfftw
 rfftw2-libs = -lrfftw_mpi -lfftw_mpi -lrfftw -lfftw
-LIBS = $(fftw2-libs) -lm ${PETSC_LIB}
+LIBS = $(fftw2-libs) -lm $(PETSC_LIB)
 
 #--------------------------------------------------------------------------------
 # Make rules
@@ -116,7 +116,7 @@ libbgy3d.a: $(libbgy3d.a)
 	$(RANLIB) $@
 
 bgy3d: $(OBJECTS) libbgy3d.a
-	${CC} ${CFLAGS} ${LDFLAGS} -o $@ $(OBJECTS) -L. -lbgy3d ${LIBS}
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) -L. -lbgy3d $(LIBS)
 
 #
 # Dont call the target "test" because we have a directory called so:
