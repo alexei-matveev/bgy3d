@@ -62,8 +62,16 @@ ProblemData bgy3d_problem_data (void)
     /* At  this  point  N  and   h  have  consistent  values  for  the
        interval. */
 
+    /* FIXME:  N^2 +  N^2 +  N^2 should  not overflow,  this condition
+       ensures that 3N^2 < 2^31: */
+    assert (N < 26755);
+
     FOR_DIM
         PD.N[dim] = N;
+
+    /* FIXME: N^3 should not overflow, this condition ensures that N^3
+       < 2^31: */
+    assert (N < 1291);
 
     PD.N3 = PD.N[0] * PD.N[1] * PD.N[2];
 
