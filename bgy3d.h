@@ -81,8 +81,6 @@
 #define BOHR 0.52917706
 
 #define CUTOFF 1.0e+8
-#define SHIFT 0.0
-
 
 /* Returns (-1)^n, that is 1 for even  and -1 for odd n. NOTE: it also
    needs to work as intended for negative n: */

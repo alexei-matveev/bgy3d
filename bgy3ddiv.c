@@ -13,8 +13,6 @@ real Lennard_Jones_ddU(real r, real xr, real epsilon, real sigma)
 {
   real sr6, r2, sr, re;
 
-  r += SHIFT;
-
   if(r==0)
     return +CUTOFF;
 

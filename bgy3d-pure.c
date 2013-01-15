@@ -141,8 +141,6 @@ static real LJ_repulsive (real r, real epsilon, real sigma)
 {
   real sr6, sr, re;
 
-  r = r + SHIFT;
-
   sr = sigma / r;
   sr6 = SQR(sr) * SQR(sr) * SQR(sr);
 

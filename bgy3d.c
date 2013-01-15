@@ -121,11 +121,9 @@ ProblemData bgy3d_problem_data (void)
     return PD;
 }
 
-real Lennard_Jones(real r, real epsilon, real sigma)
+real Lennard_Jones (real r, real epsilon, real sigma)
 {
   real sr6, sr, re;
-
-  r=r+SHIFT;
 
   sr = sigma/r;
   sr6 = SQR(sr)*SQR(sr)*SQR(sr);
@@ -138,11 +136,9 @@ real Lennard_Jones(real r, real epsilon, real sigma)
     return re;
 }
 
-real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma)
+real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
 {
   real sr6, sr, re;
-
-  r=r+SHIFT;
 
   if(xr==0)
     return 0;
