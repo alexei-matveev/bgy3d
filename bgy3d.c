@@ -123,12 +123,10 @@ ProblemData bgy3d_problem_data (void)
 
 real Lennard_Jones (real r, real epsilon, real sigma)
 {
-  real sr6, sr, re;
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
-  sr = sigma / r;
-  sr6 = SQR (sr) * SQR (sr) * SQR (sr);
-
-  re = 4. * epsilon * sr6 * (sr6 - 1.);
+  const real re = 4 * epsilon * sr6 * (sr6 - 1);
 
   if (fabs (re) > epsilon * CUTOFF)
     return epsilon * CUTOFF;
@@ -138,17 +136,15 @@ real Lennard_Jones (real r, real epsilon, real sigma)
 
 real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
 {
-  real sr6, sr, re;
-
-  if (xr == 0)
-    return 0;
-  if (r == 0)
+  if (xr == 0.0)
+    return 0.0;
+  if (r == 0.0)
     return -epsilon * CUTOFF;
 
-  sr = sigma / r;
-  sr6 = SQR (sr) * SQR (sr) * SQR (sr);
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
-  re = -24. * epsilon * sr6 / r * (2. * sr6 - 1.) * xr / r;
+  const real re = -24 * epsilon * sr6 / r * (2 * sr6 - 1) * xr / r;
 
   if (re > epsilon * CUTOFF)
     return epsilon * CUTOFF;
