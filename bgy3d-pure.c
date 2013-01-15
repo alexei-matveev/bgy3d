@@ -463,11 +463,11 @@ static void pair (State *BHD,
                 /* Coulomb short */
                 f_short_[dim][i[2]][i[1]][i[0]] +=
                   damp * Coulomb_short_grad (r_s, r[dim], q2);
-
-                /* deterministic correction */
-                c2_[i[2]][i[1]][i[0]] =
-                  exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
               }
+
+            /* deterministic correction */
+            c2_[i[2]][i[1]][i[0]] =
+              exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
           }
 
   DAVecRestoreArray (da, u_ini, &u_ini_);
