@@ -125,13 +125,13 @@ real Lennard_Jones (real r, real epsilon, real sigma)
 {
   real sr6, sr, re;
 
-  sr = sigma/r;
-  sr6 = SQR(sr)*SQR(sr)*SQR(sr);
+  sr = sigma / r;
+  sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
-  re= 4.*epsilon*sr6*(sr6-1.);
+  re = 4. * epsilon * sr6 * (sr6 - 1.);
 
-  if(fabs(re)>epsilon*CUTOFF)
-    return epsilon*CUTOFF;
+  if (fabs (re) > epsilon * CUTOFF)
+    return epsilon * CUTOFF;
   else
     return re;
 }
@@ -140,22 +140,20 @@ real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
 {
   real sr6, sr, re;
 
-  if(xr==0)
+  if (xr == 0)
     return 0;
-  if(r==0)
-    return -epsilon*CUTOFF;
+  if (r == 0)
+    return -epsilon * CUTOFF;
 
-  sr = sigma/r;
-  sr6 = SQR(sr)*SQR(sr)*SQR(sr);
+  sr = sigma / r;
+  sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
-  re = -24.*epsilon*sr6/r*(2.*sr6-1.)*xr/r;
+  re = -24. * epsilon * sr6 / r * (2. * sr6 - 1.) * xr / r;
 
-  //re = -24.*epsilon*pow(sigma,6.0)/pow(r,7.0)*(2.*pow(sigma,6.0)/pow(r,6.0)-1.)*xr/r;
-
-  if(re>epsilon*CUTOFF)
-    return epsilon*CUTOFF;
-  else if(re<-epsilon*CUTOFF)
-    return -epsilon*CUTOFF;
+  if (re > epsilon * CUTOFF)
+    return epsilon * CUTOFF;
+  else if (re < -epsilon * CUTOFF)
+    return -epsilon * CUTOFF;
   else
     return re;
 }
