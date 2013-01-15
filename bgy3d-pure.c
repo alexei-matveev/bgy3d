@@ -139,12 +139,10 @@ static void finalize_state (State *BHD)
 
 static real LJ_repulsive (real r, real epsilon, real sigma)
 {
-  real sr6, sr, re;
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
-  sr = sigma / r;
-  sr6 = SQR(sr) * SQR(sr) * SQR(sr);
-
-  re = 4. * epsilon * sr6 * sr6;
+  const real re = 4 * epsilon * sr6 * sr6;
 
   if (fabs (re) > epsilon * CUTOFF)
     return epsilon * CUTOFF;
