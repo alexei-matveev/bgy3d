@@ -273,7 +273,11 @@ void ComputeH2O_g (Vec g, Vec u0, Vec du)
       real g_i = exp(-u_i);
 
       assert (g_i >= 0.0);
+      if (isinf (g_i))
+        printf ("OVERFLOW: i=%d, u0[i]=%e, du[i]=%e\n", i, u0_[i], du_[i]);
       assert (!isinf (g_i));
+      if (isnan (g_i))
+        printf ("NOTANUMBER: i=%d, u0[i]=%e, du[i]=%e\n", i, u0_[i], du_[i]);
       assert (!isnan (g_i));
 
       g_[i] = g_i;
