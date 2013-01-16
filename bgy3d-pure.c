@@ -1117,7 +1117,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 #endif
 
   /* FIXME: g0[][] is a misnomer. Rename to u0[][]: */
-  assert (m == 2);
   Vec (*g0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
   /* set initial guess*/
@@ -1353,9 +1352,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
-      PetscPrintf (PETSC_COMM_WORLD, "HO=%e ", dg_norm[0][1]);
-      PetscPrintf (PETSC_COMM_WORLD, "HH=%e ", dg_norm[0][0]);
-      PetscPrintf (PETSC_COMM_WORLD, "OO=%e ", dg_norm[1][1]);
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
+                       solvent[i].name, solvent[j].name, dg_norm[i][j]);
+
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
@@ -1522,8 +1524,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       else
         a = a0;
 
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: dg function norms:\t", iter+1);
-
       /* Compute FFT of g[][] for all site pairs: */
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
@@ -1574,8 +1574,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "HO= %e  (%f)  ", dg_norm[0][1], a);
-
           /* g_H */
           VecSet (dg_new, 0.0);
           Compute_dg_inter (BHD,
@@ -1622,8 +1620,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
 
-          PetscPrintf (PETSC_COMM_WORLD, "H= %e  (%f)  ", dg_norm[0][0], a);
-
           /* g_O */
           VecSet (dg_new, 0.0);
           Compute_dg_inter (BHD,
@@ -1658,8 +1654,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
             bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[1][1]);
 
           dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
-
-          PetscPrintf (PETSC_COMM_WORLD, "O= %e  (%f)  ", dg_norm[1][1], a);
 
           /* ende: */
           ComputeH2O_g (g[0][1], g0[0][1], dg[0][1]);
@@ -1699,18 +1693,26 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           a1=1.0;
           mycount=0;
         }
-      PetscPrintf(PETSC_COMM_WORLD,"count= %d  upwards= %d", mycount, upwards);
-      dg_norm_old[0][0] = dg_norm[0][0];
-      dg_norm_old[1][1] = dg_norm[1][1];
-      dg_norm_old[0][1] = dg_norm[0][1];
-      /*********************************/
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++) /* Yes, full range! */
+          dg_norm_old[i][j] = dg_norm[i][j];
+
+      PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
+      PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
+                       solvent[i].name, solvent[j].name, dg_norm[i][j]);
+
+      PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
+      PetscPrintf (PETSC_COMM_WORLD, "\n");
 
       if (dg_norm[0][0] <= norm_tol &&
           dg_norm[1][1] <= norm_tol &&
           dg_norm[0][1] <= norm_tol)
         break;
-
-      PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
   /* FIXME: Debug  output from every iteration  with different overall
