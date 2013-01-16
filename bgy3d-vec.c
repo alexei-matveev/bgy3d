@@ -204,7 +204,7 @@ void bgy3d_vec_read1 (const char *format, int m, const Vec g[m])
 
 /* Fills Vec  g2 with  3D distribution derived  from the 1D  g(r) data
    from the disk.  Here g2 should be a valid allocated vector. */
-static void ReadPairDistribution (const State *BHD, const char *filename, Vec g2)
+static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
 {
   DA da;
   FILE *fp;
@@ -297,7 +297,7 @@ void bgy3d_vec_read_radial2 (const State *BHD,
         char name[20];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
-        ReadPairDistribution (BHD, name, g2[i][j]);
+        vec_read_radial (BHD, name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
