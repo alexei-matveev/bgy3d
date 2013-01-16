@@ -686,16 +686,16 @@ static void omega (const ProblemData *PD, const DA dc,
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
-          const real k = (2.0 * M_PI * rab / L) * sqrt (k2);
+          const real kr = (2.0 * M_PI * rab / L) * sqrt (k2);
 
           /* Compute ω(k): */
-          real sinc_k;
-          if (unlikely (k == 0.0))
-            sinc_k = sinc0; /* FIXME: sinc(0) = 1, but see call sites */
+          real sinc_kr;
+          if (unlikely (kr == 0.0))
+            sinc_kr = sinc0; /* FIXME: sinc(0) = 1, but see call sites */
           else
-            sinc_k = sinc (k);
+            sinc_kr = sinc (kr);
 
-          const real wk = h3 * sinc_k;
+          const real wk = h3 * sinc_kr;
 
           /* Set y(k) = wk * x(k): */
           for (int p = 0; p < d; p++)
@@ -880,29 +880,29 @@ static void Compute_dg_intra (State *BHD,
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
-          const real k = (2.0 * M_PI  * rbc / L) * sqrt (k2);
+          const real kr = (2.0 * M_PI  * rbc / L) * sqrt (k2);
 
           /* Use fg2_fft: */
           complex div = 0.0;    /* complex */
           FOR_DIM
             div += ic[dim] * fg2_fft_[dim][i[2]][i[1]][i[0]];
 
-          if (unlikely (k == 0.0))
+          if (unlikely (kr == 0.0))
             div *= 0.0;         /* 1/k2 is undefined */
           else
             div *= -I * ((h3 * scale) / k2);
 
           dg_fft_[i[2]][i[1]][i[0]] = div; /* complex */
 
-          real sinc_k;
-          if (unlikely (k == 0.0))
-            sinc_k = 0.0; /* FIXME: sinc(0) == 1, but so the original */
+          real sinc_kr;
+          if (unlikely (kr == 0.0))
+            sinc_kr = 0.0; /* FIXME: sinc(0) == 1, but so the original */
           else
-            sinc_k = sinc (k);
+            sinc_kr = sinc (kr);
 
           /* Overwrite fg2_fft: */
           FOR_DIM
-            fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sinc_k;
+            fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sinc_kr;
         }
   DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   DAVecRestoreArray (BHD->dc, cac_fft, &cac_fft_);
