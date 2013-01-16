@@ -1299,8 +1299,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     */
                     assert (t[i][k] != t[i][j]);
 
-                    /* FIXME: redundant computation for j == i: */
-                    bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], r[j][k], g[i][k], t[i][k]);
+                    /*
+                      NOTE:  without  the  next conditional  the  next
+                      computation would be redundant computation for j
+                      == i.   See the call  to bgy3d_nssa_gamma_cond()
+                      above:
+                    */
+                    if (i != j)
+                      bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], r[j][k], g[i][k], t[i][k]);
                     nssa_norm_intra (BHD, g_fft[i][k], r[j][k], BHD->fft_scratch, t[i][j]);
                     Compute_dg_intra (BHD,
                                       BHD->F[i][k], BHD->F_l[i][k], t[i][k],
