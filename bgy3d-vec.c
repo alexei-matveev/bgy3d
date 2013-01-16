@@ -135,7 +135,7 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 /*
   Read  solvent-solvent pair  distributions  g2[][] from  disk into  a
   pre-allocated   global   (distributed)   vectors.   Note   that   in
-  bgy3d_load_vec(), the  type of  the Vec will  depend on  the on-disk
+  bgy3d_vec_load(), the  type of  the Vec will  depend on  the on-disk
   data  which may  or  may not  be  compatible to  ones  used in  this
   run. That is why we use bgy3d_vec_read() here instead.
 
@@ -282,7 +282,7 @@ static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
 
 /*
   Was  used  for CS2  where  the g2  comes  from  MM simulations.   By
-  convention bgy3d_read_*  expects the storage  for the vectors  to be
+  convention bgy3d_vec_read* expects the storage for the vectors to be
   allocated.
 */
 void bgy3d_vec_read_radial2 (const State *BHD,
