@@ -137,7 +137,7 @@ void bgy3d_vec_save_ascii1 (const char *format, int m, const Vec vec[m])
   PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
   for (int i = 0; i < m; i++)
     {
-      char name[20 + sizeof format];
+      char name[20 + strlen (format)];
       snprintf (name, sizeof name, format, i);
       bgy3d_vec_save_ascii (name, vec[i]);
     }
@@ -153,7 +153,7 @@ void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m]
       {
         assert (vec[j][i] == vec[i][j]);
 
-        char name[20 + sizeof format];
+        char name[20 + strlen (format)];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
         bgy3d_vec_save_ascii (name, vec[i][j]);
