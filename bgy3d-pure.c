@@ -1056,7 +1056,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   const int m = 2;              /* FIXME: hardwired number of sites */
   State *BHD;
   Vec dg_new, dg_new2, work;
-  real a = 0.9, damp, damp_LJ;
+  real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   real dg_norm[m][m];
@@ -1131,18 +1131,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   VecSet(dg_new,0.0);
 
-  for (damp = damp_start; damp <= 1; damp += 0.1)
+  for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
-      if (damp == -0.01)
-        {
-          damp_LJ = 0.0;
-          RecomputeInitialData (BHD, 0.0, 1.0);
-        }
-      else
-        {
-          damp_LJ = 1.0;
-          RecomputeInitialData (BHD, damp, 1.0);
-        }
+      RecomputeInitialData (BHD, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       for (int i = 0; i < m; i++)
@@ -1217,7 +1208,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                   g[j][k],
                                   BHD->u2_fft[i][k], BHD->rhos[k],
                                   dg_new2);
-                VecAXPY (dg_new, damp_LJ, dg_new2);
+                VecAXPY (dg_new, 1.0, dg_new2);
               }
 
             /* FIXME: 3-site code does not do this: */
@@ -1413,7 +1404,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   const int m = 2; /* FIXME: hardwired number of inequivalent sites */
   State *BHD;
   Vec dg_new, dg_new2, work;
-  real a = 0.9, damp, damp_LJ;
+  real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
   real dg_norm[2][2];
@@ -1494,18 +1485,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   VecSet(dg_new,0.0);
 
-  for (damp = damp_start; damp <= damp_start; damp += 0.1)
+  for (real damp = damp_start; damp <= damp_start; damp += 0.1)
     {
-      if (damp == -0.01)
-        {
-          damp_LJ = 0.0;
-          RecomputeInitialData (BHD, 0.0, 1.0);
-        }
-      else
-        {
-          damp_LJ = 1.0;
-          RecomputeInitialData (BHD, damp, 1.0);
-        }
+      RecomputeInitialData (BHD, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       /* Vec work is used as a temporary here: */
@@ -1549,14 +1531,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             g[0][1],
                             BHD->u2_fft[1][1], BHD->rhos[1],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][0],
                             BHD->u2_fft[0][1], BHD->rhos[0],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
@@ -1593,14 +1575,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             g[0][1],
                             BHD->u2_fft[0][1], BHD->rhos[1],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][0], BHD->F_l[0][0], g[0][0],
                             g[0][0],
                             BHD->u2_fft[0][0], BHD->rhos[0],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
@@ -1641,14 +1623,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             g[0][1],
                             BHD->u2_fft[0][1], BHD->rhos[0],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[1][1],
                             BHD->u2_fft[1][1], BHD->rhos[1],
                             dg_new2);
-          VecAXPY (dg_new, damp_LJ, dg_new2);
+          VecAXPY (dg_new, 1.0, dg_new2);
 
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
