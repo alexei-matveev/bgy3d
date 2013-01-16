@@ -11,6 +11,7 @@
 #include "bgy3d-impure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-poisson.h"      /* laplace staff */
+#include "bgy3d-vec.h"          /* bgy3d_vec_map*() */
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */
 
@@ -258,34 +259,14 @@ real Coulomb_grad (real r, real rx, real q2)
 /* g := exp[-(u0 + du)], with a sanity check: */
 void ComputeH2O_g (Vec g, Vec u0, Vec du)
 {
-  int local_size;
-  PetscScalar *g_, *du_, *u0_;
-
-  VecGetArray (g, &g_);
-  VecGetArray (u0, &u0_);
-  VecGetArray (du, &du_);
-
-  VecGetLocalSize (g, &local_size);
-
-  for (int i = 0; i < local_size; i++)
-    {
-      real u_i = u0_[i] + du_[i];
-      real g_i = exp(-u_i);
-
-      assert (g_i >= 0.0);
-      if (isinf (g_i))
-        printf ("OVERFLOW: i=%d, u0[i]=%e, du[i]=%e\n", i, u0_[i], du_[i]);
-      assert (!isinf (g_i));
-      if (isnan (g_i))
-        printf ("NOTANUMBER: i=%d, u0[i]=%e, du[i]=%e\n", i, u0_[i], du_[i]);
-      assert (!isnan (g_i));
-
-      g_[i] = g_i;
-    }
-
-  VecRestoreArray (g, &g_);
-  VecRestoreArray (u0, &u0_);
-  VecRestoreArray (du, &du_);
+  real pure f (real x, real y)
+  {
+    const real z = exp (- (x + y));
+    assert (!isinf (z));
+    assert (!isnan (z));
+    return z;
+  }
+  bgy3d_vec_map2 (g, f, u0, du);
 }
 
 
@@ -637,27 +618,14 @@ static void safe_pointwise_divide (Vec w, /* intent(out) */
                                    Vec y, /* intent(in) */
                                    real thresh)
 {
-  int local_size;
-  PetscScalar *w_, *x_, *y_;
-
-  VecGetLocalSize (w, &local_size);
-
-  VecGetArray (w, &w_);
-  VecGetArray (x, &x_);
-  VecGetArray (y, &y_);
-
-  for (int i = 0; i < local_size; i++)
-    {
-      const real y_i = y_[i];
-      if (y_i < thresh)
-        w_[i] = x_[i] / thresh;
-      else
-        w_[i] = x_[i] / y_i;
-    }
-
-  VecRestoreArray (w, &w_);
-  VecRestoreArray (x, &x_);
-  VecRestoreArray (y, &y_);
+  real pure f (real x, real y)
+  {
+    if (y < thresh)
+      return x / thresh;
+    else
+      return x / y;
+  }
+  bgy3d_vec_map2 (w, f, x, y);
 }
 
 
@@ -791,23 +759,16 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
   /* FIXME:  make  n(x) >  0,  because it  will  appear  later in  the
      denominator. Note that the same redundant precautions are made at
      other places too. */
+  real pure f (real x)
   {
-    PetscScalar *nab_;
-    int local_size;
-
-    VecGetArray (nab, &nab_);
-    VecGetLocalSize (nab, &local_size);
-
-    for (int i = 0; i < local_size; i++)
-      {
-        real nab_i = nab_[i];
-        if (nab_i < 1.0e-8)
-          nab_i = 1.0e-8;
-
-        nab_[i] = nab_i;
-      }
-    VecRestoreArray (nab, &nab_);
+    const real thresh = 1.0e-8;
+    if (x < thresh)
+      return thresh;
+    else
+      return x;
   }
+  /* Transfrom in-place: */
+  bgy3d_vec_map1 (nab, f, nab); /* argument aliasing! */
 }
 
 
@@ -1036,23 +997,14 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, real rbc, Vec dg)
   */
   nssa_norm_intra (BHD, BHD->fft_scratch, rbc, BHD->fft_scratch, dg);
 
-  /* ln(g) */
+  /* -ln(g) */
+  real pure f (real x)
   {
-    PetscScalar *dg_;
-    int local_size;
-
-    VecGetArray (dg, &dg_);
-    VecGetLocalSize (dg, &local_size);
-
-    for (int i = 0; i < local_size; i++)
-      {
-        real g_i = dg_[i];
-        assert (g_i >= 1.0e-8);  /* See nssa_norm_intra() */
-
-        dg_[i] = -log (g_i);
-      }
-    VecRestoreArray (dg, &dg_);
+    // assert (x >= 1.0e-8);       /* See nssa_norm_intra() */
+    return - log (x);
   }
+  /* Transfrom in-place: */
+  bgy3d_vec_map1 (dg, f, dg); /* argument aliasing! */
 
   /* Ensure normalization condition int(u)=0 */
   /* VecSum (dg, &k); */
