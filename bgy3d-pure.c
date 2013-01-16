@@ -1059,8 +1059,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* Original code used to print solvent params: */
   bgy3d_sites_show ("Solvent", m, solvent);
 
-  real dg_norm[m][m];
-  real dg_norm_old[m][m];
+  real du_norm[m][m];
+  real du_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
@@ -1087,11 +1087,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  Vec g[m][m], dg[m][m], t[m][m]; /* real, ij = ji */
+  Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
   create_g2 (BHD->da, m, g);
   create_g2 (BHD->dc, m, g_fft); /* complex */
-  create_g2 (BHD->da, m, dg);
+  create_g2 (BHD->da, m, du);
   create_g2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &du_new);
@@ -1121,11 +1121,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* set initial guess*/
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      VecSet (dg[i][j], 0.0);
+      VecSet (du[i][j], 0.0);
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_vec_read2 ("dg%d%d.bin", m, dg);
+    bgy3d_vec_read2 ("du%d%d.bin", m, du);
 
   VecSet(du_new,0.0);
 
@@ -1140,12 +1140,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             /* Vec work is used as a temporary here: */
             bgy3d_impose_laplace_boundary (BHD, u0[i][j], work, x_lapl[i][j]);
 
-            /* g = g0 * exp(-dg) */
-            ComputeH2O_g (g[i][j], u0[i][j], dg[i][j]);
+            /* g = g0 * exp(-du) */
+            ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
 
             /* Not sure if 0.0 as inital value is right. */
-            dg_norm_old[i][j] = 0.0;
-            dg_norm_old[j][i] = 0.0;
+            du_norm_old[i][j] = 0.0;
+            du_norm_old[j][i] = 0.0;
           }
 
       a1 = a0;
@@ -1299,8 +1299,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
               last arg is a temp
             */
-            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], du_new, a, work);
-            dg_norm[j][i] = dg_norm[i][j];
+            du_norm[i][j] = bgy3d_vec_mix (du[i][j], du_new, a, work);
+            du_norm[j][i] = du_norm[i][j];
           }
 
       /*
@@ -1310,22 +1310,22 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       */
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
-          ComputeH2O_g (g[i][j], u0[i][j], dg[i][j]);
+          ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
 
       /* (fancy) step size control */
       assert (m == 2);
       mycount++;
       if (((iter-1)%10) &&
-          (dg_norm_old[0][0] < dg_norm[0][0] ||
-           dg_norm_old[1][1] < dg_norm[1][1] ||
-           dg_norm_old[0][1] < dg_norm[0][1]))
+          (du_norm_old[0][0] < du_norm[0][0] ||
+           du_norm_old[1][1] < du_norm[1][1] ||
+           du_norm_old[0][1] < du_norm[0][1]))
         {
           upwards = 1;
         }
       else if (iter>20 && !((iter-1)%10) && upwards==0 &&
-               (dg_norm_old[0][0] < dg_norm[0][0] ||
-                dg_norm_old[1][1] < dg_norm[1][1] ||
-                dg_norm_old[0][1] < dg_norm[0][1]))
+               (du_norm_old[0][0] < du_norm[0][0] ||
+                du_norm_old[1][1] < du_norm[1][1] ||
+                du_norm_old[0][1] < du_norm[0][1]))
         {
           a1 /= 2.0;
           if (a1 < a0)
@@ -1348,7 +1348,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j < m; j++) /* Yes, full range! */
-          dg_norm_old[i][j] = dg_norm[i][j];
+          du_norm_old[i][j] = du_norm[i][j];
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
@@ -1356,14 +1356,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
-                       solvent[i].name, solvent[j].name, dg_norm[i][j]);
+                       solvent[i].name, solvent[j].name, du_norm[i][j]);
 
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-      if (dg_norm[0][0] <= norm_tol &&
-          dg_norm[1][1] <= norm_tol &&
-          dg_norm[0][1] <= norm_tol)
+      if (du_norm[0][0] <= norm_tol &&
+          du_norm[1][1] <= norm_tol &&
+          du_norm[0][1] <= norm_tol)
           break;
     }
 
@@ -1375,9 +1375,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     bgy3d_vec_save_ascii2 (fmt, m, g);
   }
 
-  /* Save dg[][] to binary files: */
+  /* Save du[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    bgy3d_vec_save2 ("dg%d%d.bin", m, dg);
+    bgy3d_vec_save2 ("du%d%d.bin", m, du);
 
   /* Save g2[][] to binary files: */
   bgy3d_vec_save2 ("g%d%d.bin", m, g);
@@ -1387,7 +1387,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   destroy_g2 (m, g);
   destroy_g2 (m, g_fft);
   destroy_g2 (m, t);
-  destroy_g2 (m, dg);
+  destroy_g2 (m, du);
   destroy_g2 (m, x_lapl);
 
   VecDestroy (du_new);
@@ -1417,8 +1417,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   /* Original code used to print solvent params: */
   bgy3d_sites_show ("Solvent", m, solvent);
 
-  real dg_norm[m][m];
-  real dg_norm_old[m][m];
+  real du_norm[m][m];
+  real du_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
@@ -1450,11 +1450,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  Vec g[m][m], dg[m][m], t[m][m]; /* real, ij = ji */
+  Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
   create_g2 (BHD->da, m, g);
   create_g2 (BHD->dc, m, g_fft); /* complex */
-  create_g2 (BHD->da, m, dg);
+  create_g2 (BHD->da, m, du);
   create_g2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &du_new);
@@ -1485,13 +1485,13 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   u0[0][1] = BHD->u_ini[0][1];
 
   /* set initial guess*/
-  VecSet(dg[0][0],0);
-  VecSet(dg[1][1],0);
-  VecSet(dg[0][1],0);
+  VecSet(du[0][0],0);
+  VecSet(du[1][1],0);
+  VecSet(du[0][1],0);
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_vec_read2 ("dg%d%d.bin", 2, dg);
+    bgy3d_vec_read2 ("du%d%d.bin", 2, du);
 
   VecSet(du_new,0.0);
 
@@ -1505,10 +1505,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       bgy3d_impose_laplace_boundary (BHD, u0[1][1], work, x_lapl[1][1]);
       bgy3d_impose_laplace_boundary (BHD, u0[0][1], work, x_lapl[0][1]);
 
-      /* g=g0*exp(-dg) */
-      ComputeH2O_g (g[0][1], u0[0][1], dg[0][1]);
-      ComputeH2O_g (g[0][0], u0[0][0], dg[0][0]);
-      ComputeH2O_g (g[1][1], u0[1][1], dg[1][1]);
+      /* g=g0*exp(-du) */
+      ComputeH2O_g (g[0][1], u0[0][1], du[0][1]);
+      ComputeH2O_g (g[0][0], u0[0][0], du[0][0]);
+      ComputeH2O_g (g[1][1], u0[1][1], du[1][1]);
 
       a1 = a0;
       a = a0;
@@ -1572,7 +1572,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][1]);
 
-          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], du_new, a, work);
+          du_norm[0][1] = bgy3d_vec_mix (du[0][1], du_new, a, work);
 
           /* g_H */
           VecSet (du_new, 0.0);
@@ -1618,7 +1618,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][0]);
 
-          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], du_new, a, work);
+          du_norm[0][0] = bgy3d_vec_mix (du[0][0], du_new, a, work);
 
           /* g_O */
           VecSet (du_new, 0.0);
@@ -1653,27 +1653,27 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[1][1]);
 
-          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], du_new, a, work);
+          du_norm[1][1] = bgy3d_vec_mix (du[1][1], du_new, a, work);
 
           /* ende: */
-          ComputeH2O_g (g[0][1], u0[0][1], dg[0][1]);
-          ComputeH2O_g (g[0][0], u0[0][0], dg[0][0]);
-          ComputeH2O_g (g[1][1], u0[1][1], dg[1][1]);
+          ComputeH2O_g (g[0][1], u0[0][1], du[0][1]);
+          ComputeH2O_g (g[0][0], u0[0][0], du[0][0]);
+          ComputeH2O_g (g[1][1], u0[1][1], du[1][1]);
         } /* of if (1) */
 
       /* (fancy) step size control */
       mycount++;
       if (((iter-1)%10) &&
-          (dg_norm_old[0][0] < dg_norm[0][0] ||
-           dg_norm_old[1][1] < dg_norm[1][1] ||
-           dg_norm_old[0][1] < dg_norm[0][1]))
+          (du_norm_old[0][0] < du_norm[0][0] ||
+           du_norm_old[1][1] < du_norm[1][1] ||
+           du_norm_old[0][1] < du_norm[0][1]))
         {
           upwards = 1;
         }
       else if (iter>20 && !((iter-1)%10) && upwards==0 &&
-               (dg_norm_old[0][0] < dg_norm[0][0] ||
-                dg_norm_old[1][1] < dg_norm[1][1] ||
-                dg_norm_old[0][1] < dg_norm[0][1]))
+               (du_norm_old[0][0] < du_norm[0][0] ||
+                du_norm_old[1][1] < du_norm[1][1] ||
+                du_norm_old[0][1] < du_norm[0][1]))
         {
           a1 /= 2.0;
           if (a1 < a0)
@@ -1696,7 +1696,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j < m; j++) /* Yes, full range! */
-          dg_norm_old[i][j] = dg_norm[i][j];
+          du_norm_old[i][j] = du_norm[i][j];
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
@@ -1704,14 +1704,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
-                       solvent[i].name, solvent[j].name, dg_norm[i][j]);
+                       solvent[i].name, solvent[j].name, du_norm[i][j]);
 
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-      if (dg_norm[0][0] <= norm_tol &&
-          dg_norm[1][1] <= norm_tol &&
-          dg_norm[0][1] <= norm_tol)
+      if (du_norm[0][0] <= norm_tol &&
+          du_norm[1][1] <= norm_tol &&
+          du_norm[0][1] <= norm_tol)
         break;
     }
 
@@ -1723,9 +1723,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
     bgy3d_vec_save_ascii2 (fmt, m, g);
   }
 
-  /* Save dg[][] to binary files: */
+  /* Save du[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    bgy3d_vec_save2 ("dg%d%d.bin", 2, dg);
+    bgy3d_vec_save2 ("du%d%d.bin", 2, du);
 
   /* Save g2[][] to binary files: */
   bgy3d_vec_save2 ("g%d%d.bin", 2, g);
@@ -1735,7 +1735,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   destroy_g2 (m, g);
   destroy_g2 (m, g_fft);
   destroy_g2 (m, t);
-  destroy_g2 (m, dg);
+  destroy_g2 (m, du);
   destroy_g2 (m, x_lapl);
 
   VecDestroy (du_new);
