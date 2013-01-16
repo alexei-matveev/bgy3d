@@ -132,6 +132,36 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 }
 
 
+void bgy3d_vec_save_ascii1 (const char *format, int m, const Vec vec[m])
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
+  for (int i = 0; i < m; i++)
+    {
+      char name[20 + sizeof format];
+      snprintf (name, sizeof name, format, i);
+      bgy3d_vec_save_ascii (name, vec[i]);
+    }
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+
+void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m])
+{
+  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        assert (vec[j][i] == vec[i][j]);
+
+        char name[20 + sizeof format];
+        snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
+
+        bgy3d_vec_save_ascii (name, vec[i][j]);
+      }
+  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+
 /*
   Read  solvent-solvent pair  distributions  g2[][] from  disk into  a
   pre-allocated   global   (distributed)   vectors.   Note   that   in
