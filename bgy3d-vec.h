@@ -15,3 +15,8 @@ void bgy3d_vec_read2 (const char *format, int m, /* const */ Vec g2[m][m]);
 void bgy3d_vec_save1 (const char *format, int m, const Vec g[m]);
 void bgy3d_vec_read1 (const char *format, int m, const Vec g[m]);
 
+
+void bgy3d_vec_read_radial2 (const State *BHD,
+                             const char *format, int m, /* const */ Vec g2[m][m]);
+
+
