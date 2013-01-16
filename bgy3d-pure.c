@@ -46,7 +46,7 @@ static void destroy_g2 (int m, Vec g[m][m])
       VecDestroy (g[i][j]);
 }
 
-static State* initialize_state (const ProblemData *PD)
+static State* initialize_state (const ProblemData *PD, int m)
 {
   State *BHD = (State*) malloc (sizeof (*BHD));
 
@@ -58,8 +58,9 @@ static State* initialize_state (const ProblemData *PD)
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
-  BHD->rhos[0] = PD->rho; //2.*PD->rho;
-  BHD->rhos[1] = PD->rho;
+  /* FIXME: all sites have the same weight: */
+  for (int i = 0; i < m; i++)
+    BHD->rhos[i] = PD->rho; /* 2 * PD->rho; */
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
@@ -68,12 +69,12 @@ static State* initialize_state (const ProblemData *PD)
 
   /* Create global vectors. FIXME:  u2, u2_fft probably differ only by
      factors: */
-  create_g2 (BHD->da, 2, BHD->u2);
-  create_g2 (BHD->dc, 2, BHD->u2_fft); /* complex */
-  create_g2 (BHD->da, 2, BHD->c2);
-  create_g2 (BHD->da, 2, BHD->u_ini);
+  create_g2 (BHD->da, m, BHD->u2);
+  create_g2 (BHD->dc, m, BHD->u2_fft); /* complex */
+  create_g2 (BHD->da, m, BHD->c2);
+  create_g2 (BHD->da, m, BHD->u_ini);
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
@@ -100,16 +101,16 @@ static State* initialize_state (const ProblemData *PD)
 
 
 
-static void finalize_state (State *BHD)
+static void finalize_state (State *BHD, int m)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
-  destroy_g2 (2, BHD->u2);
-  destroy_g2 (2, BHD->u2_fft);
-  destroy_g2 (2, BHD->u_ini);
-  destroy_g2 (2, BHD->c2);
+  destroy_g2 (m, BHD->u2);
+  destroy_g2 (m, BHD->u2_fft);
+  destroy_g2 (m, BHD->u_ini);
+  destroy_g2 (m, BHD->c2);
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
@@ -1066,7 +1067,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = initialize_state (PD);
+  BHD = initialize_state (PD, m);
 
   if (r_HH > 0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
@@ -1392,7 +1393,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   VecDestroy (dg_new2);
   VecDestroy (work);
 
-  finalize_state (BHD);
+  finalize_state (BHD, m);
 
   return PETSC_NULL;
 }
@@ -1414,7 +1415,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = initialize_state (PD);
+  BHD = initialize_state (PD, m);
 
   if (r_HH < 0)
     {
@@ -1732,7 +1733,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   VecDestroy (dg_new2);
   VecDestroy (work);
 
-  finalize_state (BHD);
+  finalize_state (BHD, m);
 
   return PETSC_NULL;
 }
