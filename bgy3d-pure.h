@@ -24,12 +24,3 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
 
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini);
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini);
-
-/*
-  Does the mixing:
-
-    dg := a * dg_new + (1 - a) * dg
-
-  Returns the norm of the difference |dg_new - dg|.
- */
-real bgy3d_vec_mix (Vec dg, Vec dg_new, real a, Vec work);

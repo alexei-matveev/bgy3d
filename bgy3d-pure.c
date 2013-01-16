@@ -1050,32 +1050,6 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
 }
 
 
-/*
-  Does the mixing:
-
-    cur := cur + a * (new - cur)
-
-         = a * new + (1 - a) * cur
-
-  Returns the norm of the difference |new - cur|.
- */
-real bgy3d_vec_mix (Vec cur, Vec new, real a, Vec work)
-{
-  /* work := new - cur, in two steps: */
-  VecCopy (new, work);
-  VecAXPBY (work, -1.0, 1.0, cur);
-
-  /* Norm of the change: */
-  real norm;
-  VecNorm (work, NORM_INFINITY, &norm);
-
-  /* cur' = cur + a * (new - cur) */
-  VecAXPBY (cur, a, 1.0, work);
-
-  return norm;
-}
-
-
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {

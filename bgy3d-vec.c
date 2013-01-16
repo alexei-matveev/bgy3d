@@ -53,6 +53,32 @@ void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 }
 
 
+/*
+  Does the mixing:
+
+    cur := cur + a * (new - cur)
+
+         = a * new + (1 - a) * cur
+
+  Returns the norm of the difference |new - cur|.
+ */
+real bgy3d_vec_mix (Vec cur, Vec new, real a, Vec work)
+{
+  /* work := new - cur, in two steps: */
+  VecCopy (new, work);
+  VecAXPBY (work, -1.0, 1.0, cur);
+
+  /* Norm of the change: */
+  real norm;
+  VecNorm (work, NORM_INFINITY, &norm);
+
+  /* cur' = cur + a * (new - cur) */
+  VecAXPBY (cur, a, 1.0, work);
+
+  return norm;
+}
+
+
 /* This one is supposed to save enough meta-info (such as distribution
    pattern, dimensions) to recover the vector from scratch: */
 void bgy3d_vec_save (const char file[], const Vec vec)
