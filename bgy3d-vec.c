@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 
 #include "bgy3d.h"
+#include "bgy3d-vec.h"
 
 static int vec_local_size (Vec xs)
 {
