@@ -7,6 +7,7 @@
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* needs Site */
 #include "bgy3d-getopt.h"
+#include "bgy3d-vec.h"
 #include "bgy3d-pure.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-poisson.h"      /* laplace staff */

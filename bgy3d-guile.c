@@ -8,7 +8,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
-#include "bgy3d-getopt.h"       /* bgy3d_save_vec, bgy3d_load_vec */
+#include "bgy3d-vec.h"          /* bgy3d_save_vec, bgy3d_load_vec */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-guile.h"
 
