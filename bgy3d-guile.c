@@ -8,7 +8,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
-#include "bgy3d-vec.h"          /* bgy3d_save_vec, bgy3d_load_vec */
+#include "bgy3d-vec.h"          /* bgy3d_vec_save, bgy3d_vec_load */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-guile.h"
 
@@ -272,7 +272,7 @@ static SCM guile_vec_save (SCM path, SCM vec)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
-  bgy3d_save_vec (c_path, void_ptr (vec));
+  bgy3d_vec_save (c_path, void_ptr (vec));
 
   free (c_path);
 
@@ -284,7 +284,7 @@ static SCM guile_vec_load (SCM path)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
-  Vec vec = bgy3d_load_vec (c_path);
+  Vec vec = bgy3d_vec_load (c_path);
 
   free (c_path);
 

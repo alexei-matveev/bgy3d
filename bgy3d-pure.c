@@ -1408,9 +1408,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   sprintf(nameHO, "vec01-%d.m", namecount-1);
 
   PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-  bgy3d_save_vec_ascii (nameH, g[0][0]); /* g_H */
-  bgy3d_save_vec_ascii (nameO, g[1][1]); /* g_O */
-  bgy3d_save_vec_ascii (nameHO, g[0][1]); /* g_HO */
+  bgy3d_vec_save_ascii (nameH, g[0][0]); /* g_H */
+  bgy3d_vec_save_ascii (nameO, g[1][1]); /* g_O */
+  bgy3d_vec_save_ascii (nameHO, g[0][1]); /* g_HO */
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
   /* Save dg[][] to binary files: */
@@ -1762,9 +1762,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   sprintf(nameHO, "vec01-%d.m", namecount-1);
 
   PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-  bgy3d_save_vec_ascii (nameH, g[0][0]);
-  bgy3d_save_vec_ascii (nameO, g[1][1]);
-  bgy3d_save_vec_ascii (nameHO, g[0][1]);
+  bgy3d_vec_save_ascii (nameH, g[0][0]);
+  bgy3d_vec_save_ascii (nameO, g[1][1]);
+  bgy3d_vec_save_ascii (nameHO, g[0][1]);
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
   /* Save dg[][] to binary files: */

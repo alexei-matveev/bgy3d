@@ -55,7 +55,7 @@ void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 
 /* This one is supposed to save enough meta-info (such as distribution
    pattern, dimensions) to recover the vector from scratch: */
-void bgy3d_save_vec (const char file[], const Vec vec)
+void bgy3d_vec_save (const char file[], const Vec vec)
 {
   PetscViewer viewer;
 
@@ -66,7 +66,7 @@ void bgy3d_save_vec (const char file[], const Vec vec)
 
 
 /* This one  returns a newly  created vector: */
-Vec bgy3d_load_vec (const char file[])
+Vec bgy3d_vec_load (const char file[])
 {
   Vec vec;                      /* new one */
   PetscViewer viewer;
@@ -81,7 +81,7 @@ Vec bgy3d_load_vec (const char file[])
 
 /* This one takes an allocated vector  and fills it with the data read
    from from disk. Pass a valid vector here: */
-void bgy3d_read_vec (const char file[], Vec vec)
+void bgy3d_vec_read (const char file[], Vec vec)
 {
   PetscViewer viewer;
 
@@ -92,7 +92,7 @@ void bgy3d_read_vec (const char file[], Vec vec)
 
 
 /* This one will not save much of a meta-info: */
-void bgy3d_save_vec_ascii (const char file[], const Vec vec)
+void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 {
   PetscViewer viewer;
 

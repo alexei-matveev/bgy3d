@@ -525,7 +525,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
     VecDestroy (work);
   }
 
-  bgy3d_save_vec ("ve.bin", ve); /* for debugging only */
+  bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
 }
 
 
@@ -1027,7 +1027,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         {
           char name[20];
           snprintf (name, sizeof name, "vec%d-%d.m", i, namecount - 1);
-          bgy3d_save_vec_ascii (name, g[i]);
+          bgy3d_vec_save_ascii (name, g[i]);
         }
       PetscPrintf (PETSC_COMM_WORLD, "done.\n");
       /************************************/
@@ -1384,8 +1384,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
-      dgH = bgy3d_load_vec ("dg0.bin"); /* dgH */
-      dgO = bgy3d_load_vec ("dg1.bin"); /* dgO */
+      dgH = bgy3d_vec_load ("dg0.bin"); /* dgH */
+      dgO = bgy3d_vec_load ("dg1.bin"); /* dgO */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   }
 
@@ -1590,15 +1590,15 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       sprintf(nameO, "vec1-%d.m", namecount-1);
 
       PetscPrintf(PETSC_COMM_WORLD,"Writing files...");
-      bgy3d_save_vec_ascii (nameH, g[0]); /* g_H */
-      bgy3d_save_vec_ascii (nameO, g[1]); /* g_O */
+      bgy3d_vec_save_ascii (nameH, g[0]); /* g_H */
+      bgy3d_vec_save_ascii (nameO, g[1]); /* g_O */
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
       /* save g to binary file */
       if (bgy3d_getopt_test ("--save-H2O")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
-          bgy3d_save_vec ("dg0.bin", dgH); /* dgH */
-          bgy3d_save_vec ("dg1.bin", dgO); /* dgO */
+          bgy3d_vec_save ("dg0.bin", dgH); /* dgH */
+          bgy3d_vec_save ("dg1.bin", dgO); /* dgO */
           PetscPrintf(PETSC_COMM_WORLD,"done.\n");
       }
     }

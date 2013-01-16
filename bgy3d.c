@@ -316,7 +316,7 @@ void bgy3d_read_g2_radial (const State *BHD,
   pre-allocated   global   (distributed)   vectors.   Note   that   in
   bgy3d_load_vec(), the  type of  the Vec will  depend on  the on-disk
   data  which may  or  may not  be  compatible to  ones  used in  this
-  run. That is why we use bgy3d_read_vec() here instead.
+  run. That is why we use bgy3d_vec_read() here instead.
 
   Format is e.g. "g%d%d.bin"
 */
@@ -331,7 +331,7 @@ void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format)
         char name[20];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
-        bgy3d_read_vec (name, g2[i][j]);
+        bgy3d_vec_read (name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
@@ -350,7 +350,7 @@ void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format)
         char name[20];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
-        bgy3d_save_vec (name, g2[i][j]);
+        bgy3d_vec_save (name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
@@ -363,7 +363,7 @@ void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
     {
       char name[20];
       snprintf (name, sizeof name, format, i);
-      bgy3d_save_vec (name, g[i]);
+      bgy3d_vec_save (name, g[i]);
     }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
@@ -376,7 +376,7 @@ void bgy3d_read_g1 (int m, const Vec g[m], const char *format)
     {
       char name[20];
       snprintf (name, sizeof name, format, i);
-      bgy3d_read_vec (name, g[i]);
+      bgy3d_vec_read (name, g[i]);
     }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
