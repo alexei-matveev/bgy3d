@@ -818,8 +818,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
         {
-          /* Every tenth iteration, starting with iter == 0: */
-          const bool tenth = !(iter % 10);
+          /* Every nth iteration, starting with iter == 0: */
+          const bool nth = !(iter % 10);
 
           /*
             "a =  a1" is taken in  iteration 0, 10, 20,  etc.  "a1" is
@@ -830,7 +830,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
             Note that in the first iteration a1 == a0.
           */
-          const real a = tenth? a1 : a0;
+          const real a = nth? a1 : a0;
 
           /*
             Some   functions,  such   as  bgy3d_solve_normalization(),
