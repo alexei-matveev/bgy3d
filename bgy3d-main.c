@@ -152,7 +152,7 @@ int main (int argc, char **argv)
   if(solver) {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("--load")) {
-          g_ini = bgy3d_load_vec ("g.bin");
+          g_ini = bgy3d_vec_load ("g.bin");
           PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
       }
       else
@@ -170,11 +170,11 @@ int main (int argc, char **argv)
 
       /* Output result */
       if( g != PETSC_NULL) {
-          bgy3d_save_vec_ascii ("vec.m", g);
+          bgy3d_vec_save_ascii ("vec.m", g);
 
           /* save g to binary file */
           if (bgy3d_getopt_test ("--save")) {
-              bgy3d_save_vec ("g.bin", g);
+              bgy3d_vec_save ("g.bin", g);
 	      PetscPrintf(PETSC_COMM_WORLD,"Result written to file \"g.bin\".\n");
           }
 

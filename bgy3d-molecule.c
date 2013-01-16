@@ -1082,9 +1082,9 @@ Vec BGY3d_solve_DiatomicAB(const ProblemData *PD, Vec g_ini)
     }
 
   /* output */
-  bgy3d_save_vec ("g00.bin", ga);
-  bgy3d_save_vec ("g11.bin", gb);
-  bgy3d_save_vec ("g01.bin", gab);
+  bgy3d_vec_save ("g00.bin", ga);
+  bgy3d_vec_save ("g11.bin", gb);
+  bgy3d_vec_save ("g01.bin", gab);
 
   VecDestroy(ga);
   VecDestroy(gb);

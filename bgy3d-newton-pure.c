@@ -645,15 +645,15 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
 
   /*************************************/
   /* output */
-  bgy3d_save_vec_ascii ("vec00.m", gH);
-  bgy3d_save_vec_ascii ("vec11.m", gO);
-  bgy3d_save_vec_ascii ("vec01.m", gHO);
+  bgy3d_vec_save_ascii ("vec00.m", gH);
+  bgy3d_vec_save_ascii ("vec11.m", gO);
+  bgy3d_vec_save_ascii ("vec01.m", gHO);
 
   /* save g2 to binary file */
   PetscPrintf(PETSC_COMM_WORLD,"Writing g2 files...");
-  bgy3d_save_vec ("g00.bin", gH);
-  bgy3d_save_vec ("g11.bin", gO);
-  bgy3d_save_vec ("g01.bin", gHO);
+  bgy3d_vec_save ("g00.bin", gH);
+  bgy3d_vec_save ("g11.bin", gO);
+  bgy3d_vec_save ("g01.bin", gHO);
   PetscPrintf(PETSC_COMM_WORLD,"done.\n");
   /************************************/
 
