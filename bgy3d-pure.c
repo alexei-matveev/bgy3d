@@ -458,22 +458,13 @@ static void pair (State *BHD,
     DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
 }
 
-static void RecomputeInitialData (State *BHD, real damp, real damp_LJ)
+static void RecomputeInitialData (State *BHD,
+                                  int m, const Site solvent[m],
+                                  real damp, real damp_LJ)
 {
   PetscPrintf (PETSC_COMM_WORLD,
                "Recomputing initial data with damping factor %f (damp_LJ=%f)\n",
                damp, damp_LJ);
-
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  /* Get the number of solvent sites and their parameters: */
-  bgy3d_solvent_get (&m, &solvent);
-
-  /* Original code used to print solvent params: */
-  bgy3d_sites_show ("Solvent", m, solvent);
-
-  assert (m == 2);          /* FIXME: State was allocated for m = 2 */
 
   /* Over all pairs: */
   for (int i = 0; i < m; i++)
@@ -1054,12 +1045,20 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
-  const int m = 2;              /* FIXME: hardwired number of sites */
-  State *BHD;
   Vec dg_new, dg_new2, work;
   real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
+
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
+
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent);
+
+  /* Original code used to print solvent params: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+
   real dg_norm[m][m];
   real dg_norm_old[m][m];
 
@@ -1067,7 +1066,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = initialize_state (PD, m);
+  State *BHD = initialize_state (PD, m);
 
   if (r_HH > 0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
@@ -1134,7 +1133,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
-      RecomputeInitialData (BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       for (int i = 0; i < m; i++)
@@ -1402,20 +1401,28 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 /* solve with product ansatz g=g0*dg */
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 {
-  const int m = 2; /* FIXME: hardwired number of inequivalent sites */
-  State *BHD;
   Vec dg_new, dg_new2, work;
   real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
-  real dg_norm[2][2];
-  real dg_norm_old[2][2];
+
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
+
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent);
+
+  /* Original code used to print solvent params: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+
+  real dg_norm[m][m];
+  real dg_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  BHD = initialize_state (PD, m);
+  State *BHD = initialize_state (PD, m);
 
   if (r_HH < 0)
     {
@@ -1488,7 +1495,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   for (real damp = damp_start; damp <= damp_start; damp += 0.1)
     {
-      RecomputeInitialData (BHD, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       /* Vec work is used as a temporary here: */
