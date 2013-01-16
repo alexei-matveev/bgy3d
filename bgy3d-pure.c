@@ -1059,7 +1059,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
-  char nameO[20], nameH[20], nameHO[20];
   real dg_norm[m][m];
   real dg_norm_old[m][m];
 
@@ -1375,17 +1374,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
           break;
     }
 
-  /* output */
-  namecount++;
-  sprintf(nameH, "vec00-%d.m", namecount-1);
-  sprintf(nameO, "vec11-%d.m", namecount-1);
-  sprintf(nameHO, "vec01-%d.m", namecount-1);
-
-  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-  bgy3d_vec_save_ascii (nameH, g[0][0]); /* g_H */
-  bgy3d_vec_save_ascii (nameO, g[1][1]); /* g_O */
-  bgy3d_vec_save_ascii (nameHO, g[0][1]); /* g_HO */
-  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+  /* FIXME: Debug  output from every iteration  with different overall
+     scale factors damp.  Remove when no more needed. */
+  {
+    char fmt[20];
+    snprintf (fmt, sizeof fmt, "vec%%d%%d-%d.m", namecount++);
+    bgy3d_vec_save_ascii2 (fmt, m, g);
+  }
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
@@ -1421,7 +1416,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   real a = 0.9, damp, damp_LJ;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
-  char nameO[20], nameH[20], nameHO[20];
   real dg_norm[2][2];
   real dg_norm_old[2][2];
 
@@ -1729,17 +1723,13 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"\n");
     }
 
-  /* output */
-  namecount++;
-  sprintf(nameH, "vec00-%d.m", namecount-1);
-  sprintf(nameO, "vec11-%d.m", namecount-1);
-  sprintf(nameHO, "vec01-%d.m", namecount-1);
-
-  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-  bgy3d_vec_save_ascii (nameH, g[0][0]);
-  bgy3d_vec_save_ascii (nameO, g[1][1]);
-  bgy3d_vec_save_ascii (nameHO, g[0][1]);
-  PetscPrintf(PETSC_COMM_WORLD,"done.\n");
+  /* FIXME: Debug  output from every iteration  with different overall
+     scale factors damp.  Remove when no more needed. */
+  {
+    char fmt[20];
+    snprintf (fmt, sizeof fmt, "vec%%d%%d-%d.m", namecount++);
+    bgy3d_vec_save_ascii2 (fmt, m, g);
+  }
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))

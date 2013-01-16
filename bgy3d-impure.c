@@ -1020,17 +1020,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* FIXME:  Debug  output  from  every iteration  with  different
          overall scale factors damp.  Remove when no more needed. */
-      namecount++;
-
-      PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
-      for (int i = 0; i < m; i++)
-        {
-          char name[20];
-          snprintf (name, sizeof name, "vec%d-%d.m", i, namecount - 1);
-          bgy3d_vec_save_ascii (name, g[i]);
-        }
-      PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-      /************************************/
+      {
+        char fmt[20];
+        snprintf (fmt, sizeof fmt, "vec%%d-%d.m", namecount++);
+        bgy3d_vec_save_ascii1 (fmt, m, g);
+      }
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
