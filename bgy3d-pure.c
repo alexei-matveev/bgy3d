@@ -1046,9 +1046,7 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
   Vec du_new, du_new2, work;
-  real a = 0.9;
-  real a1 = 0.5;
-  int iter, mycount=0, upwards=0, namecount=0;
+  int namecount=0;
 
   int m;                        /* number of solvent sites */
   const Site *solvent;          /* solvent[m] */
@@ -1143,9 +1141,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
           }
 
-      a1 = a0;
-      a = a0;
-
       /* FIXME:   hardwired   distance   matrix.   Zeros   are   never
          referenced: */
       assert (m == 2);
@@ -1158,16 +1153,22 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         for (int j = 0; j < m; j++)
           du_norm_old[i][j] = 0.0;
 
-  for (iter = 0; iter < max_iter; iter++)
+      real a1 = a0;             /* loop-local variable */
+  for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
     {
-      if (!(iter % 10) && iter > 0)
-        a = a1;
-      else if (iter == 20)
-        {
-          /* nothing? */
-        }
-      else
-        a = a0;
+      /* Every nth iteration, starting with iter == 0: */
+      const bool nth = !(iter % 10);
+
+      /*
+        "a  = a1"  is taken  in  iteration 0,  10, 20,  etc.  "a1"  is
+        modified during the loop.
+
+        "a = a0" is taken in iterations 1-9, 11-19, etc.  "a0" remains
+        unchanged during the loop.
+
+        Note that in the first iteration a1 == a0.
+      */
+      const real a = nth? a1 : a0;
 
       /* Compute FFT of g[][] for all site pairs: */
       for (int i = 0; i < m; i++)
@@ -1405,9 +1406,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 {
   Vec du_new, du_new2, work;
-  real a = 0.9;
-  real a1 = 0.5;
-  int iter, mycount=0, upwards=0, namecount=0;
+  int namecount=0;
 
   int m;                        /* number of solvent sites */
   const Site *solvent;          /* solvent[m] */
@@ -1510,25 +1509,28 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       ComputeH2O_g (g[0][0], u0[0][0], du[0][0]);
       ComputeH2O_g (g[1][1], u0[1][1], du[1][1]);
 
-      a1 = a0;
-      a = a0;
-
       /* Not sure if 0.0 as inital value is right. */
       real du_norm_old[m][m];
       for (int i = 0; i < m; i++)
         for (int j = 0; j < m; j++)
           du_norm_old[i][j] = 0.0;
 
-  for (iter = 0; iter < max_iter; iter++)
+      real a1 = a0;             /* loop-local variable */
+  for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
     {
-      if (!(iter % 10) && iter > 0)
-        a = a1;
-      else if (iter == 20)
-        {
-          /* nothing? */
-        }
-      else
-        a = a0;
+      /* Every nth iteration, starting with iter == 0: */
+      const bool nth = !(iter % 10);
+
+      /*
+        "a  = a1"  is taken  in  iteration 0,  10, 20,  etc.  "a1"  is
+        modified during the loop.
+
+        "a = a0" is taken in iterations 1-9, 11-19, etc.  "a0" remains
+        unchanged during the loop.
+
+        Note that in the first iteration a1 == a0.
+      */
+      const real a = nth? a1 : a0;
 
       /* Compute FFT of g[][] for all site pairs: */
       for (int i = 0; i < m; i++)
