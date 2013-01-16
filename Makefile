@@ -77,6 +77,7 @@ libbgy3d.a = \
 	bgy3d-solutes.o \
 	bgy3d-getopt.o \
 	bgy3d-poisson.o \
+	bgy3d-vec.o \
 	bgy3d-fft.o \
 	bgy3d-fftw.o \
 	bgy3d-potential.o
