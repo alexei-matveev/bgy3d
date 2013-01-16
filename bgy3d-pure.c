@@ -650,10 +650,10 @@ static double pure sinc (double x)
   FIXME: sinc(0) should be always 1, even at war times!
 */
 static void omega (const ProblemData *PD, const DA dc,
-                   int d, Vec x_fft[d], /* intent(in) */
+                   const int d, Vec x_fft[d], /* intent(in) */
                    const real rab,
                    Vec y_fft[d],       /* intent(out) */
-                   real sinc0)
+                   const real sinc0)
 {
   int x[3], n[3], i[3];
 
