@@ -1060,7 +1060,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_sites_show ("Solvent", m, solvent);
 
   real du_norm[m][m];
-  real du_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
@@ -1142,10 +1141,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
             /* g = g0 * exp(-du) */
             ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
-
-            /* Not sure if 0.0 as inital value is right. */
-            du_norm_old[i][j] = 0.0;
-            du_norm_old[j][i] = 0.0;
           }
 
       a1 = a0;
@@ -1156,6 +1151,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       assert (m == 2);
       const real r[2][2] = {{0.0, r_HO},
                             {r_HO, 0.0}};
+
+      /* Not sure if 0.0 as inital value is right. */
+      real du_norm_old[m][m];
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++)
+          du_norm_old[i][j] = 0.0;
 
   for (iter = 0; iter < max_iter; iter++)
     {
@@ -1418,7 +1419,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   bgy3d_sites_show ("Solvent", m, solvent);
 
   real du_norm[m][m];
-  real du_norm_old[m][m];
 
   assert(g_ini == PETSC_NULL);
 
@@ -1512,6 +1512,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
       a1 = a0;
       a = a0;
+
+      /* Not sure if 0.0 as inital value is right. */
+      real du_norm_old[m][m];
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++)
+          du_norm_old[i][j] = 0.0;
 
   for (iter = 0; iter < max_iter; iter++)
     {
