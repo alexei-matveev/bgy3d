@@ -1045,7 +1045,7 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
-  Vec dg_new, dg_new2, work;
+  Vec du_new, du_new2, work;
   real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1094,8 +1094,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   create_g2 (BHD->da, m, dg);
   create_g2 (BHD->da, m, t);
 
-  DACreateGlobalVector (BHD->da, &dg_new);
-  DACreateGlobalVector (BHD->da, &dg_new2);
+  DACreateGlobalVector (BHD->da, &du_new);
+  DACreateGlobalVector (BHD->da, &du_new2);
   DACreateGlobalVector (BHD->da, &work);
 
 #ifdef L_BOUNDARY
@@ -1127,7 +1127,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   if (bgy3d_getopt_test ("--load-H2O"))
     bgy3d_vec_read2 ("dg%d%d.bin", m, dg);
 
-  VecSet(dg_new,0.0);
+  VecSet(du_new,0.0);
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
@@ -1179,7 +1179,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         for (int j = 0; j <= i; j++)
           {
             /* Clear accumulator, terms will be added here: */
-            VecSet (dg_new, 0.0);
+            VecSet (du_new, 0.0);
 
             /*
               Sum over  the third site k.   See the first  line of Eq.
@@ -1205,12 +1205,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                   BHD->F[i][k], BHD->F_l[i][k], g[i][k],
                                   g[j][k],
                                   BHD->u2_fft[i][k], BHD->rhos[k],
-                                  dg_new2);
-                VecAXPY (dg_new, 1.0, dg_new2);
+                                  du_new2);
+                VecAXPY (du_new, 1.0, du_new2);
               }
 
             /* FIXME: 3-site code does not do this: */
-            VecPointwiseMult (dg_new, dg_new, BHD->c2[i][j]);
+            VecPointwiseMult (du_new, du_new, BHD->c2[i][j]);
 
             /*
               These are two sums  over k /= i and k /=  j. See lines 2
@@ -1234,9 +1234,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     /* Here t is intent(out): */
                     bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], r[k][i], g[j][k], t[j][k]);
 
-                    /* Compute dg_new2 term and add to the accumulator: */
-                    Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i], dg_new2);
-                    VecAXPY (dg_new, 1.0, dg_new2);
+                    /* Compute du_new2 term and add to the accumulator: */
+                    Compute_dg_H2O_intra_ln (BHD, t[j][k], r[k][i],
+                    du_new2);
+                    VecAXPY (du_new, 1.0, du_new2);
                   }
 
                 /*
@@ -1274,13 +1275,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                                       BHD->F[i][k], BHD->F_l[i][k], t[i][k],
                                       t[i][j],
                                       BHD->u2_fft[i][k], r[j][k],
-                                      dg_new2, work);
-                    VecAXPY (dg_new, 1.0, dg_new2);
+                                      du_new2, work);
+                    VecAXPY (du_new, 1.0, du_new2);
                   }
               }
 
-            /* Long-range Coulomb: */
-            VecAXPY (dg_new, PD->beta, BHD->u2[i][j]);
+            /* Long-range Coulomb, scaled by inverse temperature: */
+            VecAXPY (du_new, PD->beta, BHD->u2[i][j]);
 
             /*
               Add  an  effective  Coulomb  field of  boundary  surface
@@ -1288,7 +1289,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               vanish:
             */
             if (iter >= 0)
-              bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[i][j]);
+              bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[i][j]);
 
             /*
               Mix du and du_new with a fixed ratio "a":
@@ -1298,7 +1299,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
               last arg is a temp
             */
-            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], dg_new, a, work);
+            dg_norm[i][j] = bgy3d_vec_mix (dg[i][j], du_new, a, work);
             dg_norm[j][i] = dg_norm[i][j];
           }
 
@@ -1389,8 +1390,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   destroy_g2 (m, dg);
   destroy_g2 (m, x_lapl);
 
-  VecDestroy (dg_new);
-  VecDestroy (dg_new2);
+  VecDestroy (du_new);
+  VecDestroy (du_new2);
   VecDestroy (work);
 
   finalize_state (BHD, m);
@@ -1402,7 +1403,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 /* solve with product ansatz g=g0*dg */
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 {
-  Vec dg_new, dg_new2, work;
+  Vec du_new, du_new2, work;
   real a = 0.9;
   real a1 = 0.5;
   int iter, mycount=0, upwards=0, namecount=0;
@@ -1456,8 +1457,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   create_g2 (BHD->da, m, dg);
   create_g2 (BHD->da, m, t);
 
-  DACreateGlobalVector (BHD->da, &dg_new);
-  DACreateGlobalVector (BHD->da, &dg_new2);
+  DACreateGlobalVector (BHD->da, &du_new);
+  DACreateGlobalVector (BHD->da, &du_new2);
   DACreateGlobalVector (BHD->da, &work);
 
 #ifdef L_BOUNDARY
@@ -1492,7 +1493,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   if (bgy3d_getopt_test ("--load-H2O"))
     bgy3d_vec_read2 ("dg%d%d.bin", 2, dg);
 
-  VecSet(dg_new,0.0);
+  VecSet(du_new,0.0);
 
   for (real damp = damp_start; damp <= damp_start; damp += 0.1)
     {
@@ -1532,127 +1533,127 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       if (1)                    /* kflg was set when with -pair */
         {
           /* g_OH */
-          VecSet (dg_new, 0.0);
+          VecSet (du_new, 0.0);
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[0][1],
                             BHD->u2_fft[1][1], BHD->rhos[1],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][0],
                             BHD->u2_fft[0][1], BHD->rhos[0],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[0][0], t[0][0]);
-          Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, dg_new2); /* t is intent(in) */
-          VecAXPY(dg_new, 2.0, dg_new2);
+          Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HO, du_new2); /* t is intent(in) */
+          VecAXPY(du_new, 2.0, du_new2);
 
           /* tO = gHO/int(gHO wHH) */
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HH, g[0][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HH, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
-                            BHD->u2_fft[0][1], r_HH, dg_new2, work);
-          VecAXPY(dg_new, 1.0, dg_new2);
+                            BHD->u2_fft[0][1], r_HH, du_new2, work);
+          VecAXPY(du_new, 1.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], r_HO, g[1][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[1][1], r_HO, BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
-                            BHD->u2_fft[1][1], r_HO, dg_new2, work);
-          VecAXPY(dg_new, 1.0, dg_new2);
+                            BHD->u2_fft[1][1], r_HO, du_new2, work);
+          VecAXPY(du_new, 1.0, du_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[0][1]);
+          VecAXPY(du_new, PD->beta, BHD->u2[0][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][1]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][1]);
 
-          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], dg_new, a, work);
+          dg_norm[0][1] = bgy3d_vec_mix (dg[0][1], du_new, a, work);
 
           /* g_H */
-          VecSet (dg_new, 0.0);
+          VecSet (du_new, 0.0);
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
                             BHD->u2_fft[0][1], BHD->rhos[1],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][0], BHD->F_l[0][0], g[0][0],
                             g[0][0],
                             BHD->u2_fft[0][0], BHD->rhos[0],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[0][0]);
-          Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, dg_new2); /* t is intent(in) */
-          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_dg_H2O_intra_ln (BHD, t[0][0], r_HH, du_new2); /* t is intent(in) */
+          VecAXPY(du_new, 1.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
-          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
-          VecAXPY(dg_new, 1.0, dg_new2);
+          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, du_new2); /* t is intent(in) */
+          VecAXPY(du_new, 1.0, du_new2);
 
           /* tO = gH/int(gH wHH) */
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HH, g[0][0], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][0], r_HH, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
-                            BHD->u2_fft[0][0], r_HH, dg_new2, work);
-          VecAXPY(dg_new, 1.0, dg_new2);
+                            BHD->u2_fft[0][0], r_HH, du_new2, work);
+          VecAXPY(du_new, 1.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
-                            BHD->u2_fft[0][1], r_HO, dg_new2, work);
-          VecAXPY(dg_new, 1.0, dg_new2);
+                            BHD->u2_fft[0][1], r_HO, du_new2, work);
+          VecAXPY(du_new, 1.0, du_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[0][0]);
+          VecAXPY(du_new, PD->beta, BHD->u2[0][0]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[0][0]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][0]);
 
-          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], dg_new, a, work);
+          dg_norm[0][0] = bgy3d_vec_mix (dg[0][0], du_new, a, work);
 
           /* g_O */
-          VecSet (dg_new, 0.0);
+          VecSet (du_new, 0.0);
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
                             BHD->u2_fft[0][1], BHD->rhos[0],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[1][1],
                             BHD->u2_fft[1][1], BHD->rhos[1],
-                            dg_new2);
-          VecAXPY (dg_new, 1.0, dg_new2);
+                            du_new2);
+          VecAXPY (du_new, 1.0, du_new2);
 
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
-          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, dg_new2); /* t is intent(in) */
-          VecAXPY(dg_new, 2.0, dg_new2);
+          Compute_dg_H2O_intra_ln (BHD, t[0][1], r_HO, du_new2); /* t is intent(in) */
+          VecAXPY(du_new, 2.0, du_new2);
 
           bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], r_HO, g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], r_HO, BHD->fft_scratch, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
-                            BHD->u2_fft[0][1], r_HO, dg_new2, work);
-          VecAXPY(dg_new, 2.0, dg_new2);
+                            BHD->u2_fft[0][1], r_HO, du_new2, work);
+          VecAXPY(du_new, 2.0, du_new2);
 
-          VecAXPY(dg_new, PD->beta, BHD->u2[1][1]);
+          VecAXPY(du_new, PD->beta, BHD->u2[1][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, dg_new, work, x_lapl[1][1]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[1][1]);
 
-          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], dg_new, a, work);
+          dg_norm[1][1] = bgy3d_vec_mix (dg[1][1], du_new, a, work);
 
           /* ende: */
           ComputeH2O_g (g[0][1], u0[0][1], dg[0][1]);
@@ -1737,8 +1738,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   destroy_g2 (m, dg);
   destroy_g2 (m, x_lapl);
 
-  VecDestroy (dg_new);
-  VecDestroy (dg_new2);
+  VecDestroy (du_new);
+  VecDestroy (du_new2);
   VecDestroy (work);
 
   finalize_state (BHD, m);
