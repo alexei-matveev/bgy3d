@@ -225,8 +225,8 @@ typedef struct State
 #endif
 } State;
 
-void bgy3d_read_g2_radial (const State *BHD,
-                           int m, /* const */ Vec g2[m][m], const char *format);
+void bgy3d_vec_read_radial2 (const State *BHD,
+                             const char *format, int m, /* const */ Vec g2[m][m]);
 
 #endif  /* ifndef BGY3d_H */
 
