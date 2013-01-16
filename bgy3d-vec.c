@@ -141,7 +141,7 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 
   Format is e.g. "g%d%d.bin"
 */
-void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format)
+void bgy3d_vec_read2 (const char *format, int m, /* const */ Vec g2[m][m])
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
   for (int i = 0; i < m; i++)
@@ -159,8 +159,8 @@ void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format)
 
 
 /* Save  solvent-solvent  pair  distributions  g2[][]  to  disk.   See
-   bgy3d_load_g2(). */
-void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format)
+   bgy3d_vec_read2(). */
+void bgy3d_vec_save2 (const char *format, int m, /* const */ Vec g2[m][m])
 {
   PetscPrintf (PETSC_COMM_WORLD, "Writing binary g2 files...");
   for (int i = 0; i < m; i++)
@@ -177,7 +177,7 @@ void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format)
 }
 
 /* Format is e.g. "g%d.bin" */
-void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
+void bgy3d_vec_save1 (const char *format, int m, const Vec g[m])
 {
   PetscPrintf (PETSC_COMM_WORLD, "Writing binary g1 files...");
   for (int i = 0; i < m; i++)
@@ -190,7 +190,7 @@ void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
 }
 
 
-void bgy3d_read_g1 (int m, const Vec g[m], const char *format)
+void bgy3d_vec_read1 (const char *format, int m, const Vec g[m])
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
   for (int i = 0; i < m; i++)

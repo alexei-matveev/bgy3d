@@ -593,7 +593,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   if (bgy3d_getopt_test ("--from-radial-g2"))
     bgy3d_read_g2_radial (&BHD, m, g2, "g%d%d.txt");
   else
-    bgy3d_read_g2 (m, g2, "g%d%d.bin");
+    bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -697,7 +697,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_read_g1 (m, du, "du%d.bin");
+    bgy3d_vec_read1 ("du%d.bin", m, du);
 
   for (real damp = damp_start; damp <= 1; damp += 0.1)
     {
@@ -1034,7 +1034,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-H2O"))
-        bgy3d_save_g1 (m, du, "du%d.bin");
+        bgy3d_vec_save1 ("du%d.bin", m, du);
 
     } /* damp loop */
 
@@ -1111,7 +1111,7 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_solve_with_solute (PD, n, sites, NULL, g, NULL);
 
   /* Save final distribution, use binary format: */
-  bgy3d_save_g1 (2, g, "g%d.bin");
+  bgy3d_vec_save1 ("g%d.bin", 2, g);
 
   for (int i = 0; i < 2; i++)
     VecDestroy (g[i]);

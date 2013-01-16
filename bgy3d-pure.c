@@ -1128,7 +1128,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_read_g2 (m, dg, "dg%d%d.bin");
+    bgy3d_vec_read2 ("dg%d%d.bin", m, dg);
 
   VecSet(dg_new,0.0);
 
@@ -1389,10 +1389,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    bgy3d_save_g2 (m, dg, "dg%d%d.bin");
+    bgy3d_vec_save2 ("dg%d%d.bin", m, dg);
 
   /* Save g2[][] to binary files: */
-  bgy3d_save_g2 (m, g, "g%d%d.bin");
+  bgy3d_vec_save2 ("g%d%d.bin", m, g);
 
     }
 
@@ -1496,7 +1496,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_read_g2 (2, dg, "dg%d%d.bin");
+    bgy3d_vec_read2 ("dg%d%d.bin", 2, dg);
 
   VecSet(dg_new,0.0);
 
@@ -1743,10 +1743,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   /* Save dg[][] to binary files: */
   if (bgy3d_getopt_test ("--save-H2O"))
-    bgy3d_save_g2 (2, dg, "dg%d%d.bin");
+    bgy3d_vec_save2 ("dg%d%d.bin", 2, dg);
 
   /* Save g2[][] to binary files: */
-  bgy3d_save_g2 (2, g, "g%d%d.bin");
+  bgy3d_vec_save2 ("g%d%d.bin", 2, g);
 
     }
 
