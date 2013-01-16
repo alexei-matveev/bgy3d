@@ -10,4 +10,8 @@ Vec bgy3d_vec_load (const char file[]); /* Creates a new Vec */
 void bgy3d_vec_read (const char file[], Vec vec);  /* Fills existing Vec */
 void bgy3d_vec_save_ascii (const char file[], const Vec vec);
 
+void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format);
+void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format);
+void bgy3d_save_g1 (int m, const Vec g[m], const char *format);
+void bgy3d_read_g1 (int m, const Vec g[m], const char *format);
 

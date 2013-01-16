@@ -5,7 +5,6 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-#include "bgy3d-vec.h"
 
 /* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
    files.  Moved here  because  bgy3d-main.c is  not  linked when  the
@@ -308,75 +307,5 @@ void bgy3d_read_g2_radial (const State *BHD,
 
         ReadPairDistribution (BHD, name, g2[i][j]);
       }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-/*
-  Read  solvent-solvent pair  distributions  g2[][] from  disk into  a
-  pre-allocated   global   (distributed)   vectors.   Note   that   in
-  bgy3d_load_vec(), the  type of  the Vec will  depend on  the on-disk
-  data  which may  or  may not  be  compatible to  ones  used in  this
-  run. That is why we use bgy3d_vec_read() here instead.
-
-  Format is e.g. "g%d%d.bin"
-*/
-void bgy3d_read_g2 (int m, /* const */ Vec g2[m][m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        assert (g2[j][i] == g2[i][j]);
-
-        char name[20];
-        snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
-
-        bgy3d_vec_read (name, g2[i][j]);
-      }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-
-/* Save  solvent-solvent  pair  distributions  g2[][]  to  disk.   See
-   bgy3d_load_g2(). */
-void bgy3d_save_g2 (int m, /* const */ Vec g2[m][m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Writing binary g2 files...");
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        assert (g2[j][i] == g2[i][j]);
-
-        char name[20];
-        snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
-
-        bgy3d_vec_save (name, g2[i][j]);
-      }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-/* Format is e.g. "g%d.bin" */
-void bgy3d_save_g1 (int m, const Vec g[m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Writing binary g1 files...");
-  for (int i = 0; i < m; i++)
-    {
-      char name[20];
-      snprintf (name, sizeof name, format, i);
-      bgy3d_vec_save (name, g[i]);
-    }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
-}
-
-
-void bgy3d_read_g1 (int m, const Vec g[m], const char *format)
-{
-  PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
-  for (int i = 0; i < m; i++)
-    {
-      char name[20];
-      snprintf (name, sizeof name, format, i);
-      bgy3d_vec_read (name, g[i]);
-    }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
