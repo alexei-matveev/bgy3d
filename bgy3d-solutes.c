@@ -183,21 +183,21 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites)
 }
 
 /*
- * Create initial solute data.
- *
- * See (5.106) and (5.08) in the  thesis.  Fill us[0] and us[1], for H
- * and O in that order  with short-range, VM_LJ + VM_coulomb_short and
- * uc  with long range  potential VM_coulomb_long  (not scaled  by the
- * charges of the solvent sites).
- *
- * The function  pointer density() passed  to bgy3d_solute_field(), if
- * not NULL,  may be used  to compute the distributed  charge density,
- * e.g. originating from electrons.  FIXME: be more specific about the
- * sign, is it a charge density or the electron density?
- */
+  Create initial solute field.
 
+  See Eqs.  (5.106) and (5.08) in  the thesis.  Fill  us[0] and us[1],
+  for H and O in that order with short-range, VM_LJ + VM_coulomb_short
+  and uc with long range  potential VM_coulomb_long (not scaled by the
+  charges  of  the solvent  sites).   Returns  both, the  (long-range)
+  electrostatic potential  Vec uc and the  corresponding (diffuse part
+  of the) charge density Vec uc_rho.
+
+  The  function pointer density()  passed to  bgy3d_solute_field(), if
+  not  NULL, is  used to  compute the  density of  (negively charged!)
+  electrons at arbitrary point in space.
+*/
 void bgy3d_solute_field (const State *BHD,
-                         int m, const Site solvent[m], /* m == 2 */
+                         int m, const Site solvent[m], /* m ~ 2 */
                          Vec us[m], Vec uc, Vec uc_rho, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
                          void (*density)(int k, const real x[k][3], real rho[k]),
@@ -220,9 +220,8 @@ void bgy3d_solute_field (const State *BHD,
     short-range Coulomb interaction  using two different factors.  The
     new code uses just one, that is why the assertion:
   */
-  real factor = damp;
   assert (damp == damp_LJ);
-  assert (factor >= 0.0);
+  assert (damp >= 0.0);
 
   /*
    * Fill the force field interaction of H and O (or other) sites with
@@ -234,23 +233,21 @@ void bgy3d_solute_field (const State *BHD,
    */
 #ifndef QM
   for (int i = 0; i < m; i++)
-    field (BHD->da, BHD->PD, solvent[i], n, solute, factor, ljc,
-           us[i]);
+    field (BHD->da, BHD->PD, solvent[i], n, solute, damp, ljc, us[i]);
 #else
-  /* At  this  place the  (short  range)  Coulomb  interaction of  the
-    solvent  site   with  the  solute  was   deliberately  omitted  by
-    specifying zero charge of the solvent site. This effectively makes
-    a point  charge (Coulomb  short + Coulomb  long) to  a distributed
-    Gaussian (Coulomb long only). */
-
+  /*
+    At this place the (short range) Coulomb interaction of the solvent
+    site with  the solute was deliberately omitted  by specifying zero
+    charge of the solvent site.  This effectively makes a point charge
+    (Coulomb short + Coulomb  long) to a distributed Gaussian (Coulomb
+    long only).
+  */
   for (int i = 0; i < m; i++)
     {
       Site neutral = solvent[i]; /* dont modify the global variable */
       neutral.charge = 0.0;      /* modify a copy */
 
-      field (BHD->da, BHD->PD,
-             neutral, n, solute, factor, ljc,
-             us[i]);
+      field (BHD->da, BHD->PD, neutral, n, solute, damp, ljc, us[i]);
     }
 #endif
 
@@ -269,10 +266,10 @@ void bgy3d_solute_field (const State *BHD,
 
   char filename[260];           /* electron density file */
 
+  /* The first  branch was  rarely tested. Maybe  use bgy3d_vec_read()
+     instead and prepare the density by some utility? */
   if (bgy3d_getopt_string("--load-charge", filename, sizeof (filename)))
-    {
-      read_charge_density (BHD->da, BHD->PD, filename, 1.0, uc);
-    }
+    read_charge_density (BHD->da, BHD->PD, filename, 1.0, uc_rho);
   else
     {
       /* This function computes the density  of the solute as a sum of
@@ -303,7 +300,7 @@ void bgy3d_solute_field (const State *BHD,
 
       /* Use f()  to compute total core  & electron at  every point of
          the local grid portion and put that into Vec uc: */
-      grid_map (BHD->da, BHD->PD, f, uc);
+      grid_map (BHD->da, BHD->PD, f, uc_rho);
     }
 
   if (1)                        /* debug prints only */
@@ -316,18 +313,19 @@ void bgy3d_solute_field (const State *BHD,
                    sum * dV);
     }
 
-  /* keep electron density for integration */
-  VecCopy (uc, uc_rho);
-
-  /* uc is scaled hereafter */
+  /* Scale  (down)  the  density   and  thus  also  the  (long  range)
+     electrostatic potential, usually damp == 1, though.  */
   VecScale (uc_rho, damp);
 
   /*
-   * 2.  Solve  the Poisson  equation,  Δu  =  -4πρ/ε₀, "in-place"  by
-   * specifying the same Vec uc as input and output:
+    2.  Solve the Poisson equation, Δu = -4πρ/ε₀.
+
+    Note  that the  nuclei  were gaussian-smeared  for the  long-range
+    electrostatics.   Therefore  the  Vec  uc_rho  is,  formally,  not
+    representing the  whole of the  solute charge density,  rather its
+    "diffuse" or "smeared" part.
    */
-  bgy3d_poisson (BHD, uc, uc,   /* NOTE: argument aliasing! */
-                 -4 * M_PI * EPSILON0INV * damp);
+  bgy3d_poisson (BHD, uc, uc_rho, -4 * M_PI * EPSILON0INV);
 }
 
 /*
