@@ -486,7 +486,7 @@ static double maxval (size_t n, const double x[n])
 static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
                                  int m, const Site solvent[m], /* m == 2*/
                                  Vec g[m], /* intent(in) */
-                                 Vec ve)   /* intent(out) */
+                                 Vec ve, Vec ve_rho)   /* intent(out) */
 {
   /* FIXME: this  code assumes  the same density  rho for  all solvent
      particles. */
@@ -496,6 +496,11 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
 
   for (int i = 0; i < m; i++)
     VecAXPY (ve, solvent[i].charge, g[i]);
+
+  /* keep solvent charge density for integration with solute
+   * electrostatic potential */
+  VecCopy (ve, ve_rho);
+  VecScale (ve_rho, BHD->PD->rho);
 
   /*
     Solve Poisson  equation in place. Note that  the output potential
@@ -563,6 +568,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
+  Vec uc_rho;                /* eletron density for integration */
   Vec du[m], du_acc, work;
   PetscScalar du_norm[m];
   int namecount = 0;
@@ -680,6 +686,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   DACreateGlobalVector (BHD.da, &work);
   DACreateGlobalVector (BHD.da, &t_vec); /* used for all sites */
   DACreateGlobalVector (BHD.da, &uc);    /* common for all sites */
+  DACreateGlobalVector (BHD.da, &uc_rho);
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -782,7 +789,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       */
       bgy3d_solute_field (&BHD,
                           m, solvent,
-                          u0, uc, /* intent(out) */
+                          u0, uc, uc_rho, /* intent(out) */
                           n, solute,
                           density, /* void (*density)(...) */
                           (damp > 0.0 ? damp : 0.0), 1.0);
@@ -1039,14 +1046,38 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   */
   {
     Vec ve;                 /* solvent electrostaic potential field */
+    Vec ve_rho;             /* keep solvent charge density for integration */
     DACreateGlobalVector (BHD.da, &ve);
+    DACreateGlobalVector (BHD.da, &ve_rho);
 
     /* This fills Vec ve with solvent electrostatic potential: */
-    bgy3d_solvent_field (&BHD, m, solvent, g, ve);
+    bgy3d_solvent_field (&BHD, m, solvent, g, ve, ve_rho);
 
     /* Optionally, return the iterator over the solvent field: */
     if (v)
       *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
+
+    /* Integration of:
+     * 1. solvent charge density with solute electron field
+     * 2. solvent field with solute electron density
+     * uc and uc_rho are returned by bgy3d_solute_field()
+     * ve and ve_rho are obtained from bgy3d_solvent_field() */
+    PetscScalar val;
+    const real h3 = BHD.PD->h[0] * BHD.PD->h[1] * BHD.PD->h[2];
+
+    /* directly multiply two vectors */
+    VecDot(uc, ve_rho, &val);
+    PetscPrintf (PETSC_COMM_WORLD,
+    "Integration value of solvent charge density and QM solute field is %lf. \n", val * h3);
+    VecDestroy (ve_rho);
+
+    /* reset val */
+    val = 0.0;
+
+    VecDot(ve, uc_rho, &val);
+    PetscPrintf (PETSC_COMM_WORLD,
+    "Integration value of solvent field and QM solute electron density is %lf. \n", val * h3);
+    VecDestroy (uc_rho);
 
     VecDestroy (ve);            /* yes, we do! */
   }
