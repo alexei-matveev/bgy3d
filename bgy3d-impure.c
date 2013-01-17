@@ -1056,29 +1056,39 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     if (v)
       *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
 
-    /* Integration of:
-     * 1. solvent charge density with solute electron field
-     * 2. solvent field with solute electron density
-     * uc and uc_rho are returned by bgy3d_solute_field()
-     * ve and ve_rho are obtained from bgy3d_solvent_field() */
-    PetscScalar val;
+    /*
+      Integration of:
+
+      1. Solvent charge density with long-range solute electrostatic
+      field.
+
+      2. Solvent electrostatic field with diffuse solute electron
+      density.
+
+      Vec uc and uc_rho  are returned by bgy3d_solute_field().  Vec ve
+      and ve_rho are obtained from bgy3d_solvent_field().
+    */
+    real val1, val2;
     const real h3 = BHD.PD->h[0] * BHD.PD->h[1] * BHD.PD->h[2];
 
-    /* directly multiply two vectors */
-    VecDot(uc, ve_rho, &val);
-    PetscPrintf (PETSC_COMM_WORLD,
-    "Integration value of solvent charge density and QM solute field is %lf. \n", val * h3);
+    /* Dot-product is an integral over space (up to a factor): */
+    VecDot (uc, ve_rho, &val1);
+    VecDot (ve, uc_rho, &val2);
+
     VecDestroy (ve_rho);
-
-    /* reset val */
-    val = 0.0;
-
-    VecDot(ve, uc_rho, &val);
-    PetscPrintf (PETSC_COMM_WORLD,
-    "Integration value of solvent field and QM solute electron density is %lf. \n", val * h3);
     VecDestroy (uc_rho);
-
     VecDestroy (ve);            /* yes, we do! */
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "<ρ_v|U_u> = %lf "
+                 "(solvent charge density with long-range electrostatic field of solute)\n",
+                 val1 * h3);
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "<U_v|ρ_u> = %lf "
+                 "(solvent electrostatic field with diffuse charge density of solute)\n",
+                 val2 * h3);
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "     diff = % lf\n", (val1 - val2) * h3);
   }
 
   /* Clean up and exit ... */
