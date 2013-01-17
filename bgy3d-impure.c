@@ -479,36 +479,35 @@ static double maxval (size_t n, const double x[n])
 /*
   Function to  generate solvent field that  is supposed to  act on the
   solute  electrons. At  the moment  only the  electrostatic  field is
-  computed.  This  "reaction"  field  should be  consistent  with  the
+  computed.   This  "reaction" field  should  be  consistent with  the
   "action" of  the solute electrons  on the solvent sites  computed in
-  bgy3d-solvent.c that is also pure electrostatics:
+  bgy3d-solvent.c  that  is also  pure  electrostatics. Returns  both,
+  electrostatic potential  with a  boundary correction and  the actual
+  solvent charge density.
 */
 static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
-                                 int m, const Site solvent[m], /* m == 2*/
-                                 Vec g[m], /* intent(in) */
-                                 Vec ve, Vec ve_rho)   /* intent(out) */
+                                 int m, const Site solvent[m],
+                                 Vec g[m],        /* intent(in) */
+                                 Vec ve, Vec rho) /* intent(out) */
 {
   /* FIXME: this  code assumes  the same density  rho for  all solvent
      particles. */
 
-  /* Reset its value to zero */
-  VecSet (ve, 0.0);
-
+  /*
+    Solvent   charge  density   for  Poisson   equation   and  (later)
+    integration   with   solute   electrostatic  potential   will   be
+    accumulated here:
+  */
+  VecSet (rho, 0.0);
   for (int i = 0; i < m; i++)
-    VecAXPY (ve, solvent[i].charge, g[i]);
-
-  /* keep solvent charge density for integration with solute
-   * electrostatic potential */
-  VecCopy (ve, ve_rho);
-  VecScale (ve_rho, BHD->PD->rho);
+    VecAXPY (rho, solvent[i].charge * BHD->PD->rho, g[i]);
 
   /*
-    Solve Poisson  equation in place. Note that  the output potential
-    is in kcals (see the definiton of EPSILON0INV) as all energies in
+    Solve Poisson equation for rho.  Note that the output potential is
+    in kcals  (see the  definiton of EPSILON0INV)  as all  energies in
     this code are:
   */
-  bgy3d_poisson (BHD, ve, ve,   /* aliasing */
-                 -4 * M_PI * EPSILON0INV * BHD->PD->rho);
+  bgy3d_poisson (BHD, ve, rho, -4 * M_PI * EPSILON0INV);
 
   /*
    Solving Poisson  equation by  FFT results in  a potential  with the
