@@ -305,11 +305,9 @@ void ComputeFFTfromCoulomb (State *BHD,
         {
           int ic[3];
 
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
             {
@@ -514,11 +512,9 @@ static void kapply (const State *BHD,
         {
           int ic[3];
 
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
@@ -670,11 +666,9 @@ static void omega (const ProblemData *PD, const DA dc,
         {
           int ic[3];
 
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
@@ -864,11 +858,9 @@ static void Compute_dg_intra (State *BHD,
         {
           int ic[3];
 
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR(ic[1]) + SQR(ic[0]);
@@ -933,11 +925,9 @@ static void Compute_dg_intra (State *BHD,
         {
           int ic[3];
 
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            if (i[dim] <= N[dim] / 2)
-              ic[dim] = i[dim];
-            else
-              ic[dim] = i[dim] - N[dim];
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);

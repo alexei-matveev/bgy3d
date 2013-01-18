@@ -223,7 +223,7 @@ static void kernel (const DA dc,
                     Vec coul,   /* complex, intent(in) */
                     Vec dfg)    /* complex, intent(out) */
 {
-  int x[3], n[3], i[3], N[3], ic[3];
+  int x[3], n[3], i[3], N[3];
 
   FOR_DIM
     N[dim] = PD->N[dim];
@@ -249,13 +249,11 @@ static void kernel (const DA dc,
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
+          int ic[3];
+
+          /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            {
-              if (i[dim] <= N[dim] / 2)
-                ic[dim] = i[dim];
-              else
-                ic[dim] = i[dim] - N[dim];
-            }
+            ic[dim] = KFREQ (i[dim], N[dim]);
 
           /* phase shift factor for x=x+L/2 */
           const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);

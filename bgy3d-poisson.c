@@ -147,7 +147,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 
   /* Loop over local portion of the k-grid */
   {
-    int x[3], n[3], i[3], ic[3];
+    int x[3], n[3], i[3];
     DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     complex ***work_;
@@ -159,13 +159,11 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
           {
             /* FIXME: what if we  change the complex vectors to remove
                the redundnacy? */
+            int ic[3];
+
+            /* Take negative frequencies for i > N/2: */
             FOR_DIM
-              {
-                if (i[dim] <= N[dim] / 2)
-                  ic[dim] = i[dim];
-                else
-                  ic[dim] = i[dim] - N[dim];
-              }
+              ic[dim] = KFREQ (i[dim], N[dim]);
 
             if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
               {
