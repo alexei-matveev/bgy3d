@@ -31,45 +31,45 @@
 #undef qO
 #undef G
 
-static State initialize_state (const ProblemData *PD)
+static State* make_state (const ProblemData *PD)
 {
-  State BHD;
+  State *BHD = malloc (sizeof *BHD);
 
-  BHD.PD = PD;
+  BHD->PD = PD;
 
   PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
-  BHD.rhos[0] = PD->rho;
-  BHD.rhos[1] = PD->rho;
+  BHD->rhos[0] = PD->rho;
+  BHD->rhos[1] = PD->rho;
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
-  bgy3d_fft_mat_create (PD->N, &BHD.fft_mat, &BHD.da, &BHD.dc);
+  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
 
 #ifdef L_BOUNDARY_MG
   /* multigrid, apparently needs two descriptors: */
-#error "Need BHD.da_dmmg"
+#error "Need BHD->da_dmmg"
 #endif
 
   /* Create global scratch vectors: */
   FOR_DIM
-    DACreateGlobalVector (BHD.da, &BHD.v[dim]); /* real */
+    DACreateGlobalVector (BHD->da, &BHD->v[dim]); /* real */
 
   /* Complex  vectors for  k-space representations.   These  three are
      used by ComputeFFTfromCoulomb(): */
   FOR_DIM
-    DACreateGlobalVector (BHD.dc, &BHD.fg2_fft[dim]); /* complex */
+    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]); /* complex */
 
-  DACreateGlobalVector (BHD.dc, &BHD.fft_scratch); /* complex */
+  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch); /* complex */
 
   return BHD;
 }
 
 
-static void finalize_state (State *BHD)
+static void destroy_state (State *BHD)
 {
   MPI_Barrier (PETSC_COMM_WORLD);
 
@@ -93,6 +93,8 @@ static void finalize_state (State *BHD)
   DADestroy (BHD->da);
   DADestroy (BHD->dc);
   MatDestroy (BHD->fft_mat);
+
+  free (BHD);
 }
 
 
@@ -572,7 +574,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
-  State BHD = initialize_state (PD);
+  State *BHD = make_state (PD);
 
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
@@ -583,7 +585,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        DACreateGlobalVector (BHD.da, &g2[i][j]);
+        DACreateGlobalVector (BHD->da, &g2[i][j]);
         g2[j][i] = g2[i][j];
       }
 
@@ -594,7 +596,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     This version uses g00.txt, g11.txt, and g01.txt instead.
   */
   if (bgy3d_getopt_test ("--from-radial-g2"))
-    bgy3d_vec_read_radial2 (&BHD, "g%d%d.txt", m, g2);
+    bgy3d_vec_read_radial2 (BHD, "g%d%d.txt", m, g2);
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
@@ -621,7 +623,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
-  bgy3d_laplace_create (BHD.da, BHD.PD, &BHD.M, &BHD.ksp);
+  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
 
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
@@ -632,14 +634,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec x_lapl[m];                /* real */
   for (int i = 0; i < m; i++)
     {
-      DACreateGlobalVector (BHD.da, &x_lapl[i]);
+      DACreateGlobalVector (BHD->da, &x_lapl[i]);
       VecSet (x_lapl[i], 0.0);
     }
 #endif
 
 #ifdef L_BOUNDARY_MG
   /* Create KSP environment */
-  InitializeDMMGSolver(&BHD);
+  InitializeDMMGSolver(BHD);
 #endif
 
   /*
@@ -651,13 +653,13 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   for (int i = 0; i < m; i++)
     {
-      DACreateGlobalVector (BHD.dc, &g_fft[i]); /* complex */
+      DACreateGlobalVector (BHD->dc, &g_fft[i]); /* complex */
 
-      DACreateGlobalVector (BHD.da, &du[i]); /* real */
+      DACreateGlobalVector (BHD->da, &du[i]); /* real */
 
       /* Here the storage for the output is allocated, the caller will
          have to destroy them: */
-      DACreateGlobalVector (BHD.da, &g[i]); /* real */
+      DACreateGlobalVector (BHD->da, &g[i]); /* real */
     }
 
   /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
@@ -667,7 +669,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        DACreateGlobalVector (BHD.dc, &ker_fft[i][j]); /* complex */
+        DACreateGlobalVector (BHD->dc, &ker_fft[i][j]); /* complex */
         ker_fft[j][i] = ker_fft[i][j];
       }
 
@@ -677,13 +679,13 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     Vec:
   */
   Vec du_acc_fft;
-  DACreateGlobalVector (BHD.dc, &du_acc_fft); /* complex */
+  DACreateGlobalVector (BHD->dc, &du_acc_fft); /* complex */
 
-  DACreateGlobalVector (BHD.da, &du_acc);
-  DACreateGlobalVector (BHD.da, &work);
-  DACreateGlobalVector (BHD.da, &t_vec); /* used for all sites */
-  DACreateGlobalVector (BHD.da, &uc);    /* common for all sites */
-  DACreateGlobalVector (BHD.da, &uc_rho);
+  DACreateGlobalVector (BHD->da, &du_acc);
+  DACreateGlobalVector (BHD->da, &work);
+  DACreateGlobalVector (BHD->da, &t_vec); /* used for all sites */
+  DACreateGlobalVector (BHD->da, &uc);    /* common for all sites */
+  DACreateGlobalVector (BHD->da, &uc_rho);
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -693,7 +695,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   Vec u0[m];                    /* real */
   for (int i = 0; i < m; i++)
     {
-      DACreateGlobalVector (BHD.da, &u0[i]);
+      DACreateGlobalVector (BHD->da, &u0[i]);
 
       /* set initial guess*/
       VecSet (du[i], 0.0);
@@ -711,7 +713,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         Here F is force within solvents particles.
 
         In RecomputeInitialFFTs(), pairwise long-range interactions in
-        BHD.u2[][] are computed by ComputeFFTfromCoulomb().
+        BHD->u2[][] are computed by ComputeFFTfromCoulomb().
 
         According to Page. 115 - 116:
 
@@ -777,14 +779,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
         site charge.
       */
 
-      solvent_kernel (&BHD, m, solvent, g2, ker_fft);
+      solvent_kernel (BHD, m, solvent, g2, ker_fft);
 
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
         VM_Coulomb_long.  No  other fields of the  struct State except
         those passed explicitly are modified:
       */
-      bgy3d_solute_field (&BHD,
+      bgy3d_solute_field (BHD,
                           m, solvent,
                           u0, uc, uc_rho, /* intent(out) */
                           n, solute,
@@ -808,7 +810,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
             intent(out) in  these calls, is,  well, a work  array. Its
             value is ignored.
           */
-          bgy3d_impose_laplace_boundary (&BHD, u0[i], work, x_lapl[i]);
+          bgy3d_impose_laplace_boundary (BHD, u0[i], work, x_lapl[i]);
 
           /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
           ComputeH2O_g (g[i], u0[i], du[i]);
@@ -850,7 +852,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < m; i++)
-            MatMult (BHD.fft_mat, g[i], g_fft[i]);
+            MatMult (BHD->fft_mat, g[i], g_fft[i]);
 
           /* for H, O in that order ... */
           for (int i = 0; i < m; i++)
@@ -863,7 +865,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               VecSet (du_acc_fft, 0.0);
 
               for (int j = 0; j < m; j++) /* This increments the accumulator: */
-                apply (BHD.dc, ker_fft[i][j], g_fft[j], beta * BHD.rhos[j],
+                apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * BHD->rhos[j],
                        du_acc_fft); /* incremented! */
 
               /*
@@ -871,7 +873,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 contributions  are  added  to  the real  space  du_acc
                 below:
               */
-              MatMultTranspose (BHD.fft_mat, du_acc_fft, du_acc);
+              MatMultTranspose (BHD->fft_mat, du_acc_fft, du_acc);
 
               /*
                 In the following the sum is  over all sites j /= i. It
@@ -897,7 +899,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     a work  vector to  pass the result  further.  Pass
                     the g(k), not g(x). Does one FFT^-1.
                   */
-                  bgy3d_nssa_gamma_cond (&BHD, g_fft[i], r_HO, g[j], t_vec);
+                  bgy3d_nssa_gamma_cond (BHD, g_fft[i], r_HO, g[j], t_vec);
 
                   /*
                     The   next  step  is   to  use   the  "conditional
@@ -909,7 +911,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     Does one  FFT and one FFT^-1. Here  it is actually
                     possible to use the same Vec as in- and output:
                   */
-                  Compute_dg_H2O_intra_ln (&BHD, t_vec, r_HO, work);
+                  Compute_dg_H2O_intra_ln (BHD, t_vec, r_HO, work);
 
                   /* Add the contrinution of site j /= i to du[i]: */
                   VecAXPY (du_acc, 1.0, work);
@@ -934,7 +936,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 to save  time in the  iterative solver.  Vec  t_vec is
                 used as a work array.
               */
-              bgy3d_impose_laplace_boundary (&BHD, du_acc, t_vec, x_lapl[i]);
+              bgy3d_impose_laplace_boundary (BHD, du_acc, t_vec, x_lapl[i]);
 
               /*
                 Mix du and du_new with a fixed ratio "a":
@@ -1052,15 +1054,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   {
     Vec ve;                 /* solvent electrostaic potential field */
     Vec ve_rho;             /* keep solvent charge density for integration */
-    DACreateGlobalVector (BHD.da, &ve);
-    DACreateGlobalVector (BHD.da, &ve_rho);
+    DACreateGlobalVector (BHD->da, &ve);
+    DACreateGlobalVector (BHD->da, &ve_rho);
 
     /* This fills Vec ve with solvent electrostatic potential: */
-    bgy3d_solvent_field (&BHD, m, solvent, g, ve, ve_rho);
+    bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
 
     /* Optionally, return the iterator over the solvent field: */
     if (v)
-      *v = bgy3d_pot_create (BHD.da, BHD.PD, ve);
+      *v = bgy3d_pot_create (BHD->da, BHD->PD, ve);
 
     /*
       Integration of:
@@ -1075,7 +1077,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
       and ve_rho are obtained from bgy3d_solvent_field().
     */
     real val1, val2;
-    const real h3 = BHD.PD->h[0] * BHD.PD->h[1] * BHD.PD->h[2];
+    const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
 
     /* Dot-product is an integral over space (up to a factor): */
     VecDot (uc, ve_rho, &val1);
@@ -1123,7 +1125,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (t_vec);
   VecDestroy (uc);
 
-  finalize_state (&BHD);
+  destroy_state (BHD);
 }
 
 /* This one emulates historical solver interface: */
