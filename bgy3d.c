@@ -5,6 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 
 /* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
    files.  Moved here  because  bgy3d-main.c is  not  linked when  the
@@ -120,6 +121,74 @@ ProblemData bgy3d_problem_data (void)
 
     return PD;
 }
+
+
+State* bgy3d_make_state (const ProblemData *PD)
+{
+  State *BHD = malloc (sizeof *BHD);
+
+  BHD->PD = PD;
+
+  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
+  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
+
+  BHD->rhos[0] = PD->rho;
+  BHD->rhos[1] = PD->rho;
+
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
+
+#ifdef L_BOUNDARY_MG
+  /* multigrid, apparently needs two descriptors: */
+#error "Need BHD->da_dmmg"
+#endif
+
+  /* Create global scratch vectors: */
+  FOR_DIM
+    DACreateGlobalVector (BHD->da, &BHD->v[dim]); /* real */
+
+  /* Complex  vectors for  k-space representations.   These  three are
+     used by ComputeFFTfromCoulomb(): */
+  FOR_DIM
+    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]); /* complex */
+
+  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch); /* complex */
+
+  return BHD;
+}
+
+
+void bgy3d_destroy_state (State *BHD)
+{
+  MPI_Barrier (PETSC_COMM_WORLD);
+
+  FOR_DIM
+    {
+      VecDestroy (BHD->v[dim]);
+      VecDestroy (BHD->fg2_fft[dim]);
+    }
+
+  VecDestroy (BHD->fft_scratch);
+
+#ifdef L_BOUNDARY
+  MatDestroy (BHD->M);
+  KSPDestroy (BHD->ksp);
+#endif
+
+#ifdef L_BOUNDARY_MG
+  DMMGDestroy (BHD->dmmg);
+#endif
+
+  DADestroy (BHD->da);
+  DADestroy (BHD->dc);
+  MatDestroy (BHD->fft_mat);
+
+  free (BHD);
+}
+
 
 real Lennard_Jones (real r, real epsilon, real sigma)
 {
