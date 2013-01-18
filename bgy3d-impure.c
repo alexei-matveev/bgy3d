@@ -1000,8 +1000,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
           PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
-          PetscPrintf (PETSC_COMM_WORLD, "H=%e ", du_norm[0]);
-          PetscPrintf (PETSC_COMM_WORLD, "O=%e ", du_norm[1]);
+
+          for (int i = 0; i < m; i++)
+            PetscPrintf (PETSC_COMM_WORLD, "%s=%e ", solvent[i].name, du_norm[i]);
 
           /* Last argument to ComputeCharge() is a work array: */
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
