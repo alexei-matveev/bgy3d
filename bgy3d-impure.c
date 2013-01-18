@@ -507,7 +507,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
-  State *BHD = bgy3d_make_state (PD);
+  State *BHD = bgy3d_make_state (PD, m);
 
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");

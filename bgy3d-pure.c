@@ -48,27 +48,16 @@ static void destroy_g2 (int m, Vec g[m][m])
 
 static State* initialize_state (const ProblemData *PD, int m)
 {
-  State *BHD = (State*) malloc (sizeof (*BHD));
+  State *BHD = bgy3d_make_state (PD, m);
 
-  BHD->PD = PD;
-
-  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
-  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
-  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
-  /* FIXME: all sites have the same weight: */
-  for (int i = 0; i < m; i++)
-    BHD->rhos[i] = PD->rho; /* 2 * PD->rho; */
-
-  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
-     depends on the grid dimensions N[] and number of processors.  All
-     other arguments are intent(out): */
-  bgy3d_fft_mat_create (PD->N, &BHD->fft_mat, &BHD->da, &BHD->dc);
-
-  /* Create global vectors. FIXME:  u2, u2_fft probably differ only by
-     factors: */
+  /*
+    Create  more global  vectors  in addition  to  those allocated  by
+    bgy3d_make_state().   FIXME: u2,  u2_fft probably  differ  only by
+    factors:
+  */
   create_g2 (BHD->da, m, BHD->u2);
   create_g2 (BHD->dc, m, BHD->u2_fft); /* complex */
   create_g2 (BHD->da, m, BHD->c2);
@@ -85,20 +74,11 @@ static State* initialize_state (const ProblemData *PD, int m)
           BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim];
         }
 
-  FOR_DIM
-    DACreateGlobalVector (BHD->da, &BHD->v[dim]);
-
-  /* Allocate memory for fft */
-  FOR_DIM
-    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]); /* complex */
-
-  /* Complex scratch vector. FIXME: is it used in pure code? */
-  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch); /* complex */
-  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);    /* complex */
+  /* Allocate more memory for fft */
+  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);       /* complex */
 
   return BHD;
 }
-
 
 
 static void finalize_state (State *BHD, int m)
@@ -118,25 +98,9 @@ static void finalize_state (State *BHD, int m)
           VecDestroy (BHD->F_l[i][j][dim]);
         }
 
-  FOR_DIM
-    {
-      VecDestroy (BHD->v[dim]);
-      VecDestroy (BHD->fg2_fft[dim]);
-    }
   VecDestroy (BHD->gfg2_fft);
 
-  VecDestroy (BHD->fft_scratch);
-
-#ifdef L_BOUNDARY
-  MatDestroy (BHD->M);
-  KSPDestroy (BHD->ksp);
-#endif
-
-  DADestroy (BHD->da);
-  DADestroy (BHD->dc);
-  MatDestroy (BHD->fft_mat);
-
-  free (BHD);
+  bgy3d_destroy_state (BHD);
 }
 
 static real LJ_repulsive (real r, real epsilon, real sigma)

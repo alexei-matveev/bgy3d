@@ -123,7 +123,7 @@ ProblemData bgy3d_problem_data (void)
 }
 
 
-State* bgy3d_make_state (const ProblemData *PD)
+State* bgy3d_make_state (const ProblemData *PD, int m)
 {
   State *BHD = malloc (sizeof *BHD);
 
@@ -133,8 +133,9 @@ State* bgy3d_make_state (const ProblemData *PD)
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 
-  BHD->rhos[0] = PD->rho;
-  BHD->rhos[1] = PD->rho;
+  /* FIXME: all sites have the same weight: */
+  for (int i = 0; i < m; i++)
+    BHD->rhos[i] = PD->rho; /* 2 * PD->rho; */
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
