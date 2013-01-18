@@ -82,9 +82,19 @@
 
 #define CUTOFF 1.0e+8
 
-/* Returns (-1)^n, that is 1 for even  and -1 for odd n. NOTE: it also
-   needs to work as intended for negative n: */
-#define COSSIGN(n)  (((n) % 2) ? -1 : 1)
+/*
+  Pick one harmonic  among the many aliased ones  with the integer FFT
+  frequencies k + m * N  and arbitrary m.  Effectively this is used to
+  take  non-negative frequencies  k for  0 <=  k <=  N/2  and negative
+  frequencies k - N for N/2 < k < N:
+*/
+#define KFREQ(k, N)  (((k) <= (N) / 2) ? (k) : ((k) - (N)))
+
+/*
+  Returns (-1)^k = cos  (πk), that is 1 for even and  -1 for odd k. It
+  also needs to work as intended for negative frequencies k:
+*/
+#define COSSIGN(k)  (((k) % 2) ? -1 : 1)
 
 /* GCC extensions: */
 #if __GNUC__ >= 3
