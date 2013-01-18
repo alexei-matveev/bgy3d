@@ -913,11 +913,18 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
                   /* Add the contrinution of site j /= i to du[i]: */
                   VecAXPY (du_acc, 1.0, work);
+
+                  /*
+                    FIXME: the code for  pure solvent adds a so-called
+                    "numerically    challenging"     term    due    to
+                    intra-molecular correlations too. There seem to be
+                    no corresponding term in this code.
+                  */
                 }
 
               /*
                 Add Coulomb field uc scaled  by the site charge to the
-                accumulator:
+                accumulator. FIXME: inverse temperature beta missing?
               */
               VecAXPY (du_acc, solvent[i].charge, uc);
 
@@ -963,7 +970,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
            */
 
           /* Infinity (max-abs) norm of du[] over all site indices: */
-          real norm8 = maxval (m, du_norm);
+          const real norm8 = maxval (m, du_norm);
 
           mycount++;
 
