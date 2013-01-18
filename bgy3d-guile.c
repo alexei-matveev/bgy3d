@@ -320,14 +320,6 @@ static SCM guile_size (void)
 }
 
 
-/* Reduce buffer by summing respective entries on all workeres: */
-static void comm_allreduce (void *buf, int count, MPI_Datatype type)
-{
-  int err = MPI_Allreduce (MPI_IN_PLACE, buf, count, type, MPI_SUM,
-                           PETSC_COMM_WORLD);
-  assert (!err);
-}
-
 /* An inefficient way of getting just one value, vec[ix], even if that
    value is not stored locally. Collective. */
 static SCM guile_vec_ref (SCM vec, SCM ix)
@@ -348,7 +340,7 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
     vals[0] = 0.0;
 
   /* Make result known on all workers: */
-  comm_allreduce (vals, 1, MPI_DOUBLE);
+  bgy3d_comm_allreduce (vals, 1, MPI_DOUBLE);
 
   return scm_from_double (vals[0]);
 }

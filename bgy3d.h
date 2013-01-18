@@ -235,5 +235,7 @@ typedef struct State
 #endif
 } State;
 
+void bgy3d_comm_allreduce (void *buf, int count, MPI_Datatype type);
+
 #endif  /* ifndef BGY3d_H */
 
