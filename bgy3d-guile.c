@@ -35,17 +35,31 @@
 static char helptext[] = "BGY3d Guile.\n";
 
 
-/* Update an integer with the  entry from an association list or leave
-   it  unchanged if  there is  no  corresponding entry.  Alist is  not
+/* Update SCM value  with the entry from an  association list or leave
+   it  unchanged if  there is  no corresponding  entry.  Alist  is not
    modified. */
-static bool alist_getopt_int (SCM alist, const char *key, int *val)
+static bool alist_getopt_scm (SCM alist, const char *key, SCM *val)
 {
   SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
 
   bool test = scm_is_true (kv);
 
   if (test)
-    *val = scm_to_int (scm_cdr (kv));
+    *val = scm_cdr (kv);
+
+  return test;
+}
+
+/* Update an integer with the  entry from an association list or leave
+   it  unchanged if  there is  no  corresponding entry.  Alist is  not
+   modified. */
+static bool alist_getopt_int (SCM alist, const char *key, int *val)
+{
+  SCM scm;
+  bool test = alist_getopt_scm (alist, key, &scm);
+
+  if (test)
+    *val = scm_to_int (scm);
 
   return test;
 }
@@ -56,12 +70,11 @@ static bool alist_getopt_int (SCM alist, const char *key, int *val)
    modified. */
 static bool alist_getopt_real (SCM alist, const char *key, double *val)
 {
-  SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
-
-  bool test = scm_is_true (kv);
+  SCM scm;
+  bool test = alist_getopt_scm (alist, key, &scm);
 
   if (test)
-    *val = scm_to_double (scm_cdr (kv));
+    *val = scm_to_double (scm);
 
   return test;
 }
@@ -72,14 +85,13 @@ static bool alist_getopt_funptr (SCM alist, /* intent(in) */
                                  const char *key,
                                  void (**val)(void))
 {
-  SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
-
-  bool test = scm_is_true (kv);
+  SCM scm;
+  bool test = alist_getopt_scm (alist, key, &scm);
 
   /* FIXME: potentially non-portable conversion of an integer to void*
      and then to function pointer, void (*)(): */
   if (test)
-    *val = void_ptr (scm_cdr (kv));
+    *val = void_ptr (scm);
 
   return test;
 }
