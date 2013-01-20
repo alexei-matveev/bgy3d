@@ -32,8 +32,6 @@
 #define scmx_ptr(x) scmx_from_intptr ((intptr_t) (x))
 #define void_ptr(x) ((void*) scmx_to_intptr (x))
 
-static SCM guile_vec_length (SCM vec); /* FIXME: reorder! */
-
 static char helptext[] = "BGY3d Guile.\n";
 
 
@@ -296,6 +294,65 @@ static SCM noop_mark (SCM smob)
   return SCM_BOOL_F;
 }
 
+static SCM vec_save (SCM path, SCM vec)
+{
+  char *c_path = scm_to_locale_string (path); /* free() it! */
+
+  bgy3d_vec_save (c_path, to_vec (vec));
+
+  free (c_path);
+
+  return SCM_UNDEFINED;
+}
+
+
+static SCM vec_load (SCM path)
+{
+  char *c_path = scm_to_locale_string (path); /* free() it! */
+
+  Vec vec = bgy3d_vec_load (c_path);
+
+  free (c_path);
+
+  return from_vec (vec);
+}
+
+
+static SCM vec_length (SCM vec)
+{
+  int len;
+  Vec c_vec = to_vec (vec);
+
+  VecGetSize (c_vec, &len);
+
+  return scm_from_int (len);
+}
+
+/* An inefficient way of getting just one value, vec[ix], even if that
+   value is not stored locally. Collective. */
+static SCM vec_ref (SCM vec, SCM ix)
+{
+  assert (sizeof(real) == sizeof(double)); /* See MPI_DOUBLE */
+
+  Vec c_vec = to_vec (vec);
+  int i = scm_to_int (ix);
+
+  PetscInt lo, hi;
+  VecGetOwnershipRange (c_vec, &lo, &hi);
+
+  PetscInt keys[1] = {i};
+  real vals[1];
+  if (lo <= i && i < hi)
+    VecGetValues (c_vec, 1, keys, vals); /* local */
+  else
+    vals[0] = 0.0;
+
+  /* Make result known on all workers: */
+  bgy3d_comm_allreduce (vals, 1, MPI_DOUBLE);
+
+  return scm_from_double (vals[0]);
+}
+
 static int state_print (SCM state, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
@@ -324,7 +381,7 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
   scm_puts ("#<vec addr: ", port);
   scm_display (scmx_ptr (c_vec), port);
   scm_puts (", length: ", port);
-  scm_display (guile_vec_length (vec), port);
+  scm_display (vec_length (vec), port);
   scm_puts (">", port);
   scm_remember_upto_here_1 (vec);
   return 1;                     /* non-zero means success */
@@ -358,6 +415,11 @@ static void vec_init_type (void)
   /* Destroy state explicitly, when producing much garbage: */
   scm_c_define_gsubr ("bgy3d-vec-make", 1, 0, 0, vec_make);
   scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, vec_destroy);
+
+  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, vec_save);
+  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, vec_load);
+  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, vec_length);
+  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, vec_ref);
 }
 
 static SCM guile_run_solvent (SCM alist)
@@ -431,40 +493,6 @@ static SCM guile_pot_destroy (SCM iter)
   return scm_from_int (0);
 }
 
-static SCM guile_vec_save (SCM path, SCM vec)
-{
-  char *c_path = scm_to_locale_string (path); /* free() it! */
-
-  bgy3d_vec_save (c_path, to_vec (vec));
-
-  free (c_path);
-
-  return SCM_UNDEFINED;
-}
-
-
-static SCM guile_vec_load (SCM path)
-{
-  char *c_path = scm_to_locale_string (path); /* free() it! */
-
-  Vec vec = bgy3d_vec_load (c_path);
-
-  free (c_path);
-
-  return from_vec (vec);
-}
-
-
-static SCM guile_vec_length (SCM vec)
-{
-  int len;
-  Vec c_vec = to_vec (vec);
-
-  VecGetSize (c_vec, &len);
-
-  return scm_from_int (len);
-}
-
 /* Return MPI runk in PETSC_COMM_WORLD: */
 static SCM guile_rank (void)
 {
@@ -480,32 +508,6 @@ static SCM guile_size (void)
   int size;
   MPI_Comm_size (PETSC_COMM_WORLD, &size);
   return scm_from_int (size);
-}
-
-
-/* An inefficient way of getting just one value, vec[ix], even if that
-   value is not stored locally. Collective. */
-static SCM guile_vec_ref (SCM vec, SCM ix)
-{
-  assert (sizeof(real) == sizeof(double)); /* See MPI_DOUBLE */
-
-  Vec c_vec = to_vec (vec);
-  int i = scm_to_int (ix);
-
-  PetscInt lo, hi;
-  VecGetOwnershipRange (c_vec, &lo, &hi);
-
-  PetscInt keys[1] = {i};
-  real vals[1];
-  if (lo <= i && i < hi)
-    VecGetValues (c_vec, 1, keys, vals); /* local */
-  else
-    vals[0] = 0.0;
-
-  /* Make result known on all workers: */
-  bgy3d_comm_allreduce (vals, 1, MPI_DOUBLE);
-
-  return scm_from_double (vals[0]);
 }
 
 
@@ -535,10 +537,6 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
-  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
-  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
-  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
-  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, guile_vec_ref);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
   scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);
