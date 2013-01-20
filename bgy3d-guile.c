@@ -321,9 +321,7 @@ static SCM vec_load (SCM path)
 static SCM vec_length (SCM vec)
 {
   int len;
-  Vec c_vec = to_vec (vec);
-
-  VecGetSize (c_vec, &len);
+  VecGetSize (to_vec (vec), &len);
 
   return scm_from_int (len);
 }
