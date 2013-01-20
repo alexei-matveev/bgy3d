@@ -279,10 +279,7 @@ static size_t vec_free (SCM vec)
 
 static SCM state_destroy (SCM state)
 {
-  {
-    State *BHD = to_state (state);
-    assert (BHD != NULL);
-  }
+  assert (to_state (state) != NULL);
   state_free (state);
   SCM_SET_SMOB_DATA (state, NULL);
   return SCM_UNSPECIFIED;
@@ -290,10 +287,7 @@ static SCM state_destroy (SCM state)
 
 static SCM vec_destroy (SCM vec)
 {
-  {
-    Vec c_vec = to_vec (vec);
-    assert (c_vec != NULL);
-  }
+  assert (to_vec (vec) != NULL);
   vec_free (vec);
   SCM_SET_SMOB_DATA (vec, NULL);
   return SCM_UNSPECIFIED;
