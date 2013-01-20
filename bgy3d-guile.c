@@ -188,6 +188,105 @@ static void make_solute (SCM solute, int *n, Site **sites, char **name)
 }
 
 
+/* The following  code declares a  State SMOB primarily to  make array
+   descriptors, FFT, and laplace matrices available to Scheme: */
+static scm_t_bits state_tag;
+
+static SCM state_make (SCM alist)
+{
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  ProblemData *PD = malloc (sizeof *PD);
+  *PD = problem_data (alist);
+
+  State *BHD = bgy3d_make_state (PD, 2);
+  /* printf ("XXX: alloc %p\n", BHD); */
+
+  SCM state;
+  SCM_NEWSMOB (state, state_tag, BHD);
+  return state;
+}
+
+static State* state_get (SCM state)
+{
+  scm_assert_smob_type (state_tag, state);
+
+  return (State*) SCM_SMOB_DATA (state);
+}
+
+static size_t state_free (SCM state)
+{
+  State *BHD = state_get (state);
+  /* printf ("XXX: free %p\n", BHD); */
+  /*
+    If bgy3d-state-destroy was called explicitly on this smob then the
+    real data is  already freed and the pointer must  have been set to
+    NULL:
+  */
+  if (BHD)
+    {
+      free ((void *) BHD->PD);  /* FIXME: discards const! */
+      bgy3d_destroy_state (BHD);
+    }
+  return 0;
+}
+
+static SCM state_destroy (SCM state)
+{
+  {
+    State *BHD = state_get (state);
+    /* printf ("XXX: destroy %p\n", BHD); */
+    assert (BHD != NULL);
+  }
+  state_free (state);
+  SCM_SET_SMOB_DATA (state, NULL);
+  return SCM_UNSPECIFIED;
+}
+
+static SCM state_mark (SCM state)
+{
+  /* We dont store SCM values in State struct yet: */
+  (void) state;
+  return SCM_BOOL_F;
+}
+
+static int state_print (SCM state, SCM port, scm_print_state *pstate)
+{
+  (void) pstate;
+  const State *BHD = state_get (state);
+  const ProblemData *PD = BHD->PD;
+
+  scm_puts ("#<state ", port);
+  scm_display (scmx_ptr (BHD), port);
+  scm_puts (", ", port);
+  for (int i = 0; i < 3; i++)
+    {
+      scm_display (scm_from_int (PD->N[i]), port);
+      if (i != 2)
+        scm_puts (" x ", port);
+    }
+  scm_puts (">", port);
+  scm_remember_upto_here_1 (state);
+  return 1;                     /* non-zero means success */
+}
+
+static void state_init_type (void)
+{
+  /*
+    This is the size of the struct, the actual memory pressure is much
+    higher and  invisible to Guile garbage  collector. Temporary Vecs,
+    matrices and such:
+  */
+  state_tag = scm_make_smob_type ("state", sizeof (State));
+  scm_set_smob_mark (state_tag, state_mark);
+  scm_set_smob_free (state_tag, state_free);
+  scm_set_smob_print (state_tag, state_print);
+
+  /* Destroy state explicitly, when producing much garbage: */
+  scm_c_define_gsubr ("bgy3d-state-make", 2, 0, 0, state_make);
+  scm_c_define_gsubr ("bgy3d-state-destroy", 1, 0, 0, state_destroy);
+}
+
 static SCM guile_run_solvent (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
@@ -380,6 +479,9 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
   scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);
+
+  /* Defines a SMOB: */
+  state_init_type();
 
   return SCM_UNSPECIFIED;
 }
