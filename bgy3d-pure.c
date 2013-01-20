@@ -1048,9 +1048,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector (BHD->da, &work);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix and create KSP environment: */
-  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
-
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
     problem  across iterations. Though  by now  I am  not sure  if KSP
@@ -1413,9 +1410,6 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   DACreateGlobalVector (BHD->da, &work);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix and create KSP environment: */
-  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
-
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
     problem  across iterations. Though  by now  I am  not sure  if KSP

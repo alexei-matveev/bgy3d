@@ -555,9 +555,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
 #ifdef L_BOUNDARY
-  /* Assemble Laplacian matrix and create KSP environment: */
-  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
-
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
     problem  across iterations. Though  by now  I am  not sure  if KSP
