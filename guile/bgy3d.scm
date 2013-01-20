@@ -10,6 +10,8 @@
   #:use-module (ice-9 getopt-long)
   #:export (new-main
             old-main
+            bgy3d-state-make
+            bgy3d-state-destroy
             bgy3d-run-solvent
             bgy3d-run-solute
             bgy3d-run
@@ -35,6 +37,8 @@
 ;;;   bgy3d-vec-ref
 ;;;   bgy3d-rank
 ;;;   bgy3d-size
+;;;   bgy3d-state-make
+;;;   bgy3d-state-destroy
 ;;;
 ;;; and posissibly more, depending on the compilation options.
 ;;;
