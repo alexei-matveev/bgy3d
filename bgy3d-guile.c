@@ -32,6 +32,8 @@
 #define scmx_ptr(x) scmx_from_intptr ((intptr_t) (x))
 #define void_ptr(x) ((void*) scmx_to_intptr (x))
 
+static SCM guile_vec_length (SCM vec); /* FIXME: reorder! */
+
 static char helptext[] = "BGY3d Guile.\n";
 
 
@@ -191,32 +193,57 @@ static void make_solute (SCM solute, int *n, Site **sites, char **name)
 /* The following  code declares a  State SMOB primarily to  make array
    descriptors, FFT, and laplace matrices available to Scheme: */
 static scm_t_bits state_tag;
+static scm_t_bits vec_tag;
 
-static SCM state_make (SCM alist)
+static SCM from_state (const State *BHD)
 {
-  /* This sets defaults, eventually modified from the command line and
-     updated by the entries from the association list: */
-  ProblemData *PD = malloc (sizeof *PD);
-  *PD = problem_data (alist);
-
-  State *BHD = bgy3d_state_make (PD, 2);
-  /* printf ("XXX: alloc %p\n", BHD); */
-
-  SCM state;
-  SCM_NEWSMOB (state, state_tag, BHD);
-  return state;
+  SCM obj;
+  SCM_NEWSMOB (obj, state_tag, BHD);
+  return obj;
 }
 
-static State* state_get (SCM state)
+static SCM from_vec (Vec vec)
+{
+  SCM obj;
+  SCM_NEWSMOB (obj, vec_tag, vec);
+  return obj;
+}
+
+static State* to_state (SCM state)
 {
   scm_assert_smob_type (state_tag, state);
 
   return (State*) SCM_SMOB_DATA (state);
 }
 
+static Vec to_vec (SCM vec)
+{
+  scm_assert_smob_type (vec_tag, vec);
+
+  return (Vec) SCM_SMOB_DATA (vec);
+}
+
+static SCM state_make (SCM alist)
+{
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  ProblemData *PD = malloc (sizeof *PD); /* free() in state_free() */
+  *PD = problem_data (alist);
+
+  return from_state (bgy3d_state_make (PD, 2));
+}
+
+static SCM vec_make (SCM state)
+{
+  State *BHD = to_state (state);
+  Vec vec;
+  DACreateGlobalVector (BHD->da, &vec);
+  return from_vec (vec);
+}
+
 static size_t state_free (SCM state)
 {
-  State *BHD = state_get (state);
+  State *BHD = to_state (state);
   /* printf ("XXX: free %p\n", BHD); */
   /*
     If bgy3d-state-destroy was called explicitly on this smob then the
@@ -231,11 +258,19 @@ static size_t state_free (SCM state)
   return 0;
 }
 
+static size_t vec_free (SCM vec)
+{
+  Vec c_vec = to_vec (vec);
+  /* printf ("XXX: vec_free %p\n", c_vec); */
+  if (c_vec)
+    VecDestroy (c_vec);
+  return 0;
+}
+
 static SCM state_destroy (SCM state)
 {
   {
-    State *BHD = state_get (state);
-    /* printf ("XXX: destroy %p\n", BHD); */
+    State *BHD = to_state (state);
     assert (BHD != NULL);
   }
   state_free (state);
@@ -243,22 +278,33 @@ static SCM state_destroy (SCM state)
   return SCM_UNSPECIFIED;
 }
 
-static SCM state_mark (SCM state)
+static SCM vec_destroy (SCM vec)
 {
-  /* We dont store SCM values in State struct yet: */
-  (void) state;
+  {
+    Vec c_vec = to_vec (vec);
+    assert (c_vec != NULL);
+  }
+  vec_free (vec);
+  SCM_SET_SMOB_DATA (vec, NULL);
+  return SCM_UNSPECIFIED;
+}
+
+static SCM noop_mark (SCM smob)
+{
+  /* We dont store SCM values in smobs yet: */
+  (void) smob;
   return SCM_BOOL_F;
 }
 
 static int state_print (SCM state, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
-  const State *BHD = state_get (state);
+  const State *BHD = to_state (state);
   const ProblemData *PD = BHD->PD;
 
-  scm_puts ("#<state ", port);
+  scm_puts ("#<state addr: ", port);
   scm_display (scmx_ptr (BHD), port);
-  scm_puts (", ", port);
+  scm_puts (", shape: ", port);
   for (int i = 0; i < 3; i++)
     {
       scm_display (scm_from_int (PD->N[i]), port);
@@ -270,6 +316,20 @@ static int state_print (SCM state, SCM port, scm_print_state *pstate)
   return 1;                     /* non-zero means success */
 }
 
+static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
+{
+  (void) pstate;
+  const Vec c_vec = to_vec (vec);
+
+  scm_puts ("#<vec addr: ", port);
+  scm_display (scmx_ptr (c_vec), port);
+  scm_puts (", length: ", port);
+  scm_display (guile_vec_length (vec), port);
+  scm_puts (">", port);
+  scm_remember_upto_here_1 (vec);
+  return 1;                     /* non-zero means success */
+}
+
 static void state_init_type (void)
 {
   /*
@@ -278,13 +338,26 @@ static void state_init_type (void)
     matrices and such:
   */
   state_tag = scm_make_smob_type ("state", sizeof (State));
-  scm_set_smob_mark (state_tag, state_mark);
+  scm_set_smob_mark (state_tag, noop_mark);
   scm_set_smob_free (state_tag, state_free);
   scm_set_smob_print (state_tag, state_print);
 
   /* Destroy state explicitly, when producing much garbage: */
   scm_c_define_gsubr ("bgy3d-state-make", 2, 0, 0, state_make);
   scm_c_define_gsubr ("bgy3d-state-destroy", 1, 0, 0, state_destroy);
+}
+
+static void vec_init_type (void)
+{
+  /* The actual memory pressure is much higher. */
+  vec_tag = scm_make_smob_type ("vec", sizeof (Vec));
+  scm_set_smob_mark (vec_tag, noop_mark);
+  scm_set_smob_free (vec_tag, vec_free);
+  scm_set_smob_print (vec_tag, vec_print);
+
+  /* Destroy state explicitly, when producing much garbage: */
+  scm_c_define_gsubr ("bgy3d-vec-make", 1, 0, 0, vec_make);
+  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, vec_destroy);
 }
 
 static SCM guile_run_solvent (SCM alist)
@@ -342,7 +415,7 @@ static SCM guile_run_solute (SCM solute, SCM settings)
   free (sites);
 
   /* Caller, dont forget to destroy them! */
-  SCM gs = scm_list_2 (scmx_ptr (g[0]), scmx_ptr (g[1]));
+  SCM gs = scm_list_2 (from_vec (g[0]),  from_vec (g[1]));
   SCM v = scmx_ptr (iter);
 
   /* Return multiple values: */
@@ -358,20 +431,11 @@ static SCM guile_pot_destroy (SCM iter)
   return scm_from_int (0);
 }
 
-static SCM guile_vec_destroy (SCM vec)
-{
-  PetscErrorCode err = VecDestroy (void_ptr (vec));
-  assert (!err);
-
-  return scm_from_int (err);
-}
-
-
 static SCM guile_vec_save (SCM path, SCM vec)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
-  bgy3d_vec_save (c_path, void_ptr (vec));
+  bgy3d_vec_save (c_path, to_vec (vec));
 
   free (c_path);
 
@@ -387,14 +451,14 @@ static SCM guile_vec_load (SCM path)
 
   free (c_path);
 
-  return scmx_ptr (vec);
+  return from_vec (vec);
 }
 
 
 static SCM guile_vec_length (SCM vec)
 {
   int len;
-  Vec c_vec = void_ptr (vec);
+  Vec c_vec = to_vec (vec);
 
   VecGetSize (c_vec, &len);
 
@@ -425,7 +489,7 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
 {
   assert (sizeof(real) == sizeof(double)); /* See MPI_DOUBLE */
 
-  Vec c_vec = void_ptr (vec);
+  Vec c_vec = to_vec (vec);
   int i = scm_to_int (ix);
 
   PetscInt lo, hi;
@@ -471,7 +535,6 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
-  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, guile_vec_destroy);
   scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, guile_vec_save);
   scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, guile_vec_load);
   scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, guile_vec_length);
@@ -480,8 +543,9 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
   scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);
 
-  /* Defines a SMOB: */
+  /* Define SMOBs: */
   state_init_type();
+  vec_init_type();
 
   return SCM_UNSPECIFIED;
 }
