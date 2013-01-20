@@ -124,7 +124,7 @@ ProblemData bgy3d_problem_data (void)
 }
 
 
-State* bgy3d_make_state (const ProblemData *PD, int m)
+State* bgy3d_state_make (const ProblemData *PD, int m)
 {
   /* Also initialize all pointers stored in State to NULL: */
   State *BHD = calloc (1, sizeof *BHD);
@@ -169,7 +169,7 @@ State* bgy3d_make_state (const ProblemData *PD, int m)
 }
 
 
-void bgy3d_destroy_state (State *BHD)
+void bgy3d_state_destroy (State *BHD)
 {
   MPI_Barrier (PETSC_COMM_WORLD);
 

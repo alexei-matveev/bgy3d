@@ -235,8 +235,8 @@ typedef struct State
 #endif
 } State;
 
-State* bgy3d_make_state (const ProblemData *PD, int m);
-void bgy3d_destroy_state (State *BHD);
+State* bgy3d_state_make (const ProblemData *PD, int m);
+void bgy3d_state_destroy (State *BHD);
 
 void bgy3d_comm_allreduce (void *buf, int count, MPI_Datatype type);
 

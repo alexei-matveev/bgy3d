@@ -199,7 +199,7 @@ static SCM state_make (SCM alist)
   ProblemData *PD = malloc (sizeof *PD);
   *PD = problem_data (alist);
 
-  State *BHD = bgy3d_make_state (PD, 2);
+  State *BHD = bgy3d_state_make (PD, 2);
   /* printf ("XXX: alloc %p\n", BHD); */
 
   SCM state;
@@ -226,7 +226,7 @@ static size_t state_free (SCM state)
   if (BHD)
     {
       free ((void *) BHD->PD);  /* FIXME: discards const! */
-      bgy3d_destroy_state (BHD);
+      bgy3d_state_destroy (BHD);
     }
   return 0;
 }

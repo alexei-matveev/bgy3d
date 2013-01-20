@@ -46,14 +46,14 @@ static void destroy_g2 (int m, Vec g[m][m])
 
 static State* initialize_state (const ProblemData *PD, int m)
 {
-  State *BHD = bgy3d_make_state (PD, m);
+  State *BHD = bgy3d_state_make (PD, m);
 
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
 
   /*
     Create  more global  vectors  in addition  to  those allocated  by
-    bgy3d_make_state().   FIXME: u2,  u2_fft probably  differ  only by
+    bgy3d_state_make().   FIXME: u2,  u2_fft probably  differ  only by
     factors:
   */
   create_g2 (BHD->da, m, BHD->u2);
@@ -98,7 +98,7 @@ static void finalize_state (State *BHD, int m)
 
   VecDestroy (BHD->gfg2_fft);
 
-  bgy3d_destroy_state (BHD);
+  bgy3d_state_destroy (BHD);
 }
 
 static real LJ_repulsive (real r, real epsilon, real sigma)
