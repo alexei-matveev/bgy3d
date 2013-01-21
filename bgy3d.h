@@ -11,13 +11,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <fftw_mpi.h>
 #include <stdbool.h>            /* bool, true, false */
 
-#include "petscsnes.h"
-#include "petscda.h"
-#include "fft_3d.h"
-#include "petscdmmg.h"
+#include "petscda.h"            /* Vec, Mat, DA, ... */
+#include "petscdmmg.h"          /* KSP, ... */
 
 /*
  * C99 standards removes M_PI from math.h, the digits were copied from
