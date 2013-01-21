@@ -307,7 +307,7 @@ void bgy3d_solute_field (const State *BHD,
     {
       PetscScalar sum;
       real dV = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
-      VecSum (uc, &sum);
+      VecSum (uc_rho, &sum);
       PetscPrintf (PETSC_COMM_WORLD,
                    "integrated charge = %f (should be close to zero)\n",
                    sum * dV);
