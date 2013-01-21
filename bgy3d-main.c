@@ -16,6 +16,7 @@
 #include "bgy3d-pure.h"         /* BGY3d_solve_2site */
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* BGY3d_solve_H2O_2site */
+#include "bgy3d-vec.h"          /* bgy3d_vec_*() */
 #ifdef WITH_EXTRA_SOLVERS
 #include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
 #include "bgy3d-newton-pure.h"
