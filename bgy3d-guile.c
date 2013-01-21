@@ -504,7 +504,7 @@ static void state_init_type (void)
   scm_set_smob_print (state_tag, state_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  scm_c_define_gsubr ("state-make", 2, 0, 0, state_make);
+  scm_c_define_gsubr ("state-make", 1, 0, 0, state_make);
   scm_c_define_gsubr ("state-destroy", 1, 0, 0, state_destroy);
 }
 
