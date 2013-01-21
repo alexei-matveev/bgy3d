@@ -18,6 +18,7 @@
             vec-save
             vec-set-random
             vec-dot
+            vec-norm
             vec-fft
             vec-ifft
             vec-fft-interp
@@ -181,6 +182,13 @@
                          (site-charge site))))))   ; original
     (map update-one sites)))
 
+
+;;;
+;;; L2-norm   of  a   vec.  The   funciton  vec-dot   is   defined  in
+;;; bgy3d-guile.c:
+;;;
+(define (vec-norm v)
+  (sqrt (vec-dot v v)))
 
 ;;;
 ;;; Will work inefficiently with  distributed vectors.  The problem is
