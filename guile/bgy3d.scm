@@ -21,6 +21,8 @@
             vec-fft
             vec-ifft
             vec-fft-interp
+            vec-map1
+            vec-map2
             vec-print
             bgy3d-run-solvent
             bgy3d-run-solute
@@ -52,6 +54,8 @@
 ;;;   vec-fft
 ;;;   vec-ifft
 ;;;   vec-fft-interp
+;;;   vec-map1
+;;;   vec-map2
 ;;;   bgy3d-rank
 ;;;   bgy3d-size
 ;;;   state-make

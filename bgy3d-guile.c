@@ -421,6 +421,42 @@ static SCM vec_set_random (SCM x)
   return x;
 }
 
+/*
+  NOTE:  scm_from_double()   allocates  on  heap   producing  lots  of
+  garbage. A  good thing  about it is  that it  also causes GC  to run
+  regularly and collect Vec smobs.
+*/
+static SCM vec_map1 (SCM f, SCM x)
+{
+  Vec x_ = to_vec (x);
+  Vec y_;
+  VecDuplicate (x_, &y_);
+
+  double f_ (double x)
+  {
+    return scm_to_double (scm_call_1 (f, scm_from_double (x)));
+  }
+  bgy3d_vec_map1 (y_, f_, x_);
+
+  return from_vec (y_);
+}
+
+static SCM vec_map2 (SCM f, SCM x, SCM y)
+{
+  Vec x_ = to_vec (x);
+  Vec y_ = to_vec (y);
+  Vec z_;
+  VecDuplicate (x_, &z_);
+
+  double f_ (double x, double y)
+  {
+    return scm_to_double (scm_call_2 (f, scm_from_double (x), scm_from_double (y)));
+  }
+  bgy3d_vec_map2 (z_, f_, x_, y_);
+
+  return from_vec (z_);
+}
+
 static int state_print (SCM state, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
@@ -494,6 +530,8 @@ static void vec_init_type (void)
   scm_c_define_gsubr ("vec-fft", 2, 0, 0, vec_fft);
   scm_c_define_gsubr ("vec-ifft", 2, 0, 0, vec_ifft);
   scm_c_define_gsubr ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
+  scm_c_define_gsubr ("vec-map1", 2, 0, 0, vec_map1);
+  scm_c_define_gsubr ("vec-map2", 3, 0, 0, vec_map2);
 }
 
 static SCM guile_run_solvent (SCM alist)
