@@ -395,7 +395,8 @@ static void lap_mat_create (const DA da, const real h[3],
 {
   const PetscScalar one = 1.0;
 
-  PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
+  if (verbosity > 0)
+    PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
   /* Create Matrix with appropriate non-zero structure */
   DAGetMatrix (da, MATMPIAIJ, M);
@@ -532,7 +533,8 @@ static void lap_mat_create (const DA da, const real h[3],
   MatAssemblyBegin (*M, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd (*M, MAT_FINAL_ASSEMBLY);
 
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  if (verbosity > 0)
+    PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
 #else
 /*
