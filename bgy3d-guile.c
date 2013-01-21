@@ -408,7 +408,7 @@ static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
       x = scm_cdr (x);
     }
 
-  bgy3d_fft_interp (BHD->dc, Y_, 1, x_, y);
+  bgy3d_fft_interp (BHD->fft_mat, Y_, 1, x_, y);
 
   /* FIXME: FFT in BGY3d code is unnormalized: */
   return scm_from_double (y[0] * sqrt (BHD->PD->N3));

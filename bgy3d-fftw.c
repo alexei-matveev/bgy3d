@@ -409,11 +409,12 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
   Note that "upscaling"  to a finer but regular grid  can be done more
   efficiently.
 */
-void bgy3d_fft_interp (const DA dc,
+void bgy3d_fft_interp (const Mat A,
                        const Vec Y, /* complex, intent(in) */
                        int np, double x[np][3], /* intent(in) */
                        double y[np])            /* intent(out) */
 {
+  const FFT *fft = context (A);
   /*
     Get grid  dimensions N[3]  with some sanity  checks.  Why,  in the
     hame of the  PETSC God, is there no way to  inquire this data from
@@ -423,7 +424,7 @@ void bgy3d_fft_interp (const DA dc,
   {
     int dim, dof;
     DAPeriodicType wrap;
-    DAGetInfo (dc, &dim,
+    DAGetInfo (fft->dc, &dim,
                &N[0], &N[1], &N[2], /* need this, rest for checks */
                NULL, NULL, NULL,
                &dof, NULL, &wrap, NULL);
@@ -443,10 +444,10 @@ void bgy3d_fft_interp (const DA dc,
 
   /* loop over local portion of grid */
   int c[3], n[3];             /* corner and the size of the section */
-  DAGetCorners (dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
 
   complex ***Y_;
-  DAVecGetArray (dc, Y, &Y_);
+  DAVecGetArray (fft->dc, Y, &Y_);
 
   int k[3];
   for (k[2] = c[2]; k[2] < c[2] + n[2]; k[2]++)
@@ -475,7 +476,7 @@ void bgy3d_fft_interp (const DA dc,
             }
         }
 
-  DAVecRestoreArray (dc, Y, &Y_);
+  DAVecRestoreArray (fft->dc, Y, &Y_);
 
   /*
     FIXME:  Discard imaginary part  which should  be zero  anyway when
