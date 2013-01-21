@@ -5,6 +5,7 @@
  * bgy3d_fft_test() for an example use.
  */
 
+#include "bgy3d.h"              /* KFREQ(), M_PI */
 #include <assert.h>
 #include <fftw_mpi.h>
 #include "petscda.h"            /* DA, Vec */
@@ -396,3 +397,100 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
   *dc = fft->dc;
 }
 
+
+/*
+  Given the FFT transform Vec  Y of some equally-spaced grid sample of
+  a real-valued function y(x), compute the values of y(x) at arbitrary
+  given  points x[][]  by trigonometric  interpolation. Note  that the
+  scale of  x here is such  that the components range  between 0.0 and
+  the respective N[] within  the unit cell.  Extrapolation outside the
+  cell is periodic by the nature of trigonometric interpolation.
+
+  Note that "upscaling"  to a finer but regular grid  can be done more
+  efficiently.
+*/
+void bgy3d_fft_interp (const DA dc,
+                       const Vec Y, /* complex, intent(in) */
+                       int np, double x[np][3], /* intent(in) */
+                       double y[np])            /* intent(out) */
+{
+  /*
+    Get grid  dimensions N[3]  with some sanity  checks.  Why,  in the
+    hame of the  PETSC God, is there no way to  inquire this data from
+    the Vec itself?
+  */
+  int N[3];
+  {
+    int dim, dof;
+    DAPeriodicType wrap;
+    DAGetInfo (dc, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, NULL, &wrap, NULL);
+
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 2);               /* degrees of freedom */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
+
+  /* Init  complex accumulator.  We  will verify  that imaginary  part
+     vanishes: */
+  complex yc[np];
+  for (int p = 0; p < np; p++)
+    yc[p] = 0.0;
+
+  /* loop over local portion of grid */
+  int c[3], n[3];             /* corner and the size of the section */
+  DAGetCorners (dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
+
+  complex ***Y_;
+  DAVecGetArray (dc, Y, &Y_);
+
+  int k[3];
+  for (k[2] = c[2]; k[2] < c[2] + n[2]; k[2]++)
+    for (k[1] = c[1]; k[1] < c[1] + n[1]; k[1]++)
+      for (k[0] = c[0]; k[0] < c[0] + n[0]; k[0]++)
+        {
+          /* Take negative frequencies where k > N/2: */
+          int K[3];
+          FOR_DIM
+            K[dim] = KFREQ (k[dim], N[dim]);
+
+          const complex yk = Y_[k[0]][k[1]][k[2]];
+
+          for (int p = 0; p < np; p++)
+            {
+              /* Coordinates  x[p][]  are  fractional, represented  by
+                 real numbers: */
+              complex wkx = 1.0;
+              FOR_DIM
+                if (2 * K[dim] != N[dim])
+                  wkx *= cexp (2 * M_PI * K[dim] * x[p][dim] / N[dim] * I);
+                else
+                  wkx *= cos (2 * M_PI * K[dim] * x[p][dim] / N[dim]);
+
+              yc[p] += yk * wkx;
+            }
+        }
+
+  DAVecRestoreArray (dc, Y, &Y_);
+
+  /*
+    FIXME:  Discard imaginary part  which should  be zero  anyway when
+    interpolating  real   data.   Also   we  *do*  normalize   as  for
+    interpolation.   This does not  correspond to  the inverse  FFT as
+    implemented by FFTW which is unnormalized!
+  */
+  for (int p = 0; p < np; p++)
+    {
+      /* printf ("yc[%d] = %f + %fi\n", p, creal (yc[p]), cimag (yc[p])); */
+      assert (fabs (cimag (yc[p])) < 1.0e-8);
+      y[p] = yc[p] / (N[0] * N[1] * N[2]);
+    }
+
+  /* Each  worker summed  only over  its own  range of  K[],  sum over
+     workers: */
+  bgy3d_comm_allreduce (y, np, MPI_DOUBLE);
+}
