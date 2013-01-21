@@ -185,11 +185,6 @@ typedef struct State
   Vec c2[2][2];                 /* exp(-  beta  * LJ_repulsive(i,  j),
                                    used only for pure solvent. */
 
-  real rhos[2];                 /* Site specific density.  Computed as
-                                   a solvent  density rho times number
-                                   of   sites  of   that  type   in  a
-                                   solvent. */
-
   /*
    The short-range solvent site-site  potentials for each pair (scaled
    by inverse  temperature beta) is  initially put into  the following
@@ -232,7 +227,7 @@ typedef struct State
 #endif
 } State;
 
-State* bgy3d_state_make (const ProblemData *PD, int m);
+State* bgy3d_state_make (const ProblemData *PD);
 void bgy3d_state_destroy (State *BHD);
 
 void bgy3d_comm_allreduce (void *buf, int count, MPI_Datatype type);

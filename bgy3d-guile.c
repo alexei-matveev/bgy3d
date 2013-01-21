@@ -241,7 +241,7 @@ static SCM state_make (SCM alist)
   ProblemData *PD = malloc (sizeof *PD); /* free() in state_free() */
   *PD = problem_data (alist);
 
-  return from_state (bgy3d_state_make (PD, 2));
+  return from_state (bgy3d_state_make (PD));
 }
 
 static SCM vec_make (SCM state)

@@ -507,10 +507,16 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
 
-  State *BHD = bgy3d_state_make (PD, m);
+  State *BHD = bgy3d_state_make (PD);
 
   if (r_HH > 0.0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
+
+  /* Site specific  density.  Computed as a solvent  density rho times
+     number of sites of that type in a solvent: */
+  real rhos[m];
+  for (int i = 0; i < m; i++)
+    rhos[i] = PD->rho;          /* 2 * PD->rho; */
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
@@ -795,7 +801,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               VecSet (du_acc_fft, 0.0);
 
               for (int j = 0; j < m; j++) /* This increments the accumulator: */
-                apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * BHD->rhos[j],
+                apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * rhos[j],
                        du_acc_fft); /* incremented! */
 
               /*
@@ -1277,7 +1283,13 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (3-site) equation ...\n");
 
   State BHD = initialize_state (PD);
-  BHD.rhos[0] = 2.0 * BHD.rhos[0]; /* specific to H2O */
+
+  /* Site specific  density.  Computed as a solvent  density rho times
+     number of sites of that type in a solvent: */
+  real rhos[m];
+  for (int i = 0; i < m; i++)
+    rhos[i] = PD->rho;
+  rhos[0] = 2.0 * rhos[0];
 
   if (r_HH < 0.0) {
     PetscPrintf(PETSC_COMM_WORLD,"Solvent not a 3-Site model!\n");
@@ -1432,16 +1444,16 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* H */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[1], BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[1], rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][0], g[0], BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][0], g[0], rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[1], BHD.u2_fft[0][1], damp * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[1], BHD.u2_fft[0][1], damp * rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], g[0], BHD.u2_fft[0][0], damp * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][0], g[0], BHD.u2_fft[0][0], damp * rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           /* Specific to H2O: */
@@ -1468,16 +1480,16 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
           /* O */
           VecSet(dg_new,0.0);
-          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[1][1], g[1], BHD.rhos[1], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[1][1], g[1], rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[0], BHD.rhos[0], dg_new2);
+          Compute_H2O_interS(&BHD, BHD.fs_g2_fft[0][1], g[0], rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
           VecScale(dg_new,damp_LJ);
 
           /* Coulomb long */
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], g[1], BHD.u2_fft[1][1], damp * BHD.rhos[1], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[1][1], g[1], BHD.u2_fft[1][1], damp * rhos[1], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
-          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[0], BHD.u2_fft[0][1], damp * BHD.rhos[0], dg_new2);
+          Compute_H2O_interS_C(&BHD, BHD.fl_g2_fft[0][1], g[0], BHD.u2_fft[0][1], damp * rhos[0], dg_new2);
           VecAXPY(dg_new, 1.0, dg_new2);
 
           Solve_NormalizationH2O_smallII (&BHD, g[1], r_HO, g[0], tH , dg_new2, work);

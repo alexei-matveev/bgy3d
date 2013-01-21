@@ -124,7 +124,7 @@ ProblemData bgy3d_problem_data (void)
 }
 
 
-State* bgy3d_state_make (const ProblemData *PD, int m)
+State* bgy3d_state_make (const ProblemData *PD)
 {
   /* Also initialize all pointers stored in State to NULL: */
   State *BHD = calloc (1, sizeof *BHD);
@@ -134,10 +134,6 @@ State* bgy3d_state_make (const ProblemData *PD, int m)
   PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
-
-  /* FIXME: all sites have the same weight: */
-  for (int i = 0; i < m; i++)
-    BHD->rhos[i] = PD->rho; /* 2 * PD->rho; */
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All

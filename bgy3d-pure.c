@@ -46,7 +46,7 @@ static void destroy_g2 (int m, Vec g[m][m])
 
 static State* initialize_state (const ProblemData *PD, int m)
 {
-  State *BHD = bgy3d_state_make (PD, m);
+  State *BHD = bgy3d_state_make (PD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
@@ -1024,6 +1024,12 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
    * Extract BGY3d specific things from supplied input:
    */
 
+  /* Site specific  density.  Computed as a solvent  density rho times
+     number of sites of that type in a solvent: */
+  real rhos[m];
+  for (int i = 0; i < m; i++)
+    rhos[i] = PD->rho;
+
   /* Mixing parameter: */
   const real a0 = PD->lambda;
 
@@ -1155,7 +1161,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 Compute_dg_inter (BHD,
                                   BHD->F[i][k], BHD->F_l[i][k], g[i][k],
                                   g[j][k],
-                                  BHD->u2_fft[i][k], BHD->rhos[k],
+                                  BHD->u2_fft[i][k], rhos[k],
                                   du_new2);
                 VecAXPY (du_new, 1.0, du_new2);
               }
@@ -1380,11 +1386,16 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       exit(1);
     }
 
-  BHD->rhos[0] = 2.*BHD->rhos[0];
-
   /*
    * Extract BGY3d specific things from supplied input:
    */
+
+  /* Site specific  density.  Computed as a solvent  density rho times
+     number of sites of that type in a solvent: */
+  real rhos[m];
+  for (int i = 0; i < m; i++)
+    rhos[i] = PD->rho;
+  rhos[0] = 2.0 * rhos[0];
 
   /* Mixing parameter: */
   const real a0 = PD->lambda;
@@ -1491,14 +1502,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[0][1],
-                            BHD->u2_fft[1][1], BHD->rhos[1],
+                            BHD->u2_fft[1][1], rhos[1],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][0],
-                            BHD->u2_fft[0][1], BHD->rhos[0],
+                            BHD->u2_fft[0][1], rhos[0],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
@@ -1533,14 +1544,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
-                            BHD->u2_fft[0][1], BHD->rhos[1],
+                            BHD->u2_fft[0][1], rhos[1],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][0], BHD->F_l[0][0], g[0][0],
                             g[0][0],
-                            BHD->u2_fft[0][0], BHD->rhos[0],
+                            BHD->u2_fft[0][0], rhos[0],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
@@ -1579,14 +1590,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
-                            BHD->u2_fft[0][1], BHD->rhos[0],
+                            BHD->u2_fft[0][1], rhos[0],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[1][1],
-                            BHD->u2_fft[1][1], BHD->rhos[1],
+                            BHD->u2_fft[1][1], rhos[1],
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
