@@ -10,6 +10,7 @@
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
 #include "bgy3d-vec.h"          /* bgy3d_vec_save, bgy3d_vec_load */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
+#include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "bgy3d-guile.h"
 
 
@@ -395,6 +396,24 @@ static SCM vec_ifft (SCM state, SCM y)
   return x;
 }
 
+static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
+{
+  State *BHD = to_state (state);
+  Vec Y_ = to_vec (Y);
+
+  double x_[1][3], y[1];
+  for (int i = 0; i < 3; i ++)
+    {
+      x_[0][i] = scm_to_double (scm_car (x));
+      x = scm_cdr (x);
+    }
+
+  bgy3d_fft_interp (BHD->dc, Y_, 1, x_, y);
+
+  /* FIXME: FFT in BGY3d code is unnormalized: */
+  return scm_from_double (y[0] * sqrt (BHD->PD->N3));
+}
+
 static SCM vec_set_random (SCM x)
 {
   VecSetRandom (to_vec (x), NULL);
@@ -474,6 +493,7 @@ static void vec_init_type (void)
   scm_c_define_gsubr ("vec-dot", 2, 0, 0, vec_dot);
   scm_c_define_gsubr ("vec-fft", 2, 0, 0, vec_fft);
   scm_c_define_gsubr ("vec-ifft", 2, 0, 0, vec_ifft);
+  scm_c_define_gsubr ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
 }
 
 static SCM guile_run_solvent (SCM alist)
