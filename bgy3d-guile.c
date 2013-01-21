@@ -251,13 +251,20 @@ static SCM vec_make (SCM state)
   return from_vec (vec);
 }
 
+static SCM vec_make_complex (SCM state)
+{
+  State *BHD = to_state (state);
+  Vec vec;
+  DACreateGlobalVector (BHD->dc, &vec);
+  return from_vec (vec);
+}
+
 static size_t state_free (SCM state)
 {
   State *BHD = to_state (state);
-  /* printf ("XXX: free %p\n", BHD); */
   /*
-    If bgy3d-state-destroy was called explicitly on this smob then the
-    real data is  already freed and the pointer must  have been set to
+    If state-destroy was called explicitly  on this smob then the real
+    data  is already  freed  and the  pointer  must have  been set  to
     NULL:
   */
   if (BHD)
@@ -271,7 +278,6 @@ static size_t state_free (SCM state)
 static size_t vec_free (SCM vec)
 {
   Vec c_vec = to_vec (vec);
-  /* printf ("XXX: vec_free %p\n", c_vec); */
   if (c_vec)
     VecDestroy (c_vec);
   return 0;
@@ -357,6 +363,45 @@ static SCM vec_ref (SCM vec, SCM ix)
   return scm_from_double (vals[0]);
 }
 
+static SCM vec_dot (SCM x, SCM y)
+{
+  double dot;
+  VecDot (to_vec (x), to_vec (y), &dot);
+
+  return scm_from_double (dot);
+}
+
+static SCM vec_fft (SCM state, SCM x)
+{
+  State *BHD = to_state (state);
+  SCM y = vec_make_complex (state);
+  Vec y_ = to_vec (y);
+
+  MatMult (BHD->fft_mat, to_vec (x), y_);
+  VecScale (y_, 1.0 / sqrt (BHD->PD->N3));
+
+  return y;
+}
+
+static SCM vec_ifft (SCM state, SCM y)
+{
+  State *BHD = to_state (state);
+  SCM x = vec_make (state);
+
+  Vec x_ = to_vec (x);
+  MatMultTranspose (BHD->fft_mat, to_vec (y), x_);
+  VecScale (x_, 1.0 / sqrt (BHD->PD->N3));
+
+  return x;
+}
+
+static SCM vec_set_random (SCM x)
+{
+  VecSetRandom (to_vec (x), NULL);
+
+  return x;
+}
+
 static int state_print (SCM state, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
@@ -404,8 +449,8 @@ static void state_init_type (void)
   scm_set_smob_print (state_tag, state_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  scm_c_define_gsubr ("bgy3d-state-make", 2, 0, 0, state_make);
-  scm_c_define_gsubr ("bgy3d-state-destroy", 1, 0, 0, state_destroy);
+  scm_c_define_gsubr ("state-make", 2, 0, 0, state_make);
+  scm_c_define_gsubr ("state-destroy", 1, 0, 0, state_destroy);
 }
 
 static void vec_init_type (void)
@@ -417,13 +462,18 @@ static void vec_init_type (void)
   scm_set_smob_print (vec_tag, vec_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  scm_c_define_gsubr ("bgy3d-vec-make", 1, 0, 0, vec_make);
-  scm_c_define_gsubr ("bgy3d-vec-destroy", 1, 0, 0, vec_destroy);
+  scm_c_define_gsubr ("vec-make", 1, 0, 0, vec_make);
+  scm_c_define_gsubr ("vec-make-complex", 1, 0, 0, vec_make_complex);
+  scm_c_define_gsubr ("vec-destroy", 1, 0, 0, vec_destroy);
 
-  scm_c_define_gsubr ("bgy3d-vec-save", 2, 0, 0, vec_save);
-  scm_c_define_gsubr ("bgy3d-vec-load", 1, 0, 0, vec_load);
-  scm_c_define_gsubr ("bgy3d-vec-length", 1, 0, 0, vec_length);
-  scm_c_define_gsubr ("bgy3d-vec-ref", 2, 0, 0, vec_ref);
+  scm_c_define_gsubr ("vec-save", 2, 0, 0, vec_save);
+  scm_c_define_gsubr ("vec-load", 1, 0, 0, vec_load);
+  scm_c_define_gsubr ("vec-length", 1, 0, 0, vec_length);
+  scm_c_define_gsubr ("vec-ref", 2, 0, 0, vec_ref);
+  scm_c_define_gsubr ("vec-set-random", 1, 0, 0, vec_set_random);
+  scm_c_define_gsubr ("vec-dot", 2, 0, 0, vec_dot);
+  scm_c_define_gsubr ("vec-fft", 2, 0, 0, vec_fft);
+  scm_c_define_gsubr ("vec-ifft", 2, 0, 0, vec_ifft);
 }
 
 static SCM guile_run_solvent (SCM alist)

@@ -10,8 +10,17 @@
   #:use-module (ice-9 getopt-long)
   #:export (new-main
             old-main
-            bgy3d-state-make
-            bgy3d-state-destroy
+            state-make
+            state-destroy
+            vec-make
+            vec-make-complex
+            vec-destroy
+            vec-save
+            vec-set-random
+            vec-dot
+            vec-fft
+            vec-ifft
+            vec-print
             bgy3d-run-solvent
             bgy3d-run-solute
             bgy3d-run
@@ -30,15 +39,21 @@
 ;;;   bgy3d-run-solvent
 ;;;   bgy3d-run-solute
 ;;;   bgy3d-pot-destroy
-;;;   bgy3d-vec-destroy
-;;;   bgy3d-vec-save
-;;;   bgy3d-vec-load
-;;;   bgy3d-vec-length
-;;;   bgy3d-vec-ref
+;;;   vec-make
+;;;   vec-make-complex
+;;;   vec-destroy
+;;;   vec-save
+;;;   vec-load
+;;;   vec-length
+;;;   vec-ref
+;;;   vec-set-random
+;;;   vec-dot
+;;;   vec-fft
+;;;   vec-ifft
 ;;;   bgy3d-rank
 ;;;   bgy3d-size
-;;;   bgy3d-state-make
-;;;   bgy3d-state-destroy
+;;;   state-make
+;;;   state-destroy
 ;;;
 ;;; and posissibly more, depending on the compilation options.
 ;;;
@@ -163,14 +178,14 @@
 
 ;;;
 ;;; Will work inefficiently with  distributed vectors.  The problem is
-;;; bgy3d-vec-ref is  collective.  The Petsc  primitive VecGetValues()
-;;; only works for local section.
+;;; vec-ref  is collective.  The  Petsc primitive  VecGetValues() only
+;;; works for local section.
 ;;;
 (define (vec-fold kons knil vec)
   "A (left) fold of a (Petsc) vector.  E.g. (vec-fold + 0.0 vec)
 computes the sum of all vector elements."
-  (let ((len (bgy3d-vec-length vec))
-        (vec (lambda (i) (bgy3d-vec-ref vec i))))
+  (let ((len (vec-length vec))
+        (vec (lambda (i) (vec-ref vec i))))
     (let loop ((knil knil)
                (i 0))
       (if (< i len)
@@ -255,7 +270,7 @@ computes the sum of all vector elements."
              (vec-id 0))
     (if (not (null? vecs))
         (let* ((vec (first vecs))
-               (len (bgy3d-vec-length vec))
+               (len (vec-length vec))
                (n (cubic-root len))
                (L (or (assq-ref settings 'L) 10.0))
                (L (angstrom->bohr L))   ; punch file is in AU
@@ -339,7 +354,7 @@ computes the sum of all vector elements."
       ;;
       ;; Save g1-files to disk:
       ;;
-      (map bgy3d-vec-save *g1-file-names* g1)
+      (map vec-save *g1-file-names* g1)
       ;;
       ;; Use g1 vectors to produce a *.pun file for visualization:
       ;;
@@ -351,7 +366,7 @@ computes the sum of all vector elements."
       ;;
       ;; Dont forget to destroy them after use:
       ;;
-      (map bgy3d-vec-destroy g1)
+      (map vec-destroy g1)
       ve)))       ; return iterator, caller must bgy3d-pot-destroy it!
 
 ;;;
@@ -428,8 +443,8 @@ computes the sum of all vector elements."
         (let-values (((g1 ve) (bgy3d-run-solute (find-solute name)
                                                 '()))) ; Use defaults and Petsc env
           (bgy3d-pot-destroy ve)                       ; not yet used
-          (map bgy3d-vec-save *g1-file-names* g1)
-          (map bgy3d-vec-destroy g1)))) ; dont forget to destroy them
+          (map vec-save *g1-file-names* g1)
+          (map vec-destroy g1)))) ; dont forget to destroy them
      ;;
      ;; Fall through to the new variant:
      ;;
@@ -475,11 +490,11 @@ computes the sum of all vector elements."
                     ;; solute in a row files will get overwritten:
                     ;;
                     (if save-binary
-                        (map bgy3d-vec-save *g1-file-names* g1))
+                        (map vec-save *g1-file-names* g1))
                     ;;
                     ;; Dont forget to destroy them:
                     ;;
-                    (map bgy3d-vec-destroy g1)))
+                    (map vec-destroy g1)))
                 solutes)))
         ;;
         ("dump"
@@ -487,7 +502,7 @@ computes the sum of all vector elements."
          ;; Dump each Vec from a *.bin file to tty:
          ;;
          (for-each (lambda (path)
-                     (let ((v (bgy3d-vec-load path)))
+                     (let ((v (vec-load path)))
                        (vec-print v)
-                       (bgy3d-vec-destroy v)))
+                       (vec-destroy v)))
                    args))))))
