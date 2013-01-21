@@ -48,6 +48,9 @@ static State* initialize_state (const ProblemData *PD, int m)
 {
   State *BHD = bgy3d_state_make (PD);
 
+  /* Code used to be verbose: */
+  bgy3d_state_print (BHD);
+
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
 

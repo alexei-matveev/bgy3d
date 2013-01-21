@@ -131,10 +131,6 @@ State* bgy3d_state_make (const ProblemData *PD)
 
   BHD->PD = PD;
 
-  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
-  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
-  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
-
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
      other arguments are intent(out): */
@@ -163,7 +159,6 @@ State* bgy3d_state_make (const ProblemData *PD)
 
   return BHD;
 }
-
 
 void bgy3d_state_destroy (State *BHD)
 {
@@ -195,6 +190,14 @@ void bgy3d_state_destroy (State *BHD)
   free (BHD);
 }
 
+/* Code used to be verbose: */
+void bgy3d_state_print (const State *BHD)
+{
+  const ProblemData *PD = BHD->PD;
+  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "h = %f\n", PD->h[0]);
+  PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
+}
 
 real Lennard_Jones (real r, real epsilon, real sigma)
 {

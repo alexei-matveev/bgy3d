@@ -229,6 +229,7 @@ typedef struct State
 
 State* bgy3d_state_make (const ProblemData *PD);
 void bgy3d_state_destroy (State *BHD);
+void bgy3d_state_print (const State *BHD);
 
 void bgy3d_comm_allreduce (void *buf, int count, MPI_Datatype type);
 
