@@ -371,6 +371,19 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
   VecDestroy (kl_fft);
 }
 
+/* Dipole of the cores of a single specie: */
+static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
+{
+  for (int j = 0; j < 3; j++)
+    d[j] = 0.0;
+
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < 3; j++)
+      d[j] += sites[i].charge * sites[i].x[j];
+
+  *d_norm = sqrt (SQR (d[0]) + SQR (d[1]) + SQR (d[2]));
+}
+
 static real ComputeCharge (const ProblemData *PD,
                            int m, const Site solvent[m],
                            const Vec g[m],
@@ -1002,6 +1015,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     /* Optionally, return the iterator over the solvent field: */
     if (v)
       *v = bgy3d_pot_create (BHD->da, BHD->PD, ve);
+
+    /* Also compute dipole moment: */
+    real d[3], d_norm;
+    dipole (n, solute, d, &d_norm);
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "|<x|ρ_N>| = |(%f, %f, %f)| = %f (solute nuclear dipole moment)\n",
+                 d[0], d[1], d[2], d_norm);
 
     /*
       Integration of:
