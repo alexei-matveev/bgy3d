@@ -459,7 +459,8 @@ void bgy3d_fft_interp (const Mat A,
           FOR_DIM
             K[dim] = KFREQ (k[dim], N[dim]);
 
-          const complex yk = Y_[k[0]][k[1]][k[2]];
+          /* Note the sequence, 2, 1, 0: */
+          const complex yk = Y_[k[2]][k[1]][k[0]];
 
           for (int p = 0; p < np; p++)
             {
