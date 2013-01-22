@@ -11,7 +11,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-poisson.h"      /* laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
-#include "bgy3d-fftw.c"         /* bgy3d_fft_interp() */
+#include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "bgy3d-impure.h"
 
 #ifndef L_BOUNDARY_MG
