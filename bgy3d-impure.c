@@ -375,12 +375,12 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 /* Dipole of the cores of a single specie: */
 static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
 {
-  for (int j = 0; j < 3; j++)
-    d[j] = 0.0;
+  FOR_DIM
+    d[dim] = 0.0;
 
   for (int i = 0; i < n; i++)
-    for (int j = 0; j < 3; j++)
-      d[j] += sites[i].charge * sites[i].x[j];
+    FOR_DIM
+      d[dim] += sites[i].charge * sites[i].x[dim];
 
   *d_norm = sqrt (SQR (d[0]) + SQR (d[1]) + SQR (d[2]));
 }
