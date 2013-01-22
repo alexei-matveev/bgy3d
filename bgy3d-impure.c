@@ -11,6 +11,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-poisson.h"      /* laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
+#include "bgy3d-fftw.c"         /* bgy3d_fft_interp() */
 #include "bgy3d-impure.h"
 
 #ifndef L_BOUNDARY_MG
@@ -478,6 +479,46 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
 }
 
+/* Side effects: uses BHD->fft_scratch! */
+static void field_at_sites (State *BHD,
+                            int n, const Site sites[n], Vec v,
+                            real vs[n]) /* intent(out) */
+{
+  const real *h = BHD->PD->h;
+  const real off = BHD->PD->interval[0];
+
+  /* Translate site coordinates into real grid coordinates where
+     integer values correspond to the grid nodes: */
+  real x[n][3];
+  for (int i = 0; i < n; i++)
+    FOR_DIM
+      x[i][dim] = (sites[i].x[dim] - off) / h[dim];
+
+  /* Fourier coefficients of the potential: */
+  MatMult (BHD->fft_mat, v, BHD->fft_scratch);
+
+  /* Trigonometric interpolation: */
+  bgy3d_fft_interp (BHD->fft_mat, BHD->fft_scratch, n, x, vs);
+}
+
+static void print_table (int n, const Site sites[n], const real vs[n])
+{
+  /* Average  over   all  sites,  has   no  real  meaning.   Only  for
+     presentation purposes: */
+  real v_avg = 0.0;
+  for (int i = 0; i < n; i++)
+    v_avg += vs[i];
+  v_avg /= n;
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "#\t site\t x        \t y        \t z        \t q        \t δv        \t v0\n");
+  for (int i = 0; i < n; i ++)
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "%d\t%5s\t% f\t% f\t% f\t% f\t% f\t% f\n",
+                 i + 1, sites[i].name,
+                 sites[i].x[0], sites[i].x[1],  sites[i].x[2],
+                 sites[i].charge, vs[i] - v_avg, v_avg);
+}
 
 /*
   This function is the main entry  point for the BGY3dM equation for a
@@ -1027,36 +1068,58 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     /*
       Integration of:
 
-      1. Solvent charge density with long-range solute electrostatic
-      field.
+      1.  Interaction  energy of solute  point cores with  the solvent
+      electrostatic field.
 
       2. Solvent electrostatic field with diffuse solute electron
       density.
 
+      3. Solvent charge density with long-range solute electrostatic
+      field.
+
       Vec uc and uc_rho  are returned by bgy3d_solute_field().  Vec ve
       and ve_rho are obtained from bgy3d_solvent_field().
     */
-    real val1, val2;
-    const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
 
-    /* Dot-product is an integral over space (up to a factor): */
-    VecDot (uc, ve_rho, &val1);
-    VecDot (ve, uc_rho, &val2);
+    /* 1. */
+    real val1;
+    {
+      real vs[n];
+      field_at_sites (BHD, n, solute, ve, vs);
 
-    VecDestroy (ve_rho);
-    VecDestroy (uc_rho);
+      val1 = 0.0;
+      for (int i = 0; i < n; i++)
+        val1 += solute[i].charge * vs[i];
+
+      print_table (n, solute, vs);
+    }
+
+    /* 2 and 3. */
+    real val2, val3;
+    {
+      /* Dot-product is an integral over space (up to a factor): */
+      const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
+      VecDot (ve, uc_rho, &val2);
+      VecDot (uc, ve_rho, &val3);
+      val2 *= h3;
+      val3 *= h3;
+    }
     VecDestroy (ve);            /* yes, we do! */
+    VecDestroy (ve_rho);
 
     PetscPrintf (PETSC_COMM_WORLD,
-                 "<ρ_v|U_u> = %lf "
-                 "(solvent charge density with long-range electrostatic field of solute)\n",
-                 val1 * h3);
+                 "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
+                 val1);
     PetscPrintf (PETSC_COMM_WORLD,
                  "<U_v|ρ_u> = %lf "
                  "(solvent electrostatic field with diffuse charge density of solute)\n",
-                 val2 * h3);
+                 val2);
     PetscPrintf (PETSC_COMM_WORLD,
-                 "     diff = % lf\n", (val1 - val2) * h3);
+                 "<ρ_v|U_u> = %lf "
+                 "(solvent charge density with long-range electrostatic field of solute)\n",
+                 val3);
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "     diff = % lf\n", val3 - val2);
   }
 
   /* Clean up and exit ... */
@@ -1084,6 +1147,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (work);
   VecDestroy (t_vec);
   VecDestroy (uc);
+  VecDestroy (uc_rho);
 
   bgy3d_state_destroy (BHD);
 }
