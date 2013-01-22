@@ -479,6 +479,10 @@ void bgy3d_fft_interp (const Mat A,
 
   DAVecRestoreArray (fft->dc, Y, &Y_);
 
+  /* Each  worker summed  only over  its own  range of  K[],  sum over
+     workers: */
+  bgy3d_comm_allreduce (yc, 2 * np, MPI_DOUBLE);
+
   /*
     FIXME:  Discard imaginary part  which should  be zero  anyway when
     interpolating  real   data.   Also   we  *do*  normalize   as  for
@@ -491,8 +495,4 @@ void bgy3d_fft_interp (const Mat A,
       assert (fabs (cimag (yc[p])) < 1.0e-8);
       y[p] = yc[p] / (N[0] * N[1] * N[2]);
     }
-
-  /* Each  worker summed  only over  its own  range of  K[],  sum over
-     workers: */
-  bgy3d_comm_allreduce (y, np, MPI_DOUBLE);
 }
