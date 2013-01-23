@@ -464,7 +464,7 @@ void bgy3d_fft_interp (const Mat A,
                  real numbers: */
               complex wkx = 1.0;
               FOR_DIM
-                if (2 * K[dim] != N[dim])
+                if ((N[dim] - 2 * K[dim]) % N[dim] != 0) /* k != N - k mod N */
                   wkx *= cexp (2 * M_PI * K[dim] * x[p][dim] / N[dim] * I);
                 else
                   wkx *= cos (2 * M_PI * K[dim] * x[p][dim] / N[dim]);
