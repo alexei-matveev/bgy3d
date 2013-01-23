@@ -44,61 +44,61 @@ static void shape (const FFT *fft, int *NI, int *NJ, int *NK)
 static const int debug = 0;
 
 /* doubl := Vec, for forward FFT */
-static void unpack_real (DA da, Vec g, fftw_complex *restrict doubl)
+static void unpack_real (FFT *fft, Vec g, fftw_complex *restrict doubl)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_;
-    DAVecGetArray (da, g, &g_);
+    double ***g_;
+    DAVecGetArray (fft->da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i]; /* im <- 0 */
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
 
 /* Vec := doubl, for inverse FFT */
-static void pack_real (DA da, Vec g, const fftw_complex *restrict doubl)
+static void pack_real (FFT *fft, Vec g, const fftw_complex *restrict doubl)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_;
-    DAVecGetArray (da, g, &g_);
+    double ***g_;
+    DAVecGetArray (fft->da, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i]; /* drops im */
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
 
 /* Vec := cmplx, for forward FFT */
-static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
+static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
@@ -106,24 +106,24 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
   /* loop over local portion of grid */
   {
     complex ***g_;
-    DAVecGetArray (da, g, &g_);
+    DAVecGetArray (fft->dc, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
 
 /* cmplx := Vec, for inverse FFT */
-static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
+static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
@@ -131,14 +131,14 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
   /* loop over local portion of grid */
   {
     complex ***g_;
-    DAVecGetArray (da, g, &g_);
+    DAVecGetArray (fft->dc, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < ni; i++)
           (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
@@ -159,13 +159,13 @@ static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
   FFT *fft = context (A);
 
   /* Fill complex array with real data from x: */
-  unpack_real (fft->da, x, fft->doubl);
+  unpack_real (fft, x, fft->doubl);
 
   /* forward fft, in place with work array: */
   fftwnd_mpi (fft->fw, 1, fft->doubl, fft->cmplx, FFTW_NORMAL_ORDER);
 
   /* Pack complex output into complex Vec y: */
-  pack_cmplx (fft->dc, y, fft->doubl);
+  pack_cmplx (fft, y, fft->doubl);
 
   return 0;
 }
@@ -179,13 +179,13 @@ static PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
   FFT *fft = context (A);
 
   /* Fill complex array with complex data from x: */
-  unpack_cmplx (fft->dc, x, fft->doubl);
+  unpack_cmplx (fft, x, fft->doubl);
 
   /* inverse fft, in place with work array: */
   fftwnd_mpi (fft->bw, 1, fft->doubl, fft->cmplx, FFTW_NORMAL_ORDER);
 
   /* Pack real output from complex array into real Vec y: */
-  pack_real (fft->da, y, fft->doubl);
+  pack_real (fft, y, fft->doubl);
 
   return 0;
 }
