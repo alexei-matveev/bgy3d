@@ -28,6 +28,18 @@ typedef struct {
   fftw_complex *cmplx;
 } FFT;
 
+/*
+  Always  use  real  array   descriptor  to  get  global  grid  shape.
+  Dimensions  of complex  arrays  maybe smaller.  Shape  of the  local
+  section is yet another thing.
+*/
+static void shape (const FFT *fft, int *NI, int *NJ, int *NK)
+{
+  int dim;
+  DAGetInfo (fft->da, &dim, NI, NJ, NK,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  assert (dim == 3);
+}
 
 static const int debug = 0;
 
@@ -415,26 +427,10 @@ void bgy3d_fft_interp (const Mat A,
                        double y[np])            /* intent(out) */
 {
   const FFT *fft = context (A);
-  /*
-    Get grid  dimensions N[3]  with some sanity  checks.  Why,  in the
-    hame of the  PETSC God, is there no way to  inquire this data from
-    the Vec itself?
-  */
-  int N[3];
-  {
-    int dim, dof;
-    DAPeriodicType wrap;
-    DAGetInfo (fft->dc, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, NULL, &wrap, NULL);
 
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 2);               /* degrees of freedom */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
+  /* Get true grid shape N[3]: */
+  int N[3];
+  shape (fft, &N[0], &N[1], &N[2]);
 
   /* Init  complex accumulator.  We  will verify  that imaginary  part
      vanishes: */
