@@ -13,11 +13,6 @@
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 #include <complex.h>            /* after fftw.h */
 
-#ifndef c_re
-#define c_re(c) ((c)[0])
-#define c_im(c) ((c)[1])
-#endif
-
 typedef struct {
   /* Array  descriptors for real  and complex  vectors that  share the
      distribution pattern with FFTW-MPI: */
@@ -150,11 +145,11 @@ static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
 
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
-  fftw_complex (*const view)[nk][nj][nip] = (fftw_complex (*)[nk][nj][nip]) cmplx;
+  complex (*const view)[nk][nj][nip] = (complex (*)[nk][nj][nip]) cmplx;
 
   /* loop over local portion of grid */
   {
-    struct {double re, im;} ***g_;
+    complex ***g_;
 
     DAVecGetArray (fft->dc, g, &g_);
 
@@ -162,10 +157,8 @@ static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < nip; i++)
-          {
-            g_[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
-            g_[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
-          }
+          g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
+
     DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
@@ -198,21 +191,19 @@ static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
 
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
-  fftw_complex (*const view)[nk][nj][nip] = (fftw_complex (*)[nk][nj][nip]) cmplx;
+  complex (*const view)[nk][nj][nip] = (complex (*)[nk][nj][nip]) cmplx;
 
   /* loop over local portion of grid */
   {
-    struct {double re, im;} ***g_;
+    complex ***g_;
 
     DAVecGetArray (fft->dc, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
         for (int i = 0; i < nip; i++)
-          {
-            c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].re;
-            c_im ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].im;
-          }
+          (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
+
     DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
