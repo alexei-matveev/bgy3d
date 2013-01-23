@@ -5,10 +5,12 @@
  * bgy3d_fft_test() for an example use.
  */
 
+#include "bgy3d.h"              /* KFREQ(), M_PI */
 #include <assert.h>
 #include <rfftw_mpi.h>
 #include "petscda.h"            /* DA, Vec */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
+#include <complex.h>            /* after fftw.h */
 
 #ifndef c_re
 #define c_re(c) ((c)[0])
@@ -32,21 +34,31 @@ typedef struct {
   double *cmplx;                /* just a name for a work array */
 } FFT;
 
+/*
+  Always  use  real  array   descriptor  to  get  global  grid  shape.
+  Dimensions  of complex  arrays  maybe smaller.  Shape  of the  local
+  section is yet another thing.
+*/
+static void shape (const FFT *fft, int *NI, int *NJ, int *NK)
+{
+  int dim;
+  DAGetInfo (fft->da, &dim, NI, NJ, NK,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  assert (dim == 3);
+}
 
 static const int debug = 0;
 
 /* doubl := Vec, for forward FFT */
-static void unpack_real (DA da, Vec g, double *restrict doubl)
+static void unpack_real (FFT *fft, Vec g, double *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  /* Get the official (full) dimension of the array: */
-  DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
-  assert (dof == 1);
+  /* Get the official (full) dimension of the grid: */
+  shape (fft, &NI, &NJ, &NK);
 
   /* Padded (physically the last) dimension. */
   const int nip = 2 * (NI / 2 + 1);
@@ -60,8 +72,8 @@ static void unpack_real (DA da, Vec g, double *restrict doubl)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_;
-    DAVecGetArray (da, g, &g_);
+    double ***g_;
+    DAVecGetArray (fft->da, g, &g_);
 
     /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
@@ -69,23 +81,21 @@ static void unpack_real (DA da, Vec g, double *restrict doubl)
         for (int i = 0; i < ni; i++)
           (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
 
 /* Vec := doubl, for inverse FFT */
-static void pack_real (DA da, Vec g, const double *restrict doubl)
+static void pack_real (FFT *fft, Vec g, const double *restrict doubl)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  /* Get the official (full) dimension of the array: */
-  DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
-  assert (dof == 1);
+  /* Get the official (full) dimension of the grid: */
+  shape (fft, &NI, &NJ, &NK);
 
   /* Padded (physically the last) dimension. */
   const int nip = 2 * (NI / 2 + 1);
@@ -99,8 +109,8 @@ static void pack_real (DA da, Vec g, const double *restrict doubl)
 
   /* loop over local portion of grid */
   {
-    PetscScalar ***g_;
-    DAVecGetArray (da, g, &g_);
+    double ***g_;
+    DAVecGetArray (fft->da, g, &g_);
 
     /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
@@ -108,36 +118,34 @@ static void pack_real (DA da, Vec g, const double *restrict doubl)
         for (int i = 0; i < ni; i++)
           g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
 
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
 
 /* Vec := cmplx, for forward FFT */
-static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
+static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  /* Get the official (full) dimension of the array: */
-  DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
-  assert (dof == 2);
+  /* Get the official (full) dimension of the grid: */
+  shape (fft, &NI, &NJ, &NK);
+
+  /* Padded (physically the last) dimension: */
+  const int nip = NI / 2 + 1;
+  if (debug)
+    printf ("pack_cmplx: shape = %d %d %d\n", nk, nj, nip);
 
   /*
     Otherwise  we  cannot  convert  between complex  and  half-complex
     locally (this is probably also the  reason why there is no real to
     half-complex transforms in FFTW3 MPI):
   */
-  assert (ni == NI);
+  assert (ni == nip);
   assert (i0 == 0);
-
-  /* Padded (physically the last) dimension: */
-  const int nip = NI / 2 + 1;
-  if (debug)
-    printf ("pack_cmplx: shape = %d %d %d\n", nk, nj, nip);
 
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
@@ -145,9 +153,9 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_;
+    struct {double re, im;} ***g_;
 
-    DAVecGetArray (da, g, &g_);
+    DAVecGetArray (fft->dc, g, &g_);
 
     /* loop over local portion of grid */
     for (int k = 0; k < nk; k++)
@@ -157,31 +165,21 @@ static void pack_cmplx (DA da, Vec g, /* const */ fftw_complex *cmplx)
             g_[k0 + k][j0 + j][i0 + i].re = c_re ((*view)[k][j][i]);
             g_[k0 + k][j0 + j][i0 + i].im = c_im ((*view)[k][j][i]);
           }
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
 
 /* cmplx := Vec, for inverse FFT */
-static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
+static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
 {
-  int i0, j0, k0, ni, nj, nk, NI, NJ, NK, dof;
+  int i0, j0, k0, ni, nj, nk, NI, NJ, NK;
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  /* Get the official (full) dimension of the array: */
-  DAGetInfo (da, NULL, &NI, &NJ, &NK,
-             NULL, NULL, NULL, &dof, NULL, NULL, NULL);
-  assert (dof == 2);
-
-  /*
-    Otherwise  we  cannot  convert  between complex  and  half-complex
-    locally (this is probably also the  reason why there is no real to
-    half-complex transforms in FFTW3 MPI):
-  */
-  assert (ni == NI);
-  assert (i0 == 0);
+  /* Get the official (full) dimension of the grid: */
+  shape (fft, &NI, &NJ, &NK);
 
   /* Padded (physically the last) dimension: */
   const int nip = NI / 2 + 1;
@@ -189,15 +187,23 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
     printf ("unpack_cmplx: shape = %d %d %d\n", nk, nj, nip);
   assert (ni < 2 * nip);
 
+  /*
+    Otherwise  we  cannot  convert  between complex  and  half-complex
+    locally (this is probably also the  reason why there is no real to
+    half-complex transforms in FFTW3 MPI):
+  */
+  assert (ni == nip);
+  assert (i0 == 0);
+
   /* The view  of local  FFT complex  storage as a  3d array  with the
      proper highest dimension: */
   fftw_complex (*const view)[nk][nj][nip] = (fftw_complex (*)[nk][nj][nip]) cmplx;
 
   /* loop over local portion of grid */
   {
-    struct {PetscScalar re, im;} ***g_;
+    struct {double re, im;} ***g_;
 
-    DAVecGetArray (da, g, &g_);
+    DAVecGetArray (fft->dc, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
@@ -206,7 +212,7 @@ static void unpack_cmplx (DA da, Vec g, fftw_complex *cmplx)
             c_re ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].re;
             c_im ((*view)[k][j][i]) = g_[k0 + k][j0 + j][i0 + i].im;
           }
-    DAVecRestoreArray (da, g, &g_);
+    DAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
@@ -227,13 +233,13 @@ static PetscErrorCode mat_mult_fft (Mat A, Vec x, Vec y)
   FFT *fft = context (A);
 
   /* Fill real array with real data from x: */
-  unpack_real (fft->da, x, fft->doubl);
+  unpack_real (fft, x, fft->doubl);
 
   /* forward fft, in place with work array: */
   rfftwnd_mpi (fft->fw, 1, fft->doubl, fft->cmplx, FFTW_NORMAL_ORDER);
 
   /* Pack complex output into complex Vec y: */
-  pack_cmplx (fft->dc, y, (fftw_complex*) fft->doubl);
+  pack_cmplx (fft, y, (fftw_complex*) fft->doubl);
 
   return 0;
 }
@@ -247,13 +253,13 @@ static PetscErrorCode mat_mult_transpose_fft (Mat A, Vec x, Vec y)
   FFT *fft = context (A);
 
   /* Fill complex array with halfcomplex data from x: */
-  unpack_cmplx (fft->dc, x, (fftw_complex*) fft->doubl);
+  unpack_cmplx (fft, x, (fftw_complex*) fft->doubl);
 
   /* inverse fft, in place with work array: */
   rfftwnd_mpi (fft->bw, 1, fft->doubl, fft->cmplx, FFTW_NORMAL_ORDER);
 
   /* Pack real output into Vec y: */
-  pack_real (fft->da, y, fft->doubl);
+  pack_real (fft, y, fft->doubl);
 
   return 0;
 }
@@ -488,4 +494,91 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 
   *da = fft->da;
   *dc = fft->dc;
+}
+
+
+/*
+  Given the FFT transform Vec  Y of some equally-spaced grid sample of
+  a real-valued function y(x), compute the values of y(x) at arbitrary
+  given  points x[][]  by trigonometric  interpolation. Note  that the
+  scale of  x here is such  that the components range  between 0.0 and
+  the respective N[] within  the unit cell.  Extrapolation outside the
+  cell is periodic by the nature of trigonometric interpolation.
+
+  Note that "upscaling"  to a finer but regular grid  can be done more
+  efficiently.
+*/
+void bgy3d_fft_interp (const Mat A,
+                       const Vec Y, /* complex, intent(in) */
+                       int np, double x[np][3], /* intent(in) */
+                       double y[np])            /* intent(out) */
+{
+  const FFT *fft = context (A);
+
+  /* Get true grid shape N[3]: */
+  int N[3];
+  shape (fft, &N[0], &N[1], &N[2]);
+
+  /* Init    real   accumulator.    Imaginary    part   vanishes    by
+     construction: */
+  for (int p = 0; p < np; p++)
+    y[p] = 0.0;
+
+  /* loop over local portion of grid */
+  int c[3], n[3];             /* corner and the size of the section */
+  DAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
+
+  complex ***Y_;
+  DAVecGetArray (fft->dc, Y, &Y_);
+
+  int k[3];
+  for (k[2] = c[2]; k[2] < c[2] + n[2]; k[2]++)
+    for (k[1] = c[1]; k[1] < c[1] + n[1]; k[1]++)
+      for (k[0] = c[0]; k[0] < c[0] + n[0]; k[0]++)
+        {
+          /* Take negative frequencies where k > N/2: */
+          int K[3];
+          FOR_DIM
+            K[dim] = KFREQ (k[dim], N[dim]);
+
+          /* Note the sequence, 2, 1, 0: */
+          const complex yk = Y_[k[2]][k[1]][k[0]];
+
+          for (int p = 0; p < np; p++)
+            {
+              /* Coordinates  x[p][]  are  fractional, represented  by
+                 real numbers: */
+              complex wkx = 1.0;
+              FOR_DIM
+                if ((N[dim] - 2 * K[dim]) % N[dim] != 0) /* k != N - k mod N */
+                  wkx *= cexp (2 * M_PI * K[dim] * x[p][dim] / N[dim] * I);
+                else
+                  wkx *= cos (2 * M_PI * K[dim] * x[p][dim] / N[dim]);
+
+              /* Avoid double counting: */
+              if ((N[0] - 2 * K[0]) % N[0] == 0) /* k == N - k mod N */
+                wkx /= 2;
+
+              /*
+                As  only (roughly)  a half  of complex  amplitudes are
+                stored, add two terms for  +K and -K. FIXME: This term
+                is  real  by  construction  maybe use  that  to  avoid
+                complex arithmetics?
+              */
+              y[p] += yk * wkx + conj (yk * wkx);
+            }
+        }
+  DAVecRestoreArray (fft->dc, Y, &Y_);
+
+  /* Each  worker summed  only over  its own  range of  K[],  sum over
+     workers: */
+  bgy3d_comm_allreduce (y, np, MPI_DOUBLE);
+
+  /*
+    FIXME:  *do*  normalize  as  for  interpolation.   This  does  not
+    correspond  to the  inverse FFT  as implemented  by FFTW  which is
+    unnormalized!
+  */
+  for (int p = 0; p < np; p++)
+    y[p] /= (N[0] * N[1] * N[2]);
 }
