@@ -480,8 +480,7 @@ static double pure sinc (double x)
 static void omega (const ProblemData *PD, const DA dc,
                    const int d, Vec x_fft[d], /* intent(in) */
                    const real rab,
-                   Vec y_fft[d],       /* intent(out) */
-                   const real sinc0)
+                   Vec y_fft[d]) /* intent(out) */
 {
   int x[3], n[3], i[3];
 
@@ -515,13 +514,7 @@ static void omega (const ProblemData *PD, const DA dc,
           const real kr = (2.0 * M_PI * rab / L) * sqrt (k2);
 
           /* Compute ω(k): */
-          real sinc_kr;
-          if (unlikely (kr == 0.0))
-            sinc_kr = sinc0; /* FIXME: sinc(0) = 1, but see call sites */
-          else
-            sinc_kr = sinc (kr);
-
-          const real wk = h3 * sinc_kr;
+          const real wk = h3 * sinc (kr);
 
           /* Set y(k) = wk * x(k): */
           for (int p = 0; p < d; p++)
@@ -575,7 +568,7 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
 
   /* Set n(k)  := ω(k) *  g(k), put result  into Vec work.   Pass both
      gac_fft and work as arrays of length 1 to omega(): */
-  omega (BHD->PD, BHD->dc, 1, &gac_fft, rbc, &work, 1.0);
+  omega (BHD->PD, BHD->dc, 1, &gac_fft, rbc, &work);
 
   /* Inverse FFT, n(k) -> n(x): */
   MatMultTranspose (BHD->fft_mat, work, nab);
@@ -678,7 +671,7 @@ static void Compute_dg_intra (State *BHD,
   */
   FOR_DIM
     set0 (fg2_fft[dim]);
-  omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft, 1.0);
+  omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft);
 
   /* int(..)/nab */
   /* Laplace^-1 * divergence */
