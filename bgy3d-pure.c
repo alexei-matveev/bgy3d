@@ -274,26 +274,20 @@ static void pair (State *BHD,
 
             r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-            /* Lennard-Jones */
-            u_ini_[i[2]][i[1]][i[0]] +=
-              damp_LJ * beta * Lennard_Jones (r_s, epsilon, sigma);
+            /* Lennard-Jones  and  Coulomb  short.  Note the  beta  as
+               factor: */
+            u_ini_[i[2]][i[1]][i[0]] += beta *
+              (damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
+               damp * Coulomb_short (r_s, q2));
 
-            /* Coulomb short */
-            u_ini_[i[2]][i[1]][i[0]] +=
-              damp * beta * Coulomb_short (r_s, q2);
-
+            /* Lennard-Jones and Coulomb short. No beta as factor: */
             FOR_DIM
-              {
-                /* Lennard-Jones */
-                f_short_[dim][i[2]][i[1]][i[0]] +=
-                  damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma);
+              f_short_[dim][i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
+                damp * Coulomb_short_grad (r_s, r[dim], q2);
 
-                /* Coulomb short */
-                f_short_[dim][i[2]][i[1]][i[0]] +=
-                  damp * Coulomb_short_grad (r_s, r[dim], q2);
-              }
-
-            /* deterministic correction */
+            /* Deterministic   correction.   FIXME:   assignment,  not
+               increment here as a sum over cells would imply, why?*/
             c2_[i[2]][i[1]][i[0]] =
               exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
           }
@@ -661,7 +655,12 @@ static void Compute_dg_intra (State *BHD,
     Apply omega()  in-place, note argument  aliasing.  FIXME: pretends
     that sinc(0) ==  0, so the original code. Is  it possible to claim
     that  the k  = 0  component of  weighted forces  vanishes? Because
-    then, formally, zero or one would not make a difference here:
+    then, formally, zero or one would not make a difference here.
+
+    At least in HCl runs  the average of the short-range fac[] forces,
+    which is the same as the  k = 0 component of its Fourier transform
+    does  not vanish  for some  reason.  The  k =  0 component  of the
+    long-range forces fac_l[] is zero.
   */
   omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft, 0.0);
 
