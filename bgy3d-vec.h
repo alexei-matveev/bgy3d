@@ -1,5 +1,8 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 
+/* FIXME: any better way? */
+#include <complex.h>
+
 real bgy3d_vec_mix (Vec dg, Vec dg_new, real a, Vec work);
 
 void bgy3d_vec_save (const char file[], const Vec vec);
@@ -67,4 +70,31 @@ static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Ve
   VecRestoreArray (xs, &xs_);
   VecRestoreArray (ys, &ys_);
   VecRestoreArray (zs, &zs_);
+}
+
+/* zs = map (f, xs, ys).   Should also work with aliased arguments for
+   in-place transform: */
+static inline void bgy3d_vec_fft_map2 (Vec z, complex (*f)(complex x, complex y), Vec x, Vec y)
+{
+  real *x_, *y_, *z_;
+
+  VecGetArray (x, &x_);
+  VecGetArray (y, &y_);
+  VecGetArray (z, &z_);
+
+  const int n = vec_local_size (x);
+  assert (vec_local_size (y) == n);
+  assert (vec_local_size (z) == n);
+  assert (n % 2 == 0);
+
+  complex *xs_ = (complex*) x_;
+  complex *ys_ = (complex*) y_;
+  complex *zs_ = (complex*) z_;
+
+  for (int i = 0; i < n / 2; i++)
+    zs_[i] = f (xs_[i], ys_[i]);
+
+  VecRestoreArray (x, &x_);
+  VecRestoreArray (y, &y_);
+  VecRestoreArray (z, &z_);
 }
