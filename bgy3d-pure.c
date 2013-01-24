@@ -597,6 +597,17 @@ static void nssa_norm_intra (const State *BHD, Vec gac_fft, real rbc,
   bgy3d_vec_map1 (nab, f, nab); /* argument aliasing! */
 }
 
+/* Set the x[0, 0, 0] component of the Vec x to 0.0: */
+static void set0 (Vec x)
+{
+  int ix[1] = {0};
+  real y[1] = {0.0};
+
+  /* Not collective. Should I call it from one worker only? */
+  VecSetValues (x, 1, ix, y, INSERT_VALUES);
+  VecAssemblyBegin (x);
+  VecAssemblyEnd (x);
+}
 
 /*
   Compute  the  so-called  third,  "challenging",  term  of  the  NSSA
@@ -652,17 +663,22 @@ static void Compute_dg_intra (State *BHD,
     }
 
   /*
-    Apply omega()  in-place, note argument  aliasing.  FIXME: pretends
-    that sinc(0) ==  0, so the original code. Is  it possible to claim
-    that  the k  = 0  component of  weighted forces  vanishes? Because
-    then, formally, zero or one would not make a difference here.
+    Apply  omega() in-place,  note argument  aliasing.   Original code
+    pretended that sinc(0) == 0. Is  it possible to claim that the k =
+    0 component of weighted  forces vanishes?  Because then, formally,
+    zero or one would not make a difference here.
 
     At least in HCl runs  the average of the short-range fac[] forces,
     which is the same as the  k = 0 component of its Fourier transform
     does  not vanish  for some  reason.  The  k =  0 component  of the
     long-range forces fac_l[] is zero.
+
+    Now instead of redefining sinc(0) we  force the real part of k = 0
+    component to 0:
   */
-  omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft, 0.0);
+  FOR_DIM
+    set0 (fg2_fft[dim]);
+  omega (BHD->PD, BHD->dc, 3, fg2_fft, rbc, fg2_fft, 1.0);
 
   /* int(..)/nab */
   /* Laplace^-1 * divergence */
