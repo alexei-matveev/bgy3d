@@ -549,6 +549,12 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
 
+  /* FIXME:   hardwired   distance   matrix.   Zeros   are   never
+     referenced: */
+  assert (m == 2);
+  const real r[2][2] = {{0.0, r_HO},
+                        {r_HO, 0.0}};
+
   /* Show solvent/solute parameters: */
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
@@ -637,6 +643,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Create KSP environment */
   InitializeDMMGSolver(BHD);
 #endif
+
+  Vec omega[m][m];
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      {
+        DACreateGlobalVector (BHD->dc, &omega[i][j]);
+        bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
+        omega[j][i] = omega[i][j];
+      }
 
   /*
     These complex  vectors will  hold FFT of  the current  g. Allocate
@@ -893,7 +908,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     a work  vector to  pass the result  further.  Pass
                     the g(k), not g(x). Does one FFT^-1.
                   */
-                  bgy3d_nssa_gamma_cond (BHD, g_fft[i], r_HO, g[j], t_vec);
+                  bgy3d_nssa_gamma_cond (BHD, g_fft[i], omega[i][j], g[j], t_vec);
 
                   /*
                     The   next  step  is   to  use   the  "conditional
@@ -905,7 +920,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                     Does one  FFT and one FFT^-1. Here  it is actually
                     possible to use the same Vec as in- and output:
                   */
-                  Compute_dg_H2O_intra_ln (BHD, t_vec, r_HO, work);
+                  Compute_dg_H2O_intra_ln (BHD, t_vec, omega[i][j], work);
 
                   /* Add the contrinution of site j /= i to du[i]: */
                   VecAXPY (du_acc, 1.0, work);
@@ -1149,6 +1164,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   VecDestroy (t_vec);
   VecDestroy (uc);
   VecDestroy (uc_rho);
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      VecDestroy (omega[i][j]);
 
   bgy3d_state_destroy (BHD);
 }
