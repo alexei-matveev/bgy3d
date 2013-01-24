@@ -449,15 +449,13 @@ static void Compute_dg_inter (State *BHD,
 
 
 /* w := x / max(y, thresh), essentially: */
-static void safe_pointwise_divide (Vec w, /* intent(out) */
-                                   Vec x, /* intent(in) */
-                                   Vec y, /* intent(in) */
-                                   real thresh)
+static void safe_pointwise_divide (Vec w,        /* intent(out) */
+                                   Vec x, Vec y) /* intent(in) */
 {
   real pure f (real x, real y)
   {
-    if (y < thresh)
-      return x / thresh;
+    if (y < NORM_REG)
+      return x / NORM_REG;
     else
       return x / y;
   }
@@ -686,7 +684,7 @@ static void Compute_dg_intra (State *BHD,
 
          v[dim] := v[dim] / nab, essentially:
       */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab, NORM_REG);
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
@@ -757,7 +755,7 @@ static void Compute_dg_intra (State *BHD,
 
          v[dim] := v[dim] / nab, essentially:
       */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab, NORM_REG);
+      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab);
 
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
@@ -876,7 +874,14 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, real rbc, Vec gab,
     aliasing) avoiding small denominators.  Some of the commented code
     used VecPointwiseDivide() instead.
   */
-  safe_pointwise_divide (tab, gab, tab, NORM_REG2); /* argument aliasing */
+  real pure f (real x, real y)
+  {
+    if (y < NORM_REG2)
+      return x / NORM_REG2;
+    else
+      return x / y;
+  }
+  bgy3d_vec_map2 (tab, f, gab, tab); /* argument aliasing */
 }
 
 
