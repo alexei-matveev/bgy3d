@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* needs Site */
+#include "bgy3d-force.h"        /* Coulomb_short() etc. */
 #include "bgy3d-getopt.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-poisson.h"      /* laplace staff */
@@ -102,124 +103,6 @@ static void finalize_state (State *BHD, int m)
   VecDestroy (BHD->gfg2_fft);
 
   bgy3d_state_destroy (BHD);
-}
-
-static real LJ_repulsive (real r, real epsilon, real sigma)
-{
-  const real sr = sigma / r;
-  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
-
-  const real re = 4 * epsilon * sr6 * sr6;
-
-  if (fabs (re) > epsilon * CUTOFF)
-    return epsilon * CUTOFF;
-  else
-    return re;
-}
-
-/* NOTE: so far  in all cases the returned  result contains the factor
-   q2. */
-real Coulomb_short (real r, real q2)
-{
-  if (r == 0.0)
-    return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-  else
-    {
-      real re = EPSILON0INV * q2 * erfc (G * r) / r;
-
-      /* Check for large values remember: exp(-re) will be computed: */
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-      else
-        return re;
-    }
-}
-
-real Coulomb_short_grad (real r, real rx, real q2)
-{
-  if (rx == 0)
-    return 0.0;
-
-  if (r == 0.0)
-    return -EPSILON0INV * q2 * (CUTOFF*1.0e-5);
-  else
-    {
-      real re = - EPSILON0INV * q2 * (erfc (G * r) +
-                                      2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow (r, 3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-      else
-        return re;
-    }
-}
-
-/* Coulomb_long  (r, 1.0) =  EPSILON0INV *  erf (G  * r)  / r  in most
-   general  case.   An  extra  argument  q2  is  the  overall  scaling
-   factor. */
-real Coulomb_long (real r, real q2)
-{
-   if (r == 0.0)
-     return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
-   else
-     {
-       real re = EPSILON0INV * q2 * erf (G * r) / r;
-
-       /* Check for large values, remember: exp(-re) will be computed */
-       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-       else
-         return re;
-     }
-}
-
-real Coulomb_long_grad (real r, real rx, real q2)
-{
-  if (r == 0.0)
-    return 0.0;
-  else
-    {
-      real re = - EPSILON0INV * q2 * (erf (G * r)
-                                      - 2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow(r,3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-      else
-        return re;
-    }
-}
-
-real Coulomb (real r, real q2)
-{
-   if (r == 0.0)
-     return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-   else
-     {
-       real re = EPSILON0INV * q2 /r;
-
-       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-       else
-         return re;
-     }
-}
-
-real Coulomb_grad (real r, real rx, real q2)
-{
-  if (rx == 0)
-    return 0;
-
-  if (r == 0)
-    return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-  else
-    {
-      real re = - EPSILON0INV * q2 * rx / pow (r, 3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
-      else
-        return re;
-    }
 }
 
 /* g := exp[-(u0 + du)], with a sanity check: */

@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* needs Site */
+#include "bgy3d-force.h"        /* Coulomb_short_grad() */
 #include "bgy3d-getopt.h"
 #include "bgy3d-vec.h"
 #include "bgy3d-pure.h"

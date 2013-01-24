@@ -138,10 +138,6 @@ typedef struct ProblemData
    interface: */
 ProblemData bgy3d_problem_data (void);
 
-/* functions */
-real Lennard_Jones(real r, real epsilon, real sigma);
-real Lennard_Jones_grad(real r, real xr, real epsilon, real sigma);
-
 real** Load_Molecule (int *N);
 void Molecule_free (real **x_M, int N);
 

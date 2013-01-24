@@ -199,39 +199,6 @@ void bgy3d_state_print (const State *BHD)
   PetscPrintf (PETSC_COMM_WORLD, "beta = %f\n", PD->beta);
 }
 
-real Lennard_Jones (real r, real epsilon, real sigma)
-{
-  const real sr = sigma / r;
-  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
-
-  const real re = 4 * epsilon * sr6 * (sr6 - 1);
-
-  if (fabs (re) > epsilon * CUTOFF)
-    return epsilon * CUTOFF;
-  else
-    return re;
-}
-
-real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
-{
-  if (xr == 0.0)
-    return 0.0;
-  if (r == 0.0)
-    return -epsilon * CUTOFF;
-
-  const real sr = sigma / r;
-  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
-
-  const real re = -24 * epsilon * sr6 / r * (2 * sr6 - 1) * xr / r;
-
-  if (re > epsilon * CUTOFF)
-    return epsilon * CUTOFF;
-  else if (re < -epsilon * CUTOFF)
-    return -epsilon * CUTOFF;
-  else
-    return re;
-}
-
 real** Load_Molecule(int *N)
 {
   FILE *fp;

@@ -1,0 +1,158 @@
+/* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
+/*==========================================================*/
+/*  $Id: bgy3dH2O.c,v 1.42 2007-07-31 17:12:33 jager Exp $ */
+/*==========================================================*/
+
+// #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
+// #include "bgy3d-solvents.h"     /* G */
+
+static inline real Lennard_Jones (real r, real epsilon, real sigma)
+{
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
+
+  const real re = 4 * epsilon * sr6 * (sr6 - 1);
+
+  if (fabs (re) > epsilon * CUTOFF)
+    return epsilon * CUTOFF;
+  else
+    return re;
+}
+
+static inline real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
+{
+  if (xr == 0.0)
+    return 0.0;
+  if (r == 0.0)
+    return -epsilon * CUTOFF;
+
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
+
+  const real re = -24 * epsilon * sr6 / r * (2 * sr6 - 1) * xr / r;
+
+  if (re > epsilon * CUTOFF)
+    return epsilon * CUTOFF;
+  else if (re < -epsilon * CUTOFF)
+    return -epsilon * CUTOFF;
+  else
+    return re;
+}
+
+static inline real LJ_repulsive (real r, real epsilon, real sigma)
+{
+  const real sr = sigma / r;
+  const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
+
+  const real re = 4 * epsilon * sr6 * sr6;
+
+  if (fabs (re) > epsilon * CUTOFF)
+    return epsilon * CUTOFF;
+  else
+    return re;
+}
+
+/* NOTE: so far  in all cases the returned  result contains the factor
+   q2. */
+static inline real Coulomb_short (real r, real q2)
+{
+  if (r == 0.0)
+    return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+  else
+    {
+      real re = EPSILON0INV * q2 * erfc (G * r) / r;
+
+      /* Check for large values remember: exp(-re) will be computed: */
+      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+        return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      else
+        return re;
+    }
+}
+
+static inline real Coulomb_short_grad (real r, real rx, real q2)
+{
+  if (rx == 0)
+    return 0.0;
+
+  if (r == 0.0)
+    return -EPSILON0INV * q2 * (CUTOFF*1.0e-5);
+  else
+    {
+      real re = - EPSILON0INV * q2 * (erfc (G * r) +
+                                      2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow (r, 3.0);
+
+      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      else
+        return re;
+    }
+}
+
+/* Coulomb_long  (r, 1.0) =  EPSILON0INV *  erf (G  * r)  / r  in most
+   general  case.   An  extra  argument  q2  is  the  overall  scaling
+   factor. */
+static inline real Coulomb_long (real r, real q2)
+{
+   if (r == 0.0)
+     return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
+   else
+     {
+       real re = EPSILON0INV * q2 * erf (G * r) / r;
+
+       /* Check for large values, remember: exp(-re) will be computed */
+       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+       else
+         return re;
+     }
+}
+
+static inline real Coulomb_long_grad (real r, real rx, real q2)
+{
+  if (r == 0.0)
+    return 0.0;
+  else
+    {
+      real re = - EPSILON0INV * q2 * (erf (G * r)
+                                      - 2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow(r,3.0);
+
+      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      else
+        return re;
+    }
+}
+
+static inline real Coulomb (real r, real q2)
+{
+   if (r == 0.0)
+     return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+   else
+     {
+       real re = EPSILON0INV * q2 /r;
+
+       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+       else
+         return re;
+     }
+}
+
+static inline real Coulomb_grad (real r, real rx, real q2)
+{
+  if (rx == 0)
+    return 0;
+
+  if (r == 0)
+    return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+  else
+    {
+      real re = - EPSILON0INV * q2 * rx / pow (r, 3.0);
+
+      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
+        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      else
+        return re;
+    }
+}

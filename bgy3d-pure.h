@@ -1,12 +1,4 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
-real Coulomb_short (real r, real q2);
-real Coulomb_short_grad (real r, real rx, real q2);
-
-real Coulomb_long (real r, real q2);
-real Coulomb_long_grad (real r, real rx, real q2);
-
-real Coulomb (real r, real q2);
-real Coulomb_grad (real r, real rx, real q2);
 
 void ComputeH2O_g (Vec g, Vec u0, Vec du);
 
