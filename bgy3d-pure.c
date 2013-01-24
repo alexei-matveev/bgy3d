@@ -474,8 +474,6 @@ static double pure sinc (double x)
   are either of length 1 or 3, in practice.
 
   NOTE: appears to work for in-place transformation with x == y.
-
-  FIXME: sinc(0) should be always 1, even at war times!
 */
 static void omega (const ProblemData *PD, const DA dc,
                    const int d, Vec x_fft[d], /* intent(in) */
