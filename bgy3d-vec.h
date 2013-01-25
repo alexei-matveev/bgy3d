@@ -98,3 +98,30 @@ static inline void bgy3d_vec_fft_map2 (Vec z, complex (*f)(complex x, complex y)
   VecRestoreArray (y, &y_);
   VecRestoreArray (z, &z_);
 }
+
+/* "Integrates" f(v(x), x) with the grid data v(x): */
+static inline real bgy3d_vec_integrate (DA da, real (*f)(real v, int i, int j, int k), Vec v)
+{
+  /* Clear accumulator: */
+  real acc = 0.0;
+
+  real ***v_;
+  DAVecGetArray (da, v, &v_);
+
+  /* Loop over local portion of grid */
+  int x[3], n[3], i[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+        acc += f (v_[i[2]][i[1]][i[0]], i[0], i[1], i[2]);
+
+  DAVecRestoreArray (da, v, &v_);
+
+  /* Sum accumulator over workers: */
+  bgy3d_comm_allreduce (1, &acc);
+
+  return acc;
+}
+
