@@ -488,7 +488,7 @@ void bgy3d_fft_interp (const Mat A,
   for (int p = 0; p < np; p++)
     {
       /* printf ("yc[%d] = %f + %fi\n", p, creal (yc[p]), cimag (yc[p])); */
-      assert (fabs (cimag (yc[p])) < 1.0e-8);
+      assert (fabs (cimag (yc[p])) < 1.0e-7);
       y[p] = yc[p] / (N[0] * N[1] * N[2]);
     }
 }
