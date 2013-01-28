@@ -3,6 +3,15 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
+static void shape (const DA da, int *NI, int *NJ, int *NK)
+{
+  int dim;
+  DAGetInfo (da, &dim, NI, NJ, NK,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  assert (dim == 3);
+}
+
+
 /*
   Does the mixing:
 
@@ -280,4 +289,38 @@ void bgy3d_vec_read_radial2 (const State *BHD,
         vec_read_radial (BHD, name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+}
+
+void bgy3d_vec_moments (const DA da, Vec v,
+                        real *q, real *x, real *y, real *z)
+{
+  /* Historically the grid origin is at 0.5 N[]: */
+  int N[3];
+  shape (da, &N[0], &N[1], &N[2]);
+
+  real m0 (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * 1;
+  }
+  real mx (real v, int i, int j, int k)
+  {
+    (void) j; (void) k;
+    return v * (i - 0.5 * N[0]);
+  }
+  real my (real v, int i, int j, int k)
+  {
+    (void) i; (void) k;
+    return v * (j - 0.5 * N[1]);
+  }
+  real mz (real v, int i, int j, int k)
+  {
+    (void) i; (void) j;
+    return v * (k - 0.5 * N[2]);
+  }
+
+  *q = bgy3d_vec_integrate (da, m0, v);
+  *x = bgy3d_vec_integrate (da, mx, v);
+  *y = bgy3d_vec_integrate (da, my, v);
+  *z = bgy3d_vec_integrate (da, mz, v);
 }

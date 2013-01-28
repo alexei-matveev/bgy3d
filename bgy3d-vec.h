@@ -23,6 +23,9 @@ void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m]
 void bgy3d_vec_read_radial2 (const State *BHD,
                              const char *format, int m, /* const */ Vec g2[m][m]);
 
+void bgy3d_vec_moments (const DA da, Vec v,
+                        real *q, real *x, real *y, real *z);
+
 static inline int vec_local_size (Vec xs)
 {
   int n;
