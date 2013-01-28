@@ -255,10 +255,9 @@ void Molecule_free( real **x_M, int N_M)
 }
 
 /* Reduce buffer by summing respective entries on all workeres: */
-void bgy3d_comm_allreduce (void *buf, int count, MPI_Datatype type)
+void bgy3d_comm_allreduce (int n, real x[n])
 {
-  int err = MPI_Allreduce (MPI_IN_PLACE, buf, count, type, MPI_SUM,
-                           PETSC_COMM_WORLD);
+  int err = MPI_Allreduce (MPI_IN_PLACE, x, n, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
   assert (!err);
 }
 
