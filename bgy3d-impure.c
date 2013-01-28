@@ -945,9 +945,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
               /*
                 Add Coulomb field uc scaled  by the site charge to the
-                accumulator. FIXME: inverse temperature beta missing?
+                accumulator.   Beware   that  the  original   code  is
+                erroneousely missing  the inverse temperature  beta in
+                this expression:
               */
-              VecAXPY (du_acc, solvent[i].charge, uc);
+              VecAXPY (du_acc, beta * solvent[i].charge, uc);
 
               /*
                 Vec du_acc  and x_lapl[i] are  intent(inout) here. Try
