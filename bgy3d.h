@@ -41,8 +41,20 @@
                            -1
     β = 1 / T = 1.6878 kcal    [* mol]
 
-  FIXME: the file bgy3d-solvents.h quotes 1.6889 instead.
+  Note that  the file  bgy3d-solvents.h quotes 1.6889  instead.  There
+  are  several definitions of  calorie in  use.  One  is based  on the
+  "International Table calorie" which is 4.1868 J, another is based on
+  the  "theormochemical calorie"  which is  4.184 J  exactly  [1].  It
+  appears  that at  least  in some  cases  the former,  "International
+  Table" definition was assumed in this code.
 
+  [1] http://physics.nist.gov/Pubs/SP811/appenB8.html
+
+  Boltzmann constant assuming the IT-calorie definition:
+*/
+#define KBOLTZMANN (8.3144621/4186.8) /* kcal/mol/K */
+
+/*
   The interaction energy of two unit charges separated by 1 A is
                    -1
     E = 1 * 1 / 1 A   = 0.529 au = 332 kcal [/ mol]
@@ -62,9 +74,7 @@
 
     => 331.84164
 
-  FIXME: why the value 332.067 I obtain by multiplying 0.52917706 au *
-  27.211658 eV  / au  * 23.0605376  kcal / eV  differs already  in the
-  third digit?
+  Again, the code appears to use the IT-calorie to define 1 / ε₀:
 */
 #define EPSILON0INV 331.84164 //331.84164
 
