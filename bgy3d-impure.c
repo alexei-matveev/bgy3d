@@ -386,6 +386,20 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
   *d_norm = sqrt (SQR (d[0]) + SQR (d[1]) + SQR (d[2]));
 }
 
+static void moments (const State *BHD, Vec v,
+                     real *q, real *x, real *y, real *z)
+{
+  const real *h = BHD->PD->h;   /* h[3] */
+  const real h3 = h[0] * h[1] * h[2];
+
+  bgy3d_vec_moments (BHD->da, v, q, x, y, z);
+
+  *q *= h3 * 1;
+  *x *= h3 * h[0];
+  *y *= h3 * h[1];
+  *z *= h3 * h[2];
+}
+
 static real ComputeCharge (const ProblemData *PD,
                            int m, const Site solvent[m],
                            const Vec g[m])
@@ -1070,9 +1084,20 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     dipole (n, solute, d, &d_norm);
 
     PetscPrintf (PETSC_COMM_WORLD,
-                 "|<x|ρ_N>| = |(%f, %f, %f)| = %f (solute nuclear dipole moment)\n",
+                 "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
                  d[0], d[1], d[2], d_norm);
 
+    {
+      real q, x, y, z;
+      moments (BHD, ve_rho, &q, &x, &y, &z);
+
+      const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
+
+      PetscPrintf (PETSC_COMM_WORLD,
+                   "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
+                   x, y, z, d);
+      PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
+    }
     /*
       Integration of:
 
