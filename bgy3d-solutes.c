@@ -407,7 +407,12 @@ static void grid_map (DA da, const ProblemData *PD,
 
   /* MEMORY: huge arrays here: */
   int m = ni * nj * nk;
-  real x[m][3], fx[m];
+
+  /* use dynamically memory allocation here */
+  real (*x)[3], *fx;
+  fx = malloc(m * sizeof(real));
+  /* contiguous memory allocation */
+  x = malloc(m * 3 * sizeof(real));
 
   /* Get coordinates of the local grid portion: */
   {
@@ -447,6 +452,10 @@ static void grid_map (DA da, const ProblemData *PD,
     assert (ijk == m);
     DAVecRestoreArray (da, v, &vec);
   }
+
+  /* remember to free! */
+  free(fx);
+  free(x);
 }
 
 /*
