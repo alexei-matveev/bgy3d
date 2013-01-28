@@ -388,23 +388,20 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
 
 static real ComputeCharge (const ProblemData *PD,
                            int m, const Site solvent[m],
-                           const Vec g[m],
-                           Vec work)
+                           const Vec g[m])
 {
-  const real dV = PD->h[0] * PD->h[1] * PD->h[2];
-  const real rho = PD->rho;
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
   real total = 0.0;
   for (int i = 0; i < m; i++)
     {
-      real sum;
-      VecCopy (g[i], work);
-      VecShift (work, -1.0);
-      VecSum (work, &sum);
-      total += sum * rho * dV * solvent[i].charge;
+      real num;
+      VecSum (g[i], &num);
+      total += solvent[i].charge * num;
     }
 
-  return total;
+  /* FIXME: different rhos[]? */
+  return total * h3 * PD->rho;
 }
 
 /* Returns most  negative number for  zero sized arrays.   Will return
@@ -1020,12 +1017,8 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           for (int i = 0; i < m; i++)
             PetscPrintf (PETSC_COMM_WORLD, "%s=%e ", solvent[i].name, du_norm[i]);
 
-          /* Last argument to ComputeCharge() is a work array: */
-          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, m, solvent, g, work));
-
-          PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d",
-                       mycount, upwards);
+          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ", ComputeCharge (PD, m, solvent, g));
+          PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
           PetscPrintf (PETSC_COMM_WORLD, "\n");
 
           /* Exit  when any  of  du[]  does not  change  by more  than
@@ -1634,9 +1627,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
           ComputeH2O_g( g[0], g0[0], dgH);
           ComputeH2O_g( g[1], g0[1], dgO);
 
-          /* Last argument to ComputeCharge() is a work array: */
-          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ",
-                       ComputeCharge (PD, 2, solvent, g, work));
+          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ", ComputeCharge (PD, 2, solvent, g));
 
           /* (fancy) step size control */
           mycount++;
