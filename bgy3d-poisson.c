@@ -770,6 +770,8 @@ static void InitializeKSPSolver (Mat M, KSP *ksp)
   /* Set preconditioner */
   PCSetType (pc, PCBJACOBI);
 
+  /* This is the place which is  supposed to tell KSP solver to re-use
+     the supplied vector as initial guess: */
   KSPSetInitialGuessNonzero (*ksp, PETSC_TRUE);
 
   /* runtime options will override default parameters */

@@ -958,9 +958,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
-    problem  across iterations. Though  by now  I am  not sure  if KSP
-    solver  really uses  them as  initial guess  as opposed  to always
-    starting iterations from zero:
+    problem across iterations. See call to KSPSetInitialGuessNonzero()
+    in bgy3d-poisson.c:
   */
   Vec x_lapl[m][m];             /* real */
   create_g2 (BHD->da, m, x_lapl);
@@ -1331,9 +1330,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 #ifdef L_BOUNDARY
   /*
     These  will be  used to  store solutions  of the  Laplace boundary
-    problem  across iterations. Though  by now  I am  not sure  if KSP
-    solver  really uses  them as  initial guess  as opposed  to always
-    starting iterations from zero:
+    problem across iterations. See call to KSPSetInitialGuessNonzero()
+    in bgy3d-poisson.c:
   */
   Vec x_lapl[2][2];             /* real */
   create_g2 (BHD->da, 2, x_lapl);
