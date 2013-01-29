@@ -132,13 +132,12 @@ void ComputeFFTfromCoulomb (State *BHD,
                             Vec fc_fft[3], /* complex, intent(out) */
                             real factor)
 {
-  int x[3], n[3], i[3];
-
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
   const real L = PD->interval[1] - PD->interval[0];
 
-  /* Get local portion of the grid */
+  /* Get local portion of the k-grid */
+  int x[3], n[3], i[3];
   DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***uc_fft_, ***fc_fft_[3];
@@ -208,7 +207,6 @@ static void pair (State *BHD,
   PetscScalar ***(f_short_[3]);
   PetscScalar ***c2_;
   real r[3], r_s, h[3], interval[2], beta, L;
-  int x[3], n[3], i[3];
 
   /* LJ parameters of pair interaction and charge product: */
   const real epsilon = LJ_params[0];
@@ -235,9 +233,9 @@ static void pair (State *BHD,
      {0, L, L}, {0, -L, L}, {0, L, -L}, {0, -L, -L},
      {L, 0, L}, {-L, 0, L}, {L, 0, -L}, {-L, 0, -L}};
 
-  /* Get local portion of the grid */
+  /* Get local portion of the r-grid */
+  int x[3], n[3], i[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
 
    FOR_DIM
     {
@@ -343,9 +341,9 @@ static void kapply (const State *BHD,
   FOR_DIM
     DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
-  /* Get local portion of the grid */
+  /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners(BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -472,13 +470,12 @@ static double pure sinc (double x)
 */
 void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 {
-  int x[3], n[3], i[3];
-
   const int *N = PD->N;         /* N[3] */
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
-  /* Get local portion of the grid */
+  /* Get local portion of the k-grid */
+  int x[3], n[3], i[3];
   DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***w_fft_;
@@ -622,10 +619,7 @@ static void Compute_dg_intra (State *BHD,
                               Vec wbc_fft,
                               Vec dg, Vec dg_help)
 {
-  int x[3], n[3], i[3];
-
   const ProblemData *PD = BHD->PD;
-  const DA da = BHD->da;
   const int *N = PD->N;         /* N[3] */
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
 
@@ -633,9 +627,6 @@ static void Compute_dg_intra (State *BHD,
   Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real scale = L / (2. * M_PI); /* siehe oben ... */
-
-  /* Get local portion of the grid */
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -693,7 +684,10 @@ static void Compute_dg_intra (State *BHD,
       MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
     }
 
-  /*******************************************/
+  /* Get local portion of the k-grid */
+  int x[3], n[3], i[3];
+  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
   complex ***wbc_fft_, ***dg_fft_, ***cac_fft_;
   complex ***fg2_fft_[3];
   DAVecGetArray (BHD->dc, wbc_fft, &wbc_fft_);
