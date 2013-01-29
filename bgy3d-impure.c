@@ -904,33 +904,14 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
                 {
                   if (j == i) continue;
                   /*
-                    This  body  is executed  exactly  once for  2-site
-                    models.   FIXME:  in   a  more  general  case  the
-                    distance  should be  the  intra-molecular distance
-                    between sites i and j.
-
-                    The  first   step  is  to   compute  normalization
-                    functions ĝ(x), Eqs. (4.105), (4.106) and (4.110).
-                    This already involves  a convolution integral with
-                    the geometric factor δ(|x| - r) / 4πr².
-
-                    Vec t_vec, is intent  (out) here and is re-used as
-                    a work  vector to  pass the result  further.  Pass
-                    the g(k), not g(x). Does one FFT^-1.
+                    Compute intramolecular contribution due to j /= i.
+                    So  called  log-term,  see  e.g.   Eqs.   (4.107),
+                    (4.109), and  (4.114). Implies that  the two sites
+                    belong to the same species.  This body is executed
+                    exactly once for 2-site models. Vec work is intent
+                    (out) to be added to accumulator later:
                   */
-                  bgy3d_nssa_gamma_cond (BHD, g_fft[i], omega[i][j], g[j], t_vec);
-
-                  /*
-                    The   next  step  is   to  use   the  "conditional
-                    distribution" ĝ(x) again in a convolution integral
-                    with the same geometric  factor δ(|x| - r) / 4πr²,
-                    Eq. (4.114).
-
-                    Vec t_vec is intent(in)  and work is intent (out).
-                    Does one  FFT and one FFT^-1. Here  it is actually
-                    possible to use the same Vec as in- and output:
-                  */
-                  Compute_dg_H2O_intra_ln (BHD, t_vec, omega[i][j], work);
+                  bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
 
                   /* Add the contrinution of site j /= i to du[i]: */
                   VecAXPY (du_acc, 1.0, work);

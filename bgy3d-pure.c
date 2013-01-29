@@ -818,7 +818,7 @@ static void Compute_dg_intra (State *BHD,
 
   FIXME: compare the code to nssa_norm_intra().
 */
-void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
+static void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 {
   /* g(x) -> g(k): */
   MatMult (BHD->fft_mat, gac, BHD->fft_scratch);
@@ -868,8 +868,8 @@ void Compute_dg_H2O_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 
   Side effects: used BHD->fft_scratch as work array!
 */
-void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
-                            Vec tab) /* intent(out) */
+static void nssa_gamma_cond (const State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
+                             Vec tab) /* intent(out) */
 {
   /* n(x) goes into Vec tab which is is intent(out) here: */
   nssa_norm_intra (BHD, gac_fft, wbc_fft, BHD->fft_scratch, tab);
@@ -887,6 +887,44 @@ void bgy3d_nssa_gamma_cond (const State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
       return x / y;
   }
   bgy3d_vec_map2 (tab, f, gab, tab); /* argument aliasing */
+}
+
+/*
+  Compute  intramolecular  contribution due  to  b  /=  a.  So  called
+  log-term, see e.g. Eqs.  (4.107), (4.109), and (4.114). Implies that
+  the two  sites belong  to the  same species and  are separated  by a
+  fixed distance behind intra-molecular correlation funciton wab_fft.
+
+  To be called as in
+
+  bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], du)
+
+  The call sequence implemented by  this public wrapper also occurs in
+  this  file at  a few  places.  It  appears that  one can  re-use the
+  output of nssa_gamma_cond() though.
+*/
+void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du)
+{
+  /*
+    The  first  step  is  to  compute  normalization  functions  ĝ(x),
+    Eqs.  (4.105),  (4.106)  and  (4.110).  This  already  involves  a
+    convolution integral with the geometric factor δ(|x| - r) / 4πr².
+
+    Vec du,  is intent (out) here and  is re-used as a  work vector to
+    pass the result further.  Does one FFT^-1.
+  */
+  nssa_gamma_cond (BHD, ga_fft, wab_fft, gb, du);
+
+  /*
+    The next step is to  use the "conditional distribution" ĝ(x) again
+    in a convolution  integral with the same geometric  factor δ(|x| -
+    r) / 4πr², Eq. (4.114).
+
+    Vec du  is both intent(in) in  first position and  intent (out) in
+    the second.   Does one  FFT and one  FFT^-1.  Here it  is actually
+    possible to use the same Vec as in- and output:
+  */
+  Compute_dg_H2O_intra_ln (BHD, du, wab_fft, du); /* aliasing! */
 }
 
 
@@ -1093,7 +1131,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                 if (k != i)
                   {
                     /* Here t is intent(out): */
-                    bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], omega[k][i], g[j][k], t[j][k]);
+                    nssa_gamma_cond (BHD, g_fft[i][j], omega[k][i], g[j][k], t[j][k]);
 
                     /* Compute du_new2 term and add to the accumulator: */
                     Compute_dg_H2O_intra_ln (BHD, t[j][k], omega[k][i], du_new2);
@@ -1125,11 +1163,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                     /*
                       NOTE:  without  the  next conditional  the  next
                       computation would be redundant computation for j
-                      == i.   See the call  to bgy3d_nssa_gamma_cond()
-                      above:
+                      == i.  See the call to nssa_gamma_cond() above:
                     */
                     if (i != j)
-                      bgy3d_nssa_gamma_cond (BHD, g_fft[i][j], omega[j][k], g[i][k], t[i][k]);
+                      nssa_gamma_cond (BHD, g_fft[i][j], omega[j][k], g[i][k], t[i][k]);
                     nssa_norm_intra (BHD, g_fft[i][k], omega[j][k], BHD->fft_scratch, t[i][j]);
                     Compute_dg_intra (BHD,
                                       BHD->F[i][k], BHD->F_l[i][k], t[i][k],
@@ -1427,19 +1464,19 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[0][0], t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], omega[0][1], du_new2); /* t is intent(in) */
           VecAXPY(du_new, 2.0, du_new2);
 
           /* tO = gHO/int(gHO wHH) */
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], omega[0][0], g[0][1], t[1][1]);
+          nssa_gamma_cond (BHD, g_fft[0][1], omega[0][0], g[0][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][0], BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
                             BHD->u2_fft[0][1], omega[0][0], du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[1][1], t[1][1]);
+          nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[1][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[1][1], omega[0][1], BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
@@ -1469,23 +1506,23 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[0][0]);
+          nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[0][0]);
           Compute_dg_H2O_intra_ln (BHD, t[0][0], omega[0][0], du_new2); /* t is intent(in) */
           VecAXPY(du_new, 1.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], omega[0][1], du_new2); /* t is intent(in) */
           VecAXPY(du_new, 1.0, du_new2);
 
           /* tO = gH/int(gH wHH) */
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[1][1]);
+          nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[1][1]);
           nssa_norm_intra (BHD, g_fft[0][0], omega[0][0], BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
                             BHD->u2_fft[0][0], omega[0][0], du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
@@ -1516,11 +1553,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY (du_new, 1.0, du_new2);
 
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], omega[0][1], g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[1][1], omega[0][1], g[0][1], t[0][1]);
           Compute_dg_H2O_intra_ln (BHD, t[0][1], omega[0][1], du_new2); /* t is intent(in) */
           VecAXPY(du_new, 2.0, du_new2);
 
-          bgy3d_nssa_gamma_cond (BHD, g_fft[1][1], omega[0][1], g[0][1], t[0][1]);
+          nssa_gamma_cond (BHD, g_fft[1][1], omega[0][1], g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
