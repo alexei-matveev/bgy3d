@@ -597,12 +597,14 @@ static SCM guile_run_solute (SCM solute, SCM settings)
   free (solute_name);
   free (solute_sites);
 
-  /* Caller, dont forget to destroy them! */
-  assert (m == 2);
-  SCM gs = scm_list_2 (from_vec (g[0]),  from_vec (g[1]));
+  /* Build a list starting from the tail: */
+  SCM gs = SCM_EOL;
+  for (int i = m - 1; i >= 0; i--)
+    gs = scm_cons (from_vec (g[i]), gs);
+
   SCM v = scmx_ptr (iter);
 
-  /* Return multiple values: */
+  /* Return multiple values. Caller, dont forget to destroy them! */
   return scm_values (scm_list_2 (gs, v));
 }
 
