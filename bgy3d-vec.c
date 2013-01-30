@@ -3,6 +3,36 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
+void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
+{
+  for (int i = 0; i < m; i++)
+    DACreateGlobalVector (da, &g[i]);
+}
+
+void bgy3d_vec_destroy1 (int m, Vec g[m])
+{
+  for (int i = 0; i < m; i++)
+    VecDestroy (g[i]);
+}
+
+/* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
+void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        DACreateGlobalVector (da, &g[i][j]);
+        g[j][i] = g[i][j];
+      }
+}
+
+void bgy3d_vec_destroy2 (int m, Vec g[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecDestroy (g[i][j]);
+}
+
 static void shape (const DA da, int *NI, int *NJ, int *NK)
 {
   int dim;
