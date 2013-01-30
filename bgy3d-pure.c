@@ -934,12 +934,6 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
 
-  /* FIXME:   hardwired   distance   matrix.   Zeros   are   never
-     referenced: */
-  assert (m == 2);
-  const real r[2][2] = {{0.0, r_HO},
-                        {r_HO, 0.0}};
-
   /* Original code used to print solvent params: */
   bgy3d_sites_show ("Solvent", m, solvent);
 
@@ -1002,13 +996,21 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 #endif
 
   Vec omega[m][m];
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < i; j++)
-      {
-        DACreateGlobalVector (BHD->dc, &omega[i][j]);
-        bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
-        omega[j][i] = omega[i][j];
-      }
+  {
+    /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
+       well.  Diagonal zeros are never referenced: */
+    real r[m][m];
+    bgy3d_sites_dist_mat (m, solvent, r);
+
+    /* Precompute omega[][]: */
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j < i; j++)
+        {
+          DACreateGlobalVector (BHD->dc, &omega[i][j]);
+          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
+          omega[j][i] = omega[i][j];
+        }
+  }
 
   Vec (*u0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
