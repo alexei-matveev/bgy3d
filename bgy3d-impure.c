@@ -589,12 +589,7 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
   Vec g2[m][m];               /* solvent-solvent pair distributions */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->da, &g2[i][j]);
-        g2[j][i] = g2[i][j];
-      }
+  bgy3d_vec_create2 (BHD->da, m, g2);
 
   /*
     Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
@@ -635,11 +630,9 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     in bgy3d-poisson.c:
   */
   Vec x_lapl[m];                /* real */
+  bgy3d_vec_create1 (BHD->da, m, x_lapl);
   for (int i = 0; i < m; i++)
-    {
-      DACreateGlobalVector (BHD->da, &x_lapl[i]);
-      VecSet (x_lapl[i], 0.0);
-    }
+    VecSet (x_lapl[i], 0.0);
 #endif
 
 #ifdef L_BOUNDARY_MG
@@ -670,28 +663,17 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     loop.
   */
   Vec g_fft[m];
+  bgy3d_vec_create1 (BHD->dc, m, g_fft); /* complex */
+  bgy3d_vec_create1 (BHD->da, m, du);    /* real */
 
-  for (int i = 0; i < m; i++)
-    {
-      DACreateGlobalVector (BHD->dc, &g_fft[i]); /* complex */
-
-      DACreateGlobalVector (BHD->da, &du[i]); /* real */
-
-      /* Here the storage for the output is allocated, the caller will
-         have to destroy them: */
-      DACreateGlobalVector (BHD->da, &g[i]); /* real */
-    }
+  /* Here the  storage for  the output is  allocated, the  caller will
+     have to destroy them: */
+  bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
   /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
      vectors in momentum space.  Note that HO = OH. */
   Vec ker_fft[m][m];
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (BHD->dc, &ker_fft[i][j]); /* complex */
-        ker_fft[j][i] = ker_fft[i][j];
-      }
+  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
 
   /*
     There is no  point to transform each contribution  computed in the
@@ -712,13 +694,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
     filled with data yet, I assume.
   */
   Vec u0[m];                    /* real */
-  for (int i = 0; i < m; i++)
-    {
-      DACreateGlobalVector (BHD->da, &u0[i]);
+  bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
-      /* set initial guess*/
-      VecSet (du[i], 0.0);
-    }
+  /* Set initial guess: */
+  for (int i = 0; i < m; i++)
+    VecSet (du[i], 0.0);
 
   /* load initial configuration from file ??? */
   if (bgy3d_getopt_test ("--load-H2O"))
@@ -1141,23 +1121,15 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   /* Clean up and exit ... */
   VecDestroy (du_acc_fft);
 
-  for (int i = 0; i < m; i++)
-    {
-      /* Delegated to the caller:
-         VecDestroy (g[i]); */
+  /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
+  bgy3d_vec_destroy1 (m, u0);
+  bgy3d_vec_destroy1 (m, du);
+  bgy3d_vec_destroy1 (m, g_fft);
+  bgy3d_vec_destroy1 (m, x_lapl);
 
-      VecDestroy (u0[i]);
-      VecDestroy (du[i]);
-      VecDestroy (g_fft[i]);
-      VecDestroy (x_lapl[i]);
-
-      /* Pair quantities here: */
-      for (int j = 0; j <= i; j++)
-        {
-          VecDestroy (g2[i][j]);
-          VecDestroy (ker_fft[i][j]);
-        }
-    }
+  /* Pair quantities here: */
+  bgy3d_vec_destroy2 (m, g2);
+  bgy3d_vec_destroy2 (m, ker_fft);
 
   VecDestroy (du_acc);
   VecDestroy (work);
