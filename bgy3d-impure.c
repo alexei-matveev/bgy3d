@@ -530,18 +530,13 @@ static void print_table (int n, const Site sites[n], const real vs[n])
   is responsible  for calling bgy3d_pot_destroy() when it  is not more
   needed.
 */
-void bgy3d_solve_with_solute (const ProblemData *PD,
-                              int n, const Site solute[n],
-                              void (*density)(int k, const real x[k][3], real rho[k]),
-                              Vec g[2],    /* intent(out) */
-                              Context **v) /* intent(out) */
+void bgy3d_solute_solve (const ProblemData *PD,
+                         int m, const Site solvent[m],
+                         int n, const Site solute[n],
+                         void (*density)(int k, const real x[k][3], real rho[k]),
+                         Vec g[m],    /* intent(out) */
+                         Context **v) /* intent(out) */
 {
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  /* Get the number of solvent sites and their parameters: */
-  bgy3d_solvent_get (&m, &solvent);
-
   /* Show solvent/solute parameters: */
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
@@ -1118,8 +1113,14 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   (void) g_ini;                 /* FIXME: interface obligation */
 
   int n;                        /* number of solute sites */
-  const Site *sites;            /* [n], array of sites */
-  Vec g[2];                     /* solution */
+  const Site *solute;           /* solute[n] */
+
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
+
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent);
+
   char name[200] = "hydrogen chloride"; /* default solute */
 
   /* Solutes name, HCl by default: */
@@ -1129,18 +1130,20 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
   /* Get the solute from the tables: */
-  bgy3d_solute_get (name, &n, &sites);
+  bgy3d_solute_get (name, &n, &solute);
 
-  /* This does the  real work. Vec g[2] is  intent(out) in all senses,
-     dont  forget   to  destroy   them.  Here  no   additional  charge
-     distribution, so supply NULL for the function pointer: */
-  bgy3d_solve_with_solute (PD, n, sites, NULL, g, NULL);
+  /*
+    This does  the real work. Vec  g[m] is intent(out)  in all senses,
+    dont  forget   to  destroy   them.   Here  no   additional  charge
+    distribution, so supply NULL for the function pointer:
+  */
+  Vec g[m];
+  bgy3d_solute_solve (PD, m, solvent, n, solute, NULL, g, NULL);
 
   /* Save final distribution, use binary format: */
-  bgy3d_vec_save1 ("g%d.bin", 2, g);
+  bgy3d_vec_save1 ("g%d.bin", m, g);
 
-  for (int i = 0; i < 2; i++)
-    VecDestroy (g[i]);
+  bgy3d_vec_destroy1 (m, g);
 
   return PETSC_NULL;            /* fake, interface obligation */
 }

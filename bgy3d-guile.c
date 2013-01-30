@@ -5,6 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
+#include "bgy3d-solvents.h"     /* bgy3d_solvent_get() */
 #include "bgy3d-pure.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
@@ -553,27 +554,33 @@ static SCM guile_run_solute (SCM solute, SCM settings)
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
 
-  int n;
-  Site *sites;
-  char *name;
-  Vec g[2];
+  int m;                        /* number of solvent sites */
+  const Site *solvent_sites;    /* solvent_sites[m] */
 
-  /* Allocates sites, name: */
-  make_solute (solute, &n, &sites, &name);
+  /* Get the number of solvent sites and their parameters: */
+  bgy3d_solvent_get (&m, &solvent_sites);
+
+  int n;                        /* number of solute sites */
+  Site *solute_sites;           /* solute_sites[n] */
+  char *solute_name;
+
+  /* Get the  number of solunt  sites and their  parameters. Allocates
+     solute_sites, solute_name: */
+  make_solute (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
 
   /* This declares and  sets a function pointer. If  the settings dont
      specify it, it should remain NULL: */
   void (*qm_density) (int n, const real x[n][3], real rho[n]) = NULL;
 
-  /* Cast is to silence the warning here.  Note that we pass a pointer
-     to  a  funptr,  void  (**)(),  as the  function  is  supposed  to
-     (eventually) set that funptr to something meaningful: */
+  /*
+    Cast is to silence the warning  here.  Note that we pass a pointer
+    to  a  funptr,  void  (**)(),  as  the  function  is  supposed  to
+    (eventually) set that funptr to something meaningful:
+  */
   alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
-
-  // printf ("qm-density=%p\n", qm_density); /* print funptr in hex */
 
   /*
     This  takes part  of  the  input from  the  disk, returns  solvent
@@ -582,13 +589,16 @@ static SCM guile_run_solute (SCM solute, SCM settings)
     NULL as  the function  pointer. Similarly, if  you do not  want an
     iterator over the solvent potential pass NULL:
   */
+  Vec g[m];
   Context *iter;
-  bgy3d_solve_with_solute (&PD, n, sites, qm_density, g, &iter);
+  bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                      g, &iter);
 
-  free (name);
-  free (sites);
+  free (solute_name);
+  free (solute_sites);
 
   /* Caller, dont forget to destroy them! */
+  assert (m == 2);
   SCM gs = scm_list_2 (from_vec (g[0]),  from_vec (g[1]));
   SCM v = scmx_ptr (iter);
 

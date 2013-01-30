@@ -3,19 +3,20 @@
 
 /*
   This function is the main entry  point for the BGY3dM equation for a
-  2-site solvent and an arbitrary solute.  The two vectors in
+  2-site solvent and an arbitrary solute.  The vectors in
 
-  Vec g[2], intent(out)
+  Vec g[m], intent(out)
 
   are  initialzed as  global distributed  arrays and  filled  with the
   solvent site  distributions. It is the responsibility  of the caller
   to destroy them when no more needed.
  */
-void bgy3d_solve_with_solute (const ProblemData *PD,
-                              int n, const Site solute[n],
-                              void (*density)(int k, const real x[k][3], real rho[k]),
-                              Vec g[2],
-                              Context **v);
+void bgy3d_solute_solve (const ProblemData *PD,
+                         int m, const Site solvent[m],
+                         int n, const Site solute[n],
+                         void (*density)(int k, const real x[k][3], real rho[k]),
+                         Vec g[m],     /* intent(out) */
+                         Context **v); /* intent(out) */
 
 Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
 
