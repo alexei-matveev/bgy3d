@@ -14,8 +14,8 @@
  is exactly two:
 */
 static const Site solvent[] =
-  {{"h", {0.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH directly */
-   {"o", {0.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
+  {{"h", {+r_HO/2.0, 0.0, 0.0}, sH, eH, qH}, /* dont use sH, eH, qH directly */
+   {"o", {-r_HO/2.0, 0.0, 0.0}, sO, eO, qO}}; /* same for sO, eO, qO */
 
 #undef sH
 #undef eH
@@ -23,7 +23,8 @@ static const Site solvent[] =
 #undef sO
 #undef eO
 #undef qO
-
+#undef G
+#undef r_HO
 
 /*
   Get solvent sites.  Functions that do the real work operate on array
@@ -34,6 +35,15 @@ void bgy3d_solvent_get (/* const char *name */ int *n, const Site **sites)
   /* Return solvent sites and their count: */
   *n = sizeof (solvent) / sizeof (Site);
   *sites = solvent;
+}
+
+void bgy3d_sites_dist_mat (int m, const Site sites[m], real r[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < m; j++)
+      r[i][j] = sqrt (SQR (sites[i].x[0] - sites[j].x[0]) +
+                      SQR (sites[i].x[1] - sites[j].x[1]) +
+                      SQR (sites[i].x[2] - sites[j].x[2]));
 }
 
 /*
