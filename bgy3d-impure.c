@@ -570,7 +570,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
 
-  Vec t_vec;                 /* used for all sites */
   Vec uc;                    /* Coulomb long, common for all sites. */
   Vec uc_rho;                /* eletron density for integration */
   Vec du[m], du_acc, work;
@@ -702,7 +701,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   DACreateGlobalVector (BHD->da, &du_acc);
   DACreateGlobalVector (BHD->da, &work);
-  DACreateGlobalVector (BHD->da, &t_vec); /* used for all sites */
   DACreateGlobalVector (BHD->da, &uc);    /* common for all sites */
   DACreateGlobalVector (BHD->da, &uc_rho);
 
@@ -935,10 +933,10 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
               /*
                 Vec du_acc  and x_lapl[i] are  intent(inout) here. Try
                 to preserve  the values of  x_lapl[] across iterations
-                to save  time in the  iterative solver.  Vec  t_vec is
-                used as a work array.
+                to save time  in the iterative solver.  Vec  work is a
+                work array.
               */
-              bgy3d_impose_laplace_boundary (BHD, du_acc, t_vec, x_lapl[i]);
+              bgy3d_impose_laplace_boundary (BHD, du_acc, work, x_lapl[i]);
 
               /*
                 Mix du and du_new with a fixed ratio "a":
@@ -1161,7 +1159,6 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
   VecDestroy (du_acc);
   VecDestroy (work);
-  VecDestroy (t_vec);
   VecDestroy (uc);
   VecDestroy (uc_rho);
 
