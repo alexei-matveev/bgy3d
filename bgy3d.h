@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdbool.h>            /* bool, true, false */
+#include <float.h>              /* DBL_MAX */
 
 #include "petscda.h"            /* Vec, Mat, DA, ... */
 #include "petscdmmg.h"          /* KSP, ... */
@@ -238,6 +239,24 @@ void bgy3d_state_destroy (State *BHD);
 void bgy3d_state_print (const State *BHD);
 
 void bgy3d_comm_allreduce (int n, real x[n]);
+
+/* Returns most  negative number for  zero sized arrays.   Will return
+   NaN if there is any in the array. */
+static inline double maxval (size_t n, const double x[n])
+{
+  double max = -DBL_MAX;
+  for (size_t i = 0; i < n && !isnan (max); i++)
+    {
+      /* If x[i] is  NaN comparison will fail and  max will become NaN
+         too:  */
+      max = x[i] < max ? max : x[i];
+      /* We  need  to  break  out  otherwise  in  the  next  iteration
+         comparison will  fail again and  max may be overwritten  by a
+         valid number ... */
+    }
+  return max;
+}
+
 
 #endif  /* ifndef BGY3d_H */
 

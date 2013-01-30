@@ -1185,43 +1185,42 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         for (int j = 0; j <= i; j++)
           ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
 
-      /* (fancy) step size control */
-      assert (m == 2);
-      mycount++;
-      if (((iter-1)%10) &&
-          (du_norm_old[0][0] < du_norm[0][0] ||
-           du_norm_old[1][1] < du_norm[1][1] ||
-           du_norm_old[0][1] < du_norm[0][1]))
-        {
-          upwards = 1;
-        }
-      else if (iter>20 && !((iter-1)%10) && upwards==0 &&
-               (du_norm_old[0][0] < du_norm[0][0] ||
-                du_norm_old[1][1] < du_norm[1][1] ||
-                du_norm_old[0][1] < du_norm[0][1]))
-        {
-          a1 /= 2.0;
-          if (a1 < a0)
-            a1 = a0;
-          mycount=0;
-        }
-      else
-        upwards=0;
+      /* Fancy step  size control. FIXME:  weired logic. Code  used to
+         check if *any* of the norms went up: */
+      bool up;
+      {
+        real diff[m][m];
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j < m; j++)
+            diff[i][j] = du_norm[i][j] - du_norm_old[i][j];
+        up = maxval (m * m, (real*) diff) > 0.0;
+      }
 
-      if(mycount>20 && a1<=0.5)
-        {
-          a1*=2.;
-          mycount=0;
-        }
-      else if(mycount>20 && a1>0.5)
-        {
-          a1=1.0;
-          mycount=0;
-        }
-
+      /* That was the only place comparing to du_norm_old[]: */
       for (int i = 0; i < m; i++)
         for (int j = 0; j < m; j++) /* Yes, full range! */
           du_norm_old[i][j] = du_norm[i][j];
+
+      mycount++;
+
+      if ((iter - 1) % 10 && up)
+        upwards = 1;
+      else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 && up)
+        {
+          a1 = MAX (a1 / 2.0, a0);
+          mycount = 0;
+        }
+      else
+        upwards = 0;
+
+      /* Scale the coefficient  "a1" up by a factor,  but make sure it
+         is not above 1.0. Reset mycount. */
+      if (mycount > 20)
+        {
+          a1 = MIN (a1 * 2.0, 1.0);
+          mycount = 0;
+        }
+      /* otherwise leave "a1" and "mycount" unchanged */
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
       PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
@@ -1234,10 +1233,15 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
 
-      if (du_norm[0][0] <= norm_tol &&
-          du_norm[1][1] <= norm_tol &&
-          du_norm[0][1] <= norm_tol)
+      /* Exit  when  any  of  du[]   does  not  change  by  more  than
+         norm_tol: */
+      if (maxval (m * m, (real*) du_norm) <= norm_tol)
+        {
+          PetscPrintf (PETSC_COMM_WORLD,
+                       "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+                       maxval (m * m, (real*) du_norm), norm_tol, iter + 1, max_iter);
           break;
+        }
     }
 
   /* FIXME: Debug  output from every iteration  with different overall

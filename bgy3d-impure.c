@@ -19,7 +19,6 @@
 #include "bgy3d-multigrid.h"    /* InitializeDMMGSolver */
 #endif
 
-#include <float.h>              /* DBL_MAX */
 #include <stdbool.h>            /* bool */
 #include <complex.h>            /* after fftw.h */
 
@@ -416,23 +415,6 @@ static real ComputeCharge (const ProblemData *PD,
 
   /* FIXME: different rhos[]? */
   return total * h3 * PD->rho;
-}
-
-/* Returns most  negative number for  zero sized arrays.   Will return
-   NaN if there is any in the array. */
-static double maxval (size_t n, const double x[n])
-{
-  double max = -DBL_MAX;
-  for (size_t i = 0; i < n && !isnan (max); i++)
-    {
-      /* If x[i] is  NaN comparison will fail and  max will become NaN
-         too:  */
-      max = x[i] < max ? max : x[i];
-      /* We  need  to  break  out  otherwise  in  the  next  iteration
-         comparison will  fail again and  max may be overwritten  by a
-         valid number ... */
-    }
-  return max;
 }
 
 /*
@@ -939,53 +921,40 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
           for (int i = 0; i < m; i++)
             ComputeH2O_g (g[i], u0[i], du[i]);
 
-          /*
-           * Fancy step size control.
-           *
-           * FIXME: weired  logic.  The  code below appears  to modify
-           * "upwards",  "a1", and  "mycount" by  eventually resetting
-           * the latter to  zero. The goal might be  to tweak the real
-           * coefficient  "a1"   depending  on  iteration   count  and
-           * convergence.    Everytime  "mycount"   becomes   >20  the
-           * coefficient "a1" is  changed. The compiler is complaining
-           * that upwards  and du_nomr_old[] maybe  used uninitialized
-           * here. At the moment I  am not able to confirm/reject that
-           * claim.
-           */
+          /* Fancy step  size control. FIXME: weired  logic. Code used
+             to check if *any* of the norms went up: */
+          bool up;
+          {
+            real diff[m];
+            for (int i = 0; i < m; i++)
+              diff[i] = du_norm[i] - du_norm_old[i];
+            up = maxval (m, diff) > 0.0;
+          }
 
-          /* Infinity (max-abs) norm of du[] over all site indices: */
-          const real norm8 = maxval (m, du_norm);
+          /* That was the only place comparing to du_norm_old[]: */
+          for (int i = 0; i < m; i++)
+            du_norm_old[i] = du_norm[i];
 
           mycount++;
 
-          if ((iter - 1) % 10 && (du_norm_old[0] < du_norm[0] ||
-                                  du_norm_old[1] < du_norm[1]))
+          if ((iter - 1) % 10 && up)
             upwards = 1;
-          else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 &&
-                  (du_norm_old[0] < du_norm[0] || du_norm_old[1] < du_norm[1]))
+          else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 && up)
             {
-              a1 /= 2.0;
-              if (a1 < a0)
-                a1 = a0;
+              a1 = MAX (a1 / 2.0, a0);
               mycount = 0;
             }
           else
             upwards = 0;
 
+          /* Scale the coefficient "a1" up  by a factor, but make sure
+             it is not above 1.0. Reset mycount. */
           if (mycount > 20)
             {
-              /* Scale the  coefficient "a1" up by a  factor, but make
-                 sure it is not above 1.0. Reset mycount. */
-              if (a1 <= 0.5)
-                a1 *= 2.0;
-              else
-                a1 = 1.0;
+              a1 = MIN (a1 * 2.0, 1.0);
               mycount = 0;
             }
           /* otherwise leave "a1" and "mycount" unchanged */
-
-          for (int i = 0; i < m; i++)
-            du_norm_old[i] = du_norm[i];
 
           PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
           PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
@@ -999,11 +968,11 @@ void bgy3d_solve_with_solute (const ProblemData *PD,
 
           /* Exit  when any  of  du[]  does not  change  by more  than
              norm_tol: */
-          if (norm8 <= norm_tol)
+          if (maxval (m, du_norm) <= norm_tol)
             {
               PetscPrintf (PETSC_COMM_WORLD,
                            "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
-                           norm8, norm_tol, iter + 1, max_iter);
+                           maxval (m, du_norm), norm_tol, iter + 1, max_iter);
               break;
             }
 
