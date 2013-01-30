@@ -146,7 +146,7 @@ static ProblemData problem_data (SCM alist)
 /* A Site is represented by an sexp like:
 
    ("H" (0.6285 0.0 0.0) 2.735 0.03971 0.2) */
-static Site make_site (SCM s)
+static Site to_site (SCM s)
 {
   Site S;
 
@@ -181,24 +181,24 @@ static Site make_site (SCM s)
 }
 
 
-static void make_solute (SCM solute, int *n, Site **sites, char **name)
+static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 {
-  SCM s_name = scm_car (solute);   /* string */
-  SCM l_sites = scm_cadr (solute); /* list */
-  int length = scm_to_int (scm_length (l_sites));
+  SCM molecule_name = scm_car (molecule); /* string */
+  SCM site_list = scm_cadr (molecule);    /* list */
+  const int length = scm_to_int (scm_length (site_list));
 
   /* will you free() it? */
   Site *new = (Site*) malloc (length * sizeof(Site));
 
   for (int i = 0; i < length; i++)
     {
-      new[i] = make_site (scm_car (l_sites));
-      l_sites = scm_cdr (l_sites);
+      new[i] = to_site (scm_car (site_list));
+      site_list = scm_cdr (site_list);
     }
 
   *n = length;
-  *sites = new;
-  *name = scm_to_locale_string (s_name); /* will you free() it? */
+  *sites = new;                                 /* free() it! */
+  *name = scm_to_locale_string (molecule_name); /* free() it! */
 }
 
 
@@ -566,7 +566,7 @@ static SCM guile_run_solute (SCM solute, SCM settings)
 
   /* Get the  number of solunt  sites and their  parameters. Allocates
      solute_sites, solute_name: */
-  make_solute (solute, &n, &solute_sites, &solute_name);
+  to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
