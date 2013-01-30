@@ -25,26 +25,6 @@ static const real NORM_REG2 = 1.0e-2;
 #undef eO
 #undef qO
 
-/* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
-static void create_g2 (const DA da, int m, Vec g[m][m])
-{
-  /* Create global vectors */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        DACreateGlobalVector (da, &g[i][j]);
-        g[j][i] = g[i][j];
-      }
-}
-
-static void destroy_g2 (int m, Vec g[m][m])
-{
-  /* Destroy global vectors */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecDestroy (g[i][j]);
-}
-
 static State* initialize_state (const ProblemData *PD, int m)
 {
   State *BHD = bgy3d_state_make (PD);
@@ -60,10 +40,10 @@ static State* initialize_state (const ProblemData *PD, int m)
     bgy3d_state_make().   FIXME: u2,  u2_fft probably  differ  only by
     factors:
   */
-  create_g2 (BHD->da, m, BHD->u2);
-  create_g2 (BHD->dc, m, BHD->u2_fft); /* complex */
-  create_g2 (BHD->da, m, BHD->c2);
-  create_g2 (BHD->da, m, BHD->u_ini);
+  bgy3d_vec_create2 (BHD->da, m, BHD->u2);
+  bgy3d_vec_create2 (BHD->dc, m, BHD->u2_fft); /* complex */
+  bgy3d_vec_create2 (BHD->da, m, BHD->c2);
+  bgy3d_vec_create2 (BHD->da, m, BHD->u_ini);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -87,10 +67,10 @@ static void finalize_state (State *BHD, int m)
 {
   MPI_Barrier( PETSC_COMM_WORLD);
 
-  destroy_g2 (m, BHD->u2);
-  destroy_g2 (m, BHD->u2_fft);
-  destroy_g2 (m, BHD->u_ini);
-  destroy_g2 (m, BHD->c2);
+  bgy3d_vec_destroy2 (m, BHD->u2);
+  bgy3d_vec_destroy2 (m, BHD->u2_fft);
+  bgy3d_vec_destroy2 (m, BHD->u_ini);
+  bgy3d_vec_destroy2 (m, BHD->c2);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -972,10 +952,10 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
-  create_g2 (BHD->da, m, g);
-  create_g2 (BHD->dc, m, g_fft); /* complex */
-  create_g2 (BHD->da, m, du);
-  create_g2 (BHD->da, m, t);
+  bgy3d_vec_create2 (BHD->da, m, g);
+  bgy3d_vec_create2 (BHD->dc, m, g_fft); /* complex */
+  bgy3d_vec_create2 (BHD->da, m, du);
+  bgy3d_vec_create2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &du_new);
   DACreateGlobalVector (BHD->da, &du_new2);
@@ -988,7 +968,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     in bgy3d-poisson.c:
   */
   Vec x_lapl[m][m];             /* real */
-  create_g2 (BHD->da, m, x_lapl);
+  bgy3d_vec_create2 (BHD->da, m, x_lapl);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -1277,11 +1257,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
     }
 
-  destroy_g2 (m, g);
-  destroy_g2 (m, g_fft);
-  destroy_g2 (m, t);
-  destroy_g2 (m, du);
-  destroy_g2 (m, x_lapl);
+  bgy3d_vec_destroy2 (m, g);
+  bgy3d_vec_destroy2 (m, g_fft);
+  bgy3d_vec_destroy2 (m, t);
+  bgy3d_vec_destroy2 (m, du);
+  bgy3d_vec_destroy2 (m, x_lapl);
 
   VecDestroy (du_new);
   VecDestroy (du_new2);
@@ -1351,10 +1331,10 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
-  create_g2 (BHD->da, m, g);
-  create_g2 (BHD->dc, m, g_fft); /* complex */
-  create_g2 (BHD->da, m, du);
-  create_g2 (BHD->da, m, t);
+  bgy3d_vec_create2 (BHD->da, m, g);
+  bgy3d_vec_create2 (BHD->dc, m, g_fft); /* complex */
+  bgy3d_vec_create2 (BHD->da, m, du);
+  bgy3d_vec_create2 (BHD->da, m, t);
 
   DACreateGlobalVector (BHD->da, &du_new);
   DACreateGlobalVector (BHD->da, &du_new2);
@@ -1367,7 +1347,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
     in bgy3d-poisson.c:
   */
   Vec x_lapl[2][2];             /* real */
-  create_g2 (BHD->da, 2, x_lapl);
+  bgy3d_vec_create2 (BHD->da, 2, x_lapl);
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
@@ -1644,11 +1624,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
     }
 
-  destroy_g2 (m, g);
-  destroy_g2 (m, g_fft);
-  destroy_g2 (m, t);
-  destroy_g2 (m, du);
-  destroy_g2 (m, x_lapl);
+  bgy3d_vec_destroy2 (m, g);
+  bgy3d_vec_destroy2 (m, g_fft);
+  bgy3d_vec_destroy2 (m, t);
+  bgy3d_vec_destroy2 (m, du);
+  bgy3d_vec_destroy2 (m, x_lapl);
 
   VecDestroy (du_new);
   VecDestroy (du_new2);
