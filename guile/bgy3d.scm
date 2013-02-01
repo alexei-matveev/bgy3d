@@ -83,6 +83,7 @@
       (damp-start . 1.0)                ; scaling factor?
       (lambda . 0.02)))))               ; not the scheme lambda
 
+;;; FIXME: only works for 2-site solvent
 (define *g1-file-names* '("g0.bin" "g1.bin"))
 
 ;;;
