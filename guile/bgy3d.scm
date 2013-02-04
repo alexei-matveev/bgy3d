@@ -417,6 +417,8 @@ computes the sum of all vector elements."
      (value #f))
     (BGYM2Site                          ; solute + solvent run
      (value #f))
+    (from-radial-g2
+     (value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
