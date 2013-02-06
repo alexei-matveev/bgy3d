@@ -281,14 +281,27 @@ static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
 
           /* find x in array */
           for(k=0; k<=index; k++)
+            {
             if(r_s<xg[k])
               break;
+            }
+          /* in area where r_s < xg[0] */
           if(k==0)
             g2_vec[i[2]][i[1]][i[0]] = 0;
+          /* in area where r_s >= xg[index],
+           * fill the vector with 1.0
+           */
           else if(k>=index)
             g2_vec[i[2]][i[1]][i[0]] = 1.0;
           else
+            /* Linear interpolation here:
+             *                       x - x0
+             * y = y0 + (y1 - y0) * --------
+             *                      x1 - x0
+             */
             g2_vec[i[2]][i[1]][i[0]] = g[k] + (r_s-xg[k])*(g[k+1]-g[k])/(xg[k+1]-xg[k]);
+
+          /* FIXME: why do this?*/
           if(g2_vec[i[2]][i[1]][i[0]]<0)
             g2_vec[i[2]][i[1]][i[0]]=0;
         }
@@ -307,7 +320,7 @@ static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
 void bgy3d_vec_read_radial2 (const State *BHD,
                              const char *format, int m, /* const */ Vec g2[m][m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...");
+  PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...\n");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
