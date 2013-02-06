@@ -83,8 +83,12 @@
       (damp-start . 1.0)                ; scaling factor?
       (lambda . 0.02)))))               ; not the scheme lambda
 
-;;; FIXME: only works for 2-site solvent
-(define *g1-file-names* '("g0.bin" "g1.bin"))
+;;;
+;;; Only uses the length of g1 list to generate file names:
+;;;
+(define (g1-file-names g1)
+  (map (lambda (i) (format #f "g~A.bin" i)) ; no new line?
+       (iota (length g1))))
 
 ;;;
 ;;; Find a solute in a database or die:
@@ -369,7 +373,7 @@ computes the sum of all vector elements."
       ;;
       ;; Save g1-files to disk:
       ;;
-      (map vec-save *g1-file-names* g1)
+      (map vec-save (g1-file-names g1) g1)
       ;;
       ;; Use g1 vectors to produce a *.pun file for visualization:
       ;;
@@ -460,7 +464,7 @@ computes the sum of all vector elements."
         (let-values (((g1 ve) (bgy3d-run-solute (find-solute name)
                                                 '()))) ; Use defaults and Petsc env
           (bgy3d-pot-destroy ve)                       ; not yet used
-          (map vec-save *g1-file-names* g1)
+          (map vec-save (g1-file-names g1) g1)
           (map vec-destroy g1)))) ; dont forget to destroy them
      ;;
      ;; Fall through to the new variant:
@@ -507,7 +511,7 @@ computes the sum of all vector elements."
                     ;; solute in a row files will get overwritten:
                     ;;
                     (if save-binary
-                        (map vec-save *g1-file-names* g1))
+                        (map vec-save (g1-file-names g1) g1))
                     ;;
                     ;; Dont forget to destroy them:
                     ;;
