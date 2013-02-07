@@ -188,15 +188,9 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
               m1[j] += x[i][j] * v[i];
           }
 
-      /* broadcast results of each worker to total sums */
-      {
-        int err;
-        err = MPI_Allreduce (MPI_IN_PLACE, &m0, 1 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-        assert (err == MPI_SUCCESS);
-
-        err = MPI_Allreduce (MPI_IN_PLACE, m1, 3 , MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-        assert (err == MPI_SUCCESS);
-      }
+      /* Broadcast results of each worker to total sums: */
+      bgy3d_comm_allreduce (1, &m0);
+      bgy3d_comm_allreduce (3, m1);
 
       const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
       const real V = L * L * L;
