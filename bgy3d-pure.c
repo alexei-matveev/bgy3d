@@ -160,12 +160,11 @@ void ComputeFFTfromCoulomb (State *BHD,
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
 
-  /* FFT potential */
+  /* FFT^-1 potential ... */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
   VecScale (uc, 1./L/L/L);
 
-  /* FFT force, seems to be always requested: */
-  assert (fc != NULL);
+  /* ... and the corresponding force: */
   FOR_DIM
     {
       MatMultTranspose (BHD->fft_mat, fc_fft[dim], fc[dim]);
