@@ -1,20 +1,140 @@
+;;
+;; Application of an extended RISM equation to dipolar and quadrupolar
+;; fluids, Fumio  Hirata, B. Montgomery Pettitt, and  Peter J. Rossky,
+;; J. Chem. Phys. 77, 509 (1982), http://dx.doi.org/10.1063/1.443606
+;;
+;; TABLE 1. Models for dipolar diatomic fluids.
+;;
+;; Model       1^a        2^b      3^b
+;; -------------------------------------
+;; σ++ (A)     3.341     2.735    0.4
+;; σ-- (A)     3.341     3.353    3.353
+;; ε++ (K)    44.0      20.0     20.0
+;; ε-- (K)    44.0     259.0    259.0
+;; L+- (A)     1.1       1.257    1.3
+;; Z+- (e)^c   0.2       0.2      0.2
+;; T   (K)^d  72.0     210.0     210.0
+;; ρ (A^-3)^d  0.01867   0.018     0.018
+;;
+;; a)  N2-like  model.   b)  HCl-like  model;  H  corresponds  to  the
+;; positively  charged site,  and Cl  to the  negatively  charged.  c)
+;; Magnitude of site charge, if not zero, in units of the magnitude of
+;; the electronic  charge.  d) Thermodynamic conditions  used here for
+;; fluid.
+;;
+;; Density: 0.01867
+;; T =  72 K => beta = 6.9938
+;; T = 125 K => beta = 4.0284
+;;
+("dipolar nitrogen"
+ (("N+" (0.0 0.0 +0.55) 3.341 0.08738 +0.2)   ; ε = 44 K
+  ("N-" (0.0 0.0 -0.55) 3.341 0.08738 -0.2))) ; ε = 44 K
+
+;;
+;; Application of an extended RISM equation to dipolar and quadrupolar
+;; fluids, Fumio  Hirata, B. Montgomery Pettitt, and  Peter J. Rossky,
+;; J. Chem. Phys. 77, 509 (1982), http://dx.doi.org/10.1063/1.443606
+;;
+;; Density: 0.018
+;; T= 210 K => beta = 2.39788
+;; T= 420 K => beta = 1.1989
+;; T= 315 K => beta = 1.5985
+;;
 ("hydrogen chloride"
- (("H" (0.6285 0.0 0.0) 2.735 0.03971 0.2)
-  ("Cl" (-0.6285 0.0 0.0) 3.353 0.51434 -0.2)))
+ (("H" (0.6285 0.0 0.0) 2.735 0.03971 0.2)      ; ε = 20 K
+  ("Cl" (-0.6285 0.0 0.0) 3.353 0.51434 -0.2))) ; ε = 259 K
 
 ("hydrogen chloride z-aligned"
  (("H" (0.0 0.0 0.6285) 2.735 0.03971 0.2)
   ("Cl" (0.0 0.0 -0.6285) 3.353 0.51434 -0.2)))
 
+;;
+;; Parametrisierung CS2 nach Zhu:  H=S O=C
+;; sigma_H = 3.520   epsilon_H = 0.39500  q_H = 0.154
+;; sigma_O = 3.200  epsilon_O = 0.10128 q_O =-0.308
+;; r_OH = 1.56
+;; r_HH = 2*1.56
+;; theta_HOH = 180.0
+;; mass CS2 =  75.999432 u
+;; density = 1.263 g cm^-3 =  0.76059653 u/A^3 => 0.010007924 / A^3
+;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
+;; temperature : T= 360 K (? C) => 0.7149, => beta =1.3988
+;;
 ("carbon disulfide"
  (("C" (0.0 0.0 0.0) 3.2 0.10128 -0.308)
   ("S1" (-1.56 0.0 0.0) 3.52 0.395 0.154)
   ("S2" (1.56 0.0 0.0) 3.52 0.395 0.154)))
 
+;;
+;; Parametrisierung CS2 nach Tildesley:  H=S O=C
+;; sigma_H = 3.520   epsilon_H = 0.36341  q_H = 0
+;; sigma_O = 3.35  epsilon_O = 0.10168 q_O =0
+;; r_OH = 1.57
+;; r_HH = 2*1.57
+;; theta_HOH = 180.0
+;; mass CS2 =  75.999432 u
+;; density = 1.263 g cm^-3 =  0.76059653 u/A^3 => 0.010007924 / A^3
+;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
+;;
+("carbon disulfide, Tildesley"
+ (("C" (0.0 0.0 0.0) 3.35 0.10168 0.0)
+  ("S1" (-1.57 0.0 0.0) 3.52 0.36341 0.0)
+  ("S2" (+1.57 0.0 0.0) 3.52 0.36341 0.0)))
+
+;;
+;; Parametrisierung TIP3P :
+;; sigma_H = 0.400   epsilon_H = 0.046  q_H = 0.417
+;; sigma_O = 3.1506  epsilon_O = 0.1521 q_O =-0.834
+;; r_OH = 0.9572
+;; r_HH = 1.5139
+;; theta_HOH = 104.52
+;; mass H2O = 18.0154 u
+;; density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3
+;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
+;;
 ("water"
  (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
+
+;;
+;; Transferable  Potentials  for  Phase Equilibria.   1.   United-Atom
+;; Description of  n-Alkanes. Marcus G. Martin and  J.  Ilja Siepmann,
+;; J.   Phys.    Chem.   B,  1998,  102  (14),   pp  2569-2577.   DOI:
+;; 10.1021/jp972543+
+;;
+;; TABLE 1: Comparison of the Lennard-Jones Parameters for the OPLS
+;;          [7] SKS [9, 10] and TraPPE Force Fields
+;;
+;;                     OPLS        SKS            TraPPE
+;;               -------------- -------------- -------------
+;; pseudoatom    ε/kB [K] σ [Å] ε/kB [K] σ [Å] ε/kB [K] σ [Å]
+;; ----------------------------------------------------------
+;; CH4           147.9    3.73  N/A      N/A   148      3.73
+;; CH3 (ethane)  104.1    3.775 114      3.93   98      3.75
+;; CH3 (n-alkane) 88.1    3.905 114      3.93   98      3.75
+;; CH2            59.4    3.905 47       3.93   46      3.95
+;;
+;; Pseudoatoms are  connected by bonds with  a fixed length  of 1.53 Å
+;; for  the  OPLS model  and  1.54  Å for  the  SKS  and TraPPE  force
+;; fields. [...] The equilibrium angle θ0  is set to 112° for OPLS and
+;; 114° for SKS and TraPPE.
+;;
+;;
+;; Parametrisierung C3H8 nach Martin:  H=CH3 O=CH2
+;; sigma_H = 3.75   epsilon_H = 0.194616  q_H = 0
+;; sigma_O = 3.95  epsilon_O = 0.091350   q_O =0
+;; r_OH = 1.54
+;; theta_HOH = 114.0 => r_HH = 2.5831
+;; mass C3H8 =  44.0099 u
+;; density = 0.5077 kg/L =  0.3011071 u/A^3 => 0.0068418038 /A^3
+;; temperature : T= 200 K  => 0.3971755, => beta =2.5178
+;;
+;;
+("propane"
+ (("CH2" (+0.41937205696157085365 0.0 0.0) 3.95 0.091350 0.0)
+  ("CH3" (-0.41937205696157085365 +1.29155267463595300518 0.0) 3.75 0.194616 0.0)
+  ("CH3" (-0.41937205696157085365 -1.29155267463595300518 0.0) 3.75 0.194616 0.0)))
 
 ("methanol"
  (("C" (-0.748 -0.015 0.024) 3.5 0.066 0.145)
