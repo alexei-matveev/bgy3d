@@ -10,7 +10,7 @@
   2. Iterate  over the grid  doing something usefull with  the values,
      eg. computing the integral:
 
-       while ((n = bgy3d_pot_get_value (iter, chunk_size, x, v)))
+       while (bgy3d_pot_get_value (iter, chunk_size, x, v, &n))
          for (int i = 0; i < n; i++)
            ... do something with coordinates x[i] and values v[i] ...
 
