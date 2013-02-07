@@ -568,6 +568,7 @@ static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
 
   /* This declares and  sets a function pointer. If  the settings dont
