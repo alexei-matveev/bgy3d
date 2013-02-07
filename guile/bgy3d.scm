@@ -83,6 +83,7 @@
       (damp-start . 1.0)                ; scaling factor?
       (lambda . 0.02)))))               ; not the scheme lambda
 
+(define *default-molecule* "hydrogen chloride")
 ;;;
 ;;; Only uses the length of g1 list to generate file names:
 ;;;
@@ -343,6 +344,7 @@ computes the sum of all vector elements."
 (define (bgy3d-run name sites funptr)
   "To be called from QM code."
   (let ((settings bgy3d-settings)
+        (solvent (find-solute *default-molecule*)) ; FIXME: rename find-solute
         (solute (make-solute name
                              (update-sites name
                                            sites))))
@@ -365,11 +367,13 @@ computes the sum of all vector elements."
     ;;
     (bgy3d-run-solvent settings)        ; writes g??.bin files to disk
     ;;
-    ;; The function bgy3d-run-solute allocates and returns two Petsc
-    ;; Vecs in a list, it is the callers responsibility to destroy
-    ;; them:
+    ;; The  function bgy3d-run-solute allocates and returns  a list of
+    ;; Petsc Vecs and a potential (returned as multiple values). It is
+    ;; the callers responsibility to destroy all of them:
     ;;
-    (let-values (((g1 ve) (bgy3d-run-solute solute settings))) ; reads g??.bin
+    (let-values (((g1 ve) (bgy3d-run-solute solute
+                                            solvent
+                                            settings))) ; reads g??.bin
       ;;
       ;; Save g1-files to disk:
       ;;
@@ -460,8 +464,10 @@ computes the sum of all vector elements."
      ;; preset solutes from bgy3d-solutes.c:
      ;;
      ((option-ref opts 'BGYM2Site #f)
-      (let ((name (option-ref opts 'solute "hydrogen chloride")))
-        (let-values (((g1 ve) (bgy3d-run-solute (find-solute name)
+      (let ((solute (find-solute (option-ref opts 'solute *default-molecule*)))
+            (solvent (find-solute *default-molecule*)))
+        (let-values (((g1 ve) (bgy3d-run-solute solute
+                                                solvent
                                                 '()))) ; Use defaults and Petsc env
           (bgy3d-pot-destroy ve)                       ; not yet used
           (map vec-save (g1-file-names g1) g1)
@@ -500,9 +506,12 @@ computes the sum of all vector elements."
          ;; Check  if we can find  the solutes by names  early, typos are
          ;; common:
          ;;
-         (let ((solutes (map find-solute args)))
+         (let ((solutes (map find-solute args))
+               (solvent (find-solute *default-molecule*)))
            (map (lambda (solute)
-                  (let-values (((g1 ve) (bgy3d-run-solute solute settings)))
+                  (let-values (((g1 ve) (bgy3d-run-solute solute
+                                                          solvent
+                                                          settings)))
                     (bgy3d-pot-destroy ve) ; not yet used
                     ;;
                     ;; Save distributions if requested from command

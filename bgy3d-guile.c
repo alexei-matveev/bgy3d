@@ -548,24 +548,23 @@ static SCM guile_run_solvent (SCM alist)
 }
 
 
-static SCM guile_run_solute (SCM solute, SCM settings)
+static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
 
   int m;                        /* number of solvent sites */
-  const Site *solvent_sites;    /* solvent_sites[m] */
-
-  /* Get the number of solvent sites and their parameters: */
-  bgy3d_solvent_get (&m, &solvent_sites);
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
 
   int n;                        /* number of solute sites */
   Site *solute_sites;           /* solute_sites[n] */
   char *solute_name;
 
-  /* Get the  number of solunt  sites and their  parameters. Allocates
-     solute_sites, solute_name: */
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
@@ -596,6 +595,8 @@ static SCM guile_run_solute (SCM solute, SCM settings)
 
   free (solute_name);
   free (solute_sites);
+  free (solvent_name);
+  free (solvent_sites);
 
   /* Build a list starting from the tail: */
   SCM gs = SCM_EOL;
@@ -659,7 +660,7 @@ static SCM guile_bgy3d_module_init (void)
      all these gsubrs will be  module procedures available only in the
      module itself or by an explicit (use-modules ...): */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 2, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_run_solute);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
