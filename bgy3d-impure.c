@@ -516,9 +516,9 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 
 /*
   This function is the main entry  point for the BGY3dM equation for a
-  2-site solvent and an arbitrary solute.  The two vectors in
+  m-site solvent and an arbitrary solute.  The vectors in
 
-  Vec g[2], intent(out)
+  Vec g[m], intent(out)
 
   are  initialized as global  distributed arrays  and filled  with the
   solvent site  distributions. It is the responsibility  of the caller
@@ -547,7 +547,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   PetscScalar du_norm[m];
   int namecount = 0;
 
-  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (2-site) equation ...\n");
+  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (%d-site) equation ...\n", m);
 
   State *BHD = bgy3d_state_make (PD);
 
@@ -870,7 +870,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                   */
                   bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
 
-                  /* Add the contrinution of site j /= i to du[i]: */
+                  /* Add the contribution of site j /= i to du[i]: */
                   VecAXPY (du_acc, 1.0, work);
 
                   /*
@@ -970,9 +970,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                            maxval (m, du_norm), norm_tol, iter + 1, max_iter);
               break;
             }
-
         } /* iter loop */
-      /*************************************/
 
       /* FIXME:  Debug  output  from  every iteration  with  different
          overall scale factors damp.  Remove when no more needed. */
