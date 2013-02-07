@@ -398,17 +398,18 @@ computes the sum of all vector elements."
 ;;; integer numbers:
 ;;;
 (define option-spec-base
-  (map (lambda (op)
-         (quasiquote
-          ((unquote op)
-           (value #t)
-           (predicate (unquote string->number)))))
-       (map car bgy3d-settings)))       ; all of them are numbers
+  (let ((numeric (map (lambda (op)
+                        (quasiquote
+                         ((unquote op) (value #t) (predicate (unquote string->number)))))
+                      (map car bgy3d-settings)))) ; all of them are numbers
+    (quasiquote
+     ((from-radial-g2 (value #f))
+      (unquote-splicing numeric)))))
+
 
 (define option-spec-new
   (quasiquote
-   ((save-binary
-     (value #f))
+   ((save-binary	(value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
@@ -418,15 +419,10 @@ computes the sum of all vector elements."
 ;;;
 (define option-spec-all
   (quasiquote
-   ((solute                             ; a string
-     (value #t)
-     (predicate (unquote find-molecule)))
-    (BGY2Site                           ; pure solvent run
-     (value #f))
-    (BGYM2Site                          ; solute + solvent run
-     (value #f))
-    (from-radial-g2
-     (value #f))
+   ((solvent	(value #t)	(predicate (unquote find-molecule))) ; a string
+    (solute	(value #t)	(predicate (unquote find-molecule))) ; a string
+    (BGY2Site	(value #f))                ; pure solvent run
+    (BGYM2Site	(value #f))                ; solute + solvent run
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
@@ -465,7 +461,7 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'BGYM2Site #f)
       (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*)))
-            (solvent (find-molecule *default-molecule*)))
+            (solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
         (let-values (((g1 ve) (bgy3d-run-solute solute
                                                 solvent
                                                 '()))) ; Use defaults and Petsc env
@@ -489,6 +485,8 @@ computes the sum of all vector elements."
         (options	(getopt-long argv option-spec-new)))
     (let ((args                  ; positional arguments (solute names)
            (option-ref options '() '()))
+          (solvent
+           (find-molecule (option-ref options 'solvent *default-molecule*)))
           (save-binary
            (option-ref options 'save-binary #f))
           (settings               ; defaults updated from command line
@@ -506,8 +504,7 @@ computes the sum of all vector elements."
          ;; Check  if we can find  the solutes by names  early, typos are
          ;; common:
          ;;
-         (let ((solutes (map find-molecule args))
-               (solvent (find-molecule *default-molecule*)))
+         (let ((solutes (map find-molecule args)))
            (map (lambda (solute)
                   (let-values (((g1 ve) (bgy3d-run-solute solute
                                                           solvent
