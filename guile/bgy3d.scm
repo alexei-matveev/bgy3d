@@ -92,9 +92,9 @@
        (iota (length g1))))
 
 ;;;
-;;; Find a solute in a database or die:
+;;; Find a solute/solvent in a database or die:
 ;;;
-(define (find-solute name)
+(define (find-molecule name)
   (let ((solutes (slurp (find-file "guile/solutes.scm"))))
     (or (assoc name solutes)
         (error "Not in the list:" name (map first solutes)))))
@@ -176,7 +176,7 @@
 ;;;
 (define (update-sites table-name sites)
   (let* ((table                     ; fake solute with site-parameters
-          (solute-sites (find-solute table-name)))
+          (solute-sites (find-molecule table-name)))
          (update-one
           (lambda (site)
             (let* ((name (site-name site))
@@ -344,7 +344,7 @@ computes the sum of all vector elements."
 (define (bgy3d-run name sites funptr)
   "To be called from QM code."
   (let ((settings bgy3d-settings)
-        (solvent (find-solute *default-molecule*)) ; FIXME: rename find-solute
+        (solvent (find-molecule *default-molecule*))
         (solute (make-solute name
                              (update-sites name
                                            sites))))
@@ -420,7 +420,7 @@ computes the sum of all vector elements."
   (quasiquote
    ((solute                             ; a string
      (value #t)
-     (predicate (unquote find-solute)))
+     (predicate (unquote find-molecule)))
     (BGY2Site                           ; pure solvent run
      (value #f))
     (BGYM2Site                          ; solute + solvent run
@@ -458,14 +458,14 @@ computes the sum of all vector elements."
      ((option-ref opts 'BGY2Site #f)
       (bgy3d-run-solvent '()))          ; Use defaults and Petsc env
      ;;
-     ;; Solute  with solvent.  Note  that at variance with  the legacy
-     ;; code the function find-solute uses on-disk database of solutes
-     ;; in ./solutes.scm and not  the compiled in set of (currently) 6
-     ;; preset solutes from bgy3d-solutes.c:
+     ;; Solute with solvent.  Note that at variance with the legacy
+     ;; code the function find-molecule uses on-disk database in
+     ;; ./solutes.scm and not the compiled in set from bgy3d-solutes.c
+     ;; and bgy3d-solvents.h:
      ;;
      ((option-ref opts 'BGYM2Site #f)
-      (let ((solute (find-solute (option-ref opts 'solute *default-molecule*)))
-            (solvent (find-solute *default-molecule*)))
+      (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*)))
+            (solvent (find-molecule *default-molecule*)))
         (let-values (((g1 ve) (bgy3d-run-solute solute
                                                 solvent
                                                 '()))) ; Use defaults and Petsc env
@@ -506,8 +506,8 @@ computes the sum of all vector elements."
          ;; Check  if we can find  the solutes by names  early, typos are
          ;; common:
          ;;
-         (let ((solutes (map find-solute args))
-               (solvent (find-solute *default-molecule*)))
+         (let ((solutes (map find-molecule args))
+               (solvent (find-molecule *default-molecule*)))
            (map (lambda (solute)
                   (let-values (((g1 ve) (bgy3d-run-solute solute
                                                           solvent
