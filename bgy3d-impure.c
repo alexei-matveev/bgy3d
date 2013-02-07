@@ -800,9 +800,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
       real a1 = a0;             /* loop-local variable */
       for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
         {
-          /* Every nth iteration, starting with iter == 0: */
-          const bool nth = !(iter % 10);
-
+          const int nth = 10;
           /*
             "a =  a1" is taken in  iteration 0, 10, 20,  etc.  "a1" is
             modified during the loop.
@@ -812,7 +810,10 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
             Note that in the first iteration a1 == a0.
           */
-          const real a = nth? a1 : a0;
+
+          /* Every nth  iteration, raise the  mixing coefficients just
+             one time: */
+          const real a = (iter % nth == 0) ? a1 : a0;
 
           /*
             Some   functions,  such   as  bgy3d_solve_normalization(),
@@ -932,10 +933,12 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
           mycount++;
 
-          if ((iter - 1) % 10 && up)
+          if (iter % nth != 1 && up) /* not in the nth + 1 iteration */
             upwards = 1;
-          else if (iter > 20 && !((iter - 1) % 10) && upwards == 0 && up)
+          else if (iter > 2 * nth && iter % nth == 1 && upwards == 0 && up)
             {
+              /* In  the  nth +  1  iteration,  if  the norm  went  up
+                 decrease the mixing: */
               a1 = MAX (a1 / 2.0, a0);
               mycount = 0;
             }
@@ -944,7 +947,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
           /* Scale the coefficient "a1" up  by a factor, but make sure
              it is not above 1.0. Reset mycount. */
-          if (mycount > 20)
+          if (mycount > 2 * nth)
             {
               a1 = MIN (a1 * 2.0, 1.0);
               mycount = 0;
