@@ -18,10 +18,10 @@
 
 #define sH  3.341
 #define eH  0.08738
-#define qH  0.2
+#define qH  0.2                 /* sic! */
 #define sO  3.341
 #define eO  0.08738
-#define qO  -0.2
+#define qO  -0.2                /* sic! */
 
 #define r_HH  -1
 #define r_HO  1.1
