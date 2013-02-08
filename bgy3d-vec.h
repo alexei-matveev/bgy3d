@@ -32,11 +32,17 @@ void bgy3d_vec_read_radial2 (const State *BHD,
 void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
 
-static inline int vec_local_size (Vec xs)
+static inline int vec_local_size (Vec x)
 {
   int n;
-  VecGetLocalSize (xs, &n);
+  VecGetLocalSize (x, &n);
+  return n;
+}
 
+static inline int vec_size (Vec x)
+{
+  int n;
+  VecGetSize (x, &n);
   return n;
 }
 
@@ -49,11 +55,7 @@ static inline real bgy3d_vec_sum (Vec x)
 
 static inline real bgy3d_vec_avg (Vec x)
 {
-  /* FIXME: is there a better way? */
-  real n = vec_local_size (x);  /* real ... */
-  bgy3d_comm_allreduce (1, &n); /* ... because of this */
-
-  return bgy3d_vec_sum (x) / n;
+  return bgy3d_vec_sum (x) / vec_size (x);
 }
 
 static inline real bgy3d_vec_norm (Vec x)
