@@ -16,6 +16,8 @@
 
 
 
+static char helptext[] = "BGY3d Guile.\n";
+
 /*
   We  need  to  apply  either scm_from_uint32()  or  scm_from_uint64()
   depending on the size of intptr_t.   This would be a good use of C11
@@ -32,11 +34,17 @@
 # error "unknown pointer size!"
 #endif
 
-#define from_pointer(x) from_intptr ((intptr_t) (x))
-#define to_pointer(x) ((void*) to_intptr (x))
+/* The  const qualifier  might be  misleading  with all  the casts  to
+   integers and back: */
+static SCM from_pointer (const void *ptr)
+{
+  return from_intptr ((intptr_t) ptr);
+}
 
-static char helptext[] = "BGY3d Guile.\n";
-
+static void* to_pointer (SCM ptr)
+{
+  return (void*) to_intptr (ptr);
+}
 
 /* Update SCM value  with the entry from an  association list or leave
    it  unchanged if  there is  no corresponding  entry.  Alist  is not
