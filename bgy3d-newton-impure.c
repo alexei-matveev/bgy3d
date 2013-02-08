@@ -319,8 +319,8 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /* Compute g's from dg's */
   bgy3d_boundary_set (BHD, dgO, 0.0);
   bgy3d_boundary_set (BHD, dgH, 0.0);
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
 
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
 
@@ -354,7 +354,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   /***********************************************************/
   //gH_end:
 
-/*   ComputeH2O_g( ff,  BHD->g_ini[0] , dgH); */
+/*   bgy3d_compute_g (ff,  BHD->g_ini[0] , dgH); */
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
@@ -386,7 +386,7 @@ static PetscErrorCode ComputeH2OSFunction(SNES snes, Vec u, Vec f, void *data)
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
-/*   ComputeH2O_g( ff,  BHD->g_ini[1] , dgO); */
+/*   bgy3d_compute_g (ff,  BHD->g_ini[1] , dgO); */
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
@@ -506,8 +506,8 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
 
   bgy3d_boundary_set (BHD, dgO, 0.0);
   bgy3d_boundary_set (BHD, dgH, 0.0);
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
   //EnforceNormalizationCondition(BHD, dgO, dgH, gO, gH);
 
   /* Compute right hand side */
@@ -540,7 +540,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   /***********************************************************/
   //gH_end:
 
-/*   ComputeH2O_g( ff,  BHD->g_ini[0] , dgH); */
+/*   bgy3d_compute_g (ff,  BHD->g_ini[0] , dgH); */
 /*   VecAXPY(gH, -1.0, ff); */
 /*   VecCopy(gH, dgH); */
 
@@ -570,7 +570,7 @@ static PetscErrorCode ComputeH2OSFunctionFourier(SNES snes, Vec u, Vec f, void *
   VecAXPY(dgO, 2.0, help2);
   /***********************************************************/
   //gO_end:
-/*   ComputeH2O_g( ff,  BHD->g_ini[1] , dgO); */
+/*   bgy3d_compute_g (ff,  BHD->g_ini[1] , dgO); */
 /*   VecAXPY(gO, -1.0, ff); */
 /*   VecCopy(gO, dgO); */
 
@@ -677,8 +677,8 @@ static void WriteH2OSNewtonSolutionF(State *BHD, Vec u)
 
 
   /* Copmute g's from dg's */
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */
@@ -746,8 +746,8 @@ static void WriteH2OSNewtonSolution(State *BHD, Vec u)
   DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
 
   /* Copmute g's from dg's */
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */

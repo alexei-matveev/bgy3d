@@ -86,7 +86,7 @@ static void finalize_state (State *BHD, int m)
 }
 
 /* g := exp[-(u0 + du)], with a sanity check: */
-void ComputeH2O_g (Vec g, Vec u0, Vec du)
+void bgy3d_compute_g (Vec g, Vec u0, Vec du)
 {
   real pure f (real x, real y)
   {
@@ -1016,7 +1016,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             bgy3d_impose_laplace_boundary (BHD, u0[i][j], work, x_lapl[i][j]);
 
             /* g = g0 * exp(-du) */
-            ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
+            bgy3d_compute_g (g[i][j], u0[i][j], du[i][j]);
           }
 
       /* Not sure if 0.0 as inital value is right. */
@@ -1183,7 +1183,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       */
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
-          ComputeH2O_g (g[i][j], u0[i][j], du[i][j]);
+          bgy3d_compute_g (g[i][j], u0[i][j], du[i][j]);
 
       /* Fancy step  size control. FIXME:  weired logic. Code  used to
          check if *any* of the norms went up: */
@@ -1395,9 +1395,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       bgy3d_impose_laplace_boundary (BHD, u0[0][1], work, x_lapl[0][1]);
 
       /* g=g0*exp(-du) */
-      ComputeH2O_g (g[0][1], u0[0][1], du[0][1]);
-      ComputeH2O_g (g[0][0], u0[0][0], du[0][0]);
-      ComputeH2O_g (g[1][1], u0[1][1], du[1][1]);
+      bgy3d_compute_g (g[0][1], u0[0][1], du[0][1]);
+      bgy3d_compute_g (g[0][0], u0[0][0], du[0][0]);
+      bgy3d_compute_g (g[1][1], u0[1][1], du[1][1]);
 
       /* Not sure if 0.0 as inital value is right. */
       real du_norm_old[m][m];
@@ -1554,9 +1554,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           du_norm[1][1] = bgy3d_vec_mix (du[1][1], du_new, a, work);
 
           /* ende: */
-          ComputeH2O_g (g[0][1], u0[0][1], du[0][1]);
-          ComputeH2O_g (g[0][0], u0[0][0], du[0][0]);
-          ComputeH2O_g (g[1][1], u0[1][1], du[1][1]);
+          bgy3d_compute_g (g[0][1], u0[0][1], du[0][1]);
+          bgy3d_compute_g (g[0][0], u0[0][0], du[0][0]);
+          bgy3d_compute_g (g[1][1], u0[1][1], du[1][1]);
         } /* of if (1) */
 
       /* (fancy) step size control */

@@ -792,7 +792,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
           bgy3d_impose_laplace_boundary (BHD, u0[i], work, x_lapl[i]);
 
           /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
-          ComputeH2O_g (g[i], u0[i], du[i]);
+          bgy3d_compute_g (g[i], u0[i], du[i]);
         }
 
       /* Not sure if 0.0 as inital value is right. */
@@ -918,7 +918,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
             exp[-(u0 + du)], with a sanity check:
           */
           for (int i = 0; i < m; i++)
-            ComputeH2O_g (g[i], u0[i], du[i]);
+            bgy3d_compute_g (g[i], u0[i], du[i]);
 
           /* Fancy step  size control. FIXME: weired  logic. Code used
              to check if *any* of the norms went up: */
@@ -1479,8 +1479,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       bgy3d_impose_laplace_boundary (&BHD, g0[1], tH, x_lapl[1]);
 
       /* g=g0*exp(-dg) */
-      ComputeH2O_g( g[0], g0[0], dgH);
-      ComputeH2O_g( g[1], g0[1], dgO);
+      bgy3d_compute_g (g[0], g0[0], dgH);
+      bgy3d_compute_g (g[1], g0[1], dgO);
 
       a=a0;
       a1=a0;
@@ -1576,8 +1576,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
               VecNorm(work, NORM_INFINITY, &dgO_norm);
               PetscPrintf(PETSC_COMM_WORLD,"O= %e (a=%f) ", dgO_norm/a, a);
             }
-          ComputeH2O_g( g[0], g0[0], dgH);
-          ComputeH2O_g( g[1], g0[1], dgO);
+          bgy3d_compute_g (g[0], g0[0], dgH);
+          bgy3d_compute_g (g[1], g0[1], dgO);
 
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ", ComputeCharge (PD, 2, solvent, g));
 

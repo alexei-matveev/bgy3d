@@ -409,9 +409,9 @@ static PetscErrorCode ComputeH2OFunction(SNES snes, Vec u, Vec f, void *data)
   bgy3d_boundary_set (BHD, dgO, 0.0);
   bgy3d_boundary_set (BHD, dgH, 0.0);
   bgy3d_boundary_set (BHD, dgHO, 0.0);
-  ComputeH2O_g( gHO, BHD->gHO_ini, dgHO);
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gHO, BHD->gHO_ini, dgHO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
 
 
   /* Compute right hand side */
@@ -639,9 +639,9 @@ static void WriteH2ONewtonSolution(State *BHD, Vec u)
   DAVecRestoreArray(BHD->da_newton, u, (void*) &dg_struct);
 
   /* Copmute g's from dg's */
-  ComputeH2O_g( gHO, BHD->gHO_ini, dgHO);
-  ComputeH2O_g( gH,  BHD->g_ini[0] , dgH);
-  ComputeH2O_g( gO,  BHD->g_ini[1] , dgO);
+  bgy3d_compute_g (gHO, BHD->gHO_ini, dgHO);
+  bgy3d_compute_g (gH,  BHD->g_ini[0] , dgH);
+  bgy3d_compute_g (gO,  BHD->g_ini[1] , dgO);
 
   /*************************************/
   /* output */
