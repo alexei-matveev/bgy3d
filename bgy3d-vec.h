@@ -40,6 +40,43 @@ static inline int vec_local_size (Vec xs)
   return n;
 }
 
+static inline real bgy3d_vec_sum (Vec x)
+{
+  real sum;
+  VecSum (x, &sum);
+  return sum;
+}
+
+static inline real bgy3d_vec_avg (Vec x)
+{
+  /* FIXME: is there a better way? */
+  real n = vec_local_size (x);  /* real ... */
+  bgy3d_comm_allreduce (1, &n); /* ... because of this */
+
+  return bgy3d_vec_sum (x) / n;
+}
+
+static inline real bgy3d_vec_norm (Vec x)
+{
+  real norm;
+  VecNorm (x, NORM_INFINITY, &norm);
+  return norm;
+}
+
+static inline real bgy3d_vec_max (Vec x)
+{
+  real max;
+  VecMax (x, NULL, &max);      /* dont want location */
+  return max;
+}
+
+static inline real bgy3d_vec_min (Vec x)
+{
+  real min;
+  VecMin (x, NULL, &min);      /* dont want location */
+  return min;
+}
+
 /* ys  = map  (f, xs).  Should also  work with  aliased  arguments for
    in-place transform: */
 static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
