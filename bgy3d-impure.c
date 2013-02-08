@@ -203,23 +203,20 @@ static void kernel (const DA dc,
               k_fac = 0.0;
 
           /*
-           * Compute the  (Fourier transform of) of  the divergence of
-           * the "weighted force"  vector div (F g) which  serves as a
-           * convolution  kernel  in BGY3dM  equations.  Note the  the
-           * derivative in momentum space involves a factor -i so that
-           * real- and imaginary  parts of divergence are proportional
-           * to
-           *
-           *     Re = + dot(k, Im(F g))
-           *     Im = - dot(k, Re(F g))
-           *
-           * The  additional factor  -k^(-2)  effectively included  in
-           * k_fac recovers the Fourier transform of the corresponding
-           * Poisson solution.
+            Compute the  (Fourier transform  of) of the  divergence of
+            the "weighted  force" vector div  (F g) which serves  as a
+            convolution  kernel  in BGY3dM  equations.   Note the  the
+            derivative in momentum space involves a factor -I:
+
+                div = -I dot(k, (F g))
+
+            The  additional  factor  -k^(-2) effectively  included  in
+            k_fac recovers the  Fourier transform of the corresponding
+            Poisson solution.
            */
 
           /*
-            Complex  arithmetics here.   "I" is  a macro  expanding to
+            Complex arithmetics here.  "I"  is a macro expanding to an
             imaginary unit:
           */
           complex sum = 0.0;
