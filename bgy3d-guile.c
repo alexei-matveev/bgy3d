@@ -31,8 +31,8 @@
 # error "unknown pointer size!"
 #endif
 
-#define scmx_ptr(x) scmx_from_intptr ((intptr_t) (x))
-#define void_ptr(x) ((void*) scmx_to_intptr (x))
+#define from_pointer(x) scmx_from_intptr ((intptr_t) (x))
+#define to_pointer(x) ((void*) scmx_to_intptr (x))
 
 static char helptext[] = "BGY3d Guile.\n";
 
@@ -93,7 +93,7 @@ static bool alist_getopt_funptr (SCM alist, /* intent(in) */
   /* FIXME: potentially non-portable conversion of an integer to void*
      and then to function pointer, void (*)(): */
   if (test)
-    *val = void_ptr (scm);
+    *val = to_pointer (scm);
 
   return test;
 }
@@ -465,7 +465,7 @@ static int state_print (SCM state, SCM port, scm_print_state *pstate)
   const ProblemData *PD = BHD->PD;
 
   scm_puts ("#<state addr: ", port);
-  scm_display (scmx_ptr (BHD), port);
+  scm_display (from_pointer (BHD), port);
   scm_puts (", shape: ", port);
   for (int i = 0; i < 3; i++)
     {
@@ -484,7 +484,7 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
   const Vec c_vec = to_vec (vec);
 
   scm_puts ("#<vec addr: ", port);
-  scm_display (scmx_ptr (c_vec), port);
+  scm_display (from_pointer (c_vec), port);
   scm_puts (", length: ", port);
   scm_display (vec_length (vec), port);
   scm_puts (">", port);
@@ -604,7 +604,7 @@ static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
   for (int i = m - 1; i >= 0; i--)
     gs = scm_cons (from_vec (g[i]), gs);
 
-  SCM v = scmx_ptr (iter);
+  SCM v = from_pointer (iter);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
   return scm_values (scm_list_2 (gs, v));
@@ -614,7 +614,7 @@ static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
 
 static SCM guile_pot_destroy (SCM iter)
 {
-  bgy3d_pot_destroy (void_ptr (iter));
+  bgy3d_pot_destroy (to_pointer (iter));
 
   return scm_from_int (0);
 }
