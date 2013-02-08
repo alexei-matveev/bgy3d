@@ -114,7 +114,7 @@ static ProblemData problem_data (SCM alist)
   ProblemData PD = bgy3d_problem_data ();
 
   /* Overwrite  defaults with  the  data provided  in the  association
-     list. First real (double fprecision) options: */
+     list. First real (double precision) options: */
   alist_getopt_real (alist, "rho", &PD.rho);
   alist_getopt_real (alist, "beta", &PD.beta);
   alist_getopt_real (alist, "norm-tol", &PD.norm_tol);
