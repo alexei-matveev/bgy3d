@@ -1004,7 +1004,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   VecSet(du_new,0.0);
 
-  for (real damp = damp_start; damp <= 1; damp += 0.1)
+  for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);

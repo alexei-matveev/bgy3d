@@ -678,7 +678,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   if (bgy3d_getopt_test ("--load-H2O"))
     bgy3d_vec_read1 ("du%d.bin", m, du);
 
-  for (real damp = damp_start; damp <= 1; damp += 0.1)
+  for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       /*
         Return F  * g2.  Note the  calculation of F is  divided due to
