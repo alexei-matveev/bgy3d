@@ -761,10 +761,16 @@ void bgy3d_solute_solve (const ProblemData *PD,
       */
       bgy3d_solute_field (BHD,
                           m, solvent,
-                          u0, uc, uc_rho, /* intent(out) */
-                          n, solute,
-                          density, /* void (*density)(...) */
-                          (damp > 0.0 ? damp : 0.0), 1.0);
+                          u0, uc, uc_rho,      /* intent(out) */
+                          n, solute, density); /* void (*density)(...) */
+
+      /* Scale solute-solvent interactions: */
+      PetscPrintf (PETSC_COMM_WORLD,
+                   "Scaling solute-solvent interactions by %f\n", damp);
+      for (int i = 0; i < m; i++)
+        VecScale (u0[i], damp);
+      VecScale (uc, damp);
+      VecScale (uc_rho, damp);
 
       for (int i = 0; i < m; i++)
         {
@@ -1459,8 +1465,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
                             2, solvent,
                             g0, uc, /* intent(out) */
                             n, sites,
-                            NULL, /* void (*density)(...) */
-                            (damp > 0.0 ? damp : 0.0), damp_LJ);
+                            NULL); /* void (*density)(...) */
       }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);

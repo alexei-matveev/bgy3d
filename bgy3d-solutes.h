@@ -17,6 +17,5 @@ void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m == 2 */
                          Vec us[m], Vec uc, Vec uc_rho, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
-                         void (*density)(int k, const real x[k][3], real rho[k]),
-                         real damp, real damp_LJ);
+                         void (*density)(int k, const real x[k][3], real rho[k]));
 

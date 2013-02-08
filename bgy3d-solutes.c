@@ -46,7 +46,6 @@ static real ljc (const Site *A, int n, const Site S[n]);
  */
 static void field (DA da, const ProblemData *PD,
                    Site A, int n, const Site S[n],
-                   real fact,
                    real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v);
 
@@ -200,28 +199,25 @@ void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* m ~ 2 */
                          Vec us[m], Vec uc, Vec uc_rho, /* intent(out) */
                          int n, const Site solute[n], /* n arbitrary */
-                         void (*density)(int k, const real x[k][3], real rho[k]),
-                         real damp, real damp_LJ)
+                         void (*density)(int k, const real x[k][3], real rho[k]))
 {
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Computing solute data with damping factors %f, %f\n",
-               damp, damp_LJ);
+  PetscPrintf (PETSC_COMM_WORLD, "Computing solute data\n");
 
 
   /*
     Calculate FF potential for all solvent sites.
 
-    FIXME:  scaling the  epsilon of  the  solvent site  by factor  X^2
-    scales the interaction with the  solute by factor X. Why not using
-    this fact instead of handling damp/damp_LJ separately?  Similarly,
-    scaling the  solvent site  charge by a  factor scales  the Coulomb
-    interaction.  At  least in the  two test examples the  two factors
-    are  identical.   Initial  version  of  the code  scaled  LJ-  and
-    short-range Coulomb interaction  using two different factors.  The
-    new code uses just one, that is why the assertion:
+    Scaling  the  epsilon of  all  sites by  factor  X  scales the  LJ
+    site-site interaction with by the factor X.  Use this fact instead
+    of  handling  damp  factors  separately.  Similarly,  scaling  the
+    solvent site  charge by a  factor scales the  Coulomb interaction.
+    At least in  the two test examples the  two factors are identical.
+    Initial  version of the  code scaled  LJ- and  short-range Coulomb
+    interaction using  two different factors.
+
+    If want to scale all the interactions uniformly, you may choose to
+    scale the output of this funciton.
   */
-  assert (damp == damp_LJ);
-  assert (damp >= 0.0);
 
   /*
    * Fill the force field interaction of H and O (or other) sites with
@@ -232,24 +228,24 @@ void bgy3d_solute_field (const State *BHD,
    * solute.
    */
 #ifndef QM
-  for (int i = 0; i < m; i++)
-    field (BHD->da, BHD->PD, solvent[i], n, solute, damp, ljc, us[i]);
+  const real scale_coul_short = 1.0; /* regular case */
 #else
+  const real scale_coul_short = 0.0;
+#endif
   /*
-    At this place the (short range) Coulomb interaction of the solvent
-    site with  the solute was deliberately omitted  by specifying zero
-    charge of the solvent site.  This effectively makes a point charge
-    (Coulomb short + Coulomb  long) to a distributed Gaussian (Coulomb
-    long only).
+    In a special  case (ifdef QM) the short  range Coulomb interaction
+    of the  solvent site with  the solute was deliberately  omitted by
+    scaling charge of the solvent site down to zero.  This effectively
+    makes  a  point  charge  (Coulomb  short  +  Coulomb  long)  to  a
+    distributed Gaussian (Coulomb long only).
   */
   for (int i = 0; i < m; i++)
     {
-      Site neutral = solvent[i]; /* dont modify the global variable */
-      neutral.charge = 0.0;      /* modify a copy */
+      Site scaled = solvent[i];          /* dont modify the input */
+      scaled.charge *= scale_coul_short; /* modify a copy */
 
-      field (BHD->da, BHD->PD, neutral, n, solute, damp, ljc, us[i]);
+      field (BHD->da, BHD->PD, scaled, n, solute, ljc, us[i]);
     }
-#endif
 
   /*
    * Compute the charge density  of the solute.  The callback function
@@ -313,10 +309,6 @@ void bgy3d_solute_field (const State *BHD,
                    sum * dV);
     }
 
-  /* Scale  (down)  the  density   and  thus  also  the  (long  range)
-     electrostatic potential, usually damp == 1, though.  */
-  VecScale (uc_rho, damp);
-
   /*
     2.  Solve the Poisson equation, Δu = -4πρ/ε₀.
 
@@ -329,24 +321,23 @@ void bgy3d_solute_field (const State *BHD,
 }
 
 /*
- * Calculate a  real field "f"  for the solvent site  characterized by
- * (sigma,  epsilon, charge) in the presence  of the solute  S with an
- * overall factor "fact" at every point (x, y, z) of the local grid.
- *
- * The function f(x, y, z, eps, sig,  chg, S) can be ljc() or rho() as
- * two examples.
- *
- * Site  A  is intent(in)  but  has to  be  passed  by value  (copying
- * involved) at the  moment.  We are modifying coordinates  of a local
- * copy  and pass a  reference to  that copy  further to  the callback
- * function *f.  The coordinates of a site as passed to this functions
- * are ignored.
- *
- * Vector "v" is the intent(out) argument.
+  Calculate a  real field  "f" for the  solvent site  characterized by
+  (sigma, epsilon,  charge) in the presence  of the solute  S at every
+  point (x, y, z) of the local grid.
+
+  The function f(x, y,  z, eps, sig, chg, S) can be  ljc() or rho() as
+  two examples.
+
+  Site  A  is  intent(in) but  has  to  be  passed by  value  (copying
+  involved) at  the moment.  We  are modifying coordinates of  a local
+  copy  and pass  a reference  to that  copy further  to  the callback
+  function *f.  The coordinates of  a site as passed to this functions
+  are ignored.
+
+  Vector "v" is the intent(out) argument.
  */
 static void field (DA da, const ProblemData *PD,
                    Site A, int n, const Site S[n],
-                   real fact,
                    real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v)
 {
@@ -388,7 +379,7 @@ static void field (DA da, const ProblemData *PD,
                * by summing  (LJ) contributions from  all solute sites
                * at that grid point:
                */
-              vec[k][j][i] = fact * f (&A, n, S);
+              vec[k][j][i] = f (&A, n, S);
             }
         }
     }
