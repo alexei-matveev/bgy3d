@@ -16,23 +16,24 @@
 
 
 
-/* We  need  to apply  either  scm_from_uint32() or  scm_from_uint64()
-   depending on the size of intptr_t.  This would be a good use of C11
-   type generic macros.  SCMX stays  for SCM eXtension in order not to
-   confuse the  macros with those in  libguile.h. Here we  make use of
-   the macro defined by libguile.h for the size of intptr_t: */
+/*
+  We  need  to  apply  either scm_from_uint32()  or  scm_from_uint64()
+  depending on the size of intptr_t.   This would be a good use of C11
+  type  generic macros.   Here we  make use  of the  macro  defined by
+  libguile.h for the size of intptr_t:
+*/
 #if SCM_SIZEOF_INTPTR_T == 8
-# define scmx_from_intptr scm_from_uint64
-# define scmx_to_intptr scm_to_uint64
+# define from_intptr scm_from_uint64
+# define to_intptr scm_to_uint64
 #elif SCM_SIZEOF_INTPTR_T == 4
-# define scmx_from_intptr scm_from_uint32
-# define scmx_to_intptr scm_to_uint32
+# define from_intptr scm_from_uint32
+# define to_intptr scm_to_uint32
 #else
 # error "unknown pointer size!"
 #endif
 
-#define from_pointer(x) scmx_from_intptr ((intptr_t) (x))
-#define to_pointer(x) ((void*) scmx_to_intptr (x))
+#define from_pointer(x) from_intptr ((intptr_t) (x))
+#define to_pointer(x) ((void*) to_intptr (x))
 
 static char helptext[] = "BGY3d Guile.\n";
 
