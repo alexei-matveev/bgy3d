@@ -39,7 +39,7 @@ static inline int vec_local_size (Vec x)
   return n;
 }
 
-static inline int vec_size (Vec x)
+static inline int bgy3d_vec_size (Vec x)
 {
   int n;
   VecGetSize (x, &n);
@@ -55,7 +55,7 @@ static inline real bgy3d_vec_sum (Vec x)
 
 static inline real bgy3d_vec_avg (Vec x)
 {
-  return bgy3d_vec_sum (x) / vec_size (x);
+  return bgy3d_vec_sum (x) / bgy3d_vec_size (x);
 }
 
 static inline real bgy3d_vec_norm (Vec x)
