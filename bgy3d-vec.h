@@ -173,3 +173,9 @@ static inline real bgy3d_vec_integrate (DA da, real (*f)(real v, int i, int j, i
   return acc;
 }
 
+/* Returns sum (1 - g): */
+static inline real bgy3d_vec_hole (Vec g)
+{
+  /* FIXME: loss of precision possible here: */
+  return bgy3d_vec_size (g) - bgy3d_vec_sum (g);
+}

@@ -937,6 +937,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   for (int i = 0; i < m; i++)
     rhos[i] = PD->rho;
 
+  /* Here dN is rho * dV, with dV being the weight of a grid point: */
+  const real dN = PD->rho * PD->h[0] * PD->h[1] * PD->h[2];
+  {
+    const int N3 =  PD->N[0] * PD->N[1] * PD->N[2];
+    PetscPrintf (PETSC_COMM_WORLD, "Number of solvent molecules is %f\n", N3 * dN);
+  }
+
   /* Mixing parameter: */
   const real a0 = PD->lambda;
 
@@ -1231,6 +1238,14 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         for (int j = 0; j <= i; j++)
           PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
                        solvent[i].name, solvent[j].name, du_norm[i][j]);
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          PetscPrintf (PETSC_COMM_WORLD,
+                       "h(%s-%s)=% f ",
+                       solvent[i].name,
+                       solvent[j].name,
+                       dN * bgy3d_vec_hole (g[i][j]));
 
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");

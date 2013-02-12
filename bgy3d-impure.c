@@ -560,6 +560,13 @@ void bgy3d_solute_solve (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     rhos[i] = PD->rho;          /* 2 * PD->rho; */
 
+  /* Here dN is rho * dV, with dV being the weight of a grid point: */
+  const real dN = PD->rho * PD->h[0] * PD->h[1] * PD->h[2];
+  {
+    const int N3 =  PD->N[0] * PD->N[1] * PD->N[2];
+    PetscPrintf (PETSC_COMM_WORLD, "Number of solvent molecules is %f\n", N3 * dN);
+  }
+
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
   Vec g2[m][m];               /* solvent-solvent pair distributions */
@@ -962,6 +969,12 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
           for (int i = 0; i < m; i++)
             PetscPrintf (PETSC_COMM_WORLD, "%s=%e ", solvent[i].name, du_norm[i]);
+
+          for (int i = 0; i < m; i++)
+            PetscPrintf (PETSC_COMM_WORLD,
+                         "h(%s)=% f ",
+                         solvent[i].name,
+                         dN * bgy3d_vec_hole (g[i]));
 
           PetscPrintf (PETSC_COMM_WORLD, "Q=% e ", ComputeCharge (PD, m, solvent, g));
           PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
