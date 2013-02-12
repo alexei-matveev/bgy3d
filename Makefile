@@ -84,7 +84,8 @@ libbgy3d.a = \
 
 ifeq ($(WITH_GUILE),1)
 	libbgy3d.a += bgy3d-guile.o
-	LIBS += -lguile
+	LIBS += $(shell guile-config link)
+	INCDIRS += $(shell guile-config compile)
 	USERFLAGS += -DWITH_GUILE
 endif
 
