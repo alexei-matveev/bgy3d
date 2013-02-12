@@ -3,6 +3,9 @@
 /* FIXME: any better way? */
 #include <complex.h>
 
+Vec bgy3d_vec_create (const DA da);
+void bgy3d_vec_destroy (Vec g);
+
 void bgy3d_vec_create1 (const DA da, int m, Vec g[m]);
 void bgy3d_vec_destroy1 (int m, Vec g[m]);
 
