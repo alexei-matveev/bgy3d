@@ -304,24 +304,22 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 {
   /* Real  work  vectors,  re-used   for  all  m(m+1)/2  solvent  site
      pairs. */
-  Vec u2, fs[3], fl[3];
-
-  DACreateGlobalVector (BHD->da, &u2);
+  Vec u2 = bgy3d_vec_create (BHD->da);
+  Vec fs[3], fl[3];
   FOR_DIM
     {
-      DACreateGlobalVector (BHD->da, &fs[dim]);
-      DACreateGlobalVector (BHD->da, &fl[dim]);
+      fs[dim] = bgy3d_vec_create (BHD->da);
+      fl[dim] = bgy3d_vec_create (BHD->da);
     }
 
   /* Complex work vectors, re-used for all pairs: */
-  Vec kl_fft, u2_fft, fs_g2_fft[3], fl_g2_fft[3];
-
-  DACreateGlobalVector (BHD->dc, &kl_fft);
-  DACreateGlobalVector (BHD->dc, &u2_fft);
+  Vec kl_fft = bgy3d_vec_create (BHD->dc);
+  Vec u2_fft = bgy3d_vec_create (BHD->dc);
+  Vec fs_g2_fft[3], fl_g2_fft[3];
   FOR_DIM
     {
-      DACreateGlobalVector (BHD->dc, &fs_g2_fft[dim]);
-      DACreateGlobalVector (BHD->dc, &fl_g2_fft[dim]);
+      fs_g2_fft[dim] = bgy3d_vec_create (BHD->dc);
+      fl_g2_fft[dim] = bgy3d_vec_create (BHD->dc);
     }
 
   /* Over all pairs: */
@@ -457,9 +455,8 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    electrostatic field and a surface charge on that metallic cage:
   */
   {
-    Vec x, work;
-    DACreateGlobalVector (BHD->da, &x);
-    DACreateGlobalVector (BHD->da, &work);
+    Vec x = bgy3d_vec_create (BHD->da);
+    Vec work = bgy3d_vec_create (BHD->da);
 
     bgy3d_impose_laplace_boundary (BHD, ve, work, x);
 
@@ -538,9 +535,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
 
-  Vec uc;                    /* Coulomb long, common for all sites. */
-  Vec uc_rho;                /* eletron density for integration */
-  Vec du[m], du_acc, work;
+  Vec du[m];
   PetscScalar du_norm[m];
   int namecount = 0;
 
@@ -632,9 +627,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
     for (int i = 0; i < m; i++)
       for (int j = 0; j < i; j++)
         {
-          DACreateGlobalVector (BHD->dc, &omega[i][j]);
+          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
           bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
-          omega[j][i] = omega[i][j];
         }
   }
 
@@ -661,13 +655,16 @@ void bgy3d_solute_solve (const ProblemData *PD,
     momentum space back, accumulate them on the k-grid in this complex
     Vec:
   */
-  Vec du_acc_fft;
-  DACreateGlobalVector (BHD->dc, &du_acc_fft); /* complex */
+  Vec du_acc_fft = bgy3d_vec_create (BHD->dc); /* complex */
 
-  DACreateGlobalVector (BHD->da, &du_acc);
-  DACreateGlobalVector (BHD->da, &work);
-  DACreateGlobalVector (BHD->da, &uc);    /* common for all sites */
-  DACreateGlobalVector (BHD->da, &uc_rho);
+  Vec du_acc = bgy3d_vec_create (BHD->da);
+  Vec work = bgy3d_vec_create (BHD->da);
+
+  /* Coulomb long, common for all sites: */
+  Vec uc = bgy3d_vec_create (BHD->da);
+
+  /* Electron density for integration: */
+  Vec uc_rho = bgy3d_vec_create (BHD->da);
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -1011,10 +1008,11 @@ void bgy3d_solute_solve (const ProblemData *PD,
     solvent:
   */
   {
-    Vec ve;                 /* solvent electrostaic potential field */
-    Vec ve_rho;             /* keep solvent charge density for integration */
-    DACreateGlobalVector (BHD->da, &ve);
-    DACreateGlobalVector (BHD->da, &ve_rho);
+    /* Solvent electrostaic potential field: */
+    Vec ve = bgy3d_vec_create (BHD->da);
+
+    /* Keep solvent charge density for integration: */
+    Vec ve_rho = bgy3d_vec_create (BHD->da);
 
     /* This fills Vec ve with solvent electrostatic potential: */
     bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);

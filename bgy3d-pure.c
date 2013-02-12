@@ -49,15 +49,12 @@ static State* initialize_state (const ProblemData *PD, int m)
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
-          DACreateGlobalVector (BHD->da, &BHD->F[i][j][dim]);
-          BHD->F[j][i][dim] = BHD->F[i][j][dim];
-
-          DACreateGlobalVector (BHD->da, &BHD->F_l[i][j][dim]);
-          BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim];
+          BHD->F[j][i][dim] = BHD->F[i][j][dim] = bgy3d_vec_create (BHD->da);
+          BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim] = bgy3d_vec_create (BHD->da);
         }
 
   /* Allocate more memory for fft */
-  DACreateGlobalVector (BHD->dc, &BHD->gfg2_fft);       /* complex */
+  BHD->gfg2_fft = bgy3d_vec_create (BHD->dc);       /* complex */
 
   return BHD;
 }
@@ -904,7 +901,6 @@ void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du)
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
-  Vec du_new, du_new2, work;
   int namecount=0;
 
   int m;                        /* number of solvent sites */
@@ -963,9 +959,9 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_create2 (BHD->da, m, du);
   bgy3d_vec_create2 (BHD->da, m, t);
 
-  DACreateGlobalVector (BHD->da, &du_new);
-  DACreateGlobalVector (BHD->da, &du_new2);
-  DACreateGlobalVector (BHD->da, &work);
+  Vec du_new = bgy3d_vec_create (BHD->da);
+  Vec du_new2 = bgy3d_vec_create (BHD->da);
+  Vec work = bgy3d_vec_create (BHD->da);
 
 #ifdef L_BOUNDARY
   /*
@@ -992,9 +988,8 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     for (int i = 0; i < m; i++)
       for (int j = 0; j < i; j++)
         {
-          DACreateGlobalVector (BHD->dc, &omega[i][j]);
+          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
           bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
-          omega[j][i] = omega[i][j];
         }
   }
 
