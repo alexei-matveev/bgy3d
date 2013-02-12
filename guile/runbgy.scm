@@ -6,9 +6,17 @@
 ;;; your own bgy3d interpreter, if necessary.
 ;;;
 ;;; To find the  custom modules (and solute tables)  extend the module
-;;; search path to contain a path to the BGY3d repository:
+;;; search path to contain a path to the BGY3d repository. This should
+;;; work with  both 1.8  and 2.0.  Use  absolute paths  when extending
+;;; %load-path --- there is no globbing for ~/ at compile time.
 ;;;
-(set! %load-path (cons "/users/alexei/darcs/bgy3d" %load-path))
+(cond-expand
+ ((not guile-2) (use-modules (ice-9 syncase))) ; eval-when for 1.8
+ (else))                                ; nothing
+
+(eval-when
+ (eval load compile)      ; extend %load-path at compile time with 2.0
+ (set! %load-path (cons "/users/alexei/darcs/bgy3d" %load-path)))
 
 (use-modules ((guile bgy3d)
               #:select
