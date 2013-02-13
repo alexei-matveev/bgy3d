@@ -248,13 +248,12 @@ static void pair (State *BHD,
 
             r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-            /* Lennard-Jones  and  Coulomb  short.  Note the  beta  as
-               factor: */
-            u_ini_[i[2]][i[1]][i[0]] += beta *
-              (damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
-               damp * Coulomb_short (r_s, q2));
+            /* Lennard-Jones and Coulomb short potential: */
+            u_ini_[i[2]][i[1]][i[0]] +=
+              damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
+              damp * Coulomb_short (r_s, q2);
 
-            /* Lennard-Jones and Coulomb short. No beta as factor: */
+            /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
               f_short_[dim][i[2]][i[1]][i[0]] +=
                 damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
@@ -295,6 +294,9 @@ static void RecomputeInitialData (State *BHD,
               BHD->u_ini[i][j], BHD->c2[i][j],
               BHD->u2[i][j], BHD->u2_fft[i][j],
               damp, damp_LJ);
+
+        /* Was previousely done in pair(): */
+        VecScale (BHD->u_ini[i][j], BHD->PD->beta);
       }
 }
 
