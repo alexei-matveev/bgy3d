@@ -2,12 +2,6 @@
 
 void bgy3d_compute_g (Vec g, Vec u0, Vec du);
 
-void ComputeFFTfromCoulomb (State *BHD,
-                            Vec uc, Vec fc[3], /* intent(out) */
-                            Vec uc_fft,    /* complex, intent(out) */
-                            Vec fc_fft[3], /* complex, intent(out) */
-                            real factor);
-
 void bgy3d_pair (State *BHD,
                  const real LJ_params[3],
                  Vec f_short[3], Vec f_long[3],

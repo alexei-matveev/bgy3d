@@ -103,11 +103,11 @@ void bgy3d_compute_g (Vec g, Vec u0, Vec du)
 
   No side effects.
 */
-void ComputeFFTfromCoulomb (State *BHD,
-                            Vec uc, Vec fc[3], /* intent(out) */
-                            Vec uc_fft,    /* complex, intent(out) */
-                            Vec fc_fft[3], /* complex, intent(out) */
-                            real factor)
+static void ComputeFFTfromCoulomb (State *BHD,
+                                   Vec uc, Vec fc[3], /* intent(out) */
+                                   Vec uc_fft,    /* complex, intent(out) */
+                                   Vec fc_fft[3], /* complex, intent(out) */
+                                   real factor)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
