@@ -26,6 +26,7 @@
 */
 
 #include "bgy3d.h"
+#include "bgy3d-vec.h"
 #include "bgy3d-potential.h"
 
 /*
@@ -66,13 +67,11 @@ Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
   /* memory for context pointer */
   Context *s = malloc (sizeof *s);
 
-  s->da = da;
-  PetscObjectReference ((PetscObject) s->da); /* DADestroy() it! */
+  s->da = bgy3d_da_ref (da);    /* DADestroy() it! */
 
   /* Do not copy the input  vector, save a reference instead, but also
      increment the refcount. We will have to VecDestroy() it too: */
-  s->v = v;
-  PetscObjectReference ((PetscObject) s->v);
+  s->v = bgy3d_vec_ref (v);
 
   /* From  now  on  v_[k][j][i]  can   be  used  to  access  a  vector
      element: */

@@ -722,13 +722,12 @@ static void lap_mat_create (const DA da, const real h[3],
     sizes.   Copy contents,  the  there are  no  guarantees about  the
     life-time of the object pointed to:
   */
-  lap->da = da;
   for (int i = 0; i < 3; i ++)
     lap->h[i] = h[i];
 
   /* We will  DADestroy() it in  mat_destroy(), but it came  from user
      space, so increment the refcount: */
-  PetscObjectReference ((PetscObject) lap->da);
+  lap->da = bgy3d_da_ref (da);
 
   /* This is used to copy  over the boundary values: */
   if (vol)
