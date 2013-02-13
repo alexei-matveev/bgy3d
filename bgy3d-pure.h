@@ -8,6 +8,13 @@ void ComputeFFTfromCoulomb (State *BHD,
                             Vec fc_fft[3], /* complex, intent(out) */
                             real factor);
 
+void bgy3d_pair (State *BHD,
+                 const real LJ_params[3],
+                 Vec f_short[3], Vec f_long[3],
+                 Vec u_ini, Vec c2,
+                 Vec u2, Vec u2_fft,
+                 real damp, real damp_LJ);
+
 void bgy3d_omega (const ProblemData *PD, const DA dc, real rab, Vec w_fft);
 void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du);
 

@@ -171,33 +171,28 @@ void ComputeFFTfromCoulomb (State *BHD,
 
 
 /* Precompute forces and more for a pair: */
-static void pair (State *BHD,
-                  const real LJ_params[3],
-                  Vec f_short[3], Vec f_long[3],
-                  Vec u_ini, Vec c2,
-                  Vec u2, Vec u2_fft,
-                  real damp, real damp_LJ)
+void bgy3d_pair (State *BHD,
+                 const real LJ_params[3],
+                 Vec f_short[3], Vec f_long[3],
+                 Vec u_ini, Vec c2,
+                 Vec u2, Vec u2_fft,
+                 real damp, real damp_LJ)
 {
-  DA da;
-  PetscScalar ***u_ini_;
-  PetscScalar ***(f_short_[3]);
-  PetscScalar ***c2_;
-  real r[3], r_s, h[3], interval[2], beta, L;
-
   /* LJ parameters of pair interaction and charge product: */
-  const real epsilon = LJ_params[0];
-  const real sigma = LJ_params[1];
-  const real q2 = LJ_params[2];
+  const real epsilon = LJ_params[0]; /* geometric average of two */
+  const real sigma = LJ_params[1];   /* arithmetic average of two */
+  const real q2 = LJ_params[2];      /* charge product */
 
   const ProblemData *PD = BHD->PD;
-  da = BHD->da;
+  const DA da = BHD->da;
 
+  real h[3];
   FOR_DIM
     h[dim] = PD->h[dim];
 
-  interval[0] = PD->interval[0];
-  L = PD->interval[1]-PD->interval[0];
-  beta = PD->beta;
+  const real L = PD->interval[1] - PD->interval[0];
+  const real off = PD->interval[0];
+  const real beta = PD->beta;
 
   /* FIXME: only periodic[0] == {0.0, 0.0, 0.0} appears to be used: */
   real periodic[27][3] = \
@@ -209,32 +204,54 @@ static void pair (State *BHD,
      {0, L, L}, {0, -L, L}, {0, L, -L}, {0, -L, -L},
      {L, 0, L}, {-L, 0, L}, {L, 0, -L}, {-L, 0, -L}};
 
-  /* Get local portion of the r-grid */
-  int x[3], n[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-   FOR_DIM
+  FOR_DIM
     {
       VecSet (f_short[dim], 0.0);
       VecSet (f_long[dim], 0.0);
     }
-  VecSet (u_ini, 0.0);
 
-  /*********************************************/
-  /* Compute fft from Coulomb potential (long) */
-  /********************************************/
+  if (u_ini)
+    VecSet (u_ini, 0.0);
 
-  /* FFT image of Coulomb long  force in BHD->fg2_fft[3] appears to be
-     ignored since overwritten. So here these are work arrays: */
+  /* FIXME: see how c2 is being assigned, not incremented! */
+
+  /*
+    Compute long-range  Coulomb potential and  corresponding forces by
+    FFT.
+
+    Here Vec u2  and a complex array u2_fft[]  both are intent(out) in
+    the next call.  The Vec f_long[], intent(out), is  filled with the
+    corresponding force.   Performs 4 FFTs.  Again note that  the only
+    difference for all u2[i][j] and their FFT transform is the overall
+    scaling factor  q[i] * q[j].  FIXME: why  keeping O(m^2) versions,
+    with m being number of solvent sites, of almost the same field and
+    repeating unnecessary FFTs?
+
+    Side effects: fills BHD->fg2_fft[3] with FFT of long range Coulomb
+    force.  Though it  does  not appear  to  be used  further in  this
+    branch.
+  */
   ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->fg2_fft, q2 * damp);
 
-  FOR_DIM
-    VecAXPY (f_short[dim], 1.0, f_long[dim]);
+  /*
+    Sort-range  potential/force is  specific  for each  pair, on  the
+    other hand:
+  */
+  PetscScalar ***u_ini_;
+  if (u_ini)
+    DAVecGetArray (da, u_ini, &u_ini_);
 
-  DAVecGetArray (da, u_ini, &u_ini_);
-  DAVecGetArray (da, c2, &c2_);
+  PetscScalar ***c2_;
+  if (c2)
+    DAVecGetArray (da, c2, &c2_);
+
+  PetscScalar ***(f_short_[3]);
   FOR_DIM
     DAVecGetArray (da, f_short[dim], &f_short_[dim]);
+
+  /* Get local portion of the grid */
+  int x[3], n[3], i[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -243,15 +260,17 @@ static void pair (State *BHD,
         for (int cell = 0; cell < 1; cell++) /* FIXME: one of 27 unit cells */
           {
             /* set force vectors */
+            real r[3];
             FOR_DIM
-              r[dim] = i[dim] * h[dim] + interval[0] + periodic[cell][dim];
+              r[dim] = i[dim] * h[dim] + off + periodic[cell][dim];
 
-            r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
+            const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
             /* Lennard-Jones and Coulomb short potential: */
-            u_ini_[i[2]][i[1]][i[0]] +=
-              damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
-              damp * Coulomb_short (r_s, q2);
+            if (u_ini)
+              u_ini_[i[2]][i[1]][i[0]] +=
+                damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
+                damp * Coulomb_short (r_s, q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
@@ -261,12 +280,15 @@ static void pair (State *BHD,
 
             /* Deterministic   correction.   FIXME:   assignment,  not
                increment here as a sum over cells would imply, why?*/
-            c2_[i[2]][i[1]][i[0]] =
-              exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
+            if (c2)
+              c2_[i[2]][i[1]][i[0]] =
+                exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
           }
 
-  DAVecRestoreArray (da, u_ini, &u_ini_);
-  DAVecRestoreArray (da, c2, &c2_);
+  if (u_ini)
+    DAVecRestoreArray (da, u_ini, &u_ini_);
+  if (c2)
+    DAVecRestoreArray (da, c2, &c2_);
   FOR_DIM
     DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
 }
@@ -289,14 +311,25 @@ static void RecomputeInitialData (State *BHD,
         ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
         ff_params[2] = solvent[i].charge * solvent[j].charge;
 
-        pair (BHD, ff_params,
-              BHD->F[i][j], BHD->F_l[i][j],
-              BHD->u_ini[i][j], BHD->c2[i][j],
-              BHD->u2[i][j], BHD->u2_fft[i][j],
-              damp, damp_LJ);
+        /*
+          This  computes short-  and  long-rage forces,  corresponding
+          potentials and more. Note  that we put the short-range force
+          into BHD->F temporarily:
+        */
+        bgy3d_pair (BHD, ff_params,
+                    BHD->F[i][j], BHD->F_l[i][j],
+                    BHD->u_ini[i][j], BHD->c2[i][j],
+                    BHD->u2[i][j], BHD->u2_fft[i][j],
+                    damp, damp_LJ);
 
         /* Was previousely done in pair(): */
         VecScale (BHD->u_ini[i][j], BHD->PD->beta);
+
+        /* BHD->F[][]  is a  total force,  apparently.  Long  range is
+           stored also separately: */
+        FOR_DIM
+          VecAXPY (BHD->F[i][j][dim], 1.0, BHD->F_l[i][j][dim]);
+
       }
 }
 

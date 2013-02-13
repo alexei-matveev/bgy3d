@@ -41,65 +41,10 @@ static void  pair (State *BHD,
                    Vec fl_g2_fft[3],              /* intent(out) */
                    Vec u2, Vec u2_fft)            /* intent(out) */
 {
-  const real epsilon = LJ_params[0]; /* geometric average of two */
-  const real sigma = LJ_params[1];   /* arithmetic average of two */
-  const real q2 = LJ_params[2];      /* charge product */
-
-  const ProblemData *PD = BHD->PD;
-  const real *h = PD->h;        /* h[3] */
-  const DA da = BHD->da;
-  const real off = PD->interval[0];
-
-  /*
-    Compute Coulomb from fft part.
-
-    Here Vec u2  and a complex array u2_fft[]  both are intent(out) in
-    the next call.  The Vec f_long[], intent(out), is  filled with the
-    corresponding force.   Performs 4 FFTs.  Again note that  the only
-    difference for all u2[i][j] and their FFT transform is the overall
-    scaling factor  q[i] * q[j].  FIXME: why  keeping O(m^2) versions,
-    with m being number of solvent sites, of almost the same field and
-    repeating unnecessary FFTs?
-
-    Side effects: fills BHD->fg2_fft[3] with FFT of long range Coulomb
-    force.  Though it  does  not appear  to  be used  further in  this
-    branch.
-  */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->fg2_fft, q2);
-
-  /*
-    Sort-range  potential/force is  specific  for each  pair, on  the
-    other hand:
-  */
-  PetscScalar ***f_short_[3];
-  FOR_DIM
-    DAVecGetArray (da, f_short[dim], &f_short_[dim]);
-
-  /* Get local portion of the grid */
-  int x[3], n[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          real r[3], r_s;
-          /* set force vectors */
-          FOR_DIM
-            r[dim] = i[dim] * h[dim] + off; /* FIXME: offset */
-
-          r_s = sqrt (SQR(r[0]) + SQR(r[1]) + SQR(r[2]));
-
-          /* Lennard-Jones + Coulomb short */
-          FOR_DIM
-            f_short_[dim][i[2]][i[1]][i[0]] =
-            Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
-            Coulomb_short_grad (r_s, r[dim], q2);
-        }
-
-  FOR_DIM
-    DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
+  /* Compute  forces  and long-range  Coulomb  (in  both  reps) for  a
+     pair: */
+  bgy3d_pair (BHD, LJ_params, f_short, f_long, NULL, NULL, u2, u2_fft,
+              1.0, 1.0);
 
   /*
     Compute weighted forces FFT(F *  g^2). Here star is a product, not
