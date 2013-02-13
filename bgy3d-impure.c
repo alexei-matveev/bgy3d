@@ -102,57 +102,71 @@ static void  pair (State *BHD,
     DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
 
   /*
-    Compute FFT(F * g^2).
+    Compute weighted forces FFT(F *  g^2). Here star is a product, not
+    a convolution.
 
-    F * g2 = (F_LJ + F_coulomb_short) * g2
-           + (F_coulomb_long * g2 - F_coulomb_long)
-           + F_coulomb_long
+           (2)                 (2)          (2)
+      F * g   = (F   + F  ) * g    + (F  * g   - F  ) + F
+                  LJ    CS             CL         CL     CL
 
-    see (5.101) and (5.102) in Jager's thesis. FFT(F_coulomb_long) has
-    been calculated  as u2_fft by  ComputeFFTfromCoulomb() above.  The
-    code needs at least one work vector, use this:
+    (LJ is Lennard-Jones, CS is Coulomb short, CL is Coulomb long).
+
+    See (5.101) and (5.102)  in Jager's thesis.  The k-representations
+    of  the  first  two  terms  will be  stored  in  fs_g2_fft[3]  and
+    fl_g2_fft[3], respectively.  Note that the latter, fl_g2_fft[], is
+    a long-range  force weighted by  g2 - 1  and not g2.   The missing
+    FFT(F_CL)  has  been  calculated  by  ComputeFFTfromCoulomb()  but
+    discarded.  The code needs at least one work vector, use this:
   */
   Vec work = BHD->v[0];
 
   FOR_DIM
     {
-      /* First (F_LJ + F_coulomb_short) * g2: */
+      /* First (F_LJ + F_CS) * g2: */
       VecPointwiseMult (work, g2, f_short[dim]);
 
-      /* Next FFT((F_LJ + F_coulomb_short) * g2): */
+      /* Next FFT((F_LJ + F_CS) * g2): */
       MatMult (BHD->fft_mat, work, fs_g2_fft[dim]);
 
-      /* Now Coulomb long. F_coulomb_long * g2: */
+      /* Now Coulomb long, F_CL * g2: */
       VecPointwiseMult (work, g2, f_long[dim]);
 
-      /* Next F_coulomb_long * g2 - F_coulomb_long: */
+      /* Next F_CL * g2 - F_CL: */
       VecAXPY (work, -1.0, f_long[dim]);
 
-      /* Finally FFT(F_coulomb_long * g2 - F_coulomb_long): */
+      /* Finally FFT(F_CL * g2 - F_CL): */
       MatMult (BHD->fft_mat, work, fl_g2_fft[dim]);
     }
 }
 
 /*
- * This is supposed to compute the k-grid representation of the BGY3dM
- * equation:
- *
- *     Δu = - β ρ div((F g2) * g)
- *
- * with "*" being  the convolution that in Fourier  rep degenerates to
- * pointwise  product,  g2 and  g  being  the (fixed)  solvent-solvent
- * site-site  distribution  function and  (the  unknown) solvent  site
- * distribution around the solute.
- *
- * The kernel dfg(kx,  ky, kz) includes the Poisson factor  1 / k2 but
- * does not include the facotor (rho * beta):
- *
- *     u(kx, ky, kz) = β ρ dfg(kx, ky, kz) g(kx, ky, kz)
- *
- * The three fg arrays are intent(in). The dfg array is intent(out).
- *
- * No known side effects.
- */
+  This is supposed to compute  the k-grid representation of the matrix
+  (linear operator) that relates unknown u to the RHS g:
+
+    Δu = - β ρ K * g, K = div (F g2)
+
+  with "*"  being the convolution  that in Fourier rep  degenerates to
+  pointwise  product,  g2  and  g being  the  (fixed)  solvent-solvent
+  site-site  distribution  function  and  (the unknown)  solvent  site
+  distribution around the solute.
+
+  The kernel dfg(kx,  ky, kz) includes the Poisson  factor as in -K/k2
+  but does not include the factor βρ:
+
+    u(kx, ky, kz) = β ρ dfg(kx, ky, kz) g(kx, ky, kz)
+
+  The three  fg[3] arrays  are intent(in).  The  dfg array  for kernel
+  -K/k2 is intent(out).
+
+  The  weighted force  fg[3] is  missing the  long range  Coulomb part
+  F_CL,  see comments  in pair()  above. Note  that divergence  of the
+  gradient is the  laplacian and F_CL is the  negative of the gradient
+  of the long-range  Coulomb interaction: div (F_CL) =  - Δu2. That is
+  why the  function accepts additional  Coulomb potential in  Vec coul
+  and adds that (almost) unmodified to the convolution kernel.
+
+  No known side effects.
+*/
 static void kernel (const DA dc,
                     const ProblemData *PD,
                     Vec fg[3],  /* complex, intent(in) */
@@ -226,17 +240,19 @@ static void kernel (const DA dc,
           dfg_[i[2]][i[1]][i[0]] = k_fac * (-I * sum);
 
           /*
-           * FIXME: Origin of  this occasional addition needs some
-           * explanation.
-           *
-           * The   difference   between   Compute_H2O_interS_C()   and
-           * Compute_H2O_interS() of the original code reduces to this
-           * addendum.   Supply   a   NULL   pointer   for   coul   in
-           * Compute_H2O_interS_C()   to    get   the   behaviour   of
-           * Compute_H2O_interS().
-           *
-           * Long range Coulomb part (right one):
-           */
+            Origin of this occasional addition is the custom treatment
+            of  the  long-range Coulomb  interaction  that avoids  the
+            round  trip:  potential  ->  gradients  ->  divergence  ->
+            inverse laplacian.  Note that F_CL force is missing in the
+            long-range weighted  forces which include only  F_CL (g2 -
+            1).  See also description of the function.
+
+            The   difference    between   Compute_H2O_interS_C()   and
+            Compute_H2O_interS() of the  original code reduces to this
+            addendum.  Supply a NULL pointer for Vec coul to omit it.
+
+            Long range Coulomb part (right one):
+          */
           if (coul)
             dfg_[i[2]][i[1]][i[0]] += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]];
         }
