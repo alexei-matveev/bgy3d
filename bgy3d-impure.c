@@ -322,21 +322,15 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
      pairs. */
   Vec u2 = bgy3d_vec_create (BHD->da);
   Vec fs[3], fl[3];
-  FOR_DIM
-    {
-      fs[dim] = bgy3d_vec_create (BHD->da);
-      fl[dim] = bgy3d_vec_create (BHD->da);
-    }
+  bgy3d_vec_create1 (BHD->da, 3, fs); /* 3-vector */
+  bgy3d_vec_create1 (BHD->da, 3, fl); /* 3-vector */
 
   /* Complex work vectors, re-used for all pairs: */
   Vec kl_fft = bgy3d_vec_create (BHD->dc);
   Vec u2_fft = bgy3d_vec_create (BHD->dc);
   Vec fs_g2_fft[3], fl_g2_fft[3];
-  FOR_DIM
-    {
-      fs_g2_fft[dim] = bgy3d_vec_create (BHD->dc);
-      fl_g2_fft[dim] = bgy3d_vec_create (BHD->dc);
-    }
+  bgy3d_vec_create1 (BHD->dc, 3, fs_g2_fft); /* 3-vector */
+  bgy3d_vec_create1 (BHD->dc, 3, fl_g2_fft); /* 3-vector */
 
   /* Over all pairs: */
   for (int i = 0; i < m; i++)
@@ -373,14 +367,11 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
   /* Clean up and exit: */
   VecDestroy (u2);
   VecDestroy (u2_fft);
-  FOR_DIM
-    {
-      VecDestroy (fs[dim]);
-      VecDestroy (fl[dim]);
-      VecDestroy (fs_g2_fft[dim]);
-      VecDestroy (fl_g2_fft[dim]);
-    }
   VecDestroy (kl_fft);
+  bgy3d_vec_destroy1 (3, fs);
+  bgy3d_vec_destroy1 (3, fl);
+  bgy3d_vec_destroy1 (3, fs_g2_fft);
+  bgy3d_vec_destroy1 (3, fl_g2_fft);
 }
 
 /* Dipole of the cores of a single specie: */
