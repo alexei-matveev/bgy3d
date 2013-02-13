@@ -35,6 +35,22 @@ void bgy3d_vec_read_radial2 (const State *BHD,
 void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
 
+/* Increment  the  reference count,  and  return  the descriptor,  the
+   caller is obliged to VecDestroy() it. Do not abuse!. */
+static inline DA bgy3d_da_ref (DA da)
+{
+  PetscObjectReference ((PetscObject) da);
+  return da;
+}
+
+/* Increment the reference count, and return the vector, the caller is
+   obliged to VecDestroy() it. Do not abuse!. */
+static inline Vec bgy3d_vec_ref (Vec x)
+{
+  PetscObjectReference ((PetscObject) x);
+  return x;
+}
+
 static inline int vec_local_size (Vec x)
 {
   int n;
