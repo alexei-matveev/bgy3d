@@ -36,7 +36,7 @@ void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
 
 /* Increment  the  reference count,  and  return  the descriptor,  the
-   caller is obliged to VecDestroy() it. Do not abuse!. */
+   caller is obliged to DADestroy() it. Do not abuse!. */
 static inline DA bgy3d_da_ref (DA da)
 {
   PetscObjectReference ((PetscObject) da);
