@@ -1025,14 +1025,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   Vec (*u0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
-  /* set initial guess*/
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecSet (du[i][j], 0.0);
-
-  /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-H2O"))
+  /* Set initial guess, either here or by reading from file: */
+  if (bgy3d_getopt_test ("--load-initial-guess"))
     bgy3d_vec_read2 ("du%d%d.bin", m, du);
+  else
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        VecSet (du[i][j], 0.0);
 
   VecSet(du_new,0.0);
 
@@ -1413,14 +1412,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   u0[1][1] = BHD->u_ini[1][1];
   u0[0][1] = BHD->u_ini[0][1];
 
-  /* set initial guess*/
-  VecSet(du[0][0],0);
-  VecSet(du[1][1],0);
-  VecSet(du[0][1],0);
+  /* Set initial guess, either here or by reading from file: */
+  if (bgy3d_getopt_test ("--load-initial-guess"))
+    bgy3d_vec_read2 ("du%d%d.bin", m, du);
+  else
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        VecSet (du[i][j], 0.0);
 
-  /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-H2O"))
-    bgy3d_vec_read2 ("du%d%d.bin", 2, du);
 
   VecSet(du_new,0.0);
 

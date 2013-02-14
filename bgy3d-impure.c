@@ -598,13 +598,13 @@ void bgy3d_solute_solve (const ProblemData *PD,
   Vec u0[m];                    /* real */
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
-  /* Set initial guess: */
-  for (int i = 0; i < m; i++)
-    VecSet (du[i], 0.0);
-
-  /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-H2O"))
+  /* Set initial guess, either here or by reading from file: */
+  if (bgy3d_getopt_test ("--load-initial-guess"))
     bgy3d_vec_read1 ("du%d.bin", m, du);
+  else
+    for (int i = 0; i < m; i++)
+      VecSet (du[i], 0.0);
+
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -1356,7 +1356,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-H2O")) {
+  if (bgy3d_getopt_test ("--load-initial-guess")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       dgH = bgy3d_vec_load ("dg0.bin"); /* dgH */
       dgO = bgy3d_vec_load ("dg1.bin"); /* dgO */
