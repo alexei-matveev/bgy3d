@@ -5,7 +5,7 @@
 
   1. Create the context pointer:
 
-     Context *iter = bgy3d_pot_create (da, PD, vec);
+     Context *iter = bgy3d_pot_create (BHD, vec);
 
   2. Iterate  over the grid  doing something usefull with  the values,
      eg. computing the integral:
@@ -26,7 +26,8 @@
 */
 
 #include "bgy3d.h"
-#include "bgy3d-vec.h"
+#include "bgy3d-vec.h"          /* bgy3d_vec_ref(), ... */
+#include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "bgy3d-potential.h"
 
 /*
@@ -34,8 +35,9 @@
   typedef struct Context Context is in the header file.
 */
 struct Context {
-  DA da;                /* array descriptor */
-  Vec v;                /* ref to a vector */
+  DA da, dc;                 /* real and complex array descriptors */
+  Mat fft_mat;               /* FFT matrix for interpolation */
+  Vec v, v_fft;              /* refs to real and complex vectors */
   PetscScalar ***v_;    /* v_[k][j][i] points to the real data */
   int ijk;              /* linarized index for local (k, j, i) */
   real h[3];            /* mesh sizes */
@@ -62,37 +64,71 @@ static void divmod (const int n, const int N, int *j, int *i)
   while  iterating over  it.  It  may though  VecDestroy()  the vector
   right after calling this function as we will increment the refcount.
 */
-Context* bgy3d_pot_create (DA da, const ProblemData *PD, Vec v)
+Context* bgy3d_pot_create (const State *BHD, Vec v)
 {
   /* memory for context pointer */
   Context *s = malloc (sizeof *s);
 
-  s->da = bgy3d_da_ref (da);    /* DADestroy() it! */
+  /* Increment refcounts  and save a  ref in the  Context. DADestroy()
+     them! */
+  s->da = bgy3d_da_ref (BHD->da);
+  s->dc = bgy3d_da_ref (BHD->dc);
+
+  /* This     will     only      be     used     for     trigonometric
+     interpolation. MatDestroy() it! */
+  s->fft_mat = bgy3d_mat_ref (BHD->fft_mat);
 
   /* Do not copy the input  vector, save a reference instead, but also
      increment the refcount. We will have to VecDestroy() it too: */
   s->v = bgy3d_vec_ref (v);
 
+  /* The first  time interpolation is requested we  put here something
+     more usefull: */
+  s->v_fft = NULL;
+
   /* From  now  on  v_[k][j][i]  can   be  used  to  access  a  vector
      element: */
-  DAVecGetArray (da, s->v, &s->v_);
+  DAVecGetArray (s->da, s->v, &s->v_);
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
+  DAGetCorners (s->da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
 
   /* copy N3 and h3 from PD */
   FOR_DIM
-    s->h[dim] = PD->h[dim];
+    s->h[dim] = BHD->PD->h[dim];
 
   /* copy interval */
-  s->interval[0] = PD->interval[0];
-  s->interval[1] = PD->interval[1];
+  s->interval[0] = BHD->PD->interval[0];
+  s->interval[1] = BHD->PD->interval[1];
 
   /* Initalize counter: */
   s->ijk = 0;
 
   return s;
 }
+
+void bgy3d_pot_interp (Context *s, int n, /* const */ real x[n][3], real v[n])
+{
+  /* Prepare Fourier coefficients, if not has been already done: */
+  if (s->v_fft == NULL)
+    {
+      s->v_fft = bgy3d_vec_create (s->dc); /* complex */
+      MatMult (s->fft_mat, s->v, s->v_fft);
+    }
+
+  const real off = s->interval[0];
+
+  /* Translate site coordinates into real grid coordinates where
+     integer values correspond to the grid nodes: */
+  real y[n][3];
+  for (int i = 0; i < n; i++)
+    FOR_DIM
+      y[i][dim] = (x[i][dim] - off) / s->h[dim];
+
+  /* Trigonometric interpolation: */
+  bgy3d_fft_interp (s->fft_mat, s->v_fft, n, y, v);
+}
+
 
 /* Value fetch interface. Returns  number of actually delivered points
    in *np <= n. Returns false on termination. */
@@ -154,7 +190,13 @@ void bgy3d_pot_destroy (Context *s)
   /* Decrement  refcounts and  destroy  them if  the refcount  reached
      zero: */
   DADestroy (s->da);
+  DADestroy (s->dc);
+  MatDestroy (s->fft_mat);
   VecDestroy (s->v);
+
+  /* Only if interpolation was really used: */
+  if (s->v_fft)
+    VecDestroy (s->v_fft);
 
   /* free the whole context */
   free (s);
@@ -166,7 +208,7 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
   PetscPrintf (PETSC_COMM_WORLD, "Test to potential interface\n");
 
   /* Make an iterator: */
-  Context *s = bgy3d_pot_create (BHD->da, BHD->PD, vec);
+  Context *s = bgy3d_pot_create (BHD, vec);
 
   const int chunk_size = 120;
   real v[chunk_size];

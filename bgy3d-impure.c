@@ -971,7 +971,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
     /* Optionally, return the iterator over the solvent field: */
     if (v)
-      *v = bgy3d_pot_create (BHD->da, BHD->PD, ve);
+      *v = bgy3d_pot_create (BHD, ve);
 
     /* Also compute dipole moment: */
     real d[3], d_norm;
