@@ -411,7 +411,9 @@ computes the sum of all vector elements."
                          ((unquote op) (value #t) (predicate (unquote string->number)))))
                       (map car bgy3d-settings)))) ; all of them are numbers
     (quasiquote
-     ((from-radial-g2 (value #f))
+     ((from-radial-g2	(value #f))
+      (save-guess	(value #f))
+      (load-guess	(value #f))
       (unquote-splicing numeric)))))
 
 
