@@ -3,6 +3,70 @@
 /*  $Id: bgy3dH2OS.c,v 1.20 2007-08-03 15:59:50 jager Exp $ */
 /*==========================================================*/
 
+/*
+  According to Page. 115 - 116:
+
+            0
+    g(x) = g (x) exp[-u(x)]
+
+  with
+
+     0               LJ       Cs       Cl
+    g (x) = exp[-β (V  (x) + V  (x) + V  (x)]
+
+  then g(x) rewritten as:
+
+           ~ 0            Cl
+    g(x) = g  (x) exp[-β V  (x) - u(x)]
+
+  with
+
+    ~ 0               LJ       Cs
+    g  (x) = exp[-β (V  (x) + V  (x))]
+
+  then BGY equation written as:
+
+     ~              Cl
+    Δu = K(g) + β ΔV
+
+  with
+           ~ 0            Cl              ~ 0         ~
+    g(x) = g  (x) exp[-β V  (x) - u(x)] = g  (x) exp[-u(x)]
+
+                  ~
+  the solution of u can be repsented by a difference of two functions:
+
+    ~   -    *
+    u = u - u
+
+  while:
+
+     -              Cl       -
+    Δu = K(g) + β ΔV   in Ω, u(∂Ω) = f,
+
+      *           *
+    Δu = 0 in Ω, u (∂Ω) = f,
+
+  so after solving:
+
+    Δu = K(g)
+
+  we get:
+
+    -          Cl
+    u = u + β V
+
+   Cl         Cl
+  V      and V      are needed to calculated beforehand
+   (A, M)     (B, M)
+
+  and sum  to the solution  by the end  of each iteration  for solvent
+  site A and B, in the code hereafter.  These site specific potentials
+  can  be  obtained  by  multiplying  the  common  long-range  Coulomb
+  potential (stored in Vec uc) by the solvent site charge.
+*/
+
+
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* needs Site */
@@ -620,71 +684,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
-      /*
-        According to Page. 115 - 116:
-
-                  0
-          g(x) = g (x) exp[-u(x)]
-
-        with
-
-           0               LJ       Cs       Cl
-          g (x) = exp[-β (V  (x) + V  (x) + V  (x)]
-
-        then g(x) rewritten as:
-
-                 ~ 0            Cl
-          g(x) = g  (x) exp[-β V  (x) - u(x)]
-
-        with
-
-          ~ 0               LJ       Cs
-          g  (x) = exp[-β (V  (x) + V  (x))]
-
-        then BGY equation written as:
-
-           ~              Cl
-          Δu = K(g) + β ΔV
-
-        with
-                 ~ 0            Cl              ~ 0         ~
-          g(x) = g  (x) exp[-β V  (x) - u(x)] = g  (x) exp[-u(x)]
-
-                         ~
-        the solution  of u can  be repsented by a  difference of
-        two functions:
-
-          ~   -    *
-          u = u - u
-
-        while:
-
-           -              Cl       -
-          Δu = K(g) + β ΔV   in Ω, u(∂Ω) = f,
-
-            *           *
-          Δu = 0 in Ω, u (∂Ω) = f,
-
-        so after solving:
-
-          Δu = K(g)
-
-        we get:
-
-          -          Cl
-          u = u + β V
-
-         Cl         Cl
-        V      and V      are needed to calculated beforehand
-         (A, M)     (B, M)
-
-        and  sum to  the solution  by the  end of  each  iteration for
-        solvent  site A  and B,  in  the code  hereafter.  These  site
-        specific potentials can be  obtained by multiplying the common
-        long-range Coulomb potential (stored in Vec uc) by the solvent
-        site charge.
-      */
-
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
         VM_Coulomb_long.  No  other fields of the  struct State except
