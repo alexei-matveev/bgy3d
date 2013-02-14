@@ -51,6 +51,14 @@ static inline Vec bgy3d_vec_ref (Vec x)
   return x;
 }
 
+/* Increment the reference count, and return the matrix, the caller is
+   obliged to MatDestroy() it. Do not abuse!. */
+static inline Mat bgy3d_mat_ref (Mat m)
+{
+  PetscObjectReference ((PetscObject) m);
+  return m;
+}
+
 static inline int vec_local_size (Vec x)
 {
   int n;
