@@ -34,7 +34,7 @@
 
 /* Side effects: uses BHD->fg2_fft[3] as work arrays. */
 static void  pair (State *BHD,
-                   const real LJ_params[3],
+                   const Site a, const Site b, /* struct by value? */
                    const Vec g2,
                    Vec f_short[3], Vec f_long[3], /* work arrays */
                    Vec fs_g2_fft[3],              /* intent(out) */
@@ -43,7 +43,7 @@ static void  pair (State *BHD,
 {
   /* Compute  forces  and long-range  Coulomb  (in  both  reps) for  a
      pair: */
-  bgy3d_pair (BHD, LJ_params, f_short, f_long, NULL, NULL, u2, u2_fft,
+  bgy3d_pair (BHD, a, b, f_short, f_long, NULL, NULL, u2, u2_fft,
               1.0, 1.0);
 
   /*
@@ -281,14 +281,8 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* Pair interaction parameters: */
-        real ff_params[3];
-        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
-        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
-        ff_params[2] = solvent[i].charge * solvent[j].charge;
-
         /* Does real work: */
-        pair (BHD, ff_params, g2[i][j],
+        pair (BHD, solvent[i], solvent[j], g2[i][j],
               fs, fl, /* work vectors*/
               fs_g2_fft, fl_g2_fft, u2, u2_fft);
 
@@ -1123,7 +1117,6 @@ void RecomputeInitialFFTs (State *BHD,
                            Vec u2_fft[m][m]) /* complex, out */
 {
   assert (m == 2);              /* FIXME: uses global solvent[2] */
-  real ff_params[3];
 
   PetscPrintf (PETSC_COMM_WORLD, "Recomputing FFT data\n");
 
@@ -1141,13 +1134,8 @@ void RecomputeInitialFFTs (State *BHD,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* Pair interaction parameters: */
-        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
-        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
-        ff_params[2] = solvent[i].charge * solvent[j].charge;
-
         /* Does real work: */
-        pair (BHD, ff_params,
+        pair (BHD, solvent[i], solvent[j],
               g2[i][j],
               force_short, force_long, /* work vectors*/
               fs_g2_fft[i][j], fl_g2_fft[i][j],

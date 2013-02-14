@@ -3,7 +3,7 @@
 void bgy3d_compute_g (Vec g, Vec u0, Vec du);
 
 void bgy3d_pair (State *BHD,
-                 const real LJ_params[3],
+                 const Site a, const Site b, /* struct by value? */
                  Vec f_short[3], Vec f_long[3],
                  Vec u_ini, Vec c2,
                  Vec u2, Vec u2_fft,

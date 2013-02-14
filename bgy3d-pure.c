@@ -172,16 +172,17 @@ static void ComputeFFTfromCoulomb (State *BHD,
 
 /* Precompute forces and more for a pair: */
 void bgy3d_pair (State *BHD,
-                 const real LJ_params[3],
+                 const Site a, const Site b, /* struct by value? */
                  Vec f_short[3], Vec f_long[3],
                  Vec u_ini, Vec c2,
                  Vec u2, Vec u2_fft,
                  real damp, real damp_LJ)
 {
-  /* LJ parameters of pair interaction and charge product: */
-  const real epsilon = LJ_params[0]; /* geometric average of two */
-  const real sigma = LJ_params[1];   /* arithmetic average of two */
-  const real q2 = LJ_params[2];      /* charge product */
+  /* Pair   interaction  parameters:  geometric   average,  arithmetic
+     average, and charge product: */
+  const real epsilon = sqrt (a.epsilon * b.epsilon);
+  const real sigma = 0.5 * (a.sigma + b.sigma);
+  const real q2 = a.charge * b.charge;
 
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
@@ -305,18 +306,12 @@ static void RecomputeInitialData (State *BHD,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* Pair interaction parameters: */
-        real ff_params[3];
-        ff_params[0] = sqrt (solvent[i].epsilon * solvent[j].epsilon);
-        ff_params[1] = 0.5 * (solvent[i].sigma + solvent[j].sigma);
-        ff_params[2] = solvent[i].charge * solvent[j].charge;
-
         /*
           This  computes short-  and  long-rage forces,  corresponding
           potentials and more. Note  that we put the short-range force
           into BHD->F temporarily:
         */
-        bgy3d_pair (BHD, ff_params,
+        bgy3d_pair (BHD, solvent[i], solvent[j],
                     BHD->F[i][j], BHD->F_l[i][j],
                     BHD->u_ini[i][j], BHD->c2[i][j],
                     BHD->u2[i][j], BHD->u2_fft[i][j],
