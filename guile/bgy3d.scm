@@ -161,8 +161,8 @@
 (define (site-z site) (third (site-position site)))
 
 (define (print-xyz solute)
-  (let ((name (molecule-name solute))
-        (sites (molecule-sites solute)))
+  (let ((name	(molecule-name solute))
+        (sites	(molecule-sites solute)))
     (format #t "~a\n" (length sites))
     (format #t "# ~a\n" name)
     (for-each (lambda (site)
@@ -302,15 +302,15 @@ computes the sum of all vector elements."
   ;;
   ;; Grid data:
   ;;
-  (let loop ((vecs vecs)
-             (vec-id 0))
+  (let loop ((vecs	vecs)
+             (vec-id	0))
     (if (not (null? vecs))
-        (let* ((vec (first vecs))
-               (len (vec-length vec))
-               (n (cubic-root len))
-               (L (or (assq-ref settings 'L) 10.0))
-               (L (angstrom->bohr L))   ; punch file is in AU
-               (S (* L (/ (- n 2) n)))) ; off-by-one on a 2L interval
+        (let* ((vec	(first vecs))
+               (len	(vec-length vec))
+               (n	(cubic-root len))
+               (L	(or (assq-ref settings 'L) 10.0))
+               (L	(angstrom->bohr L))   ; punch file is in AU
+               (S	(* L (/ (- n 2) n)))) ; off-by-one on a 2L interval
           (header '((block . data) (records . 0)))
           (header '((block . grid_title) (records . 1)))
           (format #t "Solvent site hole density ~a\n" vec-id)
@@ -359,11 +359,11 @@ computes the sum of all vector elements."
 ;;;
 (define (bgy3d-run name sites funptr)
   "To be called from QM code."
-  (let ((settings bgy3d-settings)
-        (solvent (find-molecule *default-molecule*))
-        (solute (make-molecule name
-                               (update-sites name
-                                             sites))))
+  (let ((settings	bgy3d-settings)
+        (solvent	(find-molecule *default-molecule*))
+        (solute		(make-molecule name
+                                       (update-sites name
+                                                     sites))))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
@@ -476,8 +476,8 @@ computes the sum of all vector elements."
      ;; and bgy3d-solvents.h:
      ;;
      ((option-ref opts 'BGYM2Site #f)
-      (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*)))
-            (solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
+      (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
+            (solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
         (let-values (((g1 ve) (bgy3d-run-solute solute
                                                 solvent
                                                 '()))) ; Use defaults and Petsc env
@@ -485,11 +485,11 @@ computes the sum of all vector elements."
           ;; For  testing, primarily, evaluate  potential at positions
           ;; of solute sites and the corresponding total energy:
           ;;
-          (let* ((sites (molecule-sites solute))
-                 (positions (map site-position sites))
-                 (values (potential-map ve positions))
-                 (charges (map site-charge sites))
-                 (energy (apply + (map * charges values))))
+          (let* ((sites		(molecule-sites solute))
+                 (positions	(map site-position sites))
+                 (values	(potential-map ve positions))
+                 (charges	(map site-charge sites))
+                 (energy	(apply + (map * charges values))))
             ;;
             ;; Only print on master:
             ;;
@@ -516,16 +516,11 @@ computes the sum of all vector elements."
 (define (new-main argv)
   (let ((cmd		(car argv))     ; should be non-empty
         (options	(getopt-long argv option-spec-new)))
-    (let ((args                  ; positional arguments (solute names)
-           (option-ref options '() '()))
-          (solvent
-           (find-molecule (option-ref options 'solvent *default-molecule*)))
-          (solute
-           (find-molecule (option-ref options 'solute *default-molecule*)))
-          (save-binary
-           (option-ref options 'save-binary #f))
-          (settings               ; defaults updated from command line
-           (update-settings bgy3d-settings options)))
+    (let ((args		(option-ref options '() '())) ; positional arguments (solute names)
+          (solvent	(find-molecule (option-ref options 'solvent *default-molecule*)))
+          (solute	(find-molecule (option-ref options 'solute *default-molecule*)))
+          (save-binary	(option-ref options 'save-binary #f))
+          (settings	(update-settings bgy3d-settings options))) ; defaults updated from command line
       (match cmd
         ("solvent"
          ;;
