@@ -503,6 +503,23 @@ void bgy3d_solute_solve (const ProblemData *PD,
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
   /*
+    These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as
+    complex  vectors in  momentum space.   Note that  ker_fft[i][j] ==
+    ker_fft[j][i].
+  */
+  Vec ker_fft[m][m];
+  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
+
+  /*
+    Returns div (F * g2).  Note the calculation of F is divided due to
+    long  range Coulomb  interation.   See comments  in the  function.
+    Here F is force within solvents particles.
+
+    The pairwise long-range interaction is included in the kernel.
+  */
+  solvent_kernel (BHD, m, solvent, g2, ker_fft);
+
+  /*
    * Extract BGY3d specific things from supplied input:
    */
 
@@ -569,11 +586,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
      have to destroy them: */
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
-  /* These are  the (four)  kernels HH, HO,  OH, OO stored  as complex
-     vectors in momentum space.  Note that HO = OH. */
-  Vec ker_fft[m][m];
-  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
-
   /*
     There is no  point to transform each contribution  computed in the
     momentum space back, accumulate them on the k-grid in this complex
@@ -609,13 +621,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       /*
-        Return F  * g2.  Note the  calculation of F is  divided due to
-        long range Coulomb interation.   See comments in the function.
-        Here F is force within solvents particles.
-
-        In RecomputeInitialFFTs(), pairwise long-range interactions in
-        BHD->u2[][] are computed by ComputeFFTfromCoulomb().
-
         According to Page. 115 - 116:
 
                   0
@@ -679,8 +684,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
         long-range Coulomb potential (stored in Vec uc) by the solvent
         site charge.
       */
-
-      solvent_kernel (BHD, m, solvent, g2, ker_fft);
 
       /*
         Fill  u0[0], u0[1]  (see  the definition  above)  and uc  with
