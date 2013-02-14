@@ -151,6 +151,14 @@ static ProblemData problem_data (SCM alist)
   return PD;
 }
 
+static void to_array (SCM x, int n, double y[n])
+{
+  for (int i = 0; i < n; i++)
+    {
+      y[i] = scm_to_double (scm_car (x));
+      x = scm_cdr (x);
+    }
+}
 
 /* A Site is represented by an sexp like:
 
@@ -178,9 +186,8 @@ static Site to_site (SCM s)
 
   // printf ("len=%ld, str=>%s<\n", len, S.name);
 
-  S.x[0] = scm_to_double (scm_car (x));
-  S.x[1] = scm_to_double (scm_cadr (x));
-  S.x[2] = scm_to_double (scm_caddr (x));
+  /* Fill an array of length three from the list: */
+  to_array (x, 3, S.x);
 
   S.sigma = scm_to_double (scm_car (ff));
   S.epsilon = scm_to_double (scm_cadr (ff));
