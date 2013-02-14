@@ -484,8 +484,13 @@ computes the sum of all vector elements."
                  (values (potential-map ve positions))
                  (charges (map site-charge sites))
                  (energy (apply + (map * charges values))))
-            (pretty-print (cons 'core-potentials values))
-            (pretty-print (cons 'core-energy energy)))
+            ;;
+            ;; Only print on master:
+            ;;
+            (if (zero? (bgy3d-rank))
+                (begin
+                  (pretty-print (cons 'core-potentials values))
+                  (pretty-print (cons 'core-energy energy)))))
           ;;
           ;; Then destroy the potential:
           ;;
