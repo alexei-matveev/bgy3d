@@ -17,7 +17,13 @@
      Note that the values from Vec  vec in v[] are sacaled by h^3, the
      grid weight.
 
-  3. Remember to clean the memory:
+  3. You  can  evaluate  potential values  v[n]  at arbitrary  points,
+     x[n][3].  Beware of periodic  wrap around and interpolation costs
+     of O(N^3) per point:
+
+       bgy3d_pot_interp (iter, n, x, v)
+
+  4. Remember to clean the memory:
 
      bgy3d_pot_destroy (iter);
 
