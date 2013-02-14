@@ -411,7 +411,9 @@ computes the sum of all vector elements."
                          ((unquote op) (value #t) (predicate (unquote string->number)))))
                       (map car bgy3d-settings)))) ; all of them are numbers
     (quasiquote
-     ((from-radial-g2	(value #f))
+     ((solvent		(value #t)	(predicate (unquote find-molecule))) ; a string
+      (solute		(value #t)	(predicate (unquote find-molecule))) ; a string
+      (from-radial-g2	(value #f))
       (save-guess	(value #f))
       (load-guess	(value #f))
       (unquote-splicing numeric)))))
@@ -429,9 +431,7 @@ computes the sum of all vector elements."
 ;;;
 (define option-spec-all
   (quasiquote
-   ((solvent	(value #t)	(predicate (unquote find-molecule))) ; a string
-    (solute	(value #t)	(predicate (unquote find-molecule))) ; a string
-    (BGY2Site	(value #f))                ; pure solvent run
+   ((BGY2Site	(value #f))                ; pure solvent run
     (BGYM2Site	(value #f))                ; solute + solvent run
     (unquote-splicing option-spec-base)))) ; common options
 
@@ -516,6 +516,8 @@ computes the sum of all vector elements."
            (option-ref options '() '()))
           (solvent
            (find-molecule (option-ref options 'solvent *default-molecule*)))
+          (solute
+           (find-molecule (option-ref options 'solute *default-molecule*)))
           (save-binary
            (option-ref options 'save-binary #f))
           (settings               ; defaults updated from command line
@@ -552,6 +554,13 @@ computes the sum of all vector elements."
                     ;;
                     (map vec-destroy g1)))
                 solutes)))
+        ("punch"
+         ;;
+         ;; Use g1 vectors to produce a *.pun file for visualization:
+         ;;
+         (let ((g1 (map vec-load args)))
+            (write-punch-file solute g1 settings)
+            (map vec-destroy g1)))
         ;;
         ("dump"
          ;;
