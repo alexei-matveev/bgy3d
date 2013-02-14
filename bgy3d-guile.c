@@ -628,6 +628,21 @@ static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
 
 
 
+static SCM guile_pot_interp (SCM iter, SCM x)
+{
+  double x_[1][3], v_[1];
+
+  /* list -> array: */
+  to_array (x, 3, x_[0]);
+
+  /* printf ("guile_pot_interp: x = (% f, % f, % f)\n", */
+  /*         x_[0][0], x_[0][1], x_[0][2]); */
+
+  bgy3d_pot_interp (to_pointer (iter), 1, x_, v_);
+
+  return scm_from_double (v_[0]);
+}
+
 static SCM guile_pot_destroy (SCM iter)
 {
   bgy3d_pot_destroy (to_pointer (iter));
@@ -678,6 +693,7 @@ static SCM guile_bgy3d_module_init (void)
      module itself or by an explicit (use-modules ...): */
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
