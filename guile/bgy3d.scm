@@ -132,11 +132,11 @@
 ;;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
 ;;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 ;;;
-(define (make-solute name sites)
+(define (make-molecule name sites)
   (list name sites))
 
-(define (solute-name solute) (first solute))
-(define (solute-sites solute) (second solute))
+(define (molecule-name solute) (first solute))
+(define (molecule-sites solute) (second solute))
 
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
@@ -152,8 +152,8 @@
 (define (site-z site) (third (site-position site)))
 
 (define (print-xyz solute)
-  (let ((name (solute-name solute))
-        (sites (solute-sites solute)))
+  (let ((name (molecule-name solute))
+        (sites (molecule-sites solute)))
     (format #t "~a\n" (length sites))
     (format #t "# ~a\n" name)
     (for-each (lambda (site)
@@ -176,7 +176,7 @@
 ;;;
 (define (update-sites table-name sites)
   (let* ((table                     ; fake solute with site-parameters
-          (solute-sites (find-molecule table-name)))
+          (molecule-sites (find-molecule table-name)))
          (update-one
           (lambda (site)
             (let* ((name (site-name site))
@@ -268,16 +268,16 @@ computes the sum of all vector elements."
   ;;
   (header '((block . fragment) (records . 0)))
   (header '((block . title) (records . 1)))
-  (format #t "~a\n" (solute-name solute))
+  (format #t "~a\n" (molecule-name solute))
   (header `((block . coordinates)
-            (records . (unquote (length (solute-sites solute))))))
+            (records . (unquote (length (molecule-sites solute))))))
   (for-each (lambda (site)
               (format #t "~a ~a ~a ~a\n"
                       (site-name site)
                       (angstrom->bohr (site-x site)) ; punch file is in AU
                       (angstrom->bohr (site-y site))
                       (angstrom->bohr (site-z site))))
-            (solute-sites solute))
+            (molecule-sites solute))
   ;;
   ;; Description of the bonds:
   ;;
@@ -345,9 +345,9 @@ computes the sum of all vector elements."
   "To be called from QM code."
   (let ((settings bgy3d-settings)
         (solvent (find-molecule *default-molecule*))
-        (solute (make-solute name
-                             (update-sites name
-                                           sites))))
+        (solute (make-molecule name
+                               (update-sites name
+                                             sites))))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
@@ -394,7 +394,7 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; Specifications of command line  flags common for old- and new-main
-;;; for  use with  getopt-long. All  of these  happen to  be  real- or
+;;; for  use with getopt-long.  Most of  these happen  to be  real- or
 ;;; integer numbers:
 ;;;
 (define option-spec-base
