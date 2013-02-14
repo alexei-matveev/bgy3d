@@ -42,6 +42,7 @@
 ;;;
 ;;;   bgy3d-run-solvent
 ;;;   bgy3d-run-solute
+;;;   bgy3d-pot-interp
 ;;;   bgy3d-pot-destroy
 ;;;   vec-make
 ;;;   vec-make-complex
@@ -232,6 +233,13 @@ computes the sum of all vector elements."
   (vec-for-each
    (lambda (x) (format #t "~a\n" (normalize x)))
    v))
+
+;;;
+;;; For   each  position  x   in  the   list  xs   evaluate  potential
+;;; v(x). Potential is a BGY3D interator object, not a function:
+;;;
+(define (potential-map v xs)
+  (map (lambda (x) (bgy3d-pot-interp v x)) xs)) ; so far this accepts only one position
 
 ;;;
 ;;; BGY3d code  operates in  angstroms, QM codes  use atomic  units by
@@ -465,7 +473,21 @@ computes the sum of all vector elements."
         (let-values (((g1 ve) (bgy3d-run-solute solute
                                                 solvent
                                                 '()))) ; Use defaults and Petsc env
-          (bgy3d-pot-destroy ve)                       ; not yet used
+          ;;
+          ;; For  testing, primarily, evaluate  potential at positions
+          ;; of solute sites and the corresponding total energy:
+          ;;
+          (let* ((sites (molecule-sites solute))
+                 (positions (map site-position sites))
+                 (values (potential-map ve positions))
+                 (charges (map site-charge sites))
+                 (energy (apply + (map * charges values))))
+            (pretty-print (cons 'core-potentials values))
+            (pretty-print (cons 'core-energy energy)))
+          ;;
+          ;; Then destroy the potential:
+          ;;
+          (bgy3d-pot-destroy ve)
           (map vec-save (g1-file-names g1) g1)
           (map vec-destroy g1)))) ; dont forget to destroy them
      ;;
