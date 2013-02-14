@@ -675,7 +675,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
   /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-initial-guess"))
+  if (bgy3d_getopt_test ("--load-save-guess"))
     bgy3d_vec_read1 ("du%d.bin", m, du);
   else
     for (int i = 0; i < m; i++)
@@ -923,7 +923,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
       }
 
       /* Save du to binary file. FIXME: Why du and not g? */
-      if (bgy3d_getopt_test ("--save-H2O"))
+      if (bgy3d_getopt_test ("--load-save-guess"))
         bgy3d_vec_save1 ("du%d.bin", m, du);
 
     } /* damp loop */
@@ -1358,7 +1358,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-initial-guess")) {
+  if (bgy3d_getopt_test ("--load-save-guess")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       dgH = bgy3d_vec_load ("dg0.bin"); /* dgH */
       dgO = bgy3d_vec_load ("dg1.bin"); /* dgO */
@@ -1568,7 +1568,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
       /* save g to binary file */
-      if (bgy3d_getopt_test ("--save-H2O")) {
+      if (bgy3d_getopt_test ("--load-save-guess")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_vec_save ("dg0.bin", dgH); /* dgH */
           bgy3d_vec_save ("dg1.bin", dgO); /* dgO */

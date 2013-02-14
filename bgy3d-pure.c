@@ -1026,7 +1026,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   Vec (*u0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
   /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-initial-guess"))
+  if (bgy3d_getopt_test ("--load-save-guess"))
     bgy3d_vec_read2 ("du%d%d.bin", m, du);
   else
     for (int i = 0; i < m; i++)
@@ -1294,7 +1294,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   }
 
   /* Save du[][] to binary files: */
-  if (bgy3d_getopt_test ("--save-H2O"))
+  if (bgy3d_getopt_test ("--load-save-guess"))
     bgy3d_vec_save2 ("du%d%d.bin", m, du);
 
   /* Save g2[][] to binary files: */
@@ -1413,7 +1413,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   u0[0][1] = BHD->u_ini[0][1];
 
   /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-initial-guess"))
+  if (bgy3d_getopt_test ("--load-save-guess"))
     bgy3d_vec_read2 ("du%d%d.bin", m, du);
   else
     for (int i = 0; i < m; i++)
@@ -1661,7 +1661,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   }
 
   /* Save du[][] to binary files: */
-  if (bgy3d_getopt_test ("--save-H2O"))
+  if (bgy3d_getopt_test ("--load-save-guess"))
     bgy3d_vec_save2 ("du%d%d.bin", 2, du);
 
   /* Save g2[][] to binary files: */
