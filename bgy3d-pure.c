@@ -1025,20 +1025,24 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   Vec (*u0)[m] = BHD->u_ini;        /* FIXME: alias! */
 
-  /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-save-guess"))
-    bgy3d_vec_read2 ("du%d%d.bin", m, du);
-  else
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j <= i; j++)
-        VecSet (du[i][j], 0.0);
-
   VecSet(du_new,0.0);
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
+
+      /*
+        Set initial guess, either here or by reading from file. At the
+        end of the "dump" loop du[] is written to disk, so that in the
+        next iteration we will read an updated version:
+      */
+      if (bgy3d_getopt_test ("--load-guess"))
+        bgy3d_vec_read2 ("du%d%d.bin", m, du);
+      else
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j <= i; j++)
+            VecSet (du[i][j], 0.0);
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
@@ -1283,7 +1287,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                        maxval (m * m, (real*) du_norm), norm_tol, iter + 1, max_iter);
           break;
         }
-    }
+    } /* for (iter = ... ) */
 
   /* FIXME: Debug  output from every iteration  with different overall
      scale factors damp.  Remove when no more needed. */
@@ -1294,13 +1298,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   }
 
   /* Save du[][] to binary files: */
-  if (bgy3d_getopt_test ("--load-save-guess"))
+  if (bgy3d_getopt_test ("--save-guess"))
     bgy3d_vec_save2 ("du%d%d.bin", m, du);
 
   /* Save g2[][] to binary files: */
   bgy3d_vec_save2 ("g%d%d.bin", m, g);
 
-    }
+    } /* for (dump = ... ) */
 
   bgy3d_vec_destroy2 (m, g);
   bgy3d_vec_destroy2 (m, g_fft);
@@ -1413,7 +1417,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   u0[0][1] = BHD->u_ini[0][1];
 
   /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-save-guess"))
+  if (bgy3d_getopt_test ("--load-guess"))
     bgy3d_vec_read2 ("du%d%d.bin", m, du);
   else
     for (int i = 0; i < m; i++)
@@ -1650,7 +1654,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           du_norm[1][1] <= norm_tol &&
           du_norm[0][1] <= norm_tol)
         break;
-    }
+    } /* for (iter = ...) */
 
   /* FIXME: Debug  output from every iteration  with different overall
      scale factors damp.  Remove when no more needed. */
@@ -1661,13 +1665,13 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   }
 
   /* Save du[][] to binary files: */
-  if (bgy3d_getopt_test ("--load-save-guess"))
+  if (bgy3d_getopt_test ("--save-guess"))
     bgy3d_vec_save2 ("du%d%d.bin", 2, du);
 
   /* Save g2[][] to binary files: */
   bgy3d_vec_save2 ("g%d%d.bin", 2, g);
 
-    }
+    } /* for (damp = ...) */
 
   bgy3d_vec_destroy2 (m, g);
   bgy3d_vec_destroy2 (m, g_fft);

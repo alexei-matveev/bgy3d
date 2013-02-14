@@ -674,14 +674,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   Vec u0[m];                    /* real */
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
-  /* Set initial guess, either here or by reading from file: */
-  if (bgy3d_getopt_test ("--load-save-guess"))
-    bgy3d_vec_read1 ("du%d.bin", m, du);
-  else
-    for (int i = 0; i < m; i++)
-      VecSet (du[i], 0.0);
-
-
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       /*
@@ -720,10 +712,22 @@ void bgy3d_solute_solve (const ProblemData *PD,
             value is ignored.
           */
           bgy3d_impose_laplace_boundary (BHD, u0[i], work, x_lapl[i]);
-
-          /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
-          bgy3d_compute_g (g[i], u0[i], du[i]);
         }
+
+      /*
+        Set initial guess, either here or by reading from file. At the
+        end of the "dump" loop du[] is written to disk, so that in the
+        next iteration we will read an updated version:
+      */
+      if (bgy3d_getopt_test ("--load-guess"))
+        bgy3d_vec_read1 ("du%d.bin", m, du);
+      else
+        for (int i = 0; i < m; i++)
+          VecSet (du[i], 0.0);
+
+      /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
+      for (int i = 0; i < m; i++)
+        bgy3d_compute_g (g[i], u0[i], du[i]);
 
       /* Not sure if 0.0 as inital value is right. */
       real du_norm_old[m];
@@ -912,7 +916,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                            maxval (m, du_norm), norm_tol, iter + 1, max_iter);
               break;
             }
-        } /* iter loop */
+        } /* for (iter = ... ) */
 
       /* FIXME:  Debug  output  from  every iteration  with  different
          overall scale factors damp.  Remove when no more needed. */
@@ -923,10 +927,10 @@ void bgy3d_solute_solve (const ProblemData *PD,
       }
 
       /* Save du to binary file. FIXME: Why du and not g? */
-      if (bgy3d_getopt_test ("--load-save-guess"))
+      if (bgy3d_getopt_test ("--save-guess"))
         bgy3d_vec_save1 ("du%d.bin", m, du);
 
-    } /* damp loop */
+    } /* for (damp = ... ) */
 
   /*
     Compute, and eveutually  (when Context** v is not  NULL) return to
@@ -1358,7 +1362,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   VecSet(dg_new,0.0);
 
   /* load initial configuration from file ??? */
-  if (bgy3d_getopt_test ("--load-save-guess")) {
+  if (bgy3d_getopt_test ("--load-guess")) {
       PetscPrintf(PETSC_COMM_WORLD,"Loading binary files...");
       dgH = bgy3d_vec_load ("dg0.bin"); /* dgH */
       dgO = bgy3d_vec_load ("dg1.bin"); /* dgO */
@@ -1568,7 +1572,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"done.\n");
 
       /* save g to binary file */
-      if (bgy3d_getopt_test ("--load-save-guess")) {
+      if (bgy3d_getopt_test ("--save-guess")) {
           PetscPrintf(PETSC_COMM_WORLD,"Writing binary files...");
           bgy3d_vec_save ("dg0.bin", dgH); /* dgH */
           bgy3d_vec_save ("dg1.bin", dgO); /* dgO */
