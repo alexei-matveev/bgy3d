@@ -68,6 +68,14 @@
 (guile-bgy3d-module-init)
 
 ;;;
+;;; This  may become  define-syntax some  time, so  do not  assume the
+;;; arguments are evaluated:
+;;;
+(define (maybe-print . args)
+  (if (zero? (bgy3d-rank))
+      (apply pretty-print args)))
+
+;;;
 ;;; Settings  are  handled  as  an  association list,  these  are  the
 ;;; settings used in regression tests:
 ;;;
@@ -364,10 +372,8 @@ computes the sum of all vector elements."
                           funptr        ; value
                           settings))    ; alist
     ;; Print on master only:
-    (if (zero? (bgy3d-rank))
-        (begin
-          (pretty-print solute)
-          (pretty-print settings)))
+    (maybe-print solute)
+    (maybe-print settings)
     (force-output)
     ;;
     ;; At the moment  the function bgy3d-run-solvent echos settings as
@@ -487,10 +493,8 @@ computes the sum of all vector elements."
             ;;
             ;; Only print on master:
             ;;
-            (if (zero? (bgy3d-rank))
-                (begin
-                  (pretty-print (cons 'core-potentials values))
-                  (pretty-print (cons 'core-energy energy)))))
+            (maybe-print (cons 'core-potentials values))
+            (maybe-print (cons 'core-energy energy)))
           ;;
           ;; Then destroy the potential:
           ;;
