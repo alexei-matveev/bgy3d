@@ -419,28 +419,6 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
 }
 
-/* Side effects: uses BHD->fft_scratch! */
-static void field_at_sites (State *BHD,
-                            int n, const Site sites[n], Vec v,
-                            real vs[n]) /* intent(out) */
-{
-  const real *h = BHD->PD->h;
-  const real off = BHD->PD->interval[0];
-
-  /* Translate site coordinates into real grid coordinates where
-     integer values correspond to the grid nodes: */
-  real x[n][3];
-  for (int i = 0; i < n; i++)
-    FOR_DIM
-      x[i][dim] = (sites[i].x[dim] - off) / h[dim];
-
-  /* Fourier coefficients of the potential: */
-  MatMult (BHD->fft_mat, v, BHD->fft_scratch);
-
-  /* Trigonometric interpolation: */
-  bgy3d_fft_interp (BHD->fft_mat, BHD->fft_scratch, n, x, vs);
-}
-
 static void print_table (int n, const Site sites[n], const real vs[n])
 {
   /* Average  over   all  sites,  has   no  real  meaning.   Only  for
@@ -1009,17 +987,27 @@ void bgy3d_solute_solve (const ProblemData *PD,
     */
 
     /* 1. */
-    real val1;
-    {
-      real vs[n];
-      field_at_sites (BHD, n, solute, ve, vs);
+    if (v)                 /* If it was requested by the caller ... */
+      {
+        real xs[n][3], vs[n];   /* coordinates and potential values */
 
-      val1 = 0.0;
-      for (int i = 0; i < n; i++)
-        val1 += solute[i].charge * vs[i];
+        /* Extract coordinates into plain array: */
+        for (int i = 0; i < n; i++)
+          FOR_DIM
+            xs[i][dim] = solute[i].x[dim];
 
-      print_table (n, solute, vs);
-    }
+        bgy3d_pot_interp (*v, n, xs, vs);
+
+        print_table (n, solute, vs);
+
+        real val1 = 0.0;
+        for (int i = 0; i < n; i++)
+          val1 += solute[i].charge * vs[i];
+
+        PetscPrintf (PETSC_COMM_WORLD,
+                     "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
+                     val1);
+      }
 
     /* 2 and 3. */
     real val2, val3;
@@ -1034,9 +1022,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
     VecDestroy (ve);            /* yes, we do! */
     VecDestroy (ve_rho);
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
-                 val1);
     PetscPrintf (PETSC_COMM_WORLD,
                  "<U_v|ρ_u> = %lf "
                  "(solvent electrostatic field with diffuse charge density of solute)\n",
