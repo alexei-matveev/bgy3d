@@ -493,32 +493,37 @@ static void lap_mat_create (const DA da, const real h[3],
 }
 #endif
 
-static void InitializeKSPSolver (Mat M, KSP *ksp)
+
+/* KSP  stays for  Krylov Sub-Space,  used to  solve system  of linear
+   equations: */
+static KSP ksp_create (Mat M)
 {
   PC pc;
+  KSP ksp;
 
   /* Create ksp environment */
-  KSPCreate (PETSC_COMM_WORLD, ksp);
-  KSPGetPC (*ksp, &pc);
+  KSPCreate (PETSC_COMM_WORLD, &ksp);
+  KSPGetPC (ksp, &pc);
 
   /* FIXME: literal tolerances here: */
-  KSPSetTolerances (*ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
+  KSPSetTolerances (ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
 
   /* Set Matrix */
   //KSPSetOperators (*ksp, M, M, SAME_NONZERO_PATTERN);
-  KSPSetOperators (*ksp, M, M, SAME_PRECONDITIONER);
+  KSPSetOperators (ksp, M, M, SAME_PRECONDITIONER);
 
   /* Set preconditioner */
   PCSetType (pc, PCBJACOBI);
 
   /* This is the place which is  supposed to tell KSP solver to re-use
      the supplied vector as initial guess: */
-  KSPSetInitialGuessNonzero (*ksp, PETSC_TRUE);
+  KSPSetInitialGuessNonzero (ksp, PETSC_TRUE);
 
   /* runtime options will override default parameters */
   //KSPSetFromOptions(BHD->ksp);
-}
 
+  return ksp;
+}
 
 /* Assemble Laplacian matrix and create KSP environment: */
 void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
@@ -527,7 +532,7 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
 
   lap_mat_create (da, PD->h, &vol, M);
 
-  InitializeKSPSolver (*M, ksp);
+  *ksp = ksp_create (*M);
 }
 
 /*
