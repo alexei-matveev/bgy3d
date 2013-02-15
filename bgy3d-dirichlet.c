@@ -827,8 +827,8 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 }
 
 /* Laplace matrix, no boundary: */
-void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
+Mat bgy3d_lap_mat_create (const DA da, const real h[3])
 {
-  *A = lap_mat_create (da, h, NULL);
+  return lap_mat_create (da, h, NULL);
 }
 

@@ -5,5 +5,5 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD);
 void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x);
 #endif
 
-void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A);
+Mat bgy3d_lap_mat_create (const DA da, const real h[3]);
 
