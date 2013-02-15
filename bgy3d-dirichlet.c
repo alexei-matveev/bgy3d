@@ -171,7 +171,8 @@ static Mat mat_create (int n, int N, void *ctx,
   MatShellSetOperation (A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy);
 
-  // printf ("mat_create(%p)\n", A);
+  if (verbosity > 0)
+    printf ("mat_create(%p)\n", A);
   return A;
 }
 
@@ -350,6 +351,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
 }
 
 #else
+
 /*
   For a  plain Laplacian only the  grid dimensions and  mesh sizes are
   necessary. For a Laplacian with boundary also the third field is set
@@ -399,7 +401,8 @@ static void op_destroy (Operator *op)
 
 static PetscErrorCode mat_destroy_op (Mat A)
 {
-  // printf ("mat_destroy_op(%p)\n", A);
+  if (verbosity > 0)
+    printf ("mat_destroy_op(%p)\n", A);
 
   /* Only Operators are accepted here: */
   Operator *op = context (A);
@@ -636,13 +639,22 @@ static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
 
   KSPSolve (ksp, x, y);
 
+  /*
+    If you think you need to  know how many iteration were required to
+    solve the equation do this:
+
+    int iter;
+    KSPGetIterationNumber (ksp, &iter);
+  */
+
   return 0;
 }
 
 
 static PetscErrorCode mat_destroy_inv (Mat A)
 {
-  // printf ("mat_destroy_inv(%p)\n", A);
+  if (verbosity > 0)
+    printf ("mat_destroy_inv(%p)\n", A);
 
   KSP ksp = context (A);
 
@@ -666,21 +678,84 @@ static Mat mat_inverse (Mat A)
 }
 
 
+typedef struct Dirichlet
+{
+  DA da;          /* Array descriptor */
+  Mat A;          /* Inverse of the "almost" Laplacian */
+  Vec b;          /* Work vector to hold projection on the boundary */
+  Boundary vol;   /* Boundary definition */
+} Dirichlet;
+
+
+static PetscErrorCode mat_destroy_dir (Mat A)
+{
+  if (verbosity > 0)
+    printf ("mat_destroy_dir(%p)\n", A);
+
+  Dirichlet *op = context (A);
+
+  DADestroy (op->da);
+  MatDestroy (op->A);
+  VecDestroy (op->b);
+
+  free (op);
+
+  return 0;
+}
+
+
+static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
+{
+  Dirichlet *op = context (L);
+
+  /*
+    Get boundary b of v, the rest  of b is set to zero. Together it is
+    a linear, albeit not invertible projection operation:
+
+    b := P * v
+  */
+  VecSet (op->b, 0.0);
+  copy_boundary (op->da, &op->vol, v, op->b);
+
+  /*
+    Solve Laplace  equation, update  x iteratively.  Ideally  from the
+    state of the previous iteration:
+            -1
+    x := KSP   *  b
+  */
+  MatMult (op->A, op->b, x);
+
+  /* If you preserve the value of  x until the next call the iterative
+     solver will re-use it as initial approximation for the next x. */
+
+  return 0;
+}
+
+
 /* Assemble Laplacian matrix and create KSP environment: */
 Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
 {
+  Dirichlet *op = malloc (sizeof *op);
+
   const Boundary vol = make_boundary (PD);
 
   /* I created you ... */
   Mat B = lap_mat_create (da, PD->h, &vol);
 
-  Mat A = mat_inverse (B);      /* Caller should MatDestroy() it! */
+  op->da = bgy3d_da_ref (da);    /* DADestroy() it! */
+  op->A = mat_inverse (B);       /* MatDestroy() it! */
+  op->b = bgy3d_vec_create (da); /* VecDestroy() it! */
+  op->vol = vol;
 
-  /* ...  so I  will destroy  you too  (KSP object  does  hold another
+  /* ...   so   I  will   destroy  you  too   (Mat  A   holds  another
      reference): */
   MatDestroy (B);
 
-  return A;
+  /* Get the shape of the future matrix: */
+  int n, N;
+  msizes (op->A, &n, &N);
+
+  return mat_create (n, N, op, mat_mult_dir, mat_destroy_dir);
 }
 
 
@@ -711,36 +786,26 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
  */
 void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 {
-  const Boundary vol = make_boundary (BHD->PD);
-
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is
     a linear, albeit not invertible projection operation:
 
     b := P * v
-  */
-  VecSet (b, 0.0);
-  copy_boundary (BHD->da, &vol, v, b);
 
-  /*
-    Solve Laplace  equation, update  x iteratively.  Ideally  from the
-    state of the previous iteration:
+    and solve  Laplace equation,  update x iteratively.   Ideally from
+    the state of the previous iteration:
+
             -1
-    x := KSP   *  b
+    x := KSP   * b
+
+    The Mat dirichlet_mat implements these two linear operations:
   */
-  MatMult (BHD->dirichlet_mat, b, x);
+  MatMult (BHD->dirichlet_mat, v, x);
 
   /*
-    If you think you need to  know how many iteration were required to
-    solve the equation do this:
-
-    int iter;
-    KSPGetIterationNumber (BHD->ksp, &iter);
-  */
-
-  /*
-    Subtract  solution  from  v.  The  whole is  in  effect  a  linear
+    Now subtract  solution from  v.  The whole  is in effect  a linear
     operation:
+
                   -1
     v := [1 - (KSP  *  P)] * v
   */
@@ -754,6 +819,7 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
     call changes  results only slightly,  most probably due  to finite
     convergence thresholds in KSPSolve():
   */
+  Boundary vol = make_boundary (BHD->PD);
   set_boundary (BHD->da, &vol, v, 0.0);
 
   /* If you preserve the value of  x until the next call the iterative
