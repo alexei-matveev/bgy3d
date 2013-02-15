@@ -639,13 +639,14 @@ static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
 
   KSPSolve (ksp, x, y);
 
-  /*
-    If you think you need to  know how many iteration were required to
-    solve the equation do this:
-
-    int iter;
-    KSPGetIterationNumber (ksp, &iter);
-  */
+  /* If you think you need to know how many iteration were required to
+     solve the equation do this: */
+  if (verbosity > 0)
+    {
+      int iter;
+      KSPGetIterationNumber (ksp, &iter);
+      PetscPrintf (PETSC_COMM_WORLD, "ksp(%2d) ", iter);
+    }
 
   return 0;
 }
