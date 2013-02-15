@@ -9,7 +9,7 @@
 #include "bgy3d-force.h"        /* Coulomb_short() etc. */
 #include "bgy3d-getopt.h"
 #include "bgy3d-potential.h"    /* Context */
-#include "bgy3d-poisson.h"      /* laplace staff */
+#include "bgy3d-dirichlet.h"    /* Laplace staff */
 #include "bgy3d-vec.h"          /* bgy3d_vec_map*() */
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */

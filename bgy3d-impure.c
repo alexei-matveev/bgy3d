@@ -74,7 +74,8 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-vec.h"
 #include "bgy3d-pure.h"
-#include "bgy3d-poisson.h"      /* laplace staff */
+#include "bgy3d-poisson.h"      /* bgy3d_poisson() */
+#include "bgy3d-dirichlet.h"    /* Laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "bgy3d-impure.h"

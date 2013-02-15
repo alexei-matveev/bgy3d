@@ -6,7 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
-#include "bgy3d-poisson.h"      /* bgy3d_laplace_create() */
+#include "bgy3d-dirichlet.h"    /* bgy3d_laplace_create() */
 
 /* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
    files.  Moved here  because  bgy3d-main.c is  not  linked when  the
