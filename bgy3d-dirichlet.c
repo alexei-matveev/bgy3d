@@ -8,12 +8,14 @@
 #include "bgy3d-vec.h"          /* bgy3d_da_ref() */
 #include "bgy3d-dirichlet.h"
 
+// #define MATRIX_FREE
 
 typedef struct Boundary
 {
   int border;
   const int *N;                 /* N[3] => PD->N[3] */
 } Boundary;
+
 
 /* Returns true iff the point (i, j, k) is inside the volume described
    by the boundary: */
@@ -34,6 +36,7 @@ static bool inside_boundary (const Boundary *b, int i, int j, int k)
     likely (border < j) && likely (j < N[1] - border) &&
     likely (border < k) && likely (k < N[2] - border);
 }
+
 
 /* Returns   a   description   of    the   boundary   for   use   with
    inside_boundary(): */
@@ -92,6 +95,7 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
   DAVecRestoreArray (da, b, &b_);
 }
 
+
 /*
   This function sets everything in  the 3d-array g[:, :, :] outside of
   the central section g[i, j, k] with b  < i < N - b, (same for j, and
@@ -118,66 +122,12 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   DAVecRestoreArray (da, g, &g_);
 }
 
-#ifdef MATRIX_FREE
 /*
-  For a  plain Laplacian only the  grid dimensions and  mesh sizes are
-  necessary. For a Laplacian with boundary also the third field is set
-  and used:
-*/
-typedef struct Operator
-{
-  DA da;                        /* array descriptor */
-  real h[3];                    /* grid spacing */
-  Boundary vol;                 /* only for boundary problems */
-} Operator;
-
-static Operator* context (Mat A)
-{
-  Operator *op;
-  MatShellGetContext (A, (void**) &op);
-  return op;
-}
-
-/* Creates a matix  shell, but does not associate  any operations with
-   it: */
-static Mat mat_create_shell (const DA da, void *ctx)
-{
-  /* Get dimensions and other vector properties: */
-  int x[3], n[3], N[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* Get grid dimensions N[3], sanity checks: */
-  {
-    int dim, dof, sw;
-    DAPeriodicType wrap;
-    DAStencilType st;
-    DAGetInfo (da, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, &sw, &wrap, &st);
-
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 1);               /* degrees of freedom */
-    assert (sw >= 1);                /* stencil width */
-    assert (st == DA_STENCIL_STAR);  /* stencil type */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
-
-  /*
-    Create the matrix  itself. First, set total and  local size of the
-    matrix (section).
-  */
-  const int N3 = N[2] * N[1] * N[0];
-  const int n3 = n[2] * n[1] * n[0];
-
-  /* Also puts internals (Operator struct) into the matrix: */
-  Mat A;
-  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, &A);
-
-  return A;
-}
+ *
+ * Convenience   types   and   functions   to   create   matrix   free
+ * implementations of linear operators:
+ *
+ */
 
 /* Functions that take a Mat and a Vec and update another Vec: */
 typedef PetscErrorCode (*Operation)(Mat A, Vec x, Vec y);
@@ -185,46 +135,54 @@ typedef PetscErrorCode (*Operation)(Mat A, Vec x, Vec y);
 /* Functions that take a Mat and destroy them: */
 typedef PetscErrorCode (*Destructor)(Mat A);
 
-static Mat mat_create (const DA da, const real h[3],
-                       const Boundary *vol,
+
+/* Untyped  convinience wrapper,  not all  matrices have  a meaningful
+   context: */
+static void* context (Mat A)
+{
+  void *ctx;
+  MatShellGetContext (A, &ctx);
+  return ctx;
+}
+
+
+/* Creates a matix  shell, but does not associate  any operations with
+   it: */
+static Mat mat_create_shell (int n, int N, void *ctx)
+{
+  Mat A;
+  MatCreateShell (PETSC_COMM_WORLD, n, n, N, N, ctx, &A);
+  return A;
+}
+
+
+static Mat mat_create (int n, int N, void *ctx,
                        Operation mat_mult,
                        Destructor mat_destroy)
 {
-  /* Allocates storage for a Operator struct. Make sure to it is freed
-     in mat_destroy(): */
-  Operator *op = malloc (sizeof *op);
-
-  /*
-    That is all we need  for the Laplace operator, dimensions and mesh
-    sizes.   Copy contents,  the  there are  no  guarantees about  the
-    life-time of the object pointed to:
-  */
-  for (int i = 0; i < 3; i ++)
-    op->h[i] = h[i];
-
-  /* We will  DADestroy() it in  mat_destroy(), but it came  from user
-     space, so increment the refcount: */
-  op->da = bgy3d_da_ref (da);
-
-  /* This is used to copy  over the boundary values: */
-  if (vol)
-    op->vol = *vol;
-
   /* Create  matrix shell  with  proper dimensions  and associate  the
      context with it: */
-  Mat A = mat_create_shell (da, op);
+  Mat A = mat_create_shell (n, N, ctx);
 
-  /* Set matrix operations. If vol  is NULL, the resulting operator is
-     plain Laplace: */
+  /* Set matrix operations: */
   MatShellSetOperation (A, MATOP_MULT,
                         (void (*)(void)) mat_mult);
 
   MatShellSetOperation (A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy);
 
+  // printf ("mat_create(%p)\n", A);
   return A;
 }
-#endif
+
+
+/*
+ *
+ * Two   implementations  of   the  linear   operator   for  Dirichlet
+ * problem. The linear operator  that is Laplacian "almost" everywhere
+ * except on the boundary.
+ *
+ */
 
 /*
   The  alternative works  on a  single CPU  too. Again  the regression
@@ -392,9 +350,68 @@ static Mat lap_mat_create (const DA da, const real h[3],
 }
 
 #else
+/*
+  For a  plain Laplacian only the  grid dimensions and  mesh sizes are
+  necessary. For a Laplacian with boundary also the third field is set
+  and used:
+*/
+typedef struct Operator
+{
+  DA da;                        /* array descriptor */
+  real h[3];                    /* grid spacing */
+  Boundary vol;                 /* only for boundary problems */
+} Operator;
+
+
+static Operator* op_create (const DA da, const real h[3],
+                            const Boundary *vol)
+{
+  /* Make sure it is freed in op_destroy(): */
+  Operator *op = malloc (sizeof *op);
+
+  /*
+    That is all we need  for the Laplace operator, dimensions and mesh
+    sizes.   Copy contents,  the  there are  no  guarantees about  the
+    life-time of the object pointed to:
+  */
+  for (int i = 0; i < 3; i ++)
+    op->h[i] = h[i];
+
+  /* We will  DADestroy() it  in op_destroy(), but  it came  from user
+     space, so increment the refcount: */
+  op->da = bgy3d_da_ref (da);
+
+  /* This is used to copy  over the boundary values: */
+  if (vol)
+    op->vol = *vol;
+
+  return op;
+}
+
+
+static void op_destroy (Operator *op)
+{
+  DADestroy (op->da);           /* destroys or decrements refcount */
+
+  free (op);
+}
+
+
+static PetscErrorCode mat_destroy_op (Mat A)
+{
+  // printf ("mat_destroy_op(%p)\n", A);
+
+  /* Only Operators are accepted here: */
+  Operator *op = context (A);
+
+  op_destroy (op);
+
+  return 0;
+}
+
 
 /* Does y = A * x = Δx. Laplace operator by finite differences: */
-static PetscErrorCode mat_mult_lap (Mat A, Vec x, Vec y)
+static PetscErrorCode mat_mult_op_lap (Mat A, Vec x, Vec y)
 {
   /* Only  matrices  constructed   by  mat_create_lap()  are  accepted
      here: */
@@ -479,9 +496,9 @@ static PetscErrorCode mat_mult_lap (Mat A, Vec x, Vec y)
 
 
 /* This is what is actually used: */
-static PetscErrorCode mat_mult_bnd (Mat A, Vec x, Vec y)
+static PetscErrorCode mat_mult_op_bnd (Mat A, Vec x, Vec y)
 {
-  mat_mult_lap (A, x, y);       /* y := Δx */
+  mat_mult_op_lap (A, x, y);    /* y := Δx */
 
   Operator *lap = context (A);
 
@@ -492,36 +509,72 @@ static PetscErrorCode mat_mult_bnd (Mat A, Vec x, Vec y)
   return 0;
 }
 
-static PetscErrorCode mat_destroy (Mat A)
+
+/*
+  To create a matrix one needs  the local and total size of the matrix
+  (section). This  is how  to get it  from the array  descriptor.  See
+  also msizes().
+*/
+static void asizes (const DA da, int *n3, int *N3)
 {
-  /* Only  matrices  constructed   by  lap_mat_create()  are  accepted
-     here: */
-  Operator *lap = context (A);
+  /* Get dimensions and other vector properties: */
+  int x[3], n[3], N[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DADestroy (lap->da);          /* destroys or decrements refcount */
+  /* Get grid dimensions N[3], sanity checks: */
+  {
+    int dim, dof, sw;
+    DAPeriodicType wrap;
+    DAStencilType st;
+    DAGetInfo (da, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, &sw, &wrap, &st);
 
-  free (lap);
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 1);               /* degrees of freedom */
+    assert (sw >= 1);                /* stencil width */
+    assert (st == DA_STENCIL_STAR);  /* stencil type */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
 
-  return 0;
+  *n3 = n[2] * n[1] * n[0];
+  *N3 = N[2] * N[1] * N[0];
 }
+
 
 /* Creates Laplacian  matrix. The interface has to  be consistent with
    the other impl (see #ifndef): */
 static Mat lap_mat_create (const DA da, const real h[3],
                            const Boundary *vol)
 {
+  /* Allocates storage for a Operator struct. Make sure to it is freed
+     in mat_destroy(): */
+  Operator *op = op_create (da, h, vol);
+
+  /* Get the shape of the future matrix: */
+  int n, N;
+  asizes (da, &n, &N);
+
   Mat A;
-  /* Build either a true Laplacia  operator or the one adapted for the
+  /* Build either a true Laplacian operator or the one adapted for the
      boundary problem: */
   if (vol)
-    A = mat_create (da, h, vol, mat_mult_bnd, mat_destroy);
+    A = mat_create (n, N, op, mat_mult_op_bnd, mat_destroy_op);
   else
-    A = mat_create (da, h, vol, mat_mult_lap, mat_destroy);
+    A = mat_create (n, N, op, mat_mult_op_lap, mat_destroy_op);
 
   return A;
 }
 #endif  /* ifndef MATRIX_FREE */
 
+/*
+ *
+ * Matrix-free implementation of the matrix inverse.
+ *
+ */
 
 /* KSP  stays for  Krylov Sub-Space,  used to  solve system  of linear
    equations: */
@@ -554,15 +607,82 @@ static KSP ksp_create (Mat M)
   return ksp;
 }
 
+
+/*
+  To create a matrix one needs  the local and total size of the matrix
+  (section).  This  is how  to get it  from another matrix.   See also
+  asizes()
+*/
+static void msizes (const Mat A, int *n3, int *N3)
+{
+  int m, n;
+  MatGetLocalSize (A, &m, &n);
+  assert (m == n);
+
+  int M, N;
+  MatGetSize (A, &M, &N);
+  assert (M == N);
+
+  *n3 = n;
+  *N3 = N;
+}
+
+
+/* Does y = A x where A  = B^-1 and was constructed as A = mat_inverse
+   (B): */
+static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
+{
+  KSP ksp = context (A);
+
+  KSPSolve (ksp, x, y);
+
+  return 0;
+}
+
+
+static PetscErrorCode mat_destroy_inv (Mat A)
+{
+  // printf ("mat_destroy_inv(%p)\n", A);
+
+  KSP ksp = context (A);
+
+  KSPDestroy (ksp);
+
+  return 0;
+}
+
+
+static Mat mat_inverse (Mat A)
+{
+  /* An  inverse operator  needs to  solve linear  equations  with the
+     original matrix.  Presumable KSP object will hold a reference: */
+  KSP ksp = ksp_create (A);
+
+  /* Get the shape of the future matrix: */
+  int n, N;
+  msizes (A, &n, &N);
+
+  return mat_create (n, N, ksp, mat_mult_inv, mat_destroy_inv);
+}
+
+
 /* Assemble Laplacian matrix and create KSP environment: */
-void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
+Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
 {
   const Boundary vol = make_boundary (PD);
 
-  *M = lap_mat_create (da, PD->h, &vol);
+  /* I created you ... */
+  Mat B = lap_mat_create (da, PD->h, &vol);
 
-  *ksp = ksp_create (*M);
+  Mat A = mat_inverse (B);      /* Caller should MatDestroy() it! */
+
+  /* ...  so I  will destroy  you too  (KSP object  does  hold another
+     reference): */
+  MatDestroy (B);
+
+  return A;
 }
+
 
 /*
   This solves the Dirichlet problem Δx  = 0, x(∂Ω) = v(∂Ω) in order to
@@ -608,7 +728,7 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
             -1
     x := KSP   *  b
   */
-  KSPSolve (BHD->ksp, b, x);
+  MatMult (BHD->dirichlet_mat, b, x);
 
   /*
     If you think you need to  know how many iteration were required to
@@ -645,3 +765,4 @@ void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
 {
   *A = lap_mat_create (da, h, NULL);
 }
+

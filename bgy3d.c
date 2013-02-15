@@ -138,7 +138,7 @@ State* bgy3d_state_make (const ProblemData *PD)
 
 #ifdef L_BOUNDARY
   /* Assemble Laplacian matrix and create KSP environment: */
-  bgy3d_laplace_create (BHD->da, BHD->PD, &BHD->M, &BHD->ksp);
+  BHD->dirichlet_mat = bgy3d_dirichlet_create (BHD->da, BHD->PD);
 #endif
 
 #ifdef L_BOUNDARY_MG
@@ -173,10 +173,8 @@ void bgy3d_state_destroy (State *BHD)
   VecDestroy (BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
-  assert (BHD->M != NULL);
-  assert (BHD->ksp != NULL);
-  MatDestroy (BHD->M);
-  KSPDestroy (BHD->ksp);
+  assert (BHD->dirichlet_mat != NULL);
+  MatDestroy (BHD->dirichlet_mat);
 #endif
 
 #ifdef L_BOUNDARY_MG

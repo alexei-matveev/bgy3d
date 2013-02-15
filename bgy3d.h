@@ -207,8 +207,7 @@ typedef struct State
   Vec gfg2_fft;                 /* complex */
 
 #ifdef L_BOUNDARY
-  Mat M;
-  KSP ksp;
+  Mat dirichlet_mat;
 #endif
 
 #ifdef L_BOUNDARY_MG
