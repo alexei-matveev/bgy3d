@@ -496,6 +496,58 @@ static void print_table (int n, const Site sites[n], const real vs[n])
                  sites[i].charge, vs[i] - v_avg, v_avg);
 }
 
+
+/*
+  Apply boundary conditions (or other constraints), perform mixing and
+  update g[].
+
+  Mix du and du_new with a fixed ratio "a":
+
+    du' = a * du_out + (1 - a) * du
+    norm = |du_out - du|
+
+  Now that du[] has been  computed using g[] of the previous iteration
+  one can safely update g[].  Compute g := exp[-(u0 + du)].
+
+  Vec du_out[]  and x_lapl[] are  intent(inout) here. Try  to preserve
+  the  values  of x_lapl[]  across  iterations  to  save time  in  the
+  iterative solver.  Vec work is a work array.
+*/
+static void compute_g (const State *BHD,
+                       int m, Vec g[m], Vec u0[m], Vec du[m], Vec du_out[m],
+                       real a,
+                       real du_norm[m],
+                       Vec x_lapl[m],
+                       Vec work)
+{
+  /*
+    Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
+    preserve the values of  x_lapl[] across iterations to save
+    time in the iterative solver.  Vec work is a work array.
+  */
+  for (int i = 0; i < m; i++)
+    bgy3d_impose_laplace_boundary (BHD, du_out[i], work, x_lapl[i]);
+
+  /*
+    Mix du and du_new with a fixed ratio "a":
+
+    du' = a * du_out + (1 - a) * du
+    norm = |du_out - du|
+
+    last arg is a temp
+  */
+  for (int i = 0; i < m; i++)
+    du_norm[i] = bgy3d_vec_mix (du[i], du_out[i], a, work);
+
+  /*
+    Now that du[] has been  computed using g[] of the previous
+    iteration  one  can  safely  update  g[].   Compute  g  :=
+    exp[-(u0 + du)], with a sanity check:
+  */
+  for (int i = 0; i < m; i++)
+    bgy3d_compute_g (g[i], u0[i], du[i]);
+}
+
 /*
   This function is the main entry  point for the BGY3dM equation for a
   m-site solvent and an arbitrary solute.  The vectors in
@@ -830,31 +882,23 @@ void bgy3d_solute_solve (const ProblemData *PD,
             } /* over sites i */
 
           /*
-            Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
-            preserve the values of  x_lapl[] across iterations to save
-            time in the iterative solver.  Vec work is a work array.
-          */
-          for (int i = 0; i < m; i++)
-            bgy3d_impose_laplace_boundary (BHD, du_out[i], work, x_lapl[i]);
+            Apply boundary conditions  (or other constraints), perform
+            mixing and update g[].
 
-          /*
             Mix du and du_new with a fixed ratio "a":
 
               du' = a * du_out + (1 - a) * du
               norm = |du_out - du|
 
-            last arg is a temp
-          */
-          for (int i = 0; i < m; i++)
-            du_norm[i] = bgy3d_vec_mix (du[i], du_out[i], a, work);
-
-          /*
             Now that du[] has been  computed using g[] of the previous
             iteration  one  can  safely  update  g[].   Compute  g  :=
-            exp[-(u0 + du)], with a sanity check:
+            exp[-(u0 + du)].
+
+            Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
+            preserve the values of  x_lapl[] across iterations to save
+            time in the iterative solver.  Vec work is a work array.
           */
-          for (int i = 0; i < m; i++)
-            bgy3d_compute_g (g[i], u0[i], du[i]);
+          compute_g (BHD, m, g, u0, du, du_out, a, du_norm, x_lapl, work);
 
           /* Fancy step  size control. FIXME: weired  logic. Code used
              to check if *any* of the norms went up: */
