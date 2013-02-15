@@ -860,9 +860,8 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
   */
   set_boundary (BHD->da, &vol, v, 0.0);
 
-  /* WRONG? If  you preserve the  value of x  until the next  call the
-     iterative solver will re-use  it as initial approximation for the
-     next x. */
+  /* If you preserve the value of  x until the next call the iterative
+     solver will re-use it as initial approximation for the next x. */
 }
 #endif
 
