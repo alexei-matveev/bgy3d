@@ -785,7 +785,7 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
 
   Vec v, x are intent(inout), Vec b is a work array.
  */
-void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
+void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec x)
 {
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is

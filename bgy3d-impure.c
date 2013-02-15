@@ -469,7 +469,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
     Vec x = bgy3d_vec_create (BHD->da);
     Vec work = bgy3d_vec_create (BHD->da);
 
-    bgy3d_impose_laplace_boundary (BHD, ve, work, x);
+    bgy3d_impose_laplace_boundary (BHD, ve, x);
 
     VecDestroy (x);
     VecDestroy (work);
@@ -524,10 +524,10 @@ static void compute_g (const State *BHD,
   /*
     Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
     preserve the values of  x_lapl[] across iterations to save
-    time in the iterative solver.  Vec work is a work array.
+    time in the iterative solver.
   */
   for (int i = 0; i < m; i++)
-    bgy3d_impose_laplace_boundary (BHD, du_out[i], work, x_lapl[i]);
+    bgy3d_impose_laplace_boundary (BHD, du_out[i], x_lapl[i]);
 
   /*
     Mix du and du_new with a fixed ratio "a":
@@ -761,11 +761,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
             See pp.  116-177 in  thesis: boundary conditions (5.107) -
             (5.110):  first  impose   boundary  condition  then  solve
             laplacian equation  and substrate  from u0.  State  BHD is
-            not   modified  by  these   calls.   Vec   work,  formally
-            intent(out) in  these calls, is,  well, a work  array. Its
-            value is ignored.
+            not modified by these calls.
           */
-          bgy3d_impose_laplace_boundary (BHD, u0[i], work, x_lapl[i]);
+          bgy3d_impose_laplace_boundary (BHD, u0[i], x_lapl[i]);
         }
 
       /*
@@ -1464,8 +1462,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < 2; i++)
         VecScale (g0[i], BHD.PD->beta);
 
-      bgy3d_impose_laplace_boundary (&BHD, g0[0], tH, x_lapl[0]);
-      bgy3d_impose_laplace_boundary (&BHD, g0[1], tH, x_lapl[1]);
+      bgy3d_impose_laplace_boundary (&BHD, g0[0], x_lapl[0]);
+      bgy3d_impose_laplace_boundary (&BHD, g0[1], x_lapl[1]);
 
       /* g=g0*exp(-dg) */
       bgy3d_compute_g (g[0], g0[0], dgH);
@@ -1516,7 +1514,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[0].charge, uc);
 
-          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, x_lapl[0]);
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, x_lapl[0]);
 
           VecCopy(dg_new, dg_newH);
 
@@ -1544,7 +1542,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
              site charges into predefined locations: */
           VecAXPY(dg_new, solvent[1].charge, uc);
 
-          bgy3d_impose_laplace_boundary (&BHD, dg_new, tH, x_lapl[1]);
+          bgy3d_impose_laplace_boundary (&BHD, dg_new, x_lapl[1]);
 
           VecCopy(dg_new, dg_newO);
 

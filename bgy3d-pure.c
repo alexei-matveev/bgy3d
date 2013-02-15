@@ -1047,8 +1047,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           {
-            /* Vec work is used as a temporary here: */
-            bgy3d_impose_laplace_boundary (BHD, u0[i][j], work, x_lapl[i][j]);
+            bgy3d_impose_laplace_boundary (BHD, u0[i][j], x_lapl[i][j]);
 
             /* g = g0 * exp(-du) */
             bgy3d_compute_g (g[i][j], u0[i][j], du[i][j]);
@@ -1197,7 +1196,7 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
               vanish:
             */
             if (iter >= 0)
-              bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[i][j]);
+              bgy3d_impose_laplace_boundary (BHD, du_new, x_lapl[i][j]);
 
             /*
               Mix du and du_new with a fixed ratio "a":
@@ -1432,10 +1431,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
       RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
-      /* Vec work is used as a temporary here: */
-      bgy3d_impose_laplace_boundary (BHD, u0[0][0], work, x_lapl[0][0]);
-      bgy3d_impose_laplace_boundary (BHD, u0[1][1], work, x_lapl[1][1]);
-      bgy3d_impose_laplace_boundary (BHD, u0[0][1], work, x_lapl[0][1]);
+      bgy3d_impose_laplace_boundary (BHD, u0[0][0], x_lapl[0][0]);
+      bgy3d_impose_laplace_boundary (BHD, u0[1][1], x_lapl[1][1]);
+      bgy3d_impose_laplace_boundary (BHD, u0[0][1], x_lapl[0][1]);
 
       /* g=g0*exp(-du) */
       bgy3d_compute_g (g[0][1], u0[0][1], du[0][1]);
@@ -1511,7 +1509,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(du_new, PD->beta, BHD->u2[0][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][1]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, x_lapl[0][1]);
 
           du_norm[0][1] = bgy3d_vec_mix (du[0][1], du_new, a, work);
 
@@ -1557,7 +1555,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(du_new, PD->beta, BHD->u2[0][0]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[0][0]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, x_lapl[0][0]);
 
           du_norm[0][0] = bgy3d_vec_mix (du[0][0], du_new, a, work);
 
@@ -1592,7 +1590,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(du_new, PD->beta, BHD->u2[1][1]);
 
           if (iter >= 0)
-            bgy3d_impose_laplace_boundary (BHD, du_new, work, x_lapl[1][1]);
+            bgy3d_impose_laplace_boundary (BHD, du_new, x_lapl[1][1]);
 
           du_norm[1][1] = bgy3d_vec_mix (du[1][1], du_new, a, work);
 
