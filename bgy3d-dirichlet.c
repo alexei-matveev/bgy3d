@@ -140,7 +140,7 @@ static Operator* context (Mat A)
 
 /* Creates a matix  shell, but does not associate  any operations with
    it: */
-static void mat_create_shell (const DA da, void *ctx, Mat *A)
+static Mat mat_create_shell (const DA da, void *ctx)
 {
   /* Get dimensions and other vector properties: */
   int x[3], n[3], N[3];
@@ -173,7 +173,10 @@ static void mat_create_shell (const DA da, void *ctx, Mat *A)
   const int n3 = n[2] * n[1] * n[0];
 
   /* Also puts internals (Operator struct) into the matrix: */
-  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, A);
+  Mat A;
+  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, &A);
+
+  return A;
 }
 
 /* Functions that take a Mat and a Vec and update another Vec: */
@@ -182,11 +185,10 @@ typedef PetscErrorCode (*Operation)(Mat A, Vec x, Vec y);
 /* Functions that take a Mat and destroy them: */
 typedef PetscErrorCode (*Destructor)(Mat A);
 
-static void mat_create (const DA da, const real h[3],
-                        const Boundary *vol,
-                        Operation mat_mult,
-                        Destructor mat_destroy,
-                        Mat *A)    /* intent(out) */
+static Mat mat_create (const DA da, const real h[3],
+                       const Boundary *vol,
+                       Operation mat_mult,
+                       Destructor mat_destroy)
 {
   /* Allocates storage for a Operator struct. Make sure to it is freed
      in mat_destroy(): */
@@ -210,15 +212,17 @@ static void mat_create (const DA da, const real h[3],
 
   /* Create  matrix shell  with  proper dimensions  and associate  the
      context with it: */
-  mat_create_shell (da, op, A);
+  Mat A = mat_create_shell (da, op);
 
   /* Set matrix operations. If vol  is NULL, the resulting operator is
      plain Laplace: */
-  MatShellSetOperation (*A, MATOP_MULT,
+  MatShellSetOperation (A, MATOP_MULT,
                         (void (*)(void)) mat_mult);
 
-  MatShellSetOperation (*A, MATOP_DESTROY,
+  MatShellSetOperation (A, MATOP_DESTROY,
                         (void (*)(void)) mat_destroy);
+
+  return A;
 }
 #endif
 
@@ -237,9 +241,8 @@ static void mat_create (const DA da, const real h[3],
   the  one  that  was  tried  is  slower.  The  interface  has  to  be
   consistent with the other impl (see #else):
 */
-static void lap_mat_create (const DA da, const real h[3],
-                            const Boundary *const vol,
-                            Mat *M) /* intent(out) */
+static Mat lap_mat_create (const DA da, const real h[3],
+                           const Boundary *const vol)
 {
   const PetscScalar one = 1.0;
 
@@ -247,9 +250,10 @@ static void lap_mat_create (const DA da, const real h[3],
     PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
 
   /* Create Matrix with appropriate non-zero structure */
-  DAGetMatrix (da, MATMPIAIJ, M);
+  Mat M;
+  DAGetMatrix (da, MATMPIAIJ, &M);
 
-  MatZeroEntries (*M);
+  MatZeroEntries (M);
 
   /*
     This code constructs  (a compact representation of) the  N^3 x N^3
@@ -303,7 +307,7 @@ static void lap_mat_create (const DA da, const real h[3],
             {
               /* This  sets this  particular diagonal  element  of the
                  matrix to 1.0: */
-              MatSetValuesStencil (*M, 1, &row, 1, &row, &one, ADD_VALUES);
+              MatSetValuesStencil (M, 1, &row, 1, &row, &one, ADD_VALUES);
             }
           else
             {
@@ -373,16 +377,18 @@ static void lap_mat_create (const DA da, const real h[3],
                   const real h2 = SQR (h[dim]);
                   const PetscScalar v[3] = {1.0 / h2, -2.0 / h2, 1.0 / h2};
 
-                  MatSetValuesStencil (*M, 1, &row, 3, col, v, ADD_VALUES);
+                  MatSetValuesStencil (M, 1, &row, 3, col, v, ADD_VALUES);
                 }
             }
         }
 
-  MatAssemblyBegin (*M, MAT_FINAL_ASSEMBLY);
-  MatAssemblyEnd (*M, MAT_FINAL_ASSEMBLY);
+  MatAssemblyBegin (M, MAT_FINAL_ASSEMBLY);
+  MatAssemblyEnd (M, MAT_FINAL_ASSEMBLY);
 
   if (verbosity > 0)
     PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+
+  return M;
 }
 
 #else
@@ -501,16 +507,18 @@ static PetscErrorCode mat_destroy (Mat A)
 
 /* Creates Laplacian  matrix. The interface has to  be consistent with
    the other impl (see #ifndef): */
-static void lap_mat_create (const DA da, const real h[3],
-                            const Boundary *vol,
-                            Mat *A)    /* intent(out) */
+static Mat lap_mat_create (const DA da, const real h[3],
+                           const Boundary *vol)
 {
+  Mat A;
   /* Build either a true Laplacia  operator or the one adapted for the
      boundary problem: */
   if (vol)
-    mat_create (da, h, vol, mat_mult_bnd, mat_destroy, A);
+    A = mat_create (da, h, vol, mat_mult_bnd, mat_destroy);
   else
-    mat_create (da, h, vol, mat_mult_lap, mat_destroy, A);
+    A = mat_create (da, h, vol, mat_mult_lap, mat_destroy);
+
+  return A;
 }
 #endif  /* ifndef MATRIX_FREE */
 
@@ -551,7 +559,7 @@ void bgy3d_laplace_create (const DA da, const ProblemData *PD, Mat *M, KSP *ksp)
 {
   const Boundary vol = make_boundary (PD);
 
-  lap_mat_create (da, PD->h, &vol, M);
+  *M = lap_mat_create (da, PD->h, &vol);
 
   *ksp = ksp_create (*M);
 }
@@ -635,5 +643,5 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
 /* Laplace matrix, no boundary: */
 void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
 {
-  lap_mat_create (da, h, NULL, A);
+  *A = lap_mat_create (da, h, NULL);
 }
