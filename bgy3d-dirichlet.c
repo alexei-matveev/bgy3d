@@ -5,11 +5,12 @@
 
 #include <stdbool.h>
 #include "bgy3d.h"
+#include "bgy3d-vec.h"          /* bgy3d_da_ref() */
 #include "bgy3d-dirichlet.h"
 
-#ifdef L_BOUNDARY
 
-typedef struct Boundary {
+typedef struct Boundary
+{
   int border;
   const int *N;                 /* N[3] => PD->N[3] */
 } Boundary;
@@ -117,6 +118,110 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   DAVecRestoreArray (da, g, &g_);
 }
 
+#ifdef MATRIX_FREE
+/*
+  For a  plain Laplacian only the  grid dimensions and  mesh sizes are
+  necessary. For a Laplacian with boundary also the third field is set
+  and used:
+*/
+typedef struct Operator
+{
+  DA da;                        /* array descriptor */
+  real h[3];                    /* grid spacing */
+  Boundary vol;                 /* only for boundary problems */
+} Operator;
+
+static Operator* context (Mat A)
+{
+  Operator *op;
+  MatShellGetContext (A, (void**) &op);
+  return op;
+}
+
+/* Creates a matix  shell, but does not associate  any operations with
+   it: */
+static void mat_create_shell (const DA da, void *ctx, Mat *A)
+{
+  /* Get dimensions and other vector properties: */
+  int x[3], n[3], N[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Get grid dimensions N[3], sanity checks: */
+  {
+    int dim, dof, sw;
+    DAPeriodicType wrap;
+    DAStencilType st;
+    DAGetInfo (da, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, &sw, &wrap, &st);
+
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 1);               /* degrees of freedom */
+    assert (sw >= 1);                /* stencil width */
+    assert (st == DA_STENCIL_STAR);  /* stencil type */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
+
+  /*
+    Create the matrix  itself. First, set total and  local size of the
+    matrix (section).
+  */
+  const int N3 = N[2] * N[1] * N[0];
+  const int n3 = n[2] * n[1] * n[0];
+
+  /* Also puts internals (Operator struct) into the matrix: */
+  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, A);
+}
+
+/* Functions that take a Mat and a Vec and update another Vec: */
+typedef PetscErrorCode (*Operation)(Mat A, Vec x, Vec y);
+
+/* Functions that take a Mat and destroy them: */
+typedef PetscErrorCode (*Destructor)(Mat A);
+
+static void mat_create (const DA da, const real h[3],
+                        const Boundary *vol,
+                        Operation mat_mult,
+                        Destructor mat_destroy,
+                        Mat *A)    /* intent(out) */
+{
+  /* Allocates storage for a Operator struct. Make sure to it is freed
+     in mat_destroy(): */
+  Operator *op = malloc (sizeof *op);
+
+  /*
+    That is all we need  for the Laplace operator, dimensions and mesh
+    sizes.   Copy contents,  the  there are  no  guarantees about  the
+    life-time of the object pointed to:
+  */
+  for (int i = 0; i < 3; i ++)
+    op->h[i] = h[i];
+
+  /* We will  DADestroy() it in  mat_destroy(), but it came  from user
+     space, so increment the refcount: */
+  op->da = bgy3d_da_ref (da);
+
+  /* This is used to copy  over the boundary values: */
+  if (vol)
+    op->vol = *vol;
+
+  /* Create  matrix shell  with  proper dimensions  and associate  the
+     context with it: */
+  mat_create_shell (da, op, A);
+
+  /* Set matrix operations. If vol  is NULL, the resulting operator is
+     plain Laplace: */
+  MatShellSetOperation (*A, MATOP_MULT,
+                        (void (*)(void)) mat_mult);
+
+  MatShellSetOperation (*A, MATOP_DESTROY,
+                        (void (*)(void)) mat_destroy);
+}
+#endif
+
 /*
   The  alternative works  on a  single CPU  too. Again  the regression
   tests  "fail"  with 3-4  digits  the  same  as before.   The  bigger
@@ -125,11 +230,12 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   uses with matrix free implementation  appears to be slower and fails
   for more than one CPU.
 */
-#ifndef MATRIX_FREE_LAPLACE
+#ifndef MATRIX_FREE
 /*
-  Create    and   initialize    Laplace   matrix    with   appropriate
-  stencil.  FIXME: this  should be  probably implemented  using matrix
-  free facilities of Petsc.
+  Create and initialize Laplace matrix with appropriate stencil.  This
+  may be  implemented using matrix  free facilities of  Petsc, however
+  the  one  that  was  tried  is  slower.  The  interface  has  to  be
+  consistent with the other impl (see #else):
 */
 static void lap_mat_create (const DA da, const real h[3],
                             const Boundary *const vol,
@@ -278,33 +384,15 @@ static void lap_mat_create (const DA da, const real h[3],
   if (verbosity > 0)
     PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
+
 #else
-/*
-  For a  plain laplacian only the  grid dimensions and  mesh sizes are
-  necessary. For a Laplacian with boundary also the third field is set
-  and used:
-*/
-typedef struct Lap {
-  DA da;                        /* array descriptor */
-  real h[3];                    /* grid spacing */
-  Boundary vol;                 /* for boundary problem */
-} Lap;
-
-
-static Lap* context (Mat A)
-{
-  Lap *lap;
-  MatShellGetContext (A, (void**) &lap);
-  return lap;
-}
-
 
 /* Does y = A * x = Δx. Laplace operator by finite differences: */
 static PetscErrorCode mat_mult_lap (Mat A, Vec x, Vec y)
 {
   /* Only  matrices  constructed   by  mat_create_lap()  are  accepted
      here: */
-  const Lap *lap = context (A);
+  const Operator *lap = context (A);
 
   const real *h = lap->h;       /* h[3] */
 
@@ -389,7 +477,7 @@ static PetscErrorCode mat_mult_bnd (Mat A, Vec x, Vec y)
 {
   mat_mult_lap (A, x, y);       /* y := Δx */
 
-  Lap *lap = context (A);
+  Operator *lap = context (A);
 
   /* Untill  now we compute  plain-old Δx,  now the  boundary specific
      staff. Copy the values at the boundary from x to y as is: */
@@ -402,7 +490,7 @@ static PetscErrorCode mat_destroy (Mat A)
 {
   /* Only  matrices  constructed   by  lap_mat_create()  are  accepted
      here: */
-  Lap *lap = context (A);
+  Operator *lap = context (A);
 
   DADestroy (lap->da);          /* destroys or decrements refcount */
 
@@ -411,87 +499,20 @@ static PetscErrorCode mat_destroy (Mat A)
   return 0;
 }
 
-/* Creates a matix  shell, but does not associate  any operations with
-   it: */
-static void mat_create_shell (const DA da, void *ctx, Mat *A)
-{
-  /* Get dimensions and other vector properties: */
-  int x[3], n[3], N[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* Get grid dimensions N[3], sanity checks: */
-  {
-    int dim, dof, sw;
-    DAPeriodicType wrap;
-    DAStencilType st;
-    DAGetInfo (da, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, &sw, &wrap, &st);
-
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 1);               /* degrees of freedom */
-    assert (sw >= 1);                /* stencil width */
-    assert (st == DA_STENCIL_STAR);  /* stencil type */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
-
-  /*
-    Create the matrix  itself. First, set total and  local size of the
-    matrix (section).
-  */
-  const int N3 = N[2] * N[1] * N[0];
-  const int n3 = n[2] * n[1] * n[0];
-
-  /* Also puts internals (Lap struct) into the matrix: */
-  MatCreateShell (PETSC_COMM_WORLD, n3, n3, N3, N3, ctx, A);
-}
-
-
-/* Creates Laplacian matrix: */
+/* Creates Laplacian  matrix. The interface has to  be consistent with
+   the other impl (see #ifndef): */
 static void lap_mat_create (const DA da, const real h[3],
                             const Boundary *vol,
                             Mat *A)    /* intent(out) */
 {
-  /* Allocates storage for  a Lap struct. Make sure to  it is freed in
-     mat_destroy(): */
-  Lap *lap = malloc (sizeof *lap);
-
-  /*
-    That is all we need  for the Laplace operator, dimensions and mesh
-    sizes.   Copy contents,  the  there are  no  guarantees about  the
-    life-time of the object pointed to:
-  */
-  for (int i = 0; i < 3; i ++)
-    lap->h[i] = h[i];
-
-  /* We will  DADestroy() it in  mat_destroy(), but it came  from user
-     space, so increment the refcount: */
-  lap->da = bgy3d_da_ref (da);
-
-  /* This is used to copy  over the boundary values: */
+  /* Build either a true Laplacia  operator or the one adapted for the
+     boundary problem: */
   if (vol)
-    lap->vol = *vol;
-
-  /* Create  matrix shell  with  proper dimensions  and associate  the
-     context with it: */
-  mat_create_shell (da, lap, A);
-
-  /* Set matrix operations. If vol  is NULL, the resulting operator is
-     plain Laplace: */
-  if (vol)
-    MatShellSetOperation (*A, MATOP_MULT,
-                          (void (*)(void)) mat_mult_bnd);
+    mat_create (da, h, vol, mat_mult_bnd, mat_destroy, A);
   else
-    MatShellSetOperation (*A, MATOP_MULT,
-                          (void (*)(void)) mat_mult_lap);
-
-  MatShellSetOperation (*A, MATOP_DESTROY,
-                        (void (*)(void)) mat_destroy);
+    mat_create (da, h, vol, mat_mult_lap, mat_destroy, A);
 }
-#endif
+#endif  /* ifndef MATRIX_FREE */
 
 
 /* KSP  stays for  Krylov Sub-Space,  used to  solve system  of linear
@@ -610,8 +631,6 @@ void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec b, Vec x)
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */
 }
-#endif
-
 
 /* Laplace matrix, no boundary: */
 void bgy3d_lap_mat_create (const DA da, const real h[3], Mat *A)
