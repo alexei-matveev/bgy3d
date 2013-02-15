@@ -523,7 +523,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
 
-  Vec du[m];
   PetscScalar du_norm[m];
   int namecount = 0;
 
@@ -644,11 +643,14 @@ void bgy3d_solute_solve (const ProblemData *PD,
   */
   Vec g_fft[m];
   bgy3d_vec_create1 (BHD->dc, m, g_fft); /* complex */
-  bgy3d_vec_create1 (BHD->da, m, du);    /* real */
 
   /* Here the  storage for  the output is  allocated, the  caller will
      have to destroy them: */
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
+
+  Vec du[m], du_out[m];    /* in- and output of the BGY3D iteration */
+  bgy3d_vec_create1 (BHD->da, m, du);     /* real */
+  bgy3d_vec_create1 (BHD->da, m, du_out); /* real */
 
   /*
     There is no  point to transform each contribution  computed in the
@@ -657,7 +659,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   */
   Vec du_acc_fft = bgy3d_vec_create (BHD->dc); /* complex */
 
-  Vec du_acc = bgy3d_vec_create (BHD->da);
   Vec work = bgy3d_vec_create (BHD->da);
 
   /* Coulomb long, common for all sites: */
@@ -787,7 +788,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                 contributions  are  added  to  the real  space  du_acc
                 below:
               */
-              MatMultTranspose (BHD->fft_mat, du_acc_fft, du_acc);
+              MatMultTranspose (BHD->fft_mat, du_acc_fft, du_out[i]);
 
               /*
                 In the following the sum is  over all sites j /= i. It
@@ -809,7 +810,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                   bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
 
                   /* Add the contribution of site j /= i to du[i]: */
-                  VecAXPY (du_acc, 1.0, work);
+                  VecAXPY (du_out[i], 1.0, work);
 
                   /*
                     FIXME: the code for  pure solvent adds a so-called
@@ -825,26 +826,27 @@ void bgy3d_solute_solve (const ProblemData *PD,
                 erroneousely missing  the inverse temperature  beta in
                 this expression:
               */
-              VecAXPY (du_acc, beta * solvent[i].charge, uc);
-
-              /*
-                Vec du_acc  and x_lapl[i] are  intent(inout) here. Try
-                to preserve  the values of  x_lapl[] across iterations
-                to save time  in the iterative solver.  Vec  work is a
-                work array.
-              */
-              bgy3d_impose_laplace_boundary (BHD, du_acc, work, x_lapl[i]);
-
-              /*
-                Mix du and du_new with a fixed ratio "a":
-
-                  du' = a * du_new + (1 - a) * du
-                  norm = |du_new - du|
-
-                last arg is a temp
-              */
-              du_norm[i] = bgy3d_vec_mix (du[i], du_acc, a, work);
+              VecAXPY (du_out[i], beta * solvent[i].charge, uc);
             } /* over sites i */
+
+          /*
+            Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
+            preserve the values of  x_lapl[] across iterations to save
+            time in the iterative solver.  Vec work is a work array.
+          */
+          for (int i = 0; i < m; i++)
+            bgy3d_impose_laplace_boundary (BHD, du_out[i], work, x_lapl[i]);
+
+          /*
+            Mix du and du_new with a fixed ratio "a":
+
+              du' = a * du_out + (1 - a) * du
+              norm = |du_out - du|
+
+            last arg is a temp
+          */
+          for (int i = 0; i < m; i++)
+            du_norm[i] = bgy3d_vec_mix (du[i], du_out[i], a, work);
 
           /*
             Now that du[] has been  computed using g[] of the previous
@@ -1040,6 +1042,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
   bgy3d_vec_destroy1 (m, u0);
   bgy3d_vec_destroy1 (m, du);
+  bgy3d_vec_destroy1 (m, du_out);
   bgy3d_vec_destroy1 (m, g_fft);
   bgy3d_vec_destroy1 (m, x_lapl);
 
@@ -1047,7 +1050,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, g2);
   bgy3d_vec_destroy2 (m, ker_fft);
 
-  VecDestroy (du_acc);
   VecDestroy (work);
   VecDestroy (uc);
   VecDestroy (uc_rho);
