@@ -4,6 +4,7 @@
 #include "petscda.h"            /* PetscInitialize */
 
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"       /* bgy3d_getopt_test() */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* bgy3d_solvent_get() */
 #include "bgy3d-pure.h"
@@ -738,6 +739,12 @@ void bgy3d_guile_init (int argc, char **argv)
 
   /* Make Petsc abort when it encounters an error: */
   PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
+
+  /*
+    Set global verbosity early enough.  This is the only short option!
+    Use long-options prefixed by "--" as the usual convention.
+  */
+  verbosity = bgy3d_getopt_test ("-v"); /* extern */
 
   /*
    * Note  that  the names  defined  here  are  put into  the  private

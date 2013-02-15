@@ -58,10 +58,12 @@ int main (int argc, char **argv)
   /* Make Petsc abort when it encounters an error: */
   PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
 
-  /* Read the command  line options. Petsc insists on  keys having the
-     leading dash, so keep them  for the moment.  Set global verbosity
-     early  enough. This is  the only  short option!  Use long-options
-     prefixed by "--" as the usual convention. */
+  /*
+    Read the  command line options.  Petsc insists on keys  having the
+    leading dash, so  keep them for the moment.   Set global verbosity
+    early  enough. This is  the only  short option!   Use long-options
+    prefixed by "--" as the usual convention.
+  */
   bgy3d_getopt_int ("-v", &verbosity);
 
   /* This calls bgy3d_getopt_*() a few more times: */
