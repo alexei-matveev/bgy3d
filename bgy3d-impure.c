@@ -472,12 +472,10 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   */
   {
     Vec x = bgy3d_vec_create (BHD->da);
-    Vec work = bgy3d_vec_create (BHD->da);
 
     bgy3d_impose_laplace_boundary (BHD, ve, x);
 
     VecDestroy (x);
-    VecDestroy (work);
   }
 
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
