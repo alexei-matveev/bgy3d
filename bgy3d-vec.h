@@ -35,6 +35,8 @@ void bgy3d_vec_read_radial2 (const State *BHD,
 void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
 
+void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
+
 /* Increment  the  reference count,  and  return  the descriptor,  the
    caller is obliged to DADestroy() it. Do not abuse!. */
 static inline DA bgy3d_da_ref (DA da)

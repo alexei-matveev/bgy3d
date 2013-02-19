@@ -376,3 +376,43 @@ void bgy3d_vec_moments (const DA da, Vec v,
   *y = bgy3d_vec_integrate (da, my, v);
   *z = bgy3d_vec_integrate (da, mz, v);
 }
+
+
+/*
+  By scaling k-components of the FFT Vec v along each dimension by
+
+    exp [i * (2πk/L) * L/2] = cos (πk) = (-1)^k
+
+  we effectively  translate the center of  the grid to  the corner and
+  vice  versa.   FIXME:  again,  since the  complex  array  descriptor
+  contians different dimensions  we have to pass the  real grid shape,
+  N[3], separately. Complex Vec v is intent(inout) here:
+*/
+void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
+{
+  int x[3], n[3], i[3];
+
+  /* Get local portion of the grid */
+  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Loop over local portion of grid: */
+  complex ***v_;
+  DAVecGetArray (dc, v, &v_);
+
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+        {
+          int ic[3];
+
+          /* Take negative frequencies for i > N/2: */
+          FOR_DIM
+            ic[dim] = KFREQ (i[dim], N[dim]);
+
+          /* phase shift factor for x=x+L/2 */
+          const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
+
+          v_[i[2]][i[1]][i[0]] *= sign;
+        }
+  DAVecRestoreArray (dc, v, &v_);
+}
