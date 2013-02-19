@@ -215,14 +215,11 @@ static void kernel (const DA dc,
           FOR_DIM
             ic[dim] = KFREQ (i[dim], N[dim]);
 
-          /* phase shift factor for x=x+L/2 */
-          const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-
           real k2 = SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0]);
 
           real k_fac;
           if (k2 > 0)
-              k_fac = sign * h3 * h3 * scale / k2;
+              k_fac = h3 * h3 * scale / k2;
           else
               k_fac = 0.0;
 
@@ -264,13 +261,21 @@ static void kernel (const DA dc,
             Long range Coulomb part (right one):
           */
           if (coul)
-            dfg_[i[2]][i[1]][i[0]] += (h3 / L3) * sign * coul_[i[2]][i[1]][i[0]];
+            dfg_[i[2]][i[1]][i[0]] += (h3 / L3) * coul_[i[2]][i[1]][i[0]];
         }
   DAVecRestoreArray (dc, dfg, &dfg_);
   if (coul)
     DAVecRestoreArray (dc, coul, &coul_);
   FOR_DIM
     DAVecRestoreArray (dc, fg[dim], &fg_[dim]);
+
+  /*
+    Translate  the kernel  so  that the  real-space representation  is
+    centered at the  grid corner (0, 0, 0) and not  at the grid center
+    like other  grid representations. This  is what is assumed  in the
+    convolution integrals:
+  */
+  bgy3d_vec_fft_trans (dc, N, dfg);
 }
 
 /*

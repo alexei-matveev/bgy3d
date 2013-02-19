@@ -143,10 +143,9 @@ static void ComputeFFTfromCoulomb (State *BHD,
             {
               const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
               const real fac = EPSILON0INV / M_PI / k2;
-              const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
 
               /* Potential, complex with zero imaginary part: */
-              uc_fft_[i[2]][i[1]][i[0]] = factor * sign * fac * exp(- k2 * SQR(M_PI) / SQR(G));
+              uc_fft_[i[2]][i[1]][i[0]] = factor * fac * exp(- k2 * SQR(M_PI) / SQR(G));
 
               /* Force, imaginary: */
               FOR_DIM
@@ -156,6 +155,17 @@ static void ComputeFFTfromCoulomb (State *BHD,
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
+
+  /*
+    Translate  the Coulomb  long  field uc_fft  and the  corresponding
+    derivatives so  that the real-space  representations are localized
+    at the grid center like  other grid representations and not at the
+    grid corner.  This amounts to  scaling the k-components by a phase
+    factor:
+  */
+  bgy3d_vec_fft_trans (BHD->dc, N, uc_fft);
+  FOR_DIM
+    bgy3d_vec_fft_trans (BHD->dc, N, fc_fft[dim]);
 
   /* FFT^-1 potential ... */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
@@ -380,10 +390,7 @@ static void kapply (const State *BHD,
                  factor here: */
               div += coul_fft_[i[2]][i[1]][i[0]];
 
-              /* phase shift factor for x = x + L/2 */
-              const int sign = COSSIGN(ic[0]) * COSSIGN(ic[1]) * COSSIGN(ic[2]);
-
-              div *=  (h3 * sign) * g_fft_[i[2]][i[1]][i[0]];
+              div *=  h3 * g_fft_[i[2]][i[1]][i[0]];
             }
           dg_fft_[i[2]][i[1]][i[0]] = div;
         }
@@ -392,6 +399,14 @@ static void kapply (const State *BHD,
   DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+
+  /*
+    Translate  the dg_fft  so  that the  real-space representation  is
+    localized at  the grid center like other  grid representations and
+    not at the grid corner.   This amounts to scaling the k-components
+    by a phase factor:
+  */
+  bgy3d_vec_fft_trans (BHD->dc, N, dg_fft);
 }
 
 /*
