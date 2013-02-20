@@ -192,12 +192,6 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   /* Mixing parameter */
   const real lambda = PD->lambda;
 
-  if(lambda>1 || lambda<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
-      exit(1);
-    }
-
   /* Number of total iterations */
   const int max_iter = PD->max_iter;
 
