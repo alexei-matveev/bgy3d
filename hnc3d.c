@@ -107,13 +107,6 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   VecDuplicate(HD->pot, &(HD->v));
   VecDuplicate(HD->pot, &(HD->h_ini));
 
-  /*
-    Load  c_1d  from  file.   FIXME:  this is  not  needed  for,  say,
-    hnc3d_solve():
-  */
-  if (0)
-    bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
-
   /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
      solute-solvent interactions: */
   solute_field (HD->da, HD->PD, HD->pot);
@@ -129,8 +122,6 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   HD->c_fft = bgy3d_vec_create (HD->dc);
   HD->h_fft = bgy3d_vec_create (HD->dc);
   HD->ch_fft = bgy3d_vec_create (HD->dc);
-
-  MatMult (HD->fft_mat, HD->c, HD->c_fft);
 
   return HD;
 }
@@ -410,6 +401,11 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 
   HD = HNC3dData_malloc(PD);
 
+  /* Load c_1d from file: */
+  bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
+
+  MatMult (HD->fft_mat, HD->c, HD->c_fft);
+
   /* Create global vectors */
   VecDuplicate(HD->pot, &F);
   VecDuplicate(HD->pot, &h);
@@ -495,6 +491,12 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   bgy3d_getopt_int ("--slow-iter", &slow_iter);
 
   HD = HNC3dData_malloc(PD);
+
+  /* Load c_1d from file: */
+  bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
+
+  MatMult (HD->fft_mat, HD->c, HD->c_fft);
+
   real rho = HD->PD->rho;
   real beta = HD->PD->beta;
 
