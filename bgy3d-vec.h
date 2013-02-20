@@ -29,7 +29,9 @@ void bgy3d_vec_save_ascii1 (const char *format, int m, const Vec vec[m]);
 void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m]);
 
 
-void bgy3d_vec_read_radial2 (const State *BHD,
+void bgy3d_vec_read_radial (const DA da, const ProblemData *PD,
+                            const char *file, Vec g2);
+void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
                              const char *format, int m, /* const */ Vec g2[m][m]);
 
 void bgy3d_vec_moments (const DA da, Vec v,

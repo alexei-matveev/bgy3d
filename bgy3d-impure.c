@@ -617,7 +617,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
     This version uses g00.txt, g11.txt, and g01.txt instead.
   */
   if (bgy3d_getopt_test ("--from-radial-g2"))
-    bgy3d_vec_read_radial2 (BHD, "g%d%d.txt", m, g2);
+    bgy3d_vec_read_radial2 (BHD->da, BHD->PD, "g%d%d.txt", m, g2);
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 

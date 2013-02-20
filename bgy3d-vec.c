@@ -231,10 +231,9 @@ void bgy3d_vec_read1 (const char *format, int m, const Vec g[m])
 }
 
 /* Fills Vec  g2 with  3D distribution derived  from the 1D  g(r) data
-   from the disk.  Here g2 should be a valid allocated vector. */
-static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
+   from the disk.  Here Vec g2 should be a valid allocated vector. */
+void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *filename, Vec g2)
 {
-  DA da;
   FILE *fp;
   real *xg, *g;
   real r[3], r_s, h[3], interval[2];
@@ -242,8 +241,6 @@ static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
   int x[3], n[3], i[3], k;
   PetscScalar ***g2_vec;
 
-  da = BHD->da;
-  const ProblemData *PD = BHD->PD;
   FOR_DIM
     h[dim] = PD->h[dim];
 
@@ -326,7 +323,7 @@ static void vec_read_radial (const State *BHD, const char *filename, Vec g2)
   convention bgy3d_vec_read* expects the storage for the vectors to be
   allocated.
 */
-void bgy3d_vec_read_radial2 (const State *BHD,
+void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
                              const char *format, int m, /* const */ Vec g2[m][m])
 {
   PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...\n");
@@ -338,7 +335,7 @@ void bgy3d_vec_read_radial2 (const State *BHD,
         char name[20];
         snprintf (name, sizeof name, format, j, i); /* ji as in g01.bin */
 
-        vec_read_radial (BHD, name, g2[i][j]);
+        bgy3d_vec_read_radial (da, PD, name, g2[i][j]);
       }
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
