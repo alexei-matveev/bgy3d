@@ -266,6 +266,9 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   //VecCopy(c,g);
 
+  bgy3d_vec_save ("c00.bin", c);
+  bgy3d_vec_save ("g00.bin", g);
+
   /* free stuff */
   VecDestroy(c);
   VecDestroy(gg);
@@ -277,7 +280,6 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   HNC3dData_free(HD);
 
-  bgy3d_vec_save ("g00.bin", g);
   return g;
 }
 
@@ -353,6 +355,18 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 }
 
 
+static void solvent_kernel (HNC3dData HD, Vec c, Vec c_fft)
+{
+  /* Load c_1d from file: */
+  if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
+    bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", c);
+  else
+    bgy3d_vec_read ("c00.bin", c);
+
+  MatMult (HD->fft_mat, c, c_fft);
+}
+
+
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
 Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
@@ -367,10 +381,8 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 
   HD = HNC3dData_malloc(PD);
 
-  /* Load c_1d from file: */
-  bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
-
-  MatMult (HD->fft_mat, HD->c, HD->c_fft);
+  /* Get the solvent-solvent direct correlation function: */
+  solvent_kernel (HD, HD->c, HD->c_fft);
 
   /* Create global vectors */
   VecDuplicate(HD->pot, &F);
@@ -421,8 +433,10 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 
   SNESDestroy(snes);
 
-  /* g=h+1 */
-  VecShift(h,1.0);
+  /* g := h + 1 */
+  VecShift (h, 1.0);
+
+  bgy3d_vec_save ("g0.bin", h);
 
   return h;
 
@@ -455,10 +469,8 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 
   HD = HNC3dData_malloc(PD);
 
-  /* Load c_1d from file: */
-  bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
-
-  MatMult (HD->fft_mat, HD->c, HD->c_fft);
+  /* Get the solvent-solvent direct correlation function: */
+  solvent_kernel (HD, HD->c, HD->c_fft);
 
   real rho = HD->PD->rho;
   real beta = HD->PD->beta;
@@ -555,9 +567,11 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 
     }
 
-  /* g= h+1 */
-  VecScale(h,1./rho);
-  VecShift(h, 1.0);
+  /* g := h + 1 */
+  VecScale (h, 1. / rho);
+  VecShift (h, 1.0);
+
+  bgy3d_vec_save ("g0.bin", h);
 
   //VecCopy(c,g);
 
