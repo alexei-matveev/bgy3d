@@ -32,8 +32,6 @@ typedef struct HNC3dDataStruct
   Vec c_fft, h_fft, ch_fft;     /* complex */
 } *HNC3dData;
 
-static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
-static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
 
 HNC3dData HNC3dData_malloc(const ProblemData *PD)
 {
@@ -197,6 +195,37 @@ static void HNC3dData_free(HNC3dData HD)
 }
 
 
+static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
+{
+  int i[3];
+  PetscScalar ***g_vec, ***c_vec, ***pot_vec;
+
+  real beta = HD->PD->beta;
+
+  DAVecGetArray(HD->da, g, &g_vec);
+  DAVecGetArray(HD->da, c, &c_vec);
+  DAVecGetArray(HD->da, HD->pot, &pot_vec);
+
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+	{
+	  /* c=exp(-beta*U+g) */
+	  c_vec[i[2]][i[1]][i[0]] = exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
+					g_vec[i[2]][i[1]][i[0]]);
+	}
+  DAVecRestoreArray(HD->da, g, &g_vec);
+  DAVecRestoreArray(HD->da, c, &c_vec);
+  DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
+
+  /* c=c-g-1 */
+  VecAXPY(c, -1.0, g);
+  VecShift(c, -1.0);
+
+
+}
+
+
 static void Compute_cgfft (HNC3dData HD, Vec c_fft, Vec cg_fft, const int x[3]
 		   , const int  n[3], const real h[3])
 {
@@ -337,34 +366,74 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 }
 
 
-static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
+/* F for solving HNC equation with Newton */
+/* c appears as an input here */
+static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 {
-  int i[3];
-  PetscScalar ***g_vec, ***c_vec, ***pot_vec;
+  (void) snes;                  /* FIXME: interface obligation? */
 
-  real beta = HD->PD->beta;
+  Vec h_fft, c_fft, ch_fft;
+  int x[3], n[3], i[3];
+  HNC3dData HD;
+  PetscScalar ***f_vec, ***pot_vec, ***v_vec;
 
-  DAVecGetArray(HD->da, g, &g_vec);
-  DAVecGetArray(HD->da, c, &c_vec);
+  HD = (HNC3dData) pa;
+  const ProblemData *PD = HD->PD;
+
+  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  VecSet(HD->v, 0.0);
+
+  /* fft(h) */
+  MatMult (HD->fft_mat, h, HD->h_fft);
+
+  c_fft = HD->c_fft;
+  h_fft = HD->h_fft;
+  ch_fft= HD->ch_fft;
+
+  real rho = HD->PD->rho;
+  real beta= HD->PD->beta;
+
+  /* fft(h)*fft(c) */
+  complex pure mul (complex x, complex y)
+  {
+    return x * y;
+  }
+  bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
+
+  /* v = fft^-1(fft(c)*fft(h)) */
+  MatMultTranspose (HD->fft_mat, ch_fft, HD->v);
+
+  VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
+
+
+
+
+
   DAVecGetArray(HD->da, HD->pot, &pot_vec);
+  DAVecGetArray(HD->da, HD->v, &v_vec);
+  DAVecGetArray(HD->da, f, &f_vec);
 
+  /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
-	  /* c=exp(-beta*U+g) */
-	  c_vec[i[2]][i[1]][i[0]] = exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
-					g_vec[i[2]][i[1]][i[0]]);
+
+	  f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
+					 rho*v_vec[i[2]][i[1]][i[0]]);
 	}
-  DAVecRestoreArray(HD->da, g, &g_vec);
-  DAVecRestoreArray(HD->da, c, &c_vec);
   DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
+  DAVecRestoreArray(HD->da, HD->v, &v_vec);
+  DAVecRestoreArray(HD->da, f, &f_vec);
 
-  /* c=c-g-1 */
-  VecAXPY(c, -1.0, g);
-  VecShift(c, -1.0);
+  /* f=f+h+1 */
+  VecAXPY(f, 1.0, h);
+  VecShift(f, 1.0);
 
-
+  //VecView(HD->v,PETSC_VIEWER_STDERR_WORLD);
+  //exit(1);
+  return 0;
 }
 
 
@@ -436,76 +505,6 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 
   return h;
 
-}
-
-/* F for solving HNC equation with Newton */
-/* c appears as an input here */
-static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
-{
-  (void) snes;                  /* FIXME: interface obligation? */
-
-  Vec h_fft, c_fft, ch_fft;
-  int x[3], n[3], i[3];
-  HNC3dData HD;
-  PetscScalar ***f_vec, ***pot_vec, ***v_vec;
-
-  HD = (HNC3dData) pa;
-  const ProblemData *PD = HD->PD;
-
-  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  VecSet(HD->v, 0.0);
-
-  /* fft(h) */
-  MatMult (HD->fft_mat, h, HD->h_fft);
-
-  c_fft = HD->c_fft;
-  h_fft = HD->h_fft;
-  ch_fft= HD->ch_fft;
-
-  real rho = HD->PD->rho;
-  real beta= HD->PD->beta;
-
-  /* fft(h)*fft(c) */
-  complex pure mul (complex x, complex y)
-  {
-    return x * y;
-  }
-  bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
-
-  /* v = fft^-1(fft(c)*fft(h)) */
-  MatMultTranspose (HD->fft_mat, ch_fft, HD->v);
-
-  VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
-
-
-
-
-
-  DAVecGetArray(HD->da, HD->pot, &pot_vec);
-  DAVecGetArray(HD->da, HD->v, &v_vec);
-  DAVecGetArray(HD->da, f, &f_vec);
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-
-	  f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
-					 rho*v_vec[i[2]][i[1]][i[0]]);
-	}
-  DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-  DAVecRestoreArray(HD->da, HD->v, &v_vec);
-  DAVecRestoreArray(HD->da, f, &f_vec);
-
-  /* f=f+h+1 */
-  VecAXPY(f, 1.0, h);
-  VecShift(f, 1.0);
-
-  //VecView(HD->v,PETSC_VIEWER_STDERR_WORLD);
-  //exit(1);
-  return 0;
 }
 
 
