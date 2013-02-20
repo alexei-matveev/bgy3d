@@ -98,6 +98,22 @@
   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 
 ;;
+;; Two-site model water :
+;;
+;; Dyer, K. M., Perkyns, J. S., Stell, G. & Montgomery Pettitt, B.
+;; Site-renormalised molecular fluid theory: on the utility of a
+;; two-site model of water. Molecular Physics 107, 423-431, 2009.
+;; http://dx.doi.org/10.1080/00268970902845313
+;;
+;; sigma_H = 0.0   epsilon_H = 0.0   q_H = 0.38
+;; sigma_O = 3.16  epsilon_O = 78 K  q_O =-0.38
+;; r_OH = 1.0
+;;
+("two-site water"
+ (("O" (0.0 0.0 0.0) 3.16 0.1549 -0.38)
+  ("H" (1.0 0.0 0.0) 0.0 0.0 0.38)))
+
+;;
 ;; Transferable  Potentials  for  Phase Equilibria.   1.   United-Atom
 ;; Description of  n-Alkanes. Marcus G. Martin and  J.  Ilja Siepmann,
 ;; J.   Phys.    Chem.   B,  1998,  102  (14),   pp  2569-2577.   DOI:
