@@ -151,6 +151,31 @@ static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Ve
   VecRestoreArray (zs, &zs_);
 }
 
+
+/* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
+   in-place transform: */
+static inline void bgy3d_vec_fft_map1 (Vec y, complex (*f)(complex x), Vec x)
+{
+  real *x_, *y_;
+
+  VecGetArray (x, &x_);
+  VecGetArray (y, &y_);
+
+  const int n = vec_local_size (x);
+  assert (vec_local_size (y) == n);
+  assert (n % 2 == 0);
+
+  complex *xs_ = (complex*) x_;
+  complex *ys_ = (complex*) y_;
+
+  for (int i = 0; i < n / 2; i++)
+    ys_[i] = f (xs_[i]);
+
+  VecRestoreArray (x, &x_);
+  VecRestoreArray (y, &y_);
+}
+
+
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
 static inline void bgy3d_vec_fft_map2 (Vec z, complex (*f)(complex x, complex y), Vec x, Vec y)
