@@ -371,67 +371,69 @@ static void solvent_kernel (HNC3dData HD, Vec c, Vec c_fft)
 /* c appears as an input here */
 Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 {
-  Vec F, h;
-  HNC3dData HD;
-  SNES snes;
-  KSP ksp;
-  PC  pc;
-
   assert(g_ini==PETSC_NULL);
 
-  HD = HNC3dData_malloc(PD);
+  HNC3dData HD = HNC3dData_malloc(PD);
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, HD->c, HD->c_fft);
 
   /* Create global vectors */
-  VecDuplicate(HD->pot, &F);
-  VecDuplicate(HD->pot, &h);
+  Vec F, h;
+  VecDuplicate (HD->pot, &F);
+  VecDuplicate (HD->pot, &h);
 
-  /* initial guess */
-  VecSet(h, 0.0);
-  VecCopy(HD->c, h);
+  /* Initial  guess. FIXME: this  is only  meaningfull for  solvent as
+     solute: */
+  VecCopy (HD->c, h);
+  // VecSet (h, 0.0);
 
   /* Create the snes environment */
-  SNESCreate(PETSC_COMM_WORLD, &snes);
-  SNESGetKSP(snes,&ksp);
-  KSPGetPC(ksp, &pc);
+  SNES snes;
+  SNESCreate (PETSC_COMM_WORLD, &snes);
+
+  KSP ksp;
+  SNESGetKSP (snes, &ksp);
+
+  PC pc;
+  KSPGetPC (ksp, &pc);
 
   /* set rtol, atol, dtol, maxits */
-  // KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
-  KSPSetTolerances(ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
+  KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
+
   /* line search: SNESLS, trust region: SNESTR */
-  SNESSetType(snes, SNESLS);
+  SNESSetType (snes, SNESLS);
 
   /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
-  PCSetType( pc, PCNONE);
+  PCSetType (pc, PCNONE);
 
 /*   ComputeHNC_F(snes, g, F, (void*) HD);  */
 /*   VecView(F,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);   */
 
-  SNESSetFunction(snes, F, ComputeHNC2_F, HD);
+  SNESSetFunction (snes, F, ComputeHNC2_F, HD);
 
-  /* runtime options will override default parameters */
-  SNESSetFromOptions(snes);
+  /*
+    Runtime  options will  override default  parameters.   FIXME: note
+    that the  call to SNESSetJacobian()  is missing here.   It appears
+    tha  one has  to request  a "matrix-free"  approximation  from the
+    command line  with "-snes_mf". Otherwise the  next call terminates
+    with an error message saying "Matrix must be set first"!
+  */
+  SNESSetFromOptions (snes);
 
   /* solve problem */
-  SNESSolve(snes, PETSC_NULL, h);
-
-
+  SNESSolve (snes, PETSC_NULL, h);
 
   /* write out solution */
-  SNESGetSolution(snes, &h);
-
-
-
+  SNESGetSolution (snes, &h);
 
   /* free stuff */
-  HNC3dData_free(HD);
+  HNC3dData_free (HD);
 
-  VecDestroy(F);
+  VecDestroy (F);
 
-  SNESDestroy(snes);
+  SNESDestroy (snes);
 
   /* g := h + 1 */
   VecShift (h, 1.0);
