@@ -33,30 +33,66 @@ typedef struct HNC3dDataStruct
 } *HNC3dData;
 
 
+static void solute_field (const DA da, const ProblemData *PD, Vec pot)
+{
+  real **x_M;
+  int N_M;
+
+  real interval[2];
+  interval[0] = PD->interval[0];
+  interval[1] = PD->interval[1];
+
+  real h[3];
+  FOR_DIM
+    h[dim] = PD->h[dim];
+
+  const real epsilon = 1.0;
+  const real sigma = 1.0;
+
+  /* Load molecule from file */
+  x_M = Load_Molecule (&N_M);
+
+  VecSet (pot, 0.0);
+
+  real ***pot_;
+  DAVecGetArray (da, pot, &pot_);
+
+  int n[3], x[3], i[3];
+  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  /* loop over local portion of grid */
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+        {
+          /* set force vector */
+          /* loop over particles and grid */
+          for (int k = 0; k < N_M; k++)
+            {
+              real r[3];
+              FOR_DIM
+                r[dim] = i[dim] * h[dim] + interval[0] - x_M[k][dim];
+
+              const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
+
+              pot_[i[2]][i[1]][i[0]] +=
+                Lennard_Jones (r_s, epsilon, sigma);
+            }
+        }
+  DAVecRestoreArray (da, pot, &pot_);
+
+  Molecule_free (x_M, N_M);
+}
+
+
 HNC3dData HNC3dData_malloc(const ProblemData *PD)
 {
   HNC3dData HD;
   DA da;
-  int n[3], x[3], i[3];
-  PetscScalar ***pot_vec, interval[2], ***hini_vec;
-  PetscScalar r[3], r_s, h[3], beta;
-  real **x_M;
-  int k, N_M;
-  real epsilon, sigma;
-
 
   HD = (HNC3dData) malloc(sizeof(*HD));
 
-  epsilon = 1.0;
-  sigma = 1.0;
-
-  beta = PD->beta;
-
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
-
-  FOR_DIM
-    h[dim]=PD->h[dim];
+  HD->PD = PD;
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
@@ -71,8 +107,6 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   VecDuplicate(HD->pot, &(HD->v));
   VecDuplicate(HD->pot, &(HD->h_ini));
 
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
   /*
     Load  c_1d  from  file.   FIXME:  this is  not  needed  for,  say,
     hnc3d_solve():
@@ -80,56 +114,23 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   if (0)
     bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
 
-  /* Load molecule from file */
-  x_M = Load_Molecule(&N_M);
+  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
+     solute-solvent interactions: */
+  solute_field (HD->da, HD->PD, HD->pot);
 
+  const real beta = PD->beta;
 
-
-  VecSet(HD->pot,0.0);
-  VecSet(HD->h_ini,1.0);
-  DAVecGetArray(da, HD->pot, &pot_vec);
-  DAVecGetArray(da, HD->h_ini, &hini_vec);
-
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-
-
-	  /* set force vector */
-	  /* loop over particles and grid */
-	  for(k=0; k<N_M; k++)
-	    {
-	      FOR_DIM
-		{
-		  r[dim] = i[dim]*h[dim]+interval[0]-x_M[k][dim];
-/* 		  if( i[dim] >= N[dim]/2 ) */
-/* 		    r[dim] -= L; */
-		}
-	      r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	      pot_vec[i[2]][i[1]][i[0]] +=
-		Lennard_Jones( r_s, epsilon, sigma);
-
-	      hini_vec[i[2]][i[1]][i[0]] *=
-		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
-
-	    }
-	}
-
-  DAVecRestoreArray(da, HD->h_ini, &hini_vec);
-  DAVecRestoreArray(da, HD->pot, &pot_vec);
-  VecShift(HD->h_ini, -1.0);
+  real h0 (real v)
+  {
+    return exp (-beta * v) - 1.0;
+  }
+  bgy3d_vec_map1 (HD->h_ini, h0, HD->pot);
 
   HD->c_fft = bgy3d_vec_create (HD->dc);
   HD->h_fft = bgy3d_vec_create (HD->dc);
   HD->ch_fft = bgy3d_vec_create (HD->dc);
 
   MatMult (HD->fft_mat, HD->c, HD->c_fft);
-
-  HD->PD=PD;
-
-  Molecule_free(x_M, N_M);
 
   return HD;
 }
