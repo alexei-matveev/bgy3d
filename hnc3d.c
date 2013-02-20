@@ -55,11 +55,10 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   HNC3dData HD;
   DA da;
   int n[3], x[3], i[3], N[3];
-  PetscScalar ***pot_vec, interval[2], ***c_vec, *c1d_vec, ***hini_vec;
+  PetscScalar ***pot_vec, interval[2], ***hini_vec;
   PetscScalar r[3], r_s, L, h[3], beta;
   real **x_M, h_c1d;
   int bufsize, k, N_M, N_c1d, index;
-  Vec c_1d;
   PetscViewer pview;
   real epsilon, sigma;
 
@@ -108,13 +107,50 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
     }
 
 
-  /* Load c_1d from file */
-  /* c_1d has to be on a grid [0,L] with L=interval[1]-interval[0] */
-  PetscViewerBinaryOpen(PETSC_COMM_SELF,"c1dfile",FILE_MODE_READ,
-			&pview);
-  VecLoad( pview, VECSEQ, &c_1d);
-  VecGetSize(c_1d,&N_c1d);
-  h_c1d = L/N_c1d;
+  /*
+    Load  c_1d  from  file.   FIXME:  this is  not  needed  for,  say,
+    hnc3d_solve()   and  should   probably   be  layed   out  into   a
+    subprogram:
+  */
+  if (1)
+    {
+      Vec c_1d;
+      PetscScalar ***c_vec, *c1d_vec;
+
+      /* c_1d has to be on a grid [0,L] with L=interval[1]-interval[0] */
+      PetscViewerBinaryOpen(PETSC_COMM_SELF,"c1dfile",FILE_MODE_READ,
+                            &pview);
+      VecLoad( pview, VECSEQ, &c_1d);
+      VecGetSize(c_1d,&N_c1d);
+      h_c1d = L/N_c1d;
+
+      DAVecGetArray(da, HD->c, &c_vec);
+      VecGetArray(c_1d, &c1d_vec);
+
+      /* loop over local portion of grid */
+      for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+        for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+          for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+            {
+              /* set c-vector */
+              /* c lives on different grid -> [0,L]^3 (for fft) */
+              FOR_DIM
+                {
+                  r[dim] = i[dim]*h[dim];
+                  if( i[dim] >= N[dim]/2 )
+                    r[dim] -= L;
+                }
+              r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
+              index =(int) floor(r_s/h_c1d);
+              c_vec [i[2]][i[1]][i[0]] =
+                (c1d_vec[index]+ (c1d_vec[index+1]-c1d_vec[index])/h_c1d*
+                 (r_s-index*h_c1d));
+
+            }
+      DAVecRestoreArray(da, HD->c, &c_vec);
+      VecRestoreArray(c_1d, &c1d_vec);
+      VecDestroy(c_1d);
+    }
 
 
   /* Load molecule from file */
@@ -126,8 +162,7 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   VecSet(HD->h_ini,1.0);
   DAVecGetArray(da, HD->pot, &pot_vec);
   DAVecGetArray(da, HD->h_ini, &hini_vec);
-  DAVecGetArray(da, HD->c, &c_vec);
-  VecGetArray(c_1d, &c1d_vec);
+
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
@@ -153,27 +188,10 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 		exp(-beta* Lennard_Jones( r_s, epsilon, sigma));
 
 	    }
-	  /* set c-vector */
-	  /* c lives on different grid -> [0,L]^3 (for fft) */
-	  FOR_DIM
-	    {
-	      r[dim] = i[dim]*h[dim];
-	      if( i[dim] >= N[dim]/2 )
-		r[dim] -= L;
-	    }
-	  r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-	  index =(int) floor(r_s/h_c1d);
-	  c_vec [i[2]][i[1]][i[0]] =
-	    (c1d_vec[index]+ (c1d_vec[index+1]-c1d_vec[index])/h_c1d*
-	     (r_s-index*h_c1d));
-
 	}
 
-
-  DAVecRestoreArray(da, HD->c, &c_vec);
   DAVecRestoreArray(da, HD->h_ini, &hini_vec);
   DAVecRestoreArray(da, HD->pot, &pot_vec);
-  VecRestoreArray(c_1d, &c1d_vec);
   VecShift(HD->h_ini, -1.0);
 
 /*    VecView(HD->h_ini,PETSC_VIEWER_STDERR_WORLD);  */
@@ -209,7 +227,6 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   HD->PD=PD;
 
   Molecule_free(x_M, N_M);
-  VecDestroy(c_1d);
 
   return HD;
 }
