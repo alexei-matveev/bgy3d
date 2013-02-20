@@ -9,6 +9,7 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
 #include "bgy3d-force.h"        /* Lennard_Jones() */
 #include "hnc3d.h"
+#include <math.h>               /* expm1() */
 
 typedef struct HNC3dDataStruct
 {
@@ -115,7 +116,8 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   real h0 (real v)
   {
-    return exp (-beta * v) - 1.0;
+    /* exp (-beta * v) - 1.0; */
+    return expm1 (-beta * v);
   }
   bgy3d_vec_map1 (HD->h_ini, h0, HD->pot);
 
@@ -150,7 +152,8 @@ static void Compute_c_HNC (real beta, Vec v, Vec g, Vec c)
 {
   real pure f (real v, real g)
   {
-    return exp (-beta * v + g) - 1.0 - g;
+    /* exp (-beta * v + g) - 1.0 - g */
+    return expm1 (-beta * v + g) - g;
   }
   bgy3d_vec_map2 (c, f, v, g);
 }
