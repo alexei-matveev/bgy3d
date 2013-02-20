@@ -433,7 +433,7 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   HNC3dData HD;
   Vec h, h_old, gg, v; // c
   real g_norm;
-  int slow_iter=10, k, n[3], x[3], i[3];
+  int k, n[3], x[3], i[3];
   Vec c_fft, ch_fft, h_fft;
   PetscScalar ***pot_vec, ***h_vec, ***v_vec;
 
@@ -449,9 +449,6 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
-
-  /* Number of iterations with lambda */
-  bgy3d_getopt_int ("--slow-iter", &slow_iter);
 
   HD = HNC3dData_malloc(PD);
 
@@ -487,11 +484,6 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   /* do the iteration */
   for(k=0; k<max_iter; k++)
     {
-/*       if(k>slow_iter) */
-/* 	lambda =0.9; */
-
-
-
       /* set h_old=h */
       VecCopy(h, h_old);
 
