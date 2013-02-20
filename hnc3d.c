@@ -323,9 +323,11 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
 
+  /*
+    FIXME: there is a simpler way to compute
 
-
-
+      f :=  (h + 1) -  exp (-βU + ρv)
+  */
   DAVecGetArray(HD->da, HD->pot, &pot_vec);
   DAVecGetArray(HD->da, HD->v, &v_vec);
   DAVecGetArray(HD->da, f, &f_vec);
@@ -334,11 +336,9 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
     for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
+        f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
+                                       rho*v_vec[i[2]][i[1]][i[0]]);
 
-	  f_vec[i[2]][i[1]][i[0]] = -exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
-					 rho*v_vec[i[2]][i[1]][i[0]]);
-	}
   DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
   DAVecRestoreArray(HD->da, HD->v, &v_vec);
   DAVecRestoreArray(HD->da, f, &f_vec);
@@ -510,6 +510,11 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 
       VecScale(v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
+      /*
+        FIXME: there is a simpler way to compute
+
+        h :=  ρ [exp (-βU + v) - 1]
+      */
       DAVecGetArray(HD->da, HD->pot, &pot_vec);
       DAVecGetArray(HD->da, v, &v_vec);
       DAVecGetArray(HD->da, h, &h_vec);
@@ -518,23 +523,10 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
       for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
 	for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
 	  for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	    {
-	      h_vec[i[2]][i[1]][i[0]]=rho*(exp(-beta*pot_vec[i[2]][i[1]][i[0]]
-					       + v_vec[i[2]][i[1]][i[0]])-1.0);
-/* 	      h_vec[i[2]][i[1]][i[0]]=(exp(-beta*pot_vec[i[2]][i[1]][i[0]] */
-/* 					   + rho*v_vec[i[2]][i[1]][i[0]])-0.0); */
-	    }
-/*       PetscPrintf(PETSC_COMM_WORLD,"%e\t%e\t%e\n", h_vec[0][0][0], pot_vec[0][0][0],  */
-/*       		  v_vec[0][0][0]); */
+            h_vec[i[2]][i[1]][i[0]]=rho*(exp(-beta*pot_vec[i[2]][i[1]][i[0]]
+                                             + v_vec[i[2]][i[1]][i[0]])-1.0);
 
       DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-
-/*       DAVecGetArray(HD->da, h_old, &pot_vec); */
-/*       PetscPrintf(PETSC_COMM_WORLD,"%e\t%e\n",h_vec[0][64][64], h_vec[0][64][64]-pot_vec[0][64][64]); */
-/*       g_norm = h_vec[0][64][64]-pot_vec[0][64][64]; */
-/*       DAVecRestoreArray(HD->da, h_old, &pot_vec); */
-/*       VecShift(h,-g_norm); */
-
       DAVecRestoreArray(HD->da, v, &v_vec);
       DAVecRestoreArray(HD->da, h, &h_vec);
 
