@@ -5,23 +5,25 @@
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
-#include "bgy3d-fft.h"          /* ComputeFFTfromVec, ... */
+#include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
+#include "bgy3d-vec.h"          /* bgy3d_vec_create() */
+#include "bgy3d-force.h"        /* Lennard_Jones() */
 #include "hnc3d.h"
 
 typedef struct HNC3dDataStruct
 {
-  DA da;
+  DA da, dc;                  /* real and complex array descriptors */
   Vec pot;
   Vec h_ini;
   real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   /* Parallel FFT */
-  struct fft_plan_3d *fft_plan;
+  Mat fft_mat;                /* FFT matrix */
 
   /* things for arbitrary molecule shape */
   Vec c, v;
-  FFT_DATA *c_fft, *h_fft, *ch_fft;
+  Vec c_fft, h_fft, ch_fft;     /* complex */
 
   const ProblemData *PD;
 } *HNC3dData;
@@ -37,7 +39,7 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   PetscScalar ***pot_vec, interval[2], ***hini_vec;
   PetscScalar r[3], r_s, L, h[3], beta;
   real **x_M, h_c1d;
-  int bufsize, k, N_M, N_c1d, index;
+  int k, N_M, N_c1d, index;
   PetscViewer pview;
   real epsilon, sigma;
 
@@ -61,11 +63,10 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   FOR_DIM
     N[dim]=PD->N[dim];
 
-  /* Create distributed array */
-  DACreate3d(PETSC_COMM_WORLD, DA_NONPERIODIC, DA_STENCIL_STAR ,
-	     PD->N[0], PD->N[1], PD->N[2],
-	     PETSC_DECIDE, PETSC_DECIDE, PETSC_DECIDE,
-	     1,1, PETSC_NULL,PETSC_NULL,PETSC_NULL, &(HD->da));
+  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
+     depends on the grid dimensions N[] and number of processors.  All
+     other arguments are intent(out): */
+  bgy3d_fft_mat_create (PD->N, &HD->fft_mat, &HD->da, &HD->dc);
 
   da = HD->da;
 
@@ -77,21 +78,12 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
-  if( verbosity >2)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"Subgrids on processes:\n");
-      PetscSynchronizedPrintf(PETSC_COMM_WORLD, "id %d of %d: %d %d %d\t%d %d %d\n",
-			      PD->id, PD->np, x[0], x[1], x[2], n[0], n[1], n[2]);
-      PetscSynchronizedFlush(PETSC_COMM_WORLD);
-    }
-
-
   /*
     Load  c_1d  from  file.   FIXME:  this is  not  needed  for,  say,
     hnc3d_solve()   and  should   probably   be  layed   out  into   a
     subprogram:
   */
-  if (1)
+  if (0)
     {
       Vec c_1d;
       PetscScalar ***c_vec, *c1d_vec;
@@ -173,35 +165,11 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   DAVecRestoreArray(da, HD->pot, &pot_vec);
   VecShift(HD->h_ini, -1.0);
 
-/*    VecView(HD->h_ini,PETSC_VIEWER_STDERR_WORLD);  */
-/*    exit(1);   */
+  HD->c_fft = bgy3d_vec_create (HD->dc);
+  HD->h_fft = bgy3d_vec_create (HD->dc);
+  HD->ch_fft = bgy3d_vec_create (HD->dc);
 
-
-
-  /* Create plan for 3d fft */
-  HD->fft_plan = fft_3d_create_plan(PETSC_COMM_WORLD,
-					PD->N[0], PD->N[1], PD->N[2],
-					x[0], x[0]+n[0]-1,
-					x[1], x[1]+n[1]-1,
-					x[2], x[2]+n[2]-1,
-					x[0], x[0]+n[0]-1,
-					x[1], x[1]+n[1]-1,
-					x[2], x[2]+n[2]-1,
-					0,
-					0,
-					&bufsize);
-  if(HD->fft_plan == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Failed to get fft_plan of proc %d.\n",
-		  PD->id);
-      exit(1);
-    }
-
-  HD->c_fft = NULL;
-  HD->c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, HD->c, HD->c_fft);
-  HD->h_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
-  HD->ch_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2], sizeof(FFT_DATA));
-
+  MatMult (HD->fft_mat, HD->c, HD->c_fft);
 
   HD->PD=PD;
 
@@ -216,29 +184,30 @@ static void HNC3dData_free(HNC3dData HD)
   VecDestroy(HD->pot);
   VecDestroy(HD->c);
   VecDestroy(HD->v);
-  DADestroy(HD->da);
-  fft_3d_destroy_plan(HD->fft_plan);
+  DADestroy (HD->da);
+  DADestroy (HD->dc);
+  MatDestroy (HD->fft_mat);
 
-  free(HD->c_fft);
-  free(HD->h_fft);
-  free(HD->ch_fft);
+  VecDestroy (HD->c_fft);
+  VecDestroy (HD->h_fft);
+  VecDestroy (HD->ch_fft);
 
 
   free(HD);
 }
 
 
-static void Compute_cgfft (HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, const int x[3]
+static void Compute_cgfft (HNC3dData HD, Vec c_fft, Vec cg_fft, const int x[3]
 		   , const int  n[3], const real h[3])
 {
-  int i[3], index=0;
+  int i[3];
   real rho;
   real nenner, re, im, h3;
-  Vec t;
-  PetscScalar ***t_vec;
-  VecDuplicate(HD->pot, &t);
 
-  DAVecGetArray(HD->da, t, &t_vec);
+  struct {real re, im;} ***c_fft_, ***cg_fft_;
+  DAVecGetArray (HD->dc, c_fft, &c_fft_);
+  DAVecGetArray (HD->dc, cg_fft, &cg_fft_);
+
   rho = HD->rho;
   h3 = (h[0]*h[1]*h[2]);
 
@@ -247,25 +216,18 @@ static void Compute_cgfft (HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, cons
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
 	{
 	  /* cg_fft = rho*c_fft^2/(1-rho*c_fft) */
-	  re = c_fft[index].re*h3;
-	  im = c_fft[index].im*h3;
+	  re = c_fft_[i[2]][i[1]][i[0]].re*h3;
+	  im = c_fft_[i[2]][i[1]][i[0]].im*h3;
 	  nenner = SQR(1.0-rho*re)+SQR(rho*im);
 
-	  cg_fft[index].re = (rho*(SQR(re)-SQR(im))*(1.-rho*re)
+	  cg_fft_[i[2]][i[1]][i[0]].re = (rho*(SQR(re)-SQR(im))*(1.-rho*re)
 			      - 2.*SQR(rho)*re*SQR(im)) / nenner;
-	  cg_fft[index].im = (SQR(rho)*(SQR(re)-SQR(im))*im +
+	  cg_fft_[i[2]][i[1]][i[0]].im = (SQR(rho)*(SQR(re)-SQR(im))*im +
 			      2.*rho*re*im*(1.-rho*re)) / nenner;
 
-	  //cg_fft[index].im =0;
-	  t_vec[i[2]][i[1]][i[0]] = c_fft[index].im;
-	  index++;
 	}
-  DAVecRestoreArray(HD->da, t, &t_vec);
-/*   VecView(t,PETSC_VIEWER_STDERR_WORLD);   */
-/*   exit(1);   */
-  VecDestroy(t);
-
-
+  DAVecRestoreArray (HD->dc, c_fft, &c_fft_);
+  DAVecRestoreArray (HD->dc, cg_fft, &cg_fft_);
 }
 
 
@@ -276,7 +238,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   Vec c, c_old, g, g_old, gg;
   real g_norm, iL3;
   int k, n[3], x[3];
-  FFT_DATA *c_fft, *cg_fft;
+  Vec c_fft, cg_fft;
 
   assert(g_ini==PETSC_NULL);
 
@@ -314,8 +276,8 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   VecSet(c,0.0);
 
   /* set fft data */
-  c_fft = NULL;
-  cg_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*cg_fft));
+  c_fft = bgy3d_vec_create (HD->dc);
+  cg_fft = bgy3d_vec_create (HD->dc);
 
   /* do the iteration */
   for(k=0; k<max_iter; k++)
@@ -332,12 +294,12 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
       /* simple mixing: c = lambda*c+(1-lambda)*c_old */
       VecAXPBY(c, (1-lambda), lambda, c_old);
 
-      c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft);
+      MatMult (HD->fft_mat, c, c_fft);
 
 
       Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
 
-      ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft);
+      MatMultTranspose (HD->fft_mat, cg_fft, g);
 
       VecScale(g, iL3);
 /*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
@@ -365,12 +327,12 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   VecDestroy(c_old);
   VecDestroy(g_old);
 
-  free(c_fft);
-  free(cg_fft);
+  VecDestroy (c_fft);
+  VecDestroy (cg_fft);
 
   HNC3dData_free(HD);
 
-  bgy3d_save_vec ("g00.bin", g);
+  bgy3d_vec_save ("g00.bin", g);
   return g;
 }
 
@@ -483,8 +445,8 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 {
   (void) snes;                  /* FIXME: interface obligation? */
 
-  FFT_DATA *h_fft, *c_fft, *ch_fft;
-  int x[3], n[3], i[3], index;
+  Vec h_fft, c_fft, ch_fft;
+  int x[3], n[3], i[3];
   HNC3dData HD;
   real rho, beta;
   PetscScalar ***f_vec, ***pot_vec, ***v_vec;
@@ -497,7 +459,7 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   VecSet(HD->v, 0.0);
 
   /* fft(h) */
-  ComputeFFTfromVec(HD->da, HD->fft_plan, h, HD->h_fft);
+  MatMult (HD->fft_mat, h, HD->h_fft);
 
   c_fft = HD->c_fft;
   h_fft = HD->h_fft;
@@ -505,22 +467,16 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
 
   rho = HD->rho;
   beta= HD->beta;
+
   /* fft(h)*fft(c) */
-  index=0;
-  /* loop over local portion of grid */
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  ch_fft[index].re = c_fft[index].re*h_fft[index].re
-	                    -c_fft[index].im*h_fft[index].im;
-	  ch_fft[index].im = c_fft[index].re*h_fft[index].im
-	                    +c_fft[index].im*h_fft[index].re;
-	  index++;
-	}
+  complex pure mul (complex x, complex y)
+  {
+    return x * y;
+  }
+  bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  ComputeVecfromFFT(HD->da, HD->fft_plan, HD->v, ch_fft);
+  MatMultTranspose (HD->fft_mat, ch_fft, HD->v);
 
   VecScale(HD->v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
@@ -562,8 +518,8 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   HNC3dData HD;
   Vec h, h_old, gg, v; // c
   real g_norm, rho, beta;
-  int slow_iter=10, k, n[3], x[3], i[3], index;
-  FFT_DATA *c_fft, *ch_fft, *h_fft;
+  int slow_iter=10, k, n[3], x[3], i[3];
+  Vec c_fft, ch_fft, h_fft;
   PetscScalar ***pot_vec, ***h_vec, ***v_vec;
 
   assert(g_ini==PETSC_NULL);
@@ -621,26 +577,20 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
       /* new */
       //VecShift(h,-1);
       /* fft(h) */
-      ComputeFFTfromVec(HD->da, HD->fft_plan, h, h_fft);
+      MatMult (HD->fft_mat, h, h_fft);
 
       /* fft(h)*fft(c) */
-      index=0;
       /* set int(h)=0 for numerical stabilization */
-      h_fft[0].re=0;h_fft[0].im=0;
-      /* loop over local portion of grid */
-      for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-	for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-	  for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	    {
-	      ch_fft[index].re = c_fft[index].re*h_fft[index].re
-		-c_fft[index].im*h_fft[index].im;
-	      ch_fft[index].im = c_fft[index].re*h_fft[index].im
-		+c_fft[index].im*h_fft[index].re;
-	      index++;
-	    }
+      // FIXME: h_fft[0].re=0;h_fft[0].im=0;
+
+      complex pure mul (complex x, complex y)
+      {
+        return x * y;
+      }
+      bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
 
       /* v=fft^-1(fft(h)*fft(c)) */
-      ComputeVecfromFFT(HD->da, HD->fft_plan, v, ch_fft);
+      MatMultTranspose (HD->fft_mat, ch_fft, v);
 
       VecScale(v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
 
