@@ -74,6 +74,14 @@ moments = python ../python/moments.py
 # solvent-solvent g2-distribution  is required for  g1-distribution of
 # the solvent in the presence of a solute:
 #
+# Testing HNC3d code  is not as elaborate, this is  a special case. At
+# the  moment  it  requires  a  "molecule"  file  to  be  loaded  with
+# Load_Molecule():
+#
+hnc3d.g2: ../bgy3d
+	../bgy3d --HNC --L 5.0 --N 128 --beta 0.606060 --max-iter 320 --lambda 0.1 --rho 0.1 --norm-tol 1e-12
+	$(moments) g00.bin > $(@)
+
 %.g1: ../bgy3d hydrogen_chloride.g2
 	$(EXE) --BGYM2Site $(CMDFLAG) --solute "$(subst _, ,$(*))"
 	$(moments) g0.bin g1.bin > $(@)
