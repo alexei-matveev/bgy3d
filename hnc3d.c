@@ -15,7 +15,6 @@ typedef struct HNC3dDataStruct
   DA da, dc;                  /* real and complex array descriptors */
   Vec pot;
   Vec h_ini;
-  real beta, rho;
 
   /* Parallel FFT */
   Mat fft_mat;                /* FFT matrix */
@@ -48,8 +47,6 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   epsilon = 1.0;
   sigma = 1.0;
 
-  HD->beta = PD->beta;
-  HD->rho  = PD->rho;
   beta = PD->beta;
 
   interval[0] = PD->interval[0];
@@ -205,7 +202,7 @@ static void Compute_cgfft (HNC3dData HD, Vec c_fft, Vec cg_fft, const int x[3]
   DAVecGetArray (HD->dc, c_fft, &c_fft_);
   DAVecGetArray (HD->dc, cg_fft, &cg_fft_);
 
-  rho = HD->rho;
+  rho = HD->PD->rho;
   h3 = (h[0]*h[1]*h[2]);
 
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -338,9 +335,8 @@ static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
 {
   int i[3];
   PetscScalar ***g_vec, ***c_vec, ***pot_vec;
-  real beta;
 
-  beta = HD->beta;
+  real beta = HD->PD->beta;
 
   DAVecGetArray(HD->da, g, &g_vec);
   DAVecGetArray(HD->da, c, &c_vec);
@@ -445,7 +441,6 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   Vec h_fft, c_fft, ch_fft;
   int x[3], n[3], i[3];
   HNC3dData HD;
-  real rho, beta;
   PetscScalar ***f_vec, ***pot_vec, ***v_vec;
 
   HD = (HNC3dData) pa;
@@ -462,8 +457,8 @@ static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa)
   h_fft = HD->h_fft;
   ch_fft= HD->ch_fft;
 
-  rho = HD->rho;
-  beta= HD->beta;
+  real rho = HD->PD->rho;
+  real beta= HD->PD->beta;
 
   /* fft(h)*fft(c) */
   complex pure mul (complex x, complex y)
@@ -514,7 +509,7 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec h, h_old, gg, v; // c
-  real g_norm, rho, beta;
+  real g_norm;
   int slow_iter=10, k, n[3], x[3], i[3];
   Vec c_fft, ch_fft, h_fft;
   PetscScalar ***pot_vec, ***h_vec, ***v_vec;
@@ -536,8 +531,8 @@ Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
   bgy3d_getopt_int ("--slow-iter", &slow_iter);
 
   HD = HNC3dData_malloc(PD);
-  rho = HD->rho;
-  beta = HD->beta;
+  real rho = HD->PD->rho;
+  real beta = HD->PD->beta;
 
   DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
 
