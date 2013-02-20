@@ -3,6 +3,14 @@
 ## Without -q octave will print the GNU banner on every startup. Is
 ## there a way to tell octave not to open a graphics window?
 ##
+function x = cubic_root (n)
+  ## x = int8 (n ^ (1 / 3)); # this  does not work for 128^3 already
+  x = 0;
+  while (x^3 < n)
+    x = x + 1;
+  endwhile
+endfunction
+
 function bgy3d_plot (path)
 
   ## Default interval, there is no way to extract it from the vector:
@@ -13,7 +21,7 @@ function bgy3d_plot (path)
 
   ## Assuming all the vectors are in the same size:
   [N3, M] = size (vec);
-  N = int8 (N3 ^ (1 / 3));
+  N = cubic_root (N3);
 
   ## Reshape all the vectors:
   vec3d = reshape (vec, [N, N, N]);
