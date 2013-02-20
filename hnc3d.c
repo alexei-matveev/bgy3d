@@ -156,37 +156,23 @@ static void Compute_c_HNC (real beta, Vec v, Vec g, Vec c)
 }
 
 
-static void Compute_cgfft (HNC3dData HD, Vec c_fft, Vec cg_fft, const int x[3]
-		   , const int  n[3], const real h[3])
+/*
+  In k-representation compute
+
+        2
+  γ = ρc  / (1 - ρc)
+
+  If you scale  c by h3 beforehand or  pass rho' = rho *  h3 and scale
+  the  result by h3  in addition,  you will  compute exactly  what the
+  older version of the function did:
+*/
+static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
 {
-  int i[3];
-  real rho;
-  real nenner, re, im, h3;
-
-  struct {real re, im;} ***c_fft_, ***cg_fft_;
-  DAVecGetArray (HD->dc, c_fft, &c_fft_);
-  DAVecGetArray (HD->dc, cg_fft, &cg_fft_);
-
-  rho = HD->PD->rho;
-  h3 = (h[0]*h[1]*h[2]);
-
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* cg_fft = rho*c_fft^2/(1-rho*c_fft) */
-	  re = c_fft_[i[2]][i[1]][i[0]].re*h3;
-	  im = c_fft_[i[2]][i[1]][i[0]].im*h3;
-	  nenner = SQR(1.0-rho*re)+SQR(rho*im);
-
-	  cg_fft_[i[2]][i[1]][i[0]].re = (rho*(SQR(re)-SQR(im))*(1.-rho*re)
-			      - 2.*SQR(rho)*re*SQR(im)) / nenner;
-	  cg_fft_[i[2]][i[1]][i[0]].im = (SQR(rho)*(SQR(re)-SQR(im))*im +
-			      2.*rho*re*im*(1.-rho*re)) / nenner;
-
-	}
-  DAVecRestoreArray (HD->dc, c_fft, &c_fft_);
-  DAVecRestoreArray (HD->dc, cg_fft, &cg_fft_);
+  complex pure f (complex c)
+  {
+    return rho * (c * c) / (1.0 - rho * c);
+  }
+  bgy3d_vec_fft_map1 (g_fft, f, c_fft);
 }
 
 
@@ -224,6 +210,8 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
 
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+
   VecDuplicate(HD->pot, &c);
   VecDuplicate(HD->pot, &g);
   VecDuplicate(HD->pot, &g_old);
@@ -255,8 +243,9 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
       MatMult (HD->fft_mat, c, c_fft);
 
+      VecScale (c_fft, h3);
 
-      Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
+      Compute_cgfft(PD->rho, c_fft, cg_fft);
 
       MatMultTranspose (HD->fft_mat, cg_fft, g);
 
