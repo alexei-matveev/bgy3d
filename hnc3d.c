@@ -145,34 +145,14 @@ static void HNC3dData_free(HNC3dData HD)
 }
 
 
-static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
+/* c := exp (-β v + γ) - 1 - γ */
+static void Compute_c_HNC (real beta, Vec v, Vec g, Vec c)
 {
-  int i[3];
-  PetscScalar ***g_vec, ***c_vec, ***pot_vec;
-
-  real beta = HD->PD->beta;
-
-  DAVecGetArray(HD->da, g, &g_vec);
-  DAVecGetArray(HD->da, c, &c_vec);
-  DAVecGetArray(HD->da, HD->pot, &pot_vec);
-
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* c=exp(-beta*U+g) */
-	  c_vec[i[2]][i[1]][i[0]] = exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
-					g_vec[i[2]][i[1]][i[0]]);
-	}
-  DAVecRestoreArray(HD->da, g, &g_vec);
-  DAVecRestoreArray(HD->da, c, &c_vec);
-  DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-
-  /* c=c-g-1 */
-  VecAXPY(c, -1.0, g);
-  VecShift(c, -1.0);
-
-
+  real pure f (real v, real g)
+  {
+    return exp (-beta * v + g) - 1.0 - g;
+  }
+  bgy3d_vec_map2 (c, f, v, g);
 }
 
 
@@ -268,7 +248,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
       VecCopy(g, g_old);
       VecCopy(c, c_old);
 
-      Compute_c_HNC(HD, g, c, x, n);
+      Compute_c_HNC(HD->PD->beta, HD->pot, g, c);
 
       /* simple mixing: c = lambda*c+(1-lambda)*c_old */
       VecAXPBY(c, (1-lambda), lambda, c_old);
