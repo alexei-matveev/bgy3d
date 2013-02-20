@@ -47,7 +47,6 @@ typedef struct HNC3dNewtonStruct
 } *HNC3dNewtonData;
 
 static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
-static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3], int  n[3], real h[3]);
 static PetscErrorCode ComputeHNC2_F(SNES snes, Vec h, Vec f, void *pa);
 
 HNC3dData HNC3dData_malloc(const ProblemData *PD)
@@ -249,145 +248,8 @@ static void HNC3dData_free(HNC3dData HD)
 }
 
 
-/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
-static Vec UNUSED_HNC3d_Solve(ProblemData *PD, Vec g_ini)
-{
-  HNC3dData HD;
-  Vec c, c_old, g, g_old, gg;
-  real lambda=1, g_norm, iL3;
-  int slow_iter=10, max_iter=3, k, n[3], x[3];
-  FFT_DATA *c_fft, *cg_fft;
-
-  assert(g_ini==PETSC_NULL);
-
-  PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.\n");
-
-  /* Mixing parameter */
-  bgy3d_getopt_real ("--lambda", &lambda);
-  if(lambda>1 || lambda<0)
-    {
-      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
-      exit(1);
-    }
-  /* Number of iterations with lambda */
-  bgy3d_getopt_int ("--slow-iter", &slow_iter);
-  /* Number of total iterations */
-  bgy3d_getopt_int ("--max-iter", &max_iter);
-
-  HD = HNC3dData_malloc(PD);
-
-  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
-
-  iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
-
-  VecDuplicate(HD->pot, &c);
-  VecDuplicate(HD->pot, &g);
-  VecDuplicate(HD->pot, &g_old);
-  VecDuplicate(HD->pot, &c_old);
-  VecDuplicate(HD->pot, &gg);
-
-  /* Set initial guess */
-  VecSet(g,0.0);
-  VecSet(c,0.0);
-
-  /* set fft data */
-  c_fft = NULL;
-  cg_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*cg_fft));
-
-  /* do the iteration */
-  for(k=0; k<max_iter; k++)
-    {
-      if(k>3)
-	lambda =0.1;
-
-      /* set g_old=g */
-      VecCopy(g, g_old);
-      VecCopy(c, c_old);
-
-      Compute_c_HNC(HD, g, c, x, n);
-
-      /* simple mixing: c = lambda*c+(1-lambda)*c_old */
-      VecAXPBY(c, (1-lambda), lambda, c_old);
-
-      c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft);
-
-
-      Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
-
-      ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft);
-
-      VecScale(g, iL3);
-/*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
-/*       exit(1);   */
-      /* gg=g-g_old */
-      VecWAXPY(gg, -1.0, g_old, g);
-
-      VecNorm(gg, NORM_2, &g_norm);
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n", k,
-		  g_norm, lambda);
-
-
-
-      if( g_norm < 1.0e-30)
-      break;
-
-    }
-
-  /* g= gamma+c+1 */
-  VecAXPY(g, 1.0, c);
-  VecShift(g, 1.0);
-
-  //VecCopy(c,g);
-
-  /* free stuff */
-  VecDestroy(c);
-  VecDestroy(gg);
-  VecDestroy(c_old);
-  VecDestroy(g_old);
-
-  free(c_fft);
-  free(cg_fft);
-
-  HNC3dData_free(HD);
-
-  return g;
-}
-
-
-static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
-{
-  int i[3];
-  PetscScalar ***g_vec, ***c_vec, ***pot_vec;
-  real beta;
-
-  beta = HD->beta;
-
-  DAVecGetArray(HD->da, g, &g_vec);
-  DAVecGetArray(HD->da, c, &c_vec);
-  DAVecGetArray(HD->da, HD->pot, &pot_vec);
-
-  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-	{
-	  /* c=exp(-beta*U+g) */
-	  c_vec[i[2]][i[1]][i[0]] = exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
-					g_vec[i[2]][i[1]][i[0]]);
-	}
-  DAVecRestoreArray(HD->da, g, &g_vec);
-  DAVecRestoreArray(HD->da, c, &c_vec);
-  DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-
-  /* c=c-g-1 */
-  VecAXPY(c, -1.0, g);
-  VecShift(c, -1.0);
-
-
-}
-
-
-static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x[3]
-		   ,int  n[3], real h[3])
+static void Compute_cgfft (HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, const int x[3]
+		   , const int  n[3], const real h[3])
 {
   int i[3], index=0;
   real rho;
@@ -422,6 +284,144 @@ static void Compute_cgfft(HNC3dData HD, FFT_DATA *c_fft, FFT_DATA *cg_fft, int x
 /*   VecView(t,PETSC_VIEWER_STDERR_WORLD);   */
 /*   exit(1);   */
   VecDestroy(t);
+
+
+}
+
+
+/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
+Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
+{
+  HNC3dData HD;
+  Vec c, c_old, g, g_old, gg;
+  real g_norm, iL3;
+  int k, n[3], x[3];
+  FFT_DATA *c_fft, *cg_fft;
+
+  assert(g_ini==PETSC_NULL);
+
+  PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.\n");
+
+  /* Mixing parameter */
+  const real lambda = PD->lambda;
+
+  if(lambda>1 || lambda<0)
+    {
+      PetscPrintf(PETSC_COMM_WORLD,"lambda out of range: lambda=%f\n",lambda);
+      exit(1);
+    }
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* Convergence threshold: */
+  const real norm_tol = PD->norm_tol;
+
+  HD = HNC3dData_malloc(PD);
+
+  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+
+  iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
+
+  VecDuplicate(HD->pot, &c);
+  VecDuplicate(HD->pot, &g);
+  VecDuplicate(HD->pot, &g_old);
+  VecDuplicate(HD->pot, &c_old);
+  VecDuplicate(HD->pot, &gg);
+
+  /* Set initial guess */
+  VecSet(g,0.0);
+  VecSet(c,0.0);
+
+  /* set fft data */
+  c_fft = NULL;
+  cg_fft = (FFT_DATA*) calloc(n[0]*n[1]*n[2],sizeof(*cg_fft));
+
+  /* do the iteration */
+  for(k=0; k<max_iter; k++)
+    {
+      /* if(k>3) */
+      /*   lambda =0.1; */
+
+      /* set g_old=g */
+      VecCopy(g, g_old);
+      VecCopy(c, c_old);
+
+      Compute_c_HNC(HD, g, c, x, n);
+
+      /* simple mixing: c = lambda*c+(1-lambda)*c_old */
+      VecAXPBY(c, (1-lambda), lambda, c_old);
+
+      c_fft = ComputeFFTfromVec(HD->da, HD->fft_plan, c, c_fft);
+
+
+      Compute_cgfft(HD, c_fft, cg_fft, x, n, PD->h);
+
+      ComputeVecfromFFT(HD->da, HD->fft_plan, g, cg_fft);
+
+      VecScale(g, iL3);
+/*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
+/*       exit(1);   */
+      /* gg=g-g_old */
+      VecWAXPY(gg, -1.0, g_old, g);
+
+      VecNorm(gg, NORM_2, &g_norm);
+      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n", k,
+		  g_norm, lambda);
+
+      if (g_norm < norm_tol)
+        break;
+    }
+
+  /* g= gamma+c+1 */
+  VecAXPY(g, 1.0, c);
+  VecShift(g, 1.0);
+
+  //VecCopy(c,g);
+
+  /* free stuff */
+  VecDestroy(c);
+  VecDestroy(gg);
+  VecDestroy(c_old);
+  VecDestroy(g_old);
+
+  free(c_fft);
+  free(cg_fft);
+
+  HNC3dData_free(HD);
+
+  bgy3d_save_vec ("g00.bin", g);
+  return g;
+}
+
+
+static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3])
+{
+  int i[3];
+  PetscScalar ***g_vec, ***c_vec, ***pot_vec;
+  real beta;
+
+  beta = HD->beta;
+
+  DAVecGetArray(HD->da, g, &g_vec);
+  DAVecGetArray(HD->da, c, &c_vec);
+  DAVecGetArray(HD->da, HD->pot, &pot_vec);
+
+  for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
+    for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
+      for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
+	{
+	  /* c=exp(-beta*U+g) */
+	  c_vec[i[2]][i[1]][i[0]] = exp(-beta*pot_vec[i[2]][i[1]][i[0]]+
+					g_vec[i[2]][i[1]][i[0]]);
+	}
+  DAVecRestoreArray(HD->da, g, &g_vec);
+  DAVecRestoreArray(HD->da, c, &c_vec);
+  DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
+
+  /* c=c-g-1 */
+  VecAXPY(c, -1.0, g);
+  VecShift(c, -1.0);
 
 
 }
