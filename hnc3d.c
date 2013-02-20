@@ -12,18 +12,24 @@
 
 typedef struct HNC3dDataStruct
 {
-  DA da, dc;                  /* real and complex array descriptors */
+  /*
+    These are array  descriptors for real and complex  vectors and the
+    FFT matrix.  The  data distribution of Petsc vectors  and FFTW MPI
+    needs to be consistent, so  that these three should be constructed
+    accordingly:
+  */
+  DA da, dc;
+  Mat fft_mat;
+
+  /* Immutable command line parameters are stored here: */
+  const ProblemData *PD;
+
   Vec pot;
   Vec h_ini;
-
-  /* Parallel FFT */
-  Mat fft_mat;                /* FFT matrix */
 
   /* things for arbitrary molecule shape */
   Vec c, v;
   Vec c_fft, h_fft, ch_fft;     /* complex */
-
-  const ProblemData *PD;
 } *HNC3dData;
 
 static void Compute_c_HNC(HNC3dData HD, Vec g, Vec c, int x[3], int n[3]);
