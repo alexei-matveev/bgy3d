@@ -102,7 +102,7 @@ int main (int argc, char **argv)
     solver = BGY3d_solve;
 
   if (bgy3d_getopt_test ("--HNC"))
-    solver = HNC3d_Solve_h;
+    solver = hnc3d_solve;
 
   if (bgy3d_getopt_test ("--HNC-Newton"))
     solver = HNC3dNewton2_solve;
