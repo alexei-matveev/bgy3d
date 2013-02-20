@@ -15,7 +15,6 @@ typedef struct HNC3dDataStruct
   DA da, dc;                  /* real and complex array descriptors */
   Vec pot;
   Vec h_ini;
-  real LJ_params[2];            /* sigma and epsilon  */
   real beta, rho;
 
   /* Parallel FFT */
@@ -46,10 +45,8 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   HD = (HNC3dData) malloc(sizeof(*HD));
 
-  HD->LJ_params[0] = 1.0;       /* epsilon */
-  HD->LJ_params[1] = 1.0;       /* sigma */
-  epsilon = HD->LJ_params[0];
-  sigma = HD->LJ_params[1];
+  epsilon = 1.0;
+  sigma = 1.0;
 
   HD->beta = PD->beta;
   HD->rho  = PD->rho;
