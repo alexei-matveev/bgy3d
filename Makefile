@@ -93,6 +93,7 @@ endif
 bgy3d-extra-objs = \
 	bgy3d-simple.o \
 	hnc3d.o \
+	hnc3d-newton.o \
 	bgy3d-molecule.o \
 	bgy3ddiv.o \
 	bgy3d-fourier.o \
