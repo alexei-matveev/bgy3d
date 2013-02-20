@@ -37,12 +37,11 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 {
   HNC3dData HD;
   DA da;
-  int n[3], x[3], i[3], N[3];
+  int n[3], x[3], i[3];
   PetscScalar ***pot_vec, interval[2], ***hini_vec;
-  PetscScalar r[3], r_s, L, h[3], beta;
+  PetscScalar r[3], r_s, h[3], beta;
   real **x_M;
   int k, N_M;
-  PetscViewer pview;
   real epsilon, sigma;
 
 
@@ -55,11 +54,9 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   interval[0] = PD->interval[0];
   interval[1] = PD->interval[1];
-  L=interval[1]-interval[0];
+
   FOR_DIM
     h[dim]=PD->h[dim];
-  FOR_DIM
-    N[dim]=PD->N[dim];
 
   /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
      depends on the grid dimensions N[] and number of processors.  All
@@ -78,51 +75,10 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 
   /*
     Load  c_1d  from  file.   FIXME:  this is  not  needed  for,  say,
-    hnc3d_solve()   and  should   probably   be  layed   out  into   a
-    subprogram:
+    hnc3d_solve():
   */
   if (0)
-    {
-      Vec c_1d;
-      PetscScalar ***c_vec, *c1d_vec;
-      real h_c1d;
-      int N_c1d, index;
-
-      /* c_1d has to be on a grid [0,L] with L=interval[1]-interval[0] */
-      PetscViewerBinaryOpen(PETSC_COMM_SELF,"c1dfile",FILE_MODE_READ,
-                            &pview);
-      VecLoad( pview, VECSEQ, &c_1d);
-      VecGetSize(c_1d,&N_c1d);
-      h_c1d = L/N_c1d;
-
-      DAVecGetArray(da, HD->c, &c_vec);
-      VecGetArray(c_1d, &c1d_vec);
-
-      /* loop over local portion of grid */
-      for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-        for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-          for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-            {
-              /* set c-vector */
-              /* c lives on different grid -> [0,L]^3 (for fft) */
-              FOR_DIM
-                {
-                  r[dim] = i[dim]*h[dim];
-                  if( i[dim] >= N[dim]/2 )
-                    r[dim] -= L;
-                }
-              r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
-              index =(int) floor(r_s/h_c1d);
-              c_vec [i[2]][i[1]][i[0]] =
-                (c1d_vec[index]+ (c1d_vec[index+1]-c1d_vec[index])/h_c1d*
-                 (r_s-index*h_c1d));
-
-            }
-      DAVecRestoreArray(da, HD->c, &c_vec);
-      VecRestoreArray(c_1d, &c1d_vec);
-      VecDestroy(c_1d);
-    }
-
+    bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", HD->c);
 
   /* Load molecule from file */
   x_M = Load_Molecule(&N_M);
