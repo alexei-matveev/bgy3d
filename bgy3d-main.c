@@ -21,12 +21,12 @@
 #include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
 #include "bgy3d-newton-pure.h"
 #include "bgy3d-newton-impure.h"
-#include "hnc3d.h"
 #include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
 #include "bgy3d-test.h"         /* BGY3dDiv_test */
 #include "bgy3d-fourier.h"      /* BGY3dDiv_solve_Fourier */
 #include "bgy3d-simple.h"       /* BGY3d_solve */
 #endif
+#include "hnc3d.h"              /* hnc3d_solve() */
 
 #ifdef WITH_GUILE
 #include "bgy3d-guile.h"        /* bgy3d_guile_main */
@@ -101,9 +101,6 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("--simple"))
     solver = BGY3d_solve;
 
-  if (bgy3d_getopt_test ("--HNC"))
-    solver = hnc3d_solve;
-
   if (bgy3d_getopt_test ("--HNC-Newton"))
     solver = HNC3dNewton2_solve;
 
@@ -128,6 +125,8 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("--BGY-DIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
 #endif
+  if (bgy3d_getopt_test ("--HNC"))
+    solver = hnc3d_solve;
 
   if (bgy3d_getopt_test ("--BGY2Site"))
     solver =  BGY3d_solve_2site;

@@ -70,6 +70,7 @@ LIBS = $(fftw3-libs) -lm $(PETSC_LIB)
 #--------------------------------------------------------------------------------
 
 libbgy3d.a = \
+	hnc3d.o \
 	bgy3d.o \
 	bgy3d-pure.o \
 	bgy3d-impure.o \
@@ -92,7 +93,6 @@ endif
 
 bgy3d-extra-objs = \
 	bgy3d-simple.o \
-	hnc3d.o \
 	hnc3d-newton.o \
 	bgy3d-molecule.o \
 	bgy3ddiv.o \
