@@ -40,8 +40,8 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   int n[3], x[3], i[3], N[3];
   PetscScalar ***pot_vec, interval[2], ***hini_vec;
   PetscScalar r[3], r_s, L, h[3], beta;
-  real **x_M, h_c1d;
-  int k, N_M, N_c1d, index;
+  real **x_M;
+  int k, N_M;
   PetscViewer pview;
   real epsilon, sigma;
 
@@ -85,6 +85,8 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
     {
       Vec c_1d;
       PetscScalar ***c_vec, *c1d_vec;
+      real h_c1d;
+      int N_c1d, index;
 
       /* c_1d has to be on a grid [0,L] with L=interval[1]-interval[0] */
       PetscViewerBinaryOpen(PETSC_COMM_SELF,"c1dfile",FILE_MODE_READ,
