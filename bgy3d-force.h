@@ -52,6 +52,9 @@ static inline real LJ_repulsive (real r, real epsilon, real sigma)
     return re;
 }
 
+/* FIXME:   this  is  ugly,   the  code   uses  constant   G  #defined
+   elsewhere: */
+#ifdef G
 /* NOTE: so far  in all cases the returned  result contains the factor
    q2. */
 static inline real Coulomb_short (real r, real q2)
@@ -123,6 +126,7 @@ static inline real Coulomb_long_grad (real r, real rx, real q2)
         return re;
     }
 }
+#endif  /* ifdef G */
 
 static inline real Coulomb (real r, real q2)
 {
