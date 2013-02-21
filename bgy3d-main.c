@@ -101,9 +101,6 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("--simple"))
     solver = BGY3d_solve;
 
-  if (bgy3d_getopt_test ("--HNC-Newton"))
-    solver = HNC3dNewton2_solve;
-
   if (bgy3d_getopt_test ("--DIV"))
     solver = BGY3dDiv_solve2;
 
@@ -125,15 +122,30 @@ int main (int argc, char **argv)
   if (bgy3d_getopt_test ("--BGY-DIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
 #endif
+
+  /* Pure solvent by HNC: */
   if (bgy3d_getopt_test ("--HNC"))
     solver = hnc3d_solve;
 
+  /*
+    There  seem to  be  several  solvers that  address  a problem  of
+    finding solvent  distribution in external field  given the direct
+    correlation function of the pure solvent. These are two of them:
+  */
+  if (bgy3d_getopt_test ("--HNC-Newton"))
+    solver =  HNC3dNewton2_solve;
+
+  if (bgy3d_getopt_test ("--HNC-Picard"))
+    solver =  HNC3d_Solve_h;
+
+  /* Pure solvent: */
   if (bgy3d_getopt_test ("--BGY2Site"))
     solver =  BGY3d_solve_2site;
 
   if (bgy3d_getopt_test ("--BGY3Site"))
     solver =  BGY3d_solve_3site;
 
+  /* Solvent/solute: */
   if (bgy3d_getopt_test ("--BGYM2Site"))
     solver =  BGY3dM_solve_H2O_2site;
 
