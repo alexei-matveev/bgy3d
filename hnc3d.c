@@ -144,6 +144,82 @@ static void HNC3dData_free (HNC3dData *HD)
 }
 
 
+/*
+  A function  that takes a  context, an input  Vec x and  computes the
+  residual Vec r.  An example is the "error  vector" of the non-linear
+  equation is  the difference  between the input  and the output  of a
+  "fixpoint" iteration as a function of input:
+
+    r = x    - x
+         out    in
+*/
+typedef void (*Function) (void *ctx, Vec x, Vec r);
+
+
+/*
+  For solving HNC equation with Newton. Except of x everything else in
+  the  closure context is  considered read  only input  or intemediate
+  terms depending  on x.  That  is when looking for  total correlation
+  function h,  the direct correlation  function should be fixed  (or a
+  function of h).
+*/
+static void snes_solve (void *ctx, Function F, Vec x)
+{
+  /* Create the snes environment */
+  SNES snes;
+  SNESCreate (PETSC_COMM_WORLD, &snes);
+
+  KSP ksp;
+  SNESGetKSP (snes, &ksp);
+
+  PC pc;
+  KSPGetPC (ksp, &pc);
+
+  /* set rtol, atol, dtol, maxits */
+  KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
+
+  /* line search: SNESLS, trust region: SNESTR */
+  SNESSetType (snes, SNESLS);
+
+  /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
+  PCSetType (pc, PCNONE);
+
+  /* SNES needs a place to store residual: */
+  Vec r;
+  VecDuplicate (x, &r);
+
+  /* SNES functions should obey this interface: */
+  PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
+  {
+    (void) snes;                /* unused */
+    F (ctx, x, r);              /* assumes ctx is a Context* */
+    return 0;
+  }
+  SNESSetFunction (snes, r, F1, ctx); /* Pass Context* as ctx */
+
+  /*
+    Runtime  options will  override default  parameters.   FIXME: note
+    that the  call to SNESSetJacobian()  is missing here.   It appears
+    tha  one has  to request  a "matrix-free"  approximation  from the
+    command line  with "-snes_mf". Otherwise the  next call terminates
+    with an error message saying "Matrix must be set first"!
+  */
+  SNESSetFromOptions (snes);
+
+  /* Solve  problem F(x)  = 0.  PETSC_NULL indicates  that the  rhs is
+     0: */
+  SNESSolve (snes, PETSC_NULL, x);
+
+  /* Write  out  solution.   FIXME:   and  what  was  the  purpose  of
+     SNESSolve()? */
+  // SNESGetSolution (snes, &x);
+
+  VecDestroy (r);
+
+  SNESDestroy (snes);
+}
+
+
 /* c := exp (-β v + γ) - 1 - γ */
 static void Compute_c_HNC (real beta, Vec v, Vec g, Vec c)
 {
@@ -343,81 +419,6 @@ static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
   MatMult (HD->fft_mat, c, c_fft);
 }
 
-/*
-  A function that  takes an input Vec x and  computes the residual Vec
-  r. An  example is the "error  vector" of the  non-linear equation is
-  the  difference between  the input  and the  output of  a "fixpoint"
-  iteration as a function of input:
-
-    r = x    - x
-         out    in
-*/
-typedef void (*Function) (HNC3dData *HD, Vec x, Vec r);
-
-
-/*
-  F for solving HNC equation  with Newton. Except of x everything else
-  in the closure context is  considered read only input or intemediate
-  terms depending  on x.  That  is when looking for  total correlation
-  function h,  the direct correlation  function should be fixed  (or a
-  function of h).
-*/
-static void snes_solve (HNC3dData *HD, Function F, Vec x)
-{
-  /* Create the snes environment */
-  SNES snes;
-  SNESCreate (PETSC_COMM_WORLD, &snes);
-
-  KSP ksp;
-  SNESGetKSP (snes, &ksp);
-
-  PC pc;
-  KSPGetPC (ksp, &pc);
-
-  /* set rtol, atol, dtol, maxits */
-  KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
-
-  /* line search: SNESLS, trust region: SNESTR */
-  SNESSetType (snes, SNESLS);
-
-  /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
-  PCSetType (pc, PCNONE);
-
-  /* SNES needs a place to store residual: */
-  Vec r;
-  VecDuplicate (x, &r);
-
-  /* SNES functions should obey this interface: */
-  PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
-  {
-    (void) snes;                /* unused */
-    F ((HNC3dData*) ctx, x, r); /* assumes ctx is a HNC3dData* */
-    return 0;
-  }
-  SNESSetFunction (snes, r, F1, HD); /* Pass HNC3dData* as ctx */
-
-  /*
-    Runtime  options will  override default  parameters.   FIXME: note
-    that the  call to SNESSetJacobian()  is missing here.   It appears
-    tha  one has  to request  a "matrix-free"  approximation  from the
-    command line  with "-snes_mf". Otherwise the  next call terminates
-    with an error message saying "Matrix must be set first"!
-  */
-  SNESSetFromOptions (snes);
-
-  /* Solve  problem F(x)  = 0.  PETSC_NULL indicates  that the  rhs is
-     0: */
-  SNESSolve (snes, PETSC_NULL, x);
-
-  /* Write  out  solution.   FIXME:   and  what  was  the  purpose  of
-     SNESSolve()? */
-  // SNESGetSolution (snes, &x);
-
-  VecDestroy (r);
-
-  SNESDestroy (snes);
-}
-
 
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
@@ -439,9 +440,12 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
   VecCopy (HD->c, h);
   // VecSet (h, 0.0);
 
-  /* Find an  h such  that dh as  returned by  iterate (HD, h,  dh) is
-     zero: */
-  snes_solve (HD, iterate, h);
+  /*
+    Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
+    zero. Cast is  there to silence the mismatch in  the type of first
+    pointer argument: HNC3dData* vs. void*:
+  */
+  snes_solve (HD, (Function) iterate, h);
 
   /* free stuff */
   HNC3dData_free (HD);
