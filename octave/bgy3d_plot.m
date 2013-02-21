@@ -46,6 +46,21 @@ function bgy3d_plot (path)
 
   ## This saves the figure in a format derived from the file extension:
   print (out);
+
+  ## Now plot 1d projections along x-, y-, and z-axes throuth the middle
+  ## of the grid:
+  zray = squeeze (vec3d(N/2, N/2, :));
+  yray = squeeze (vec3d(N/2, :, N/2));
+  xray = squeeze (vec3d(:, N/2, N/2));
+
+  plot (x, xray, "-+;x;", x, yray, "-x;y;", x, zray, "-o;z;");
+  title (path);
+
+  ## Append .png to the input path:
+  out = [path, ".rays.png"];
+
+  ## This saves the figure in a format derived from the file extension:
+  print (out);
 endfunction
 
 ## Each argument is a path:
