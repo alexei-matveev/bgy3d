@@ -190,7 +190,8 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   assert(g_ini==PETSC_NULL);
 
-  PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.\n");
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation. Fixpoint iteration.\n");
 
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -253,8 +254,8 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
       VecWAXPY(gg, -1.0, g_old, g);
 
       VecNorm(gg, NORM_2, &g_norm);
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n", k,
-		  g_norm, lambda);
+      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
+                   k + 1, g_norm, lambda);
 
       if (g_norm < norm_tol)
         break;
@@ -487,7 +488,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
 
       real norm;
       VecNorm (dh, NORM_INFINITY, &norm);
-      PetscPrintf (PETSC_COMM_WORLD, "%02d: norm of difference: %e\t%f\n",
+      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
 		   k + 1, norm, lambda);
 
       if (norm < norm_tol)
