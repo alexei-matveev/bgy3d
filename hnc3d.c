@@ -351,7 +351,7 @@ static void solvent_kernel (HNC3dData HD, Vec c, Vec c_fft)
 
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
-Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
+Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
 {
   assert(g_ini==PETSC_NULL);
 
@@ -429,7 +429,7 @@ Vec HNC3dNewton2_solve(const ProblemData *PD, Vec g_ini)
 
 /* Solving for h of HNC eqauation with fixpoint iteration */
 /* c is input */
-Vec HNC3d_Solve_h(const ProblemData *PD, Vec g_ini)
+Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
 {
   HNC3dData HD;
   Vec h, h_old, gg, v; // c

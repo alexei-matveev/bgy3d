@@ -133,10 +133,10 @@ int main (int argc, char **argv)
     correlation function of the pure solvent. These are two of them:
   */
   if (bgy3d_getopt_test ("--HNC-Newton"))
-    solver =  HNC3dNewton2_solve;
+    solver =  hnc3d_solute_solve_newton;
 
   if (bgy3d_getopt_test ("--HNC-Picard"))
-    solver =  HNC3d_Solve_h;
+    solver =  hnc3d_solute_solve_picard;
 
   /* Pure solvent: */
   if (bgy3d_getopt_test ("--BGY2Site"))
