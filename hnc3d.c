@@ -283,17 +283,15 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   return g;
 }
 
+/*
+  HNC iteration for a fixed direct correlation:
 
-/* F for solving HNC equation with Newton */
-/* c appears as an input here */
-static PetscErrorCode ComputeHNC2_F (SNES snes, Vec h, Vec f, void *pa)
+  h    ->  dh = h    - h
+    in           out    in
+ */
+static void iterate (HNC3dData HD, Vec h, Vec dh)
 {
-  (void) snes;                  /* FIXME: interface obligation? */
-
-  HNC3dData HD = (HNC3dData) pa;
   const ProblemData *PD = HD->PD;
-
-  VecSet (HD->v, 0.0);
 
   /* fft(h) */
   MatMult (HD->fft_mat, h, HD->h_fft);
@@ -318,22 +316,42 @@ static PetscErrorCode ComputeHNC2_F (SNES snes, Vec h, Vec f, void *pa)
   VecScale (HD->v, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
 
   /*
-    The "error vector" of the non-linear equation is:
+    The new candidate for the total correlation
 
-    f = [exp (-βU + ρv) - 1] - h
+    h = exp (-βU + ρv) - 1
 
-    First compute the term in square brackets:
+    stored in Vec dh:
   */
   real pure h_out (real u, real v)
   {
     return expm1 (-beta * u + rho * v);
   }
-  bgy3d_vec_map2 (f, h_out, HD->pot, HD->v);
+  bgy3d_vec_map2 (dh, h_out, HD->pot, HD->v);
 
-  /* f := f - h */
-  VecAXPY (f, -1.0, h);
+  /*
+    dh := h    - h
+           out    in
+  */
+  VecAXPY (dh, -1.0, h);
+}
 
-  return 0;
+/* F for solving HNC equation with Newton */
+/* c appears as an input here */
+static PetscErrorCode snes_function (SNES snes, Vec h, Vec f, void *pa)
+{
+  (void) snes;                  /* interface obligation */
+
+  HNC3dData HD = (HNC3dData) pa;
+
+  /*
+    The "error vector" of the non-linear equation is:
+
+    f := h    - h
+          out    in
+  */
+  iterate (HD, h, f);
+
+  return 0;                     /* interface obligation */
 }
 
 
@@ -393,7 +411,7 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
 /*   VecView(F,PETSC_VIEWER_STDERR_WORLD);  */
 /*   exit(1);   */
 
-  SNESSetFunction (snes, F, ComputeHNC2_F, HD);
+  SNESSetFunction (snes, F, snes_function, HD);
 
   /*
     Runtime  options will  override default  parameters.   FIXME: note
@@ -431,16 +449,10 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
 /* c is input */
 Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
 {
-  HNC3dData HD;
-  Vec h, h_old, gg, v; // c
-  real g_norm;
-  int k, n[3], x[3], i[3];
-  Vec c_fft, ch_fft, h_fft;
-  PetscScalar ***pot_vec, ***h_vec, ***v_vec;
+  assert (g_ini == PETSC_NULL);
 
-  assert(g_ini==PETSC_NULL);
-
-  PetscPrintf(PETSC_COMM_WORLD,"Solving 3d-HNC equation. Fixpoint iteration.Fixed c.\n");
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation by fixpoint iteration. Fixed c.\n");
 
   /* Mixing parameter: */
   const real lambda = PD->lambda;
@@ -451,108 +463,47 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  HD = HNC3dData_malloc(PD);
+  HNC3dData HD = HNC3dData_malloc(PD);
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, HD->c, HD->c_fft);
 
-  real rho = HD->PD->rho;
-  real beta = HD->PD->beta;
+  Vec h, dh;
+  VecDuplicate (HD->pot, &h);
+  VecDuplicate (HD->pot, &dh);
 
-  DAGetCorners (HD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-
-
-
-  VecDuplicate(HD->pot, &h);
-  VecDuplicate(HD->pot, &h_old);
-  VecDuplicate(HD->pot, &gg);
-  /* c=HD->c; */
-  v=HD->v;
   /* Set initial guess */
+  VecCopy (HD->h_ini, h);
   //VecSet(h,0.0);
-  VecCopy(HD->h_ini, h);
-  VecScale(h, rho);
-  //VecShift(h,1);
-
-  /* set fft data */
-  c_fft = HD->c_fft;
-  ch_fft = HD->ch_fft;
-  h_fft = HD->h_fft;
 
   /* do the iteration */
-  for(k=0; k<max_iter; k++)
+  for (int k = 0; k < max_iter; k++)
     {
-      /* set h_old=h */
-      VecCopy(h, h_old);
+      /* dh := h_out - h_in */
+      iterate (HD, h, dh);
 
-      /* new */
-      //VecShift(h,-1);
-      /* fft(h) */
-      MatMult (HD->fft_mat, h, h_fft);
+      /* Simple mixing: h = lambda * h_out + (1 - lambda) * h_in */
+      VecAXPY (h, lambda, dh);
 
-      /* fft(h)*fft(c) */
-      /* set int(h)=0 for numerical stabilization */
-      // FIXME: h_fft[0].re=0;h_fft[0].im=0;
+      real norm;
+      VecNorm (dh, NORM_INFINITY, &norm);
+      PetscPrintf (PETSC_COMM_WORLD, "%02d: norm of difference: %e\t%f\n",
+		   k + 1, norm, lambda);
 
-      complex pure mul (complex x, complex y)
-      {
-        return x * y;
-      }
-      bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
-
-      /* v=fft^-1(fft(h)*fft(c)) */
-      MatMultTranspose (HD->fft_mat, ch_fft, v);
-
-      VecScale(v, PD->h[0]*PD->h[1]*PD->h[2]/PD->N[0]/PD->N[1]/PD->N[2]);
-
-      /*
-        FIXME: there is a simpler way to compute
-
-        h :=  ρ [exp (-βU + v) - 1]
-      */
-      DAVecGetArray(HD->da, HD->pot, &pot_vec);
-      DAVecGetArray(HD->da, v, &v_vec);
-      DAVecGetArray(HD->da, h, &h_vec);
-
-      /* loop over local portion of grid */
-      for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
-	for(i[1]=x[1]; i[1]<x[1]+n[1]; i[1]++)
-	  for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
-            h_vec[i[2]][i[1]][i[0]]=rho*(exp(-beta*pot_vec[i[2]][i[1]][i[0]]
-                                             + v_vec[i[2]][i[1]][i[0]])-1.0);
-
-      DAVecRestoreArray(HD->da, HD->pot, &pot_vec);
-      DAVecRestoreArray(HD->da, v, &v_vec);
-      DAVecRestoreArray(HD->da, h, &h_vec);
-
-
-
-      /* gg=h-h_old */
-      VecWAXPY(gg, -1.0, h_old, h);
-      VecNorm(gg, NORM_INFINITY, &g_norm);
-      PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n",
-		  k+1, g_norm, lambda);
-
-      /* simple mixing: h = lambda * h + (1 - lambda) * h_old */
-      VecAXPBY (h, (1 - lambda), lambda, h_old);
-
-      if (g_norm < norm_tol)
+      if (norm < norm_tol)
         break;
     }
 
-  /* g := h + 1 */
-  VecScale (h, 1. / rho);
+  /* g = h + 1 */
   VecShift (h, 1.0);
 
   bgy3d_vec_save ("g0.bin", h);
 
   /* free stuff */
-  VecDestroy(h_old);
-  VecDestroy(gg);
+  /* Delegated to the caller: VecDestroy (h); */
+  VecDestroy (dh);
 
-
-  HNC3dData_free(HD);
+  HNC3dData_free (HD);
 
   return h;
 }
