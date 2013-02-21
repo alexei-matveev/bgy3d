@@ -332,26 +332,6 @@ static void iterate (HNC3dData *HD, Vec h, Vec dh)
   VecAXPY (dh, -1.0, h);
 }
 
-/* F for solving HNC equation with Newton */
-/* c appears as an input here */
-static PetscErrorCode snes_function (SNES snes, Vec h, Vec f, void *pa)
-{
-  (void) snes;                  /* interface obligation */
-
-  HNC3dData *HD = (HNC3dData*) pa;
-
-  /*
-    The "error vector" of the non-linear equation is:
-
-    f := h    - h
-          out    in
-  */
-  iterate (HD, h, f);
-
-  return 0;                     /* interface obligation */
-}
-
-
 static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
 {
   /* Load c_1d from file: */
@@ -363,28 +343,27 @@ static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
   MatMult (HD->fft_mat, c, c_fft);
 }
 
+/*
+  A function that  takes an input Vec x and  computes the residual Vec
+  r. An  example is the "error  vector" of the  non-linear equation is
+  the  difference between  the input  and the  output of  a "fixpoint"
+  iteration as a function of input:
 
-/* solving for h only of HNC equation with Newton */
-/* c appears as an input here */
-Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
+    r = x    - x
+         out    in
+*/
+typedef void (*Function) (HNC3dData *HD, Vec x, Vec r);
+
+
+/*
+  F for solving HNC equation  with Newton. Except of x everything else
+  in the closure context is  considered read only input or intemediate
+  terms depending  on x.  That  is when looking for  total correlation
+  function h,  the direct correlation  function should be fixed  (or a
+  function of h).
+*/
+static void snes_solve (HNC3dData *HD, Function F, Vec x)
 {
-  assert(g_ini==PETSC_NULL);
-
-  HNC3dData *HD = HNC3dData_malloc (PD);
-
-  /* Get the solvent-solvent direct correlation function: */
-  solvent_kernel (HD, HD->c, HD->c_fft);
-
-  /* Create global vectors */
-  Vec F, h;
-  VecDuplicate (HD->pot, &F);
-  VecDuplicate (HD->pot, &h);
-
-  /* Initial  guess. FIXME: this  is only  meaningfull for  solvent as
-     solute: */
-  VecCopy (HD->c, h);
-  // VecSet (h, 0.0);
-
   /* Create the snes environment */
   SNES snes;
   SNESCreate (PETSC_COMM_WORLD, &snes);
@@ -404,11 +383,18 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
   /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
   PCSetType (pc, PCNONE);
 
-/*   ComputeHNC_F(snes, g, F, (void*) HD);  */
-/*   VecView(F,PETSC_VIEWER_STDERR_WORLD);  */
-/*   exit(1);   */
+  /* SNES needs a place to store residual: */
+  Vec r;
+  VecDuplicate (x, &r);
 
-  SNESSetFunction (snes, F, snes_function, HD);
+  /* SNES functions should obey this interface: */
+  PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
+  {
+    (void) snes;                /* unused */
+    F ((HNC3dData*) ctx, x, r); /* assumes ctx is a HNC3dData* */
+    return 0;
+  }
+  SNESSetFunction (snes, r, F1, HD); /* Pass HNC3dData* as ctx */
 
   /*
     Runtime  options will  override default  parameters.   FIXME: note
@@ -419,18 +405,46 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
   */
   SNESSetFromOptions (snes);
 
-  /* solve problem */
-  SNESSolve (snes, PETSC_NULL, h);
+  /* Solve  problem F(x)  = 0.  PETSC_NULL indicates  that the  rhs is
+     0: */
+  SNESSolve (snes, PETSC_NULL, x);
 
-  /* write out solution */
-  SNESGetSolution (snes, &h);
+  /* Write  out  solution.   FIXME:   and  what  was  the  purpose  of
+     SNESSolve()? */
+  // SNESGetSolution (snes, &x);
+
+  VecDestroy (r);
+
+  SNESDestroy (snes);
+}
+
+
+/* solving for h only of HNC equation with Newton */
+/* c appears as an input here */
+Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
+{
+  assert(g_ini==PETSC_NULL);
+
+  HNC3dData *HD = HNC3dData_malloc (PD);
+
+  /* Get the solvent-solvent direct correlation function: */
+  solvent_kernel (HD, HD->c, HD->c_fft);
+
+  /* Create global vectors */
+  Vec h;
+  VecDuplicate (HD->pot, &h);
+
+  /* Initial  guess. FIXME: this  is only  meaningfull for  solvent as
+     solute: */
+  VecCopy (HD->c, h);
+  // VecSet (h, 0.0);
+
+  /* Find an  h such  that dh as  returned by  iterate (HD, h,  dh) is
+     zero: */
+  snes_solve (HD, iterate, h);
 
   /* free stuff */
   HNC3dData_free (HD);
-
-  VecDestroy (F);
-
-  SNESDestroy (snes);
 
   /* g := h + 1 */
   VecShift (h, 1.0);
@@ -438,7 +452,6 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
   bgy3d_vec_save ("g0.bin", h);
 
   return h;
-
 }
 
 
