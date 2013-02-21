@@ -256,7 +256,7 @@ static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
 Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 {
   Vec c, c_old, g, g_old, gg;
-  real g_norm, iL3;
+  real iL3;
 
   assert(g_ini==PETSC_NULL);
 
@@ -321,11 +321,11 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
       /* gg=g-g_old */
       VecWAXPY(gg, -1.0, g_old, g);
 
-      VecNorm(gg, NORM_2, &g_norm);
+      const real norm = bgy3d_vec_norm (gg);
       PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
-                   k + 1, g_norm, lambda);
+                   k + 1, norm, lambda);
 
-      if (g_norm < norm_tol)
+      if (norm < norm_tol)
         break;
     }
 
@@ -496,8 +496,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
       /* Simple mixing: h = lambda * h_out + (1 - lambda) * h_in */
       VecAXPY (h, lambda, dh);
 
-      real norm;
-      VecNorm (dh, NORM_INFINITY, &norm);
+      const real norm = bgy3d_vec_norm (dh);
       PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
 		   k + 1, norm, lambda);
 
