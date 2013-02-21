@@ -59,7 +59,7 @@ static void solute_field (const DA da, const ProblemData *PD, Vec pot)
   DAVecGetArray (da, pot, &pot_);
 
   int n[3], x[3], i[3];
-  DAGetCorners(da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -103,10 +103,10 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
   da = HD->da;
 
   /* Create global vectors */
-  DACreateGlobalVector(da, &(HD->pot));
-  VecDuplicate(HD->pot, &(HD->c));
-  VecDuplicate(HD->pot, &(HD->v));
-  VecDuplicate(HD->pot, &(HD->h_ini));
+  DACreateGlobalVector (da, &HD->pot);
+  VecDuplicate (HD->pot, &HD->c);
+  VecDuplicate (HD->pot, &HD->v);
+  VecDuplicate (HD->pot, &HD->h_ini);
 
   /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
      solute-solvent interactions: */
@@ -203,7 +203,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   HD = HNC3dData_malloc(PD);
 
-  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners (HD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
 
@@ -459,7 +459,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   real rho = HD->PD->rho;
   real beta = HD->PD->beta;
 
-  DAGetCorners(HD->da, &(x[0]), &(x[1]), &(x[2]), &(n[0]), &(n[1]), &(n[2]));
+  DAGetCorners (HD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
 
 
