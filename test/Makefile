@@ -5,7 +5,7 @@ SHELL = /bin/sh
 # Flags  for  bgy3d executable.  With  current  version  it takes  312
 # iterations to converge butanoic acid in HCl.
 #
-CMDFLAG = \
+BGY-FLAGS = \
 	--N 32 \
 	--rho 0.018 \
 	--beta 1.1989 \
@@ -14,6 +14,15 @@ CMDFLAG = \
 	--L 10.0 \
 	--damp-start 1.0 \
 	--lambda 0.02
+
+HNC-FLAGS = \
+	--L 5.0 \
+	--N 128 \
+	--beta 0.606060 \
+	--max-iter 320 \
+	--lambda 0.1 \
+	--rho 0.1 \
+	--norm-tol 1e-12
 
 #
 # In case $(EXE) is not defined, assume the executable is one level up
@@ -25,7 +34,7 @@ EXE ?= ../bgy3d
 # These  are  phony  targets,  they   are  not  created  as  files  to
 # re-evaluate the diffs every time Make is executed:
 #
-diffs = \
+bgy-diffs = \
 	hydrogen_chloride.g2.diff \
 	hydrogen_chloride.g1.diff \
 	carbon_disulfide.g1.diff \
@@ -34,10 +43,15 @@ diffs = \
 	butanoic_acid.g1.diff \
 	hexane.g1.diff
 
+hnc-diffs = \
+	hnc3d.g2.diff \
+	hnc3d.g1.diff \
+
 #
-# By default "make" all the diffs:
+# By default "make"  all the diffs. Unomment the  second entry to also
+# run HNC3D tests:
 #
-all: $(diffs)
+all: $(bgy-diffs) # $(hnc-diffs)
 
 #
 # Prerequisites for a  diff are the two files, keep  them in the order
@@ -79,15 +93,20 @@ moments = python ../python/moments.py
 # Load_Molecule():
 #
 hnc3d.g2: ../bgy3d
-	../bgy3d --HNC --L 5.0 --N 128 --beta 0.606060 --max-iter 320 --lambda 0.1 --rho 0.1 --norm-tol 1e-12
+	../bgy3d --HNC $(HNC-FLAGS)
 	$(moments) g00.bin > $(@)
 
+hnc3d.g1: ../bgy3d hnc3d.g2
+	../bgy3d --HNC-Newton $(HNC-FLAGS) -snes_mf -snes_monitor
+	$(moments) g0.bin > $(@)
+
+
 %.g1: ../bgy3d hydrogen_chloride.g2
-	$(EXE) --BGYM2Site $(CMDFLAG) --solute "$(subst _, ,$(*))"
+	$(EXE) --BGYM2Site $(BGY-FLAGS) --solute "$(subst _, ,$(*))"
 	$(moments) g0.bin g1.bin > $(@)
 
 %.g2: ../bgy3d
-	$(EXE) --BGY2Site $(CMDFLAG)
+	$(EXE) --BGY2Site $(BGY-FLAGS)
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 
 clean:
