@@ -534,21 +534,11 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
       PetscPrintf(PETSC_COMM_WORLD,"iter %d: norm of difference: %e\t%f\n",
 		  k+1, g_norm, lambda);
 
-      if(g_norm < norm_tol)
-	{
-	  /* simple mixing: h = lambda*h+(1-lambda)*h_old */
-	  VecAXPBY(h, (1-lambda), lambda, h_old);
-	  break;
-	}
-      else
-	/* simple mixing: h = lambda*h+(1-lambda)*h_old */
-	VecAXPBY(h, (1-lambda), lambda, h_old);
+      /* simple mixing: h = lambda * h + (1 - lambda) * h_old */
+      VecAXPBY (h, (1 - lambda), lambda, h_old);
 
-/*       VecSum(h, &g_norm); */
-/*       VecSum(h_old, &gold_norm); */
-/*       PetscPrintf(PETSC_COMM_WORLD,"%e\n",g_norm*PD->h[0]*PD->h[1]*PD->h[2]/1000); */
-/*       VecShift(h,-g_norm*PD->h[0]*PD->h[1]*PD->h[2]/1000); */
-
+      if (g_norm < norm_tol)
+        break;
     }
 
   /* g := h + 1 */
@@ -556,8 +546,6 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   VecShift (h, 1.0);
 
   bgy3d_vec_save ("g0.bin", h);
-
-  //VecCopy(c,g);
 
   /* free stuff */
   VecDestroy(h_old);
