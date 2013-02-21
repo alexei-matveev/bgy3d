@@ -11,7 +11,7 @@
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
 
-typedef struct HNC3dDataStruct
+typedef struct HNC3dData
 {
   /*
     These are array  descriptors for real and complex  vectors and the
@@ -31,7 +31,7 @@ typedef struct HNC3dDataStruct
   /* things for arbitrary molecule shape */
   Vec c, v;
   Vec c_fft, h_fft, ch_fft;     /* complex */
-} *HNC3dData;
+} HNC3dData;
 
 
 static void solute_field (const DA da, const ProblemData *PD, Vec pot)
@@ -86,12 +86,9 @@ static void solute_field (const DA da, const ProblemData *PD, Vec pot)
 }
 
 
-HNC3dData HNC3dData_malloc(const ProblemData *PD)
+HNC3dData* HNC3dData_malloc(const ProblemData *PD)
 {
-  HNC3dData HD;
-  DA da;
-
-  HD = (HNC3dData) malloc(sizeof(*HD));
+  HNC3dData *HD = malloc (sizeof (*HD));
 
   HD->PD = PD;
 
@@ -100,7 +97,7 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
      other arguments are intent(out): */
   bgy3d_fft_mat_create (PD->N, &HD->fft_mat, &HD->da, &HD->dc);
 
-  da = HD->da;
+  DA da = HD->da;
 
   /* Create global vectors */
   DACreateGlobalVector (da, &HD->pot);
@@ -129,7 +126,7 @@ HNC3dData HNC3dData_malloc(const ProblemData *PD)
 }
 
 
-static void HNC3dData_free(HNC3dData HD)
+static void HNC3dData_free (HNC3dData *HD)
 {
   VecDestroy(HD->pot);
   VecDestroy(HD->c);
@@ -182,7 +179,6 @@ static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
 /* Solve h and c of HNC equation simultaneously, fixpoint iteration */
 Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 {
-  HNC3dData HD;
   Vec c, c_old, g, g_old, gg;
   real g_norm, iL3;
   int k, n[3], x[3];
@@ -202,7 +198,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   /* Convergence threshold: */
   const real norm_tol = PD->norm_tol;
 
-  HD = HNC3dData_malloc(PD);
+  HNC3dData *HD = HNC3dData_malloc (PD);
 
   DAGetCorners (HD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
@@ -279,7 +275,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   VecDestroy (c_fft);
   VecDestroy (cg_fft);
 
-  HNC3dData_free(HD);
+  HNC3dData_free (HD);
 
   return g;
 }
@@ -290,7 +286,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   h    ->  dh = h    - h
     in           out    in
  */
-static void iterate (HNC3dData HD, Vec h, Vec dh)
+static void iterate (HNC3dData *HD, Vec h, Vec dh)
 {
   const ProblemData *PD = HD->PD;
 
@@ -342,7 +338,7 @@ static PetscErrorCode snes_function (SNES snes, Vec h, Vec f, void *pa)
 {
   (void) snes;                  /* interface obligation */
 
-  HNC3dData HD = (HNC3dData) pa;
+  HNC3dData *HD = (HNC3dData*) pa;
 
   /*
     The "error vector" of the non-linear equation is:
@@ -356,7 +352,7 @@ static PetscErrorCode snes_function (SNES snes, Vec h, Vec f, void *pa)
 }
 
 
-static void solvent_kernel (HNC3dData HD, Vec c, Vec c_fft)
+static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
 {
   /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
@@ -374,7 +370,7 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
 {
   assert(g_ini==PETSC_NULL);
 
-  HNC3dData HD = HNC3dData_malloc(PD);
+  HNC3dData *HD = HNC3dData_malloc (PD);
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, HD->c, HD->c_fft);
@@ -464,7 +460,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  HNC3dData HD = HNC3dData_malloc(PD);
+  HNC3dData *HD = HNC3dData_malloc (PD);
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, HD->c, HD->c_fft);
