@@ -124,18 +124,21 @@ int main (int argc, char **argv)
 #endif
 
   /* Pure solvent by HNC: */
-  if (bgy3d_getopt_test ("--HNC"))
-    solver = hnc3d_solve;
+  if (bgy3d_getopt_test ("--HNC-Picard"))
+    solver = hnc3d_solve_picard;
+
+  if (bgy3d_getopt_test ("--HNC-Newton"))
+    solver = hnc3d_solve_newton;
 
   /*
     There  seem to  be  several  solvers that  address  a problem  of
     finding solvent  distribution in external field  given the direct
     correlation function of the pure solvent. These are two of them:
   */
-  if (bgy3d_getopt_test ("--HNC-Newton"))
+  if (bgy3d_getopt_test ("--HNC-M-Newton"))
     solver =  hnc3d_solute_solve_newton;
 
-  if (bgy3d_getopt_test ("--HNC-Picard"))
+  if (bgy3d_getopt_test ("--HNC-M-Picard"))
     solver =  hnc3d_solute_solve_picard;
 
   /* Pure solvent: */
@@ -163,7 +166,8 @@ int main (int argc, char **argv)
     solver = BGY3d_SolveNewton_H2OSF;
 #endif
 
-  if(solver) {
+  if (solver)
+    {
       /* load initial configuration from file ??? */
       if (bgy3d_getopt_test ("--load")) {
           g_ini = bgy3d_vec_load ("g.bin");
@@ -197,7 +201,8 @@ int main (int argc, char **argv)
 
   }
   else
-    PetscPrintf(PETSC_COMM_WORLD, "Please choose one of: -BGY2site or -BGYM2site!\n");
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "Please choose one of: -BGY2site or -BGYM2site!\n");
 
   ierr = PetscFinalize();CHKERRQ(ierr);
 

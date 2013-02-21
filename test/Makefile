@@ -22,7 +22,9 @@ HNC-FLAGS = \
 	--max-iter 320 \
 	--lambda 0.1 \
 	--rho 0.1 \
-	--norm-tol 1e-12
+	--norm-tol 1e-12 \
+	-snes_mf \
+	-snes_monitor
 
 #
 # In case $(EXE) is not defined, assume the executable is one level up
@@ -93,11 +95,11 @@ moments = python ../python/moments.py
 # Load_Molecule():
 #
 hnc3d.g2: ../bgy3d
-	../bgy3d --HNC $(HNC-FLAGS)
+	../bgy3d --HNC-Newton $(HNC-FLAGS)
 	$(moments) g00.bin > $(@)
 
 hnc3d.g1: ../bgy3d hnc3d.g2
-	../bgy3d --HNC-Newton $(HNC-FLAGS) -snes_mf -snes_monitor
+	../bgy3d --HNC-M-Newton $(HNC-FLAGS)
 	$(moments) g0.bin > $(@)
 
 

@@ -252,16 +252,111 @@ static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
 }
 
 
-/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
-Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
-{
-  Vec c, c_old, g, g_old, gg;
-  real iL3;
+/*
+  HNC iteration for a direct correlation where the total correlation
+  is considered a function of that:
 
+  c    ->  dc = c    - c
+    in           out    in
+*/
+typedef struct Ctx
+{
+  HNC3dData *HD;
+  Vec gam;                      /* real */
+  Vec c_fft, gam_fft;           /* complex */
+} Ctx;
+
+
+static void iterate_c (Ctx *ctx, Vec c, Vec dc)
+{
+  const ProblemData *PD = ctx->HD->PD;
+  const real rho = PD->rho;
+  const real beta = PD->beta;
+  const real L = PD->interval[1] - PD->interval[0];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+
+  MatMult (ctx->HD->fft_mat, c, ctx->c_fft);
+
+  VecScale (ctx->c_fft, h3);
+
+  Compute_cgfft (rho, ctx->c_fft, ctx->gam_fft);
+
+  MatMultTranspose (ctx->HD->fft_mat, ctx->gam_fft, ctx->gam);
+
+  VecScale (ctx->gam, 1.0/L/L/L);
+
+  Compute_c_HNC (beta, ctx->HD->pot, ctx->gam, dc);
+
+  VecAXPY (dc, -1.0, c);
+}
+
+
+/* Solving  for  c  and  h(c)  of HNC  equation  with  Newton.  Direct
+   correlation c appears as a primary variable here: */
+Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
+{
+  assert(g_ini==PETSC_NULL);
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation. Newton iteration.\n");
+
+  HNC3dData *HD = HNC3dData_malloc (PD);
+  Vec gam = bgy3d_vec_create (HD->da);
+  Vec gam_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec c_fft = bgy3d_vec_create (HD->dc);   /* complex */
+
+  /* Create intial guess: */
+  Vec c = bgy3d_vec_create (HD->da);
+  VecSet (c, 0.0);
+
+  /*
+    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
+    zero. Cast is  there to silence the mismatch in  the type of first
+    pointer argument: struct Ctx* vs. void*:
+  */
+  {
+    struct Ctx ctx = {HD, gam, gam_fft, c_fft};
+    snes_solve (&ctx, (Function) iterate_c, c);
+  }
+
+  /* g = γ + c + 1, store in Vec gam: */
+  VecAXPY (gam, 1.0, c);
+  VecShift (gam, 1.0);
+
+  bgy3d_vec_save ("c00.bin", c);
+  bgy3d_vec_save ("g00.bin", gam);
+
+  /* free stuff */
+  HNC3dData_free (HD);
+  /* Delegated to the caller: VecDestroy (gam); */
+  VecDestroy (gam_fft);
+  VecDestroy (c);
+  VecDestroy (c_fft);
+
+  return gam;
+}
+
+
+/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
+Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
+{
   assert(g_ini==PETSC_NULL);
 
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation. Fixpoint iteration.\n");
+
+  HNC3dData *HD = HNC3dData_malloc (PD);
+  Vec gam = bgy3d_vec_create (HD->da);
+  Vec gam_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec c_fft = bgy3d_vec_create (HD->dc);   /* complex */
+
+  /* Work area for iterate_c(): */
+  struct Ctx ctx = {HD, gam, gam_fft, c_fft};
+
+  /* Create intial guess: */
+  Vec c = bgy3d_vec_create (HD->da);
+  Vec dc = bgy3d_vec_create (HD->da);
+  VecSet (c, 0.0);
 
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -272,56 +367,19 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   /* Convergence threshold: */
   const real norm_tol = PD->norm_tol;
 
-  HNC3dData *HD = HNC3dData_malloc (PD);
-
-  iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
-
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  VecDuplicate(HD->pot, &c);
-  VecDuplicate(HD->pot, &g);
-  VecDuplicate(HD->pot, &g_old);
-  VecDuplicate(HD->pot, &c_old);
-  VecDuplicate(HD->pot, &gg);
-
-  /* Set initial guess */
-  VecSet(g,0.0);
-  VecSet(c,0.0);
-
-  /* set fft data */
-  Vec c_fft = bgy3d_vec_create (HD->dc);
-  Vec cg_fft = bgy3d_vec_create (HD->dc);
-
-  /* do the iteration */
+  /*
+    Find an c  such that dc as returned by iterate_c  (&ctx, c, dc) is
+    zero:
+  */
   for (int k = 0; k < max_iter; k++)
     {
-      /* if(k>3) */
-      /*   lambda =0.1; */
+      iterate_c (&ctx, c, dc);
 
-      /* set g_old=g */
-      VecCopy(g, g_old);
-      VecCopy(c, c_old);
+      /* Simple mixing: c = lambda * c + (1 - lambda) * c_old */
+      VecAXPY (c, lambda, dc);
 
-      Compute_c_HNC(HD->PD->beta, HD->pot, g, c);
+      const real norm = bgy3d_vec_norm (dc);
 
-      /* simple mixing: c = lambda*c+(1-lambda)*c_old */
-      VecAXPBY(c, (1-lambda), lambda, c_old);
-
-      MatMult (HD->fft_mat, c, c_fft);
-
-      VecScale (c_fft, h3);
-
-      Compute_cgfft(PD->rho, c_fft, cg_fft);
-
-      MatMultTranspose (HD->fft_mat, cg_fft, g);
-
-      VecScale(g, iL3);
-/*       VecView(c,PETSC_VIEWER_STDERR_WORLD);   */
-/*       exit(1);   */
-      /* gg=g-g_old */
-      VecWAXPY(gg, -1.0, g_old, g);
-
-      const real norm = bgy3d_vec_norm (gg);
       PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
                    k + 1, norm, lambda);
 
@@ -329,27 +387,22 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
         break;
     }
 
-  /* g= gamma+c+1 */
-  VecAXPY(g, 1.0, c);
-  VecShift(g, 1.0);
-
-  //VecCopy(c,g);
+  /* g = γ + c + 1, store in Vec gam: */
+  VecAXPY (gam, 1.0, c);
+  VecShift (gam, 1.0);
 
   bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", g);
+  bgy3d_vec_save ("g00.bin", gam);
 
   /* free stuff */
-  VecDestroy(c);
-  VecDestroy(gg);
-  VecDestroy(c_old);
-  VecDestroy(g_old);
-
-  VecDestroy (c_fft);
-  VecDestroy (cg_fft);
-
   HNC3dData_free (HD);
+  /* Delegated to the caller: VecDestroy (gam); */
+  VecDestroy (gam_fft);
+  VecDestroy (c);
+  VecDestroy (c_fft);
+  VecDestroy (dc);
 
-  return g;
+  return gam;
 }
 
 
@@ -359,7 +412,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   h    ->  dh = h    - h
     in           out    in
 */
-static void iterate (HNC3dData *HD, Vec h, Vec dh)
+static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
 {
   const ProblemData *PD = HD->PD;
 
@@ -419,9 +472,12 @@ static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
 
 /* solving for h only of HNC equation with Newton */
 /* c appears as an input here */
-Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
+Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
 {
   assert(g_ini==PETSC_NULL);
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
 
   HNC3dData *HD = HNC3dData_malloc (PD);
 
@@ -442,7 +498,7 @@ Vec hnc3d_solute_solve_newton(const ProblemData *PD, Vec g_ini)
     zero. Cast is  there to silence the mismatch in  the type of first
     pointer argument: HNC3dData* vs. void*:
   */
-  snes_solve (HD, (Function) iterate, h);
+  snes_solve (HD, (Function) iterate_h, h);
 
   /* free stuff */
   HNC3dData_free (HD);
@@ -463,7 +519,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   assert (g_ini == PETSC_NULL);
 
   PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation by fixpoint iteration. Fixed c.\n");
+               "Solving 3d-HNC equation. Fixpoint iteration. Fixed c.\n");
 
   /* Mixing parameter: */
   const real lambda = PD->lambda;
@@ -491,7 +547,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   for (int k = 0; k < max_iter; k++)
     {
       /* dh := h_out - h_in */
-      iterate (HD, h, dh);
+      iterate_h (HD, h, dh);
 
       /* Simple mixing: h = lambda * h_out + (1 - lambda) * h_in */
       VecAXPY (h, lambda, dh);
