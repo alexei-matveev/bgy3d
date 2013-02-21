@@ -257,8 +257,6 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 {
   Vec c, c_old, g, g_old, gg;
   real g_norm, iL3;
-  int k, n[3], x[3];
-  Vec c_fft, cg_fft;
 
   assert(g_ini==PETSC_NULL);
 
@@ -276,8 +274,6 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 
   HNC3dData *HD = HNC3dData_malloc (PD);
 
-  DAGetCorners (HD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
   iL3 = 1./pow(PD->interval[1]-PD->interval[0],3);
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
@@ -293,11 +289,11 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   VecSet(c,0.0);
 
   /* set fft data */
-  c_fft = bgy3d_vec_create (HD->dc);
-  cg_fft = bgy3d_vec_create (HD->dc);
+  Vec c_fft = bgy3d_vec_create (HD->dc);
+  Vec cg_fft = bgy3d_vec_create (HD->dc);
 
   /* do the iteration */
-  for(k=0; k<max_iter; k++)
+  for (int k = 0; k < max_iter; k++)
     {
       /* if(k>3) */
       /*   lambda =0.1; */
@@ -356,12 +352,13 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
   return g;
 }
 
+
 /*
   HNC iteration for a fixed direct correlation:
 
   h    ->  dh = h    - h
     in           out    in
- */
+*/
 static void iterate (HNC3dData *HD, Vec h, Vec dh)
 {
   const ProblemData *PD = HD->PD;
