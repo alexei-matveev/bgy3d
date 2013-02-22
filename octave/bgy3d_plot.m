@@ -11,6 +11,19 @@ function x = cubic_root (n)
   endwhile
 endfunction
 
+function bgy3d_contour (x, y, f, name, path)
+  contourf (x, y, f, "linestyle", "none"); ## "levelsep", 0.05)
+  title ([path, " ", name]);
+  caxis ([0.0, 2.0]);        # range suitable for distribution functions
+  colorbar ();
+
+  ## Append .png to the input path:
+  out = [path, "-", name, ".png"];
+
+  ## This saves the figure in a format derived from the file extension:
+  print (out);
+endfunction
+
 function bgy3d_plot (path)
 
   ## Default interval, there is no way to extract it from the vector:
@@ -26,26 +39,17 @@ function bgy3d_plot (path)
   ## Reshape all the vectors:
   vec3d = reshape (vec, [N, N, N]);
 
-  ## Cut the yz plane, squeeze(v(x0, 1:y, 1:z)) actually get vx(1:z,
-  ## 1:y) at plane x = x0
-  vec2d = squeeze (vec3d(N / 2, :, :));
-
   ## Axis for border:
   x = linspace (interval(1), interval(2), N);
 
   ## Contourf plot bgy vectors:
   figure (1);
 
-  contourf (x, x, vec2d, "linestyle", "none"); ## "levelsep", 0.05)
-  title (path);
-  caxis ([0.0, 2.0]);
-  colorbar ();
-
-  ## Append .png to the input path:
-  out = [path, ".png"];
-
-  ## This saves the figure in a format derived from the file extension:
-  print (out);
+  ## Cut the yz plane, squeeze(v(x0, 1:y, 1:z)) actually get vx(1:z,
+  ## 1:y) at plane x = x0
+  bgy3d_contour (x, x, squeeze (vec3d(N/2, :, :)), "yz-plane", path);
+  bgy3d_contour (x, x, squeeze (vec3d(:, N/2, :)), "xz-plane", path);
+  bgy3d_contour (x, x, squeeze (vec3d(:, :, N/2)), "xy-plane", path);
 
   ## Now plot 1d projections along x-, y-, and z-axes throuth the middle
   ## of the grid:
