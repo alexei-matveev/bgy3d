@@ -301,7 +301,7 @@ typedef struct Ctx_c
 {
   HNC3dData *HD;
   Vec t;                        /* real */
-  Vec c_fft, t_fft;             /* complex */
+  Vec t_fft, c_fft;             /* complex */
 } Ctx_c;
 
 
@@ -348,7 +348,13 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_c* vs. void*:
   */
   {
-    struct Ctx_c ctx = {HD, t, t_fft, c_fft};
+    struct Ctx_c ctx =
+      {
+        .HD = HD,
+        .t = t,
+        .t_fft = t_fft,
+        .c_fft = c_fft
+      };
     snes_solve (PD, &ctx, (Function) iterate_c, c);
   }
 
