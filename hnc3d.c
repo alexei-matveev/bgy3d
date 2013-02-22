@@ -194,7 +194,7 @@ static void snes_solve (void *ctx, Function F, Vec x)
 
 
 /* h := exp (-β v) - 1 */
-static void Compute_h (real beta, Vec v, Vec h)
+static void compute_h (real beta, Vec v, Vec h)
 {
   real pure f (real v)
   {
@@ -205,35 +205,47 @@ static void Compute_h (real beta, Vec v, Vec h)
 }
 
 
-/* c := exp (-β v + γ) - 1 - γ */
-static void Compute_c_HNC (real beta, Vec v, Vec g, Vec c)
+/*
+  Hypernetted   Chain  (HNC)  closure   relation  to   compute  direct
+  correlation function c in real space.  See OZ equation below for the
+  second  relation between  two unknowns  c and  γ. Other  sources use
+  latin "t"  to denote that difference  and we will use  that to avoid
+  confusion with distributions functions:
+
+    c := exp (-β v + γ) - 1 - γ
+*/
+static void compute_c (real beta, Vec v, Vec t, Vec c)
 {
-  real pure f (real v, real g)
+  real pure f (real v, real t)
   {
-    /* exp (-beta * v + g) - 1.0 - g */
-    return expm1 (-beta * v + g) - g;
+    /* exp (-beta * v + t) - 1.0 - t */
+    return expm1 (-beta * v + t) - t;
   }
-  bgy3d_vec_map2 (c, f, v, g);
+  bgy3d_vec_map2 (c, f, v, t);
 }
 
 
 /*
-  In k-representation compute
+  Use the k-representation of Ornstein-Zernike (OZ) equation
 
-        2
-  γ = ρc  / (1 - ρc)
+    h = c + ρ c * h
+
+  to compute γ =  h - c form c:
+
+          2
+    γ = ρc  / (1 - ρc)
 
   If you scale  c by h3 beforehand or  pass rho' = rho *  h3 and scale
   the  result by h3  in addition,  you will  compute exactly  what the
   older version of the function did:
 */
-static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
+static void compute_t (real rho, Vec c_fft, Vec t_fft)
 {
   complex pure f (complex c)
   {
     return rho * (c * c) / (1.0 - rho * c);
   }
-  bgy3d_vec_fft_map1 (g_fft, f, c_fft);
+  bgy3d_vec_fft_map1 (t_fft, f, c_fft);
 }
 
 
@@ -247,8 +259,8 @@ static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
 typedef struct Ctx_c
 {
   HNC3dData *HD;
-  Vec gam;                      /* real */
-  Vec c_fft, gam_fft;           /* complex */
+  Vec t;                        /* real */
+  Vec c_fft, t_fft;             /* complex */
 } Ctx_c;
 
 
@@ -264,13 +276,13 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   VecScale (ctx->c_fft, h3);
 
-  Compute_cgfft (rho, ctx->c_fft, ctx->gam_fft);
+  compute_t (rho, ctx->c_fft, ctx->t_fft);
 
-  MatMultTranspose (ctx->HD->fft_mat, ctx->gam_fft, ctx->gam);
+  MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft, ctx->t);
 
-  VecScale (ctx->gam, 1.0/L/L/L);
+  VecScale (ctx->t, 1.0/L/L/L);
 
-  Compute_c_HNC (beta, ctx->HD->pot, ctx->gam, dc);
+  compute_c (beta, ctx->HD->pot, ctx->t, dc);
 
   VecAXPY (dc, -1.0, c);
 }
@@ -286,9 +298,9 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Newton iteration.\n");
 
   HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec gam = bgy3d_vec_create (HD->da);
-  Vec gam_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec c_fft = bgy3d_vec_create (HD->dc);   /* complex */
+  Vec t = bgy3d_vec_create (HD->da);
+  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
 
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
@@ -300,26 +312,26 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
     pointer argument: struct Ctx_c* vs. void*:
   */
   {
-    struct Ctx_c ctx = {HD, gam, gam_fft, c_fft};
+    struct Ctx_c ctx = {HD, t, t_fft, c_fft};
     snes_solve (&ctx, (Function) iterate_c, c);
   }
 
-  /* g = γ + c + 1, store in Vec gam: */
-  VecAXPY (gam, 1.0, c);
-  VecShift (gam, 1.0);
+  /* g = γ + c + 1, store in Vec t: */
+  VecAXPY (t, 1.0, c);
+  VecShift (t, 1.0);
 
   bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", gam);
+  bgy3d_vec_save ("g00.bin", t);
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (gam); */
-  VecDestroy (gam_fft);
+  /* Delegated to the caller: VecDestroy (t); */
+  VecDestroy (t_fft);
   VecDestroy (c);
   VecDestroy (c_fft);
 
   HNC3dData_free (HD);
 
-  return gam;
+  return t;
 }
 
 
@@ -332,12 +344,12 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Fixpoint iteration.\n");
 
   HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec gam = bgy3d_vec_create (HD->da);
-  Vec gam_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec c_fft = bgy3d_vec_create (HD->dc);   /* complex */
+  Vec t = bgy3d_vec_create (HD->da);
+  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
 
   /* Work area for iterate_c(): */
-  struct Ctx_c ctx = {HD, gam, gam_fft, c_fft};
+  struct Ctx_c ctx = {HD, t, t_fft, c_fft};
 
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
@@ -373,23 +385,23 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
         break;
     }
 
-  /* g = γ + c + 1, store in Vec gam: */
-  VecAXPY (gam, 1.0, c);
-  VecShift (gam, 1.0);
+  /* g = γ + c + 1, store in Vec t: */
+  VecAXPY (t, 1.0, c);
+  VecShift (t, 1.0);
 
   bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", gam);
+  bgy3d_vec_save ("g00.bin", t);
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (gam); */
-  VecDestroy (gam_fft);
+  /* Delegated to the caller: VecDestroy (t); */
+  VecDestroy (t_fft);
   VecDestroy (c);
   VecDestroy (c_fft);
   VecDestroy (dc);
 
   HNC3dData_free (HD);
 
-  return gam;
+  return t;
 }
 
 
@@ -402,7 +414,7 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
 typedef struct Ctx_h
 {
   HNC3dData *HD;
-  Vec gam;                      /* real */
+  Vec t;                      /* real */
   Vec c_fft, h_fft, ch_fft;     /* complex */
 } Ctx_h;
 
@@ -410,7 +422,7 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
 {
   const ProblemData *PD = ctx->HD->PD;
 
-  Vec gam = ctx->gam;           /* temp */
+  Vec t = ctx->t;           /* temp */
   Vec c_fft = ctx->c_fft;       /* fixed solvent kernel */
   Vec h_fft = ctx->h_fft;       /* temp */
   Vec ch_fft = ctx->ch_fft;     /* temp */
@@ -429,9 +441,9 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
   bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  MatMultTranspose (ctx->HD->fft_mat, ch_fft, gam);
+  MatMultTranspose (ctx->HD->fft_mat, ch_fft, t);
 
-  VecScale (gam, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
+  VecScale (t, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
 
   /*
     The new candidate for the total correlation
@@ -444,7 +456,7 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
   {
     return expm1 (-beta * u + rho * g);
   }
-  bgy3d_vec_map2 (dh, h_out, ctx->HD->pot, gam);
+  bgy3d_vec_map2 (dh, h_out, ctx->HD->pot, t);
 
   /*
     dh := h    - h
@@ -479,7 +491,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
 
   HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec gam = bgy3d_vec_create (HD->da);
+  Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
@@ -492,7 +504,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
   VecDuplicate (HD->pot, &h);
 
   /* Set initial guess */
-  Compute_h (HD->PD->beta, HD->pot, h);
+  compute_h (HD->PD->beta, HD->pot, h);
 
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
@@ -504,7 +516,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
     struct Ctx_h ctx =
       {
         .HD = HD,
-        .gam = gam,
+        .t = t,
         .c_fft = c_fft,
         .h_fft = h_fft,
         .ch_fft = ch_fft
@@ -515,7 +527,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
 
   /* free stuff */
   /* Delegated to the caller: VecDestroy (h) */
-  VecDestroy (gam);
+  VecDestroy (t);
   VecDestroy (h_fft);
   VecDestroy (c_fft);
   VecDestroy (ch_fft);
@@ -550,7 +562,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   const real norm_tol = PD->norm_tol;
 
   HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec gam = bgy3d_vec_create (HD->da);
+  Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
@@ -559,7 +571,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   struct Ctx_h ctx =
     {
       .HD = HD,
-      .gam = gam,
+      .t = t,
       .c_fft = c_fft,
       .h_fft = h_fft,
       .ch_fft = ch_fft
@@ -573,7 +585,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   VecDuplicate (HD->pot, &dh);
 
   /* Set initial guess */
-  Compute_h (HD->PD->beta, HD->pot, h);
+  compute_h (HD->PD->beta, HD->pot, h);
 
   /* do the iteration */
   for (int k = 0; k < max_iter; k++)
@@ -599,7 +611,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
 
   /* free stuff */
   /* Delegated to the caller: VecDestroy (h) */
-  VecDestroy (gam);
+  VecDestroy (t);
   VecDestroy (c_fft);
   VecDestroy (h_fft);
   VecDestroy (ch_fft);
