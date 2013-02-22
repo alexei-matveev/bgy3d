@@ -26,7 +26,6 @@ typedef struct HNC3dData
   const ProblemData *PD;
 
   Vec pot;
-  Vec h_ini;
 } HNC3dData;
 
 
@@ -97,20 +96,10 @@ HNC3dData* HNC3dData_malloc(const ProblemData *PD)
 
   /* Create global vectors */
   DACreateGlobalVector (da, &HD->pot);
-  VecDuplicate (HD->pot, &HD->h_ini);
 
   /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
      solute-solvent interactions: */
   solute_field (HD->da, HD->PD, HD->pot);
-
-  const real beta = PD->beta;
-
-  real h0 (real v)
-  {
-    /* exp (-beta * v) - 1.0; */
-    return expm1 (-beta * v);
-  }
-  bgy3d_vec_map1 (HD->h_ini, h0, HD->pot);
 
   return HD;
 }
@@ -119,7 +108,6 @@ HNC3dData* HNC3dData_malloc(const ProblemData *PD)
 static void HNC3dData_free (HNC3dData *HD)
 {
   VecDestroy (HD->pot);
-  VecDestroy (HD->h_ini);
 
   DADestroy (HD->da);
   DADestroy (HD->dc);
@@ -202,6 +190,18 @@ static void snes_solve (void *ctx, Function F, Vec x)
   VecDestroy (r);
 
   SNESDestroy (snes);
+}
+
+
+/* h := exp (-β v) - 1 */
+static void Compute_h (real beta, Vec v, Vec h)
+{
+  real pure f (real v)
+  {
+    /* exp (-beta * v) - 1 */
+    return expm1 (-beta * v);
+  }
+  bgy3d_vec_map1 (h, f, v);
 }
 
 
@@ -492,7 +492,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
   VecDuplicate (HD->pot, &h);
 
   /* Set initial guess */
-  VecCopy (HD->h_ini, h);
+  Compute_h (HD->PD->beta, HD->pot, h);
 
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
@@ -573,7 +573,7 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   VecDuplicate (HD->pot, &dh);
 
   /* Set initial guess */
-  VecCopy (HD->h_ini, h);
+  Compute_h (HD->PD->beta, HD->pot, h);
 
   /* do the iteration */
   for (int k = 0; k < max_iter; k++)
