@@ -128,6 +128,10 @@ static void HNC3dData_free (HNC3dData *HD)
 */
 typedef void (*Function) (void *ctx, Vec x, Vec r);
 
+/* Solver for  non-linear equations, either Newton  or fixpoint Picard
+   iterations: */
+typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
+
 
 /*
   For solving HNC equation with Newton. Except of x everything else in
@@ -136,8 +140,10 @@ typedef void (*Function) (void *ctx, Vec x, Vec r);
   function h,  the direct correlation  function should be fixed  (or a
   function of h).
 */
-static void snes_solve (void *ctx, Function F, Vec x)
+static void newton_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
 {
+  (void) PD;             /* FIXME: convergence criteria are ignored */
+
   /* Create the snes environment */
   SNES snes;
   SNESCreate (PETSC_COMM_WORLD, &snes);
@@ -323,15 +329,10 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 }
 
 
-/* Solving  for  c  and  h(c)  of HNC  equation  with  Newton.  Direct
-   correlation c appears as a primary variable here: */
-Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
+/* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
+   appears as a primary variable here: */
+static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
 {
-  assert(g_ini==PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Newton iteration.\n");
-
   HNC3dData *HD = HNC3dData_malloc (PD);
   Vec t = bgy3d_vec_create (HD->da);
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
@@ -348,7 +349,7 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
   */
   {
     struct Ctx_c ctx = {HD, t, t_fft, c_fft};
-    snes_solve (&ctx, (Function) iterate_c, c);
+    snes_solve (PD, &ctx, (Function) iterate_c, c);
   }
 
   /* g = γ + c + 1, store in Vec t: */
@@ -366,56 +367,39 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
 
   HNC3dData_free (HD);
 
-  return t;
+  /* Return just one distribution. VecDestroy() it! */
+  g[0][0] = t;
+}
+
+
+/* Solving  for  c  and  h(c)  of HNC  equation  with  Newton.  Direct
+   correlation c appears as a primary variable here: */
+Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
+{
+  assert (g_ini == PETSC_NULL);
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation. Newton iteration.\n");
+
+  Vec g[1][1];
+  solvent_solve (PD, newton_solve, g);
+
+  return g[0][0];               /* VecDestroy() it! */
 }
 
 
 /* Solve h and c of HNC equation simultaneously, fixpoint iteration */
 Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
 {
-  assert(g_ini==PETSC_NULL);
+  assert (g_ini == PETSC_NULL);
 
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation. Fixpoint iteration.\n");
 
-  HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec t = bgy3d_vec_create (HD->da);
-  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec g[1][1];
+  solvent_solve (PD, picard_solve, g);
 
-  /* Create intial guess: */
-  Vec c = bgy3d_vec_create (HD->da);
-  Vec dc = bgy3d_vec_create (HD->da);
-  VecSet (c, 0.0);
-
-  /*
-    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_c* vs. void*:
-  */
-  {
-    /* Work area for iterate_c(): */
-    struct Ctx_c ctx = {HD, t, t_fft, c_fft};
-    picard_solve (PD, &ctx, (Function) iterate_c, c);
-  }
-
-  /* g = γ + c + 1, store in Vec t: */
-  VecAXPY (t, 1.0, c);
-  VecShift (t, 1.0);
-
-  bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", t);
-
-  /* free stuff */
-  /* Delegated to the caller: VecDestroy (t); */
-  VecDestroy (t_fft);
-  VecDestroy (c);
-  VecDestroy (c_fft);
-  VecDestroy (dc);
-
-  HNC3dData_free (HD);
-
-  return t;
+  return g[0][0];               /* VecDestroy() it! */
 }
 
 
@@ -431,6 +415,7 @@ typedef struct Ctx_h
   Vec t;                      /* real */
   Vec c_fft, h_fft, ch_fft;     /* complex */
 } Ctx_h;
+
 
 static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
 {
@@ -479,6 +464,7 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
   VecAXPY (dh, -1.0, h);
 }
 
+
 static void solvent_kernel (HNC3dData *HD, Vec c_fft)
 {
   Vec c = bgy3d_vec_create (HD->da);
@@ -495,15 +481,10 @@ static void solvent_kernel (HNC3dData *HD, Vec c_fft)
 }
 
 
-/* solving for h only of HNC equation with Newton */
-/* c appears as an input here */
-Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
+/* Solving for h only of HNC equation. Direct correlation c appears as
+   an input here */
+static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
 {
-  assert(g_ini==PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
-
   HNC3dData *HD = HNC3dData_malloc (PD);
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
@@ -536,7 +517,7 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
         .ch_fft = ch_fft
       };
 
-    snes_solve (&ctx, (Function) iterate_h, h);
+    snes_solve (PD, &ctx, (Function) iterate_h, h);
   }
 
   /* free stuff */
@@ -553,7 +534,24 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
 
   bgy3d_vec_save ("g0.bin", h);
 
-  return h;
+  /* Just one distribution so far. VecDestroy() it! */
+  g[0] = h;
+}
+
+
+/* solving for h only of HNC equation with Newton */
+/* c appears as an input here */
+Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
+{
+  assert (g_ini == PETSC_NULL);
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
+
+  Vec g[1];
+  solute_solve (PD, newton_solve, g);
+
+  return g[0];
 }
 
 
@@ -566,55 +564,8 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation. Fixpoint iteration. Fixed c.\n");
 
-  HNC3dData *HD = HNC3dData_malloc (PD);
-  Vec t = bgy3d_vec_create (HD->da);
-  Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec g[1];
+  solute_solve (PD, picard_solve, g);
 
-  /* Get the solvent-solvent direct correlation function: */
-  solvent_kernel (HD, c_fft);
-
-  Vec h, dh;
-  VecDuplicate (HD->pot, &h);
-  VecDuplicate (HD->pot, &dh);
-
-  /* Set initial guess */
-  compute_h (HD->PD->beta, HD->pot, h);
-
-  /*
-    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_c* vs. void*:
-  */
-  {
-    /* Work area for iterate_h(): */
-    struct Ctx_h ctx =
-      {
-        .HD = HD,
-        .t = t,
-        .c_fft = c_fft,
-        .h_fft = h_fft,
-        .ch_fft = ch_fft
-      };
-
-    picard_solve (PD, &ctx, (Function) iterate_h, h);
-  }
-
-  /* g = h + 1 */
-  VecShift (h, 1.0);
-
-  bgy3d_vec_save ("g0.bin", h);
-
-  /* free stuff */
-  /* Delegated to the caller: VecDestroy (h) */
-  VecDestroy (t);
-  VecDestroy (c_fft);
-  VecDestroy (h_fft);
-  VecDestroy (ch_fft);
-  VecDestroy (dh);
-
-  HNC3dData_free (HD);
-
-  return h;
+  return g[0];
 }
