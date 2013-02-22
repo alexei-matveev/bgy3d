@@ -370,7 +370,7 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 
           ker = ker_l + ker_s
         */
-        VecAXPBY (ker_fft[i][j], 1.0, 1.0, kl_fft);
+        VecAXPY (ker_fft[i][j], 1.0, kl_fft);
       }
 
   /* Clean up and exit: */
