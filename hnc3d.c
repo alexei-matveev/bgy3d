@@ -11,23 +11,6 @@
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
 
-typedef struct HNC3dData
-{
-  /*
-    These are array  descriptors for real and complex  vectors and the
-    FFT matrix.  The  data distribution of Petsc vectors  and FFTW MPI
-    needs to be consistent, so  that these three should be constructed
-    accordingly:
-  */
-  DA da, dc;
-  Mat fft_mat;
-
-  /* Immutable command line parameters are stored here: */
-  const ProblemData *PD;
-
-} HNC3dData;
-
-
 static void solute_field (const DA da, const ProblemData *PD, Vec pot)
 {
   real **x_M;
@@ -77,31 +60,6 @@ static void solute_field (const DA da, const ProblemData *PD, Vec pot)
   DAVecRestoreArray (da, pot, &pot_);
 
   Molecule_free (x_M, N_M);
-}
-
-
-HNC3dData* HNC3dData_malloc(const ProblemData *PD)
-{
-  HNC3dData *HD = malloc (sizeof (*HD));
-
-  HD->PD = PD;
-
-  /* Initialize  parallel  stuff,  fftw  +  petsc.  Data  distribution
-     depends on the grid dimensions N[] and number of processors.  All
-     other arguments are intent(out): */
-  bgy3d_fft_mat_create (PD->N, &HD->fft_mat, &HD->da, &HD->dc);
-
-  return HD;
-}
-
-
-static void HNC3dData_free (HNC3dData *HD)
-{
-  DADestroy (HD->da);
-  DADestroy (HD->dc);
-  MatDestroy (HD->fft_mat);
-
-  free(HD);
 }
 
 
@@ -287,7 +245,7 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
 */
 typedef struct Ctx_c
 {
-  HNC3dData *HD;
+  State *HD;
   Vec v, t;                     /* real */
   Vec t_fft, c_fft;             /* complex */
 } Ctx_c;
@@ -321,7 +279,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
    appears as a primary variable here: */
 static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
 {
-  HNC3dData *HD = HNC3dData_malloc (PD);
+  State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
   Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
@@ -366,7 +324,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   VecDestroy (c_fft);
   VecDestroy (v);
 
-  HNC3dData_free (HD);
+  bgy3d_state_destroy (HD);
 
   /* Return just one distribution. VecDestroy() it! */
   g[0][0] = t;
@@ -412,7 +370,7 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
 */
 typedef struct Ctx_h
 {
-  HNC3dData *HD;
+  State *HD;
   Vec v, t;                     /* real */
   Vec c_fft, h_fft, ch_fft;     /* complex */
 } Ctx_h;
@@ -466,7 +424,7 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
 }
 
 
-static void solvent_kernel (HNC3dData *HD, Vec c_fft)
+static void solvent_kernel (State *HD, Vec c_fft)
 {
   Vec c = bgy3d_vec_create (HD->da);
 
@@ -486,7 +444,7 @@ static void solvent_kernel (HNC3dData *HD, Vec c_fft)
    an input here */
 static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
 {
-  HNC3dData *HD = HNC3dData_malloc (PD);
+  State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
@@ -535,7 +493,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   VecDestroy (ch_fft);
   VecDestroy (v);
 
-  HNC3dData_free (HD);
+  bgy3d_state_destroy (HD);
 
   /* g := h + 1 */
   VecShift (h, 1.0);
