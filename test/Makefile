@@ -95,11 +95,11 @@ moments = python ../python/moments.py
 # Load_Molecule():
 #
 hnc3d.g2: ../bgy3d
-	../bgy3d --HNC-Newton $(HNC-FLAGS)
+	$(EXE) --HNC-Newton $(HNC-FLAGS)
 	$(moments) g00.bin > $(@)
 
 hnc3d.g1: ../bgy3d hnc3d.g2
-	../bgy3d --HNC-M-Newton $(HNC-FLAGS)
+	$(EXE) --HNC-M-Newton $(HNC-FLAGS)
 	$(moments) g0.bin > $(@)
 
 
