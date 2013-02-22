@@ -25,7 +25,6 @@ typedef struct HNC3dData
   /* Immutable command line parameters are stored here: */
   const ProblemData *PD;
 
-  Vec pot;
 } HNC3dData;
 
 
@@ -92,23 +91,12 @@ HNC3dData* HNC3dData_malloc(const ProblemData *PD)
      other arguments are intent(out): */
   bgy3d_fft_mat_create (PD->N, &HD->fft_mat, &HD->da, &HD->dc);
 
-  DA da = HD->da;
-
-  /* Create global vectors */
-  DACreateGlobalVector (da, &HD->pot);
-
-  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
-     solute-solvent interactions: */
-  solute_field (HD->da, HD->PD, HD->pot);
-
   return HD;
 }
 
 
 static void HNC3dData_free (HNC3dData *HD)
 {
-  VecDestroy (HD->pot);
-
   DADestroy (HD->da);
   DADestroy (HD->dc);
   MatDestroy (HD->fft_mat);
@@ -300,7 +288,7 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
 typedef struct Ctx_c
 {
   HNC3dData *HD;
-  Vec t;                        /* real */
+  Vec v, t;                     /* real */
   Vec t_fft, c_fft;             /* complex */
 } Ctx_c;
 
@@ -323,7 +311,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   VecScale (ctx->t, 1.0/L/L/L);
 
-  compute_c (beta, ctx->HD->pot, ctx->t, dc);
+  compute_c (beta, ctx->v, ctx->t, dc);
 
   VecAXPY (dc, -1.0, c);
 }
@@ -337,6 +325,11 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   Vec t = bgy3d_vec_create (HD->da);
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
   Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec v = bgy3d_vec_create (HD->da); /* solvent-solvent interaction */
+
+  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
+     solute-solvent interactions: */
+  solute_field (HD->da, HD->PD, v);
 
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
@@ -351,9 +344,10 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     struct Ctx_c ctx =
       {
         .HD = HD,
+        .v = v,
         .t = t,
         .t_fft = t_fft,
-        .c_fft = c_fft
+        .c_fft = c_fft,
       };
     snes_solve (PD, &ctx, (Function) iterate_c, c);
   }
@@ -370,6 +364,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   VecDestroy (t_fft);
   VecDestroy (c);
   VecDestroy (c_fft);
+  VecDestroy (v);
 
   HNC3dData_free (HD);
 
@@ -418,7 +413,7 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
 typedef struct Ctx_h
 {
   HNC3dData *HD;
-  Vec t;                      /* real */
+  Vec v, t;                     /* real */
   Vec c_fft, h_fft, ch_fft;     /* complex */
 } Ctx_h;
 
@@ -453,15 +448,15 @@ static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
   /*
     The new candidate for the total correlation
 
-    h = exp (-βU + ρv) - 1
+    h = exp (-βv + ρt) - 1
 
     stored in Vec dh:
   */
-  real pure h_out (real u, real g)
+  real pure h_out (real v, real t)
   {
-    return expm1 (-beta * u + rho * g);
+    return expm1 (-beta * v + rho * t);
   }
-  bgy3d_vec_map2 (dh, h_out, ctx->HD->pot, t);
+  bgy3d_vec_map2 (dh, h_out, ctx->v, t);
 
   /*
     dh := h    - h
@@ -496,16 +491,21 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec v = bgy3d_vec_create (HD->da); /* solute-solvent interaction */
+
+  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
+     solute-solvent interactions: */
+  solute_field (HD->da, HD->PD, v);
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, c_fft);
 
   /* Create global vectors */
   Vec h;
-  VecDuplicate (HD->pot, &h);
+  VecDuplicate (v, &h);
 
   /* Set initial guess */
-  compute_h (HD->PD->beta, HD->pot, h);
+  compute_h (HD->PD->beta, v, h);
 
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
@@ -517,10 +517,11 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
     struct Ctx_h ctx =
       {
         .HD = HD,
+        .v = v,
         .t = t,
         .c_fft = c_fft,
         .h_fft = h_fft,
-        .ch_fft = ch_fft
+        .ch_fft = ch_fft,
       };
 
     snes_solve (PD, &ctx, (Function) iterate_h, h);
@@ -532,6 +533,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   VecDestroy (h_fft);
   VecDestroy (c_fft);
   VecDestroy (ch_fft);
+  VecDestroy (v);
 
   HNC3dData_free (HD);
 
