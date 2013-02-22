@@ -200,7 +200,7 @@ static void snes_solve (void *ctx, Function F, Vec x)
   /*
     Runtime  options will  override default  parameters.   FIXME: note
     that the  call to SNESSetJacobian()  is missing here.   It appears
-    tha  one has  to request  a "matrix-free"  approximation  from the
+    that  one has to  request a  "matrix-free" approximation  from the
     command line  with "-snes_mf". Otherwise the  next call terminates
     with an error message saying "Matrix must be set first"!
   */
@@ -424,7 +424,7 @@ static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
   Vec ch_fft= HD->ch_fft;
 
   const real rho = HD->PD->rho;
-  const real beta= HD->PD->beta;
+  const real beta = HD->PD->beta;
 
   /* fft(h)*fft(c) */
   complex pure mul (complex x, complex y)
