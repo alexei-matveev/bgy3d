@@ -418,11 +418,7 @@ static real ComputeCharge (const ProblemData *PD,
 
   real total = 0.0;
   for (int i = 0; i < m; i++)
-    {
-      real num;
-      VecSum (g[i], &num);
-      total += solvent[i].charge * num;
-    }
+    total += solvent[i].charge * bgy3d_vec_sum (g[i]);
 
   /* FIXME: different rhos[]? */
   return total * h3 * PD->rho;
