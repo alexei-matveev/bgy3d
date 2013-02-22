@@ -27,10 +27,6 @@ typedef struct HNC3dData
 
   Vec pot;
   Vec h_ini;
-
-  /* things for arbitrary molecule shape */
-  Vec c, v;
-  Vec c_fft, h_fft, ch_fft;     /* complex */
 } HNC3dData;
 
 
@@ -101,8 +97,6 @@ HNC3dData* HNC3dData_malloc(const ProblemData *PD)
 
   /* Create global vectors */
   DACreateGlobalVector (da, &HD->pot);
-  VecDuplicate (HD->pot, &HD->c);
-  VecDuplicate (HD->pot, &HD->v);
   VecDuplicate (HD->pot, &HD->h_ini);
 
   /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
@@ -118,27 +112,18 @@ HNC3dData* HNC3dData_malloc(const ProblemData *PD)
   }
   bgy3d_vec_map1 (HD->h_ini, h0, HD->pot);
 
-  HD->c_fft = bgy3d_vec_create (HD->dc);
-  HD->h_fft = bgy3d_vec_create (HD->dc);
-  HD->ch_fft = bgy3d_vec_create (HD->dc);
-
   return HD;
 }
 
 
 static void HNC3dData_free (HNC3dData *HD)
 {
-  VecDestroy(HD->pot);
-  VecDestroy(HD->c);
-  VecDestroy(HD->v);
+  VecDestroy (HD->pot);
+  VecDestroy (HD->h_ini);
+
   DADestroy (HD->da);
   DADestroy (HD->dc);
   MatDestroy (HD->fft_mat);
-
-  VecDestroy (HD->c_fft);
-  VecDestroy (HD->h_fft);
-  VecDestroy (HD->ch_fft);
-
 
   free(HD);
 }
@@ -259,15 +244,15 @@ static void Compute_cgfft (real rho, Vec c_fft, Vec g_fft)
   c    ->  dc = c    - c
     in           out    in
 */
-typedef struct Ctx
+typedef struct Ctx_c
 {
   HNC3dData *HD;
   Vec gam;                      /* real */
   Vec c_fft, gam_fft;           /* complex */
-} Ctx;
+} Ctx_c;
 
 
-static void iterate_c (Ctx *ctx, Vec c, Vec dc)
+static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 {
   const ProblemData *PD = ctx->HD->PD;
   const real rho = PD->rho;
@@ -312,10 +297,10 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
   /*
     Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx* vs. void*:
+    pointer argument: struct Ctx_c* vs. void*:
   */
   {
-    struct Ctx ctx = {HD, gam, gam_fft, c_fft};
+    struct Ctx_c ctx = {HD, gam, gam_fft, c_fft};
     snes_solve (&ctx, (Function) iterate_c, c);
   }
 
@@ -327,11 +312,12 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_save ("g00.bin", gam);
 
   /* free stuff */
-  HNC3dData_free (HD);
   /* Delegated to the caller: VecDestroy (gam); */
   VecDestroy (gam_fft);
   VecDestroy (c);
   VecDestroy (c_fft);
+
+  HNC3dData_free (HD);
 
   return gam;
 }
@@ -351,7 +337,7 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
   Vec c_fft = bgy3d_vec_create (HD->dc);   /* complex */
 
   /* Work area for iterate_c(): */
-  struct Ctx ctx = {HD, gam, gam_fft, c_fft};
+  struct Ctx_c ctx = {HD, gam, gam_fft, c_fft};
 
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
@@ -395,12 +381,13 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_save ("g00.bin", gam);
 
   /* free stuff */
-  HNC3dData_free (HD);
   /* Delegated to the caller: VecDestroy (gam); */
   VecDestroy (gam_fft);
   VecDestroy (c);
   VecDestroy (c_fft);
   VecDestroy (dc);
+
+  HNC3dData_free (HD);
 
   return gam;
 }
@@ -412,19 +399,27 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
   h    ->  dh = h    - h
     in           out    in
 */
-static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
+typedef struct Ctx_h
 {
-  const ProblemData *PD = HD->PD;
+  HNC3dData *HD;
+  Vec gam;                      /* real */
+  Vec c_fft, h_fft, ch_fft;     /* complex */
+} Ctx_h;
+
+static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
+{
+  const ProblemData *PD = ctx->HD->PD;
+
+  Vec gam = ctx->gam;           /* temp */
+  Vec c_fft = ctx->c_fft;       /* fixed solvent kernel */
+  Vec h_fft = ctx->h_fft;       /* temp */
+  Vec ch_fft = ctx->ch_fft;     /* temp */
+
+  const real rho = PD->rho;
+  const real beta = PD->beta;
 
   /* fft(h) */
-  MatMult (HD->fft_mat, h, HD->h_fft);
-
-  Vec c_fft = HD->c_fft;
-  Vec h_fft = HD->h_fft;
-  Vec ch_fft= HD->ch_fft;
-
-  const real rho = HD->PD->rho;
-  const real beta = HD->PD->beta;
+  MatMult (ctx->HD->fft_mat, h, h_fft);
 
   /* fft(h)*fft(c) */
   complex pure mul (complex x, complex y)
@@ -434,9 +429,9 @@ static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
   bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  MatMultTranspose (HD->fft_mat, ch_fft, HD->v);
+  MatMultTranspose (ctx->HD->fft_mat, ch_fft, gam);
 
-  VecScale (HD->v, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
+  VecScale (gam, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
 
   /*
     The new candidate for the total correlation
@@ -445,11 +440,11 @@ static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
 
     stored in Vec dh:
   */
-  real pure h_out (real u, real v)
+  real pure h_out (real u, real g)
   {
-    return expm1 (-beta * u + rho * v);
+    return expm1 (-beta * u + rho * g);
   }
-  bgy3d_vec_map2 (dh, h_out, HD->pot, HD->v);
+  bgy3d_vec_map2 (dh, h_out, ctx->HD->pot, gam);
 
   /*
     dh := h    - h
@@ -458,8 +453,10 @@ static void iterate_h (HNC3dData *HD, Vec h, Vec dh)
   VecAXPY (dh, -1.0, h);
 }
 
-static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
+static void solvent_kernel (HNC3dData *HD, Vec c_fft)
 {
+  Vec c = bgy3d_vec_create (HD->da);
+
   /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
     bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", c);
@@ -467,6 +464,8 @@ static void solvent_kernel (HNC3dData *HD, Vec c, Vec c_fft)
     bgy3d_vec_read ("c00.bin", c);
 
   MatMult (HD->fft_mat, c, c_fft);
+
+  VecDestroy (c);
 }
 
 
@@ -480,27 +479,47 @@ Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
 
   HNC3dData *HD = HNC3dData_malloc (PD);
+  Vec gam = bgy3d_vec_create (HD->da);
+  Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
 
   /* Get the solvent-solvent direct correlation function: */
-  solvent_kernel (HD, HD->c, HD->c_fft);
+  solvent_kernel (HD, c_fft);
 
   /* Create global vectors */
   Vec h;
   VecDuplicate (HD->pot, &h);
 
-  /* Initial  guess. FIXME: this  is only  meaningfull for  solvent as
-     solute: */
-  VecCopy (HD->c, h);
-  // VecSet (h, 0.0);
+  /* Set initial guess */
+  VecCopy (HD->h_ini, h);
 
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: HNC3dData* vs. void*:
+    pointer argument: Ctx_h* vs. void*:
   */
-  snes_solve (HD, (Function) iterate_h, h);
+  {
+    /* Work area for iterate_h(): */
+    struct Ctx_h ctx =
+      {
+        .HD = HD,
+        .gam = gam,
+        .c_fft = c_fft,
+        .h_fft = h_fft,
+        .ch_fft = ch_fft
+      };
+
+    snes_solve (&ctx, (Function) iterate_h, h);
+  }
 
   /* free stuff */
+  /* Delegated to the caller: VecDestroy (h) */
+  VecDestroy (gam);
+  VecDestroy (h_fft);
+  VecDestroy (c_fft);
+  VecDestroy (ch_fft);
+
   HNC3dData_free (HD);
 
   /* g := h + 1 */
@@ -531,9 +550,23 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   const real norm_tol = PD->norm_tol;
 
   HNC3dData *HD = HNC3dData_malloc (PD);
+  Vec gam = bgy3d_vec_create (HD->da);
+  Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
+
+  /* Work area for iterate_h(): */
+  struct Ctx_h ctx =
+    {
+      .HD = HD,
+      .gam = gam,
+      .c_fft = c_fft,
+      .h_fft = h_fft,
+      .ch_fft = ch_fft
+    };
 
   /* Get the solvent-solvent direct correlation function: */
-  solvent_kernel (HD, HD->c, HD->c_fft);
+  solvent_kernel (HD, c_fft);
 
   Vec h, dh;
   VecDuplicate (HD->pot, &h);
@@ -541,13 +574,12 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
 
   /* Set initial guess */
   VecCopy (HD->h_ini, h);
-  //VecSet(h,0.0);
 
   /* do the iteration */
   for (int k = 0; k < max_iter; k++)
     {
       /* dh := h_out - h_in */
-      iterate_h (HD, h, dh);
+      iterate_h (&ctx, h, dh);
 
       /* Simple mixing: h = lambda * h_out + (1 - lambda) * h_in */
       VecAXPY (h, lambda, dh);
@@ -566,7 +598,11 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_save ("g0.bin", h);
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (h); */
+  /* Delegated to the caller: VecDestroy (h) */
+  VecDestroy (gam);
+  VecDestroy (c_fft);
+  VecDestroy (h_fft);
+  VecDestroy (ch_fft);
   VecDestroy (dh);
 
   HNC3dData_free (HD);
