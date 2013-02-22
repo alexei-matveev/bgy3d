@@ -299,7 +299,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_c* vs. void*:
   */
   {
-    struct Ctx_c ctx =
+    Ctx_c ctx =
       {
         .HD = HD,
         .v = v,
@@ -472,7 +472,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   */
   {
     /* Work area for iterate_h(): */
-    struct Ctx_h ctx =
+    Ctx_h ctx =
       {
         .HD = HD,
         .v = v,
