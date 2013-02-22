@@ -193,6 +193,41 @@ static void snes_solve (void *ctx, Function F, Vec x)
 }
 
 
+static void picard_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
+{
+  /* Mixing parameter */
+  const real lambda = PD->lambda;
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* Convergence threshold: */
+  const real norm_tol = PD->norm_tol;
+
+  /* A place to store residual: */
+  Vec dx;
+  VecDuplicate (x, &dx);
+
+  /* Find an x such that dx as returned by F (ctx, x, dx) is zero: */
+  for (int k = 0; k < max_iter; k++)
+    {
+      F (ctx, x, dx);
+
+      /* Simple mixing: x = lambda * x + (1 - lambda) * x_old */
+      VecAXPY (x, lambda, dx);
+
+      const real norm = bgy3d_vec_norm (dx);
+
+      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
+                   k + 1, norm, lambda);
+
+      if (norm < norm_tol)
+        break;
+    }
+  VecDestroy (dx);
+}
+
+
 /* h := exp (-β v) - 1 */
 static void compute_h (real beta, Vec v, Vec h)
 {
@@ -348,42 +383,21 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
   Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
 
-  /* Work area for iterate_c(): */
-  struct Ctx_c ctx = {HD, t, t_fft, c_fft};
-
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
   Vec dc = bgy3d_vec_create (HD->da);
   VecSet (c, 0.0);
 
-  /* Mixing parameter */
-  const real lambda = PD->lambda;
-
-  /* Number of total iterations */
-  const int max_iter = PD->max_iter;
-
-  /* Convergence threshold: */
-  const real norm_tol = PD->norm_tol;
-
   /*
-    Find an c  such that dc as returned by iterate_c  (&ctx, c, dc) is
-    zero:
+    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
+    zero. Cast is  there to silence the mismatch in  the type of first
+    pointer argument: struct Ctx_c* vs. void*:
   */
-  for (int k = 0; k < max_iter; k++)
-    {
-      iterate_c (&ctx, c, dc);
-
-      /* Simple mixing: c = lambda * c + (1 - lambda) * c_old */
-      VecAXPY (c, lambda, dc);
-
-      const real norm = bgy3d_vec_norm (dc);
-
-      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
-                   k + 1, norm, lambda);
-
-      if (norm < norm_tol)
-        break;
-    }
+  {
+    /* Work area for iterate_c(): */
+    struct Ctx_c ctx = {HD, t, t_fft, c_fft};
+    picard_solve (PD, &ctx, (Function) iterate_c, c);
+  }
 
   /* g = γ + c + 1, store in Vec t: */
   VecAXPY (t, 1.0, c);
@@ -552,30 +566,11 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation. Fixpoint iteration. Fixed c.\n");
 
-  /* Mixing parameter: */
-  const real lambda = PD->lambda;
-
-  /* Number of total iterations */
-  const int max_iter = PD->max_iter;
-
-  /* norm_tol for convergence test */
-  const real norm_tol = PD->norm_tol;
-
   HNC3dData *HD = HNC3dData_malloc (PD);
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
-
-  /* Work area for iterate_h(): */
-  struct Ctx_h ctx =
-    {
-      .HD = HD,
-      .t = t,
-      .c_fft = c_fft,
-      .h_fft = h_fft,
-      .ch_fft = ch_fft
-    };
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, c_fft);
@@ -587,22 +582,24 @@ Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
   /* Set initial guess */
   compute_h (HD->PD->beta, HD->pot, h);
 
-  /* do the iteration */
-  for (int k = 0; k < max_iter; k++)
-    {
-      /* dh := h_out - h_in */
-      iterate_h (&ctx, h, dh);
+  /*
+    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
+    zero. Cast is  there to silence the mismatch in  the type of first
+    pointer argument: struct Ctx_c* vs. void*:
+  */
+  {
+    /* Work area for iterate_h(): */
+    struct Ctx_h ctx =
+      {
+        .HD = HD,
+        .t = t,
+        .c_fft = c_fft,
+        .h_fft = h_fft,
+        .ch_fft = ch_fft
+      };
 
-      /* Simple mixing: h = lambda * h_out + (1 - lambda) * h_in */
-      VecAXPY (h, lambda, dh);
-
-      const real norm = bgy3d_vec_norm (dh);
-      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
-		   k + 1, norm, lambda);
-
-      if (norm < norm_tol)
-        break;
-    }
+    picard_solve (PD, &ctx, (Function) iterate_h, h);
+  }
 
   /* g = h + 1 */
   VecShift (h, 1.0);
