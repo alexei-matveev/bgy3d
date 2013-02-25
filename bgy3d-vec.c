@@ -7,6 +7,7 @@ extern int vebosity;
 
 #define MY_MALLOC_FREE false
 
+
 /* Shape of the grid: */
 static void da_shape (const DA da, int N[static 3])
 {
@@ -27,22 +28,29 @@ static int da_dof (const DA da)
 }
 
 
-/* To create  a new Vec one needs  the local and total  sizes. This is
-   how to get them from the array descriptor: */
-static void da_sizes (const DA da, int *n3, int *N3)
+/*
+  To create  a new  Vec one needs  the local  size. The total  size is
+  computable.   This is  how  to get  the  local size  from the  array
+  descriptor:
+*/
+static int da_local_size (const DA da)
 {
   /* Get dimensions and other vector properties: */
   int x[3], n[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  /* Get grid dimensions N[3]: */
-  int N[3];
-  da_shape (da, N);
-
   const int dof = da_dof (da);  /* dof == 2 for complex Vecs */
 
-  *n3 = dof * n[2] * n[1] * n[0];
-  *N3 = dof * N[2] * N[1] * N[0];
+  return dof * n[2] * n[1] * n[0];
+}
+
+
+static Vec vec_from_array (int n, real x_[n])
+{
+  Vec x;
+  /* FIXME: interface changed in 3.3! */
+  VecCreateMPIWithArray (PETSC_COMM_WORLD, n, PETSC_DECIDE, x_, &x);
+  return x;
 }
 
 
@@ -57,60 +65,42 @@ Vec bgy3d_vec_duplicate (const Vec x)
         bgy3d_vec_create()  and   by  bgy3d_vec_duplicate().  It  will
         attempt to free() the buffer:
       */
-      int n = vec_local_size (x);
-      int N = bgy3d_vec_size (x);
-      real *buf = malloc (n * sizeof *buf);
-      /* FIXME: interface changed in 3.3! */
-      VecCreateMPIWithArray (PETSC_COMM_WORLD, n, N, buf, &y);
+      const int n = vec_local_size (x);
+      y = vec_from_array (n, malloc (n * sizeof (real)));
     }
   else
     VecDuplicate (x, &y);
 
-  if (verbosity > 0)
-    printf ("+<Vec: addr=%p, n=%d, N=%d>\n", y, vec_local_size (y), bgy3d_vec_size (y));
-
   return y;
 }
 
+
 Vec bgy3d_vec_create (const DA da)
 {
-  Vec g;
+  Vec x;
 
   if (MY_MALLOC_FREE)
     {
       /* We allocate the storage for data ourselves: */
-      int n, N;
-      da_sizes (da, &n, &N);
-      real *buf = malloc (n * sizeof *buf);
-      /* FIXME: changed in 3.3! */
-      VecCreateMPIWithArray (PETSC_COMM_WORLD, n, N, buf, &g);
+      const int n = da_local_size (da);
+      x = vec_from_array (n, malloc (n * sizeof (real)));
     }
   else
-    DACreateGlobalVector (da, &g);
+    DACreateGlobalVector (da, &x);
 
-  if (verbosity > 0)
-    printf ("+<Vec: addr=%p, n=%d, N=%d>\n", g, vec_local_size (g), bgy3d_vec_size (g));
-
-  return g;
+  return x;
 }
 
 /* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
    they take the pointer to a Petsc object and nullify it: */
 void bgy3d_vec_destroy (Vec *g)
 {
-  if (verbosity > 0)
-    printf ("-<Vec: addr=%p, n=%d, N=%d>\n", *g, vec_local_size (*g), bgy3d_vec_size (*g));
-
+  /* VecDestroy() will not free() the buffer if the Vec was created by
+     vec_from_array(): */
   if (MY_MALLOC_FREE)
-    {
-      /* VecDestroy()  will  not free()  the  buffer  if  the Vec  was
-         created by VecCreateMPIWithArray(): */
-      real *buf;
-      VecGetArray (*g, &buf);
-      free (buf);
-    }
+    free (vec_get_array (*g));
 
-  VecDestroy (*g); /* FIXME: VecDestroy (g) for Petsc 3.2 and above! */
+  VecDestroy (*g); /* FIXME: Petsc 3.2 and above? */
   *g = NULL;
 }
 
