@@ -700,10 +700,10 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 
   /* Only if the matrix was really used: */
   if (op->A)
-    MatDestroy (op->A);
+    MatDestroy (op->A);         /* FIXME: change in 3.2 */
 
   if (op->b)
-    VecDestroy (op->b);
+    bgy3d_vec_destroy (&op->b);
 
   free (op);
 
@@ -722,7 +722,7 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
       Mat B = lap_mat_create (op->da, op->h, &op->vol);
 
       op->A = mat_inverse (B);           /* MatDestroy() it! */
-      op->b = bgy3d_vec_create (op->da); /* VecDestroy() it! */
+      op->b = bgy3d_vec_create (op->da); /* bgy3d_vec_destroy() it! */
 
       /* ...   so  I  will  destroy  you  too  (Mat  A  holds  another
          reference): */
