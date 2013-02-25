@@ -73,11 +73,11 @@ static void finalize_state (State *BHD, int m)
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
-          VecDestroy (BHD->F[i][j][dim]);
-          VecDestroy (BHD->F_l[i][j][dim]);
+          bgy3d_vec_destroy (&BHD->F[i][j][dim]);
+          bgy3d_vec_destroy (&BHD->F_l[i][j][dim]);
         }
 
-  VecDestroy (BHD->gfg2_fft);
+  bgy3d_vec_destroy (&BHD->gfg2_fft);
 
   bgy3d_state_destroy (BHD);
 }
@@ -1326,13 +1326,13 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_destroy2 (m, du);
   bgy3d_vec_destroy2 (m, x_lapl);
 
-  VecDestroy (du_new);
-  VecDestroy (du_new2);
-  VecDestroy (work);
+  bgy3d_vec_destroy (&du_new);
+  bgy3d_vec_destroy (&du_new2);
+  bgy3d_vec_destroy (&work);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      VecDestroy (omega[i][j]);
+      bgy3d_vec_destroy (&omega[i][j]);
 
   finalize_state (BHD, m);
 
@@ -1692,12 +1692,12 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_destroy2 (m, du);
   bgy3d_vec_destroy2 (m, x_lapl);
 
-  VecDestroy (du_new);
-  VecDestroy (du_new2);
-  VecDestroy (work);
+  bgy3d_vec_destroy (&du_new);
+  bgy3d_vec_destroy (&du_new2);
+  bgy3d_vec_destroy (&work);
 
-  VecDestroy (omega[0][1]);
-  VecDestroy (omega[0][0]);
+  bgy3d_vec_destroy (&omega[0][1]);
+  bgy3d_vec_destroy (&omega[0][0]);
 
   finalize_state (BHD, m);
 
