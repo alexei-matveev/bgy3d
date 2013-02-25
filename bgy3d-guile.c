@@ -298,7 +298,7 @@ static size_t vec_free (SCM vec)
 {
   Vec c_vec = to_vec (vec);
   if (c_vec)
-    VecDestroy (c_vec);
+    bgy3d_vec_destroy (&c_vec);
   return 0;
 }
 
