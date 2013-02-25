@@ -53,7 +53,9 @@ hnc-diffs = \
 # By default "make"  all the diffs. Unomment the  second entry to also
 # run HNC3D tests:
 #
-all: $(bgy-diffs) # $(hnc-diffs)
+all: bgy-tests # hnc-tests
+bgy-tests: $(bgy-diffs)
+hnc-tests: $(hnc-diffs)
 
 #
 # Prerequisites for a  diff are the two files, keep  them in the order
