@@ -67,8 +67,9 @@ static void divmod (const int n, const int N, int *j, int *i)
 
   Vec v is saved in the returned iterator context by reference, not by
   copying.  User  code should  not change the  contents of  the vector
-  while  iterating over  it.  It  may though  VecDestroy()  the vector
-  right after calling this function as we will increment the refcount.
+  while  iterating over  it.   It may  though bgy3d_vec_destroy()  the
+  vector right  after calling this  function as we will  increment the
+  refcount.
 */
 Context* bgy3d_pot_create (const State *BHD, Vec v)
 {
@@ -84,8 +85,11 @@ Context* bgy3d_pot_create (const State *BHD, Vec v)
      interpolation. MatDestroy() it! */
   s->fft_mat = bgy3d_mat_ref (BHD->fft_mat);
 
-  /* Do not copy the input  vector, save a reference instead, but also
-     increment the refcount. We will have to VecDestroy() it too: */
+  /*
+    Do not copy the input vector, save a reference instead, but also
+    Uincrement the refcount. We will have to bgy3d_vec_destroy() it
+    too:
+  */
   s->v = bgy3d_vec_ref (v);
 
   /* The first  time interpolation is requested we  put here something
@@ -198,11 +202,11 @@ void bgy3d_pot_destroy (Context *s)
   DADestroy (s->da);
   DADestroy (s->dc);
   MatDestroy (s->fft_mat);
-  VecDestroy (s->v);
+  bgy3d_vec_destroy (&s->v);
 
   /* Only if interpolation was really used: */
   if (s->v_fft)
-    VecDestroy (s->v_fft);
+    bgy3d_vec_destroy (&s->v_fft);
 
   /* free the whole context */
   free (s);
