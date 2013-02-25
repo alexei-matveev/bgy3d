@@ -11,6 +11,8 @@
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
 
+// #define HNC3D_T                 /* use γ as primary variable */
+
 static void solute_field (const DA da, const ProblemData *PD, Vec pot)
 {
   real **x_M;
@@ -251,7 +253,47 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
   bgy3d_vec_fft_map1 (t_fft, f, c_fft);
 }
 
+#ifdef HNC3D_T
+/*
+  HNC iteration for an indirect correlation γ = h - c (here denoted by
+  t) where other intermediates are considered a function of that:
 
+  t    ->  dt = t    - t
+    in           out    in
+*/
+typedef struct Ctx_t
+{
+  State *HD;
+  Vec v, c;                     /* real */
+  Vec t_fft, c_fft;             /* complex */
+} Ctx_t;
+
+
+static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
+{
+  const State *HD = ctx->HD;
+  const ProblemData *PD = HD->PD;
+  const real rho = PD->rho;
+  const real beta = PD->beta;
+  const real L = PD->interval[1] - PD->interval[0];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+
+  compute_c (beta, ctx->v, t, ctx->c);
+
+  MatMult (HD->fft_mat, ctx->c, ctx->c_fft);
+
+  VecScale (ctx->c_fft, h3);
+
+  compute_t (rho, ctx->c_fft, ctx->t_fft);
+
+  MatMultTranspose (HD->fft_mat, ctx->t_fft, dt);
+
+  VecScale (dt, 1.0/L/L/L);
+
+  VecAXPY (dt, -1.0, t);
+}
+
+#else
 /*
   HNC iteration for a direct correlation where the total correlation
   is considered a function of that:
@@ -290,8 +332,73 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   VecAXPY (dc, -1.0, c);
 }
+#endif
+
+#ifdef HNC3D_T
+/*
+  Solving for indirect  correlation γ = h - c  and other quantities of
+  HNC equation.  Indirect correlation  γ appears as a primary variable
+  here:
+*/
+static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
+{
+  PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
+
+  State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
+  Vec v = bgy3d_vec_create (HD->da); /* solvent-solvent interaction */
+  Vec c = bgy3d_vec_create (HD->da);
+  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
 
 
+  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
+     solute-solvent interactions: */
+  solute_field (HD->da, HD->PD, v);
+
+  /* Create intial guess: */
+  Vec t = bgy3d_vec_create (HD->da);
+  VecSet (t, 0.0);
+
+  /*
+    Find a  t such that dt as  returned by iterate_t (&ctx,  t, dt) is
+    zero. Cast is  there to silence the mismatch in  the type of first
+    pointer argument: struct Ctx_t* vs. void*:
+  */
+  {
+    Ctx_t ctx =
+      {
+        .HD = HD,
+        .v = v,
+        .c = c,
+        .t_fft = t_fft,
+        .c_fft = c_fft,
+      };
+    snes_solve (PD, &ctx, (Function) iterate_t, t);
+  }
+
+  bgy3d_vec_save ("t00.bin", t);
+
+  /* g = γ + c + 1, store in Vec t: */
+  VecAXPY (t, 1.0, c);
+  VecShift (t, 1.0);
+
+  bgy3d_vec_save ("c00.bin", c);
+  bgy3d_vec_save ("g00.bin", t);
+
+  /* free stuff */
+  /* Delegated to the caller: VecDestroy (t); */
+  VecDestroy (v);
+  VecDestroy (c);
+  VecDestroy (c_fft);
+  VecDestroy (t_fft);
+
+  bgy3d_state_destroy (HD);
+
+  /* Return just one distribution. VecDestroy() it! */
+  g[0][0] = t;
+}
+
+#else
 /* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
    appears as a primary variable here: */
 static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
@@ -346,7 +453,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   /* Return just one distribution. VecDestroy() it! */
   g[0][0] = t;
 }
-
+#endif
 
 /* Solving  for  c  and  h(c)  of HNC  equation  with  Newton.  Direct
    correlation c appears as a primary variable here: */
