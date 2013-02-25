@@ -265,16 +265,14 @@ static SCM state_make (SCM alist)
 static SCM vec_make (SCM state)
 {
   State *BHD = to_state (state);
-  Vec vec;
-  DACreateGlobalVector (BHD->da, &vec);
+  Vec vec = bgy3d_vec_create (BHD->da);
   return from_vec (vec);
 }
 
 static SCM vec_make_complex (SCM state)
 {
   State *BHD = to_state (state);
-  Vec vec;
-  DACreateGlobalVector (BHD->dc, &vec);
+  Vec vec = bgy3d_vec_create (BHD->dc);
   return from_vec (vec);
 }
 
