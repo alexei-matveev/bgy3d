@@ -10,7 +10,8 @@
 #include "fft_3d.h"             /* FFT_DATA */
 #endif
 
-#include "petscda.h"            /* DA, Vec */
+#include "bgy3d.h"
+#include "bgy3d-vec.h"          /* bgy3d_vec_destroy() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
 #include <complex.h>            /* after fftw.h */
@@ -101,14 +102,11 @@ double bgy3d_fft_test (int m, int n, int p)
 
   bgy3d_fft_mat_create (N, &A, &da, &dc);
 
-  Vec x, z;                     /* real */
-  Vec y;                        /* complex */
-
-  DACreateGlobalVector (da, &x);
-  DACreateGlobalVector (da, &z);
+  Vec x = bgy3d_vec_create (da); /* real */
+  Vec z = bgy3d_vec_create (da); /* real */
 
   /* This one is complex, note use of another array descriptor: */
-  DACreateGlobalVector (dc, &y);
+  Vec y = bgy3d_vec_create (dc); /* complex */
 
   /*
     To  test  if  reference  counting  works, let  us  destroy  array
@@ -139,16 +137,16 @@ double bgy3d_fft_test (int m, int n, int p)
   double norm;
   VecNorm (z, NORM_INFINITY, &norm);
 
-  VecDestroy (x);
-  VecDestroy (y);
-  VecDestroy (z);
+  bgy3d_vec_destroy (&x);
+  bgy3d_vec_destroy (&y);
+  bgy3d_vec_destroy (&z);
 
   /*
     Also   destroys   array   descriptors   for  real   and   complex
     vectors.  With proper reference  counting the  finalization order
     should not matter:
   */
-  MatDestroy (A);
+  MatDestroy (A);               /* FIXME: petsc 3.2! */
 
   return norm;
 }
