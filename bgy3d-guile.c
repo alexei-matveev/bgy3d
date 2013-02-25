@@ -442,8 +442,7 @@ static SCM vec_set_random (SCM x)
 static SCM vec_map1 (SCM f, SCM x)
 {
   Vec x_ = to_vec (x);
-  Vec y_;
-  VecDuplicate (x_, &y_);
+  Vec y_ = bgy3d_vec_duplicate (x_);
 
   double f_ (double x)
   {
@@ -458,8 +457,7 @@ static SCM vec_map2 (SCM f, SCM x, SCM y)
 {
   Vec x_ = to_vec (x);
   Vec y_ = to_vec (y);
-  Vec z_;
-  VecDuplicate (x_, &z_);
+  Vec z_ = bgy3d_vec_duplicate (x_);
 
   double f_ (double x, double y)
   {
