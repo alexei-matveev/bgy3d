@@ -64,6 +64,13 @@ static inline Mat bgy3d_mat_ref (Mat m)
   return m;
 }
 
+static inline real* vec_get_array (Vec x)
+{
+  real *x_;
+  VecGetArray (x, &x_);
+  return x_;
+}
+
 static inline int vec_local_size (Vec x)
 {
   int n;
@@ -118,14 +125,13 @@ static inline real bgy3d_vec_min (Vec x)
   return min;
 }
 
+
 /* ys  = map  (f, xs).  Should also  work with  aliased  arguments for
    in-place transform: */
 static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 {
-  real *xs_, *ys_;
-
-  VecGetArray (xs, &xs_);
-  VecGetArray (ys, &ys_);
+  real *xs_ = vec_get_array (xs);
+  real *ys_ = vec_get_array (ys);
 
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
@@ -141,11 +147,9 @@ static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
    in-place transform: */
 static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 {
-    real *xs_, *ys_, *zs_;
-
-  VecGetArray (xs, &xs_);
-  VecGetArray (ys, &ys_);
-  VecGetArray (zs, &zs_);
+  real *xs_ = vec_get_array (xs);
+  real *ys_ = vec_get_array (ys);
+  real *zs_ = vec_get_array (zs);
 
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
@@ -164,10 +168,8 @@ static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Ve
    in-place transform: */
 static inline void bgy3d_vec_fft_map1 (Vec y, complex (*f)(complex x), Vec x)
 {
-  real *x_, *y_;
-
-  VecGetArray (x, &x_);
-  VecGetArray (y, &y_);
+  real *x_ = vec_get_array (x);
+  real *y_ = vec_get_array (y);
 
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
@@ -188,11 +190,9 @@ static inline void bgy3d_vec_fft_map1 (Vec y, complex (*f)(complex x), Vec x)
    in-place transform: */
 static inline void bgy3d_vec_fft_map2 (Vec z, complex (*f)(complex x, complex y), Vec x, Vec y)
 {
-  real *x_, *y_, *z_;
-
-  VecGetArray (x, &x_);
-  VecGetArray (y, &y_);
-  VecGetArray (z, &z_);
+  real *x_ = vec_get_array (x);
+  real *y_ = vec_get_array (y);
+  real *z_ = vec_get_array (z);
 
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
