@@ -3,10 +3,19 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
+Vec bgy3d_vec_duplicate (const Vec x)
+{
+  Vec y;
+  VecDuplicate (x, &y);
+  // printf ("+<Vec: addr=%p, n=%d, N=%d>\n", y, vec_local_size (y), bgy3d_vec_size (y));
+  return y;
+}
+
 Vec bgy3d_vec_create (const DA da)
 {
   Vec g;
   DACreateGlobalVector (da, &g);
+  // printf ("+<Vec: addr=%p, n=%d, N=%d>\n", g, vec_local_size (g), bgy3d_vec_size (g));
   return g;
 }
 
@@ -14,6 +23,7 @@ Vec bgy3d_vec_create (const DA da)
    they take the pointer to a Petsc object and nullify it: */
 void bgy3d_vec_destroy (Vec *g)
 {
+  // printf ("-<Vec: addr=%p, n=%d, N=%d>\n", *g, vec_local_size (*g), bgy3d_vec_size (*g));
   VecDestroy (*g); /* FIXME: VecDestroy (g) for Petsc 3.2 and above! */
   *g = NULL;
 }

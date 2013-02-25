@@ -3,6 +3,7 @@
 /* FIXME: any better way? */
 #include <complex.h>
 
+Vec bgy3d_vec_duplicate (const Vec x);
 Vec bgy3d_vec_create (const DA da);
 void bgy3d_vec_destroy (Vec *g);
 
