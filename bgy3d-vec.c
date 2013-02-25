@@ -10,9 +10,12 @@ Vec bgy3d_vec_create (const DA da)
   return g;
 }
 
-void bgy3d_vec_destroy (Vec g)
+/* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
+   they take the pointer to a Petsc object and nullify it: */
+void bgy3d_vec_destroy (Vec *g)
 {
-  VecDestroy (g);
+  VecDestroy (*g); /* FIXME: VecDestroy (g) for Petsc 3.2 and above! */
+  *g = NULL;
 }
 
 void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
@@ -24,7 +27,7 @@ void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
 void bgy3d_vec_destroy1 (int m, Vec g[m])
 {
   for (int i = 0; i < m; i++)
-    bgy3d_vec_destroy (g[i]);
+    bgy3d_vec_destroy (&g[i]);
 }
 
 /* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
@@ -39,7 +42,7 @@ void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 {
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      bgy3d_vec_destroy (g[i][j]);
+      bgy3d_vec_destroy (&g[i][j]);
 }
 
 static void shape (const DA da, int *NI, int *NJ, int *NK)
