@@ -192,14 +192,15 @@ static void compute_h (real beta, Vec v, Vec h)
 }
 
 
+#if 1
 /*
   Hypernetted   Chain  (HNC)  closure   relation  to   compute  direct
   correlation function c in real space.  See OZ equation below for the
-  second  relation between  two unknowns  c and  γ. Other  sources use
-  latin "t"  to denote that difference  and we will use  that to avoid
-  confusion with distributions functions:
+  second relation between two  unknowns.  The indirect correlation γ =
+  h - c is denoted by latin  "t" in other sources. We will use that to
+  avoid greek identifiers and confusion with distribution functions:
 
-    c := exp (-β v + γ) - 1 - γ
+    c := exp (-βv + γ) - 1 - γ
 */
 static void compute_c (real beta, Vec v, Vec t, Vec c)
 {
@@ -210,7 +211,22 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
   }
   bgy3d_vec_map2 (c, f, v, t);
 }
+#else
+/*
+  Percus-Yevick  (PY) closure  relation between  direct-  and indirect
+  correlation c and γ:
 
+    c := exp (-βv) [1 + γ] - 1 - γ
+*/
+static void compute_c (real beta, Vec v, Vec t, Vec c)
+{
+  real pure f (real v, real t)
+  {
+    return exp (-beta * v) * (1 + t) - 1 - t;
+  }
+  bgy3d_vec_map2 (c, f, v, t);
+}
+#endif
 
 /*
   Use the k-representation of Ornstein-Zernike (OZ) equation
