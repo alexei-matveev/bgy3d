@@ -71,11 +71,10 @@ static void finalize_state (State *BHD, int m)
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      FOR_DIM
-        {
-          bgy3d_vec_destroy (&BHD->F[i][j][dim]);
-          bgy3d_vec_destroy (&BHD->F_l[i][j][dim]);
-        }
+      {
+        bgy3d_vec_destroy1 (3, BHD->F[i][j]);
+        bgy3d_vec_destroy1 (3, BHD->F_l[i][j]);
+      }
 
   bgy3d_vec_destroy (&BHD->gfg2_fft);
 
