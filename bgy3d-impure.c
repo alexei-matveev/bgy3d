@@ -374,9 +374,9 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
       }
 
   /* Clean up and exit: */
-  VecDestroy (u2);
-  VecDestroy (u2_fft);
-  VecDestroy (kl_fft);
+  bgy3d_vec_destroy (&u2);
+  bgy3d_vec_destroy (&u2_fft);
+  bgy3d_vec_destroy (&kl_fft);
   bgy3d_vec_destroy1 (3, fs);
   bgy3d_vec_destroy1 (3, fl);
   bgy3d_vec_destroy1 (3, fs_g2_fft);
@@ -471,7 +471,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
 
     bgy3d_impose_laplace_boundary (BHD, ve, x);
 
-    VecDestroy (x);
+    bgy3d_vec_destroy (&x);
   }
 
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
@@ -1063,8 +1063,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
       val2 *= h3;
       val3 *= h3;
     }
-    VecDestroy (ve);            /* yes, we do! */
-    VecDestroy (ve_rho);
+    bgy3d_vec_destroy (&ve);            /* yes, we do! */
+    bgy3d_vec_destroy (&ve_rho);
 
     PetscPrintf (PETSC_COMM_WORLD,
                  "<U_v|ρ_u> = %lf "
@@ -1079,7 +1079,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   }
 
   /* Clean up and exit ... */
-  VecDestroy (du_acc_fft);
+  bgy3d_vec_destroy (&du_acc_fft);
 
   /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
   bgy3d_vec_destroy1 (m, u0);
@@ -1092,13 +1092,13 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, g2);
   bgy3d_vec_destroy2 (m, ker_fft);
 
-  VecDestroy (work);
-  VecDestroy (uc);
-  VecDestroy (uc_rho);
+  bgy3d_vec_destroy (&work);
+  bgy3d_vec_destroy (&uc);
+  bgy3d_vec_destroy (&uc_rho);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      VecDestroy (omega[i][j]);
+      bgy3d_vec_destroy (&omega[i][j]);
 
   bgy3d_state_destroy (BHD);
 }
@@ -1195,8 +1195,8 @@ void RecomputeInitialFFTs (State *BHD,
   /* Clean up and exit: */
   FOR_DIM
     {
-      VecDestroy (force_short[dim]);
-      VecDestroy (force_long[dim]);
+      bgy3d_vec_destroy (&force_short[dim]);
+      bgy3d_vec_destroy (&force_long[dim]);
     }
 }
 
@@ -1248,9 +1248,9 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* ifft(dg) */
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  VecDestroy (ker_fft);
-  VecDestroy (g_fft);
-  VecDestroy (dg_fft);
+  bgy3d_vec_destroy (&ker_fft);
+  bgy3d_vec_destroy (&g_fft);
+  bgy3d_vec_destroy (&dg_fft);
 }
 
 /*
@@ -1626,24 +1626,24 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   for (int i = 0; i < 2; i++)
     {
-      VecDestroy(g[i]);
-      VecDestroy(g0[i]);
+      bgy3d_vec_destroy (&g[i]);
+      bgy3d_vec_destroy (&g0[i]);
     }
-  VecDestroy(dgH);
-  VecDestroy(dgO);
-  VecDestroy(dg_new);
-  VecDestroy(dg_new2);
-  VecDestroy(work);
+  bgy3d_vec_destroy (&dgH);
+  bgy3d_vec_destroy (&dgO);
+  bgy3d_vec_destroy (&dg_new);
+  bgy3d_vec_destroy (&dg_new2);
+  bgy3d_vec_destroy (&work);
 
-  VecDestroy(tH);
-  VecDestroy(tO);
+  bgy3d_vec_destroy (&tH);
+  bgy3d_vec_destroy (&tO);
 
-  VecDestroy (uc);
+  bgy3d_vec_destroy (&uc);
 
-  VecDestroy(dg_newH);
-  VecDestroy(dg_newO);
-  VecDestroy(dg_histH);
-  VecDestroy(dg_histO);
+  bgy3d_vec_destroy (&dg_newH);
+  bgy3d_vec_destroy (&dg_newO);
+  bgy3d_vec_destroy (&dg_histH);
+  bgy3d_vec_destroy (&dg_histO);
 
   finalize_state (&BHD);
 
