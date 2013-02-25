@@ -178,6 +178,61 @@ static Mat mat_create (int n, int N, void *ctx,
 
 
 /*
+  To create a matrix one needs  the local and total size of the matrix
+  (section).  This  is how  to get it  from another matrix.   See also
+  asizes()
+*/
+static void msizes (const Mat A, int *n3, int *N3)
+{
+  int m, n;
+  MatGetLocalSize (A, &m, &n);
+  assert (m == n);
+
+  int M, N;
+  MatGetSize (A, &M, &N);
+  assert (M == N);
+
+  *n3 = n;
+  *N3 = N;
+}
+
+
+/*
+  To create a matrix one needs  the local and total size of the matrix
+  (section). This  is how  to get it  from the array  descriptor.  See
+  also msizes().
+*/
+static void asizes (const DA da, int *n3, int *N3)
+{
+  /* Get dimensions and other vector properties: */
+  int x[3], n[3], N[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Get grid dimensions N[3], sanity checks: */
+  {
+    int dim, dof, sw;
+    DAPeriodicType wrap;
+    DAStencilType st;
+    DAGetInfo (da, &dim,
+               &N[0], &N[1], &N[2], /* need this, rest for checks */
+               NULL, NULL, NULL,
+               &dof, &sw, &wrap, &st);
+
+    /* It may  or may  not work  for other settings  too, it  was only
+       tested with these: */
+    assert (dim == 3);               /* 3d Vec */
+    assert (dof == 1);               /* degrees of freedom */
+    assert (sw >= 1);                /* stencil width */
+    assert (st == DA_STENCIL_STAR);  /* stencil type */
+    assert (wrap == DA_XYZPERIODIC); /* periodicity */
+  }
+
+  *n3 = n[2] * n[1] * n[0];
+  *N3 = N[2] * N[1] * N[0];
+}
+
+
+/*
  *
  * Two   implementations  of   the  linear   operator   for  Dirichlet
  * problem. The linear operator  that is Laplacian "almost" everywhere
@@ -513,41 +568,6 @@ static PetscErrorCode mat_mult_op_bnd (Mat A, Vec x, Vec y)
 }
 
 
-/*
-  To create a matrix one needs  the local and total size of the matrix
-  (section). This  is how  to get it  from the array  descriptor.  See
-  also msizes().
-*/
-static void asizes (const DA da, int *n3, int *N3)
-{
-  /* Get dimensions and other vector properties: */
-  int x[3], n[3], N[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* Get grid dimensions N[3], sanity checks: */
-  {
-    int dim, dof, sw;
-    DAPeriodicType wrap;
-    DAStencilType st;
-    DAGetInfo (da, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, &sw, &wrap, &st);
-
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 1);               /* degrees of freedom */
-    assert (sw >= 1);                /* stencil width */
-    assert (st == DA_STENCIL_STAR);  /* stencil type */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
-
-  *n3 = n[2] * n[1] * n[0];
-  *N3 = N[2] * N[1] * N[0];
-}
-
-
 /* Creates Laplacian  matrix. The interface has to  be consistent with
    the other impl (see #ifndef): */
 static Mat lap_mat_create (const DA da, const real h[3],
@@ -611,26 +631,6 @@ static KSP ksp_create (Mat M)
 }
 
 
-/*
-  To create a matrix one needs  the local and total size of the matrix
-  (section).  This  is how  to get it  from another matrix.   See also
-  asizes()
-*/
-static void msizes (const Mat A, int *n3, int *N3)
-{
-  int m, n;
-  MatGetLocalSize (A, &m, &n);
-  assert (m == n);
-
-  int M, N;
-  MatGetSize (A, &M, &N);
-  assert (M == N);
-
-  *n3 = n;
-  *N3 = N;
-}
-
-
 /* Does y = A x where A  = B^-1 and was constructed as A = mat_inverse
    (B): */
 static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
@@ -682,6 +682,7 @@ static Mat mat_inverse (Mat A)
 typedef struct Dirichlet
 {
   DA da;          /* Array descriptor */
+  real h[3];      /* Grid spacing */
   Mat A;          /* Inverse of the "almost" Laplacian */
   Vec b;          /* Work vector to hold projection on the boundary */
   Boundary vol;   /* Boundary definition */
@@ -696,8 +697,13 @@ static PetscErrorCode mat_destroy_dir (Mat A)
   Dirichlet *op = context (A);
 
   DADestroy (op->da);
-  MatDestroy (op->A);
-  VecDestroy (op->b);
+
+  /* Only if the matrix was really used: */
+  if (op->A)
+    MatDestroy (op->A);
+
+  if (op->b)
+    VecDestroy (op->b);
 
   free (op);
 
@@ -708,6 +714,20 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
 {
   Dirichlet *op = context (L);
+
+  /* Complete postponed initialization: */
+  if (op->A == NULL)
+    {
+      /* I created you ... */
+      Mat B = lap_mat_create (op->da, op->h, &op->vol);
+
+      op->A = mat_inverse (B);           /* MatDestroy() it! */
+      op->b = bgy3d_vec_create (op->da); /* VecDestroy() it! */
+
+      /* ...   so  I  will  destroy  you  too  (Mat  A  holds  another
+         reference): */
+      MatDestroy (B);
+    }
 
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is
@@ -738,23 +758,23 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
 {
   Dirichlet *op = malloc (sizeof *op);
 
-  const Boundary vol = make_boundary (PD);
-
-  /* I created you ... */
-  Mat B = lap_mat_create (da, PD->h, &vol);
-
+  /* Save the input for later and do the minumum initialization: */
   op->da = bgy3d_da_ref (da);    /* DADestroy() it! */
-  op->A = mat_inverse (B);       /* MatDestroy() it! */
-  op->b = bgy3d_vec_create (da); /* VecDestroy() it! */
-  op->vol = vol;
+  FOR_DIM
+    op->h[dim] = PD->h[dim];
 
-  /* ...   so   I  will   destroy  you  too   (Mat  A   holds  another
-     reference): */
-  MatDestroy (B);
+  /* This is  cheap and we dont want  to save the whole  struct PD for
+     later: */
+  op->vol = make_boundary (PD);
+
+  /* Building  sparse  "laplacian"   matrix  costs  time  and  memory,
+     postpone it: */
+  op->A = NULL;
+  op->b = NULL;
 
   /* Get the shape of the future matrix: */
   int n, N;
-  msizes (op->A, &n, &N);
+  asizes (op->da, &n, &N);
 
   return mat_create (n, N, op, mat_mult_dir, mat_destroy_dir);
 }
