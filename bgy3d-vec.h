@@ -96,6 +96,13 @@ static inline real bgy3d_vec_norm (Vec x)
   return norm;
 }
 
+static inline real bgy3d_vec_dot (Vec x, Vec y)
+{
+  real dot;
+  VecDot (x, y, &dot);
+  return dot;
+}
+
 static inline real bgy3d_vec_max (Vec x)
 {
   real max;
