@@ -803,17 +803,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
              one time: */
           const real a = (iter % nth == 0) ? a1 : a0;
 
-          /*
-            Some   functions,  such   as  bgy3d_solve_normalization(),
-            Compute_dg_H2O_intra_ln(), and Compute_H2O_interS/_C() use
-            preallocated fftw_complex arrays in State BHD for work but
-            do not  re-define any  of the Vecs  in that  struct except
-            those passed explicitly.
-
-            Same     holds    for    Solve_NormalizationH2O_smallII(),
-            bgy3d_impose_laplace_boundary()   to   the   best  of   my
-            (limited) knowledge.
-          */
+          /* Some   functions,  such  as   bgy3d_nssa_intra_log()  use
+             preallocated complex Vecs in State BHD for work. */
 
           /* Compute FFT of g[] for all sites: */
           for (int i = 0; i < m; i++)
