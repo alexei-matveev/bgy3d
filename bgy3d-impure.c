@@ -1171,11 +1171,8 @@ void RecomputeInitialFFTs (State *BHD,
   /* FIXME: maybe use BHD->v[3] for one of them? */
   Vec force_short[3];           /* work vectors for pair() */
   Vec force_long[3];            /* work vectors for pair() */
-  FOR_DIM
-    {
-      DACreateGlobalVector (BHD->da, &force_short[dim]);
-      DACreateGlobalVector (BHD->da, &force_long[dim]);
-    }
+  bgy3d_vec_create1 (BHD->da, 3, force_short);
+  bgy3d_vec_create1 (BHD->da, 3, force_long);
 
 
   /* Over all distinct solvent site pairs: */
@@ -1218,10 +1215,9 @@ static void Compute_H2O_interS_C (const State *BHD,
   /************************************************/
 
   /* FIXME: move allocations out of the loop: */
-  Vec ker_fft, g_fft, dg_fft;
-  DACreateGlobalVector (BHD->dc, &ker_fft);
-  DACreateGlobalVector (BHD->dc, &g_fft);
-  DACreateGlobalVector (BHD->dc, &dg_fft);
+  Vec ker_fft = bgy3d_vec_create (BHD->dc);
+  Vec g_fft = bgy3d_vec_create (BHD->dc);
+  Vec dg_fft = bgy3d_vec_create (BHD->dc);
 
   /*
     FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
@@ -1358,11 +1354,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
     in bgy3d-poisson.c:
   */
   Vec x_lapl[2];                /* real */
+  bgy3d_vec_create1 (BHD->da, 2, x_lapl);
   for (int i = 0; i < 2; i++)
-    {
-      DACreateGlobalVector (BHD.da, &x_lapl[i]);
-      VecSet (x_lapl[i], 0.0);
-    }
+    VecSet (x_lapl[i], 0.0);
 #endif
 
 #ifdef L_BOUNDARY_MG
@@ -1370,30 +1364,30 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   InitializeDMMGSolver(&BHD);
 #endif
 
-  DACreateGlobalVector(BHD.da, &g[0]);
-  DACreateGlobalVector(BHD.da, &g[1]);
-  DACreateGlobalVector(BHD.da, &dgH);
-  DACreateGlobalVector(BHD.da, &dgO);
-  DACreateGlobalVector(BHD.da, &dg_new);
-  DACreateGlobalVector(BHD.da, &dg_new2);
-  DACreateGlobalVector(BHD.da, &work);
+  g[0] = bgy3d_vec_create (BHD.da);
+  g[1] = bgy3d_vec_create (BHD.da);
+  dgH = bgy3d_vec_create (BHD.da);
+  dgO = bgy3d_vec_create (BHD.da);
+  dg_new = bgy3d_vec_create (BHD.da);
+  dg_new2 = bgy3d_vec_create (BHD.da);
+  work = bgy3d_vec_create (BHD.da);
 
-  DACreateGlobalVector(BHD.da, &tH);
-  DACreateGlobalVector(BHD.da, &tO);
+  tH = bgy3d_vec_create (BHD.da);
+  tO = bgy3d_vec_create (BHD.da);
 
-  DACreateGlobalVector(BHD.da, &dg_newH);
-  DACreateGlobalVector(BHD.da, &dg_newO);
+  dg_newH = bgy3d_vec_create (BHD.da);
+  dg_newO = bgy3d_vec_create (BHD.da);
 
-  DACreateGlobalVector(BHD.da, &uc); /* common for all sites */
+  uc = bgy3d_vec_create (BHD.da); /* common for all sites */
 
-  DACreateGlobalVector(BHD.da, &dg_histO);
-  DACreateGlobalVector(BHD.da, &dg_histH);
+  dg_histO = bgy3d_vec_create (BHD.da);
+  dg_histH = bgy3d_vec_create (BHD.da);
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
   Vec g0[2];
   for (int i = 0; i < 2; i++)
-    DACreateGlobalVector (BHD.da, &g0[i]);
+    g0[i] = bgy3d_vec_create (BHD.da);
 
   /* set initial guess*/
   VecSet(dgH,0);
