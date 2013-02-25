@@ -141,7 +141,7 @@ static void newton_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
      SNESSolve()? */
   // SNESGetSolution (snes, &x);
 
-  VecDestroy (r);
+  bgy3d_vec_destroy (&r);
 
   SNESDestroy (snes);
 }
@@ -178,7 +178,7 @@ static void picard_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
       if (norm < norm_tol)
         break;
     }
-  VecDestroy (dx);
+  bgy3d_vec_destroy (&dx);
 }
 
 
@@ -386,15 +386,15 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   bgy3d_vec_save ("g00.bin", t);
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (t); */
-  VecDestroy (v);
-  VecDestroy (c);
-  VecDestroy (c_fft);
-  VecDestroy (t_fft);
+  /* Delegated to the caller: bgy3d_vec_destroy (&t); */
+  bgy3d_vec_destroy (&v);
+  bgy3d_vec_destroy (&c);
+  bgy3d_vec_destroy (&c_fft);
+  bgy3d_vec_destroy (&t_fft);
 
   bgy3d_state_destroy (HD);
 
-  /* Return just one distribution. VecDestroy() it! */
+  /* Return just one distribution. bgy3d_vec_destroy (&) it! */
   g[0][0] = t;
 }
 
@@ -442,15 +442,15 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
   bgy3d_vec_save ("g00.bin", t);
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (t); */
-  VecDestroy (t_fft);
-  VecDestroy (c);
-  VecDestroy (c_fft);
-  VecDestroy (v);
+  /* Delegated to the caller: bgy3d_vec_destroy (&t); */
+  bgy3d_vec_destroy (&t_fft);
+  bgy3d_vec_destroy (&c);
+  bgy3d_vec_destroy (&c_fft);
+  bgy3d_vec_destroy (&v);
 
   bgy3d_state_destroy (HD);
 
-  /* Return just one distribution. VecDestroy() it! */
+  /* Return just one distribution. bgy3d_vec_destroy (&) it! */
   g[0][0] = t;
 }
 #endif
@@ -467,7 +467,7 @@ Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
   Vec g[1][1];
   solvent_solve (PD, newton_solve, g);
 
-  return g[0][0];               /* VecDestroy() it! */
+  return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
 
 
@@ -482,7 +482,7 @@ Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
   Vec g[1][1];
   solvent_solve (PD, picard_solve, g);
 
-  return g[0][0];               /* VecDestroy() it! */
+  return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
 
 
@@ -560,7 +560,7 @@ static void solvent_kernel (State *HD, Vec c_fft)
 
   MatMult (HD->fft_mat, c, c_fft);
 
-  VecDestroy (c);
+  bgy3d_vec_destroy (&c);
 }
 
 
@@ -610,12 +610,12 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   }
 
   /* free stuff */
-  /* Delegated to the caller: VecDestroy (h) */
-  VecDestroy (t);
-  VecDestroy (h_fft);
-  VecDestroy (c_fft);
-  VecDestroy (ch_fft);
-  VecDestroy (v);
+  /* Delegated to the caller: bgy3d_vec_destroy (&h) */
+  bgy3d_vec_destroy (&t);
+  bgy3d_vec_destroy (&h_fft);
+  bgy3d_vec_destroy (&c_fft);
+  bgy3d_vec_destroy (&ch_fft);
+  bgy3d_vec_destroy (&v);
 
   bgy3d_state_destroy (HD);
 
@@ -624,7 +624,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
 
   bgy3d_vec_save ("g0.bin", h);
 
-  /* Just one distribution so far. VecDestroy() it! */
+  /* Just one distribution so far. bgy3d_vec_destroy (&) it! */
   g[0] = h;
 }
 
