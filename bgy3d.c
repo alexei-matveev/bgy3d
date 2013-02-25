@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
+#include "bgy3d-vec.h"          /* bgy3d_vec_destroy() */
 #include "bgy3d-dirichlet.h"    /* bgy3d_laplace_create() */
 
 /* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
@@ -147,15 +148,13 @@ State* bgy3d_state_make (const ProblemData *PD)
 #endif
 
   /* Create global scratch vectors: */
-  FOR_DIM
-    DACreateGlobalVector (BHD->da, &BHD->v[dim]); /* real */
+  bgy3d_vec_create1 (BHD->da, 3, BHD->v); /* real */
 
   /* Complex  vectors for  k-space representations.   These  three are
      used by ComputeFFTfromCoulomb(): */
-  FOR_DIM
-    DACreateGlobalVector (BHD->dc, &BHD->fg2_fft[dim]); /* complex */
+  bgy3d_vec_create1 (BHD->dc, 3, BHD->fg2_fft); /* complex */
 
-  DACreateGlobalVector (BHD->dc, &BHD->fft_scratch); /* complex */
+  BHD->fft_scratch = bgy3d_vec_create (BHD->dc); /* complex */
 
   return BHD;
 }
@@ -164,13 +163,10 @@ void bgy3d_state_destroy (State *BHD)
 {
   MPI_Barrier (PETSC_COMM_WORLD);
 
-  FOR_DIM
-    {
-      VecDestroy (BHD->v[dim]);
-      VecDestroy (BHD->fg2_fft[dim]);
-    }
+  bgy3d_vec_destroy1 (3, BHD->v);
+  bgy3d_vec_destroy1 (3, BHD->fg2_fft);
 
-  VecDestroy (BHD->fft_scratch);
+  bgy3d_vec_destroy (&BHD->fft_scratch);
 
 #ifdef L_BOUNDARY
   assert (BHD->dirichlet_mat != NULL);
