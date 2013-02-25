@@ -1193,11 +1193,8 @@ void RecomputeInitialFFTs (State *BHD,
       }
 
   /* Clean up and exit: */
-  FOR_DIM
-    {
-      bgy3d_vec_destroy (&force_short[dim]);
-      bgy3d_vec_destroy (&force_long[dim]);
-    }
+  bgy3d_vec_destroy1 (3, force_short);
+  bgy3d_vec_destroy1 (3, force_long);
 }
 
 /*
@@ -1624,11 +1621,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       }
     }
 
-  for (int i = 0; i < 2; i++)
-    {
-      bgy3d_vec_destroy (&g[i]);
-      bgy3d_vec_destroy (&g0[i]);
-    }
+  bgy3d_vec_destroy1 (2, g);
+  bgy3d_vec_destroy1 (2, g0);
+
   bgy3d_vec_destroy (&dgH);
   bgy3d_vec_destroy (&dgO);
   bgy3d_vec_destroy (&dg_new);
