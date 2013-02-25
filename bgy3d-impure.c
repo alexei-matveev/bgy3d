@@ -1058,10 +1058,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
     {
       /* Dot-product is an integral over space (up to a factor): */
       const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
-      VecDot (ve, uc_rho, &val2);
-      VecDot (uc, ve_rho, &val3);
-      val2 *= h3;
-      val3 *= h3;
+      val2 = h3 * bgy3d_vec_dot (ve, uc_rho);
+      val3 = h3 * bgy3d_vec_dot (uc, ve_rho);
     }
     bgy3d_vec_destroy (&ve);            /* yes, we do! */
     bgy3d_vec_destroy (&ve_rho);
