@@ -269,19 +269,20 @@ typedef struct Ctx_c
 
 static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 {
-  const ProblemData *PD = ctx->HD->PD;
+  const State *HD = ctx->HD;
+  const ProblemData *PD = HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  MatMult (ctx->HD->fft_mat, c, ctx->c_fft);
+  MatMult (HD->fft_mat, c, ctx->c_fft);
 
   VecScale (ctx->c_fft, h3);
 
   compute_t (rho, ctx->c_fft, ctx->t_fft);
 
-  MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft, ctx->t);
+  MatMultTranspose (HD->fft_mat, ctx->t_fft, ctx->t);
 
   VecScale (ctx->t, 1.0/L/L/L);
 
