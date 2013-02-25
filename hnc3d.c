@@ -112,8 +112,7 @@ static void newton_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
   PCSetType (pc, PCNONE);
 
   /* SNES needs a place to store residual: */
-  Vec r;
-  VecDuplicate (x, &r);
+  Vec r = bgy3d_vec_duplicate (x);
 
   /* SNES functions should obey this interface: */
   PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
@@ -159,8 +158,7 @@ static void picard_solve (const ProblemData *PD, void *ctx, Function F, Vec x)
   const real norm_tol = PD->norm_tol;
 
   /* A place to store residual: */
-  Vec dx;
-  VecDuplicate (x, &dx);
+  Vec dx = bgy3d_vec_duplicate (x);
 
   /* Find an x such that dx as returned by F (ctx, x, dx) is zero: */
   for (int k = 0; k < max_iter; k++)
@@ -583,8 +581,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
   solvent_kernel (HD, c_fft);
 
   /* Create global vectors */
-  Vec h;
-  VecDuplicate (v, &h);
+  Vec h = bgy3d_vec_duplicate (v);
 
   /* Set initial guess */
   compute_h (HD->PD->beta, v, h);
