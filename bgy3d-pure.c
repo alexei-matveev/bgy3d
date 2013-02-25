@@ -1398,9 +1398,9 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
   bgy3d_vec_create2 (BHD->da, m, du);
   bgy3d_vec_create2 (BHD->da, m, t);
 
-  DACreateGlobalVector (BHD->da, &du_new);
-  DACreateGlobalVector (BHD->da, &du_new2);
-  DACreateGlobalVector (BHD->da, &work);
+  du_new = bgy3d_vec_create (BHD->da);
+  du_new2 = bgy3d_vec_create (BHD->da);
+  work = bgy3d_vec_create (BHD->da);
 
 #ifdef L_BOUNDARY
   /*
@@ -1417,8 +1417,8 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 #endif
 
   Vec omega[2][2];
-  DACreateGlobalVector (BHD->dc, &omega[0][1]);
-  DACreateGlobalVector (BHD->dc, &omega[0][0]);
+  omega[0][1] = bgy3d_vec_create (BHD->dc);
+  omega[0][0] = bgy3d_vec_create (BHD->dc);
   omega[1][0] = omega[0][1];
   omega[1][1] = NULL;
   bgy3d_omega (BHD->PD, BHD->dc, r_HO, omega[0][1]);
