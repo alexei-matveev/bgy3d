@@ -14,20 +14,21 @@ endfunction
 function bgy3d_contour (x, y, f, name, path)
   contourf (x, y, f, "linestyle", "none"); ## "levelsep", 0.05)
   title ([path, " ", name]);
-  caxis ([0.0, 2.0]);        # range suitable for distribution functions
+  # caxis ([0.0, 2.0]);        # range suitable for distribution functions
   colorbar ();
 
   ## Append .png to the input path:
-  out = [path, "-", name, ".png"];
+  # out = [path, ".", name, ".png"];
 
   ## This saves the figure in a format derived from the file extension:
-  print (out);
+  # print (out);
 endfunction
 
 function bgy3d_plot (path)
 
   ## Default interval, there is no way to extract it from the vector:
-  interval = [-10.0, 10.0];
+  LENGTH = 10.0;
+  interval = [-LENGTH, LENGTH];
 
   ## Vectors from BGY (arent they in *.m format?):
   vec = load (path);
@@ -43,12 +44,15 @@ function bgy3d_plot (path)
   x = linspace (interval(1), interval(2), N);
 
   ## Contourf plot bgy vectors:
-  figure (1);
-
   ## Cut the yz plane, squeeze(v(x0, 1:y, 1:z)) actually get vx(1:z,
   ## 1:y) at plane x = x0
+  subplot (2, 2, 1);
   bgy3d_contour (x, x, squeeze (vec3d(N/2, :, :)), "yz-plane", path);
+
+  subplot (2, 2, 2);
   bgy3d_contour (x, x, squeeze (vec3d(:, N/2, :)), "xz-plane", path);
+
+  subplot (2, 2, 3);
   bgy3d_contour (x, x, squeeze (vec3d(:, :, N/2)), "xy-plane", path);
 
   ## Now plot 1d projections along x-, y-, and z-axes throuth the middle
@@ -57,11 +61,14 @@ function bgy3d_plot (path)
   yray = squeeze (vec3d(N/2, :, N/2));
   xray = squeeze (vec3d(:, N/2, N/2));
 
+  subplot (2, 2, 4);
   plot (x, xray, "-+;x;", x, yray, "-x;y;", x, zray, "-o;z;");
-  title (path);
+  title ([path, " x-, y-, and z-rays"]);
+  # ylim ([-0.1, 2.5]);            # FIXME: for distribution functions
+  axis ("square");
 
   ## Append .png to the input path:
-  out = [path, ".rays.png"];
+  out = [path, ".png"];
 
   ## This saves the figure in a format derived from the file extension:
   print (out);
