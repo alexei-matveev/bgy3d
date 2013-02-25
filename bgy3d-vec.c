@@ -3,19 +3,94 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
+extern int vebosity;
+
+#define MY_MALLOC_FREE false
+
+/* Shape of the grid: */
+static void da_shape (const DA da, int N[static 3])
+{
+  int dim;
+  DAGetInfo (da, &dim, &N[0], &N[1], &N[2],
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  assert (dim == 3);
+}
+
+
+/* Degrees of freedom, usually 1. For complex vectors -- 2: */
+static int da_dof (const DA da)
+{
+  int n;
+  DAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             &n, NULL, NULL, NULL);
+  return n;
+}
+
+
+/* To create  a new Vec one needs  the local and total  sizes. This is
+   how to get them from the array descriptor: */
+static void da_sizes (const DA da, int *n3, int *N3)
+{
+  /* Get dimensions and other vector properties: */
+  int x[3], n[3];
+  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  /* Get grid dimensions N[3]: */
+  int N[3];
+  da_shape (da, N);
+
+  const int dof = da_dof (da);  /* dof == 2 for complex Vecs */
+
+  *n3 = dof * n[2] * n[1] * n[0];
+  *N3 = dof * N[2] * N[1] * N[0];
+}
+
+
 Vec bgy3d_vec_duplicate (const Vec x)
 {
   Vec y;
-  VecDuplicate (x, &y);
-  // printf ("+<Vec: addr=%p, n=%d, N=%d>\n", y, vec_local_size (y), bgy3d_vec_size (y));
+
+  if (MY_MALLOC_FREE)
+    {
+      /*
+        bgy3d_vec_destroy() cannot distinguish between Vecs created by
+        bgy3d_vec_create()  and   by  bgy3d_vec_duplicate().  It  will
+        attempt to free() the buffer:
+      */
+      int n = vec_local_size (x);
+      int N = bgy3d_vec_size (x);
+      real *buf = malloc (n * sizeof *buf);
+      /* FIXME: interface changed in 3.3! */
+      VecCreateMPIWithArray (PETSC_COMM_WORLD, n, N, buf, &y);
+    }
+  else
+    VecDuplicate (x, &y);
+
+  if (verbosity > 0)
+    printf ("+<Vec: addr=%p, n=%d, N=%d>\n", y, vec_local_size (y), bgy3d_vec_size (y));
+
   return y;
 }
 
 Vec bgy3d_vec_create (const DA da)
 {
   Vec g;
-  DACreateGlobalVector (da, &g);
-  // printf ("+<Vec: addr=%p, n=%d, N=%d>\n", g, vec_local_size (g), bgy3d_vec_size (g));
+
+  if (MY_MALLOC_FREE)
+    {
+      /* We allocate the storage for data ourselves: */
+      int n, N;
+      da_sizes (da, &n, &N);
+      real *buf = malloc (n * sizeof *buf);
+      /* FIXME: changed in 3.3! */
+      VecCreateMPIWithArray (PETSC_COMM_WORLD, n, N, buf, &g);
+    }
+  else
+    DACreateGlobalVector (da, &g);
+
+  if (verbosity > 0)
+    printf ("+<Vec: addr=%p, n=%d, N=%d>\n", g, vec_local_size (g), bgy3d_vec_size (g));
+
   return g;
 }
 
@@ -23,10 +98,22 @@ Vec bgy3d_vec_create (const DA da)
    they take the pointer to a Petsc object and nullify it: */
 void bgy3d_vec_destroy (Vec *g)
 {
-  // printf ("-<Vec: addr=%p, n=%d, N=%d>\n", *g, vec_local_size (*g), bgy3d_vec_size (*g));
+  if (verbosity > 0)
+    printf ("-<Vec: addr=%p, n=%d, N=%d>\n", *g, vec_local_size (*g), bgy3d_vec_size (*g));
+
+  if (MY_MALLOC_FREE)
+    {
+      /* VecDestroy()  will  not free()  the  buffer  if  the Vec  was
+         created by VecCreateMPIWithArray(): */
+      real *buf;
+      VecGetArray (*g, &buf);
+      free (buf);
+    }
+
   VecDestroy (*g); /* FIXME: VecDestroy (g) for Petsc 3.2 and above! */
   *g = NULL;
 }
+
 
 void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
 {
@@ -34,11 +121,13 @@ void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
     g[i] = bgy3d_vec_create (da);
 }
 
+
 void bgy3d_vec_destroy1 (int m, Vec g[m])
 {
   for (int i = 0; i < m; i++)
     bgy3d_vec_destroy (&g[i]);
 }
+
 
 /* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
 void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
@@ -48,19 +137,12 @@ void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
       g[j][i] = g[i][j] = bgy3d_vec_create (da);
 }
 
+
 void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 {
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       bgy3d_vec_destroy (&g[i][j]);
-}
-
-static void shape (const DA da, int *NI, int *NJ, int *NK)
-{
-  int dim;
-  DAGetInfo (da, &dim, NI, NJ, NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-  assert (dim == 3);
 }
 
 
@@ -358,7 +440,7 @@ void bgy3d_vec_moments (const DA da, Vec v,
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
-  shape (da, &N[0], &N[1], &N[2]);
+  da_shape (da, N);
 
   real m0 (real v, int i, int j, int k)
   {
