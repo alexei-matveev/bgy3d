@@ -301,7 +301,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
       distribution. The  FFTW MPI distributes the  work/data among the
       workers along the leading dimension:
     */
-    int l0[1], l1[1], l2[np]; /* sum (l2[:]) == N[0] */
+    int l0[1], l1[1], l2[np]; /* sum (l2[:]) == N[2] */
 
     /* Collect  the  info  about  the  local  shares  of  the  leading
        dimension from all workers: */
