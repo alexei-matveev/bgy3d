@@ -384,10 +384,7 @@ static SCM vec_ref (SCM vec, SCM ix)
 
 static SCM vec_dot (SCM x, SCM y)
 {
-  double dot;
-  VecDot (to_vec (x), to_vec (y), &dot);
-
-  return scm_from_double (dot);
+  return scm_from_double (bgy3d_vec_dot (to_vec (x), to_vec (y)));
 }
 
 static SCM vec_fft (SCM state, SCM x)
