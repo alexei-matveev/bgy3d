@@ -9,8 +9,8 @@ BGY-FLAGS = \
 	--N 32 \
 	--rho 0.018 \
 	--beta 1.1989 \
-	--norm-tol 1.0e-2 \
-	--max-iter 320 \
+	--norm-tol 1.0e-7 \
+	--max-iter 1000 \
 	--L 10.0 \
 	--damp-start 1.0 \
 	--lambda 0.02
