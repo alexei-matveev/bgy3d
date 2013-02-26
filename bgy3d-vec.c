@@ -3,7 +3,6 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
-extern int vebosity;
 
 #define MY_MALLOC_FREE false
 
