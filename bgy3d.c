@@ -117,10 +117,6 @@ ProblemData bgy3d_problem_data (void)
     PD.zpad = maxL;
     bgy3d_getopt_real ("--zpad", &PD.zpad);
 
-    /* Parallel staff: */
-    MPI_Comm_size(PETSC_COMM_WORLD, &PD.np);
-    MPI_Comm_rank(PETSC_COMM_WORLD, &PD.id);
-
     return PD;
 }
 

@@ -132,10 +132,6 @@ typedef struct ProblemData
   real rho;                     /* solvent density */
   int N[3], N3;                 /* global Grid size */
 
-  /* Parallel stuff */
-  int id;                       /* id of this process */
-  int np;                       /* number of processes */
-
   /* Other staff that was retrieved by the solvers themselves from the
      (Petsc) environment: */
   real lambda;                  /* Mixing parameter. */
