@@ -497,56 +497,120 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
-/*
-  Apply boundary conditions (or other constraints), perform mixing and
-  update g[].
-
-  Mix du and du_new with a fixed ratio "a":
-
-    du' = a * du_out + (1 - a) * du
-    norm = |du_out - du|
-
-  Now that du[] has been  computed using g[] of the previous iteration
-  one can safely update g[].  Compute g := exp[-(u0 + du)].
-
-  Vec du_out[]  and x_lapl[] are  intent(inout) here. Try  to preserve
-  the  values  of x_lapl[]  across  iterations  to  save time  in  the
-  iterative solver.  Vec work is a work array.
-*/
-static void compute_g (const State *BHD,
-                       int m, Vec g[m], Vec u0[m], Vec du[m], Vec du_out[m],
-                       real a,
-                       real du_norm[m],
-                       Vec x_lapl[m],
-                       Vec work)
+static void iterate (State *BHD,
+                     int m,
+                     const Site solvent[m],
+                     const real rhos[m],
+                     Vec ker_fft[m][m], /* in */
+                     Vec omega[m][m],   /* in */
+                     Vec u0[m],         /* in */
+                     Vec uc,            /* in */
+                     Vec u[m],          /* in */
+                     Vec x_lapl[m],     /* inout */
+                     Vec g[m],          /* out */
+                     Vec g_fft[m],      /* work */
+                     Vec du_acc_fft,    /* work */
+                     Vec work,          /* work */
+                     Vec du[m])         /* out */
 {
-  /*
-    Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
-    preserve the values of  x_lapl[] across iterations to save
-    time in the iterative solver.
-  */
+  /* Some functions,  such as bgy3d_nssa_intra_log()  use preallocated
+     complex Vecs in State BHD for work. */
+
+  const ProblemData *PD = BHD->PD;
+  const real beta = PD->beta;
+
+  /* Apply  boundary  conditions  (or  other constraints)  and  update
+     g[]. Intent(out) Vec du[] can be used as work arrays:XS */
   for (int i = 0; i < m; i++)
-    bgy3d_impose_laplace_boundary (BHD, du_out[i], x_lapl[i]);
+    {
+      /*
+        Add  Coulomb  field  uc  scaled  by the  site  charge  to  the
+        accumulator.   Beware that the  original code  is erroneousely
+        missing the inverse temperature beta in this expression:
+      */
+      VecWAXPY (du[i], beta * solvent[i].charge, uc, u0[i]);
 
-  /*
-    Mix du and du_new with a fixed ratio "a":
+      VecAXPY (du[i], 1.0, u[i]);
+      /*
+        See  pp.  116-177  in  thesis: boundary  conditions (5.107)  -
+        (5.110): first impose  boundary condition then solve laplacian
+        equation and substrate from u0.   State BHD is not modified by
+        these calls.
 
-    du' = a * du_out + (1 - a) * du
-    norm = |du_out - du|
+        Vec du[] and x_lapl[]  are intent(inout) here. Try to preserve
+        the values of  x_lapl[] across iterations to save  time in the
+        iterative solver.
+      */
+      bgy3d_impose_laplace_boundary (BHD, du[i], x_lapl[i]);
+    }
 
-    last arg is a temp
-  */
+  real pure f (real u)
+  {
+    return exp (-u);
+  }
+
   for (int i = 0; i < m; i++)
-    du_norm[i] = bgy3d_vec_mix (du[i], du_out[i], a, work);
+    bgy3d_vec_map1 (g[i], f, du[i]);
 
-  /*
-    Now that du[] has been  computed using g[] of the previous
-    iteration  one  can  safely  update  g[].   Compute  g  :=
-    exp[-(u0 + du)], with a sanity check:
-  */
+  /* Compute FFT of g[] for all sites: */
   for (int i = 0; i < m; i++)
-    bgy3d_compute_g (g[i], u0[i], du[i]);
+    MatMult (BHD->fft_mat, g[i], g_fft[i]);
+
+  /* for H, O in that order ... */
+  for (int i = 0; i < m; i++)
+    {
+      /*
+        ... sum  over H, O in  that order.  LJ, short-  and long range
+        Coulomb, and a so called  strange addition is accounted for in
+        the kernel.  First clear accumulator:
+      */
+      VecSet (du_acc_fft, 0.0);
+
+      for (int j = 0; j < m; j++) /* This increments the accumulator: */
+        apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * rhos[j],
+               du_acc_fft); /* incremented! */
+
+      /*
+        Compute  IFFT  of  du_acc_fft  for  the  current  site.  Other
+        contributions are added to the real space du_acc below:
+      */
+      MatMultTranspose (BHD->fft_mat, du_acc_fft, du[i]);
+
+      /*
+        In  the following the  sum is  over all  sites j  /= i.  It is
+        supposed to account  for intra-molecular site-site correlation
+        of   the  solvent  sites   due  to   the  rigid   bonds.   See
+        e.g. Eq. (4.114), Jager Diss:
+      */
+      for (int j = 0; j < m; j++)
+        {
+          if (j == i) continue;
+          /*
+            Compute  intramolecular contribution  due to  j /=  i.  So
+            called  log-term, see  e.g.  Eqs.   (4.107),  (4.109), and
+            (4.114).  Implies that the  two sites  belong to  the same
+            species.  This  body is  executed exactly once  for 2-site
+            models.  Vec   work  is  intent  (out)  to   be  added  to
+            accumulator later:
+          */
+          bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
+
+          /* Add the contribution of site j /= i to du[i]: */
+          VecAXPY (du[i], 1.0, work);
+
+          /*
+            FIXME:  the  code  for   pure  solvent  adds  a  so-called
+            "numerically  challenging"  term  due  to  intra-molecular
+            correlations too.  There seem to be  no corresponding term
+            in this code.
+          */
+        }
+
+      // VecAXPY (du[i], 1.0, u0[i]);
+      VecAXPY (du[i], -1.0, u[i]);
+    } /* over sites i */
 }
+
 
 /*
   This function is the main entry  point for the BGY3dM equation for a
@@ -700,9 +764,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
      have to destroy them: */
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
-  Vec du[m], du_out[m];    /* in- and output of the BGY3D iteration */
-  bgy3d_vec_create1 (BHD->da, m, du);     /* real */
-  bgy3d_vec_create1 (BHD->da, m, du_out); /* real */
+  Vec u[m], du[m];         /* in- and output of the BGY3D iteration */
+  bgy3d_vec_create1 (BHD->da, m, u);  /* real */
+  bgy3d_vec_create1 (BHD->da, m, du); /* real */
 
   /*
     There is no  point to transform each contribution  computed in the
@@ -747,23 +811,13 @@ void bgy3d_solute_solve (const ProblemData *PD,
       VecScale (uc, damp);
       VecScale (uc_rho, damp);
 
+      /*
+        Historically short-range potential is scaled by the Uinverse
+        temperature and the code operates with u(x) = βv(x) insead of
+        potential itself at many places:
+      */
       for (int i = 0; i < m; i++)
-        {
-          /*
-            Historically  short-range  potential   is  scaled  by  the
-            inverse  temperature and  the  code operates  with u(x)  =
-            βv(x) insead of potential itself at many places:
-          */
-          VecScale (u0[i], beta);
-
-          /*
-            See pp.  116-177 in  thesis: boundary conditions (5.107) -
-            (5.110):  first  impose   boundary  condition  then  solve
-            laplacian equation  and substrate  from u0.  State  BHD is
-            not modified by these calls.
-          */
-          bgy3d_impose_laplace_boundary (BHD, u0[i], x_lapl[i]);
-        }
+        VecScale (u0[i], beta);
 
       /*
         Set initial guess, either here or by reading from file. At the
@@ -771,14 +825,10 @@ void bgy3d_solute_solve (const ProblemData *PD,
         next iteration we will read an updated version:
       */
       if (bgy3d_getopt_test ("--load-guess"))
-        bgy3d_vec_read1 ("du%d.bin", m, du);
+        bgy3d_vec_read1 ("u%d.bin", m, u);
       else
         for (int i = 0; i < m; i++)
-          VecSet (du[i], 0.0);
-
-      /* g :=  exp[-(u0 + du)] = g0 * exp(-du) */
-      for (int i = 0; i < m; i++)
-        bgy3d_compute_g (g[i], u0[i], du[i]);
+          VecSet (u[i], 0.0);
 
       /* Not sure if 0.0 as inital value is right. */
       real du_norm_old[m];
@@ -803,91 +853,29 @@ void bgy3d_solute_solve (const ProblemData *PD,
              one time: */
           const real a = (iter % nth == 0) ? a1 : a0;
 
-          /* Some   functions,  such  as   bgy3d_nssa_intra_log()  use
-             preallocated complex Vecs in State BHD for work. */
+          iterate (BHD,
+                   m,
+                   solvent,     /* in */
+                   rhos,        /* in */
+                   ker_fft,     /* in */
+                   omega,       /* in */
+                   u0,          /* in */
+                   uc,          /* in */
+                   u,           /* in <- here */
+                   x_lapl,      /* inout */
+                   g,           /* out */
+                   g_fft,       /* out */
+                   du_acc_fft,  /* work */
+                   work,        /* work */
+                   du);         /* out <- here */
 
-          /* Compute FFT of g[] for all sites: */
+          /* norm = |du| */
           for (int i = 0; i < m; i++)
-            MatMult (BHD->fft_mat, g[i], g_fft[i]);
+            du_norm[i] = bgy3d_vec_norm (du[i]);
 
-          /* for H, O in that order ... */
+          /* Mix u and u + du with a fixed ratio "a" */
           for (int i = 0; i < m; i++)
-            {
-              /*
-                ... sum over H, O  in that order.  LJ, short- and long
-                range  Coulomb, and  a so  called strange  addition is
-                accounted for in the kernel.  First clear accumulator:
-              */
-              VecSet (du_acc_fft, 0.0);
-
-              for (int j = 0; j < m; j++) /* This increments the accumulator: */
-                apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * rhos[j],
-                       du_acc_fft); /* incremented! */
-
-              /*
-                Compute IFFT of du_acc_fft for the current site. Other
-                contributions  are  added  to  the real  space  du_acc
-                below:
-              */
-              MatMultTranspose (BHD->fft_mat, du_acc_fft, du_out[i]);
-
-              /*
-                In the following the sum is  over all sites j /= i. It
-                is supposed  to account for  intra-molecular site-site
-                correlation  of the  solvent  sites due  to the  rigid
-                bonds.  See e.g. Eq. (4.114), Jager Diss:
-              */
-              for (int j = 0; j < m; j++)
-                {
-                  if (j == i) continue;
-                  /*
-                    Compute intramolecular contribution due to j /= i.
-                    So  called  log-term,  see  e.g.   Eqs.   (4.107),
-                    (4.109), and  (4.114). Implies that  the two sites
-                    belong to the same species.  This body is executed
-                    exactly once for 2-site models. Vec work is intent
-                    (out) to be added to accumulator later:
-                  */
-                  bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
-
-                  /* Add the contribution of site j /= i to du[i]: */
-                  VecAXPY (du_out[i], 1.0, work);
-
-                  /*
-                    FIXME: the code for  pure solvent adds a so-called
-                    "numerically    challenging"     term    due    to
-                    intra-molecular correlations too. There seem to be
-                    no corresponding term in this code.
-                  */
-                }
-
-              /*
-                Add Coulomb field uc scaled  by the site charge to the
-                accumulator.   Beware   that  the  original   code  is
-                erroneousely missing  the inverse temperature  beta in
-                this expression:
-              */
-              VecAXPY (du_out[i], beta * solvent[i].charge, uc);
-            } /* over sites i */
-
-          /*
-            Apply boundary conditions  (or other constraints), perform
-            mixing and update g[].
-
-            Mix du and du_new with a fixed ratio "a":
-
-              du' = a * du_out + (1 - a) * du
-              norm = |du_out - du|
-
-            Now that du[] has been  computed using g[] of the previous
-            iteration  one  can  safely  update  g[].   Compute  g  :=
-            exp[-(u0 + du)].
-
-            Vec du_out[]  and x_lapl[] are intent(inout)  here. Try to
-            preserve the values of  x_lapl[] across iterations to save
-            time in the iterative solver.  Vec work is a work array.
-          */
-          compute_g (BHD, m, g, u0, du, du_out, a, du_norm, x_lapl, work);
+            VecAXPY (u[i], a, du[i]);
 
           /* Fancy step  size control. FIXME: weired  logic. Code used
              to check if *any* of the norms went up: */
@@ -963,7 +951,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
       /* Save du to binary file. FIXME: Why du and not g? */
       if (bgy3d_getopt_test ("--save-guess"))
-        bgy3d_vec_save1 ("du%d.bin", m, du);
+        bgy3d_vec_save1 ("u%d.bin", m, u);
 
     } /* for (damp = ... ) */
 
@@ -1072,8 +1060,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
   bgy3d_vec_destroy1 (m, u0);
+  bgy3d_vec_destroy1 (m, u);
   bgy3d_vec_destroy1 (m, du);
-  bgy3d_vec_destroy1 (m, du_out);
   bgy3d_vec_destroy1 (m, g_fft);
   bgy3d_vec_destroy1 (m, x_lapl);
 
