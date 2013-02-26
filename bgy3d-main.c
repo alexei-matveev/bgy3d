@@ -77,7 +77,11 @@ int main (int argc, char **argv)
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_SELF, PETSC_VIEWER_ASCII_MATLAB);
   /*==================================*/
 
-  PetscPrintf(PETSC_COMM_WORLD, "NP= %d\n", PD.np);
+  {
+    int np;
+    MPI_Comm_size (PETSC_COMM_WORLD, &np);
+    PetscPrintf (PETSC_COMM_WORLD, "NP= %d\n", np);
+  }
   PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n", PD.N[0], PD.N[1], PD.N[2]);
   PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n", PD.N3);
   PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD.interval[0], PD.interval[1]);
