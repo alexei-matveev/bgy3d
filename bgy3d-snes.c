@@ -107,3 +107,100 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, Function F, Vec x)
     }
   bgy3d_vec_destroy (&dx);
 }
+
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx, Function F, Vec x)
+{
+  /* Mixing parameter */
+  const real lambda = PD->lambda;
+
+  /* Number of total iterations */
+  const int max_iter = PD->max_iter;
+
+  /* Convergence threshold: */
+  const real norm_tol = PD->norm_tol;
+
+  /* A place to store residual: */
+  Vec dx = bgy3d_vec_duplicate (x);
+
+  /* Not sure if 0.0 as inital value is right. */
+  real norm_old = 0.0;
+
+  /* Find an x such that dx as returned by F (ctx, x, dx) is zero: */
+  const real a0 = lambda;
+  real a1 = lambda;             /* loop-local variable */
+  for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
+    {
+      /* Calculate residual: */
+      F (ctx, x, dx);
+
+      const real norm = bgy3d_vec_norm (dx);
+
+      /*
+        Most  of  the  logic  below  is  to  control  how  the  mixing
+        coefficient  "a" changes  from interation  to  iterations also
+        dependign on the behaviour of the residual norm.
+      */
+      const int nth = 10;
+      /*
+        "a  = a1"  is taken  in  iteration 0,  10, 20,  etc.  "a1"  is
+        modified during the loop.
+
+        "a = a0" is taken in iterations 1-9, 11-19, etc.  "a0" remains
+        unchanged during the loop.
+
+        Note that in the first iteration a1 == a0.
+      */
+
+      /* Every nth  iteration, raise the mixing  coefficients just one
+         time: */
+      const real a = (iter % nth == 0) ? a1 : a0;
+
+      /* Simple mixing: x = a * x + (1 - a) * x_old */
+      VecAXPY (x, a, dx);
+
+      /* Fancy step  size control. FIXME:  weired logic. Code  used to
+         check if the norm went up: */
+      const bool up = norm > norm_old;
+
+      /* That was the only place comparing to norm_old: */
+      norm_old = norm;
+
+      mycount++;
+
+      if (iter % nth != 1 && up) /* not in the nth + 1 iteration */
+        upwards = 1;
+      else if (iter > 2 * nth && iter % nth == 1 && upwards == 0 && up)
+        {
+          /* In the  nth + 1 iteration,  if the norm  went up decrease
+             the mixing: */
+          a1 = MAX (a1 / 2.0, a0);
+          mycount = 0;
+        }
+      else
+        upwards = 0;
+
+      /* Scale the coefficient  "a1" up by a factor,  but make sure it
+         is not above 1.0. Reset mycount. */
+      if (mycount > 2 * nth)
+        {
+          a1 = MIN (a1 * 2.0, 1.0);
+          mycount = 0;
+        }
+      /* otherwise leave "a1" and "mycount" unchanged */
+
+      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f",
+                   iter + 1, norm, a);
+      PetscPrintf (PETSC_COMM_WORLD, " count=%3d upwards=%1d", mycount, upwards);
+      PetscPrintf (PETSC_COMM_WORLD, "\n");
+
+      /* Exit when residual norm does not exceed norm_tol: */
+      if (norm <= norm_tol)
+        {
+          PetscPrintf (PETSC_COMM_WORLD,
+                       "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+                       norm, norm_tol, iter + 1, max_iter);
+          break;
+        }
+    } /* for (iter = ... ) */
+  bgy3d_vec_destroy (&dx);
+}

@@ -16,9 +16,10 @@ typedef void (*Function) (void *ctx, Vec x, Vec r);
 typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
 
 /*
-  Two solvers  for F(x) = 0  taking a Function  its execution context,
-  initial guess  and some user input  eventually affecting convergence
+  A few solvers for F(x) = 0 taking a Function, its execution context,
+  initial guess, and some  user input eventually affecting convergence
   criteria:
 */
 void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x);
 void bgy3d_snes_picard (const ProblemData *PD, void *ctx, Function F, Vec x);
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx, Function F, Vec x);
