@@ -135,6 +135,65 @@ void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 }
 
 
+void bgy3d_vec_aliases_create (Vec gs, int m, Vec g[m])
+{
+  /*
+    The  length  of  Vec gs  should  be  divisible  by m.   Though  in
+    principle any Vec gs satisfying this should be accepted, this code
+    is  only used  for  Vecs created  by bgy3d_vec_pack_create(),  see
+    below:
+  */
+  const int mn = vec_local_size (gs);
+  const int n = mn / m;
+  assert (m * n == mn);
+
+  /* Enough space for m Vecs: */
+  real *buf = vec_get_array (gs);
+
+  /* Create m Vecs with the storage from buf: */
+  for (int i = 0; i < m; i++)
+    g[i] = vec_from_array (n, buf + i * n);
+}
+
+
+/*
+  This  function should  not  attempt  to free()  the  storage of  the
+  aliases.   It  is   owned  by   another  longer   Vec.    FIXME:  If
+  MY_MALLOC_FREE    is   always    false   one    could    have   used
+  bgy3d_vec_destroy()  instead relying  on the  magic  of VecDestroy()
+  that alone knows how a Vec was created.
+*/
+void bgy3d_vec_aliases_destroy (int m, Vec g[m])
+{
+  for (int i = 0; i < m; i++)
+    {
+      VecDestroy (g[i]);        /* should not free() */
+      g[i] = NULL;
+    }
+}
+
+
+/* Create  a   vector  m-times   longer  that  the   array  descriptor
+   specification. See bgy3d_vec_alias_create(): */
+Vec bgy3d_vec_pack_create (const DA da, int m)
+{
+  /* Allocate space for m Vecs: */
+  const int mn = m * da_local_size (da);
+
+  return vec_from_array (mn, malloc (mn * sizeof (real)));
+}
+
+
+/* VecDestroy() will  not free the storage  if it was  provided by the
+   user. We do it ourselves: */
+void bgy3d_vec_pack_destroy (Vec *x)
+{
+  free (vec_get_array (*x));    /* free() the whole */
+  VecDestroy (*x);              /* should not free() */
+  *x = NULL;
+}
+
+
 /*
   Does the mixing:
 
