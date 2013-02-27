@@ -305,6 +305,9 @@ void bgy3d_pair (State *BHD,
 
 static void RecomputeInitialData (State *BHD,
                                   int m, const Site solvent[m],
+                                  Vec f[m][m][3], Vec f_l[m][m][3],
+                                  Vec u_ini[m][m], Vec c2[m][m],
+                                  Vec u2[m][m], Vec u2_fft[m][m],
                                   real damp, real damp_LJ)
 {
   PetscPrintf (PETSC_COMM_WORLD,
@@ -321,18 +324,18 @@ static void RecomputeInitialData (State *BHD,
           into BHD->F temporarily:
         */
         bgy3d_pair (BHD, solvent[i], solvent[j],
-                    BHD->F[i][j], BHD->F_l[i][j],
-                    BHD->u_ini[i][j], BHD->c2[i][j],
-                    BHD->u2[i][j], BHD->u2_fft[i][j],
+                    f[i][j], f_l[i][j],
+                    u_ini[i][j], c2[i][j],
+                    u2[i][j], u2_fft[i][j],
                     damp, damp_LJ);
 
         /* Was previousely done in pair(): */
-        VecScale (BHD->u_ini[i][j], BHD->PD->beta);
+        VecScale (u_ini[i][j], BHD->PD->beta);
 
         /* BHD->F[][]  is a  total force,  apparently.  Long  range is
            stored also separately: */
         FOR_DIM
-          VecAXPY (BHD->F[i][j][dim], 1.0, BHD->F_l[i][j][dim]);
+          VecAXPY (f[i][j][dim], 1.0, f_l[i][j][dim]);
 
       }
 }
@@ -1043,7 +1046,11 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
-      RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialData (BHD, m, solvent,
+                            BHD->F, BHD->F_l,
+                            BHD->u_ini, BHD->c2,
+                            BHD->u2, BHD->u2_fft,
+                            (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       /*
@@ -1442,7 +1449,11 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
   for (real damp = damp_start; damp <= damp_start; damp += 0.1)
     {
-      RecomputeInitialData (BHD, m, solvent, (damp > 0.0 ? damp : 0.0), 1.0);
+      RecomputeInitialData (BHD, m, solvent,
+                            BHD->F, BHD->F_l,
+                            BHD->u_ini, BHD->c2,
+                            BHD->u2, BHD->u2_fft,
+                            (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
       bgy3d_impose_laplace_boundary (BHD, u0[0][0], x_lapl[0][0]);
