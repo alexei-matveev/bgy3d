@@ -767,10 +767,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
      have to destroy them: */
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
-  Vec u[m], du[m];         /* in- and output of the BGY3D iteration */
-  bgy3d_vec_create1 (BHD->da, m, u);  /* real */
-  bgy3d_vec_create1 (BHD->da, m, du); /* real */
-
   /*
     There is no  point to transform each contribution  computed in the
     momentum space back, accumulate them on the k-grid in this complex
@@ -793,6 +789,18 @@ void bgy3d_solute_solve (const ProblemData *PD,
   */
   Vec u0[m];                    /* real */
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
+
+  /*
+    For primary  variable there are two  ways to access  the data: via
+    the long Vec and m shorter  Vecs aliased to the subsections of the
+    longer one.
+  */
+  Vec us = bgy3d_vec_pack_create (BHD->da, m);  /* long Vec */
+  Vec dus = bgy3d_vec_pack_create (BHD->da, m); /* long Vec */
+
+  Vec u[m], du[m];         /* in- and output of the BGY3D iteration */
+  bgy3d_vec_aliases_create (us, m, u);   /* aliases to subsections */
+  bgy3d_vec_aliases_create (dus, m, du); /* aliases to subsections */
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -1059,12 +1067,13 @@ void bgy3d_solute_solve (const ProblemData *PD,
   }
 
   /* Clean up and exit ... */
-  bgy3d_vec_destroy (&du_acc_fft);
+  bgy3d_vec_aliases_destroy (m, u);
+  bgy3d_vec_aliases_destroy (m, du);
 
-  /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
+  bgy3d_vec_pack_destroy (&us);  /* not bgy3d_vec_destroy()! */
+  bgy3d_vec_pack_destroy (&dus); /* not bgy3d_vec_destroy()! */
+
   bgy3d_vec_destroy1 (m, u0);
-  bgy3d_vec_destroy1 (m, u);
-  bgy3d_vec_destroy1 (m, du);
   bgy3d_vec_destroy1 (m, g_fft);
   bgy3d_vec_destroy1 (m, x_lapl);
 
@@ -1072,6 +1081,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, g2);
   bgy3d_vec_destroy2 (m, ker_fft);
 
+  bgy3d_vec_destroy (&du_acc_fft);
   bgy3d_vec_destroy (&work);
   bgy3d_vec_destroy (&uc);
   bgy3d_vec_destroy (&uc_rho);
@@ -1079,6 +1089,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&omega[i][j]);
+
+  /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
 
   bgy3d_state_destroy (BHD);
 }
