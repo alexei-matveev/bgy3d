@@ -79,6 +79,7 @@ libbgy3d.a = \
 	bgy3d-getopt.o \
 	bgy3d-poisson.o \
 	bgy3d-dirichlet.o \
+	bgy3d-snes.o \
 	bgy3d-vec.o \
 	bgy3d-fft.o \
 	bgy3d-fftw3.o \
