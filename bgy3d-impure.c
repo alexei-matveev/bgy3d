@@ -520,22 +520,24 @@ static void iterate (State *BHD,
   const real beta = PD->beta;
 
   /* Apply  boundary  conditions  (or  other constraints)  and  update
-     g[]. Intent(out) Vec du[] can be used as work arrays:XS */
+     g[]. Intent(out) Vec du[] can be used as work arrays: */
   for (int i = 0; i < m; i++)
     {
       /*
-        Add  Coulomb  field  uc  scaled  by the  site  charge  to  the
+        Set  accumulator to  the  sum of  short-range  field u0[]  and
+        long-range Coulomb field  uc scaled by the site  charge to the
         accumulator.   Beware that the  original code  is erroneousely
         missing the inverse temperature beta in this expression:
       */
       VecWAXPY (du[i], beta * solvent[i].charge, uc, u0[i]);
 
       VecAXPY (du[i], 1.0, u[i]);
+
       /*
         See  pp.  116-177  in  thesis: boundary  conditions (5.107)  -
         (5.110): first impose  boundary condition then solve laplacian
-        equation and substrate from u0.   State BHD is not modified by
-        these calls.
+        equation  and  subtract from  the  field.   State  BHD is  not
+        modified by these calls.
 
         Vec du[] and x_lapl[]  are intent(inout) here. Try to preserve
         the values of  x_lapl[] across iterations to save  time in the
@@ -606,7 +608,8 @@ static void iterate (State *BHD,
           */
         }
 
-      // VecAXPY (du[i], 1.0, u0[i]);
+      /* By convention,  we return the  increment, not the new  u[] so
+         that at convergence the result vanishes: */
       VecAXPY (du[i], -1.0, u[i]);
     } /* over sites i */
 }
