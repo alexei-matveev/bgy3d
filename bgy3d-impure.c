@@ -78,6 +78,7 @@
 #include "bgy3d-dirichlet.h"    /* Laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
+#include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
 #include "bgy3d-impure.h"
 
 #ifndef L_BOUNDARY_MG
@@ -615,6 +616,61 @@ static void iterate (State *BHD,
 }
 
 
+typedef struct Ctx
+{
+  State *BHD;
+  int m;
+  const Site *solvent;          /* [m] */
+  real *rhos;                   /* [m] */
+  Vec *ker_fft;                 /* [m][m] */
+  Vec *omega;                   /* [m][m] */
+  Vec *u0;                      /* [m] */
+  Vec uc;                       /*  */
+  Vec *x_lapl;                  /* [m] */
+  Vec *g;                       /* [m] */
+  Vec *g_fft;                   /* [m] */
+  Vec du_acc_fft;               /* work */
+  Vec work;                     /* work */
+} Ctx;
+
+
+static void iterate_u (Ctx *s, Vec us, Vec dus)
+{
+  const int m = s->m;           /* number of solvent sites */
+
+  /* Compiler expects us to pass [m][m] arrays to iterate(): */
+  Vec (*ker_fft)[m] = (void*) s->ker_fft;
+  Vec (*omega)[m] = (void*) s->omega;
+
+  /* Establish  aliases to  the subsections  of  the long  Vec us  and
+     dus */
+  Vec u[m], du[m];
+  bgy3d_vec_aliases_create (us, m, u);
+  bgy3d_vec_aliases_create (dus, m, du);
+
+  /* Iterate u[] -> du[]: */
+  iterate (s->BHD,              /*  1 in */
+           s->m,                /*  2 in */
+           s->solvent,          /*  3 in */
+           s->rhos,             /*  4 in */
+           ker_fft,             /*  5 in */
+           omega,               /*  6 in */
+           s->u0,               /*  7 in */
+           s->uc,               /*  8 in */
+           u,                   /*  9 in <- here */
+           s->x_lapl,           /* 10 inout */
+           s->g,                /* 11 out */
+           s->g_fft,            /* 12 work */
+           s->du_acc_fft,       /* 13 work */
+           s->work,             /* 14 work */
+           du);                 /* 15 out <- here */
+
+  /* This  destroys the  aliases, but  does  not free  the memory,  of
+     course. The actuall data is owned by Vec us and Vec dus: */
+  bgy3d_vec_aliases_destroy (m, u);
+  bgy3d_vec_aliases_destroy (m, du);
+}
+
 /*
   This function is the main entry  point for the BGY3dM equation for a
   m-site solvent and an arbitrary solute.  The vectors in
@@ -642,7 +698,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
 
-  PetscScalar du_norm[m];
   int namecount = 0;
 
   PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (%d-site) equation ...\n", m);
@@ -705,22 +760,11 @@ void bgy3d_solute_solve (const ProblemData *PD,
    * Extract BGY3d specific things from supplied input:
    */
 
-  /* Mixing parameter: */
-  const real a0 = PD->lambda;
-
   /* Initial damping factor: */
   const real damp_start = PD->damp;
 
-  /* Number of total iterations */
-  const int max_iter = PD->max_iter;
-
-  /* norm_tol for convergence test */
-  const real norm_tol = PD->norm_tol;
-
   /* Inverse temperature: */
   const real beta = PD->beta;
-
-  PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
 #ifdef L_BOUNDARY
   /*
@@ -841,116 +885,43 @@ void bgy3d_solute_solve (const ProblemData *PD,
         for (int i = 0; i < m; i++)
           VecSet (u[i], 0.0);
 
-      /* Not sure if 0.0 as inital value is right. */
-      real du_norm_old[m];
-      for (int i = 0; i < m; i++)
-        du_norm_old[i] = 0.0;
-
-      real a1 = a0;             /* loop-local variable */
-      for (int iter = 0, mycount = 0, upwards = 0; iter < max_iter; iter++)
-        {
-          const int nth = 10;
-          /*
-            "a =  a1" is taken in  iteration 0, 10, 20,  etc.  "a1" is
-            modified during the loop.
-
-            "a =  a0" is  taken in iterations  1-9, 11-19,  etc.  "a0"
-            remains unchanged during the loop.
-
-            Note that in the first iteration a1 == a0.
-          */
-
-          /* Every nth  iteration, raise the  mixing coefficients just
-             one time: */
-          const real a = (iter % nth == 0) ? a1 : a0;
-
-          iterate (BHD,
-                   m,
-                   solvent,     /* in */
-                   rhos,        /* in */
-                   ker_fft,     /* in */
-                   omega,       /* in */
-                   u0,          /* in */
-                   uc,          /* in */
-                   u,           /* in <- here */
-                   x_lapl,      /* inout */
-                   g,           /* out */
-                   g_fft,       /* out */
-                   du_acc_fft,  /* work */
-                   work,        /* work */
-                   du);         /* out <- here */
-
-          /* norm = |du| */
-          for (int i = 0; i < m; i++)
-            du_norm[i] = bgy3d_vec_norm (du[i]);
-
-          /* Mix u and u + du with a fixed ratio "a" */
-          for (int i = 0; i < m; i++)
-            VecAXPY (u[i], a, du[i]);
-
-          /* Fancy step  size control. FIXME: weired  logic. Code used
-             to check if *any* of the norms went up: */
-          bool up;
+      {
+        /*
+          Work area for iterate_u().   Enclosing block is to make sure
+          Ctx ctx is  only used by iterate_u() and  noone else. Though
+          beware that the assignments  below just add other references
+          to the local variables accessible by their name too.
+        */
+        Ctx ctx =
           {
-            real diff[m];
-            for (int i = 0; i < m; i++)
-              diff[i] = du_norm[i] - du_norm_old[i];
-            up = maxval (m, diff) > 0.0;
-          }
+            .BHD = BHD,                 /* in, mostly */
+            .m = m,                     /* in */
+            .solvent = solvent,         /* in */
+            .rhos = rhos,               /* in */
+            .ker_fft = (void*) ker_fft, /* in */
+            .omega = (void*) omega,     /* in */
+            .u0 = u0,                   /* in */
+            .uc = uc,                   /* in */
+            .x_lapl = x_lapl,           /* inout */
+            .g = g,                     /* out */
+            .g_fft = g_fft,             /* work */
+            .du_acc_fft = du_acc_fft,   /* work */
+            .work = work,               /* work */
+          };
 
-          /* That was the only place comparing to du_norm_old[]: */
-          for (int i = 0; i < m; i++)
-            du_norm_old[i] = du_norm[i];
+        /*
+          Find such a u that du as returned by iterate_u (&ctx, u, du)
+          is zero. Cast  is there to silence the  mismatch in the type
+          of  first   pointer  argument:  Ctx*  vs.    void*.   A  few
+          alternative solvers  can be used here,  approximately in the
+          order of sophistication (not preformace!):
 
-          mycount++;
-
-          if (iter % nth != 1 && up) /* not in the nth + 1 iteration */
-            upwards = 1;
-          else if (iter > 2 * nth && iter % nth == 1 && upwards == 0 && up)
-            {
-              /* In  the  nth +  1  iteration,  if  the norm  went  up
-                 decrease the mixing: */
-              a1 = MAX (a1 / 2.0, a0);
-              mycount = 0;
-            }
-          else
-            upwards = 0;
-
-          /* Scale the coefficient "a1" up  by a factor, but make sure
-             it is not above 1.0. Reset mycount. */
-          if (mycount > 2 * nth)
-            {
-              a1 = MIN (a1 * 2.0, 1.0);
-              mycount = 0;
-            }
-          /* otherwise leave "a1" and "mycount" unchanged */
-
-          PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
-          PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
-
-          for (int i = 0; i < m; i++)
-            PetscPrintf (PETSC_COMM_WORLD, "%s=%e ", solvent[i].name, du_norm[i]);
-
-          for (int i = 0; i < m; i++)
-            PetscPrintf (PETSC_COMM_WORLD,
-                         "h(%s)=% f ",
-                         solvent[i].name,
-                         dN * bgy3d_vec_hole (g[i]));
-
-          PetscPrintf (PETSC_COMM_WORLD, "Q=% e ", ComputeCharge (PD, m, solvent, g));
-          PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
-          PetscPrintf (PETSC_COMM_WORLD, "\n");
-
-          /* Exit  when any  of  du[]  does not  change  by more  than
-             norm_tol: */
-          if (maxval (m, du_norm) <= norm_tol)
-            {
-              PetscPrintf (PETSC_COMM_WORLD,
-                           "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
-                           maxval (m, du_norm), norm_tol, iter + 1, max_iter);
-              break;
-            }
-        } /* for (iter = ... ) */
+          bgy3d_snes_picard(),
+          bgy3d_snes_jager(),
+          bgy3d_snes_newton().
+        */
+        bgy3d_snes_jager (PD, &ctx, (Function) iterate_u, us);
+      }
 
       /* FIXME:  Debug  output  from  every iteration  with  different
          overall scale factors damp.  Remove when no more needed. */
