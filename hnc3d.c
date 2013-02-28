@@ -78,7 +78,10 @@ static void compute_h (real beta, Vec v, Vec h)
 }
 
 
-#if 1
+/* There  are  several  closure   relations,  all  must  satisfy  this
+   interface. Vec c is intent(out) the rest is input: */
+typedef void (*Closure)(real beta, Vec v, Vec t, Vec c);
+
 /*
   Hypernetted   Chain  (HNC)  closure   relation  to   compute  direct
   correlation function c in real space.  See OZ equation below for the
@@ -88,7 +91,7 @@ static void compute_h (real beta, Vec v, Vec h)
 
     c := exp (-βv + γ) - 1 - γ
 */
-static void compute_c (real beta, Vec v, Vec t, Vec c)
+static void compute_c_HNC (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
   {
@@ -97,14 +100,38 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
   }
   bgy3d_vec_map2 (c, f, v, t);
 }
-#else
+
+
+/* For x <= 0 the same as  exp(x) - 1, but does not grow exponentially
+   for positive x:  */
+static real lexpm1 (real x)
+{
+  if (x <= 0.0)
+    return expm1 (x);
+  else
+    return x;
+}
+
+
+/* Kovalenko-Hirata closure. */
+static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
+{
+  real pure f (real v, real t)
+  {
+    /* Note that lexpm1() /= expm1(): */
+    return lexpm1 (-beta * v + t) - t;
+  }
+  bgy3d_vec_map2 (c, f, v, t);
+}
+
+
 /*
   Percus-Yevick  (PY) closure  relation between  direct-  and indirect
   correlation c and γ:
 
     c := exp (-βv) [1 + γ] - 1 - γ
 */
-static void compute_c (real beta, Vec v, Vec t, Vec c)
+static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
   {
@@ -112,7 +139,7 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
   }
   bgy3d_vec_map2 (c, f, v, t);
 }
-#endif
+
 
 /*
   Use the k-representation of Ornstein-Zernike (OZ) equation
@@ -137,6 +164,7 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
   bgy3d_vec_fft_map1 (t_fft, f, c_fft);
 }
 
+
 #ifdef HNC3D_T
 /*
   HNC iteration for an indirect correlation γ = h - c (here denoted by
@@ -150,6 +178,7 @@ typedef struct Ctx_t
   State *HD;
   Vec v, c;                     /* real */
   Vec t_fft, c_fft;             /* complex */
+  Closure compute_c;
 } Ctx_t;
 
 
@@ -162,7 +191,7 @@ static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  compute_c (beta, ctx->v, t, ctx->c);
+  ctx->compute_c (beta, ctx->v, t, ctx->c);
 
   MatMult (HD->fft_mat, ctx->c, ctx->c_fft);
 
@@ -190,6 +219,7 @@ typedef struct Ctx_c
   State *HD;
   Vec v, t;                     /* real */
   Vec t_fft, c_fft;             /* complex */
+  Closure compute_c;
 } Ctx_c;
 
 
@@ -212,7 +242,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   VecScale (ctx->t, 1.0/L/L/L);
 
-  compute_c (beta, ctx->v, ctx->t, dc);
+  ctx->compute_c (beta, ctx->v, ctx->t, dc);
 
   VecAXPY (dc, -1.0, c);
 }
@@ -249,6 +279,10 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_t* vs. void*:
   */
   {
+    /* FIXME: Mention alternative closures to get rid of warnings: */
+    (void) compute_c_PY;
+    (void) compute_c_KH;
+
     Ctx_t ctx =
       {
         .HD = HD,
@@ -256,6 +290,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .c = c,
         .t_fft = t_fft,
         .c_fft = c_fft,
+        .compute_c = compute_c_HNC, /* HNC closure */
       };
     snes_solve (PD, &ctx, (Function) iterate_t, t);
   }
@@ -307,6 +342,10 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_c* vs. void*:
   */
   {
+    /* FIXME: Mention alternative closures to get rid of warnings: */
+    (void) compute_c_PY;
+    (void) compute_c_KH;
+
     Ctx_c ctx =
       {
         .HD = HD,
@@ -314,6 +353,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .t = t,
         .t_fft = t_fft,
         .c_fft = c_fft,
+        .compute_c = compute_c_HNC, /* HNC closure */
       };
     snes_solve (PD, &ctx, (Function) iterate_c, c);
   }
