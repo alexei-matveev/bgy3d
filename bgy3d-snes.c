@@ -22,25 +22,10 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
   SNES snes;
   SNESCreate (PETSC_COMM_WORLD, &snes);
 
-  KSP ksp;
-  SNESGetKSP (snes, &ksp);
-
-  PC pc;
-  KSPGetPC (ksp, &pc);
-
-  /* set rtol, atol, dtol, maxits */
-  KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
-
-  /* line search: SNESLS, trust region: SNESTR */
-  SNESSetType (snes, SNESLS);
-
-  /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
-  PCSetType (pc, PCNONE);
-
   /* SNES needs a place to store residual: */
   Vec r = bgy3d_vec_duplicate (x);
 
-  /* SNES functions should obey this interface: */
+  /* SNES form-functions should obey this interface: */
   PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
   {
     (void) snes;                /* unused */
@@ -49,26 +34,66 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
   }
   SNESSetFunction (snes, r, F1, ctx); /* Pass Context* as ctx */
 
+  /* line search: SNESLS, trust region: SNESTR */
+  SNESSetType (snes, SNESLS);
+
+  {
+    /*
+      This has the same effect as specifying "-snes_mf" in the command
+      line.  We  do it  explicitly here in  order not to  require that
+      switch from the user. MF stays for Matrix-Free.
+
+      The  idea  is  that  matrix-vector products  with  Jacobian  are
+      computed   by   numerical   differentiation  of   the   original
+      form-function.  The  form-function has to  already be associated
+      with the SNES object, see above.
+    */
+    Mat J;
+    MatCreateSNESMF (snes, &J);
+
+    /*
+      Petsc provides a placeholder for this case:
+
+        PetscErrorCode
+        MatMFFDComputeJacobian (SNES, Vec, Mat*, Mat*, MatStructure*, void*)
+
+      The last argument is a user context for jacobian evaluation:
+    */
+    SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
+  }
+
   /* set atol, rtol, stol , its, fct. eval. */
   // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, 1.0e-4 , 50, 10000);
   // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, PD->norm_tol, 50, 10000);
 
+  {
+    /* This linear equation solver is  most probably used to solve the
+       linear equations with Jacobian matrix: */
+    KSP ksp;
+    SNESGetKSP (snes, &ksp);
+
+    /* set rtol, atol, dtol, maxits */
+    KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
+
+    PC pc;
+    KSPGetPC (ksp, &pc);
+
+    /* set preconditioner: PCLU, PCNONE, PCJACOBI... */
+    PCSetType (pc, PCNONE);
+  }
+
   /*
-    Runtime  options will  override default  parameters.   FIXME: note
-    that the  call to SNESSetJacobian()  is missing here.   It appears
-    that  one has to  request a  "matrix-free" approximation  from the
-    command line  with "-snes_mf". Otherwise the  next call terminates
-    with an error message saying "Matrix must be set first"!
+    Runtime options  will override  default parameters.  Note  that if
+    SNESSetJacobian() is not called  one, has to request a matrix-free
+    approximation  from the command  line with  "-snes_mf".  Otherwise
+    the next call terminates with an error message saying "Matrix must
+    be set first"!
   */
   SNESSetFromOptions (snes);
 
   /* Solve  problem F(x)  = 0.  PETSC_NULL indicates  that the  rhs is
      0: */
   SNESSolve (snes, PETSC_NULL, x);
-
-  /* Write  out  solution.   FIXME:   and  what  was  the  purpose  of
-     SNESSolve()? */
-  // SNESGetSolution (snes, &x);
 
   bgy3d_vec_destroy (&r);
 
