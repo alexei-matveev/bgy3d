@@ -379,32 +379,20 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
 }
 #endif
 
-/* Solving  for  c  and  h(c)  of HNC  equation  with  Newton.  Direct
-   correlation c appears as a primary variable here: */
-Vec hnc3d_solve_newton (const ProblemData *PD, Vec g_ini)
+/*
+  Solving  for c  and  h(c)  of HNC  equation  with non-linear  solver
+  specified by  the --snes-solver flag.  Direct  correlation c appears
+  as a primary variable here:
+*/
+Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
 {
   assert (g_ini == PETSC_NULL);
 
   PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Newton iteration.\n");
+               "Solving 3d-HNC equation.\n");
 
   Vec g[1][1];
-  solvent_solve (PD, bgy3d_snes_newton, g);
-
-  return g[0][0];               /* bgy3d_vec_destroy (&) it! */
-}
-
-
-/* Solve h and c of HNC equation simultaneously, fixpoint iteration */
-Vec hnc3d_solve_picard (const ProblemData *PD, Vec g_ini)
-{
-  assert (g_ini == PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Fixpoint iteration.\n");
-
-  Vec g[1][1];
-  solvent_solve (PD, bgy3d_snes_picard, g);
+  solvent_solve (PD, bgy3d_snes_default, g);
 
   return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
@@ -552,33 +540,20 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
 }
 
 
-/* solving for h only of HNC equation with Newton */
-/* c appears as an input here */
-Vec hnc3d_solute_solve_newton (const ProblemData *PD, Vec g_ini)
+/*
+  Solving for  h of HNC equation  with a default  non-linear solver as
+  sUpecified  by  the  --snes-solver  option. The  direct  correlation
+  function "c" is fixed and appears as an input here:
+*/
+Vec hnc3d_solute_solve (const ProblemData *PD, Vec g_ini)
 {
   assert (g_ini == PETSC_NULL);
 
   PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Newton iteration. Fixed c.\n");
+               "Solving 3d-HNC equation. Fixed c.\n");
 
   Vec g[1];
-  solute_solve (PD, bgy3d_snes_newton, g);
-
-  return g[0];
-}
-
-
-/* Solving for h of HNC eqauation with fixpoint iteration */
-/* c is input */
-Vec hnc3d_solute_solve_picard (const ProblemData *PD, Vec g_ini)
-{
-  assert (g_ini == PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Fixpoint iteration. Fixed c.\n");
-
-  Vec g[1];
-  solute_solve (PD, bgy3d_snes_picard, g);
+  solute_solve (PD, bgy3d_snes_default, g);
 
   return g[0];
 }
