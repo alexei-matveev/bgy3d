@@ -20,6 +20,7 @@ typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
   initial guess, and some  user input eventually affecting convergence
   criteria:
 */
+void bgy3d_snes_default (const ProblemData *PD, void *ctx, Function F, Vec x);
 void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x);
 void bgy3d_snes_picard (const ProblemData *PD, void *ctx, Function F, Vec x);
 void bgy3d_snes_jager (const ProblemData *PD, void *ctx, Function F, Vec x);

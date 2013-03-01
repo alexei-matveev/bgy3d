@@ -5,7 +5,28 @@
 
 #include "bgy3d.h"
 #include "bgy3d-vec.h"          /* bgy3d_vec_duplicate() */
+#include "bgy3d-getopt.h"       /* bgy3d_getopt_string() */
 #include "bgy3d-snes.h"         /* Function, Solver */
+
+
+void bgy3d_snes_default (const ProblemData *PD, void *ctx, Function F, Vec x)
+{
+  char solver[20] = "newton";
+  bgy3d_getopt_string ("--snes-solver", solver, sizeof solver);
+
+  if (strcmp (solver, "newton") == 0)
+    bgy3d_snes_newton (PD, ctx, F, x);
+  else if (strcmp (solver, "picard") == 0)
+    bgy3d_snes_picard (PD, ctx, F, x);
+  else if (strcmp (solver, "jager") == 0)
+    bgy3d_snes_jager (PD, ctx, F, x);
+  else
+    {
+      PetscPrintf (PETSC_COMM_WORLD, "No such SNES solver: %s\n", solver);
+      exit (1);
+    }
+}
+
 
 /*
   For solving HNC equation with Newton. Except of x everything else in
