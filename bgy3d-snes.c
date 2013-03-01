@@ -91,7 +91,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
     /* This linear equation solver is  most probably used to solve the
        linear equations with Jacobian matrix: */
     KSP ksp;
-    SNESGetKSP (snes, &ksp);
+    SNESGetKSP (snes, &ksp);    /* no need to destroy, apparently */
 
     /* set rtol, atol, dtol, maxits */
     KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
