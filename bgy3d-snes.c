@@ -75,6 +75,21 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
     /* set rtol, atol, dtol, maxits */
     KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
 
+    /*
+      Though the manual says:
+
+        "The  matrix-free  variant is  allowed  only  when the  linear
+         systems are solved by an iterative method in combination with
+         no preconditioning (PCNONE or -pc_type none), a user-provided
+         preconditioner  matrix,  or  a  user-provided  preconditioner
+         shell (PCSHELL, discussed in Section 4.4); that is, obviously
+         matrix-free methods cannot  be used if a direct  solver is to
+         be employed."
+
+      it seems that commenting the following lines does not affect the
+      behaviour.  FIXME:  Didnt we  set the preconditioner  with third
+      argument of SNESSetJacobian()?
+    */
     PC pc;
     KSPGetPC (ksp, &pc);
 
