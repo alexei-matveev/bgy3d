@@ -10,6 +10,7 @@
 #include "bgy3d-pure.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* bgy3d_solve_with_solute */
+#include "hnc3d.h"              /* hnc3d_solute_solve() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_save, bgy3d_vec_load */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
@@ -545,7 +546,7 @@ static void vec_init_type (void)
   scm_c_define_gsubr ("vec-map2", 3, 0, 0, vec_map2);
 }
 
-static SCM guile_run_solvent (SCM alist)
+static SCM guile_bgy3d_solvent (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -558,7 +559,23 @@ static SCM guile_run_solvent (SCM alist)
 }
 
 
-static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
+static SCM guile_hnc3d_solvent (SCM alist)
+{
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  const ProblemData PD = problem_data (alist);
+
+  Vec g[1][1];
+
+  hnc3d_solvent_solve (&PD, g);
+
+  bgy3d_vec_destroy (&g[0][0]);
+
+  return alist;
+}
+
+
+static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -615,6 +632,48 @@ static SCM guile_run_solute (SCM solute, SCM solvent, SCM settings)
     gs = scm_cons (from_vec (g[i]), gs);
 
   SCM v = from_pointer (iter);
+
+  /* Return multiple values. Caller, dont forget to destroy them! */
+  return scm_values (scm_list_2 (gs, v));
+}
+
+static SCM guile_hnc3d_solute (SCM solute, SCM settings)
+{
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  const ProblemData PD = problem_data (settings);
+
+  const int m = 1;
+  int n;                        /* number of solute sites */
+  Site *solute_sites;           /* solute_sites[n] */
+  char *solute_name;
+
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
+  to_sites (solute, &n, &solute_sites, &solute_name);
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
+
+  /*
+    This  takes part  of  the  input from  the  disk, returns  solvent
+    distribution  in Vec  g[] (dont  forget to  destroy them).   If no
+    additional charge distribution is  associated with the solute pass
+    NULL as  the function  pointer. Similarly, if  you do not  want an
+    iterator over the solvent potential pass NULL:
+  */
+  Vec g[m];
+  hnc3d_solute_solve (&PD, g);
+
+  free (solute_name);
+  free (solute_sites);
+
+  /* Build a list starting from the tail: */
+  SCM gs = SCM_EOL;
+  for (int i = m - 1; i >= 0; i--)
+    gs = scm_cons (from_vec (g[i]), gs);
+
+  SCM v = from_pointer (NULL);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
   return scm_values (scm_list_2 (gs, v));
@@ -685,8 +744,10 @@ static SCM guile_bgy3d_module_init (void)
   /* If Scheme executes this code  inside a module (which we do), then
      all these gsubrs will be  module procedures available only in the
      module itself or by an explicit (use-modules ...): */
-  scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_run_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_run_solute);
+  scm_c_define_gsubr ("hnc3d-run-solvent", 1, 0, 0, guile_hnc3d_solvent);
+  scm_c_define_gsubr ("hnc3d-run-solute", 2, 0, 0, guile_hnc3d_solute);
+  scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_bgy3d_solvent);
+  scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_bgy3d_solute);
   scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
