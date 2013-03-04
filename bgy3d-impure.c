@@ -498,6 +498,17 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
+/* g := exp (-u) */
+static void mexp (Vec g, Vec u)
+{
+  real pure f (real u)
+  {
+    return exp (-u);
+  }
+  bgy3d_vec_map1 (g, f, u);
+}
+
+
 static void iterate (State *BHD,
                      int m,
                      const Site solvent[m],
@@ -547,13 +558,9 @@ static void iterate (State *BHD,
       bgy3d_impose_laplace_boundary (BHD, du[i], x_lapl[i]);
     }
 
-  real pure f (real u)
-  {
-    return exp (-u);
-  }
-
+  /* g := exp (-u): */
   for (int i = 0; i < m; i++)
-    bgy3d_vec_map1 (g[i], f, du[i]);
+    mexp (g[i], du[i]);
 
   /* Compute FFT of g[] for all sites: */
   for (int i = 0; i < m; i++)
