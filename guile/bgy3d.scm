@@ -422,6 +422,7 @@ computes the sum of all vector elements."
       (from-radial-g2	(value #f))
       (save-guess	(value #f))
       (load-guess	(value #f))
+      (snes-solver	(value #t))   ; "jager", "newton", or "picard"
       (verbose		(single-char #\v)	(value #f))     ; verbosity
       (unquote-splicing numeric)))))
 
