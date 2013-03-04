@@ -11,9 +11,12 @@
 */
 typedef void (*Function) (void *ctx, Vec x, Vec r);
 
-/* Solver for  non-linear equations, either Newton  or fixpoint Picard
-   iterations: */
-typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
+/*
+  Solver for non-linear equations, either Newton or fixpoint Picard
+  Uiterations:
+
+  typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
+*/
 
 /*
   A few solvers for F(x) = 0 taking a Function, its execution context,
