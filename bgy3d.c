@@ -94,7 +94,7 @@ ProblemData bgy3d_problem_data (void)
     PD.lambda = 0.1;
     bgy3d_getopt_real ("--lambda", &PD.lambda);
 
-    assert (PD.lambda > 0.0);
+    assert (PD.lambda >= 0.0);
     assert (PD.lambda <= 1.0);
 
     /* Get damp_start from command line*/
