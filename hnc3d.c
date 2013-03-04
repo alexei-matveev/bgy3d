@@ -272,7 +272,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
   HNC equation.  Indirect correlation  γ appears as a primary variable
   here:
 */
-static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
+static void solvent_solve (const ProblemData *PD, Vec g[1][1])
 {
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
@@ -305,7 +305,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .t_fft = t_fft,
         .c_fft = c_fft,
       };
-    snes_solve (PD, &ctx, (Function) iterate_t, t);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_t, t);
   }
 
   bgy3d_vec_save ("t00.bin", t);
@@ -333,7 +333,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
 #else
 /* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
    appears as a primary variable here: */
-static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1])
+static void solvent_solve (const ProblemData *PD, Vec g[1][1])
 {
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
@@ -363,7 +363,7 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .t_fft = t_fft,
         .c_fft = c_fft,
       };
-    snes_solve (PD, &ctx, (Function) iterate_c, c);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_c, c);
   }
 
   /* g = γ + c + 1, store in Vec t: */
@@ -400,7 +400,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation.\n");
 
   Vec g[1][1];
-  solvent_solve (PD, bgy3d_snes_default, g);
+  solvent_solve (PD, g);
 
   return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
@@ -486,7 +486,7 @@ static void solvent_kernel (State *HD, Vec c_fft)
 
 /* Solving for h only of HNC equation. Direct correlation c appears as
    an input here */
-static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
+static void solute_solve (const ProblemData *PD, Vec g[1])
 {
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
@@ -525,7 +525,7 @@ static void solute_solve (const ProblemData *PD, Solver snes_solve, Vec g[1])
         .ch_fft = ch_fft,
       };
 
-    snes_solve (PD, &ctx, (Function) iterate_h, h);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_h, h);
   }
 
   /* free stuff */
@@ -561,7 +561,7 @@ Vec hnc3d_solute_solve (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Fixed c.\n");
 
   Vec g[1];
-  solute_solve (PD, bgy3d_snes_default, g);
+  solute_solve (PD, g);
 
   return g[0];
 }
