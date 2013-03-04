@@ -31,38 +31,6 @@ typedef struct Solute {
   Site sites[];                 /* site descriptions */
 } Solute;
 
-/*
- * This function  obeys the callback interface assumed  in field(). It
- * is supposed to  get (1) parameters of the solvent  site such as its
- * location and force  field parameters, and (2) a  description of the
- * solute and  return a real number  such as an  interaction energy or
- * the charge density:
- */
-static real ljc (const Site *A, int n, const Site S[n]);
-
-/*
- * This function expects a callback obeying the above interface as one
- * of the arguments:
- */
-static void field (DA da, const ProblemData *PD,
-                   Site A, int n, const Site S[n],
-                   real (*f)(const Site *A, int n, const Site S[n]),
-                   Vec v);
-
-/* This is  another type of  (elemental) callbacks that take  array of
-   coordinates and return an array of respective values: */
-static void gf_density (int m, const real x[m][3], real rho[m],
-                        int n, const Site S[n]); /* extra */
-
-/* Callback here  is that of  gf_density() closure over all  but three
-   leading arguments: */
-static void grid_map (DA da, const ProblemData *PD,
-                      void (*f)(int m, const real x[m][3], real fx[m]),
-                      Vec v);
-
-static void read_charge_density (DA da, const ProblemData *PD,
-				const char *filename, real fact, Vec v);
-
 // FIXME: maybe #include "solutes.h" instead?
 
 /*********************************/
@@ -180,6 +148,322 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites)
   *n = solutes[i]->n;
   *sites = solutes[i]->sites;
 }
+
+
+/*
+  Calculate a  real field  "f" for the  solvent site  characterized by
+  (sigma, epsilon,  charge) in the presence  of the solute  S at every
+  point (x, y, z) of the local grid.
+
+  This  function expects  a callback  f() obeying  specific interface.
+  The function f(x, y,  z, eps, sig, chg, S) can be  ljc() or rho() as
+  two examples.
+
+  Site  A  is  intent(in) but  has  to  be  passed by  value  (copying
+  involved) at  the moment.  We  are modifying coordinates of  a local
+  copy  and pass  a reference  to that  copy further  to  the callback
+  function *f.  The coordinates of  a site as passed to this functions
+  are ignored.
+
+  Vector "v" is the intent(out) argument.
+ */
+static void field (DA da, const ProblemData *PD,
+                   Site A, int n, const Site S[n],
+                   real (*f)(const Site *A, int n, const Site S[n]),
+                   Vec v)
+{
+  PetscScalar ***vec;
+  real h[3];
+  int i0, j0, k0;
+  int ni, nj, nk;
+
+  /*
+   * FIXME: do we  really assume that intervals for x-,  y- and z- are
+   * the same? This basically means the  corner of the unit cell is at
+   * (offset, offset, offset):
+   */
+  real offset = PD->interval[0];
+
+  FOR_DIM
+    h[dim] = PD->h[dim];
+
+  /* Get local portion of the grid */
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  DAVecGetArray (da, v, &vec);
+
+  /* loop over local portion of grid */
+  for (int k = k0; k < k0 + nk; k++)
+    {
+      A.x[2] = k * h[2] + offset;
+
+      for (int j = j0; j < j0 + nj; j++)
+        {
+          A.x[1] = j * h[1] + offset;
+
+          for (int i = i0; i < i0 + ni; i++)
+            {
+              A.x[0] = i * h[0] + offset;
+
+              /*
+               * Compute the field  f at (x, y, z) <->  (i, j, k) e.g.
+               * by summing  (LJ) contributions from  all solute sites
+               * at that grid point:
+               */
+              vec[k][j][i] = f (&A, n, S);
+            }
+        }
+    }
+  DAVecRestoreArray (da, v, &vec);
+}
+
+/* Callback here  is that of  gf_density() closure over all  but three
+   leading arguments: */
+static void grid_map (DA da, const ProblemData *PD,
+                      void (*f)(int m, const real x[m][3], real fx[m]),
+                      Vec v)
+{
+  int i0, j0, k0;
+  int ni, nj, nk;
+
+  /* Get local portion of the grid */
+  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  /* MEMORY: huge arrays here: */
+  int m = ni * nj * nk;
+
+  /* use dynamically memory allocation here */
+  real (*x)[3], *fx;
+  fx = malloc(m * sizeof(real));
+  /* contiguous memory allocation */
+  x = malloc(m * 3 * sizeof(real));
+
+  /* Get coordinates of the local grid portion: */
+  {
+    int ijk = 0;
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            /* Coordinates  (x, y,  z) <->  (i, j,  k).  FIXME:  do we
+               really assume that intervals for  x-, y- and z- are the
+               same? This basically means  the corner of the unit cell
+               is at (offset, offset, offset): */
+            x[ijk][0] = i * PD->h[0] + PD->interval[0];
+            x[ijk][1] = j * PD->h[1] + PD->interval[0];
+            x[ijk][2] = k * PD->h[2] + PD->interval[0];
+            ijk++;
+          }
+    assert (ijk == m);
+  }
+
+  /* Let the function f() compute  the field/density at our portion of
+     the grid. FIXME: cast here is to silence the const-warning: */
+  f (m, (const real (*)[3]) x, fx);
+
+  /* Copy contents of fx[] to the output vector: */
+  {
+    PetscScalar ***vec;
+    DAVecGetArray (da, v, &vec);
+    int ijk = 0;
+    for (int k = k0; k < k0 + nk; k++)
+      for (int j = j0; j < j0 + nj; j++)
+        for (int i = i0; i < i0 + ni; i++)
+          {
+            vec[k][j][i] = fx[ijk];
+            ijk++;
+          }
+    assert (ijk == m);
+    DAVecRestoreArray (da, v, &vec);
+  }
+
+  /* remember to free! */
+  free(fx);
+  free(x);
+}
+
+
+/*
+  Interaction of a charged LJ  site (sigma, epsilon, charge) at (x, y,
+  z) with the solute S.
+
+  This function obeys the callback interface assumed in field(). It is
+  supposed  to get  (1) parameters  of the  solvent site  such  as its
+  location and  force field parameters,  and (2) a description  of the
+  solute and return a real number such as an interaction energy or the
+  charge density:
+*/
+static real ljc (const Site *A, int n, const Site S[n])
+{
+  /* Sum force field contribution from all solute sites: */
+  real field = 0.0;
+
+  for (int site = 0; site < n; site++)
+    {
+
+      /* Interaction parameters for a pair of LJ sites: */
+      real e2 = sqrt (A->epsilon * S[site].epsilon);
+      real s2 = 0.5 * (A->sigma + S[site].sigma);
+
+      /* Distance from a grid point to this site: */
+      real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
+                       SQR(A->x[1] - S[site].x[1]) +
+                       SQR(A->x[2] - S[site].x[2]));
+
+      /* 1. Lennard-Jones */
+      field += Lennard_Jones (r_s, e2, s2);
+
+      /* 2.  Coulomb, short  range part.   For historical  reasons the
+         overall scaling  factor, the  product of solvent-  and solute
+         site charges, is handled by the function itself: */
+      field += Coulomb_short (r_s, A->charge * S[site].charge);
+    }
+
+  return field;
+}
+
+/*
+  Gaussian functions  (gf) represent each solute  site charge, compute
+  the total charge density at every point x[]. Compare to the function
+  rho() above that does the same for one point at a time.
+
+  Each gaussian is evaluated as:
+
+    ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
+
+  This is  another type  of (elemental) callbacks  that take  array of
+  coordinates and return an array of respective values.
+*/
+static void gf_density (int m, const real x[m][3], /* coordinates */
+                        real rho[m],            /* output densities */
+                        int n, const Site S[n]) /* solute description */
+{
+  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
+     a property of the (solute) site  in the same way as the charge of
+     the site. */
+  real prefac = pow(G / sqrt(M_PI), 3.0);
+
+  for (int i = 0; i < m; i++)
+    {
+      /* Sum Gaussian contributions from all solute sites: */
+      real ro = 0.0;
+      for (int j = 0; j < n; j++)
+        {
+
+          /* Square of the distance from a grid point to this site: */
+          real r2 = SQR (x[i][0] - S[j].x[0]) +
+                    SQR (x[i][1] - S[j].x[1]) +
+                    SQR (x[i][2] - S[j].x[2]);
+
+          /* Gaussian distribution,  note that G  is not a  width, but
+             rather an inverse of it: */
+          ro += prefac * S[j].charge * exp(- G * G * r2);
+        }
+      rho[i] = ro;
+    }
+}
+
+
+/* Read density file generated by  GPAW calculation need BOHR to scale
+   the length values back. */
+static void read_charge_density (DA da, const ProblemData *PD,
+                                 const char *filename, real fact, Vec v)
+{
+  PetscScalar ***vec;
+  char line_buffer[BUFSIZ];
+  int AtomNum;                  /* atom numbers in the molecule */
+  real corner[3], dx[3], dy[3], dz[3];
+  int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
+  real h[3];
+  FILE *fp;
+  int i0, j0, k0;
+  int ni, nj, nk;
+
+
+  fp = fopen(filename, "r");
+  if (fp == NULL)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Can not open file %s. \n", filename);
+      exit(1);
+    }
+
+  PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
+  /* Skip the first two lines */
+  for (int i = 0; i < 2; i++)
+    {
+      char *p = fgets (line_buffer, sizeof(line_buffer), fp);
+      assert (p != NULL);
+    }
+
+  /* Atom numers and corner shifts */
+  {
+    int n = fscanf (fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
+    assert (n == 4);
+  }
+
+  /* Grid numbers and spaces */
+  FOR_DIM
+    {
+      int n = fscanf (fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
+      assert (n == 4);
+    }
+
+  /* Scale the grid space */
+  dx[0] *= BOHR;
+  dy[1] *= BOHR;
+  dz[2] *= BOHR;
+
+  /* Allocate memory */
+  int electron[AtomNum];  /* electrons of each atom */
+  real zero[AtomNum];     /* = 0.0 as in ase.io.cube.write_cube, don't
+                             know the meaning */
+  real x[AtomNum], y[AtomNum], z[AtomNum];
+
+  for (int i = 0; i < AtomNum; i++)
+    {
+      int n = fscanf (fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
+      assert (n == 5);
+      x[i] *= BOHR;
+      y[i] *= BOHR;
+      z[i] *= BOHR;
+    }
+
+  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
+
+  FOR_DIM
+    h[dim] = PD->h[dim];
+
+
+  /* FIXME: will need interpolation if grid not match */
+  if ( GridNum[0] * GridNum[1] * GridNum[2] != ni * nj * nk)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Grid size not match!\n");
+      exit(1);
+    }
+  else if ( fabs(dx[0] - h[0]) >= 0.001 || fabs(dy[1] - h[1]) >= 0.001 || fabs(dz[2] - h[2]) >= 0.001)
+    {
+      PetscPrintf(PETSC_COMM_WORLD, "Grid space not match!\n");
+      exit(1);
+    }
+
+  DAVecGetArray(da, v, &vec);
+
+  /* electron density scaled by BOHR^3 in python script */
+  real invB3 = 1. / BOHR / BOHR / BOHR;
+  for (int i = i0; i < i0 + ni; i++)
+    for (int j = j0; j < j0 + nj; j++)
+      for (int k = k0; k < k0 + nk; k++)
+        {
+          int n = fscanf (fp, "%lf", &vec[i][j][k]);
+          assert (n == 1);
+          vec[i][j][k] *= fact * invB3;
+        }
+
+  fclose(fp);
+  DAVecRestoreArray(da, v, &vec);
+}
+
+
 
 /*
   Create initial solute field.
@@ -319,304 +603,3 @@ void bgy3d_solute_field (const State *BHD,
    */
   bgy3d_poisson (BHD, uc, uc_rho, -4 * M_PI * EPSILON0INV);
 }
-
-/*
-  Calculate a  real field  "f" for the  solvent site  characterized by
-  (sigma, epsilon,  charge) in the presence  of the solute  S at every
-  point (x, y, z) of the local grid.
-
-  The function f(x, y,  z, eps, sig, chg, S) can be  ljc() or rho() as
-  two examples.
-
-  Site  A  is  intent(in) but  has  to  be  passed by  value  (copying
-  involved) at  the moment.  We  are modifying coordinates of  a local
-  copy  and pass  a reference  to that  copy further  to  the callback
-  function *f.  The coordinates of  a site as passed to this functions
-  are ignored.
-
-  Vector "v" is the intent(out) argument.
- */
-static void field (DA da, const ProblemData *PD,
-                   Site A, int n, const Site S[n],
-                   real (*f)(const Site *A, int n, const Site S[n]),
-                   Vec v)
-{
-  PetscScalar ***vec;
-  real h[3];
-  int i0, j0, k0;
-  int ni, nj, nk;
-
-  /*
-   * FIXME: do we  really assume that intervals for x-,  y- and z- are
-   * the same? This basically means the  corner of the unit cell is at
-   * (offset, offset, offset):
-   */
-  real offset = PD->interval[0];
-
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  DAVecGetArray (da, v, &vec);
-
-  /* loop over local portion of grid */
-  for (int k = k0; k < k0 + nk; k++)
-    {
-      A.x[2] = k * h[2] + offset;
-
-      for (int j = j0; j < j0 + nj; j++)
-        {
-          A.x[1] = j * h[1] + offset;
-
-          for (int i = i0; i < i0 + ni; i++)
-            {
-              A.x[0] = i * h[0] + offset;
-
-              /*
-               * Compute the field  f at (x, y, z) <->  (i, j, k) e.g.
-               * by summing  (LJ) contributions from  all solute sites
-               * at that grid point:
-               */
-              vec[k][j][i] = f (&A, n, S);
-            }
-        }
-    }
-  DAVecRestoreArray (da, v, &vec);
-}
-
-static void grid_map (DA da, const ProblemData *PD,
-                      void (*f)(int m, const real x[m][3], real fx[m]),
-                      Vec v)
-{
-  int i0, j0, k0;
-  int ni, nj, nk;
-
-  /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  /* MEMORY: huge arrays here: */
-  int m = ni * nj * nk;
-
-  /* use dynamically memory allocation here */
-  real (*x)[3], *fx;
-  fx = malloc(m * sizeof(real));
-  /* contiguous memory allocation */
-  x = malloc(m * 3 * sizeof(real));
-
-  /* Get coordinates of the local grid portion: */
-  {
-    int ijk = 0;
-    for (int k = k0; k < k0 + nk; k++)
-      for (int j = j0; j < j0 + nj; j++)
-        for (int i = i0; i < i0 + ni; i++)
-          {
-            /* Coordinates  (x, y,  z) <->  (i, j,  k).  FIXME:  do we
-               really assume that intervals for  x-, y- and z- are the
-               same? This basically means  the corner of the unit cell
-               is at (offset, offset, offset): */
-            x[ijk][0] = i * PD->h[0] + PD->interval[0];
-            x[ijk][1] = j * PD->h[1] + PD->interval[0];
-            x[ijk][2] = k * PD->h[2] + PD->interval[0];
-            ijk++;
-          }
-    assert (ijk == m);
-  }
-
-  /* Let the function f() compute  the field/density at our portion of
-     the grid. FIXME: cast here is to silence the const-warning: */
-  f (m, (const real (*)[3]) x, fx);
-
-  /* Copy contents of fx[] to the output vector: */
-  {
-    PetscScalar ***vec;
-    DAVecGetArray (da, v, &vec);
-    int ijk = 0;
-    for (int k = k0; k < k0 + nk; k++)
-      for (int j = j0; j < j0 + nj; j++)
-        for (int i = i0; i < i0 + ni; i++)
-          {
-            vec[k][j][i] = fx[ijk];
-            ijk++;
-          }
-    assert (ijk == m);
-    DAVecRestoreArray (da, v, &vec);
-  }
-
-  /* remember to free! */
-  free(fx);
-  free(x);
-}
-
-/*
- * Interaction of a charged LJ site (sigma, epsilon, charge) at (x, y,
- * z) with the solute S:
- */
-static real ljc (const Site *A, int n, const Site S[n])
-{
-  /* Sum force field contribution from all solute sites: */
-  real field = 0.0;
-
-  for (int site = 0; site < n; site++)
-    {
-
-      /* Interaction parameters for a pair of LJ sites: */
-      real e2 = sqrt (A->epsilon * S[site].epsilon);
-      real s2 = 0.5 * (A->sigma + S[site].sigma);
-
-      /* Distance from a grid point to this site: */
-      real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
-                       SQR(A->x[1] - S[site].x[1]) +
-                       SQR(A->x[2] - S[site].x[2]));
-
-      /* 1. Lennard-Jones */
-      field += Lennard_Jones (r_s, e2, s2);
-
-      /* 2.  Coulomb, short  range part.   For historical  reasons the
-         overall scaling  factor, the  product of solvent-  and solute
-         site charges, is handled by the function itself: */
-      field += Coulomb_short (r_s, A->charge * S[site].charge);
-    }
-
-  return field;
-}
-
-/*
- * Gaussian functions (gf) represent  each solute site charge, compute
- * the  total  charge density  at  every  point  x[]. Compare  to  the
- * function rho() above that does the same for one point at a time.
- *
- * Each gaussian is evaluated as:
- *
- *   ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
- */
-static void gf_density (int m, const real x[m][3], /* coordinates */
-                        real rho[m],            /* output densities */
-                        int n, const Site S[n]) /* solute description */
-{
-  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
-     a property of the (solute) site  in the same way as the charge of
-     the site. */
-  real prefac = pow(G / sqrt(M_PI), 3.0);
-
-  for (int i = 0; i < m; i++)
-    {
-      /* Sum Gaussian contributions from all solute sites: */
-      real ro = 0.0;
-      for (int j = 0; j < n; j++)
-        {
-
-          /* Square of the distance from a grid point to this site: */
-          real r2 = SQR (x[i][0] - S[j].x[0]) +
-                    SQR (x[i][1] - S[j].x[1]) +
-                    SQR (x[i][2] - S[j].x[2]);
-
-          /* Gaussian distribution,  note that G  is not a  width, but
-             rather an inverse of it: */
-          ro += prefac * S[j].charge * exp(- G * G * r2);
-        }
-      rho[i] = ro;
-    }
-}
-
-
-/* Read density file generated by  GPAW calculation need BOHR to scale
-   the length values back. */
-static void read_charge_density (DA da, const ProblemData *PD,
-                                 const char *filename, real fact, Vec v)
-{
-  PetscScalar ***vec;
-  char line_buffer[BUFSIZ];
-  int AtomNum;                  /* atom numbers in the molecule */
-  real corner[3], dx[3], dy[3], dz[3];
-  int GridNum[3]; /* Grid numers in each direction: [0]:x, [1]:y, [2]:z */
-  real h[3];
-  FILE *fp;
-  int i0, j0, k0;
-  int ni, nj, nk;
-
-
-  fp = fopen(filename, "r");
-  if (fp == NULL)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Can not open file %s. \n", filename);
-      exit(1);
-    }
-
-  PetscPrintf(PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
-  /* Skip the first two lines */
-  for (int i = 0; i < 2; i++)
-    {
-      char *p = fgets (line_buffer, sizeof(line_buffer), fp);
-      assert (p != NULL);
-    }
-
-  /* Atom numers and corner shifts */
-  {
-    int n = fscanf (fp, "%d %lf %lf %lf", &AtomNum, &corner[0], &corner[1], &corner[2]);
-    assert (n == 4);
-  }
-
-  /* Grid numbers and spaces */
-  FOR_DIM
-    {
-      int n = fscanf (fp, "%d %lf %lf %lf", &GridNum[dim], &dx[dim], &dy[dim], &dz[dim]);
-      assert (n == 4);
-    }
-
-  /* Scale the grid space */
-  dx[0] *= BOHR;
-  dy[1] *= BOHR;
-  dz[2] *= BOHR;
-
-  /* Allocate memory */
-  int electron[AtomNum];  /* electrons of each atom */
-  real zero[AtomNum];     /* = 0.0 as in ase.io.cube.write_cube, don't
-                             know the meaning */
-  real x[AtomNum], y[AtomNum], z[AtomNum];
-
-  for (int i = 0; i < AtomNum; i++)
-    {
-      int n = fscanf (fp, "%d %lf %lf %lf %lf", &electron[i], &zero[i], &x[i], &y[i], &z[i]);
-      assert (n == 5);
-      x[i] *= BOHR;
-      y[i] *= BOHR;
-      z[i] *= BOHR;
-    }
-
-  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-
-  /* FIXME: will need interpolation if grid not match */
-  if ( GridNum[0] * GridNum[1] * GridNum[2] != ni * nj * nk)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Grid size not match!\n");
-      exit(1);
-    }
-  else if ( fabs(dx[0] - h[0]) >= 0.001 || fabs(dy[1] - h[1]) >= 0.001 || fabs(dz[2] - h[2]) >= 0.001)
-    {
-      PetscPrintf(PETSC_COMM_WORLD, "Grid space not match!\n");
-      exit(1);
-    }
-
-  DAVecGetArray(da, v, &vec);
-
-  /* electron density scaled by BOHR^3 in python script */
-  real invB3 = 1. / BOHR / BOHR / BOHR;
-  for (int i = i0; i < i0 + ni; i++)
-    for (int j = j0; j < j0 + nj; j++)
-      for (int k = k0; k < k0 + nk; k++)
-        {
-          int n = fscanf (fp, "%lf", &vec[i][j][k]);
-          assert (n == 1);
-          vec[i][j][k] *= fact * invB3;
-        }
-
-  fclose(fp);
-  DAVecRestoreArray(da, v, &vec);
-}
-
