@@ -40,6 +40,8 @@
 ;;;
 ;;; The list of the procedures defined by the next call includes:
 ;;;
+;;;   hnc3d-run-solvent
+;;;   hnc3d-run-solute
 ;;;   bgy3d-run-solvent
 ;;;   bgy3d-run-solute
 ;;;   bgy3d-pot-interp
@@ -441,6 +443,8 @@ computes the sum of all vector elements."
   (quasiquote
    ((BGY2Site	(value #f))                ; pure solvent run
     (BGYM2Site	(value #f))                ; solute + solvent run
+    (HNC	(value #f))
+    (HNC-M	(value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
@@ -469,6 +473,9 @@ computes the sum of all vector elements."
      ;;
      ;; Pure solvent:
      ;;
+     ((option-ref opts 'HNC #f)
+      (hnc3d-run-solvent '()))          ; Use defaults and Petsc env
+     ;;
      ((option-ref opts 'BGY2Site #f)
       (bgy3d-run-solvent '()))          ; Use defaults and Petsc env
      ;;
@@ -476,6 +483,14 @@ computes the sum of all vector elements."
      ;; code the function find-molecule uses on-disk database in
      ;; ./solutes.scm and not the compiled in set from bgy3d-solutes.c
      ;; and bgy3d-solvents.h:
+     ;;
+     ((option-ref opts 'HNC-M #f)
+      (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
+            (solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
+        (let-values (((g1 ve) (hnc3d-run-solute solute
+                                                '()))) ; Use defaults and Petsc env
+          (map vec-save (g1-file-names g1) g1)
+          (map vec-destroy g1)))) ; dont forget to destroy them
      ;;
      ((option-ref opts 'BGYM2Site #f)
       (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
