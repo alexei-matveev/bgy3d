@@ -13,7 +13,8 @@ BGY-FLAGS = \
 	--max-iter 1000 \
 	--L 10.0 \
 	--damp-start 1.0 \
-	--lambda 0.02
+	--lambda 0.02 \
+	--snes-solver jager \
 
 HNC-FLAGS = \
 	--L 5.0 \
