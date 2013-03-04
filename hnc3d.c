@@ -333,7 +333,7 @@ static void solvent_solve (const ProblemData *PD, Vec g[1][1])
 #else
 /* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
    appears as a primary variable here: */
-static void solvent_solve (const ProblemData *PD, Vec g[1][1])
+void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
 {
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
@@ -392,7 +392,7 @@ static void solvent_solve (const ProblemData *PD, Vec g[1][1])
   specified by  the --snes-solver flag.  Direct  correlation c appears
   as a primary variable here:
 */
-Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
+Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 {
   assert (g_ini == PETSC_NULL);
 
@@ -400,7 +400,7 @@ Vec hnc3d_solve (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation.\n");
 
   Vec g[1][1];
-  solvent_solve (PD, g);
+  hnc3d_solvent_solve (PD, g);
 
   return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
@@ -486,7 +486,7 @@ static void solvent_kernel (State *HD, Vec c_fft)
 
 /* Solving for h only of HNC equation. Direct correlation c appears as
    an input here */
-static void solute_solve (const ProblemData *PD, Vec g[1])
+void hnc3d_solute_solve (const ProblemData *PD, Vec g[1])
 {
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
@@ -553,7 +553,7 @@ static void solute_solve (const ProblemData *PD, Vec g[1])
   sUpecified  by  the  --snes-solver  option. The  direct  correlation
   function "c" is fixed and appears as an input here:
 */
-Vec hnc3d_solute_solve (const ProblemData *PD, Vec g_ini)
+Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
 {
   assert (g_ini == PETSC_NULL);
 
@@ -561,7 +561,7 @@ Vec hnc3d_solute_solve (const ProblemData *PD, Vec g_ini)
                "Solving 3d-HNC equation. Fixed c.\n");
 
   Vec g[1];
-  solute_solve (PD, g);
+  hnc3d_solute_solve (PD, g);
 
   return g[0];
 }

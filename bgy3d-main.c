@@ -129,7 +129,7 @@ int main (int argc, char **argv)
 
   /* Pure solvent by HNC: */
   if (bgy3d_getopt_test ("--HNC"))
-    solver = hnc3d_solve;
+    solver = HNC3d_solvent_solve;
 
   /*
     There  seem to  be  several  solvers that  address  a problem  of
@@ -137,7 +137,7 @@ int main (int argc, char **argv)
     correlation function of the pure solvent. These are two of them:
   */
   if (bgy3d_getopt_test ("--HNC-M"))
-    solver =  hnc3d_solute_solve;
+    solver =  HNC3d_solute_solve;
 
   /* Pure solvent: */
   if (bgy3d_getopt_test ("--BGY2Site"))
