@@ -78,12 +78,13 @@ static void compute_h (real beta, Vec v, Vec h)
 }
 
 
-/* There  are  several  closure   relations,  all  must  satisfy  this
-   interface. Vec c is intent(out) the rest is input: */
-typedef void (*Closure)(real beta, Vec v, Vec t, Vec c);
-
 /*
-  Hypernetted   Chain  (HNC)  closure   relation  to   compute  direct
+  There  are several  closure  relations, all  must  satisfy the  same
+  interface. Vec c is intent(out) the rest is input.
+
+  typedef void (*Closure)(real beta, Vec v, Vec t, Vec c);
+
+  1)  Hypernetted  Chain  (HNC)  closure relation  to  compute  direct
   correlation function c in real space.  See OZ equation below for the
   second relation between two  unknowns.  The indirect correlation γ =
   h - c is denoted by latin  "t" in other sources. We will use that to
@@ -113,7 +114,7 @@ static real lexpm1 (real x)
 }
 
 
-/* Kovalenko-Hirata closure. */
+/* 2) Kovalenko-Hirata (KH) closure. */
 static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
@@ -126,7 +127,7 @@ static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
 
 
 /*
-  Percus-Yevick  (PY) closure  relation between  direct-  and indirect
+  3) Percus-Yevick (PY) closure  relation between direct- and indirect
   correlation c and γ:
 
     c := exp (-βv) [1 + γ] - 1 - γ
@@ -138,6 +139,25 @@ static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
     return exp (-beta * v) * (1 + t) - 1 - t;
   }
   bgy3d_vec_map2 (c, f, v, t);
+}
+
+
+void compute_c (real beta, Vec v, Vec t, Vec c)
+{
+  char closure[20] = "HNC";
+  bgy3d_getopt_string ("--closure", closure, sizeof closure);
+
+  if (strcmp (closure, "HNC") == 0)
+    compute_c_HNC (beta, v, t, c);
+  else if (strcmp (closure, "KH") == 0)
+    compute_c_KH (beta, v, t, c);
+  else if (strcmp (closure, "PY") == 0)
+    compute_c_PY (beta, v, t, c);
+  else
+    {
+      PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
+      exit (1);
+    }
 }
 
 
@@ -178,7 +198,6 @@ typedef struct Ctx_t
   State *HD;
   Vec v, c;                     /* real */
   Vec t_fft, c_fft;             /* complex */
-  Closure compute_c;
 } Ctx_t;
 
 
@@ -191,7 +210,7 @@ static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  ctx->compute_c (beta, ctx->v, t, ctx->c);
+  compute_c (beta, ctx->v, t, ctx->c);
 
   MatMult (HD->fft_mat, ctx->c, ctx->c_fft);
 
@@ -219,7 +238,6 @@ typedef struct Ctx_c
   State *HD;
   Vec v, t;                     /* real */
   Vec t_fft, c_fft;             /* complex */
-  Closure compute_c;
 } Ctx_c;
 
 
@@ -242,7 +260,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   VecScale (ctx->t, 1.0/L/L/L);
 
-  ctx->compute_c (beta, ctx->v, ctx->t, dc);
+  compute_c (beta, ctx->v, ctx->t, dc);
 
   VecAXPY (dc, -1.0, c);
 }
@@ -279,10 +297,6 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_t* vs. void*:
   */
   {
-    /* FIXME: Mention alternative closures to get rid of warnings: */
-    (void) compute_c_PY;
-    (void) compute_c_KH;
-
     Ctx_t ctx =
       {
         .HD = HD,
@@ -290,7 +304,6 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .c = c,
         .t_fft = t_fft,
         .c_fft = c_fft,
-        .compute_c = compute_c_HNC, /* HNC closure */
       };
     snes_solve (PD, &ctx, (Function) iterate_t, t);
   }
@@ -342,10 +355,6 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
     pointer argument: struct Ctx_c* vs. void*:
   */
   {
-    /* FIXME: Mention alternative closures to get rid of warnings: */
-    (void) compute_c_PY;
-    (void) compute_c_KH;
-
     Ctx_c ctx =
       {
         .HD = HD,
@@ -353,7 +362,6 @@ static void solvent_solve (const ProblemData *PD, Solver snes_solve, Vec g[1][1]
         .t = t,
         .t_fft = t_fft,
         .c_fft = c_fft,
-        .compute_c = compute_c_HNC, /* HNC closure */
       };
     snes_solve (PD, &ctx, (Function) iterate_c, c);
   }
