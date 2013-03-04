@@ -39,6 +39,8 @@ static inline real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma
     return re;
 }
 
+/* This  one  is only  used  for  some  kind of  pre-conditioning,  or
+   regularization inside the solvent excluded volume: */
 static inline real LJ_repulsive (real r, real epsilon, real sigma)
 {
   const real sr = sigma / r;
