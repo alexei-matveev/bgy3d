@@ -24,7 +24,6 @@ HNC-FLAGS = \
 	--lambda 0.1 \
 	--rho 0.1 \
 	--norm-tol 1e-12 \
-	-snes_monitor
 
 #
 # In case $(EXE) is not defined, assume the executable is one level up
