@@ -838,7 +838,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
     actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
     filled with data yet, I assume.
   */
-  Vec u0[m];                    /* real */
+  Vec u0[m];                          /* real */
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
   /*
@@ -868,18 +868,16 @@ void bgy3d_solute_solve (const ProblemData *PD,
       /* Scale solute-solvent interactions: */
       PetscPrintf (PETSC_COMM_WORLD,
                    "Scaling solute-solvent interactions by %f\n", damp);
-      for (int i = 0; i < m; i++)
-        VecScale (u0[i], damp);
+      /*
+        Historically  short-range potential is  scaled by  the inverse
+        temperature and the code operates  with u(x) = βv(x) insead of
+        potential  itself   at  many  places.    FIXME:  actually  all
+        potentials should appear only in this combination!
+      */
       VecScale (uc, damp);
       VecScale (uc_rho, damp);
-
-      /*
-        Historically short-range potential is scaled by the Uinverse
-        temperature and the code operates with u(x) = βv(x) insead of
-        potential itself at many places:
-      */
       for (int i = 0; i < m; i++)
-        VecScale (u0[i], beta);
+        VecScale (u0[i], beta * damp);
 
       /*
         Set initial guess, either here or by reading from file. At the
