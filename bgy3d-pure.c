@@ -1502,14 +1502,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[0][1],
                             BHD->u2_fft[1][1], rhos[1],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][0],
                             BHD->u2_fft[0][1], rhos[0],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[0][0], t[0][0]);
@@ -1521,14 +1521,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][0], BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[1][1], t[0][1],
-                            BHD->u2_fft[0][1], omega[0][0], du_new2, work);
+                            BHD->u2_fft[0][1], omega[0][0], BHD->gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[1][1], t[1][1]);
           nssa_norm_intra (BHD, g_fft[1][1], omega[0][1], BHD->fft_scratch, t[0][1]);
           Compute_dg_intra (BHD, BHD->F[1][1], BHD->F_l[1][1],
                             t[1][1], t[0][1],
-                            BHD->u2_fft[1][1], omega[0][1], du_new2, work);
+                            BHD->u2_fft[1][1], omega[0][1], BHD->gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           VecAXPY(du_new, PD->beta, BHD->u2[0][1]);
@@ -1544,14 +1544,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
                             BHD->u2_fft[0][1], rhos[1],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[0][0], BHD->F_l[0][0], g[0][0],
                             g[0][0],
                             BHD->u2_fft[0][0], rhos[0],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[0][0]);
@@ -1567,14 +1567,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           nssa_norm_intra (BHD, g_fft[0][0], omega[0][0], BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][0], BHD->F_l[0][0],
                             t[1][1], t[0][0],
-                            BHD->u2_fft[0][0], omega[0][0], du_new2, work);
+                            BHD->u2_fft[0][0], omega[0][0], BHD->gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[0][0]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[0][0],
-                            BHD->u2_fft[0][1], omega[0][1], du_new2, work);
+                            BHD->u2_fft[0][1], omega[0][1], BHD->gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           VecAXPY(du_new, PD->beta, BHD->u2[0][0]);
@@ -1590,14 +1590,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             BHD->F[0][1], BHD->F_l[0][1], g[0][1],
                             g[0][1],
                             BHD->u2_fft[0][1], rhos[0],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
           Compute_dg_inter (BHD,
                             BHD->F[1][1], BHD->F_l[1][1], g[1][1],
                             g[1][1],
                             BHD->u2_fft[1][1], rhos[1],
-                            du_new2);
+                            BHD->gfg2_fft, du_new2);
           VecAXPY (du_new, 1.0, du_new2);
 
 
@@ -1609,7 +1609,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[1][1]);
           Compute_dg_intra (BHD, BHD->F[0][1], BHD->F_l[0][1],
                             t[0][1], t[1][1],
-                            BHD->u2_fft[0][1], omega[0][1], du_new2, work);
+                            BHD->u2_fft[0][1], omega[0][1], BHD->gfg2_fft, du_new2, work);
           VecAXPY(du_new, 2.0, du_new2);
 
           VecAXPY(du_new, PD->beta, BHD->u2[1][1]);
