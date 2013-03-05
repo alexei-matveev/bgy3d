@@ -48,8 +48,9 @@ bgy-diffs = \
 	$(patsubst %,%.g1.diff,$(solutes))
 
 hnc-diffs = \
-	hnc3d.g2.diff \
-	hnc3d.g1.diff \
+	LJ.hnc3d.g2.diff \
+	LJ.hnc3d.g1.diff \
+	$(patsubst %,%.hnc3d.g1.diff,$(solutes))
 
 #
 # By default "make"  all the diffs. Unomment the  second entry to also
@@ -68,9 +69,11 @@ hnc-tests: $(hnc-diffs)
 
 #
 # Dont  delete  distribution  summary  files rebuilt  as  intermediate
-# targets.  Running a test takes some time:
+# targets.  Running a  test takes some time. FIXME: why  do I need the
+# second rule, given the first?
 #
-.PRECIOUS: %.g2 %.g1
+.PRECIOUS: %.g2 %.g1 %.hnc3d.g1
+.PRECIOUS: %.hnc3d.g2 %.hnc3d.g1
 
 #
 # Nothing to  be done for  reference outputs.  Without this  rule Make
@@ -98,12 +101,12 @@ moments = python ../python/moments.py
 # the  moment  it  requires  a  "molecule"  file  to  be  loaded  with
 # Load_Molecule():
 #
-hnc3d.g2: ../bgy3d
+%.hnc3d.g2: ../bgy3d
 	$(EXE) --HNC $(HNC-FLAGS)
 	$(moments) g00.bin > $(@)
 
-hnc3d.g1: ../bgy3d hnc3d.g2
-	$(EXE) --HNC-M $(HNC-FLAGS) --solute "LJ"
+%.hnc3d.g1: ../bgy3d LJ.hnc3d.g2
+	$(EXE) --HNC-M $(HNC-FLAGS) --solute "$(subst _, ,$(*))"
 	$(moments) g0.bin > $(@)
 
 
