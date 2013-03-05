@@ -7,12 +7,19 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
+#include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-force.h"        /* Lennard_Jones() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
 
 // #define HNC3D_T                 /* use γ as primary variable */
+
+
+/* Fake solvent */
+static const Site solvent[] =
+  {{"lj", {0.0, 0.0, 0.0}, 1.0, 1.0, 0.0}};
+
 
 static void solute_field (const DA da, const ProblemData *PD, Vec pot)
 {
@@ -486,27 +493,39 @@ static void solvent_kernel (State *HD, Vec c_fft)
 
 /* Solving for h only of HNC equation. Direct correlation c appears as
    an input here */
-void hnc3d_solute_solve (const ProblemData *PD, Vec g[1])
+void hnc3d_solute_solve (const ProblemData *PD,
+                         const int n, const Site solute[n],
+                         Vec g[1])
 {
+  const int m = sizeof solvent / sizeof (Site); /* 1 */
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec v = bgy3d_vec_create (HD->da); /* solute-solvent interaction */
 
-  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
-     solute-solvent interactions: */
-  solute_field (HD->da, HD->PD, v);
+  Vec v[m];
+  bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
   /* Get the solvent-solvent direct correlation function: */
   solvent_kernel (HD, c_fft);
 
+  /*
+    Get  solute-solvent interaction.   Fill v[]  with  the short-range
+    potential. FIXME: long-range Coulomb is ignored yet:
+  */
+  bgy3d_solute_field (HD, m, solvent, n, solute,
+                      v,          /* out */
+                      NULL, NULL, /* no coulomb */
+                      NULL);      /* no electrons */
+
+  assert (m == 1);
+
   /* Create global vectors */
-  Vec h = bgy3d_vec_duplicate (v);
+  Vec h = bgy3d_vec_duplicate (v[0]);
 
   /* Set initial guess */
-  compute_h (HD->PD->beta, v, h);
+  compute_h (HD->PD->beta, v[0], h);
 
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
@@ -518,7 +537,7 @@ void hnc3d_solute_solve (const ProblemData *PD, Vec g[1])
     Ctx_h ctx =
       {
         .HD = HD,
-        .v = v,
+        .v = v[0],
         .t = t,
         .c_fft = c_fft,
         .h_fft = h_fft,
@@ -534,7 +553,7 @@ void hnc3d_solute_solve (const ProblemData *PD, Vec g[1])
   bgy3d_vec_destroy (&h_fft);
   bgy3d_vec_destroy (&c_fft);
   bgy3d_vec_destroy (&ch_fft);
-  bgy3d_vec_destroy (&v);
+  bgy3d_vec_destroy1 (m, v);
 
   bgy3d_state_destroy (HD);
 
@@ -550,7 +569,7 @@ void hnc3d_solute_solve (const ProblemData *PD, Vec g[1])
 
 /*
   Solving for  h of HNC equation  with a default  non-linear solver as
-  sUpecified  by  the  --snes-solver  option. The  direct  correlation
+  specified  by  the  --snes-solver  option.  The  direct  correlation
   function "c" is fixed and appears as an input here:
 */
 Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
@@ -560,8 +579,22 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation. Fixed c.\n");
 
+  int n;                        /* number of solute sites */
+  const Site *solute;           /* solute[n] */
+
+  char name[200] = "LJ";        /* default solute */
+
+  /* Solutes name, HCl by default: */
+  bgy3d_getopt_string ("--solute", name, sizeof(name));
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
+
+  /* Get the solute from the tables: */
+  bgy3d_solute_get (name, &n, &solute);
+
   Vec g[1];
-  hnc3d_solute_solve (PD, g);
+  hnc3d_solute_solve (PD, n, solute, g);
 
   return g[0];
 }

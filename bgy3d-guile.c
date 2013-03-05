@@ -663,7 +663,7 @@ static SCM guile_hnc3d_solute (SCM solute, SCM settings)
     iterator over the solvent potential pass NULL:
   */
   Vec g[m];
-  hnc3d_solute_solve (&PD, g);
+  hnc3d_solute_solve (&PD, n, solute_sites, g);
 
   free (solute_name);
   free (solute_sites);
