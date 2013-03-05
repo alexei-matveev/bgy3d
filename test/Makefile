@@ -31,18 +31,21 @@ HNC-FLAGS = \
 #
 EXE ?= ../bgy3d
 
+solutes = \
+	hydrogen_chloride \
+	carbon_disulfide \
+	water \
+	methanol \
+	butanoic_acid \
+	hexane
+
 #
 # These  are  phony  targets,  they   are  not  created  as  files  to
 # re-evaluate the diffs every time Make is executed:
 #
 bgy-diffs = \
 	hydrogen_chloride.g2.diff \
-	hydrogen_chloride.g1.diff \
-	carbon_disulfide.g1.diff \
-	water.g1.diff \
-	methanol.g1.diff \
-	butanoic_acid.g1.diff \
-	hexane.g1.diff
+	$(patsubst %,%.g1.diff,$(solutes))
 
 hnc-diffs = \
 	hnc3d.g2.diff \
