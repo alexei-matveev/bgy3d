@@ -982,7 +982,6 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   Vec f[m][m][3], f_l[m][m][3];
   Vec u0[m][m], c2[m][m];
   Vec u2[m][m], u2_fft[m][m];
-  Vec gfg2_fft;
 
   bgy3d_vec_create2 (BHD->da, m, u2);
   bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
@@ -998,7 +997,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
         }
 
   /* Allocate more memory for fft */
-  gfg2_fft = bgy3d_vec_create (BHD->dc);       /* complex */
+  Vec gfg2_fft = bgy3d_vec_create (BHD->dc); /* complex */
 
   /* end of allocation */
 
