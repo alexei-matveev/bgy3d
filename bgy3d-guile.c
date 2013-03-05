@@ -637,22 +637,27 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
   return scm_values (scm_list_2 (gs, v));
 }
 
-static SCM guile_hnc3d_solute (SCM solute, SCM settings)
+static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
 
-  const int m = 1;
+  int m;                        /* number of solvent sites */
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
+
   int n;                        /* number of solute sites */
   Site *solute_sites;           /* solute_sites[n] */
   char *solute_name;
 
   /* Get  the  number  of   sites  and  their  parameters.   Allocates
      sol*_sites, sol*_name: */
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
 
   /*
@@ -663,10 +668,12 @@ static SCM guile_hnc3d_solute (SCM solute, SCM settings)
     iterator over the solvent potential pass NULL:
   */
   Vec g[m];
-  hnc3d_solute_solve (&PD, n, solute_sites, g);
+  hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, g);
 
   free (solute_name);
   free (solute_sites);
+  free (solvent_name);
+  free (solvent_sites);
 
   /* Build a list starting from the tail: */
   SCM gs = SCM_EOL;
@@ -745,7 +752,7 @@ static SCM guile_bgy3d_module_init (void)
      all these gsubrs will be  module procedures available only in the
      module itself or by an explicit (use-modules ...): */
   scm_c_define_gsubr ("hnc3d-run-solvent", 1, 0, 0, guile_hnc3d_solvent);
-  scm_c_define_gsubr ("hnc3d-run-solute", 2, 0, 0, guile_hnc3d_solute);
+  scm_c_define_gsubr ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_bgy3d_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_bgy3d_solute);
   scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);

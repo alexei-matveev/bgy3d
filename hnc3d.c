@@ -17,7 +17,7 @@
 
 
 /* Fake solvent */
-static const Site solvent[] =
+static const Site default_solvent[] =
   {{"lj", {0.0, 0.0, 0.0}, 1.0, 1.0, 0.0}};
 
 
@@ -494,10 +494,12 @@ static void solvent_kernel (State *HD, Vec c_fft)
 /* Solving for h only of HNC equation. Direct correlation c appears as
    an input here */
 void hnc3d_solute_solve (const ProblemData *PD,
+                         const int m, const Site solvent[m],
                          const int n, const Site solute[n],
-                         Vec g[1])
+                         Vec g[m])
 {
-  const int m = sizeof solvent / sizeof (Site); /* 1 */
+  assert (m == 1);
+
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
@@ -507,7 +509,12 @@ void hnc3d_solute_solve (const ProblemData *PD,
   Vec v[m];
   bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
-  /* Get the solvent-solvent direct correlation function: */
+  /*
+    Get  the solvent-solvent direct  correlation function.   FIXME: we
+    get the solvent  description as an argument, but  read the file to
+    get  the  rest.   There  is  no  guarantee  the  two  sources  are
+    consistent.
+  */
   solvent_kernel (HD, c_fft);
 
   /*
@@ -582,19 +589,30 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   int n;                        /* number of solute sites */
   const Site *solute;           /* solute[n] */
 
-  char name[200] = "LJ";        /* default solute */
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
 
-  /* Solutes name, HCl by default: */
-  bgy3d_getopt_string ("--solute", name, sizeof(name));
+  char name[200] = "LJ";        /* default solvent & solute */
+
+  /* Get the number of solvent sites and their parameters. Get it from
+     the solute tables: */
+  bgy3d_solute_get (name, &m, &solvent);
 
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
+  /* Get solute name or stay with the default: */
+  bgy3d_getopt_string ("--solute", name, sizeof name);
+
   /* Get the solute from the tables: */
   bgy3d_solute_get (name, &n, &solute);
 
-  Vec g[1];
-  hnc3d_solute_solve (PD, n, solute, g);
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
+  Vec g[m];
+  hnc3d_solute_solve (PD, m, solvent, n, solute, g);
+
+  assert (m == 1);
   return g[0];
 }

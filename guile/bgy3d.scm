@@ -486,8 +486,9 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'HNC-M #f)
       (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
-            (solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
+            (solvent	(find-molecule (option-ref opts 'solvent "LJ"))))
         (let-values (((g1 ve) (hnc3d-run-solute solute
+                                                solvent
                                                 '()))) ; Use defaults and Petsc env
           (map vec-save (g1-file-names g1) g1)
           (map vec-destroy g1)))) ; dont forget to destroy them
