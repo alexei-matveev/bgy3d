@@ -69,7 +69,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
       form-function.  The  form-function has to  already be associated
       with the SNES object, see above.
     */
-    Mat J;
+    Mat J;                      /* I guess we need to destroy it? */
     MatCreateSNESMF (snes, &J);
 
     /*
@@ -81,6 +81,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
       The last argument is a user context for jacobian evaluation:
     */
     SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
+    MatDestroy (J);         /* I hope SNES saved a ref to that Mat? */
   }
 
   /* set atol, rtol, stol , its, fct. eval. */
