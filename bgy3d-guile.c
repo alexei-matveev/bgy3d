@@ -225,12 +225,14 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 static scm_t_bits state_tag;
 static scm_t_bits vec_tag;
 
+
 static SCM from_state (const State *BHD)
 {
   SCM obj;
   SCM_NEWSMOB (obj, state_tag, BHD);
   return obj;
 }
+
 
 static SCM from_vec (Vec vec)
 {
@@ -257,12 +259,14 @@ static State* to_state (SCM state)
   return (State*) SCM_SMOB_DATA (state);
 }
 
+
 static Vec to_vec (SCM vec)
 {
   scm_assert_smob_type (vec_tag, vec);
 
   return (Vec) SCM_SMOB_DATA (vec);
 }
+
 
 static SCM state_make (SCM alist)
 {
@@ -274,6 +278,7 @@ static SCM state_make (SCM alist)
   return from_state (bgy3d_state_make (PD));
 }
 
+
 static SCM vec_make (SCM state)
 {
   State *BHD = to_state (state);
@@ -281,12 +286,14 @@ static SCM vec_make (SCM state)
   return from_vec (vec);
 }
 
+
 static SCM vec_make_complex (SCM state)
 {
   State *BHD = to_state (state);
   Vec vec = bgy3d_vec_create (BHD->dc);
   return from_vec (vec);
 }
+
 
 static size_t state_free (SCM state)
 {
@@ -304,6 +311,7 @@ static size_t state_free (SCM state)
   return 0;
 }
 
+
 static size_t vec_free (SCM vec)
 {
   Vec c_vec = to_vec (vec);
@@ -311,6 +319,7 @@ static size_t vec_free (SCM vec)
     bgy3d_vec_destroy (&c_vec);
   return 0;
 }
+
 
 static SCM state_destroy (SCM state)
 {
@@ -320,6 +329,7 @@ static SCM state_destroy (SCM state)
   return SCM_UNSPECIFIED;
 }
 
+
 static SCM vec_destroy (SCM vec)
 {
   assert (to_vec (vec) != NULL);
@@ -328,12 +338,14 @@ static SCM vec_destroy (SCM vec)
   return SCM_UNSPECIFIED;
 }
 
+
 static SCM noop_mark (SCM smob)
 {
   /* We dont store SCM values in smobs yet: */
   (void) smob;
   return SCM_BOOL_F;
 }
+
 
 static SCM vec_save (SCM path, SCM vec)
 {
@@ -392,10 +404,12 @@ static SCM vec_ref (SCM vec, SCM ix)
   return scm_from_double (vals[0]);
 }
 
+
 static SCM vec_dot (SCM x, SCM y)
 {
   return scm_from_double (bgy3d_vec_dot (to_vec (x), to_vec (y)));
 }
+
 
 static SCM vec_fft (SCM state, SCM x)
 {
@@ -409,6 +423,7 @@ static SCM vec_fft (SCM state, SCM x)
   return y;
 }
 
+
 static SCM vec_ifft (SCM state, SCM y)
 {
   State *BHD = to_state (state);
@@ -420,6 +435,7 @@ static SCM vec_ifft (SCM state, SCM y)
 
   return x;
 }
+
 
 static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
 {
@@ -438,6 +454,7 @@ static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
   /* FIXME: FFT in BGY3d code is unnormalized: */
   return scm_from_double (y[0] * sqrt (BHD->PD->N3));
 }
+
 
 static SCM vec_set_random (SCM x)
 {
@@ -465,6 +482,7 @@ static SCM vec_map1 (SCM f, SCM x)
   return from_vec (y_);
 }
 
+
 static SCM vec_map2 (SCM f, SCM x, SCM y)
 {
   Vec x_ = to_vec (x);
@@ -479,6 +497,7 @@ static SCM vec_map2 (SCM f, SCM x, SCM y)
 
   return from_vec (z_);
 }
+
 
 static int state_print (SCM state, SCM port, scm_print_state *pstate)
 {
@@ -500,6 +519,7 @@ static int state_print (SCM state, SCM port, scm_print_state *pstate)
   return 1;                     /* non-zero means success */
 }
 
+
 static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
@@ -513,6 +533,7 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
   scm_remember_upto_here_1 (vec);
   return 1;                     /* non-zero means success */
 }
+
 
 static void state_init_type (void)
 {
@@ -530,6 +551,7 @@ static void state_init_type (void)
   scm_c_define_gsubr ("state-make", 1, 0, 0, state_make);
   scm_c_define_gsubr ("state-destroy", 1, 0, 0, state_destroy);
 }
+
 
 static void vec_init_type (void)
 {
@@ -556,6 +578,7 @@ static void vec_init_type (void)
   scm_c_define_gsubr ("vec-map1", 2, 0, 0, vec_map1);
   scm_c_define_gsubr ("vec-map2", 3, 0, 0, vec_map2);
 }
+
 
 static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
 {
