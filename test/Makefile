@@ -100,7 +100,7 @@ hnc3d.g2: ../bgy3d
 	$(moments) g00.bin > $(@)
 
 hnc3d.g1: ../bgy3d hnc3d.g2
-	$(EXE) --HNC-M $(HNC-FLAGS)
+	$(EXE) --HNC-M $(HNC-FLAGS) --solute "LJ"
 	$(moments) g0.bin > $(@)
 
 
