@@ -860,10 +860,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
         VM_Coulomb_long.  No  other fields of the  struct State except
         those passed explicitly are modified:
       */
-      bgy3d_solute_field (BHD,
-                          m, solvent,
-                          u0, uc, uc_rho,      /* intent(out) */
-                          n, solute, density); /* void (*density)(...) */
+      bgy3d_solute_field (BHD, m, solvent, n, solute,
+                          u0, uc, uc_rho, /* out */
+                          density);       /* void (*density)(...) */
 
       /* Scale solute-solvent interactions: */
       PetscPrintf (PETSC_COMM_WORLD,

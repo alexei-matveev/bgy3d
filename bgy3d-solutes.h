@@ -14,8 +14,9 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites);
 /* Fill intent(out) us[] and uc  fields with the solute field on every
    solvent site. The rest is intent(in). */
 void bgy3d_solute_field (const State *BHD,
-                         int m, const Site solvent[m], /* m == 2 */
-                         Vec us[m], Vec uc, Vec uc_rho, /* intent(out) */
-                         int n, const Site solute[n], /* n arbitrary */
+                         int m, const Site solvent[m], /* in */
+                         int n, const Site solute[n],  /* in */
+                         Vec us[m],                    /* out */
+                         Vec uc, Vec uc_rho,           /* out, optional */
                          void (*density)(int k, const real x[k][3], real rho[k]));
 
