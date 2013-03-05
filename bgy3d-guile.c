@@ -563,6 +563,9 @@ static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
   /* This writes to the disk: */
   bgy3d_solve_solvent (&PD, m, solvent_sites);
 
+  free (solvent_name);
+  free (solvent_sites);
+
   return alist;
 }
 

@@ -980,14 +980,14 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
   /* allocation for local work vectors */
   Vec f[m][m][3], f_l[m][m][3];
-  Vec u_ini[m][m], c2[m][m];
+  Vec u0[m][m], c2[m][m];
   Vec u2[m][m], u2_fft[m][m];
   Vec gfg2_fft;
 
   bgy3d_vec_create2 (BHD->da, m, u2);
   bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
   bgy3d_vec_create2 (BHD->da, m, c2);
-  bgy3d_vec_create2 (BHD->da, m, u_ini);
+  bgy3d_vec_create2 (BHD->da, m, u0);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -1078,15 +1078,13 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
         }
   }
 
-  Vec (*u0)[m] = u_ini;        /* FIXME: alias! */
-
   VecSet(du_new,0.0);
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       RecomputeInitialData (BHD, m, solvent,
                             f, f_l,
-                            u_ini, c2,
+                            u0, c2,
                             u2, u2_fft,
                             (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
@@ -1386,7 +1384,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
   bgy3d_vec_destroy2 (m, u2);
   bgy3d_vec_destroy2 (m, u2_fft);
-  bgy3d_vec_destroy2 (m, u_ini);
+  bgy3d_vec_destroy2 (m, u0);
   bgy3d_vec_destroy2 (m, c2);
 
   for (int i = 0; i < m; i++)
