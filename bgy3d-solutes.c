@@ -532,6 +532,10 @@ void bgy3d_solute_field (const State *BHD,
       field (BHD->da, BHD->PD, scaled, n, solute, ljc, us[i]);
     }
 
+  /* Early return if no Coulomb is requested: */
+  if (uc == NULL && uc_rho == NULL)
+    return;
+
   /*
    * Compute the charge density  of the solute.  The callback function
    * gf_density() sums  (net or nuclear) charge  distribution for each
