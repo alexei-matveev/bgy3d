@@ -1,4 +1,9 @@
 ;;
+;; Simplest species, single neutral site LJ particle:
+;;
+("LJ" (("LJ" (0.0 0.0 0.0) 1.0 1.0 0.0)))
+
+;;
 ;; Application of an extended RISM equation to dipolar and quadrupolar
 ;; fluids, Fumio  Hirata, B. Montgomery Pettitt, and  Peter J. Rossky,
 ;; J. Chem. Phys. 77, 509 (1982), http://dx.doi.org/10.1063/1.443606
