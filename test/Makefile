@@ -112,5 +112,19 @@ hnc3d.g1: ../bgy3d hnc3d.g2
 	$(EXE) --BGY2Site $(BGY-FLAGS)
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 
+
+# This only works if ../bgy3d executable was built WITH_GUILE:
+%.m: %.bin
+	../guile/runbgy.scm dump $(<) > $(@)
+
+# This pops a graphics window for  a second. Is there a way to disable
+# that?
+%.m.png: %.m
+	../octave/bgy3d_plot.m $(<)
+
+# Do  not delte  intermediate  ascii *.m  files  produced when  making
+# figures:
+.PRECIOUS: %.m
+
 clean:
 	rm -f *.g1 *.g2 *.bin *.info *.m
