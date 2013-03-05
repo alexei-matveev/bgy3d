@@ -1004,9 +1004,6 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
   PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
 
-  if (r_HH > 0)
-    PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
-
   /*
    * Extract BGY3d specific things from supplied input:
    */
