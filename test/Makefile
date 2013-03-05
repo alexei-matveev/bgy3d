@@ -17,8 +17,8 @@ BGY-FLAGS = \
 	--snes-solver jager \
 
 HNC-FLAGS = \
-	--L 5.0 \
 	--N 128 \
+	--L 10.0 \
 	--beta 0.606060 \
 	--max-iter 320 \
 	--lambda 0.1 \
