@@ -1364,6 +1364,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
     } /* for (dump = ... ) */
 
+  /* deallocation of work vectors */
   bgy3d_vec_destroy2 (m, g);
   bgy3d_vec_destroy2 (m, g_fft);
   bgy3d_vec_destroy2 (m, t);
@@ -1377,9 +1378,6 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&omega[i][j]);
-
-  /* deallocation of work vectors */
-  MPI_Barrier( PETSC_COMM_WORLD);
 
   bgy3d_vec_destroy2 (m, u2);
   bgy3d_vec_destroy2 (m, u2_fft);
