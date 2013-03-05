@@ -420,6 +420,7 @@ static void Compute_dg_inter (State *BHD,
                               Vec gb,
                               Vec cab_fft, /* long range coulomb */
                               real rhob,
+                              Vec dua_fft,
                               Vec dua) /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
@@ -427,7 +428,6 @@ static void Compute_dg_inter (State *BHD,
 
   Vec gb_fft = BHD->fft_scratch;
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
-  Vec dua_fft = BHD->gfg2_fft;
 
   /************************************************/
   /* rhob * FS*gab gb */
@@ -640,6 +640,7 @@ static void Compute_dg_intra (State *BHD,
                               Vec fac[3], Vec fac_l[3],
                               Vec gac, Vec nab, Vec cac_fft,
                               Vec wbc_fft,
+                              Vec dg_fft,
                               Vec dg, Vec dg_help)
 {
   const ProblemData *PD = BHD->PD;
@@ -647,7 +648,6 @@ static void Compute_dg_intra (State *BHD,
   Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  Vec dg_fft = BHD->gfg2_fft;
   const real L = PD->interval[1] - PD->interval[0];
   const real scale = L / (2. * M_PI); /* siehe oben ... */
 
@@ -948,24 +948,62 @@ void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du)
 /* solve */
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
 {
-  int namecount=0;
-
   int m;                        /* number of solvent sites */
   const Site *solvent;          /* solvent[m] */
+
+  assert(g_ini == PETSC_NULL);
 
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
 
-  /* Original code used to print solvent params: */
-  bgy3d_sites_show ("Solvent", m, solvent);
+  bgy3d_solve_solvent (PD, m, solvent);
+
+  return PETSC_NULL;
+
+}
+
+void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
+{
+  State *BHD = bgy3d_state_make (PD);
+
+  /* Code used to be verbose: */
+  bgy3d_state_print (BHD);
+
+  int namecount=0;
 
   real du_norm[m][m];
 
-  assert(g_ini == PETSC_NULL);
+  /* Original code used to print solvent params: */
+  bgy3d_sites_show ("Solvent", m, solvent);
 
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
-  State *BHD = initialize_state (PD, m);
+  /* allocation for local work vectors */
+  Vec f[m][m][3], f_l[m][m][3];
+  Vec u_ini[m][m], c2[m][m];
+  Vec u2[m][m], u2_fft[m][m];
+  Vec gfg2_fft;
+
+  bgy3d_vec_create2 (BHD->da, m, u2);
+  bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
+  bgy3d_vec_create2 (BHD->da, m, c2);
+  bgy3d_vec_create2 (BHD->da, m, u_ini);
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      FOR_DIM
+        {
+          f[j][i][dim] = f[i][j][dim] = bgy3d_vec_create (BHD->da);
+          f_l[j][i][dim] = f_l[i][j][dim] = bgy3d_vec_create (BHD->da);
+        }
+
+  /* Allocate more memory for fft */
+  gfg2_fft = bgy3d_vec_create (BHD->dc);       /* complex */
+
+  /* end of allocation */
+
+  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
+  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
 
   if (r_HH > 0)
     PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
@@ -1040,16 +1078,16 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
         }
   }
 
-  Vec (*u0)[m] = BHD->u_ini;        /* FIXME: alias! */
+  Vec (*u0)[m] = u_ini;        /* FIXME: alias! */
 
   VecSet(du_new,0.0);
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       RecomputeInitialData (BHD, m, solvent,
-                            BHD->F, BHD->F_l,
-                            BHD->u_ini, BHD->c2,
-                            BHD->u2, BHD->u2_fft,
+                            f, f_l,
+                            u_ini, c2,
+                            u2, u2_fft,
                             (damp > 0.0 ? damp : 0.0), 1.0);
       PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
 
@@ -1132,15 +1170,17 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
             for (int k = 0; k < m; k++)
               {
                 Compute_dg_inter (BHD,
-                                  BHD->F[i][k], BHD->F_l[i][k], g[i][k],
+                                  f[i][k], f_l[i][k], g[i][k],
                                   g[j][k],
-                                  BHD->u2_fft[i][k], rhos[k],
+                                  u2_fft[i][k], rhos[k],
+                                  gfg2_fft,
                                   du_new2);
                 VecAXPY (du_new, 1.0, du_new2);
               }
 
             /* FIXME: 3-site code does not do this: */
-            VecPointwiseMult (du_new, du_new, BHD->c2[i][j]);
+            if (m == 2)
+              VecPointwiseMult (du_new, du_new, c2[i][j]);
 
             /*
               These are two sums  over k /= i and k /=  j. See lines 2
@@ -1200,16 +1240,17 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
                       nssa_gamma_cond (BHD, g_fft[i][j], omega[j][k], g[i][k], t[i][k]);
                     nssa_norm_intra (BHD, g_fft[i][k], omega[j][k], BHD->fft_scratch, t[i][j]);
                     Compute_dg_intra (BHD,
-                                      BHD->F[i][k], BHD->F_l[i][k], t[i][k],
+                                      f[i][k], f_l[i][k], t[i][k],
                                       t[i][j],
-                                      BHD->u2_fft[i][k], omega[j][k],
+                                      u2_fft[i][k], omega[j][k],
+                                      gfg2_fft,
                                       du_new2, work);
                     VecAXPY (du_new, 1.0, du_new2);
                   }
               }
 
             /* Long-range Coulomb, scaled by inverse temperature: */
-            VecAXPY (du_new, PD->beta, BHD->u2[i][j]);
+            VecAXPY (du_new, PD->beta, u2[i][j]);
 
             /*
               Add  an  effective  Coulomb  field of  boundary  surface
@@ -1340,9 +1381,24 @@ Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&omega[i][j]);
 
-  finalize_state (BHD, m);
+  /* deallocation of work vectors */
+  MPI_Barrier( PETSC_COMM_WORLD);
 
-  return PETSC_NULL;
+  bgy3d_vec_destroy2 (m, u2);
+  bgy3d_vec_destroy2 (m, u2_fft);
+  bgy3d_vec_destroy2 (m, u_ini);
+  bgy3d_vec_destroy2 (m, c2);
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        bgy3d_vec_destroy1 (3, f[i][j]);
+        bgy3d_vec_destroy1 (3, f_l[i][j]);
+      }
+
+  bgy3d_vec_destroy (&gfg2_fft);
+
+  bgy3d_state_destroy (BHD);
 }
 
 
