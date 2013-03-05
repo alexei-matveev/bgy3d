@@ -279,7 +279,7 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
   HNC equation.  Indirect correlation  γ appears as a primary variable
   here:
 */
-static void solvent_solve (const ProblemData *PD, Vec g[1][1])
+void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
 {
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
