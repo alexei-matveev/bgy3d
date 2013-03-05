@@ -556,8 +556,11 @@ static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
   Site *solvent_sites;          /* solvent_sites[m] */
   char *solvent_name;
 
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
   to_sites (solvent, &m, &solvent_sites, &solvent_name);
 
+  /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
 
   /* This writes to the disk: */
@@ -589,6 +592,7 @@ static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
 
   Vec g[m][m];
 
+  /* This writes to the disk: */
   hnc3d_solvent_solve (&PD, m, solvent_sites, g);
 
   free (solvent_name);
@@ -687,10 +691,7 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 
   /*
     This  takes part  of  the  input from  the  disk, returns  solvent
-    distribution  in Vec  g[] (dont  forget to  destroy them).   If no
-    additional charge distribution is  associated with the solute pass
-    NULL as  the function  pointer. Similarly, if  you do not  want an
-    iterator over the solvent potential pass NULL:
+    distribution in Vec g[] (dont forget to destroy them).:
   */
   Vec g[m];
   hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, g);
