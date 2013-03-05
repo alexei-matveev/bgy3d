@@ -239,6 +239,17 @@ static SCM from_vec (Vec vec)
   return obj;
 }
 
+
+/* Build a list starting from the tail: */
+static SCM from_vec1 (int m, const Vec g[m])
+{
+  SCM gs = SCM_EOL;             /* empty list */
+  for (int i = m - 1; i >= 0; i--)
+    gs = scm_cons (from_vec (g[i]), gs);
+  return gs;
+}
+
+
 static State* to_state (SCM state)
 {
   scm_assert_smob_type (state_tag, state);
@@ -656,10 +667,7 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
   free (solvent_sites);
 
   /* Build a list starting from the tail: */
-  SCM gs = SCM_EOL;
-  for (int i = m - 1; i >= 0; i--)
-    gs = scm_cons (from_vec (g[i]), gs);
-
+  SCM gs = from_vec1 (m, g);
   SCM v = from_pointer (iter);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
@@ -702,10 +710,7 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
   free (solvent_sites);
 
   /* Build a list starting from the tail: */
-  SCM gs = SCM_EOL;
-  for (int i = m - 1; i >= 0; i--)
-    gs = scm_cons (from_vec (g[i]), gs);
-
+  SCM gs = from_vec1 (m, g);
   SCM v = from_pointer (NULL);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
