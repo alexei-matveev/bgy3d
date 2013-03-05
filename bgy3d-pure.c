@@ -25,61 +25,6 @@ static const real NORM_REG2 = 1.0e-2;
 #undef eO
 #undef qO
 
-static State* initialize_state (const ProblemData *PD, int m)
-{
-  State *BHD = bgy3d_state_make (PD);
-
-  /* Code used to be verbose: */
-  bgy3d_state_print (BHD);
-
-  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
-  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
-
-  /*
-    Create  more global  vectors  in addition  to  those allocated  by
-    bgy3d_state_make().   FIXME: u2,  u2_fft probably  differ  only by
-    factors:
-  */
-  bgy3d_vec_create2 (BHD->da, m, BHD->u2);
-  bgy3d_vec_create2 (BHD->dc, m, BHD->u2_fft); /* complex */
-  bgy3d_vec_create2 (BHD->da, m, BHD->c2);
-  bgy3d_vec_create2 (BHD->da, m, BHD->u_ini);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      FOR_DIM
-        {
-          BHD->F[j][i][dim] = BHD->F[i][j][dim] = bgy3d_vec_create (BHD->da);
-          BHD->F_l[j][i][dim] = BHD->F_l[i][j][dim] = bgy3d_vec_create (BHD->da);
-        }
-
-  /* Allocate more memory for fft */
-  BHD->gfg2_fft = bgy3d_vec_create (BHD->dc);       /* complex */
-
-  return BHD;
-}
-
-
-static void finalize_state (State *BHD, int m)
-{
-  MPI_Barrier( PETSC_COMM_WORLD);
-
-  bgy3d_vec_destroy2 (m, BHD->u2);
-  bgy3d_vec_destroy2 (m, BHD->u2_fft);
-  bgy3d_vec_destroy2 (m, BHD->u_ini);
-  bgy3d_vec_destroy2 (m, BHD->c2);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        bgy3d_vec_destroy1 (3, BHD->F[i][j]);
-        bgy3d_vec_destroy1 (3, BHD->F_l[i][j]);
-      }
-
-  bgy3d_vec_destroy (&BHD->gfg2_fft);
-
-  bgy3d_state_destroy (BHD);
-}
 
 /* g := exp[-(u0 + du)], with a sanity check: */
 void bgy3d_compute_g (Vec g, Vec u0, Vec du)
