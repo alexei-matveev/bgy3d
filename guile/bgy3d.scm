@@ -478,7 +478,9 @@ computes the sum of all vector elements."
         (hnc3d-run-solvent solvent '()))) ; Use defaults and Petsc env
      ;;
      ((option-ref opts 'BGY2Site #f)
-      (bgy3d-run-solvent '()))          ; Use defaults and Petsc env
+      (let ((solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
+        (bgy3d-run-solvent solvent
+			   '())))          ; Use defaults and Petsc env
      ;;
      ;; Solute with solvent.  Note that at variance with the legacy
      ;; code the function find-molecule uses on-disk database in
@@ -546,7 +548,7 @@ computes the sum of all vector elements."
          ;; Only then run pure solvent, if --solvent was present in the
          ;; command line:
          ;;
-         (bgy3d-run-solvent settings))
+         (bgy3d-run-solvent solvent settings))
         ;;
         ((or "solute" "solutes")
          ;;

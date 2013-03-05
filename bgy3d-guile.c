@@ -546,14 +546,22 @@ static void vec_init_type (void)
   scm_c_define_gsubr ("vec-map2", 3, 0, 0, vec_map2);
 }
 
-static SCM guile_bgy3d_solvent (SCM alist)
+static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (alist);
 
+  int m;                        /* number of solvent sites */
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
+
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
+
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
+
   /* This writes to the disk: */
-  BGY3d_solve_2site (&PD, NULL);
+  bgy3d_solve_solvent (&PD, m, solvent_sites);
 
   return alist;
 }
@@ -767,7 +775,7 @@ static SCM guile_bgy3d_module_init (void)
      module itself or by an explicit (use-modules ...): */
   scm_c_define_gsubr ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
   scm_c_define_gsubr ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
-  scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_bgy3d_solvent);
+  scm_c_define_gsubr ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_bgy3d_solute);
   scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
