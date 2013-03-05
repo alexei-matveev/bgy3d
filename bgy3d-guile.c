@@ -559,19 +559,33 @@ static SCM guile_bgy3d_solvent (SCM alist)
 }
 
 
-static SCM guile_hnc3d_solvent (SCM alist)
+static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
-  const ProblemData PD = problem_data (alist);
+  const ProblemData PD = problem_data (settings);
 
-  Vec g[1][1];
+  int m;                        /* number of solvent sites */
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
 
-  hnc3d_solvent_solve (&PD, g);
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
 
-  bgy3d_vec_destroy (&g[0][0]);
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
 
-  return alist;
+  Vec g[m][m];
+
+  hnc3d_solvent_solve (&PD, m, solvent_sites, g);
+
+  free (solvent_name);
+  free (solvent_sites);
+
+  bgy3d_vec_destroy2 (m, g);
+
+  return settings;
 }
 
 
@@ -751,7 +765,7 @@ static SCM guile_bgy3d_module_init (void)
   /* If Scheme executes this code  inside a module (which we do), then
      all these gsubrs will be  module procedures available only in the
      module itself or by an explicit (use-modules ...): */
-  scm_c_define_gsubr ("hnc3d-run-solvent", 1, 0, 0, guile_hnc3d_solvent);
+  scm_c_define_gsubr ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
   scm_c_define_gsubr ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
   scm_c_define_gsubr ("bgy3d-run-solvent", 1, 0, 0, guile_bgy3d_solvent);
   scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_bgy3d_solute);

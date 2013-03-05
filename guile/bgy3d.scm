@@ -474,7 +474,8 @@ computes the sum of all vector elements."
      ;; Pure solvent:
      ;;
      ((option-ref opts 'HNC #f)
-      (hnc3d-run-solvent '()))          ; Use defaults and Petsc env
+      (let ((solvent (find-molecule (option-ref opts 'solvent "LJ"))))
+        (hnc3d-run-solvent solvent '()))) ; Use defaults and Petsc env
      ;;
      ((option-ref opts 'BGY2Site #f)
       (bgy3d-run-solvent '()))          ; Use defaults and Petsc env

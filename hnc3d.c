@@ -8,6 +8,7 @@
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
 #include "bgy3d-solutes.h"      /* struct Site */
+#define G 1.2
 #include "bgy3d-force.h"        /* Lennard_Jones() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
 #include "hnc3d.h"
@@ -16,15 +17,15 @@
 // #define HNC3D_T                 /* use γ as primary variable */
 
 
-/* Fake solvent */
-static const Site default_solvent[] =
-  {{"lj", {0.0, 0.0, 0.0}, 1.0, 1.0, 0.0}};
-
-
-static void solute_field (const DA da, const ProblemData *PD, Vec pot)
+static void pair (const DA da, const ProblemData *PD,
+                  const Site a, const Site b, /* by value? */
+                  Vec pot)
 {
-  real **x_M;
-  int N_M;
+  /* Pair   interaction  parameters:  geometric   average,  arithmetic
+     average, and charge product. Site coordinates are not used. */
+  const real epsilon = sqrt (a.epsilon * b.epsilon);
+  const real sigma = 0.5 * (a.sigma + b.sigma);
+  const real q2 = a.charge * b.charge;
 
   real interval[2];
   interval[0] = PD->interval[0];
@@ -33,12 +34,6 @@ static void solute_field (const DA da, const ProblemData *PD, Vec pot)
   real h[3];
   FOR_DIM
     h[dim] = PD->h[dim];
-
-  const real epsilon = 1.0;
-  const real sigma = 1.0;
-
-  /* Load molecule from file */
-  x_M = Load_Molecule (&N_M);
 
   VecSet (pot, 0.0);
 
@@ -53,23 +48,16 @@ static void solute_field (const DA da, const ProblemData *PD, Vec pot)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          /* set force vector */
-          /* loop over particles and grid */
-          for (int k = 0; k < N_M; k++)
-            {
-              real r[3];
-              FOR_DIM
-                r[dim] = i[dim] * h[dim] + interval[0] - x_M[k][dim];
+          real r[3];
+          FOR_DIM
+            r[dim] = i[dim] * h[dim] + interval[0];
 
-              const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
+          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-              pot_[i[2]][i[1]][i[0]] +=
-                Lennard_Jones (r_s, epsilon, sigma);
-            }
+          pot_[i[2]][i[1]][i[0]] +=
+            Lennard_Jones (r_s, epsilon, sigma) + Coulomb_short (r_s, q2);
         }
   DAVecRestoreArray (da, pot, &pot_);
-
-  Molecule_free (x_M, N_M);
 }
 
 
@@ -340,22 +328,28 @@ void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
 #else
 /* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
    appears as a primary variable here: */
-void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
+void hnc3d_solvent_solve (const ProblemData *PD,
+                          int m, const Site solvent[m],
+                          Vec g[m][m])
 {
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
   Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec v = bgy3d_vec_create (HD->da); /* solvent-solvent interaction */
 
-  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
-     solute-solvent interactions: */
-  solute_field (HD->da, HD->PD, v);
+  Vec v[m][m];
+  bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
+
+  /* Get solvent-solvent site-site interactions: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /* Create intial guess: */
   Vec c = bgy3d_vec_create (HD->da);
   VecSet (c, 0.0);
 
+  assert (m == 1);
   /*
     Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
     zero. Cast is  there to silence the mismatch in  the type of first
@@ -365,7 +359,7 @@ void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
     Ctx_c ctx =
       {
         .HD = HD,
-        .v = v,
+        .v = v[0][0],
         .t = t,
         .t_fft = t_fft,
         .c_fft = c_fft,
@@ -385,7 +379,7 @@ void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
   bgy3d_vec_destroy (&t_fft);
   bgy3d_vec_destroy (&c);
   bgy3d_vec_destroy (&c_fft);
-  bgy3d_vec_destroy (&v);
+  bgy3d_vec_destroy2 (m, v);
 
   bgy3d_state_destroy (HD);
 
@@ -406,9 +400,22 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD,
                "Solving 3d-HNC equation.\n");
 
-  Vec g[1][1];
-  hnc3d_solvent_solve (PD, g);
+  int m;                        /* number of solvent sites */
+  const Site *solvent;          /* solvent[m] */
 
+  char name[200] = "LJ";        /* solvent & default solute */
+
+  /* Get the number of solvent sites and their parameters. Get it from
+     the solute tables: */
+  bgy3d_solute_get (name, &m, &solvent);
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
+
+  Vec g[m][m];
+  hnc3d_solvent_solve (PD, m, solvent, g);
+
+  assert (m == 1);
   return g[0][0];               /* bgy3d_vec_destroy (&) it! */
 }
 
@@ -592,14 +599,14 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   int m;                        /* number of solvent sites */
   const Site *solvent;          /* solvent[m] */
 
-  char name[200] = "LJ";        /* default solvent & solute */
+  char name[200] = "LJ";        /* solvent & default solute */
 
   /* Get the number of solvent sites and their parameters. Get it from
      the solute tables: */
   bgy3d_solute_get (name, &m, &solvent);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
 
   /* Get solute name or stay with the default: */
   bgy3d_getopt_string ("--solute", name, sizeof name);
