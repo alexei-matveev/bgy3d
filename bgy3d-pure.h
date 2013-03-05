@@ -14,3 +14,4 @@ void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du);
 
 Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini);
 Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini);
+void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m]);
