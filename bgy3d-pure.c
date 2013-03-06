@@ -1118,8 +1118,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
               }
 
             /* FIXME: 3-site code does not do this: */
-            if (m == 2)
-              VecPointwiseMult (du_new, du_new, c2[i][j]);
+            VecPointwiseMult (du_new, du_new, c2[i][j]);
 
             /*
               These are two sums  over k /= i and k /=  j. See lines 2
