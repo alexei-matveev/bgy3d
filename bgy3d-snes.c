@@ -37,8 +37,6 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, Function F, Vec x)
 */
 void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
 {
-  (void) PD;             /* FIXME: convergence criteria are ignored */
-
   /* Create the snes environment */
   SNES snes;
   SNESCreate (PETSC_COMM_WORLD, &snes);
