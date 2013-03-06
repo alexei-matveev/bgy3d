@@ -85,8 +85,16 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
   }
 
   /* set atol, rtol, stol , its, fct. eval. */
-  // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, 1.0e-4 , 50, 10000);
-  // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, PD->norm_tol, 50, 10000);
+  {
+    real atol, rtol, stol;
+    int max_it, max_funcs;
+
+    /* Only max-iter  changed. Sometimes it  is convenient to  let the
+       solver do just one, or just a few iterations: */
+    SNESGetTolerances (snes, &atol, &rtol, &stol, &max_it, &max_funcs);
+    SNESSetTolerances (snes, atol, rtol, stol, PD->max_iter, max_funcs);
+    // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, 1.0e-4 , 50, 10000);
+  }
 
   {
     /* This linear equation solver is  most probably used to solve the
@@ -121,7 +129,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
 
   /*
     Runtime options  will override  default parameters.  Note  that if
-    SNESSetJacobian() is not called  one, has to request a matrix-free
+    SNESSetJacobian() is not called,  one has to request a matrix-free
     approximation  from the command  line with  "-snes_mf".  Otherwise
     the next call terminates with an error message saying "Matrix must
     be set first"!
