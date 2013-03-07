@@ -165,12 +165,16 @@ typedef struct State
   /* Immutable command line parameters are stored here: */
   const ProblemData *PD;
 
-  /* Real work vectors: */
-  Vec v[3];
+  /*
+    Real  and   complex  work  vectors.   Vec  v_fft[3]  is   used  by
+    bgy3d_pair()  to offer work  space to  ComputeFFTfromCoulomb(), by
+    Compute_dg_inter(), and Compute_dg_intra():
+  */
+  Vec v[3];                     /* real */
+  Vec v_fft[3];                 /* complex */
 
-  /* Complex work vectors to store FFT images: */
+  /* A few more complex work vectors to store FFT images: */
   Vec fft_scratch;              /* complex */
-  Vec fg2_fft[3];               /* complex */
   Vec gfg2_fft;                 /* complex */
 
 #ifdef L_BOUNDARY

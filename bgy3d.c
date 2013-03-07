@@ -148,7 +148,7 @@ State* bgy3d_state_make (const ProblemData *PD)
 
   /* Complex  vectors for  k-space representations.   These  three are
      used by ComputeFFTfromCoulomb(): */
-  bgy3d_vec_create1 (BHD->dc, 3, BHD->fg2_fft); /* complex */
+  bgy3d_vec_create1 (BHD->dc, 3, BHD->v_fft); /* complex */
 
   BHD->fft_scratch = bgy3d_vec_create (BHD->dc); /* complex */
 
@@ -160,7 +160,7 @@ void bgy3d_state_destroy (State *BHD)
   MPI_Barrier (PETSC_COMM_WORLD);
 
   bgy3d_vec_destroy1 (3, BHD->v);
-  bgy3d_vec_destroy1 (3, BHD->fg2_fft);
+  bgy3d_vec_destroy1 (3, BHD->v_fft);
 
   bgy3d_vec_destroy (&BHD->fft_scratch);
 

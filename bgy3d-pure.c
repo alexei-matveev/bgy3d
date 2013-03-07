@@ -182,11 +182,11 @@ void bgy3d_pair (State *BHD,
     with m being number of solvent sites, of almost the same field and
     repeating unnecessary FFTs?
 
-    Side effects: fills BHD->fg2_fft[3] with FFT of long range Coulomb
-    force.  Though it  does  not appear  to  be used  further in  this
+    Side effects:  fills BHD->v_fft[3] with FFT of  long range Coulomb
+    force.   Though it  does not  appear to  be used  further  in this
     branch.
   */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->fg2_fft, q2 * damp);
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->v_fft, q2 * damp);
 
   /*
     Sort-range  potential/force is  specific  for each  pair, on  the
@@ -372,7 +372,7 @@ static void Compute_dg_inter (State *BHD,
   const real L = PD->interval[1] - PD->interval[0];
 
   Vec gb_fft = BHD->fft_scratch;
-  Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
+  Vec *fg2_fft = BHD->v_fft;    /* fg2_fft[3] */
 
   /************************************************/
   /* rhob * FS*gab gb */
@@ -590,7 +590,7 @@ static void Compute_dg_intra (State *BHD,
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
-  Vec *fg2_fft = BHD->fg2_fft;  /* fg2_fft[3] */
+  Vec *fg2_fft = BHD->v_fft;    /* fg2_fft[3] */
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
