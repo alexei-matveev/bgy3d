@@ -381,7 +381,7 @@ computes the sum of all vector elements."
     ;; At the moment  the function bgy3d-run-solvent echos settings as
     ;; is, the output is written to disk instead:
     ;;
-    (bgy3d-run-solvent settings)        ; writes g??.bin files to disk
+    (bgy3d-run-solvent solvent settings) ; writes g??.bin files to disk
     ;;
     ;; The  function bgy3d-run-solute allocates and returns  a list of
     ;; Petsc Vecs and a potential (returned as multiple values). It is
