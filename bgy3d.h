@@ -175,7 +175,6 @@ typedef struct State
 
   /* A few more complex work vectors to store FFT images: */
   Vec fft_scratch;              /* complex */
-  Vec gfg2_fft;                 /* complex */
 
 #ifdef L_BOUNDARY
   Mat dirichlet_mat;
