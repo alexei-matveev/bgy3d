@@ -491,7 +491,16 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   {
     Vec x = bgy3d_vec_create (BHD->da);
 
-    bgy3d_impose_laplace_boundary (BHD, ve, x);
+    /*
+      Correction is  a linear function  of potential on  the boundary.
+      Almost  the  same  can  be  achieved by  invoking  the  function
+      bgy3d_impose_laplace_boundary  (BHD,  ve,  x) except  that  that
+      function also zeroes the boundary explicitly:
+    */
+    MatMult (BHD->dirichlet_mat, ve, x);
+
+    /* Subtract it, making ve vanish at the boundary: */
+    VecAXPY (ve, -1.0, x);
 
     bgy3d_vec_destroy (&x);
   }
