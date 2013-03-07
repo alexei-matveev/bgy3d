@@ -138,6 +138,19 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
      0: */
   SNESSolve (snes, PETSC_NULL, x);
 
+  /*
+    I  looks like SNESGetSolution()  is only  good for  callbacks that
+    need to  extract intermediate solution from the  SNES object. Here
+    it is fully redundant.   Do not bgy3d_vec_destroy (&y), check this
+    assert out. Appears to hold  even when SNES does not converge, say
+    due to iteration limit:
+  */
+  {
+    Vec y;
+    SNESGetSolution (snes, &y);
+    assert (x == y);
+  }
+
   bgy3d_vec_destroy (&r);
 
   SNESDestroy (snes);
