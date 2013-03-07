@@ -357,8 +357,8 @@ static void kapply (const State *BHD,
 }
 
 /*
-  Side effects:  uses BHD->{v[], fft_scratch,  fg2_fft[], gfg2_fft} as
-  work Vecs. Does (4 + 1) FFTs. One inverse.
+  Side  effects:   uses  BHD->{v[],  v_fft[],   fft_scratch}  as  work
+  Vecs. Does (4 + 1) FFTs. One inverse.
 */
 static void Compute_dg_inter (State *BHD,
                               Vec fab_s[3], Vec fab_l[3], Vec gab,
