@@ -881,13 +881,26 @@ void bgy3d_solute_solve (const ProblemData *PD,
       /*
         Set initial guess, either here or by reading from file. At the
         end of the "dump" loop du[] is written to disk, so that in the
-        next iteration we will read an updated version:
+        next iteration we will read an updated version.
+
+        The  unscreened  Coulomb  field  of  the  solute  may  be  too
+        attractive in  some regions close  to the excluded  volume, so
+        that initial  distribution g0(x) has  unphysically large peaks
+        in  that region.  In  such cases  (e.g.  CS2/QM)  the solution
+        immediately  diverges.   The  original  code handled  this  by
+        omitting the Coulomb long from g0(x) and added that to u(x) in
+        the body of iterations.  We  here start with the initial guess
+        u(x) = - [(ε - 1) / ε] * q * uc(x) with some large ε instead.
       */
       if (bgy3d_getopt_test ("--load-guess"))
         bgy3d_vec_read1 ("u%d.bin", m, u);
       else
         for (int i = 0; i < m; i++)
-          VecSet (u[i], 0.0);
+          {
+            const real eps = 80.0; /* FIXME: literal */
+            VecCopy (uc, u[i]);
+            VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
+          }
 
       {
         /*
