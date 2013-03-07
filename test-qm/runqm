@@ -27,13 +27,15 @@
              ;; BGY3d functionality:
              ;;
              ((guile bgy3d)
-              #:select (bgy3d-run)))
+              #:select (bgy3d-solvent
+                        bgy3d-solute)))
 
 ;;;
-;;; ParaGauss looks up this name in the top-level environment. We bind
-;;; it to a procedure later:
+;;; ParaGauss looks  up these names  in the top-level  environment. We
+;;; bind it to a procedure later:
 ;;;
-(define bgy3d-hook (if #f #f))          ; unspecified yet
+(define bgy3d-solvent-hook bgy3d-solvent)
+(define bgy3d-solute-hook (if #f #f))   ; unspecified yet
 
 ;;;
 ;;; The   input  file   is  supposed   to  contain   (at   least)  two
@@ -47,7 +49,9 @@
 ;;;
 ;;;   ((solute "hydrogen chloride"))
 ;;;
-;;; Note the extra pair of parens, it should be a *list* of forms.
+;;; Note the  extra pair of  parens, it should  be a *list*  of forms.
+;;; FIXME: the input would need to specify the solvent as well. So far
+;;; default solvent is used.
 ;;;
 (let* ((argv (command-line))
        (path (second argv))            ; first arg is the program name
@@ -59,12 +63,12 @@
   (pretty-print opts)
   (pretty-print table)
   ;;
-  ;; PG  calls bgy3d-hook with  solute sites (having fake  force field
-  ;; parameters) and a pointer to a function returning the density. In
-  ;; this  case we call bgy3d-run with  a name of the  table read from
-  ;; the input prepended to the list of arguments:
+  ;; PG calls bgy3d-solute-hook with solute sites (having fake force
+  ;; field parameters) and a pointer to a function returning the
+  ;; density. In this case we call bgy3d-run with a name of the table
+  ;; read from the input prepended to the list of arguments:
   ;;
-  (set! bgy3d-hook
+  (set! bgy3d-solute-hook
         (lambda args
-          (apply bgy3d-run table args))) ; returns potential
+          (apply bgy3d-solute table args))) ; returns potential
   (qm-main argv))

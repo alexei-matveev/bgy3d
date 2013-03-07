@@ -27,7 +27,8 @@
             vec-print
             bgy3d-run-solvent
             bgy3d-run-solute
-            bgy3d-run
+            bgy3d-solvent
+            bgy3d-solute
             bgy3d-test))
 
 ;;;
@@ -359,9 +360,19 @@ computes the sum of all vector elements."
                 (+ 1 vec-id))))))
 
 ;;;
-;;; This hook is called from PG:
+;;; These hooks, bgy3d-solvent and bgy3d-solute, are called from PG:
 ;;;
-(define (bgy3d-run name sites funptr)
+(define (bgy3d-solvent)
+  (let ((settings	bgy3d-settings)
+        (solvent	(find-molecule *default-molecule*)))
+    ;;
+    ;; At the moment  the function bgy3d-run-solvent echos settings as
+    ;; is, the output is written to disk instead:
+    ;;
+    (bgy3d-run-solvent solvent settings)))
+
+
+(define (bgy3d-solute name sites funptr)
   "To be called from QM code."
   (let ((settings	bgy3d-settings)
         (solvent	(find-molecule *default-molecule*))
@@ -379,11 +390,6 @@ computes the sum of all vector elements."
     (maybe-print solute)
     (maybe-print settings)
     (force-output)
-    ;;
-    ;; At the moment  the function bgy3d-run-solvent echos settings as
-    ;; is, the output is written to disk instead:
-    ;;
-    (bgy3d-run-solvent solvent settings) ; writes g??.bin files to disk
     ;;
     ;; The  function bgy3d-run-solute allocates and returns  a list of
     ;; Petsc Vecs and a potential (returned as multiple values). It is
