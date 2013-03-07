@@ -924,14 +924,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
 
   /* allocation for local work vectors */
-  Vec f[m][m][3], f_l[m][m][3];
-  Vec u0[m][m], c2[m][m];
-  Vec u2[m][m], u2_fft[m][m];
-
-  bgy3d_vec_create2 (BHD->da, m, u2);
-  bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
-  bgy3d_vec_create2 (BHD->da, m, c2);
-  bgy3d_vec_create2 (BHD->da, m, u0);
+  Vec f[m][m][3], f_l[m][m][3]; /* full and long range pair force */
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -940,6 +933,28 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
           f[j][i][dim] = f[i][j][dim] = bgy3d_vec_create (BHD->da);
           f_l[j][i][dim] = f_l[i][j][dim] = bgy3d_vec_create (BHD->da);
         }
+
+  /*
+   The short-range solvent site-site  potentials for each pair (scaled
+   by inverse  temperature beta) is  initially put into  the following
+   array:
+  */
+  Vec u0[m][m];
+  Vec c2[m][m];                 /* exp(- beta * LJ_repulsive(i, j) */
+
+  bgy3d_vec_create2 (BHD->da, m, u0);
+  bgy3d_vec_create2 (BHD->da, m, c2);
+
+  /*
+    Long-range Coulomb interaction for  solvent site pairs. So far the
+    pairs differ only by a factor  q[i] * q[j]. Maybe we should rather
+    store just one?  Here u2_fft are the Fourier transform of u2.  The
+    same redundancy. Those are complex Vecs.
+  */
+  Vec u2[m][m], u2_fft[m][m];
+
+  bgy3d_vec_create2 (BHD->da, m, u2);
+  bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
 
   /* Allocate more memory for fft */
   Vec gfg2_fft = bgy3d_vec_create (BHD->dc); /* complex */
