@@ -6,43 +6,50 @@
 /*
   According to Page. 115 - 116:
 
+    g(x) = g (x) exp[-u(x)]                                        (1)
             0
-    g(x) = g (x) exp[-u(x)]
 
   with
 
-     0               LJ       Cs       Cl
-    g (x) = exp[-β (V  (x) + V  (x) + V  (x)]
+    g (x) = exp[-β (V  (x) + V  (x) + V  (x))]                     (2)
+     0               LJ       CS       CL
 
-  then g(x) rewritten as:
+  Here  and below  LJ stays  for Lennard-Jones,  CS stays  for Coulomb
+  short, and  CL stays for Coulomb  long.  Then g(x)  can be rewritten
+  as:
 
-           ~ 0            Cl
+           ~
     g(x) = g  (x) exp[-β V  (x) - u(x)]
+             0            CL
 
   with
 
-    ~ 0               LJ       Cs
+    ~
     g  (x) = exp[-β (V  (x) + V  (x))]
+      0               LJ       CS
 
   then BGY equation written as:
 
-     ~              Cl
+     ~
     Δu = K(g) + β ΔV
+                    CL
 
   with
-           ~ 0            Cl              ~ 0         ~
-    g(x) = g  (x) exp[-β V  (x) - u(x)] = g  (x) exp[-u(x)]
+           ~                             ~          ~
+    g(x) = g (x) exp[-β V  (x) - u(x)] = g (x) exp[-u(x)]
+            0            CL               0
 
                   ~
-  the solution of u can be repsented by a difference of two functions:
+  the solution of u can be represented by a difference of two functions:
 
     ~   -    *
     u = u - u
 
   while:
 
-     -              Cl       -
+     -                       -
     Δu = K(g) + β ΔV   in Ω, u(∂Ω) = f,
+                    CL
 
       *           *
     Δu = 0 in Ω, u (∂Ω) = f,
@@ -53,17 +60,31 @@
 
   we get:
 
-    -          Cl
+    -
     u = u + β V
+               CL
 
-   Cl         Cl
-  V      and V      are needed to calculated beforehand
-   (A, M)     (B, M)
+  Just  like  in  the  last  equation  the  original  code  added  the
+  long-range  Coulomb term  with the  (back then  erroneously missing)
+  inverse temperature  factor to  the final PMF,  u(x), at the  end of
+  iteration  after computing the  convolution term  and all  the magic
+  intra-molecular  contributions. By now  it is  treated more  like in
+  Eqs.   (1)  and  (2) where  it  is  a  part  of zero  density  limit
+  potential. Instead the the initial  guess for PMF u(x) is defined to
+  (almost) negative of the Coulomb long: - [(ε - 1) / ε] uc(x).  There
+  is a kind of arbitrarness  whether to assign constant terms to g₀(x)
+  or to u(x).
 
-  and sum  to the solution  by the end  of each iteration  for solvent
-  site A and B, in the code hereafter.  These site specific potentials
-  can  be  obtained  by  multiplying  the  common  long-range  Coulomb
-  potential (stored in Vec uc) by the solvent site charge.
+  The Coulomb  potential of  the solute common  for all  solvent sites
+  that  differ only  by their  charges is  calculated  beforehand. The
+  site-specific potentials  can be obtained by  multiplying the common
+  long-range Coulomb potential (stored in  Vec uc) by the solvent site
+  charge.
+
+  There is  another story about short- and  long-range Coulomb. Namely
+  that of the two such terms in the *solvent* kernel K[]. The two were
+  intrinsically related in the pure  code where solute and the solvent
+  are the same species. FIXME: elaborate this point.
 */
 
 
@@ -581,8 +602,8 @@ static void iterate (State *BHD,
                du_acc_fft); /* incremented! */
 
       /*
-        Compute  IFFT  of  du_acc_fft  for  the  current  site.  Other
-        contributions are added to the real space du_acc below:
+        Compute  IFFT  of  du_acc_fft  for the  current  site.   Other
+        contributions are added to the real space du[] below:
       */
       MatMultTranspose (BHD->fft_mat, du_acc_fft, du[i]);
 
@@ -948,19 +969,23 @@ void bgy3d_solute_solve (const ProblemData *PD,
         bgy3d_vec_save_ascii1 (fmt, m, g);
       }
 
-      /* Save du to binary file. FIXME: Why du and not g? */
+      /*
+        On  request,  save  u[]   to  binary  file.   If  you  provide
+        --load-guess  in the  next  run this  u[]  can be  used as  an
+        initial guess.  See above.
+      */
       if (bgy3d_getopt_test ("--save-guess"))
         bgy3d_vec_save1 ("u%d.bin", m, u);
 
     } /* for (damp = ... ) */
 
   /*
-    Compute, and eveutually  (when Context** v is not  NULL) return to
+    Compute, and eventually  (when Context** v is not  NULL) return to
     the  caller  the  iterator  over electrostatic  potential  of  the
     solvent:
   */
   {
-    /* Solvent electrostaic potential field: */
+    /* Solvent electrostatic potential field: */
     Vec ve = bgy3d_vec_create (BHD->da);
 
     /* Keep solvent charge density for integration: */
