@@ -79,7 +79,9 @@
 
 ;;;
 ;;; Settings  are  handled  as  an  association list,  these  are  the
-;;; settings used in regression tests:
+;;; settings used in regression tests. To get butanoic acid and hexane
+;;; (two larges ones) convere when  treated by QM one needs about 1500
+;;; iterations (well, we should make the solver better).
 ;;;
 (define bgy3d-settings
   (let ((half-size 10.0))
@@ -87,8 +89,8 @@
      ((N . 32)                          ; grid dimension
       (rho . 0.018)                     ; solvent density
       (beta . 1.1989)                   ; inverse temperature
-      (norm-tol . 1.0e-2)               ; convergence threshold
-      (max-iter . 320)                  ; max number of iterations
+      (norm-tol . 1.0e-7)               ; convergence threshold
+      (max-iter . 1500)                 ; max number of iterations
       (L . (unquote half-size))         ; [-L, L] gives the box size
       (zpad . (unquote half-size))      ; affects boundary condition
       (damp-start . 1.0)                ; scaling factor?
