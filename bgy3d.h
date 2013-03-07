@@ -165,39 +165,10 @@ typedef struct State
   /* Immutable command line parameters are stored here: */
   const ProblemData *PD;
 
-  /*
-   * In much of the code one refers  to the two sites by literal H and
-   * O, though the actual sites may be different.  Let us stick to the
-   * convention that data for H is  stored in first- and data for O is
-   * stored  in  second  position  of  an array.  For  symmetric  pair
-   * quantities  one may  chose  to store  them  in a  2x2 array,  say
-   * g2[2][2] with a constrain that g2[0][1] == g2[1][0].
-   */
-  Vec F[2][2][3];               /* sort range pair force */
-  Vec F_l[2][2][3];             /* long range pair force, redundant */
-  Vec v[3];                     /* work vectors */
+  /* Real work vectors: */
+  Vec v[3];
 
-  /* Long-range Coulomb interaction for solvent site pairs. So far the
-     pairs differ only by a factor q[i] * q[j]. Maybe we should rather
-     store just one? */
-  Vec u2[2][2];
-
-  Vec u2_fft[2][2];             /* The  fourier transform of  u2.  The
-                                   same redundancy. Complex Vecs. */
-
-  Vec c2[2][2];                 /* exp(-  beta  * LJ_repulsive(i,  j),
-                                   used only for pure solvent. */
-
-  /*
-   The short-range solvent site-site  potentials for each pair (scaled
-   by inverse  temperature beta) is  initially put into  the following
-   array:
-   */
-  Vec u_ini[2][2];              /* used for pure solvent only */
-
-  /*
-    Parallel FFT.  These are the complex vectors to store FFT images:
-  */
+  /* Complex work vectors to store FFT images: */
   Vec fft_scratch;              /* complex */
   Vec fg2_fft[3];               /* complex */
   Vec gfg2_fft;                 /* complex */
@@ -212,9 +183,18 @@ typedef struct State
 #endif
 
 #ifdef WITH_EXTRA_SOLVERS
-  /* BGY3dM 3-site  stuff.  These are vector  field quantities indexed
-     by  two site  indices. FIXME:  get rid  of them,  see  the 2-site
-     version. */
+  /*
+    BGY3dM 3-site  stuff.  These  are vector field  quantities indexed
+    Uby  two site  indices. FIXME:  get rid  of them,  see  the 2-site
+    version.
+
+    In much of the  code one refers to the two sites  by literal H and
+    O, though the actual sites may  be different.  Let us stick to the
+    convention that data  for H is stored in first- and  data for O is
+    stored  in  second  position  of  an array.   For  symmetric  pair
+    quantities  one  may chose  to  store them  in  a  2x2 array,  say
+    g2[2][2] with a constrain that g2[0][1] == g2[1][0].
+  */
   Vec fs_g2_fft[2][2][3];       /* complex */
   Vec fl_g2_fft[2][2][3];       /* complex */
 
