@@ -5,8 +5,14 @@
 ;;; This script uses both PG  and BGY3d functionality, so set the path
 ;;; accordingly and use the proper interpreter in the shebang line.
 ;;;
-(set! %load-path (cons "/home/matveev/darcs/bgy3d" %load-path))
-(set! %load-path (cons "/home/matveev/darcs/ttfs-mac" %load-path))
+(cond-expand
+ ((not guile-2) (use-modules (ice-9 syncase))) ; eval-when for 1.8
+ (else))                                ; nothing
+
+(eval-when
+ (eval load compile)      ; extend %load-path at compile time with 2.0
+ (set! %load-path (cons "/home/matveev/darcs/bgy3d" %load-path))
+ (set! %load-path (cons "/home/matveev/darcs/ttfs-mac" %load-path)))
 
 ;;;
 ;;; FIXME: can we make PG to look up the names in a specific module to
