@@ -1605,7 +1605,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
                             u2_fft[0][1], omega[0][1], gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
-          VecAXPY(du_new, PD->beta, BHD->u2[0][0]);
+          VecAXPY(du_new, PD->beta, u2[0][0]);
 
           if (iter >= 0)
             bgy3d_impose_laplace_boundary (BHD, du_new, x_lapl[0][0]);
