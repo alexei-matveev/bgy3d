@@ -162,17 +162,22 @@ typedef struct State
   DA da, dc;
   Mat fft_mat;
 
+  /*
+    Distributed  arrays (DA) descriptors  offer an  infrastructure for
+    temp Vecs.   You can get them with  DAGetGlobalVector() and return
+    with DARestoreGlobalVector().  Do NOT VecDestroy() them! Note that
+    the Vecs  are created  as needed, but  up to  ~10 of them  will be
+    "cached" and  consume the memory until destroyed  together with DA
+    object upon DADestroy().
+
+    Code needs both real and complex work vectors.  Up to four complex
+    Vecs   are  used   by  bgy3d_pair()   to  offer   work   space  to
+    ComputeFFTfromCoulomb(),      by      Compute_dg_inter(),      and
+    Compute_dg_intra(). The last one needs the most.
+  */
+
   /* Immutable command line parameters are stored here: */
   const ProblemData *PD;
-
-  /*
-    Real and complex  work vectors.  Up to four  complex Vecs are used
-    by bgy3d_pair() to offer work space to ComputeFFTfromCoulomb(), by
-    Compute_dg_inter(), and Compute_dg_intra(). The last one needs the
-    most.
-  */
-  Vec scratch[1];               /* real */
-  Vec scratch_fft[4];           /* complex */
 
 #ifdef L_BOUNDARY
   Mat dirichlet_mat;
@@ -235,65 +240,29 @@ static inline double maxval (size_t n, const double x[n])
 
 static inline Vec pop_vec (State *BHD)
 {
-  const int n = sizeof (BHD->scratch) / sizeof (Vec);
-
-  int i = 0;
-  while (i < n && BHD->scratch[i] == NULL)
-    i++;
-  assert (i < n);
-
-  Vec work = BHD->scratch[i];
-  BHD->scratch[i] = NULL;
-
-  /* printf ("pop %d %p\n", i, work); */
+  Vec work;
+  DAGetGlobalVector (BHD->da, &work);
 
   return work;
 }
 
 static inline void push_vec (State *BHD, Vec *work)
 {
-  const int n = sizeof (BHD->scratch) / sizeof (Vec);
-
-  int i = 0;
-  while (i < n && BHD->scratch[i] != NULL)
-    i++;
-  assert (i < n);
-
-  /* printf ("push %d %p\n", i, *work); */
-
-  BHD->scratch[i] = *work;
+  DARestoreGlobalVector (BHD->da, work);
   *work = NULL;
 }
 
 static inline Vec pop_vec_fft (State *BHD)
 {
-  const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
-
-  int i = 0;
-  while (i < n && BHD->scratch_fft[i] == NULL)
-    i++;
-  assert (i < n);
-
-  Vec work = BHD->scratch_fft[i];
-  BHD->scratch_fft[i] = NULL;
-
-  /* printf ("pop %d %p\n", i, work); */
+  Vec work;
+  DAGetGlobalVector (BHD->dc, &work);
 
   return work;
 }
 
 static inline void push_vec_fft (State *BHD, Vec *work)
 {
-  const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
-
-  int i = 0;
-  while (i < n && BHD->scratch_fft[i] != NULL)
-    i++;
-  assert (i < n);
-
-  /* printf ("push %d %p\n", i, *work); */
-
-  BHD->scratch_fft[i] = *work;
+  DARestoreGlobalVector (BHD->dc, work);
   *work = NULL;
 }
 
