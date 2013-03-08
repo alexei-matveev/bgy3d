@@ -182,9 +182,8 @@ void bgy3d_pair (State *BHD,
     with m being number of solvent sites, of almost the same field and
     repeating unnecessary FFTs?
 
-    Side  effects: fills  BHD->scratch_fft[3] with  FFT of  long range
-    Coulomb force.   Though it does not  appear to be  used further in
-    this branch.
+    NOTE: this code fills temp  Vec f_long_fft[3] with FFT of the long
+    range Coulomb forces and discards that data.
   */
   {
     Vec f_long_fft[3];
