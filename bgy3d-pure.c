@@ -364,8 +364,8 @@ static void kapply (const State *BHD,
   bgy3d_vec_fft_trans (BHD->dc, N, dg_fft);
 }
 
-/* Side  effects:   uses  four   complex  work  vectors   from  struct
-   State. Does (4 + 1) FFTs. One inverse. */
+/* Side effects: uses one real and four complex work vectors.  Does (4
+   + 1) FFTs. One inverse. */
 static void Compute_dg_inter (State *BHD,
                               Vec fab_s[3], Vec fab_l[3], Vec gab,
                               Vec gb,
@@ -534,11 +534,9 @@ static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
   this  manipulation is plain  screening of  the too  small (negative)
   values.
 
-  Vec work is a complex work vector.
   Vec nab is real, intent(out).
 
-  As a matter of  fact, the Vec work and the input  Vec gac_fft may be
-  aliased. Then the input will be destroyed, of course.
+  Side effects: uses one complex temp Vec.
 
   FIXME: compare the code to Compute_dg_intra_ln().
  */
@@ -547,16 +545,16 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  Vec work_fft = bgy3d_vec_pop (BHD->dc);
+  Vec nab_fft = bgy3d_vec_pop (BHD->dc);
 
-  /* Set n(k)  := ω(k) *  g(k), put result  into Vec work.   Pass both
-     gac_fft and work as arrays of length 1 to omega(): */
-  omega_apply (wbc_fft, 1, &gac_fft, &work_fft);
+  /* Set n(k) := ω(k) * g(k),  put result into Vec nab_fft.  Pass both
+     gac_fft and nab_fft as arrays of length 1 to omega(): */
+  omega_apply (wbc_fft, 1, &gac_fft, &nab_fft);
 
   /* Inverse FFT, n(k) -> n(x): */
-  MatMultTranspose (BHD->fft_mat, work_fft, nab);
+  MatMultTranspose (BHD->fft_mat, nab_fft, nab);
 
-  bgy3d_vec_push (BHD->dc, &work_fft);
+  bgy3d_vec_push (BHD->dc, &nab_fft);
 
   VecScale (nab, 1./L/L/L);
 
@@ -604,6 +602,8 @@ static void set0 (Vec x)
   the extra arguments: the long-range force fac_l and cab_fft.
 
   See line 3 of Eq. (4.118) p. 79 of Jager thesis.
+
+  Side effects: uses one real and three complex work Vecs.
 */
 static void Compute_dg_intra (State *BHD,
                               Vec fac[3], Vec fac_l[3],
@@ -817,25 +817,23 @@ static void Compute_dg_intra (State *BHD,
   Vec gac is intent(in).
   Vec dg is intent(out).
 
-  Side effects: uses BHD->fft_scratch as temp Vec.
+  Side   effects:  uses   one   complex  temp   Vec,   but  see   also
+  nssa_norm_intra() which  uses one  more.  The two  can be  (and have
+  been) aliased, but that is confusing.
 
   FIXME: compare the code to nssa_norm_intra().
 */
 static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 {
-  Vec fft_scratch = bgy3d_vec_pop (BHD->dc);
+  Vec gac_fft = bgy3d_vec_pop (BHD->dc);
 
   /* g(x) -> g(k): */
-  MatMult (BHD->fft_mat, gac, fft_scratch);
+  MatMult (BHD->fft_mat, gac, gac_fft);
 
-  /*
-    FIXME:  argument aliasing!   BHD->fft_scratch is  the  input alias
-    work  array.  Its  contents  is  destroyed on  return.  Vec dg  is
-    intent(out) here:
-  */
-  nssa_norm_intra (BHD, fft_scratch, wbc_fft, dg);
+  /* Vec dg  is intent(out) here: */
+  nssa_norm_intra (BHD, gac_fft, wbc_fft, dg);
 
-  bgy3d_vec_push (BHD->dc, &fft_scratch);
+  bgy3d_vec_push (BHD->dc, &gac_fft);
 
   /* -ln(g) */
   real pure f (real x)
@@ -873,7 +871,7 @@ static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 
   Vec tab is real, intent(out).
 
-  Side effects: used BHD->fft_scratch as work array!
+  Side effects: by way of nssa_norm_intra() uses some work Vecs.
 */
 static void nssa_gamma_cond (State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
                              Vec tab) /* intent(out) */
