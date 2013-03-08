@@ -530,6 +530,113 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
+/*
+  Prints  and returns  some info  interesting to  the caller.   At the
+  moment  it  returns  the  iterator  over  the  medium  electrostatic
+  potential. See bgy3d-potentialc:
+*/
+static Context* info (const State *BHD,
+                      int m, const Site solvent[m],
+                      int n, const Site solute[n],
+                      Vec g[m],           /* in */
+                      Vec uc, Vec uc_rho) /* in */
+{
+  /* Solvent electrostatic potential field: */
+  Vec ve = bgy3d_vec_create (BHD->da);
+
+  /* Keep solvent charge density for integration: */
+  Vec ve_rho = bgy3d_vec_create (BHD->da);
+
+  /* This fills Vec ve with solvent electrostatic potential: */
+  bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
+
+  /* Return the iterator over the solvent field: */
+  Context *v = bgy3d_pot_create (BHD, ve);
+
+  /* Also compute dipole moment: */
+  real d[3], d_norm;
+  dipole (n, solute, d, &d_norm);
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
+               d[0], d[1], d[2], d_norm);
+
+  {
+    real q, x, y, z;
+    moments (BHD, ve_rho, &q, &x, &y, &z);
+
+    const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
+                 x, y, z, d);
+    PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
+  }
+  /*
+    Integration of:
+
+    1.  Interaction  energy of solute  point cores with  the solvent
+    electrostatic field.
+
+    2. Solvent electrostatic field with diffuse solute electron
+    density.
+
+    3. Solvent charge density with long-range solute electrostatic
+    field.
+
+    Vec uc and uc_rho  are returned by bgy3d_solute_field().  Vec ve
+    and ve_rho are obtained from bgy3d_solvent_field().
+  */
+
+  /* 1. */
+  {
+    real xs[n][3], vs[n];   /* coordinates and potential values */
+
+    /* Extract coordinates into plain array: */
+    for (int i = 0; i < n; i++)
+      FOR_DIM
+        xs[i][dim] = solute[i].x[dim];
+
+    bgy3d_pot_interp (v, n, xs, vs);
+
+    print_table (n, solute, vs);
+
+    real val1 = 0.0;
+    for (int i = 0; i < n; i++)
+      val1 += solute[i].charge * vs[i];
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
+                 val1);
+  }
+
+  /* 2 and 3. */
+  real val2, val3;
+  {
+    /* Dot-product is an integral over space (up to a factor): */
+    const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
+    val2 = h3 * bgy3d_vec_dot (ve, uc_rho);
+    val3 = h3 * bgy3d_vec_dot (uc, ve_rho);
+  }
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               "<U_v|ρ_u> = %lf "
+               "(solvent electrostatic field with diffuse charge density of solute)\n",
+               val2);
+  PetscPrintf (PETSC_COMM_WORLD,
+               "<ρ_v|U_u> = %lf "
+               "(solvent charge density with long-range electrostatic field of solute)\n",
+               val3);
+  PetscPrintf (PETSC_COMM_WORLD,
+               "     diff = % lf\n", val3 - val2);
+
+  bgy3d_vec_destroy (&ve);            /* yes, we do! */
+  bgy3d_vec_destroy (&ve_rho);
+
+  return v;
+}
+
+
 /* g := exp (-u) */
 static void mexp (Vec g, Vec u)
 {
@@ -919,100 +1026,11 @@ static void solute_solve (State *BHD,
     the  caller  the  iterator  over electrostatic  potential  of  the
     solvent:
   */
-  {
-    /* Solvent electrostatic potential field: */
-    Vec ve = bgy3d_vec_create (BHD->da);
-
-    /* Keep solvent charge density for integration: */
-    Vec ve_rho = bgy3d_vec_create (BHD->da);
-
-    /* This fills Vec ve with solvent electrostatic potential: */
-    bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
-
-    /* Optionally, return the iterator over the solvent field: */
-    if (v)
-      *v = bgy3d_pot_create (BHD, ve);
-
-    /* Also compute dipole moment: */
-    real d[3], d_norm;
-    dipole (n, solute, d, &d_norm);
-
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
-                 d[0], d[1], d[2], d_norm);
-
-    {
-      real q, x, y, z;
-      moments (BHD, ve_rho, &q, &x, &y, &z);
-
-      const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
-
-      PetscPrintf (PETSC_COMM_WORLD,
-                   "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
-                   x, y, z, d);
-      PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
-    }
-    /*
-      Integration of:
-
-      1.  Interaction  energy of solute  point cores with  the solvent
-      electrostatic field.
-
-      2. Solvent electrostatic field with diffuse solute electron
-      density.
-
-      3. Solvent charge density with long-range solute electrostatic
-      field.
-
-      Vec uc and uc_rho  are returned by bgy3d_solute_field().  Vec ve
-      and ve_rho are obtained from bgy3d_solvent_field().
-    */
-
-    /* 1. */
-    if (v)                 /* If it was requested by the caller ... */
-      {
-        real xs[n][3], vs[n];   /* coordinates and potential values */
-
-        /* Extract coordinates into plain array: */
-        for (int i = 0; i < n; i++)
-          FOR_DIM
-            xs[i][dim] = solute[i].x[dim];
-
-        bgy3d_pot_interp (*v, n, xs, vs);
-
-        print_table (n, solute, vs);
-
-        real val1 = 0.0;
-        for (int i = 0; i < n; i++)
-          val1 += solute[i].charge * vs[i];
-
-        PetscPrintf (PETSC_COMM_WORLD,
-                     "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
-                     val1);
-      }
-
-    /* 2 and 3. */
-    real val2, val3;
-    {
-      /* Dot-product is an integral over space (up to a factor): */
-      const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
-      val2 = h3 * bgy3d_vec_dot (ve, uc_rho);
-      val3 = h3 * bgy3d_vec_dot (uc, ve_rho);
-    }
-    bgy3d_vec_destroy (&ve);            /* yes, we do! */
-    bgy3d_vec_destroy (&ve_rho);
-
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "<U_v|ρ_u> = %lf "
-                 "(solvent electrostatic field with diffuse charge density of solute)\n",
-                 val2);
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "<ρ_v|U_u> = %lf "
-                 "(solvent charge density with long-range electrostatic field of solute)\n",
-                 val3);
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "     diff = % lf\n", val3 - val2);
-  }
+  Context *ret = info (BHD, m, solvent, n, solute, g, uc, uc_rho);
+  if (v)
+    *v = ret;
+  else
+    bgy3d_pot_destroy (ret);
 
   /* Clean up and exit ... */
   bgy3d_vec_aliases_destroy (m, u);
