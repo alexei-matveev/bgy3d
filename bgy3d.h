@@ -104,15 +104,27 @@
 */
 #define COSSIGN(k)  (((k) % 2) ? -1 : 1)
 
+
 /* GCC extensions: */
 #if __GNUC__ >= 3
+
 #define likely(x)    __builtin_expect (!!(x), 1)
 #define unlikely(x)  __builtin_expect (!!(x), 0)
+
 #define pure         __attribute__((const))
+
+static inline void assert_is_null (void *x)
+{
+  void **y = (void**) x;
+  assert (*y == NULL);
+}
+#define local __attribute__((cleanup(assert_is_null)))
+
 #else
 #define likely(x)    (x)
 #define unlikely(x)  (x)
 #define pure                    /* pure */
+#define local                   /* local */
 #endif
 
 extern int verbosity;
