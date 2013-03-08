@@ -354,8 +354,8 @@ static void apply (const DA dc,
   arrays.
 */
 static void solvent_kernel (State *BHD, int m, const Site solvent[m],
-                            Vec g2[m][m],      /* real, in */
-                            Vec ker_fft[m][m]) /* complex, out */
+                            Vec g2[m][m],         /* in */
+                            Vec kernel_fft[m][m]) /* out */
 {
   /* Real  work  vectors,  re-used   for  all  m(m+1)/2  solvent  site
      pairs. */
@@ -382,7 +382,7 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 
         /* Kernel term originating from the the short-range (weighted)
            forces: */
-        kernel (BHD->dc, BHD->PD, fs_g2_fft, NULL, ker_fft[i][j]);
+        kernel (BHD->dc, BHD->PD, fs_g2_fft, NULL, kernel_fft[i][j]);
 
         /* This used to be  the long-range contribution, we compute it
            separately, but later add to the total kernel: */
@@ -394,7 +394,7 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 
           ker = ker_l + ker_s
         */
-        VecAXPY (ker_fft[i][j], 1.0, kl_fft);
+        VecAXPY (kernel_fft[i][j], 1.0, kl_fft);
       }
 
   /* Clean up and exit: */
@@ -545,17 +545,17 @@ static void iterate (State *BHD,
                      int m,
                      const Site solvent[m],
                      const real rhos[m],
-                     Vec ker_fft[m][m],   /* in */
-                     Vec omega_fft[m][m], /* in */
-                     Vec u0[m],           /* in */
-                     Vec uc,              /* in */
-                     Vec u[m],            /* in */
-                     Vec x_lapl[m],       /* inout */
-                     Vec g[m],            /* out */
-                     Vec g_fft[m],        /* work */
-                     Vec du_acc_fft,      /* work */
-                     Vec work,            /* work */
-                     Vec du[m])           /* out */
+                     Vec kernel_fft[m][m], /* in */
+                     Vec omega_fft[m][m],  /* in */
+                     Vec u0[m],            /* in */
+                     Vec uc,               /* in */
+                     Vec u[m],             /* in */
+                     Vec x_lapl[m],        /* inout */
+                     Vec g[m],             /* out */
+                     Vec g_fft[m],         /* work */
+                     Vec du_acc_fft,       /* work */
+                     Vec work,             /* work */
+                     Vec du[m])            /* out */
 {
   /* Some functions,  such as bgy3d_nssa_intra_log()  use preallocated
      complex Vecs in State BHD for work. */
@@ -609,7 +609,7 @@ static void iterate (State *BHD,
       VecSet (du_acc_fft, 0.0);
 
       for (int j = 0; j < m; j++) /* This increments the accumulator: */
-        apply (BHD->dc, ker_fft[i][j], g_fft[j], beta * rhos[j],
+        apply (BHD->dc, kernel_fft[i][j], g_fft[j], beta * rhos[j],
                du_acc_fft); /* incremented! */
 
       /*
@@ -662,7 +662,7 @@ typedef struct Ctx
   int m;
   const Site *solvent;          /* [m] */
   real *rhos;                   /* [m] */
-  Vec *ker_fft;                 /* [m][m] */
+  Vec *kernel_fft;              /* [m][m] */
   Vec *omega_fft;               /* [m][m] */
   Vec *u0;                      /* [m] */
   Vec uc;                       /*  */
@@ -679,7 +679,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   const int m = s->m;           /* number of solvent sites */
 
   /* Compiler expects us to pass [m][m] arrays to iterate(): */
-  Vec (*ker_fft)[m] = (void*) s->ker_fft;
+  Vec (*kernel_fft)[m] = (void*) s->kernel_fft;
   Vec (*omega_fft)[m] = (void*) s->omega_fft;
 
   /* Establish  aliases to  the subsections  of  the long  Vec us  and
@@ -693,7 +693,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
            s->m,                /*  2 in */
            s->solvent,          /*  3 in */
            s->rhos,             /*  4 in */
-           ker_fft,             /*  5 in */
+           kernel_fft,          /*  5 in */
            omega_fft,           /*  6 in */
            s->u0,               /*  7 in */
            s->uc,               /*  8 in */
@@ -732,7 +732,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
 */
 static void solute_solve (State *BHD,
                           int m, const Site solvent[m], /* in */
-                          Vec ker_fft[m][m],            /* in */
+                          Vec kernel_fft[m][m],         /* in */
                           Vec omega_fft[m][m],          /* in */
                           int n, const Site solute[n],  /* in */
                           void (*density)(int k, const real x[k][3], real rho[k]),
@@ -881,15 +881,15 @@ static void solute_solve (State *BHD,
             .m = m,                     /* in */
             .solvent = solvent,         /* in */
             .rhos = rhos,               /* in */
-            .ker_fft = (void*) ker_fft, /* in */
-            .omega_fft = (void*) omega_fft, /* in */
-            .u0 = u0,                       /* in */
-            .uc = uc,                       /* in */
-            .x_lapl = x_lapl,               /* inout */
-            .g = g,                         /* out */
-            .g_fft = g_fft,                 /* work */
-            .du_acc_fft = du_acc_fft,       /* work */
-            .work = work,                   /* work */
+            .kernel_fft = (void*) kernel_fft, /* in */
+            .omega_fft = (void*) omega_fft,   /* in */
+            .u0 = u0,                         /* in */
+            .uc = uc,                         /* in */
+            .x_lapl = x_lapl,                 /* inout */
+            .g = g,                           /* out */
+            .g_fft = g_fft,                   /* work */
+            .du_acc_fft = du_acc_fft,         /* work */
+            .work = work,                     /* work */
           };
 
         /*
@@ -1099,11 +1099,11 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   /*
     These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as
-    complex  vectors in  momentum space.   Note that  ker_fft[i][j] ==
-    ker_fft[j][i].
+    complex vectors in momentum  space.  Note that kernel_fft[i][j] ==
+    kernel_fft[j][i].
   */
-  Vec ker_fft[m][m];
-  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
+  Vec kernel_fft[m][m];
+  bgy3d_vec_create2 (BHD->dc, m, kernel_fft); /* complex */
 
   /*
     Returns div (F * g2).  Note the calculation of F is divided due to
@@ -1112,20 +1112,20 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
     The pairwise long-range interaction is included in the kernel.
   */
-  solvent_kernel (BHD, m, solvent, g2, ker_fft);
+  solvent_kernel (BHD, m, solvent, g2, kernel_fft);
 
   /* Here the  storage for  the output is  allocated, the  caller will
      have to destroy them: */
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
   solute_solve (BHD,
-                m, solvent, ker_fft, omega_fft, /* in */
-                n, solute, density,             /* in */
-                g, v);                          /* out */
+                m, solvent, kernel_fft, omega_fft, /* in */
+                n, solute, density,                /* in */
+                g, v);                             /* out */
 
   /* Clean up and exit. Pair quantities here: */
   bgy3d_vec_destroy2 (m, g2);
-  bgy3d_vec_destroy2 (m, ker_fft);
+  bgy3d_vec_destroy2 (m, kernel_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
@@ -1251,17 +1251,17 @@ static void Compute_H2O_interS_C (const State *BHD,
   /************************************************/
 
   /* FIXME: move allocations out of the loop: */
-  Vec ker_fft = bgy3d_vec_create (BHD->dc);
+  Vec kernel_fft = bgy3d_vec_create (BHD->dc);
   Vec g_fft = bgy3d_vec_create (BHD->dc);
   Vec dg_fft = bgy3d_vec_create (BHD->dc);
 
   /*
     FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
     iterations.   Here we put  the fft  of the  kernel into  local Vec
-    ker_fft:
+    kernel_fft:
   */
   kernel (BHD->dc, BHD->PD, fg2_fft, coul_fft,
-          ker_fft);    /* result */
+          kernel_fft);          /* result */
 
   /* fft(g) */
   MatMult (BHD->fft_mat, g, g_fft);
@@ -1270,12 +1270,12 @@ static void Compute_H2O_interS_C (const State *BHD,
   VecSet (dg_fft, 0.0);
 
   /* Apply the kernel, Put result into the complex temp Vec dg_fft: */
-  apply (BHD->dc, ker_fft, g_fft, scale, dg_fft);
+  apply (BHD->dc, kernel_fft, g_fft, scale, dg_fft);
 
   /* ifft(dg) */
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  bgy3d_vec_destroy (&ker_fft);
+  bgy3d_vec_destroy (&kernel_fft);
   bgy3d_vec_destroy (&g_fft);
   bgy3d_vec_destroy (&dg_fft);
 }
