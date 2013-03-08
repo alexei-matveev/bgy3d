@@ -741,8 +741,6 @@ static void solute_solve (State *BHD,
 {
   const ProblemData *PD = BHD->PD;
 
-  int namecount = 0;
-
   /* Site specific  density.  Computed as a solvent  density rho times
      number of sites of that type in a solvent: */
   real rhos[m];
@@ -904,14 +902,6 @@ static void solute_solve (State *BHD,
           bgy3d_snes_newton().
         */
         bgy3d_snes_jager (PD, &ctx, (Function) iterate_u, us);
-      }
-
-      /* FIXME:  Debug  output  from  every iteration  with  different
-         overall scale factors damp.  Remove when no more needed. */
-      {
-        char fmt[20];
-        snprintf (fmt, sizeof fmt, "vec%%d-%d.m", namecount++);
-        bgy3d_vec_save_ascii1 (fmt, m, g);
       }
 
       /*
