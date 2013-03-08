@@ -238,31 +238,17 @@ static inline double maxval (size_t n, const double x[n])
   return max;
 }
 
-static inline Vec pop_vec (State *BHD)
+static inline Vec pop_vec (DA da)
 {
   Vec work;
-  DAGetGlobalVector (BHD->da, &work);
+  DAGetGlobalVector (da, &work);
 
   return work;
 }
 
-static inline void push_vec (State *BHD, Vec *work)
+static inline void push_vec (DA da, Vec *work)
 {
-  DARestoreGlobalVector (BHD->da, work);
-  *work = NULL;
-}
-
-static inline Vec pop_vec_fft (State *BHD)
-{
-  Vec work;
-  DAGetGlobalVector (BHD->dc, &work);
-
-  return work;
-}
-
-static inline void push_vec_fft (State *BHD, Vec *work)
-{
-  DARestoreGlobalVector (BHD->dc, work);
+  DARestoreGlobalVector (da, work);
   *work = NULL;
 }
 
