@@ -186,14 +186,16 @@ void bgy3d_pair (State *BHD,
     Coulomb force.   Though it does not  appear to be  used further in
     this branch.
   */
-  Vec f_long_fft[3];
-  FOR_DIM
-    f_long_fft[dim] = pop_vec (BHD->dc);
+  {
+    Vec f_long_fft[3];
+    FOR_DIM
+      f_long_fft[dim] = pop_vec (BHD->dc);
 
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2 * damp);
+    ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2 * damp);
 
-  FOR_DIM
-    push_vec (BHD->dc, &f_long_fft[dim]);
+    FOR_DIM
+      push_vec (BHD->dc, &f_long_fft[dim]);
+  }
 
   /*
     Sort-range  potential/force is  specific  for each  pair, on  the
