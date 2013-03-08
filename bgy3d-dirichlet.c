@@ -684,7 +684,6 @@ typedef struct Dirichlet
   DA da;          /* Array descriptor */
   real h[3];      /* Grid spacing */
   Mat A;          /* Inverse of the "almost" Laplacian */
-  Vec b;          /* Work vector to hold projection on the boundary */
   Boundary vol;   /* Boundary definition */
 } Dirichlet;
 
@@ -702,15 +701,13 @@ static PetscErrorCode mat_destroy_dir (Mat A)
   if (op->A)
     MatDestroy (op->A);         /* FIXME: change in 3.2 */
 
-  if (op->b)
-    bgy3d_vec_destroy (&op->b);
-
   free (op);
 
   return 0;
 }
 
 
+/* Side effects: uses one temp Vec. */
 static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
 {
   Dirichlet *op = context (L);
@@ -722,12 +719,14 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
       Mat B = lap_mat_create (op->da, op->h, &op->vol);
 
       op->A = mat_inverse (B);           /* MatDestroy() it! */
-      op->b = bgy3d_vec_create (op->da); /* bgy3d_vec_destroy() it! */
 
       /* ...   so  I  will  destroy  you  too  (Mat  A  holds  another
          reference): */
       MatDestroy (B);
     }
+
+  /* Work vector to hold projection on the boundary: */
+  Vec b = bgy3d_vec_pop (op->da); /* get temp Vec */
 
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is
@@ -735,8 +734,8 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
 
     b := P * v
   */
-  VecSet (op->b, 0.0);
-  copy_boundary (op->da, &op->vol, v, op->b);
+  VecSet (b, 0.0);
+  copy_boundary (op->da, &op->vol, v, b);
 
   /*
     Solve Laplace  equation, update  x iteratively.  Ideally  from the
@@ -744,7 +743,9 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
             -1
     x := KSP   *  b
   */
-  MatMult (op->A, op->b, x);
+  MatMult (op->A, b, x);
+
+  bgy3d_vec_push (op->da, &b);  /* release temp Vec */
 
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */
@@ -770,7 +771,6 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
   /* Building  sparse  "laplacian"   matrix  costs  time  and  memory,
      postpone it: */
   op->A = NULL;
-  op->b = NULL;
 
   /* Get the shape of the future matrix: */
   int n, N;
