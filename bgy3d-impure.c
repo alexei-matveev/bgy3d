@@ -710,15 +710,18 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   bgy3d_vec_aliases_destroy (m, du);
 }
 
+
 /*
-  This function is the main entry  point for the BGY3dM equation for a
-  m-site solvent and an arbitrary solute.  The vectors in
+  This function  solves the the  BGY3dM equation for a  m-site solvent
+  and  an arbitrary  solute.  Solvent  properties in  the form  of the
+  array of  sites, convolution kernel  and intra-molecular correlation
+  functions  should  be  supplied  by the  caller.  The  pre-allocated
+  vectors
 
   Vec g[m], intent(out)
 
-  are  initialized as global  distributed arrays  and filled  with the
-  solvent site  distributions. It is the responsibility  of the caller
-  to destroy them when no more needed.
+  provided   by  the  caller   are  filled   with  the   solvent  site
+  distributions.
 
   Context **v, inent(out);
 
@@ -726,64 +729,23 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   is responsible  for calling bgy3d_pot_destroy() when it  is not more
   needed.
 */
-void bgy3d_solute_solve (const ProblemData *PD,
-                         int m, const Site solvent[m],
-                         int n, const Site solute[n],
-                         void (*density)(int k, const real x[k][3], real rho[k]),
-                         Vec g[m],    /* intent(out) */
-                         Context **v) /* intent(out) */
+static void solute_solve (State *BHD,
+                          int m, const Site solvent[m],       /* in */
+                          Vec ker_fft[m][m], Vec omega[m][m], /* in */
+                          int n, const Site solute[n],        /* in */
+                          void (*density)(int k, const real x[k][3], real rho[k]),
+                          Vec g[m],    /* out */
+                          Context **v) /* out */
 {
-  /* Show solvent/solute parameters: */
-  bgy3d_sites_show ("Solvent", m, solvent);
-  bgy3d_sites_show ("Solute", n, solute);
+  const ProblemData *PD = BHD->PD;
 
   int namecount = 0;
-
-  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (%d-site) equation ...\n", m);
-
-  State *BHD = bgy3d_state_make (PD);
-
-  /* Code used to be verbose: */
-  bgy3d_state_print (BHD);
 
   /* Site specific  density.  Computed as a solvent  density rho times
      number of sites of that type in a solvent: */
   real rhos[m];
   for (int i = 0; i < m; i++)
     rhos[i] = PD->rho;          /* 2 * PD->rho; */
-
-  /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
-     and work: */
-  Vec g2[m][m];               /* solvent-solvent pair distributions */
-  bgy3d_vec_create2 (BHD->da, m, g2);
-
-  /*
-    Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
-    the original version hard-coded  reading the pair distributions as
-    radial functions  from the  text files named  g2C, g2S,  and g2CS.
-    This version uses g00.txt, g11.txt, and g01.txt instead.
-  */
-  if (bgy3d_getopt_test ("--from-radial-g2"))
-    bgy3d_vec_read_radial2 (BHD->da, BHD->PD, "g%d%d.txt", m, g2);
-  else
-    bgy3d_vec_read2 ("g%d%d.bin", m, g2);
-
-  /*
-    These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as
-    complex  vectors in  momentum space.   Note that  ker_fft[i][j] ==
-    ker_fft[j][i].
-  */
-  Vec ker_fft[m][m];
-  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
-
-  /*
-    Returns div (F * g2).  Note the calculation of F is divided due to
-    long  range Coulomb  interation.   See comments  in the  function.
-    Here F is force within solvents particles.
-
-    The pairwise long-range interaction is included in the kernel.
-  */
-  solvent_kernel (BHD, m, solvent, g2, ker_fft);
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -812,22 +774,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   InitializeDMMGSolver(BHD);
 #endif
 
-  Vec omega[m][m];
-  {
-    /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
-       well.  Diagonal zeros are never referenced: */
-    real r[m][m];
-    bgy3d_sites_dist_mat (m, solvent, r);
-
-    /* Precompute omega[][]: */
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j < i; j++)
-        {
-          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
-          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
-        }
-  }
-
   /*
     These complex  vectors will  hold FFT of  the current  g. Allocate
     enough to  hold a  local portion  of the grid  and free  after the
@@ -835,10 +781,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   */
   Vec g_fft[m];
   bgy3d_vec_create1 (BHD->dc, m, g_fft); /* complex */
-
-  /* Here the  storage for  the output is  allocated, the  caller will
-     have to destroy them: */
-  bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
   /*
     There is no  point to transform each contribution  computed in the
@@ -1091,14 +1033,97 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy1 (m, g_fft);
   bgy3d_vec_destroy1 (m, x_lapl);
 
-  /* Pair quantities here: */
-  bgy3d_vec_destroy2 (m, g2);
-  bgy3d_vec_destroy2 (m, ker_fft);
-
   bgy3d_vec_destroy (&du_acc_fft);
   bgy3d_vec_destroy (&work);
   bgy3d_vec_destroy (&uc);
   bgy3d_vec_destroy (&uc_rho);
+}
+
+
+/*
+  Prepares the solvent (pair) properties  and calls the solver for the
+  siglet distribution funcitons  g[].  Allocates g[m], deallocation is
+  delegated to the caller.
+*/
+void bgy3d_solute_solve (const ProblemData *PD,
+                         int m, const Site solvent[m],
+                         int n, const Site solute[n],
+                         void (*density)(int k, const real x[k][3], real rho[k]),
+                         Vec g[m],    /* out */
+                         Context **v) /* out */
+{
+  /* Show solvent/solute parameters: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+  bgy3d_sites_show ("Solute", n, solute);
+
+  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (%d-site) equation ...\n", m);
+
+  State *BHD = bgy3d_state_make (PD);
+
+  /* Code used to be verbose: */
+  bgy3d_state_print (BHD);
+
+  /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
+     and work: */
+  Vec g2[m][m];               /* solvent-solvent pair distributions */
+  bgy3d_vec_create2 (BHD->da, m, g2);
+
+  /*
+    Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
+    the original version hard-coded  reading the pair distributions as
+    radial functions  from the  text files named  g2C, g2S,  and g2CS.
+    This version uses g00.txt, g11.txt, and g01.txt instead.
+  */
+  if (bgy3d_getopt_test ("--from-radial-g2"))
+    bgy3d_vec_read_radial2 (BHD->da, BHD->PD, "g%d%d.txt", m, g2);
+  else
+    bgy3d_vec_read2 ("g%d%d.bin", m, g2);
+
+  Vec omega[m][m];
+  {
+    /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
+       well.  Diagonal zeros are never referenced: */
+    real r[m][m];
+    bgy3d_sites_dist_mat (m, solvent, r);
+
+    /* Precompute omega[][]: */
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j < i; j++)
+        {
+          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
+          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
+        }
+  }
+
+  /*
+    These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as
+    complex  vectors in  momentum space.   Note that  ker_fft[i][j] ==
+    ker_fft[j][i].
+  */
+  Vec ker_fft[m][m];
+  bgy3d_vec_create2 (BHD->dc, m, ker_fft); /* complex */
+
+  /*
+    Returns div (F * g2).  Note the calculation of F is divided due to
+    long  range Coulomb  interation.   See comments  in the  function.
+    Here F is force within solvents particles.
+
+    The pairwise long-range interaction is included in the kernel.
+  */
+  solvent_kernel (BHD, m, solvent, g2, ker_fft);
+
+  /* Here the  storage for  the output is  allocated, the  caller will
+     have to destroy them: */
+  bgy3d_vec_create1 (BHD->da, m, g); /* real */
+
+  solute_solve (BHD,
+                m, solvent, ker_fft, omega, /* in */
+                n, solute, density,         /* in */
+                g, v);                      /* out */
+
+  /* Clean up and exit. Pair quantities here: */
+  bgy3d_vec_destroy2 (m, g2);
+  bgy3d_vec_destroy2 (m, ker_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
@@ -1108,6 +1133,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   bgy3d_state_destroy (BHD);
 }
+
 
 /* This one emulates historical solver interface: */
 Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
