@@ -545,17 +545,17 @@ static void iterate (State *BHD,
                      int m,
                      const Site solvent[m],
                      const real rhos[m],
-                     Vec ker_fft[m][m], /* in */
-                     Vec omega[m][m],   /* in */
-                     Vec u0[m],         /* in */
-                     Vec uc,            /* in */
-                     Vec u[m],          /* in */
-                     Vec x_lapl[m],     /* inout */
-                     Vec g[m],          /* out */
-                     Vec g_fft[m],      /* work */
-                     Vec du_acc_fft,    /* work */
-                     Vec work,          /* work */
-                     Vec du[m])         /* out */
+                     Vec ker_fft[m][m],   /* in */
+                     Vec omega_fft[m][m], /* in */
+                     Vec u0[m],           /* in */
+                     Vec uc,              /* in */
+                     Vec u[m],            /* in */
+                     Vec x_lapl[m],       /* inout */
+                     Vec g[m],            /* out */
+                     Vec g_fft[m],        /* work */
+                     Vec du_acc_fft,      /* work */
+                     Vec work,            /* work */
+                     Vec du[m])           /* out */
 {
   /* Some functions,  such as bgy3d_nssa_intra_log()  use preallocated
      complex Vecs in State BHD for work. */
@@ -635,7 +635,8 @@ static void iterate (State *BHD,
             models.  Vec   work  is  intent  (out)  to   be  added  to
             accumulator later:
           */
-          bgy3d_nssa_intra_log (BHD, g_fft[i], omega[i][j], g[j], work);
+          bgy3d_nssa_intra_log (BHD, g_fft[i], omega_fft[i][j], g[j],
+                                work); /* out */
 
           /* Add the contribution of site j /= i to du[i]: */
           VecAXPY (du[i], 1.0, work);
@@ -662,7 +663,7 @@ typedef struct Ctx
   const Site *solvent;          /* [m] */
   real *rhos;                   /* [m] */
   Vec *ker_fft;                 /* [m][m] */
-  Vec *omega;                   /* [m][m] */
+  Vec *omega_fft;               /* [m][m] */
   Vec *u0;                      /* [m] */
   Vec uc;                       /*  */
   Vec *x_lapl;                  /* [m] */
@@ -679,7 +680,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
 
   /* Compiler expects us to pass [m][m] arrays to iterate(): */
   Vec (*ker_fft)[m] = (void*) s->ker_fft;
-  Vec (*omega)[m] = (void*) s->omega;
+  Vec (*omega_fft)[m] = (void*) s->omega_fft;
 
   /* Establish  aliases to  the subsections  of  the long  Vec us  and
      dus */
@@ -693,7 +694,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
            s->solvent,          /*  3 in */
            s->rhos,             /*  4 in */
            ker_fft,             /*  5 in */
-           omega,               /*  6 in */
+           omega_fft,           /*  6 in */
            s->u0,               /*  7 in */
            s->uc,               /*  8 in */
            u,                   /*  9 in <- here */
@@ -730,9 +731,10 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   needed.
 */
 static void solute_solve (State *BHD,
-                          int m, const Site solvent[m],       /* in */
-                          Vec ker_fft[m][m], Vec omega[m][m], /* in */
-                          int n, const Site solute[n],        /* in */
+                          int m, const Site solvent[m], /* in */
+                          Vec ker_fft[m][m],            /* in */
+                          Vec omega_fft[m][m],          /* in */
+                          int n, const Site solute[n],  /* in */
                           void (*density)(int k, const real x[k][3], real rho[k]),
                           Vec g[m],    /* out */
                           Context **v) /* out */
@@ -880,14 +882,14 @@ static void solute_solve (State *BHD,
             .solvent = solvent,         /* in */
             .rhos = rhos,               /* in */
             .ker_fft = (void*) ker_fft, /* in */
-            .omega = (void*) omega,     /* in */
-            .u0 = u0,                   /* in */
-            .uc = uc,                   /* in */
-            .x_lapl = x_lapl,           /* inout */
-            .g = g,                     /* out */
-            .g_fft = g_fft,             /* work */
-            .du_acc_fft = du_acc_fft,   /* work */
-            .work = work,               /* work */
+            .omega_fft = (void*) omega_fft, /* in */
+            .u0 = u0,                       /* in */
+            .uc = uc,                       /* in */
+            .x_lapl = x_lapl,               /* inout */
+            .g = g,                         /* out */
+            .g_fft = g_fft,                 /* work */
+            .du_acc_fft = du_acc_fft,       /* work */
+            .work = work,                   /* work */
           };
 
         /*
@@ -1079,19 +1081,19 @@ void bgy3d_solute_solve (const ProblemData *PD,
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
-  Vec omega[m][m];
+  Vec omega_fft[m][m];
   {
     /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
        well.  Diagonal zeros are never referenced: */
     real r[m][m];
     bgy3d_sites_dist_mat (m, solvent, r);
 
-    /* Precompute omega[][]: */
+    /* Precompute omega_fft[][]: */
     for (int i = 0; i < m; i++)
       for (int j = 0; j < i; j++)
         {
-          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
-          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
+          omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
+          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
         }
   }
 
@@ -1117,9 +1119,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_create1 (BHD->da, m, g); /* real */
 
   solute_solve (BHD,
-                m, solvent, ker_fft, omega, /* in */
-                n, solute, density,         /* in */
-                g, v);                      /* out */
+                m, solvent, ker_fft, omega_fft, /* in */
+                n, solute, density,             /* in */
+                g, v);                          /* out */
 
   /* Clean up and exit. Pair quantities here: */
   bgy3d_vec_destroy2 (m, g2);
@@ -1127,7 +1129,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      bgy3d_vec_destroy (&omega[i][j]);
+      bgy3d_vec_destroy (&omega_fft[i][j]);
 
   /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
 
