@@ -746,9 +746,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
   /* Code used to be verbose: */
   bgy3d_state_print (BHD);
 
-  if (r_HH > 0.0)
-    PetscPrintf (PETSC_COMM_WORLD, "WARNING: Solvent not a 2-Site model!\n");
-
   /* Site specific  density.  Computed as a solvent  density rho times
      number of sites of that type in a solvent: */
   real rhos[m];
