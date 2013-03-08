@@ -150,7 +150,7 @@ static void  pair (State *BHD,
     FFT(F_CL)  has  been  calculated  by  ComputeFFTfromCoulomb()  but
     discarded.  The code needs at least one work vector, use this:
   */
-  Vec work = bgy3d_vec_pop (BHD->da);
+  local Vec work = bgy3d_vec_pop (BHD->da);
 
   FOR_DIM
     {
@@ -359,15 +359,15 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 {
   /* Real  work  vectors,  re-used   for  all  m(m+1)/2  solvent  site
      pairs. */
-  Vec u2 = bgy3d_vec_create (BHD->da);
-  Vec fs[3], fl[3];
+  local Vec u2 = bgy3d_vec_create (BHD->da);
+  local Vec fs[3], fl[3];
   bgy3d_vec_create1 (BHD->da, 3, fs); /* 3-vector */
   bgy3d_vec_create1 (BHD->da, 3, fl); /* 3-vector */
 
   /* Complex work vectors, re-used for all pairs: */
-  Vec kl_fft = bgy3d_vec_create (BHD->dc);
-  Vec u2_fft = bgy3d_vec_create (BHD->dc);
-  Vec fs_g2_fft[3], fl_g2_fft[3];
+  local Vec kl_fft = bgy3d_vec_create (BHD->dc);
+  local Vec u2_fft = bgy3d_vec_create (BHD->dc);
+  local Vec fs_g2_fft[3], fl_g2_fft[3];
   bgy3d_vec_create1 (BHD->dc, 3, fs_g2_fft); /* 3-vector */
   bgy3d_vec_create1 (BHD->dc, 3, fl_g2_fft); /* 3-vector */
 
@@ -491,7 +491,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    electrostatic field and a surface charge on that metallic cage:
   */
   {
-    Vec x = bgy3d_vec_create (BHD->da);
+    local Vec x = bgy3d_vec_create (BHD->da);
 
     /*
       Correction is  a linear function  of potential on  the boundary.
@@ -542,10 +542,10 @@ static Context* info (const State *BHD,
                       Vec uc, Vec uc_rho) /* in */
 {
   /* Solvent electrostatic potential field: */
-  Vec ve = bgy3d_vec_create (BHD->da);
+  local Vec ve = bgy3d_vec_create (BHD->da);
 
   /* Keep solvent charge density for integration: */
-  Vec ve_rho = bgy3d_vec_create (BHD->da);
+  local Vec ve_rho = bgy3d_vec_create (BHD->da);
 
   /* This fills Vec ve with solvent electrostatic potential: */
   bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
@@ -791,7 +791,7 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
 
   /* Establish  aliases to  the subsections  of  the long  Vec us  and
      dus */
-  Vec u[m], du[m];
+  local Vec u[m], du[m];
   bgy3d_vec_aliases_create (us, m, u);
   bgy3d_vec_aliases_create (dus, m, du);
 
@@ -870,7 +870,7 @@ static void solute_solve (State *BHD,
     problem across iterations. See call to KSPSetInitialGuessNonzero()
     in bgy3d-poisson.c:
   */
-  Vec x_lapl[m];                /* real */
+  local Vec x_lapl[m];          /* real */
   bgy3d_vec_create1 (BHD->da, m, x_lapl);
   for (int i = 0; i < m; i++)
     VecSet (x_lapl[i], 0.0);
@@ -886,7 +886,7 @@ static void solute_solve (State *BHD,
     enough to  hold a  local portion  of the grid  and free  after the
     loop.
   */
-  Vec g_fft[m];
+  local Vec g_fft[m];
   bgy3d_vec_create1 (BHD->dc, m, g_fft); /* complex */
 
   /*
@@ -894,22 +894,22 @@ static void solute_solve (State *BHD,
     momentum space back, accumulate them on the k-grid in this complex
     Vec:
   */
-  Vec du_acc_fft = bgy3d_vec_create (BHD->dc); /* complex */
+  local Vec du_acc_fft = bgy3d_vec_create (BHD->dc); /* complex */
 
-  Vec work = bgy3d_vec_create (BHD->da);
+  local Vec work = bgy3d_vec_create (BHD->da);
 
   /* Coulomb long, common for all sites: */
-  Vec uc = bgy3d_vec_create (BHD->da);
+  local Vec uc = bgy3d_vec_create (BHD->da);
 
   /* Electron density for integration: */
-  Vec uc_rho = bgy3d_vec_create (BHD->da);
+  local Vec uc_rho = bgy3d_vec_create (BHD->da);
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
     actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
     filled with data yet, I assume.
   */
-  Vec u0[m];                          /* real */
+  local Vec u0[m];                    /* real */
   bgy3d_vec_create1 (BHD->da, m, u0); /* real */
 
   /*
@@ -917,10 +917,10 @@ static void solute_solve (State *BHD,
     the long Vec and m shorter  Vecs aliased to the subsections of the
     longer one.
   */
-  Vec us = bgy3d_vec_pack_create (BHD->da, m);  /* long Vec */
-  Vec dus = bgy3d_vec_pack_create (BHD->da, m); /* long Vec */
+  local Vec us = bgy3d_vec_pack_create (BHD->da, m);  /* long Vec */
+  local Vec dus = bgy3d_vec_pack_create (BHD->da, m); /* long Vec */
 
-  Vec u[m], du[m];         /* in- and output of the BGY3D iteration */
+  local Vec u[m], du[m];   /* in- and output of the BGY3D iteration */
   bgy3d_vec_aliases_create (us, m, u);   /* aliases to subsections */
   bgy3d_vec_aliases_create (dus, m, du); /* aliases to subsections */
 
@@ -1075,7 +1075,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
-  Vec g2[m][m];               /* solvent-solvent pair distributions */
+  local Vec g2[m][m];               /* solvent-solvent pair distributions */
   bgy3d_vec_create2 (BHD->da, m, g2);
 
   /*
@@ -1089,7 +1089,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
-  Vec omega_fft[m][m];
+  local Vec omega_fft[m][m];
   {
     /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
        well.  Diagonal zeros are never referenced: */
@@ -1098,11 +1098,14 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
     /* Precompute omega_fft[][]: */
     for (int i = 0; i < m; i++)
-      for (int j = 0; j < i; j++)
-        {
-          omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
-          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
-        }
+      for (int j = 0; j <= i; j++)
+        if (i != j)
+          {
+            omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
+            bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
+          }
+        else
+          omega_fft[i][j] = NULL;
   }
 
   /*
@@ -1110,7 +1113,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
     complex vectors in momentum  space.  Note that kernel_fft[i][j] ==
     kernel_fft[j][i].
   */
-  Vec kernel_fft[m][m];
+  local Vec kernel_fft[m][m];
   bgy3d_vec_create2 (BHD->dc, m, kernel_fft); /* complex */
 
   /*
