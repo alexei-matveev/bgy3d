@@ -166,15 +166,13 @@ typedef struct State
   const ProblemData *PD;
 
   /*
-    Real  and   complex  work  vectors.   Vec  v_fft[3]  is   used  by
-    bgy3d_pair()  to offer work  space to  ComputeFFTfromCoulomb(), by
-    Compute_dg_inter(), and Compute_dg_intra():
+    Real and complex  work vectors.  Up to four  complex Vecs are used
+    by bgy3d_pair() to offer work space to ComputeFFTfromCoulomb(), by
+    Compute_dg_inter(), and Compute_dg_intra(). The last one needs the
+    most.
   */
-  Vec v[3];                     /* real */
-  Vec v_fft[3];                 /* complex */
-
-  /* A few more complex work vectors to store FFT images: */
-  Vec fft_scratch;              /* complex */
+  Vec scratch[1];               /* real */
+  Vec scratch_fft[4];           /* complex */
 
 #ifdef L_BOUNDARY
   Mat dirichlet_mat;
@@ -235,6 +233,69 @@ static inline double maxval (size_t n, const double x[n])
   return max;
 }
 
+static inline Vec pop_vec (State *BHD)
+{
+  const int n = sizeof (BHD->scratch) / sizeof (Vec);
+
+  int i = 0;
+  while (i < n && BHD->scratch[i] == NULL)
+    i++;
+  assert (i < n);
+
+  Vec work = BHD->scratch[i];
+  BHD->scratch[i] = NULL;
+
+  /* printf ("pop %d %p\n", i, work); */
+
+  return work;
+}
+
+static inline void push_vec (State *BHD, Vec *work)
+{
+  const int n = sizeof (BHD->scratch) / sizeof (Vec);
+
+  int i = 0;
+  while (i < n && BHD->scratch[i] != NULL)
+    i++;
+  assert (i < n);
+
+  /* printf ("push %d %p\n", i, *work); */
+
+  BHD->scratch[i] = *work;
+  *work = NULL;
+}
+
+static inline Vec pop_vec_fft (State *BHD)
+{
+  const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
+
+  int i = 0;
+  while (i < n && BHD->scratch_fft[i] == NULL)
+    i++;
+  assert (i < n);
+
+  Vec work = BHD->scratch_fft[i];
+  BHD->scratch_fft[i] = NULL;
+
+  /* printf ("pop %d %p\n", i, work); */
+
+  return work;
+}
+
+static inline void push_vec_fft (State *BHD, Vec *work)
+{
+  const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
+
+  int i = 0;
+  while (i < n && BHD->scratch_fft[i] != NULL)
+    i++;
+  assert (i < n);
+
+  /* printf ("push %d %p\n", i, *work); */
+
+  BHD->scratch_fft[i] = *work;
+  *work = NULL;
+}
 
 #endif  /* ifndef BGY3d_H */
 

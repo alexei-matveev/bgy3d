@@ -182,11 +182,18 @@ void bgy3d_pair (State *BHD,
     with m being number of solvent sites, of almost the same field and
     repeating unnecessary FFTs?
 
-    Side effects:  fills BHD->v_fft[3] with FFT of  long range Coulomb
-    force.   Though it  does not  appear to  be used  further  in this
-    branch.
+    Side  effects: fills  BHD->scratch_fft[3] with  FFT of  long range
+    Coulomb force.   Though it does not  appear to be  used further in
+    this branch.
   */
-  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, BHD->v_fft, q2 * damp);
+  Vec f_long_fft[3];
+  FOR_DIM
+    f_long_fft[dim] = pop_vec_fft (BHD);
+
+  ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2 * damp);
+
+  FOR_DIM
+    push_vec_fft (BHD, &f_long_fft[dim]);
 
   /*
     Sort-range  potential/force is  specific  for each  pair, on  the
@@ -356,10 +363,8 @@ static void kapply (const State *BHD,
   bgy3d_vec_fft_trans (BHD->dc, N, dg_fft);
 }
 
-/*
-  Side  effects:   uses  BHD->{v[],  v_fft[],   fft_scratch}  as  work
-  Vecs. Does (4 + 1) FFTs. One inverse.
-*/
+/* Side  effects:   uses  four   complex  work  vectors   from  struct
+   State. Does (4 + 1) FFTs. One inverse. */
 static void Compute_dg_inter (State *BHD,
                               Vec fab_s[3], Vec fab_l[3], Vec gab,
                               Vec gb,
@@ -371,8 +376,9 @@ static void Compute_dg_inter (State *BHD,
   const ProblemData *PD = BHD->PD;
   const real L = PD->interval[1] - PD->interval[0];
 
-  Vec gb_fft = BHD->fft_scratch;
-  Vec *fg2_fft = BHD->v_fft;    /* fg2_fft[3] */
+  Vec fg2_fft[3];
+  FOR_DIM
+    fg2_fft[dim] = pop_vec_fft (BHD);
 
   /************************************************/
   /* rhob * FS*gab gb */
@@ -383,23 +389,36 @@ static void Compute_dg_inter (State *BHD,
     (f_ab  g_ab).  This  force  is the  precursor  to the  convolution
     kernel K_ab. Again the long-range part is treated separately.
   */
+  {
+    Vec work = pop_vec (BHD);
+    FOR_DIM
+      {
+        VecPointwiseMult (work, gab, fab_s[dim]);
+
+        /* special treatment: Coulomb long */
+        VecAXPY (work, -1.0, fab_l[dim]);
+
+        MatMult (BHD->fft_mat, work, fg2_fft[dim]);
+      }
+    push_vec (BHD, &work);
+  }
+
+  {
+    Vec gb_fft = pop_vec_fft (BHD);
+
+    /* The  convolution will  be  computed in  momentum  space, so  also
+       compute fft (g_b): */
+    MatMult (BHD->fft_mat, gb, gb_fft);
+
+    /* This  effectively applies  K_ab  to g_b  in  k-space and  returns
+       k-space du_a: */
+    kapply (BHD, fg2_fft, gb_fft, cab_fft, dua_fft);
+
+    push_vec_fft (BHD, &gb_fft);
+  }
+
   FOR_DIM
-    {
-      VecPointwiseMult (BHD->v[dim], gab, fab_s[dim]);
-
-      /* special treatment: Coulomb long */
-      VecAXPY (BHD->v[dim], -1.0, fab_l[dim]);
-
-      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-    }
-
-  /* The  convolution will  be  computed in  momentum  space, so  also
-     compute fft (g_b): */
-  MatMult (BHD->fft_mat, gb, gb_fft);
-
-  /* This  effectively applies  K_ab  to g_b  in  k-space and  returns
-     k-space du_a: */
-  kapply (BHD, fg2_fft, gb_fft, cab_fft, dua_fft);
+    push_vec_fft (BHD, &fg2_fft[dim]);
 
   /* Transform the result of the convolution to real space du_a: */
   MatMultTranspose (BHD->fft_mat, dua_fft, dua);
@@ -522,17 +541,21 @@ static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
 
   FIXME: compare the code to Compute_dg_intra_ln().
  */
-static void nssa_norm_intra (const State *BHD, Vec gac_fft, Vec wbc_fft,
-                             Vec work, Vec nab)
+static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
+                             Vec nab)
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
+  Vec work_fft = pop_vec_fft (BHD);
+
   /* Set n(k)  := ω(k) *  g(k), put result  into Vec work.   Pass both
      gac_fft and work as arrays of length 1 to omega(): */
-  omega_apply (wbc_fft, 1, &gac_fft, &work);
+  omega_apply (wbc_fft, 1, &gac_fft, &work_fft);
 
   /* Inverse FFT, n(k) -> n(x): */
-  MatMultTranspose (BHD->fft_mat, work, nab);
+  MatMultTranspose (BHD->fft_mat, work_fft, nab);
+
+  push_vec_fft (BHD, &work_fft);
 
   VecScale (nab, 1./L/L/L);
 
@@ -590,25 +613,32 @@ static void Compute_dg_intra (State *BHD,
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
-  Vec *fg2_fft = BHD->v_fft;    /* fg2_fft[3] */
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
   const real scale = L / (2. * M_PI); /* siehe oben ... */
+
+  Vec fg2_fft[3];
+  FOR_DIM
+    fg2_fft[dim] = pop_vec_fft (BHD);
 
   /************************************************/
   /* Fa*ga ga*/
   /************************************************/
 
   /* fft(f1*gac) */
-  FOR_DIM
-    {
-      VecPointwiseMult (BHD->v[dim], gac, fac[dim]);
-      /* special treatment: Coulomb long */
-      VecAXPY (BHD->v[dim], -1.0, fac_l[dim]);
+  {
+    Vec work = pop_vec (BHD);
+    FOR_DIM
+      {
+        VecPointwiseMult (work, gac, fac[dim]);
+        /* special treatment: Coulomb long */
+        VecAXPY (work, -1.0, fac_l[dim]);
 
-      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-    }
+        MatMult (BHD->fft_mat, work, fg2_fft[dim]);
+      }
+    push_vec (BHD, &work);
+  }
 
   /*
     Apply  omega() in-place,  note argument  aliasing.   Original code
@@ -637,20 +667,24 @@ static void Compute_dg_intra (State *BHD,
 
   /* Back  transformation of coulomb  part, divide  by nab  and forward
      transfromation */
-  FOR_DIM
-    {
-      MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
-      VecScale (BHD->v[dim], 1./L/L/L);
+  {
+    Vec work = pop_vec (BHD);
+    FOR_DIM
+      {
+        MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
+        VecScale (work, 1./L/L/L);
 
-      /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
-         BHD->v[dim], nab);
+        /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
+           BHD->v[dim], nab);
 
-         v[dim] := v[dim] / nab, essentially:
-      */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab);
+           v[dim] := v[dim] / nab, essentially:
+        */
+        safe_pointwise_divide (work, work, nab);
 
-      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-    }
+        MatMult (BHD->fft_mat, work, fg2_fft[dim]);
+      }
+    push_vec (BHD, &work);
+  }
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -712,20 +746,23 @@ static void Compute_dg_intra (State *BHD,
 
   /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
-  FOR_DIM
-    {
-      MatMultTranspose (BHD->fft_mat, fg2_fft[dim], BHD->v[dim]);
-      VecScale (BHD->v[dim], 1./L/L/L);
+  {
+    Vec work = pop_vec (BHD);
+    FOR_DIM
+      {
+        MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
+        VecScale (work, 1./L/L/L);
 
-      /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
-         BHD->v[dim], nab);
+        /* A safer version of VecPointwiseDivide (work, work, nab);
 
-         v[dim] := v[dim] / nab, essentially:
-      */
-      safe_pointwise_divide (BHD->v[dim], BHD->v[dim], nab);
+           work := work / nab, essentially:
+        */
+        safe_pointwise_divide (work, work, nab);
 
-      MatMult (BHD->fft_mat, BHD->v[dim], fg2_fft[dim]);
-    }
+        MatMult (BHD->fft_mat, work, fg2_fft[dim]);
+      }
+    push_vec (BHD, &work);
+  }
 
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
@@ -760,6 +797,9 @@ static void Compute_dg_intra (State *BHD,
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
+  FOR_DIM
+    push_vec_fft (BHD, &fg2_fft[dim]);
+
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
   VecScale (dg, PD->beta/L/L/L);
@@ -782,15 +822,19 @@ static void Compute_dg_intra (State *BHD,
 */
 static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 {
+  Vec fft_scratch = pop_vec_fft (BHD);
+
   /* g(x) -> g(k): */
-  MatMult (BHD->fft_mat, gac, BHD->fft_scratch);
+  MatMult (BHD->fft_mat, gac, fft_scratch);
 
   /*
     FIXME:  argument aliasing!   BHD->fft_scratch is  the  input alias
     work  array.  Its  contents  is  destroyed on  return.  Vec dg  is
     intent(out) here:
   */
-  nssa_norm_intra (BHD, BHD->fft_scratch, wbc_fft, BHD->fft_scratch, dg);
+  nssa_norm_intra (BHD, fft_scratch, wbc_fft, dg);
+
+  push_vec_fft (BHD, &fft_scratch);
 
   /* -ln(g) */
   real pure f (real x)
@@ -830,11 +874,11 @@ static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 
   Side effects: used BHD->fft_scratch as work array!
 */
-static void nssa_gamma_cond (const State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
+static void nssa_gamma_cond (State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
                              Vec tab) /* intent(out) */
 {
   /* n(x) goes into Vec tab which is is intent(out) here: */
-  nssa_norm_intra (BHD, gac_fft, wbc_fft, BHD->fft_scratch, tab);
+  nssa_norm_intra (BHD, gac_fft, wbc_fft, tab);
 
   /*
     t(x) =  g(x) / n(x)  (or rather t(x)  = g(x) / t(x)  with argument
@@ -1191,7 +1235,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
                     */
                     if (i != j)
                       nssa_gamma_cond (BHD, g_fft[i][j], omega[j][k], g[i][k], t[i][k]);
-                    nssa_norm_intra (BHD, g_fft[i][k], omega[j][k], BHD->fft_scratch, t[i][j]);
+                    nssa_norm_intra (BHD, g_fft[i][k], omega[j][k], t[i][j]);
                     Compute_dg_intra (BHD,
                                       f[i][k], f_l[i][k], t[i][k],
                                       t[i][j],
@@ -1546,14 +1590,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           /* tO = gHO/int(gHO wHH) */
           nssa_gamma_cond (BHD, g_fft[0][1], omega[0][0], g[0][1], t[1][1]);
-          nssa_norm_intra (BHD, g_fft[0][1], omega[0][0], BHD->fft_scratch, t[0][1]);
+          nssa_norm_intra (BHD, g_fft[0][1], omega[0][0], t[0][1]);
           Compute_dg_intra (BHD, f[0][1], f_l[0][1],
                             t[1][1], t[0][1],
                             u2_fft[0][1], omega[0][0], gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][1], omega[0][1], g[1][1], t[1][1]);
-          nssa_norm_intra (BHD, g_fft[1][1], omega[0][1], BHD->fft_scratch, t[0][1]);
+          nssa_norm_intra (BHD, g_fft[1][1], omega[0][1], t[0][1]);
           Compute_dg_intra (BHD, f[1][1], f_l[1][1],
                             t[1][1], t[0][1],
                             u2_fft[1][1], omega[0][1], gfg2_fft, du_new2, work);
@@ -1592,14 +1636,14 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
 
           /* tO = gH/int(gH wHH) */
           nssa_gamma_cond (BHD, g_fft[0][0], omega[0][0], g[0][0], t[1][1]);
-          nssa_norm_intra (BHD, g_fft[0][0], omega[0][0], BHD->fft_scratch, t[0][0]);
+          nssa_norm_intra (BHD, g_fft[0][0], omega[0][0], t[0][0]);
           Compute_dg_intra (BHD, f[0][0], f_l[0][0],
                             t[1][1], t[0][0],
                             u2_fft[0][0], omega[0][0], gfg2_fft, du_new2, work);
           VecAXPY(du_new, 1.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[0][0], omega[0][1], g[0][1], t[0][1]);
-          nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[0][0]);
+          nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], t[0][0]);
           Compute_dg_intra (BHD, f[0][1], f_l[0][1],
                             t[0][1], t[0][0],
                             u2_fft[0][1], omega[0][1], gfg2_fft, du_new2, work);
@@ -1634,7 +1678,7 @@ Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
           VecAXPY(du_new, 2.0, du_new2);
 
           nssa_gamma_cond (BHD, g_fft[1][1], omega[0][1], g[0][1], t[0][1]);
-          nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], BHD->fft_scratch, t[1][1]);
+          nssa_norm_intra (BHD, g_fft[0][1], omega[0][1], t[1][1]);
           Compute_dg_intra (BHD, f[0][1], f_l[0][1],
                             t[0][1], t[1][1],
                             u2_fft[0][1], omega[0][1], gfg2_fft, du_new2, work);

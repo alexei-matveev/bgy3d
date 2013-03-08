@@ -150,7 +150,7 @@ static void  pair (State *BHD,
     FFT(F_CL)  has  been  calculated  by  ComputeFFTfromCoulomb()  but
     discarded.  The code needs at least one work vector, use this:
   */
-  Vec work = BHD->v[0];
+  Vec work = pop_vec (BHD);
 
   FOR_DIM
     {
@@ -169,6 +169,8 @@ static void  pair (State *BHD,
       /* Finally FFT(F_CL * g2 - F_CL): */
       MatMult (BHD->fft_mat, work, fl_g2_fft[dim]);
     }
+
+  push_vec (BHD, &work);
 }
 
 /*

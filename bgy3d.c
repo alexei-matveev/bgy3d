@@ -144,13 +144,17 @@ State* bgy3d_state_make (const ProblemData *PD)
 #endif
 
   /* Create global scratch vectors: */
-  bgy3d_vec_create1 (BHD->da, 3, BHD->v); /* real */
+  {
+    const int n = sizeof (BHD->scratch) / sizeof (Vec);
+    bgy3d_vec_create1 (BHD->da, n, BHD->scratch); /* real */
+  }
 
   /* Complex  vectors for  k-space representations.   These  three are
      used by ComputeFFTfromCoulomb(): */
-  bgy3d_vec_create1 (BHD->dc, 3, BHD->v_fft); /* complex */
-
-  BHD->fft_scratch = bgy3d_vec_create (BHD->dc); /* complex */
+  {
+    const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
+    bgy3d_vec_create1 (BHD->dc, n, BHD->scratch_fft); /* complex */
+  }
 
   return BHD;
 }
@@ -159,10 +163,14 @@ void bgy3d_state_destroy (State *BHD)
 {
   MPI_Barrier (PETSC_COMM_WORLD);
 
-  bgy3d_vec_destroy1 (3, BHD->v);
-  bgy3d_vec_destroy1 (3, BHD->v_fft);
-
-  bgy3d_vec_destroy (&BHD->fft_scratch);
+  {
+    const int n = sizeof (BHD->scratch) / sizeof (Vec);
+    bgy3d_vec_destroy1 (n, BHD->scratch);
+  }
+  {
+    const int n = sizeof (BHD->scratch_fft) / sizeof (Vec);
+    bgy3d_vec_destroy1 (n, BHD->scratch_fft);
+  }
 
 #ifdef L_BOUNDARY
   assert (BHD->dirichlet_mat != NULL);
