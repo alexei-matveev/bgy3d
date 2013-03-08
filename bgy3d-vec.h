@@ -46,6 +46,23 @@ void bgy3d_vec_moments (const DA da, Vec v,
 
 void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
 
+
+static inline Vec bgy3d_vec_pop (DA da)
+{
+  Vec work;
+  DAGetGlobalVector (da, &work);
+
+  return work;
+}
+
+
+static inline void bgy3d_vec_push (DA da, Vec *work)
+{
+  DARestoreGlobalVector (da, work);
+  *work = NULL;
+}
+
+
 /* Increment  the  reference count,  and  return  the descriptor,  the
    caller is obliged to DADestroy() it. Do not abuse!. */
 static inline DA bgy3d_da_ref (DA da)

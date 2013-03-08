@@ -189,12 +189,12 @@ void bgy3d_pair (State *BHD,
   {
     Vec f_long_fft[3];
     FOR_DIM
-      f_long_fft[dim] = pop_vec (BHD->dc);
+      f_long_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
     ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2 * damp);
 
     FOR_DIM
-      push_vec (BHD->dc, &f_long_fft[dim]);
+      bgy3d_vec_push (BHD->dc, &f_long_fft[dim]);
   }
 
   /*
@@ -380,7 +380,7 @@ static void Compute_dg_inter (State *BHD,
 
   Vec fg2_fft[3];
   FOR_DIM
-    fg2_fft[dim] = pop_vec (BHD->dc);
+    fg2_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
   /************************************************/
   /* rhob * FS*gab gb */
@@ -392,7 +392,7 @@ static void Compute_dg_inter (State *BHD,
     kernel K_ab. Again the long-range part is treated separately.
   */
   {
-    Vec work = pop_vec (BHD->da);
+    Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         VecPointwiseMult (work, gab, fab_s[dim]);
@@ -402,11 +402,11 @@ static void Compute_dg_inter (State *BHD,
 
         MatMult (BHD->fft_mat, work, fg2_fft[dim]);
       }
-    push_vec (BHD->da, &work);
+    bgy3d_vec_push (BHD->da, &work);
   }
 
   {
-    Vec gb_fft = pop_vec (BHD->dc);
+    Vec gb_fft = bgy3d_vec_pop (BHD->dc);
 
     /* The  convolution will  be  computed in  momentum  space, so  also
        compute fft (g_b): */
@@ -416,11 +416,11 @@ static void Compute_dg_inter (State *BHD,
        k-space du_a: */
     kapply (BHD, fg2_fft, gb_fft, cab_fft, dua_fft);
 
-    push_vec (BHD->dc, &gb_fft);
+    bgy3d_vec_push (BHD->dc, &gb_fft);
   }
 
   FOR_DIM
-    push_vec (BHD->dc, &fg2_fft[dim]);
+    bgy3d_vec_push (BHD->dc, &fg2_fft[dim]);
 
   /* Transform the result of the convolution to real space du_a: */
   MatMultTranspose (BHD->fft_mat, dua_fft, dua);
@@ -548,7 +548,7 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  Vec work_fft = pop_vec (BHD->dc);
+  Vec work_fft = bgy3d_vec_pop (BHD->dc);
 
   /* Set n(k)  := ω(k) *  g(k), put result  into Vec work.   Pass both
      gac_fft and work as arrays of length 1 to omega(): */
@@ -557,7 +557,7 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
   /* Inverse FFT, n(k) -> n(x): */
   MatMultTranspose (BHD->fft_mat, work_fft, nab);
 
-  push_vec (BHD->dc, &work_fft);
+  bgy3d_vec_push (BHD->dc, &work_fft);
 
   VecScale (nab, 1./L/L/L);
 
@@ -622,7 +622,7 @@ static void Compute_dg_intra (State *BHD,
 
   Vec fg2_fft[3];
   FOR_DIM
-    fg2_fft[dim] = pop_vec (BHD->dc);
+    fg2_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
   /************************************************/
   /* Fa*ga ga*/
@@ -630,7 +630,7 @@ static void Compute_dg_intra (State *BHD,
 
   /* fft(f1*gac) */
   {
-    Vec work = pop_vec (BHD->da);
+    Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         VecPointwiseMult (work, gac, fac[dim]);
@@ -639,7 +639,7 @@ static void Compute_dg_intra (State *BHD,
 
         MatMult (BHD->fft_mat, work, fg2_fft[dim]);
       }
-    push_vec (BHD->da, &work);
+    bgy3d_vec_push (BHD->da, &work);
   }
 
   /*
@@ -670,7 +670,7 @@ static void Compute_dg_intra (State *BHD,
   /* Back  transformation of coulomb  part, divide  by nab  and forward
      transfromation */
   {
-    Vec work = pop_vec (BHD->da);
+    Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
@@ -685,7 +685,7 @@ static void Compute_dg_intra (State *BHD,
 
         MatMult (BHD->fft_mat, work, fg2_fft[dim]);
       }
-    push_vec (BHD->da, &work);
+    bgy3d_vec_push (BHD->da, &work);
   }
 
   /* Get local portion of the k-grid */
@@ -749,7 +749,7 @@ static void Compute_dg_intra (State *BHD,
   /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
   {
-    Vec work = pop_vec (BHD->da);
+    Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
@@ -763,7 +763,7 @@ static void Compute_dg_intra (State *BHD,
 
         MatMult (BHD->fft_mat, work, fg2_fft[dim]);
       }
-    push_vec (BHD->da, &work);
+    bgy3d_vec_push (BHD->da, &work);
   }
 
   DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
@@ -800,7 +800,7 @@ static void Compute_dg_intra (State *BHD,
     DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   FOR_DIM
-    push_vec (BHD->dc, &fg2_fft[dim]);
+    bgy3d_vec_push (BHD->dc, &fg2_fft[dim]);
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
@@ -824,7 +824,7 @@ static void Compute_dg_intra (State *BHD,
 */
 static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 {
-  Vec fft_scratch = pop_vec (BHD->dc);
+  Vec fft_scratch = bgy3d_vec_pop (BHD->dc);
 
   /* g(x) -> g(k): */
   MatMult (BHD->fft_mat, gac, fft_scratch);
@@ -836,7 +836,7 @@ static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
   */
   nssa_norm_intra (BHD, fft_scratch, wbc_fft, dg);
 
-  push_vec (BHD->dc, &fft_scratch);
+  bgy3d_vec_push (BHD->dc, &fft_scratch);
 
   /* -ln(g) */
   real pure f (real x)

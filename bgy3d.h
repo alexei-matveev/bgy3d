@@ -238,19 +238,5 @@ static inline double maxval (size_t n, const double x[n])
   return max;
 }
 
-static inline Vec pop_vec (DA da)
-{
-  Vec work;
-  DAGetGlobalVector (da, &work);
-
-  return work;
-}
-
-static inline void push_vec (DA da, Vec *work)
-{
-  DARestoreGlobalVector (da, work);
-  *work = NULL;
-}
-
 #endif  /* ifndef BGY3d_H */
 
