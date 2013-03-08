@@ -186,7 +186,7 @@ void bgy3d_pair (State *BHD,
     range Coulomb forces and discards that data.
   */
   {
-    Vec f_long_fft[3];
+    local Vec f_long_fft[3];
     FOR_DIM
       f_long_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
@@ -377,7 +377,7 @@ static void Compute_dg_inter (State *BHD,
   const ProblemData *PD = BHD->PD;
   const real L = PD->interval[1] - PD->interval[0];
 
-  Vec fg2_fft[3];
+  local Vec fg2_fft[3];
   FOR_DIM
     fg2_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
@@ -391,7 +391,7 @@ static void Compute_dg_inter (State *BHD,
     kernel K_ab. Again the long-range part is treated separately.
   */
   {
-    Vec work = bgy3d_vec_pop (BHD->da);
+    local Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         VecPointwiseMult (work, gab, fab_s[dim]);
@@ -405,7 +405,7 @@ static void Compute_dg_inter (State *BHD,
   }
 
   {
-    Vec gb_fft = bgy3d_vec_pop (BHD->dc);
+    local Vec gb_fft = bgy3d_vec_pop (BHD->dc);
 
     /* The  convolution will  be  computed in  momentum  space, so  also
        compute fft (g_b): */
@@ -545,7 +545,7 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
 {
   const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
 
-  Vec nab_fft = bgy3d_vec_pop (BHD->dc);
+  local Vec nab_fft = bgy3d_vec_pop (BHD->dc);
 
   /* Set n(k) := ω(k) * g(k),  put result into Vec nab_fft.  Pass both
      gac_fft and nab_fft as arrays of length 1 to omega(): */
@@ -619,7 +619,7 @@ static void Compute_dg_intra (State *BHD,
   const real L = PD->interval[1] - PD->interval[0];
   const real scale = L / (2. * M_PI); /* siehe oben ... */
 
-  Vec fg2_fft[3];
+  local Vec fg2_fft[3];
   FOR_DIM
     fg2_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
@@ -629,7 +629,7 @@ static void Compute_dg_intra (State *BHD,
 
   /* fft(f1*gac) */
   {
-    Vec work = bgy3d_vec_pop (BHD->da);
+    local Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         VecPointwiseMult (work, gac, fac[dim]);
@@ -669,7 +669,7 @@ static void Compute_dg_intra (State *BHD,
   /* Back  transformation of coulomb  part, divide  by nab  and forward
      transfromation */
   {
-    Vec work = bgy3d_vec_pop (BHD->da);
+    local Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
@@ -748,7 +748,7 @@ static void Compute_dg_intra (State *BHD,
   /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
   {
-    Vec work = bgy3d_vec_pop (BHD->da);
+    local Vec work = bgy3d_vec_pop (BHD->da);
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
@@ -825,7 +825,7 @@ static void Compute_dg_intra (State *BHD,
 */
 static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
 {
-  Vec gac_fft = bgy3d_vec_pop (BHD->dc);
+  local Vec gac_fft = bgy3d_vec_pop (BHD->dc);
 
   /* g(x) -> g(k): */
   MatMult (BHD->fft_mat, gac, gac_fft);
