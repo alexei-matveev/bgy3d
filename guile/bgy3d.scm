@@ -518,28 +518,31 @@ computes the sum of all vector elements."
      ((option-ref opts 'BGYM2Site #f)
       (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
             (solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
-        (let-values (((g1 ve) (bgy3d-run-solute solute
-                                                solvent
-                                                '()))) ; Use defaults and Petsc env
+        (let-values (((g1 potential) (bgy3d-run-solute solute
+                                                       solvent
+                                                       '()))) ; Use Petsc env
           ;;
           ;; For  testing, primarily, evaluate  potential at positions
           ;; of solute sites and the corresponding total energy:
           ;;
           (let* ((sites		(molecule-sites solute))
                  (positions	(map site-position sites))
-                 (values	(potential-map ve positions))
+                 (potentials	(potential-map potential positions))
                  (charges	(map site-charge sites))
-                 (energy	(apply + (map * charges values))))
+                 (energy	(apply + (map * charges potentials))))
             ;;
             ;; Only print on master:
             ;;
-            (maybe-print (cons 'core-potentials values))
+            (maybe-print (cons 'core-potentials potentials))
             (maybe-print (cons 'core-energy energy)))
           ;;
-          ;; Then destroy the potential:
+          ;; Write g?.bin files:
           ;;
-          (bgy3d-pot-destroy ve)
           (map vec-save (g1-file-names g1) g1)
+          ;;
+          ;; Then destroy the objects returned:
+          ;;
+          (bgy3d-pot-destroy potential)
           (map vec-destroy g1)))) ; dont forget to destroy them
      ;;
      ;; Fall through to the new variant:
