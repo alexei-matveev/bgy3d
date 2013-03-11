@@ -415,11 +415,12 @@ computes the sum of all vector elements."
       ;;
       ;; Use g1 vectors to produce a *.pun file for visualization:
       ;;
-      (let ((path (if (zero? (bgy3d-rank))
-                      "plot.pun"
-                      "/dev/null")))    ; discard output of slaves
-        (with-output-to-file path
-          (lambda () (write-punch-file solute g1 settings))))
+      (if #f                            ; debug
+          (let ((path (if (zero? (bgy3d-rank))
+                          "plot.pun"
+                          "/dev/null"))) ; discard output of slaves
+            (with-output-to-file path
+              (lambda () (write-punch-file solute g1 settings)))))
       ;;
       ;; Dont forget to destroy them after use:
       ;;
