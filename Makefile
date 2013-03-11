@@ -54,7 +54,7 @@ srcdir = .
 
 # Compiler and compiler options
 CC       = gcc
-CFLAGS   = -std=c99 -Wall -Wextra -Ofast $(USERFLAGS)
+CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS)
 LDFLAGS  =
 
 
