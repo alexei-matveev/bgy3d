@@ -106,24 +106,28 @@
 
 
 /* GCC extensions: */
-#if __GNUC__ >= 3
+#ifdef __GNUC__
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
+#endif
 
+#if GCC_VERSION > 30000
 #define likely(x)    __builtin_expect (!!(x), 1)
 #define unlikely(x)  __builtin_expect (!!(x), 0)
-
 #define pure         __attribute__((const))
+#else
+#define likely(x)    (x)
+#define unlikely(x)  (x)
+#define pure                    /* pure */
+#endif
 
+#if GCC_VERSION > 40300
 static inline void assert_is_null (void *x)
 {
   void **y = (void**) x;
   assert (*y == NULL);
 }
 #define local __attribute__((cleanup(assert_is_null)))
-
 #else
-#define likely(x)    (x)
-#define unlikely(x)  (x)
-#define pure                    /* pure */
 #define local                   /* local */
 #endif
 
