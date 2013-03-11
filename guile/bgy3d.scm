@@ -25,6 +25,7 @@
             vec-map1
             vec-map2
             vec-print
+            bgy3d-api-version
             bgy3d-run-solvent
             bgy3d-run-solute
             bgy3d-solvent
@@ -39,6 +40,14 @@
   (@@ (guile-user) guile-bgy3d-module-init))
 
 ;;;
+;;; Functionality is  in the  flux. QM  code may want  to check  if it
+;;; assumes   the   correct  API.    Change   this  when   introducing
+;;; incompatible  changes. The variable  is a  3-list of  (major minor
+;;; extra) integer numbers.
+;;;
+(define bgy3d-api-version '(0 0 0))
+
+;;;
 ;;; The list of the procedures defined by the next call includes:
 ;;;
 ;;;   hnc3d-run-solvent
@@ -47,6 +56,7 @@
 ;;;   bgy3d-run-solute
 ;;;   bgy3d-pot-interp
 ;;;   bgy3d-pot-destroy
+;;;   bgy3d-restart-destroy
 ;;;   vec-make
 ;;;   vec-make-complex
 ;;;   vec-destroy
