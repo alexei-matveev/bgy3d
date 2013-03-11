@@ -819,6 +819,15 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
 }
 
 
+void bgy3d_restart_destroy (Restart *restart)
+{
+  /* Restart info  is just a (long)  Vec that happens to  fit into (or
+     *rather is*) a pointer: */
+  local Vec us = (Vec) restart;
+  bgy3d_vec_pack_destroy (&us);
+}
+
+
 /*
   This function  solves the the  BGY3dM equation for a  m-site solvent
   and  an arbitrary  solute.  Solvent  properties in  the form  of the
@@ -843,8 +852,9 @@ static void solute_solve (State *BHD,
                           Vec omega_fft[m][m],          /* in */
                           int n, const Site solute[n],  /* in */
                           void (*density)(int k, const real x[k][3], real rho[k]),
-                          Vec g[m],    /* out */
-                          Context **v) /* out */
+                          Vec g[m],          /* out */
+                          Context **medium,  /* out, optional */
+                          Restart **restart) /* inout, optional */
 {
   const ProblemData *PD = BHD->PD;
 
@@ -950,9 +960,10 @@ static void solute_solve (State *BHD,
         VecScale (u0[i], beta * damp);
 
       /*
-        Set initial guess, either here or by reading from file. At the
-        end of the "dump" loop du[] is written to disk, so that in the
-        next iteration we will read an updated version.
+        Set initial  guess, either  as supplied by  the caller,  by an
+        estimate or  by reading  from file. At  the end of  the "dump"
+        loop du[] is  (eventually) written to disk, so  that next time
+        we can read an updated version.
 
         The  unscreened  Coulomb  field  of  the  solute  may  be  too
         attractive in  some regions close  to the excluded  volume, so
@@ -963,15 +974,32 @@ static void solute_solve (State *BHD,
         the body of iterations.  We  here start with the initial guess
         u(x) = - [(ε - 1) / ε] * q * uc(x) with some large ε instead.
       */
-      if (bgy3d_getopt_test ("--load-guess"))
+      if (restart && *restart)
+        {
+          /*
+            If the argument is present  and valid, this is the data to
+            be used for resuming iterations.  So far this data is just
+            a ref to a long Vec that happens to fit into a pointer:
+          */
+          Vec us_old = (Vec) (*restart);
+
+          /* Initialize long  Vec us by copying restart  data from the
+             last run: */
+          VecCopy (us_old, us);
+          bgy3d_restart_destroy (*restart);
+        }
+      else if (bgy3d_getopt_test ("--load-guess"))
         bgy3d_vec_read1 ("u%d.bin", m, u);
       else
-        for (int i = 0; i < m; i++)
-          {
-            const real eps = 80.0; /* FIXME: literal */
-            VecCopy (uc, u[i]);
-            VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
-          }
+        {
+          /* The very first iteration! */
+          for (int i = 0; i < m; i++)
+            {
+              const real eps = 80.0; /* FIXME: literal */
+              VecCopy (uc, u[i]);
+              VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
+            }
+        }
 
       {
         /*
@@ -1021,14 +1049,28 @@ static void solute_solve (State *BHD,
 
     } /* for (damp = ... ) */
 
+  if (restart)
+    {
+      /*
+        This is probably QM code  calling, eventually this will not be
+        the last call during SCF.  Pass  the PMF Vec us (the long Vec)
+        to help us restart iterations  in the next SCF round.  At this
+        point we  give up ownersip of  the long Vec us  to the caller.
+        The caller will eventually have to dispose of it, unless it is
+        passed back to this function.
+      */
+      *restart = (void*) us;
+      us = NULL;
+    }
+
   /*
     Compute, and eventually  (when Context** v is not  NULL) return to
     the  caller  the  iterator  over electrostatic  potential  of  the
     solvent:
   */
   Context *ret = info (BHD, m, solvent, n, solute, g, uc, uc_rho);
-  if (v)
-    *v = ret;
+  if (medium)
+    *medium = ret;
   else
     bgy3d_pot_destroy (ret);
 
@@ -1036,7 +1078,8 @@ static void solute_solve (State *BHD,
   bgy3d_vec_aliases_destroy (m, u);
   bgy3d_vec_aliases_destroy (m, du);
 
-  bgy3d_vec_pack_destroy (&us);  /* not bgy3d_vec_destroy()! */
+  if (us)
+    bgy3d_vec_pack_destroy (&us);  /* not bgy3d_vec_destroy()! */
   bgy3d_vec_pack_destroy (&dus); /* not bgy3d_vec_destroy()! */
 
   bgy3d_vec_destroy1 (m, u0);
@@ -1059,8 +1102,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          int m, const Site solvent[m],
                          int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         Vec g[m],    /* out */
-                         Context **v) /* out */
+                         Vec g[m],          /* out */
+                         Context **medium,  /* out, optional */
+                         Restart **restart) /* inout, optional */
 {
   /* Show solvent/solute parameters: */
   bgy3d_sites_show ("Solvent", m, solvent);
@@ -1132,7 +1176,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
   solute_solve (BHD,
                 m, solvent, kernel_fft, omega_fft, /* in */
                 n, solute, density,                /* in */
-                g, v);                             /* out */
+                g, medium,                         /* out */
+                restart);                          /* inout */
 
   /* Clean up and exit. Pair quantities here: */
   bgy3d_vec_destroy2 (m, g2);
@@ -1179,7 +1224,11 @@ Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
     distribution, so supply NULL for the function pointer:
   */
   Vec g[m];
-  bgy3d_solute_solve (PD, m, solvent, n, solute, NULL, g, NULL);
+  bgy3d_solute_solve (PD, m, solvent, n, solute,
+                      NULL,     /* no electron density */
+                      g,        /* out */
+                      NULL,     /* dont need medium info */
+                      NULL);    /* not going to restart */
 
   /* Save final distribution, use binary format: */
   bgy3d_vec_save1 ("g%d.bin", m, g);

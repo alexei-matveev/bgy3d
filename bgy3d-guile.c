@@ -638,7 +638,8 @@ static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
 }
 
 
-static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
+static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings,
+                               SCM restart) /* optional */
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -673,16 +674,47 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
   alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
 
   /*
-    This  takes part  of  the  input from  the  disk, returns  solvent
-    distribution  in Vec  g[] (dont  forget to  destroy them).   If no
-    additional charge distribution is  associated with the solute pass
-    NULL as  the function  pointer. Similarly, if  you do not  want an
-    iterator over the solvent potential pass NULL:
+    A call  to bgy3d_solute_solve() takes  part of the input  from the
+    disk and returns  solvent distribution in Vec g[]  (dont forget to
+    destroy them).  If no additional charge distribution is associated
+    with the solute  pass NULL as the function  pointer. Similarly, if
+    you do not want an iterator over the solvent potential pass NULL:
   */
   Vec g[m];
-  Context *iter;
-  bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                      g, &iter);
+  Context *medium_;
+
+  /*
+    If the argument "restart" is  not present, the caller is not going
+    to  resume a  calculaiton  with with  a,  say, slightly  different
+    solute  parameters.  When  the argument  is present  but  NULL the
+    restart will be (eventually) used, but no restart information from
+    the previous run  is available yet.  In this  case the solver puts
+    such info into this  position on exit, thus, effectively returning
+    one more value.
+  */
+  SCM next_restart;
+  if (SCM_UNBNDP (restart))
+    {
+      bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                          g,          /* out */
+                          &medium_,   /* out, if not NULL */
+                          NULL);      /* not restartable */
+      next_restart = restart;         /* unspecified */
+    }
+  else
+    {
+      /*
+        This is a pointer to  some structure holding restart info (ok,
+        so far it is just a long Vec in disguise). This is NULL in the
+        first call of a series:
+      */
+      Restart *restart_ = to_pointer (restart);
+      bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                          g,          /* out */
+                          &medium_,   /* out */
+                          &restart_); /* inout */
+      next_restart = from_pointer (restart_);
+    }
 
   free (solute_name);
   free (solute_sites);
@@ -691,11 +723,26 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings)
 
   /* Build a list starting from the tail: */
   SCM gs = from_vec1 (m, g);
-  SCM v = from_pointer (iter);
+  SCM medium = from_pointer (medium_);
 
-  /* Return multiple values. Caller, dont forget to destroy them! */
-  return scm_values (scm_list_2 (gs, v));
+  /*
+    Return  multiple  values. Caller,  dont  forget  to destroy  them!
+    FIXME: this is a terrible function --- the number of return values
+    depends on the input!
+  */
+  if (SCM_UNBNDP (next_restart))
+    return scm_values (scm_list_2 (gs, medium));
+  else
+    return scm_values (scm_list_3 (gs, medium, next_restart));
 }
+
+
+static SCM guile_restart_destroy (SCM restart)
+{
+  bgy3d_restart_destroy (to_pointer (restart));
+  return from_pointer (NULL);
+}
+
 
 static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 {
@@ -808,9 +855,10 @@ static SCM guile_bgy3d_module_init (void)
   scm_c_define_gsubr ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
   scm_c_define_gsubr ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
   scm_c_define_gsubr ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 3, 0, 0, guile_bgy3d_solute);
+  scm_c_define_gsubr ("bgy3d-run-solute", 3, 1, 0, guile_bgy3d_solute);
   scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
+  scm_c_define_gsubr ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
   scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
   scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
   scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);

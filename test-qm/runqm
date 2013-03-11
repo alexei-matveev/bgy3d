@@ -33,14 +33,16 @@
              ;; BGY3d functionality:
              ;;
              ((guile bgy3d)
-              #:select (bgy3d-solvent
-                        bgy3d-solute)))
+              #:select (bgy3d-api-version
+                        bgy3d-solvent
+                        bgy3d-solute
+                        bgy3d-restart-destroy)))
 
 ;;;
-;;; ParaGauss looks  up these names  in the top-level  environment. We
-;;; bind it to a procedure later:
+;;; ParaGauss looks  up names in  the top-level environment.   See the
+;;; imports from  (guile bgy3d) module.  Also  we bind this  hook to a
+;;; closure over input parameters later:
 ;;;
-(define bgy3d-solvent-hook bgy3d-solvent)
 (define bgy3d-solute-hook (if #f #f))   ; unspecified yet
 
 ;;;

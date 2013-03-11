@@ -45,7 +45,7 @@
 ;;; incompatible  changes. The variable  is a  3-list of  (major minor
 ;;; extra) integer numbers.
 ;;;
-(define bgy3d-api-version '(0 0 0))
+(define bgy3d-api-version '(1 0 0))
 
 ;;;
 ;;; The list of the procedures defined by the next call includes:
@@ -382,7 +382,7 @@ computes the sum of all vector elements."
     (bgy3d-run-solvent solvent settings)))
 
 
-(define (bgy3d-solute name sites funptr)
+(define (bgy3d-solute name sites funptr restart)
   "To be called from QM code."
   (let ((settings	bgy3d-settings)
         (solvent	(find-molecule *default-molecule*))
@@ -397,17 +397,20 @@ computes the sum of all vector elements."
                           funptr        ; value
                           settings))    ; alist
     ;; Print on master only:
+    (maybe-print (list 'restart: restart))
     (maybe-print solute)
     (maybe-print settings)
     (force-output)
     ;;
     ;; The  function bgy3d-run-solute allocates and returns  a list of
     ;; Petsc Vecs and a potential (returned as multiple values). It is
-    ;; the callers responsibility to destroy all of them:
+    ;; the callers responsibility to destroy all of them. As of now it
+    ;; expects files g??.bin to exist and reads them:
     ;;
-    (let-values (((g1 ve) (bgy3d-run-solute solute
-                                            solvent
-                                            settings))) ; reads g??.bin
+    (let-values (((g1 potential restart) (bgy3d-run-solute solute
+                                                           solvent
+                                                           settings
+                                                           restart)))
       ;;
       ;; Save g1-files to disk:
       ;;
@@ -425,7 +428,13 @@ computes the sum of all vector elements."
       ;; Dont forget to destroy them after use:
       ;;
       (map vec-destroy g1)
-      ve)))       ; return iterator, caller must bgy3d-pot-destroy it!
+      ;;
+      ;; Return (a) the (iterator over) potential (the caller must
+      ;; bgy3d-pot-destroy it) and (b) the restart info that, when
+      ;; passed to this function next time, could help saving a few
+      ;; BGY iterations:
+      ;;
+      (cons potential restart))))
 
 ;;;
 ;;; Specifications of command line  flags common for old- and new-main
