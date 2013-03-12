@@ -416,15 +416,6 @@ computes the sum of all vector elements."
       ;;
       (map vec-save (g1-file-names g1) g1)
       ;;
-      ;; Use g1 vectors to produce a *.pun file for visualization:
-      ;;
-      (if #f                            ; debug
-          (let ((path (if (zero? (bgy3d-rank))
-                          "plot.pun"
-                          "/dev/null"))) ; discard output of slaves
-            (with-output-to-file path
-              (lambda () (write-punch-file solute g1 settings)))))
-      ;;
       ;; Dont forget to destroy them after use:
       ;;
       (map vec-destroy g1)
