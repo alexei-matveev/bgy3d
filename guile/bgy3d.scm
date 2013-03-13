@@ -97,7 +97,7 @@
 (define bgy3d-settings
   (let ((half-size 10.0))
     (quasiquote
-     ((N . 32)                          ; grid dimension
+     ((N . 64)                          ; grid dimension
       (rho . 0.018)                     ; solvent density
       (beta . 1.1989)                   ; inverse temperature
       (norm-tol . 1.0e-7)               ; convergence threshold
