@@ -8,17 +8,20 @@ SHELL = /bin/sh
 #
 EXE ?= ./runqm
 
+solutes = \
+	hydrogen_chloride \
+	carbon_disulfide \
+	water \
+	methanol \
+	butanoic_acid \
+	hexane
+
 #
 # These  are  phony  targets,  they   are  not  created  as  files  to
 # re-evaluate the diffs every time Make is executed:
 #
 diffs = \
-	hydrogen_chloride.g1.diff \
-	carbon_disulfide.g1.diff \
-	water.g1.diff \
-	methanol.g1.diff \
-	butanoic_acid.g1.diff \
-	hexane.g1.diff
+	$(patsubst %,%.g1.diff,$(solutes))
 
 #
 # By default "make" all the diffs:
@@ -64,4 +67,4 @@ moments = python ../python/moments.py
 
 clean:
 	rm -f *.g1 *.g2 *.bin *.info *.m *.nml
-	rm -rf o.*
+	rm -rf $(patsubst %,o.%,$(solutes))
