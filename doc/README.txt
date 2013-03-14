@@ -69,54 +69,52 @@ Carbon disulfide (CS2)
 
 Property               MM, 32     MM, 64           QM, 64          SCF, 64
 -----------------   ---------  ---------  ---------------  ---------------
-Solute dipole       0.0
-Induced dipole      0.001715
-Solute charge       0.0
-Induced charge     -0.084692
+Solute dipole       0.0        0.0
+Induced dipole      0.001715   0.000855
+Solute charge       0.0        0.0
+Induced charge     -0.084692  -0.125740
 Solvation:
-point nuclei       -0.372028
-diffuse density    -0.370351
-solvent density    -0.370255
-QM                         -
-Electron reorg.            -
+point nuclei       -0.372028  -0.373906
+diffuse density    -0.370351  -0.373662
+solvent density    -0.370255  -0.374992
+QM                         -          -
+Electron reorg.            -          -
 Potentials:
 ---------------------------------------------------------------------------
-
 
 Water (H2O)
 -----------
 
 Property               MM, 32     MM, 64           QM, 64          SCF, 64
 -----------------   ---------  ---------  ---------------  ---------------
-Solute dipole       0.488557
-Induced dipole      0.482920
-Solute charge       0.0
-Induced charge     -0.004372
+Solute dipole       0.488557   0.488557
+Induced dipole      0.482920   0.431496
+Solute charge       0.0        0.0
+Induced charge     -0.004372   0.002604
 Solvation:
-point nuclei       -5.711713
-diffuse density    -5.515792
-solvent density    -5.539995
-QM                         -
-Electron reorg.            -
+point nuclei       -5.711713  -5.489982
+diffuse density    -5.515792  -5.488975
+solvent density    -5.539995  -5.505404
+QM                         -          -
+Electron reorg.            -          -
 Potentials:
 ---------------------------------------------------------------------------
-
 
 Methanol (CH3OH)
 ----------------
 
 Property               MM, 32     MM, 64           QM, 64          SCF, 64
 -----------------   ---------  ---------  ---------------  ---------------
-Solute dipole       0.501684
-Induced dipole      0.554468
-Solute charge       0.0
-Induced charge     -0.115578
+Solute dipole       0.501684   0.501684
+Induced dipole      0.554468   0.502932
+Solute charge       0.0        0.0
+Induced charge     -0.115578  -0.162064
 Solvation:
-point nuclei       -5.544705
-diffuse density    -5.467964
-solvent density    -5.500922
-QM                         -
-Electron reorg.            -
+point nuclei       -5.544705  -5.524472
+diffuse density    -5.467964  -5.516670
+solvent density    -5.500922  -5.538708
+QM                         -          -
+Electron reorg.            -          -
 Potentials:
 ---------------------------------------------------------------------------
 
@@ -125,16 +123,16 @@ Butanoic acid (C3H7COOH)
 
 Property               MM, 32     MM, 64           QM, 64          SCF, 64
 -----------------   ---------  ---------  ---------------  ---------------
-Solute dipole       0.617248
-Induced dipole      0.690702
-Solute charge       0.0
-Induced charge     -0.085109
+Solute dipole       0.617248   0.617248
+Induced dipole      0.690702   0.690340
+Solute charge       0.0        0.0
+Induced charge     -0.085109  -0.108007
 Solvation:
-point nuclei       -4.594817
-diffuse density    -4.542757
-solvent density    -4.593047
-QM                         -
-Electron reorg.            -
+point nuclei       -4.594817  -4.519687
+diffuse density    -4.542757  -4.514622
+solvent density    -4.593047  -4.550776
+QM                         -          -
+Electron reorg.            -          -
 Potentials:
 ---------------------------------------------------------------------------
 
@@ -143,17 +141,18 @@ Hexane (C6H14)
 
 Property               MM, 32     MM, 64           QM, 64          SCF, 64
 -----------------   ---------  ---------  ---------------  ---------------
-Solute dipole       0.001209
-Induced dipole      0.015086
-Solute charge       0.0
-Induced charge     -0.035860
+Solute dipole       0.001209   0.001209
+Induced dipole      0.015086   0.009558
+Solute charge       0.0        0.0
+Induced charge     -0.035860  -0.042026
 Solvation:
-point nuclei       -0.070050
-diffuse density    -0.031091
-solvent density    -0.028981
-QM                         -
-Electron reorg.            -
+point nuclei       -0.070050  -0.027137
+diffuse density    -0.031091  -0.027207
+solvent density    -0.028981  -0.025604
+QM                         -          -
+Electron reorg.            -          -
 Potentials:
 ---------------------------------------------------------------------------
 
 ### Raw data MM, 64
+
