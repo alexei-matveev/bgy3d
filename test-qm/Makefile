@@ -61,10 +61,11 @@ moments = python ../python/moments.py
 # resulting distributions:
 #
 %.g1: %.scm
-	$(EXE) $(*).scm
+	$(EXE) $(*).scm | tee $(*).out
 	$(moments) g0.bin g1.bin > $(@)
+	$(SHELL) summary.sh $(*).out >> $(@)
 	rm -f *.info
 
 clean:
-	rm -f *.g1 *.g2 *.bin *.info *.m *.nml
+	rm -f *.g1 *.g2 *.bin *.info *.m *.nml *.out
 	rm -rf $(patsubst %,o.%,$(solutes))
