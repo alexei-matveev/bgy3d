@@ -5,6 +5,7 @@
   (operations_symm #t)
   (operations_integral #t)
   (operations_scf #t)
+  (operations_dipole #t)
   (operations_properties #t))
  (main_options
   (integrals_on_file #f)                ; This is faster
