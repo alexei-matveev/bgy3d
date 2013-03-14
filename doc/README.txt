@@ -14,8 +14,8 @@ This corresponds to
 - $\beta$ = 1.1989 (420.0 K)
 - $\rho$ = 0.018 (144 per cell)
 
-Hydrogen chloride
------------------
+Hydrogen chloride (HCl)
+-----------------------
 
 Properties  of hydrogen chloride  in HCl  solvent. Charges  in natural
 units e, dipole moments in e\AA, energies and potentials in kcal/mol.
@@ -63,3 +63,97 @@ distributions:
   post-SCF  expectation  values of  the  "gas  phase" hamiltonian.  It
   reflects  the strength  of  the reorganization  of electron  density
   under influence of the solvent field.
+
+Carbon disulfide (CS2)
+----------------------
+
+Property               MM, 32     MM, 64           QM, 64          SCF, 64
+-----------------   ---------  ---------  ---------------  ---------------
+Solute dipole       0.0
+Induced dipole      0.001715
+Solute charge       0.0
+Induced charge     -0.084692
+Solvation:
+point nuclei       -0.372028
+diffuse density    -0.370351
+solvent density    -0.370255
+QM                         -
+Electron reorg.            -
+Potentials:
+---------------------------------------------------------------------------
+
+
+Water (H2O)
+-----------
+
+Property               MM, 32     MM, 64           QM, 64          SCF, 64
+-----------------   ---------  ---------  ---------------  ---------------
+Solute dipole       0.488557
+Induced dipole      0.482920
+Solute charge       0.0
+Induced charge     -0.004372
+Solvation:
+point nuclei       -5.711713
+diffuse density    -5.515792
+solvent density    -5.539995
+QM                         -
+Electron reorg.            -
+Potentials:
+---------------------------------------------------------------------------
+
+
+Methanol (CH3OH)
+----------------
+
+Property               MM, 32     MM, 64           QM, 64          SCF, 64
+-----------------   ---------  ---------  ---------------  ---------------
+Solute dipole       0.501684
+Induced dipole      0.554468
+Solute charge       0.0
+Induced charge     -0.115578
+Solvation:
+point nuclei       -5.544705
+diffuse density    -5.467964
+solvent density    -5.500922
+QM                         -
+Electron reorg.            -
+Potentials:
+---------------------------------------------------------------------------
+
+Butanoic acid (C3H7COOH)
+------------------------
+
+Property               MM, 32     MM, 64           QM, 64          SCF, 64
+-----------------   ---------  ---------  ---------------  ---------------
+Solute dipole       0.617248
+Induced dipole      0.690702
+Solute charge       0.0
+Induced charge     -0.085109
+Solvation:
+point nuclei       -4.594817
+diffuse density    -4.542757
+solvent density    -4.593047
+QM                         -
+Electron reorg.            -
+Potentials:
+---------------------------------------------------------------------------
+
+Hexane (C6H14)
+------------------------
+
+Property               MM, 32     MM, 64           QM, 64          SCF, 64
+-----------------   ---------  ---------  ---------------  ---------------
+Solute dipole       0.001209
+Induced dipole      0.015086
+Solute charge       0.0
+Induced charge     -0.035860
+Solvation:
+point nuclei       -0.070050
+diffuse density    -0.031091
+solvent density    -0.028981
+QM                         -
+Electron reorg.            -
+Potentials:
+---------------------------------------------------------------------------
+
+### Raw data MM, 64
