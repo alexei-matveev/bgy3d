@@ -376,10 +376,18 @@ computes the sum of all vector elements."
   (let ((settings	bgy3d-settings)
         (solvent	(find-molecule *default-molecule*)))
     ;;
-    ;; At the moment  the function bgy3d-run-solvent echos settings as
-    ;; is, the output is written to disk instead:
+    ;; At the moment the function bgy3d-run-solvent echos settings as
+    ;; is, the output is written to disk instead. FIXME: a hack to
+    ;; save some time re-running pure solvent calculations.  Set
+    ;; always-run-solvent to #f. Then the calulation will only run if
+    ;; the file "g00.bin" does not exist. It may still correspond to a
+    ;; different solvent or settings.
     ;;
-    (bgy3d-run-solvent solvent settings)))
+    (let ((always-run-solvent #t))
+      (if (or always-run-solvent
+              (not (file-exists? "g00.bin")))
+          (bgy3d-run-solvent solvent settings) ; writes g??.bin
+          settings))))
 
 
 (define (bgy3d-solute name sites funptr restart)
