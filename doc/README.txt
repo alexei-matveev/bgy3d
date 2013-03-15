@@ -31,13 +31,16 @@ point nuclei        -0.842385  -0.833298  40.076264        40.590794
 diffuse density     -0.834841  -0.833376  -2.011084        -2.254806
 solvent density     -0.840428  -0.837090  -2.016555        -2.261501
 QM                          -          -  -1.993208        -2.237503
-Electron reorg.             -          -          -         0.258717
+Electron reorg.             -          -          -         0.061836
 Potentials:
 H                   -0.939689  -0.898025  -0.348204        -0.651956
 Cl                   3.272238   3.268467   5.774924         5.891822
 --------------------------------------------------------------------
 
-There is something wrong with the dipole moments as computed by QM.
+Electronic energies:
+
+* -15.536046511749  (post-scf)
+* -15.535947971512  (scf)
 
 The five entries for  "Solvation" are all slightly different estimates
 of  the electrostatic  interaction of  the solute  and  solvent charge
@@ -60,9 +63,10 @@ distributions:
   values of the solvent field at locations of nuclei.
 
 - The fifth  entry, "Electron  reorg.", is the  difference of  SCF and
-  post-SCF  expectation  values of  the  "gas  phase" hamiltonian.  It
-  reflects  the strength  of  the reorganization  of electron  density
-  under influence of the solvent field.
+  post-SCF  expectation  values of  the  "gas  phase" hamiltonian  (or
+  rather the  difference of the DFT counterparts  of these expectation
+  values).  It reflects the strength of the reorganization of electron
+  density under influence of the solvent field.
 
 Carbon disulfide (CS2)
 ----------------------
@@ -78,9 +82,14 @@ point nuclei        -0.372028  -0.373906  14.373086  14.100849
 diffuse density     -0.370351  -0.373662  -0.035914  -0.038270
 solvent density     -0.370255  -0.374992  -0.035318  -0.037677
 QM                         -          -    0.164666   0.162444
-Electron reorg.            -          -           -   ?
+Electron reorg.            -          -           -   0.000744
 Potentials:
 --------------------------------------------------------------
+
+Electronic energies:
+
+* -25.969418157956 (post-scf)
+* -25.969416971661 (scf)
 
 Water (H2O)
 -----------
@@ -96,9 +105,14 @@ point nuclei        -5.711713  -5.489982  -106.9138  -109.3312
 diffuse density     -5.515792  -5.488975  -8.239829  -9.184369
 solvent density     -5.539995  -5.505404  -8.091826  -9.033639
 QM                          -          -  -8.131681  -9.078939
-Electron reorg.             -          -          -  ?
+Electron reorg.             -          -          -   0.198669
 Potentials:
 --------------------------------------------------------------
+
+Electronic energies:
+
+* -17.154353092917 (post-scf)
+* -17.154036496839 (scf)
 
 Methanol (CH3OH)
 ----------------
@@ -114,9 +128,14 @@ point nuclei        -5.544705  -5.524472  17.673523  17.097857
 diffuse density     -5.467964  -5.516670  -5.016932  -6.381589
 solvent density     -5.500922  -5.538708  -5.037368  -6.406807
 QM                          -          -  -4.810845  -6.158992
-Electron reorg.             -          -          -  ?
+Electron reorg.             -          -          -   0.277062
 Potentials:
 --------------------------------------------------------------
+
+Electronic energies:
+
+* -23.983214454853 (post-scf)
+* -23.982772933117 (scf)
 
 Butanoic acid (C3H7COOH)
 ------------------------
@@ -132,9 +151,14 @@ point nuclei        -4.594817  -4.519687  271.32440  288.78482
 diffuse density     -4.542757  -4.514622  -7.136493  -8.709857
 solvent density     -4.593047  -4.550776  -7.158122  -8.743076
 QM                          -          -  -6.980013  -8.565302
-Electron reorg.             -          -          -  ?
+Electron reorg.             -          -          -   0.386236
 Potentials:
 --------------------------------------------------------------
+
+Electronic energies:
+
+* -59.326272328142 (post-scf)
+* -59.325656827000 (scf)
 
 Hexane (C6H14)
 ------------------------
@@ -150,9 +174,14 @@ point nuclei        -0.070050  -0.027137  82.000621  81.392287
 diffuse density     -0.031091  -0.027207  -0.343400  -0.372157
 solvent density     -0.028981  -0.025604  -0.355654  -0.385512
 QM                          -          -  -0.068319  -0.089780
-Electron reorg.             -          -          - ?
+Electron reorg.             -          -          -   0.007266
 Potentials:
 --------------------------------------------------------------
+
+Electronic energies:
+
+* -42.289934379628 (post-scf)
+* -42.289922799953 (scf)
 
 ## Electron reorg?
 
