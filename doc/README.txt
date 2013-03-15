@@ -10,7 +10,7 @@ Options:
 
 This corresponds to
 
-- $V$ = $20^3$ \AA$^3$
+- $V$ = 20^3^ \AA^3^
 - $\beta$ = 1.1989 (420.0 K)
 - $\rho$ = 0.018 (144 per cell)
 
@@ -68,7 +68,7 @@ distributions:
   values).  It reflects the strength of the reorganization of electron
   density under influence of the solvent field.
 
-Carbon disulfide (CS2)
+Carbon disulfide (CS~2~)
 ----------------------
 
 Property               MM, 32     MM, 64     QM, 64    SCF, 64
@@ -91,7 +91,7 @@ Electronic energies:
 * -25.969418157956 (post-scf)
 * -25.969416971661 (scf)
 
-Water (H2O)
+Water (H~2~O)
 -----------
 
 Property               MM, 32     MM, 64     QM, 64    SCF, 64
@@ -114,7 +114,7 @@ Electronic energies:
 * -17.154353092917 (post-scf)
 * -17.154036496839 (scf)
 
-Methanol (CH3OH)
+Methanol (CH~3~OH)
 ----------------
 
 Property               MM, 32     MM, 64     QM, 64    SCF, 64
@@ -137,7 +137,7 @@ Electronic energies:
 * -23.983214454853 (post-scf)
 * -23.982772933117 (scf)
 
-Butanoic acid (C3H7COOH)
+Butanoic acid (C~3~H~7~COOH)
 ------------------------
 
 Property               MM, 32     MM, 64     QM, 64    SCF, 64
@@ -160,7 +160,7 @@ Electronic energies:
 * -59.326272328142 (post-scf)
 * -59.325656827000 (scf)
 
-Hexane (C6H14)
+Hexane (C~6~H~14~)
 ------------------------
 
 Property               MM, 32     MM, 64     QM, 64    SCF, 64
@@ -182,6 +182,3 @@ Electronic energies:
 
 * -42.289934379628 (post-scf)
 * -42.289922799953 (scf)
-
-## Electron reorg?
-
