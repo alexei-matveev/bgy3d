@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function grep_match () {
+grep_match () {
 
     # $1 is grep pattern
     local greppattern=$1
@@ -34,7 +34,7 @@ function grep_match () {
     fi
 }
 
-function main () {
+main () {
 
     # receive file name from input
     file=$1
