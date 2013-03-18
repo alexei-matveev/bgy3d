@@ -35,6 +35,15 @@ WITH_GUILE = 0
 #
 WITH_EXTRA_SOLVERS = 0
 
+#
+# Compile  a   shared  library  libbgy3d.so  and  link   that  to  the
+# executable.   May require  setting LD_LIBRARY_PATH  in order  to run
+# that. The following flag is used in expressions like $(if $(shared),
+# ...) so  in order to turn  the feature off  it is not enough  to set
+# shared = 0, one has to comment the line instead:
+#
+# shared = 1
+
 USERFLAGS = -DFFT_FFTW
 ifeq ($(WITH_EXTRA_SOLVERS),1)
 USERFLAGS += -DWITH_EXTRA_SOLVERS
@@ -54,7 +63,7 @@ srcdir = .
 
 # Compiler and compiler options
 CC       = gcc
-CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS)
+CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS) $(if $(shared), -fPIC)
 LDFLAGS  =
 
 
@@ -120,7 +129,12 @@ libbgy3d.a: $(libbgy3d.a)
 	$(AR) ruv $@  $(^)
 	$(RANLIB) $@
 
-bgy3d: $(OBJECTS) libbgy3d.a
+libbgy3d.so: $(libbgy3d.a)
+	$(CC) -shared -Wl,-soname,libbgy3d.so.1 -o libbgy3d.so.1.0 $(libbgy3d.a)
+	ln -sf libbgy3d.so.1.0 libbgy3d.so.1
+	ln -sf libbgy3d.so.1 libbgy3d.so
+
+bgy3d: $(OBJECTS) $(if $(shared), libbgy3d.so, libbgy3d.a)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) -L. -lbgy3d $(LIBS)
 
 #
@@ -136,12 +150,12 @@ test-all:
 clean: myclean
 
 myclean:
-	rm -f *.a *.o fft/*.o *.bin *.info
+	rm -f *.a *.so *.o fft/*.o *.bin *.info
 	rm -f bgy3d
 .PHONY: myclean
 
 distclean:
-	rm -f *.o *.d  fft/*.o fft/*.d
+	rm -f *.o *.so *.d  fft/*.o fft/*.d
 	rm -f bgy3d
 .PHONY: distclean
 
