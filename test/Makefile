@@ -72,7 +72,7 @@ hnc-tests: $(hnc-diffs)
 # targets.  Running a  test takes some time. FIXME: why  do I need the
 # second rule, given the first?
 #
-.PRECIOUS: %.g2 %.g1 %.hnc3d.g1
+.PRECIOUS: %.g2 %.g1
 .PRECIOUS: %.hnc3d.g2 %.hnc3d.g1
 
 #
@@ -97,9 +97,7 @@ moments = python ../python/moments.py
 # solvent-solvent g2-distribution  is required for  g1-distribution of
 # the solvent in the presence of a solute:
 #
-# Testing HNC3d code  is not as elaborate, this is  a special case. At
-# the  moment  it  requires  a  "molecule"  file  to  be  loaded  with
-# Load_Molecule():
+# Testing HNC3d code is not as elaborate, thus the special case.
 #
 %.hnc3d.g2: ../bgy3d
 	$(EXE) --HNC $(HNC-FLAGS)
