@@ -510,23 +510,19 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
 }
 
+
+/* Print  a table  with some  site  info and  site-specific values  of
+   potential from vs[n] in the last column: */
 static void print_table (int n, const Site sites[n], const real vs[n])
 {
-  /* Average  over   all  sites,  has   no  real  meaning.   Only  for
-     presentation purposes: */
-  real v_avg = 0.0;
-  for (int i = 0; i < n; i++)
-    v_avg += vs[i];
-  v_avg /= n;
-
   PetscPrintf (PETSC_COMM_WORLD,
-               "#\t site\t x        \t y        \t z        \t q        \t δv        \t v0\n");
+               "#\t site\t x        \t y        \t z        \t q        \t δv\n");
   for (int i = 0; i < n; i ++)
     PetscPrintf (PETSC_COMM_WORLD,
-                 "%d\t%5s\t% f\t% f\t% f\t% f\t% f\t% f\n",
+                 "%d\t%5s\t% f\t% f\t% f\t% f\t% f\n",
                  i + 1, sites[i].name,
                  sites[i].x[0], sites[i].x[1],  sites[i].x[2],
-                 sites[i].charge, vs[i] - v_avg, v_avg);
+                 sites[i].charge, vs[i]);
 }
 
 
