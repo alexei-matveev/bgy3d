@@ -955,7 +955,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   State *BHD = bgy3d_state_make (PD);
 
   /* Code used to be verbose: */
-  bgy3d_state_print (BHD);
+  bgy3d_problem_data_print (PD);
 
   int namecount=0;
 

@@ -1111,7 +1111,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   State *BHD = bgy3d_state_make (PD);
 
   /* Code used to be verbose: */
-  bgy3d_state_print (BHD);
+  bgy3d_problem_data_print (PD);
 
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */

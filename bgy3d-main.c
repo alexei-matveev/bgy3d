@@ -81,17 +81,7 @@ int main (int argc, char **argv)
     MPI_Comm_size (PETSC_COMM_WORLD, &np);
     PetscPrintf (PETSC_COMM_WORLD, "NP= %d\n", np);
   }
-  PetscPrintf(PETSC_COMM_WORLD, "Grid size N=%d %d %d\n", PD.N[0], PD.N[1], PD.N[2]);
-  PetscPrintf(PETSC_COMM_WORLD, "Total dof N^3=%d\n", PD.N3);
-  PetscPrintf(PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD.interval[0], PD.interval[1]);
-  PetscPrintf(PETSC_COMM_WORLD, "h = %f\n", PD.h[0]);
-  PetscPrintf(PETSC_COMM_WORLD, "beta = %f\n", PD.beta);
-  PetscPrintf(PETSC_COMM_WORLD, "rho = %f\n", PD.rho);
-
-  PetscPrintf(PETSC_COMM_WORLD, "lambda = %f\n", PD.lambda);
-  PetscPrintf(PETSC_COMM_WORLD, "tolerance = %e\n", PD.norm_tol);
-  PetscPrintf(PETSC_COMM_WORLD, "zpad = %f\n", PD.zpad);
-  PetscPrintf(PETSC_COMM_WORLD, "max_iter = %d\n", PD.max_iter);
+  bgy3d_problem_data_print (&PD);
 
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
 

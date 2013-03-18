@@ -167,16 +167,19 @@ void bgy3d_state_destroy (State *BHD)
 }
 
 /* Code used to be verbose: */
-void bgy3d_state_print (const State *BHD)
+void bgy3d_problem_data_print (const ProblemData *PD)
 {
-  const ProblemData *PD = BHD->PD;
   const real L = PD->interval[1] - PD->interval[0];
 
-  PetscPrintf (PETSC_COMM_WORLD, "Domain [%f %f]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "Ω = [%g %g]^3\n", PD->interval[0], PD->interval[1]);
   PetscPrintf (PETSC_COMM_WORLD, "N = %d x %d x %d\n", PD->N[0], PD->N[1], PD->N[2]);
   PetscPrintf (PETSC_COMM_WORLD, "h = %g x %g x %g\n", PD->h[0], PD->h[1], PD->h[2]);
   PetscPrintf (PETSC_COMM_WORLD, "β = %g (%5.1f K)\n", PD->beta, 1.0 / PD->beta / KBOLTZMANN);
   PetscPrintf (PETSC_COMM_WORLD, "ρ = %g (%g per cell)\n", PD->rho, PD->rho * L * L * L);
+  PetscPrintf (PETSC_COMM_WORLD, "λ = %g\n", PD->lambda);
+  PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);
+  PetscPrintf (PETSC_COMM_WORLD, "max-iter = %d\n", PD->max_iter);
+  PetscPrintf (PETSC_COMM_WORLD, "zpad = %g\n", PD->zpad);
 }
 
 real** Load_Molecule(int *N)
