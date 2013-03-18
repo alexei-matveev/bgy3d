@@ -1,82 +1,31 @@
 #!/bin/bash
 
-grep_match () {
+# receive file name from input
+file=$1
 
-    # $1 is grep pattern
-    greppattern=$1
+# Get charge
+grep "integrated charge" $file | tail -1
 
-    # $2 is options for grep, e.g. -A 1
-    grepopt=$2
-    if [ -n "$greppattern" ]; then
+grep "charge of solvent medium" $file | tail -1
 
-      # declare the following kind of statement as local variable result
-      # in error in dash
-      greptmp=`grep $grepopt "$greppattern" $file | tail -1`
+# Get dipole
+grep "dipole moment of solute" $file | tail -1
 
-      if [ -n "$greptmp" ]; then
+grep "dipole moment of solvent" $file | tail -1
 
-	# text seperated with space, so print the last field after "="
-	# FIXME: what if no space between "=" with target value
-	echo $greptmp | awk '
-		    BEGIN {FS="[ ]+"}
-			  {
-			    for (i = 1; i <= NF; i++) 
-			      if ($i~"=") 
-				j=i+1 
-			  }
-		    # only print six digits after the decimal point
-		    END {printf "%.6f\n", $j}'
-      else
-	echo "entry not found"
-	exit 1
-      fi
-    else
-      echo "no entry to match"
-      exit 1
-    fi
-}
+# Get energy.  Interaction between point nuclei with solvent potential
+grep "with solute point nuclei" $file | tail -1
 
-main () {
+# Interaction between diffuse solute charge density with solvent
+# potential
+grep "diffuse charge density" $file | tail -1
 
-    # receive file name from input
-    file=$1
+# Interaction between solvent charge density with solute electrostatic
+# potential
+grep "with long-range electrostatic" $file | tail -1
 
-    # Get charge
-    echo "****charge information****"
+# Energy from PG
+grep -A1 "Total energy of solute with solvent" $file | tail -2
 
-    q_u=$(grep_match "integrated charge")
-    echo "Solute charge:" $q_u
-
-    q_v=$(grep_match "charge of solvent medium")
-    echo "Induced charge:" $q_v
-
-    # Get dipole
-    echo "****dipole information****"
-
-    d_u=$(grep_match "dipole moment of solute")
-    echo "Solute dipole:" $d_u
-
-    d_v=$(grep_match "dipole moment of solvent")
-    echo "Solute dipole:" $d_v
-
-    # Get energy
-    echo "****Solvation energy information****"
-
-    # Interaction between point nuclei with solvent potential
-    bgy_e_nuc=$(grep_match "with solute point nuclei")
-    echo "e_nuc:" $bgy_e_nuc
-
-    # Interaction between diffuse solute charge density with solvent potential
-    bgy_e_dif=$(grep_match "diffuse charge density")
-    echo "e_dif:" $bgy_e_dif
-
-    # Interaction between solvent charge density with solute electrostatic potential
-    bgy_e_slv=$(grep_match "with long-range electrostatic")
-    echo "e_slv:" $bgy_e_slv
-
-    # Energy from PG
-    e_qm=$(grep_match "Total energy of solute with solvent" "-A 1")
-    echo "e_qm :" $e_qm
-}
-
-main $*
+# This is to satisfy GNU Make:
+exit 0
