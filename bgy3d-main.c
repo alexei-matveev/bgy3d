@@ -45,7 +45,6 @@ typedef Vec Solver (const ProblemData *PD, Vec g_ini);
 
 int main (int argc, char **argv)
 {
-  int ierr;
   real mpi_start, mpi_stop;
   Solver *solver = NULL;
 
@@ -195,7 +194,7 @@ int main (int argc, char **argv)
     PetscPrintf (PETSC_COMM_WORLD,
                  "Please choose one of: -BGY2site or -BGYM2site!\n");
 
-  ierr = PetscFinalize();CHKERRQ(ierr);
+  int ierr = PetscFinalize();CHKERRQ(ierr);
 
   /*
    * Original version of BGY3D  executable returned 1. Make interprets
