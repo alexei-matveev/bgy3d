@@ -61,6 +61,23 @@ bgy-tests: $(bgy-diffs)
 hnc-tests: $(hnc-diffs)
 
 #
+# Target specific variables. Four cases (g1, g2) x (BGY, HNC) at most:
+#
+$(bgy-diffs): base-flags = $(BGY-FLAGS)
+$(hnc-diffs): base-flags = $(HNC-FLAGS)
+
+$(filter %.g1.diff, $(bgy-diffs)): cmd-flags = --BGYM2Site
+$(filter %.g2.diff, $(bgy-diffs)): cmd-flags = --BGY2Site
+$(filter %.g1.diff, $(hnc-diffs)): cmd-flags = --HNC-M
+$(filter %.g2.diff, $(hnc-diffs)): cmd-flags = --HNC
+
+#
+# For g1 calculations need to specify additional flags:
+#
+%.hnc3d.g1 %.g1: solute-flags= --solute "$(subst _, ,$(*))"
+
+
+#
 # Prerequisites for a  diff are the two files, keep  them in the order
 # old, new:
 #
@@ -100,20 +117,19 @@ moments = python ../python/moments.py
 # Testing HNC3d code is not as elaborate, thus the special case.
 #
 %.hnc3d.g2: ../bgy3d
-	$(EXE) --HNC $(HNC-FLAGS)
+	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
 	$(moments) g00.bin > $(@)
 
 %.hnc3d.g1: ../bgy3d LJ.hnc3d.g2
-	$(EXE) --HNC-M $(HNC-FLAGS) --solute "$(subst _, ,$(*))"
+	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin > $(@)
 
-
 %.g1: ../bgy3d hydrogen_chloride.g2
-	$(EXE) --BGYM2Site $(BGY-FLAGS) --solute "$(subst _, ,$(*))"
+	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin > $(@)
 
 %.g2: ../bgy3d
-	$(EXE) --BGY2Site $(BGY-FLAGS)
+	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 
 
@@ -131,4 +147,4 @@ moments = python ../python/moments.py
 .PRECIOUS: %.m
 
 clean:
-	rm -f *.g1 *.g2 *.bin *.info *.m
+	rm -f *.g1 *.g2 *.bin *.info *.m *.out
