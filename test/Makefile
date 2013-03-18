@@ -108,9 +108,9 @@ out/%:
 moments = python ../python/moments.py
 
 #
-# FIXME: do not scatter files over directories:
+# This script is also used in QM regression tests, see ../test-qm:
 #
-make-summary = $(SHELL) ../test-qm/summary.sh
+make-summary = $(SHELL) ./summary.sh
 
 #
 # To produce a *.g2 or *.g1 summary file execute BGY3d and examine the

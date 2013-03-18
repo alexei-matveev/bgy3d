@@ -57,6 +57,11 @@ out/%:
 moments = python ../python/moments.py
 
 #
+# This script is also used in MM regression tests, see ../test:
+#
+make-summary = $(SHELL) ../test/summary.sh
+
+#
 # To produce a *.g2 or *.g1 summary file execute BGY3d and examine the
 # resulting distributions:
 #
