@@ -108,6 +108,11 @@ out/%:
 moments = python ../python/moments.py
 
 #
+# FIXME: do not scatter files over directories:
+#
+make-summary = $(SHELL) ../test-qm/summary.sh
+
+#
 # To produce a *.g2 or *.g1 summary file execute BGY3d and examine the
 # resulting  distributions.  Updating  the executable  should  lead to
 # re-running  the  test, so  add  it  as  a pre-requisite.   Also  the
@@ -119,18 +124,22 @@ moments = python ../python/moments.py
 %.hnc3d.g2: ../bgy3d
 	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
 	$(moments) g00.bin > $(@)
+	$(make-summary) $(@).out >> $(@)
 
 %.hnc3d.g1: ../bgy3d LJ.hnc3d.g2
 	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin > $(@)
+	$(make-summary) $(@).out >> $(@)
 
 %.g1: ../bgy3d hydrogen_chloride.g2
 	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin > $(@)
+	$(make-summary) $(@).out >> $(@)
 
 %.g2: ../bgy3d
 	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g11.bin g01.bin > $(@)
+	$(make-summary) $(@).out >> $(@)
 
 
 # This only works if ../bgy3d executable was built WITH_GUILE:
