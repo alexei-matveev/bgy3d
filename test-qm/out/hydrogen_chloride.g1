@@ -1,33 +1,31 @@
 Moments from g0.bin
-<1> =  2102.84306722
-<x> =  31.9711249045
-<y> =  31.972203466
-<z> =  30.4094560409
-<xy> =  0.00645183952655
-<yz> =  0.00753729421178
-<zx> =  0.00408784974702
-<z^2 - 1/3 * r^2> =  24.3752636937
-<x^2 - y^2> =  0.0147813336418
-<r^2> =  140.224241328
+<1> =  2103.0731227
+<x> =  31.9711202272
+<y> =  31.972216423
+<z> =  30.4090974223
+<xy> =  0.00629209947946
+<yz> =  0.00723126305241
+<zx> =  0.00383115101166
+<z^2 - 1/3 * r^2> =  24.3877505789
+<x^2 - y^2> =  0.0138236809055
+<r^2> =  140.285361915
 Moments from g1.bin
-<1> =  1876.04983045
-<x> =  31.961304777
-<y> =  31.9627128146
-<z> =  25.4206448572
-<xy> =  0.00865548057575
-<yz> =  -0.178639886331
-<zx> =  -0.190067687257
-<z^2 - 1/3 * r^2> =  -52.5156143295
-<x^2 - y^2> =  0.020735092013
-<r^2> =  -76.6386779693
-****charge information****
-Solute charge: -0.021331
-Induced charge: -0.024916
-****dipole information****
-Solute dipole: 3.771000
-Solute dipole: 0.308941
-****Solvation energy information****
-e_nuc: 40.075703
-e_dif: -2.011087
-e_slv: -2.016557
-e_qm : -1.993208
+<1> =  1876.06927789
+<x> =  31.9612515383
+<y> =  31.962721278
+<z> =  25.4206233817
+<xy> =  0.00869031649131
+<yz> =  -0.178548534562
+<zx> =  -0.190297823668
+<z^2 - 1/3 * r^2> =  -52.5229614067
+<x^2 - y^2> =  0.0196652693485
+<r^2> =  -76.681904341
+integrated charge = -0.021331 (should be close to zero)
+q_v = -0.024939 (charge of solvent medium)
+|<x|ρ_n>| = |-3.771000,  0.000000,  0.000000| = 3.771000 (dipole moment of solute cores)
+|<x|ρ_v>| = |-0.308907, -0.000395, -0.000411| = 0.308908 (dipole moment of solvent medium)
+<U_v|ρ_N> = 40.076266 (solvent electrostatic field with solute point nuclei)
+<U_v|ρ_u> = -2.011085 (solvent electrostatic field with diffuse charge density of solute)
+<ρ_v|U_u> = -2.016554 (solvent charge density with long-range electrostatic field of solute)
+ Total energy of solute with solvent:
+ e_slv = -3.17644893286916918E-003 a.u. =  -1.9931899408860749      kcal/mol
