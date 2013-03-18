@@ -934,7 +934,7 @@ void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du)
 
 
 /* solve */
-Vec BGY3d_solve_2site (const ProblemData *PD, Vec g_ini)
+Vec BGY3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 {
   int m;                        /* number of solvent sites */
   const Site *solvent;          /* solvent[m] */
@@ -1397,7 +1397,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
 
 /* solve with product ansatz g=g0*dg */
-Vec BGY3d_solve_3site (const ProblemData *PD, Vec g_ini)
+Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
 {
   State *BHD = bgy3d_state_make (PD);
 

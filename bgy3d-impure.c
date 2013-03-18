@@ -1190,7 +1190,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
 
 /* This one emulates historical solver interface: */
-Vec BGY3dM_solve_H2O_2site (const ProblemData *PD, Vec g_ini)
+Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini)
 {
   (void) g_ini;                 /* FIXME: interface obligation */
 

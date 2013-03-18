@@ -6,6 +6,7 @@ SHELL = /bin/sh
 # iterations to converge butanoic acid in HCl.
 #
 BGY-FLAGS = \
+	--bgy \
 	--N 32 \
 	--rho 0.018 \
 	--beta 1.1989 \
@@ -17,6 +18,7 @@ BGY-FLAGS = \
 	--snes-solver jager \
 
 HNC-FLAGS = \
+	--hnc \
 	--N 128 \
 	--L 10.0 \
 	--beta 0.606060 \
@@ -65,11 +67,6 @@ hnc-tests: $(hnc-diffs)
 #
 $(bgy-diffs): base-flags = $(BGY-FLAGS)
 $(hnc-diffs): base-flags = $(HNC-FLAGS)
-
-$(filter %.g1.diff, $(bgy-diffs)): cmd-flags = --BGYM2Site
-$(filter %.g2.diff, $(bgy-diffs)): cmd-flags = --BGY2Site
-$(filter %.g1.diff, $(hnc-diffs)): cmd-flags = --HNC-M
-$(filter %.g2.diff, $(hnc-diffs)): cmd-flags = --HNC
 
 #
 # For g1 calculations need to specify additional flags:
@@ -122,22 +119,22 @@ make-summary = $(SHELL) ./summary.sh
 # Testing HNC3d code is not as elaborate, thus the special case.
 #
 %.hnc3d.g2: ../bgy3d
-	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
+	$(EXE) $(base-flags) | tee $(@).out
 	$(moments) g00.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
 %.hnc3d.g1: ../bgy3d LJ.hnc3d.g2
-	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
+	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
 %.g1: ../bgy3d hydrogen_chloride.g2
-	$(EXE) $(cmd-flags) $(base-flags) $(solute-flags) | tee $(@).out
+	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
 %.g2: ../bgy3d
-	$(EXE) $(cmd-flags) $(base-flags) | tee $(@).out
+	$(EXE) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 

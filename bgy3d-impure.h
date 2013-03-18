@@ -28,7 +28,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
 void bgy3d_restart_destroy (Restart *restart);
 
-Vec BGY3dM_solve_H2O_2site(const ProblemData *PD, Vec g_ini);
+Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini);
 
 #ifdef WITH_EXTRA_SOLVERS
 Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);

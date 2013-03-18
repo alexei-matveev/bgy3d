@@ -468,10 +468,8 @@ computes the sum of all vector elements."
 ;;;
 (define option-spec-all
   (quasiquote
-   ((BGY2Site	(value #f))                ; pure solvent run
-    (BGYM2Site	(value #f))                ; solute + solvent run
-    (HNC	(value #f))
-    (HNC-M	(value #f))
+   ((bgy	(value #f))
+    (hnc	(value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
@@ -498,60 +496,68 @@ computes the sum of all vector elements."
     ;; (pretty-print opts)
     (cond
      ;;
-     ;; Pure solvent:
+     ;; HNC:
      ;;
-     ((option-ref opts 'HNC #f)
+     ((option-ref opts 'hnc #f)
       (let ((solvent (find-molecule (option-ref opts 'solvent "LJ"))))
-        (hnc3d-run-solvent solvent '()))) ; Use defaults and Petsc env
-     ;;
-     ((option-ref opts 'BGY2Site #f)
-      (let ((solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
-        (bgy3d-run-solvent solvent
-			   '())))          ; Use defaults and Petsc env
-     ;;
-     ;; Solute with solvent.  Note that at variance with the legacy
-     ;; code the function find-molecule uses on-disk database in
-     ;; ./solutes.scm and not the compiled in set from bgy3d-solutes.c
-     ;; and bgy3d-solvents.h:
-     ;;
-     ((option-ref opts 'HNC-M #f)
-      (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
-            (solvent	(find-molecule (option-ref opts 'solvent "LJ"))))
-        (let-values (((g1 ve) (hnc3d-run-solute solute
-                                                solvent
-                                                '()))) ; Use defaults and Petsc env
-          (map vec-save (g1-file-names g1) g1)
-          (map vec-destroy g1)))) ; dont forget to destroy them
-     ;;
-     ((option-ref opts 'BGYM2Site #f)
-      (let ((solute	(find-molecule (option-ref opts 'solute *default-molecule*)))
-            (solvent	(find-molecule (option-ref opts 'solvent *default-molecule*))))
-        (let-values (((g1 potential) (bgy3d-run-solute solute
-                                                       solvent
-                                                       '()))) ; Use Petsc env
-          ;;
-          ;; For  testing, primarily, evaluate  potential at positions
-          ;; of solute sites and the corresponding total energy:
-          ;;
-          (let* ((sites		(molecule-sites solute))
-                 (positions	(map site-position sites))
-                 (potentials	(potential-map potential positions))
-                 (charges	(map site-charge sites))
-                 (energy	(apply + (map * charges potentials))))
+        (if (option-ref opts 'solute #f)
             ;;
-            ;; Only print on master:
+            ;; Solute with solvent:
             ;;
-            (maybe-print (cons 'core-potentials potentials))
-            (maybe-print (cons 'core-energy energy)))
-          ;;
-          ;; Write g?.bin files:
-          ;;
-          (map vec-save (g1-file-names g1) g1)
-          ;;
-          ;; Then destroy the objects returned:
-          ;;
-          (bgy3d-pot-destroy potential)
-          (map vec-destroy g1)))) ; dont forget to destroy them
+            (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
+              (let-values (((g1 ve) (hnc3d-run-solute solute
+                                                      solvent
+                                                      '())))
+                (map vec-save (g1-file-names g1) g1)
+                (map vec-destroy g1)))
+            ;;
+            ;; Pure solvent:
+            ;;
+            (hnc3d-run-solvent solvent '()))))
+     ;;
+     ;; BGY:
+     ;;
+     ((option-ref opts 'bgy #f)
+      (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
+        (if (option-ref opts 'solute #f)
+            ;;
+            ;; Solute with solvent.  Note that at variance with the
+            ;; legacy code the function find-molecule uses on-disk
+            ;; database in ./solutes.scm and not the compiled in set
+            ;; from bgy3d-solutes.c and bgy3d-solvents.h:
+            ;;
+            (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
+              (let-values (((g1 potential) (bgy3d-run-solute solute
+                                                             solvent
+                                                             '()))) ; Use Petsc env
+                ;;
+                ;; For testing, primarily, evaluate potential at
+                ;; positions of solute sites and the corresponding
+                ;; total energy:
+                ;;
+                (let* ((sites		(molecule-sites solute))
+                       (positions	(map site-position sites))
+                       (potentials	(potential-map potential positions))
+                       (charges		(map site-charge sites))
+                       (energy		(apply + (map * charges potentials))))
+                  ;;
+                  ;; Only print on master:
+                  ;;
+                  (maybe-print (cons 'core-potentials potentials))
+                  (maybe-print (cons 'core-energy energy)))
+                ;;
+                ;; Write g?.bin files:
+                ;;
+                (map vec-save (g1-file-names g1) g1)
+                ;;
+                ;; Then destroy the objects returned:
+                ;;
+                (bgy3d-pot-destroy potential)
+                (map vec-destroy g1)))
+            ;;
+            ;; Pure solvent:
+            ;;
+            (bgy3d-run-solvent solvent '()))))
      ;;
      ;; Fall through to the new variant:
      ;;
