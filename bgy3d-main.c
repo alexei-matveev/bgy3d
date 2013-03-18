@@ -13,9 +13,9 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"      /* FIXME: struct Site in prototypes */
-#include "bgy3d-pure.h"         /* BGY3d_solve_2site */
+#include "bgy3d-pure.h"         /* BGY3d_solvent_solve(), ... */
 #include "bgy3d-potential.h"    /* Context */
-#include "bgy3d-impure.h"       /* BGY3d_solve_H2O_2site */
+#include "bgy3d-impure.h"       /* BGY3d_solute_solve() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_*() */
 #ifdef WITH_EXTRA_SOLVERS
 #include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
@@ -46,7 +46,6 @@ int main (int argc, char **argv)
 {
   int ierr;
   real mpi_start, mpi_stop;
-  Vec g, g_ini;
   Solver *solver = NULL;
 
   verbosity = 0;                /* global var */
@@ -170,37 +169,38 @@ int main (int argc, char **argv)
 
   if (solver)
     {
+      local Vec g_ini;
       /* load initial configuration from file ??? */
-      if (bgy3d_getopt_test ("--load")) {
+      if (bgy3d_getopt_test ("--load"))
+        {
           g_ini = bgy3d_vec_load ("g.bin");
-          PetscPrintf(PETSC_COMM_WORLD,"g_ini loaded from file \"g.bin\".\n");
-      }
+          PetscPrintf (PETSC_COMM_WORLD, "g_ini loaded from file \"g.bin\".\n");
+        }
       else
-          g_ini = PETSC_NULL;
+        g_ini = NULL;
 
-      g = solver (&PD, g_ini);
+      local Vec g = solver (&PD, g_ini);
 
       /* computation time measurement end point*/
-      MPI_Barrier( PETSC_COMM_WORLD);
+      MPI_Barrier (PETSC_COMM_WORLD);
       mpi_stop = MPI_Wtime();
-      PetscPrintf(PETSC_COMM_WORLD,"Total computation time: %.4f s\n",
-                  mpi_stop-mpi_start);
-
-
+      PetscPrintf (PETSC_COMM_WORLD, "Total computation time: %.4f s\n",
+                   mpi_stop - mpi_start);
 
       /* Output result */
-      if( g != PETSC_NULL) {
+      if (g != NULL)
+        {
           bgy3d_vec_save_ascii ("vec.m", g);
 
           /* save g to binary file */
-          if (bgy3d_getopt_test ("--save")) {
+          if (bgy3d_getopt_test ("--save"))
+            {
               bgy3d_vec_save ("g.bin", g);
-	      PetscPrintf(PETSC_COMM_WORLD,"Result written to file \"g.bin\".\n");
-          }
+              PetscPrintf (PETSC_COMM_WORLD, "Result written to file \"g.bin\".\n");
+            }
 
 	  bgy3d_vec_destroy (&g);
-      }
-
+        }
   }
   else
     PetscPrintf (PETSC_COMM_WORLD,
