@@ -31,41 +31,35 @@ typedef struct Solute {
   Site sites[];                 /* site descriptions */
 } Solute;
 
-// FIXME: maybe #include "solutes.h" instead?
+/*
+  FIXME:  see guile/solutes.scm  for  more.  It  does  not "scale"  to
+  include every solute paremetrization  in the source code.  Here only
+  the solutes that are used  in regression tests using the OLD command
+  line   interface.   Recompile  WITH_GUILE   and   use  the   on-disk
+  database. Maybe #include "solutes.h" instead?
+*/
 
-/*********************************/
 /* HCl */
-/*********************************/
-
 static const Solute HydrogenChloride =
   {"hydrogen chloride", 2,
    {{"H", {0.6285, 0.0, 0.0}, 2.735, 0.03971, 0.2},
     {"Cl", {-0.6285, 0.0, 0.0}, 3.353, 0.51434, -0.2}}};
 
-/*********************************/
 /* CS2 */
-/*********************************/
-
 static const Solute CarbonDisulfide =
   {"carbon disulfide", 3,
    {{"C", {0.0, 0.0, 0.0}, 3.2, 0.10128, -0.308},
     {"S1", {-1.56, 0.0, 0.0}, 3.52, 0.395, 0.154},
     {"S2", {1.56, 0.0, 0.0}, 3.52, 0.395, 0.154}}};
 
-/*********************************/
 /* Water */
-/*********************************/
-
 static const Solute Water =
   {"water", 3,
    {{"O", {-0.2929, 0.0, 0.0}, 3.1506, 0.1521, -0.834},
     {"OH", {0.2929, 0.757, 0.0}, 0.4, 0.046, 0.417},
     {"OH", {0.2929, -0.757, 0.0}, 0.4, 0.046, 0.417}}};
 
-/*********************************/
 /* Methanol */
-/*********************************/
-
 static const Solute Methanol =
   {"methanol", 6,
    {{"C", {-0.748, -0.015, 0.024}, 3.5, 0.066, 0.145},
@@ -75,9 +69,7 @@ static const Solute Methanol =
     {"O", {0.558, 0.42, -0.278}, 3.12, 0.17, -0.683},
     {"OH", {0.716, 1.404, 0.137}, 0.4, 0.04, 0.418}}};
 
-/* BUTANOIC ACID */
-/* H1 sigma and epsilon adopted */
-
+/* Butanoic acid. H1 sigma and epsilon adopted */
 static const Solute ButanoicAcid =
   {"butanoic acid", 14,
    {{"C1", {1.422, -0.017, 0.0}, 3.75, 0.105, 0.52},
@@ -95,10 +87,7 @@ static const Solute ButanoicAcid =
     {"H7", {-2.439, -1.178, -0.89}, 2.5, 0.03, 0.06},
     {"H8", {-3.21, 0.157, 0.0}, 2.5, 0.03, 0.06}}};
 
-/*********************************/
 /* Hexane */
-/*********************************/
-
 static const Solute Hexane =
   {"hexane", 20,
    {{"C", {1.709, -2.812, 0.0}, 3.5, 0.066, -0.18},
@@ -122,12 +111,18 @@ static const Solute Hexane =
     {"H", {-0.696, 3.204, 0.89}, 2.5, 0.03, 0.06},
     {"H", {-2.236, 3.19, 0.0}, 2.5, 0.03, 0.06}}};
 
+/* Lennard-Jones particle */
+static const Solute LJ =
+  {"LJ", 1,
+   {{"LJ", {0.0, 0.0, 0.0}, 1.0, 1.0, 0.0}}};
+
 static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &CarbonDisulfide,  /* 1 */
                                   &Water,            /* 2 */
                                   &Methanol,         /* 3 */
                                   &ButanoicAcid,     /* 4 */
-                                  &Hexane};          /* 5 */
+                                  &Hexane,           /* 5 */
+                                  &LJ};              /* 6 */
 
 /* Get solute  sites by solute name.  Functions that do  the real work
    operate on array of sites: */
