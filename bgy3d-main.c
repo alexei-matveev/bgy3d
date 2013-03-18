@@ -17,6 +17,8 @@
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-impure.h"       /* BGY3d_solute_solve() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_*() */
+#include "hnc3d.h"              /* hnc3d_solute_solve(), ... */
+
 #ifdef WITH_EXTRA_SOLVERS
 #include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
 #include "bgy3d-newton-pure.h"
@@ -26,7 +28,6 @@
 #include "bgy3d-fourier.h"      /* BGY3dDiv_solve_Fourier */
 #include "bgy3d-simple.h"       /* BGY3d_solve */
 #endif
-#include "hnc3d.h"              /* hnc3d_solve() */
 
 #ifdef WITH_GUILE
 #include "bgy3d-guile.h"        /* bgy3d_guile_main */
@@ -89,7 +90,34 @@ int main (int argc, char **argv)
   /*     start_debugger(); */
   /* sleep(5); */
 
-  /* Read method to solve from command line */
+  /*
+    Read method to solve from  command line.  There seem to be several
+    solvers that address a  problem of finding solvent distribution in
+    external field  given the direct correlation function  of the pure
+    solvent. This is a common entry  point for all of them. The actual
+    algorith will be affected by --closure HNC/PY/KH and --snes-solver
+    newton/picard/jager:
+  */
+  if (bgy3d_getopt_test ("--hnc"))
+    {
+      if (bgy3d_getopt_test ("--solute"))
+        solver = HNC3d_solute_solve; /* solute/solvent by HNC */
+      else
+        solver = HNC3d_solvent_solve; /* pure solvent by HNC */
+    }
+
+  if (bgy3d_getopt_test ("--bgy"))
+    {
+      if (bgy3d_getopt_test ("--solute"))
+        solver =  BGY3d_solute_solve; /* solvent/solute by BGY */
+      else
+        solver =  BGY3d_solvent_solve; /* pure solvent by BGY */
+    }
+
+  /* This one may only work for 3-site symmetric H2O-like solvents: */
+  if (bgy3d_getopt_test ("--BGY3Site"))
+    solver =  BGY3d_solvent_solve_h2o;
+
 #ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("--simple"))
     solver = BGY3d_solve;
@@ -114,36 +142,7 @@ int main (int argc, char **argv)
 
   if (bgy3d_getopt_test ("--BGY-DIATOMIC"))
     solver =  BGY3d_solve_DiatomicAB;
-#endif
 
-  /*
-    There seem to be several solvers that address a problem of finding
-    solvent   distribution  in   external  field   given   the  direct
-    correlation function of  the pure solvent. This is  a common entry
-    point for  all of  them. The actual  algorith will be  affected by
-    --closure HNC/PY/KH and --snes-solver newton/picard/jager:
-  */
-  if (bgy3d_getopt_test ("--hnc"))
-    {
-      if (bgy3d_getopt_test ("--solute"))
-        solver = HNC3d_solute_solve; /* solute/solvent by HNC */
-      else
-        solver = HNC3d_solvent_solve; /* pure solvent by HNC */
-    }
-
-  if (bgy3d_getopt_test ("--bgy"))
-    {
-      if (bgy3d_getopt_test ("--solute"))
-        solver =  BGY3d_solute_solve; /* solvent/solute by BGY */
-      else
-        solver =  BGY3d_solvent_solve; /* pure solvent by BGY */
-    }
-
-  /* This one may only work for 3-site symmetric H2O-like solvents: */
-  if (bgy3d_getopt_test ("--BGY3Site"))
-    solver =  BGY3d_solvent_solve_h2o;
-
-#ifdef WITH_EXTRA_SOLVERS
   if (bgy3d_getopt_test ("--BGYM3Site"))
     solver =  BGY3dM_solve_H2O_3site;
 
