@@ -1,31 +1,31 @@
 Moments from g0.bin
-<1> =  2103.0731227
-<x> =  31.9711202272
-<y> =  31.972216423
-<z> =  30.4090974223
-<xy> =  0.00629209947946
-<yz> =  0.00723126305241
-<zx> =  0.00383115101166
-<z^2 - 1/3 * r^2> =  24.3877505789
-<x^2 - y^2> =  0.0138236809055
-<r^2> =  140.285361915
+<1> =  2007.17527994
+<x> =  31.9704973194
+<y> =  31.9716421136
+<z> =  30.203984517
+<xy> =  0.00664308808628
+<yz> =  0.0061317403971
+<zx> =  0.00229257099801
+<z^2 - 1/3 * r^2> =  21.4880243387
+<x^2 - y^2> =  0.0140275438869
+<r^2> =  130.588352642
 Moments from g1.bin
-<1> =  1876.06927789
-<x> =  31.9612515383
-<y> =  31.962721278
-<z> =  25.4206233817
-<xy> =  0.00869031649131
-<yz> =  -0.178548534562
-<zx> =  -0.190297823668
-<z^2 - 1/3 * r^2> =  -52.5229614067
-<x^2 - y^2> =  0.0196652693485
-<r^2> =  -76.681904341
-integrated charge = -0.021331 (should be close to zero)
-q_v = -0.024939 (charge of solvent medium)
+<1> =  1790.24562912
+<x> =  31.9602879735
+<y> =  31.9618248897
+<z> =  24.5576459224
+<xy> =  0.00912823554823
+<yz> =  -0.21025782781
+<zx> =  -0.224036911636
+<z^2 - 1/3 * r^2> =  -63.7340408478
+<x^2 - y^2> =  0.0200928561615
+<r^2> =  -100.186293106
+integrated charge = -0.021161 (should be close to zero)
+q_v = -0.023833 (charge of solvent medium)
 |<x|ρ_n>| = |-3.771000,  0.000000,  0.000000| = 3.771000 (dipole moment of solute cores)
-|<x|ρ_v>| = |-0.308907, -0.000395, -0.000411| = 0.308908 (dipole moment of solvent medium)
-<U_v|ρ_N> = 40.076266 (solvent electrostatic field with solute point nuclei)
-<U_v|ρ_u> = -2.011085 (solvent electrostatic field with diffuse charge density of solute)
-<ρ_v|U_u> = -2.016554 (solvent charge density with long-range electrostatic field of solute)
+|<x|ρ_v>| = |-0.333666, -0.000392, -0.000408| = 0.333666 (dipole moment of solvent medium)
+<U_v|ρ_N> = 40.590794 (solvent electrostatic field with solute point nuclei)
+<U_v|ρ_u> = -2.254806 (solvent electrostatic field with diffuse charge density of solute)
+<ρ_v|U_u> = -2.261501 (solvent charge density with long-range electrostatic field of solute)
  Total energy of solute with solvent:
- e_slv = -3.17644893286916918E-003 a.u. =  -1.9931899408860749      kcal/mol
+ e_slv = -3.56579889597870292E-003 a.u. =  -2.2375031492376762      kcal/mol
