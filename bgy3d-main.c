@@ -81,6 +81,9 @@ int main (int argc, char **argv)
     MPI_Comm_size (PETSC_COMM_WORLD, &np);
     PetscPrintf (PETSC_COMM_WORLD, "NP= %d\n", np);
   }
+
+  /* FIXME:  some solvers do  this, some  dont. Sometimes  this output
+     appears twice: */
   bgy3d_problem_data_print (&PD);
 
   //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
