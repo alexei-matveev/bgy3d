@@ -137,7 +137,7 @@ static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
 }
 
 
-void compute_c (real beta, Vec v, Vec t, Vec c)
+static void compute_c (real beta, Vec v, Vec t, Vec c)
 {
   char closure[20] = "HNC";
   bgy3d_getopt_string ("--closure", closure, sizeof closure);
