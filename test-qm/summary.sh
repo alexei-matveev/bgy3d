@@ -3,19 +3,21 @@
 grep_match () {
 
     # $1 is grep pattern
-    local greppattern=$1
+    greppattern=$1
 
     # $2 is options for grep, e.g. -A 1
-    local opt=$2
+    grepopt=$2
     if [ -n "$greppattern" ]; then
 
-      local tmp=`grep $opt "$greppattern" $file | tail -1`
+      # declare the following kind of statement as local variable result
+      # in error in dash
+      greptmp=`grep $grepopt "$greppattern" $file | tail -1`
 
-      if [ -n "$tmp" ]; then
+      if [ -n "$greptmp" ]; then
 
 	# text seperated with space, so print the last field after "="
 	# FIXME: what if no space between "=" with target value
-	echo $tmp | awk '
+	echo $greptmp | awk '
 		    BEGIN {FS="[ ]+"}
 			  {
 			    for (i = 1; i <= NF; i++) 
