@@ -446,13 +446,18 @@ computes the sum of all vector elements."
                          ((unquote op) (value #t) (predicate (unquote string->number)))))
                       (map car bgy3d-settings)))) ; all of them are numbers
     (quasiquote
-     ((solvent		(value #t)	(predicate (unquote find-molecule))) ; a string
-      (solute		(value #t)	(predicate (unquote find-molecule))) ; a string
-      (from-radial-g2	(value #f))
-      (save-guess	(value #f))
-      (load-guess	(value #f))
-      (snes-solver	(value #t))   ; "jager", "newton", or "picard"
-      (verbose		(single-char #\v)	(value #f))     ; verbosity
+     ((solvent          (value #t)
+                        (predicate ,find-molecule)) ; a string
+      (solute           (value #t)
+                        (predicate ,find-molecule)) ; a string
+      (from-radial-g2   (value #f))
+      (save-guess       (value #f))
+      (load-guess       (value #f))
+      (snes-solver      (value #t)
+                        (predicate ,(lambda (x)
+                                      (member x '("jager" "newton" "picard")))))
+      (verbose          (single-char #\v)
+                        (value #f)) ; verbosity
       (unquote-splicing numeric)))))
 
 
