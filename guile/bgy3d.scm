@@ -468,8 +468,11 @@ computes the sum of all vector elements."
 ;;;
 (define option-spec-all
   (quasiquote
-   ((bgy	(value #f))
-    (hnc	(value #f))
+   ((bgy        (value #f))
+    (hnc        (value #f))
+    (closure    (value #t)
+                (predicate ,(lambda (x)
+                              (member x '("HNC" "PY" "KH")))))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
