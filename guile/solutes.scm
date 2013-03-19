@@ -118,6 +118,11 @@
  (("O" (0.0 0.0 0.0) 3.16 0.1549 -0.38)
   ("H" (1.0 0.0 0.0) 0.0 0.0 0.38)))
 
+;;;
+;;; Fake single-site LJ water model:
+;;;
+("OW" (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
+
 ;;
 ;; Transferable  Potentials  for  Phase Equilibria.   1.   United-Atom
 ;; Description of  n-Alkanes. Marcus G. Martin and  J.  Ilja Siepmann,
