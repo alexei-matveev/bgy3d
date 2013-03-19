@@ -406,8 +406,8 @@ computes the sum of all vector elements."
                           settings))    ; alist
     ;; Print on master only:
     (maybe-print (list 'restart: restart))
-    (maybe-print solute)
-    (maybe-print settings)
+    (maybe-print (list 'solute: solute))
+    (maybe-print (list 'settings: settings))
     (force-output)
     ;;
     ;; The  function bgy3d-run-solute allocates and returns  a list of
@@ -500,11 +500,13 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'hnc #f)
       (let ((solvent (find-molecule (option-ref opts 'solvent "LJ"))))
+        (maybe-print (list 'solvent: solvent))
         (if (option-ref opts 'solute #f)
             ;;
             ;; Solute with solvent:
             ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
+              (maybe-print (list 'solute: solute))
               (let-values (((g1 ve) (hnc3d-run-solute solute
                                                       solvent
                                                       '())))
@@ -519,6 +521,7 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'bgy #f)
       (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
+        (maybe-print (list 'solvent: solvent))
         (if (option-ref opts 'solute #f)
             ;;
             ;; Solute with solvent.  Note that at variance with the
@@ -527,6 +530,7 @@ computes the sum of all vector elements."
             ;; from bgy3d-solutes.c and bgy3d-solvents.h:
             ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
+              (maybe-print (list 'solute: solute))
               (let-values (((g1 potential) (bgy3d-run-solute solute
                                                              solvent
                                                              '()))) ; Use Petsc env
