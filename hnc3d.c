@@ -188,15 +188,15 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
   t    ->  dt = t    - t
     in           out    in
 */
-typedef struct Ctx_t
+typedef struct Ctx_t2
 {
   State *HD;
   Vec v, c;                     /* real */
   Vec t_fft, c_fft;             /* complex */
-} Ctx_t;
+} Ctx_t2;
 
 
-static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
+static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
 {
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
@@ -234,15 +234,15 @@ static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
   c    ->  dc = c    - c
     in           out    in
 */
-typedef struct Ctx_c
+typedef struct Ctx_c2
 {
   State *HD;
   Vec v, t;                     /* real */
   Vec t_fft, c_fft;             /* complex */
-} Ctx_c;
+} Ctx_c2;
 
 
-static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
+static void iterate_c2 (Ctx_c2 *ctx, Vec c, Vec dc)
 {
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
@@ -307,12 +307,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   assert (m == 1);
   /*
-    Find a  t such that dt as  returned by iterate_t (&ctx,  t, dt) is
+    Find a t  such that dt as returned by iterate_t2  (&ctx, t, dt) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_t* vs. void*:
+    pointer argument: struct Ctx_t2* vs. void*:
   */
   {
-    Ctx_t ctx =
+    Ctx_t2 ctx =
       {
         .HD = HD,
         .v = v[0][0],
@@ -320,7 +320,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
         .t_fft = t_fft,
         .c_fft = c_fft,
       };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_t, t);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_t2, t);
   }
 
   bgy3d_vec_save ("t00.bin", t);
@@ -374,12 +374,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   assert (m == 1);
   /*
-    Find a  c such that dc as  returned by iterate_c (&ctx,  c, dc) is
+    Find a c  such that dc as returned by iterate_c2  (&ctx, c, dc) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_c* vs. void*:
+    pointer argument: struct Ctx_c2* vs. void*:
   */
   {
-    Ctx_c ctx =
+    Ctx_c2 ctx =
       {
         .HD = HD,
         .v = v[0][0],
@@ -387,7 +387,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
         .t_fft = t_fft,
         .c_fft = c_fft,
       };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_c, c);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, c);
   }
 
   bgy3d_vec_save ("t00.bin", t);
@@ -451,15 +451,15 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   h    ->  dh = h    - h
     in           out    in
 */
-typedef struct Ctx_h
+typedef struct Ctx_h1
 {
   State *HD;
   Vec v, t;                     /* real */
   Vec c_fft, h_fft, ch_fft;     /* complex */
-} Ctx_h;
+} Ctx_h1;
 
 
-static void iterate_h (Ctx_h *ctx, Vec h, Vec dh)
+static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
 {
   const ProblemData *PD = ctx->HD->PD;
 
@@ -579,11 +579,11 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /*
     Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: Ctx_h* vs. void*:
+    pointer argument: Ctx_h1* vs. void*:
   */
   {
-    /* Work area for iterate_h(): */
-    Ctx_h ctx =
+    /* Work area for iterate_h1(): */
+    Ctx_h1 ctx =
       {
         .HD = HD,
         .v = v[0],
@@ -593,7 +593,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .ch_fft = ch_fft,
       };
 
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_h, h);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_h1, h);
   }
 
   /* free stuff */
