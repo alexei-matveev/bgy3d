@@ -490,19 +490,28 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   /*
     The new candidate for the total correlation
 
-      h = exp [-βv + t] - 1
+      h = exp (-βv + t) - 1
 
     with
 
       t = ρ (c * h)
 
-    computed using the input h.  Resulting new h is stored in Vec dh:
+    computed using the input h.  Resulting new h will be stored in Vec
+    dh. To compute that we re-use the closure relation, which, in case
+    of HNC closure, outputs
+
+      exp (-βv + t) - 1.0 - t
+
+    (I dont call the expression above "c" as in the closure definition
+    to avoid the necessity to differentiate between pair and singleton
+    c2 and c1).   It is questionable whether we  should always use HNC
+    closure  here  or  respect   the  input  of  the  user  (--closure
+    switch). There is  only a chance for solute  == solvent to produce
+    the same result as the pure solvent if we use the "native" closure
+    here:
   */
-  real pure h_out (real v, real t)
-  {
-    return expm1 (-beta * v + t);
-  }
-  bgy3d_vec_map2 (dh, h_out, ctx->v, t);
+  compute_c (beta, ctx->v, t, dh);
+  VecAXPY (dh, 1.0, t);
 
   /*
     dh := h    - h
