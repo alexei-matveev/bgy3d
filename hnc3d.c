@@ -475,28 +475,32 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   /* fft(h) */
   MatMult (ctx->HD->fft_mat, h, h_fft);
 
-  /* fft(h)*fft(c) */
+  /* fft(h) * fft(c) */
   complex pure mul (complex x, complex y)
   {
     return x * y;
   }
   bgy3d_vec_fft_map2 (t_fft, mul, c_fft, h_fft);
 
-  /* v = fft^-1(fft(c)*fft(h)) */
+  /* t = fft^-1 (fft(c) * fft(h)) */
   MatMultTranspose (ctx->HD->fft_mat, t_fft, t);
 
-  VecScale (t, h3 / N3);
+  VecScale (t, rho * h3 / N3);
 
   /*
     The new candidate for the total correlation
 
-    h = exp (-βv + ρt) - 1
+      h = exp [-βv + t] - 1
 
-    stored in Vec dh:
+    with
+
+      t = ρ (c * h)
+
+    computed using the input h.  Resulting new h is stored in Vec dh:
   */
   real pure h_out (real v, real t)
   {
-    return expm1 (-beta * v + rho * t);
+    return expm1 (-beta * v + t);
   }
   bgy3d_vec_map2 (dh, h_out, ctx->v, t);
 
