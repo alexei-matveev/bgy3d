@@ -390,6 +390,8 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     bgy3d_snes_default (PD, &ctx, (Function) iterate_c, c);
   }
 
+  bgy3d_vec_save ("t00.bin", t);
+
   /* g = γ + c + 1, store in Vec t: */
   VecAXPY (t, 1.0, c);
   VecShift (t, 1.0);
