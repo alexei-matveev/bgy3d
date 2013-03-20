@@ -86,7 +86,9 @@
 ;;;
 (define (maybe-print . args)
   (if (zero? (bgy3d-rank))
-      (apply pretty-print args)))
+      (begin
+        (apply pretty-print args)
+        (force-output))))
 
 ;;;
 ;;; Settings  are  handled  as  an  association list,  these  are  the
@@ -408,7 +410,6 @@ computes the sum of all vector elements."
     (maybe-print (list 'restart: restart))
     (maybe-print (list 'solute: solute))
     (maybe-print (list 'settings: settings))
-    (force-output)
     ;;
     ;; The  function bgy3d-run-solute allocates and returns  a list of
     ;; Petsc Vecs and a potential (returned as multiple values). It is
