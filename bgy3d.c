@@ -97,8 +97,15 @@ ProblemData bgy3d_problem_data (void)
     assert (PD.lambda >= 0.0);
     assert (PD.lambda <= 1.0);
 
-    /* Get damp_start from command line*/
-    PD.damp = 0.0;
+    /*
+      Get initial  interaction scaling  factor from command  line. The
+      code  used   to  automate  "blending-in"   some  interaction  by
+      iterating  scaling factor  from  some low  initial  value to  1.
+      Default was  0.0 originally, but that makes  necessary to always
+      specify --damp-start when 1.0 you do not want blending.  I think
+      1.0 is a more reasonable default:
+    */
+    PD.damp = 1.0;
     bgy3d_getopt_real ("--damp-start", &PD.damp);
 
     /* Number of total iterations */
