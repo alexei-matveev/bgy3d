@@ -531,7 +531,7 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
 
 static void solvent_kernel (State *HD, Vec c_fft)
 {
-  Vec c = bgy3d_vec_create (HD->da);
+  local Vec c = bgy3d_vec_create (HD->da);
 
   /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
@@ -542,6 +542,13 @@ static void solvent_kernel (State *HD, Vec c_fft)
   MatMult (HD->fft_mat, c, c_fft);
 
   bgy3d_vec_destroy (&c);
+
+  /*
+    Translate the  distribution to the  grid corner. This is  what one
+    expects in convolution integrals. FIXME: or should we rather store
+    the convolution kernel on disk in ready form?
+  */
+  bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft);
 }
 
 
@@ -573,13 +580,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
     consistent.
   */
   solvent_kernel (HD, c_fft);
-
-  /*
-    Translate the  distribution to the  grid corner. This is  what one
-    expects in convolution integrals. FIXME: or should we rather store
-    the convolution kernel on disk in ready form?
-  */
-  bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft);
 
   /*
     Get  solute-solvent interaction.   Fill v[]  with  the short-range
