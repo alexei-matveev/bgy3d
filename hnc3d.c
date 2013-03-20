@@ -267,25 +267,33 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
   HNC equation.  Indirect correlation  γ appears as a primary variable
   here:
 */
-void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
+void hnc3d_solvent_solve (const ProblemData *PD,
+                          int m, const Site solvent[m],
+                          Vec g[m][m])
 {
+  /* Code used to be verbose: */
+  bgy3d_problem_data_print (PD);
+
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  Vec v = bgy3d_vec_create (HD->da); /* solvent-solvent interaction */
   Vec c = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
 
+  Vec v[m][m];
+  bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
 
-  /* FIXME:   this  is   abused  to   get  both   solvent-solvent  and
-     solute-solvent interactions: */
-  solute_field (HD->da, HD->PD, v);
+  /* Get solvent-solvent site-site interactions: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /* Create intial guess: */
   Vec t = bgy3d_vec_create (HD->da);
   VecSet (t, 0.0);
 
+  assert (m == 1);
   /*
     Find a  t such that dt as  returned by iterate_t (&ctx,  t, dt) is
     zero. Cast is  there to silence the mismatch in  the type of first
@@ -295,7 +303,7 @@ void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
     Ctx_t ctx =
       {
         .HD = HD,
-        .v = v,
+        .v = v[0][0],
         .c = c,
         .t_fft = t_fft,
         .c_fft = c_fft,
@@ -314,10 +322,10 @@ void hnc3d_solvent_solve (const ProblemData *PD, Vec g[1][1])
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&t); */
-  bgy3d_vec_destroy (&v);
   bgy3d_vec_destroy (&c);
   bgy3d_vec_destroy (&c_fft);
   bgy3d_vec_destroy (&t_fft);
+  bgy3d_vec_destroy2 (m, v);
 
   bgy3d_state_destroy (HD);
 
@@ -332,6 +340,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
                           int m, const Site solvent[m],
                           Vec g[m][m])
 {
+  /* Code used to be verbose: */
+  bgy3d_problem_data_print (PD);
+
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
   Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
@@ -506,6 +517,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          Vec g[m])
 {
   assert (m == 1);
+
+  /* Code used to be verbose: */
+  bgy3d_problem_data_print (PD);
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
   Vec t = bgy3d_vec_create (HD->da);
