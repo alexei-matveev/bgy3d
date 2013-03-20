@@ -462,14 +462,15 @@ typedef struct Ctx_h1
 static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
 {
   const ProblemData *PD = ctx->HD->PD;
+  const real rho = PD->rho;
+  const real beta = PD->beta;
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
 
   Vec t = ctx->t;           /* temp */
   Vec c_fft = ctx->c_fft;   /* fixed solvent kernel */
   Vec h_fft = ctx->h_fft;   /* temp */
   Vec t_fft = ctx->t_fft;   /* temp */
-
-  const real rho = PD->rho;
-  const real beta = PD->beta;
 
   /* fft(h) */
   MatMult (ctx->HD->fft_mat, h, h_fft);
@@ -484,7 +485,7 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   /* v = fft^-1(fft(c)*fft(h)) */
   MatMultTranspose (ctx->HD->fft_mat, t_fft, t);
 
-  VecScale (t, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
+  VecScale (t, h3 / N3);
 
   /*
     The new candidate for the total correlation
