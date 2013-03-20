@@ -804,7 +804,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
     The problem with  h as a primary variable cannot  be severe as the
     Jager solver manages that.
   */
-  if (1)
+  if (0)
     solute_solve_h1 (PD, m, solvent, n, solute, g);
   else
     solute_solve_t1 (PD, m, solvent, n, solute, g);

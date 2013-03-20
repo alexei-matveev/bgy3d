@@ -21,11 +21,12 @@ HNC-FLAGS = \
 	--hnc \
 	--N 128 \
 	--L 10.0 \
-	--beta 0.606060 \
-	--max-iter 320 \
-	--lambda 0.1 \
-	--rho 0.1 \
+	--beta 1.6889 \
+	--max-iter 1000 \
+	--lambda 0.02 \
+	--rho 0.033427745 \
 	--norm-tol 1e-12 \
+	--solvent "OW" \
 
 #
 # In case $(EXE) is not defined, assume the executable is one level up
@@ -50,8 +51,8 @@ bgy-diffs = \
 	$(patsubst %,%.g1.diff,$(solutes))
 
 hnc-diffs = \
-	LJ.hnc3d.g2.diff \
-	LJ.hnc3d.g1.diff \
+	OW.hnc3d.g2.diff \
+	OW.hnc3d.g1.diff \
 	$(patsubst %,%.hnc3d.g1.diff,$(solutes))
 
 #
@@ -123,7 +124,7 @@ make-summary = $(SHELL) ./summary.sh
 	$(moments) g00.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.hnc3d.g1: ../bgy3d LJ.hnc3d.g2
+%.hnc3d.g1: ../bgy3d OW.hnc3d.g2
 	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
