@@ -209,9 +209,15 @@ static void iterate_t (Ctx_t *ctx, Vec t, Vec dt)
 
   MatMult (HD->fft_mat, ctx->c, ctx->c_fft);
 
+  /* Translate distribution to the grid corner. */
+  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->c_fft);
+
   VecScale (ctx->c_fft, h3);
 
   compute_t (rho, ctx->c_fft, ctx->t_fft);
+
+  /* Translate distribution to the grid center. */
+  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
 
   MatMultTranspose (HD->fft_mat, ctx->t_fft, dt);
 
@@ -247,9 +253,15 @@ static void iterate_c (Ctx_c *ctx, Vec c, Vec dc)
 
   MatMult (HD->fft_mat, c, ctx->c_fft);
 
+  /* Translate distribution to the grid corner. */
+  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->c_fft);
+
   VecScale (ctx->c_fft, h3);
 
   compute_t (rho, ctx->c_fft, ctx->t_fft);
+
+  /* Translate distribution to the grid center. */
+  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
 
   MatMultTranspose (HD->fft_mat, ctx->t_fft, ctx->t);
 
@@ -537,6 +549,13 @@ void hnc3d_solute_solve (const ProblemData *PD,
     consistent.
   */
   solvent_kernel (HD, c_fft);
+
+  /*
+    Translate the  distribution to the  grid corner. This is  what one
+    expects in convolution integrals. FIXME: or should we rather store
+    the convolution kernel on disk in ready form?
+  */
+  bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft);
 
   /*
     Get  solute-solvent interaction.   Fill v[]  with  the short-range
