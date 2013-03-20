@@ -13,7 +13,6 @@ BGY-FLAGS = \
 	--norm-tol 1.0e-7 \
 	--max-iter 1000 \
 	--L 10.0 \
-	--damp-start 1.0 \
 	--lambda 0.02 \
 	--snes-solver jager \
 
