@@ -459,6 +459,7 @@ computes the sum of all vector elements."
                                       (member x '("jager" "newton" "picard")))))
       (verbose          (single-char #\v)
                         (value #f)) ; verbosity
+      (no-cage          (value #f)) ; turns off metallic cage boundary
       (unquote-splicing numeric)))))
 
 
