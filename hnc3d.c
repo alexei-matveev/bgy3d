@@ -467,25 +467,22 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
 
-  Vec t = ctx->t;           /* temp */
-  Vec c_fft = ctx->c_fft;   /* fixed solvent kernel */
-  Vec h_fft = ctx->h_fft;   /* temp */
-  Vec t_fft = ctx->t_fft;   /* temp */
+  /* fft(h).  Here h is the 3d  unknown hole density h1 of the solvent
+     sites. */
+  MatMult (ctx->HD->fft_mat, h, ctx->h_fft);
 
-  /* fft(h) */
-  MatMult (ctx->HD->fft_mat, h, h_fft);
-
-  /* fft(h) * fft(c) */
+  /* fft(h)  *  fft(c).  Here   c  is  the  constant  (radial)  direct
+     correlation c2 of the pure solvent. */
   complex pure mul (complex x, complex y)
   {
     return x * y;
   }
-  bgy3d_vec_fft_map2 (t_fft, mul, c_fft, h_fft);
+  bgy3d_vec_fft_map2 (ctx->t_fft, mul, ctx->c_fft, ctx->h_fft);
 
-  /* t = fft^-1 (fft(c) * fft(h)) */
-  MatMultTranspose (ctx->HD->fft_mat, t_fft, t);
+  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
+  MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft, ctx->t);
 
-  VecScale (t, rho * h3 / N3);
+  VecScale (ctx->t, rho * h3 / N3);
 
   /*
     The new candidate for the total correlation
@@ -510,8 +507,8 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
     the same result as the pure solvent if we use the "native" closure
     here:
   */
-  compute_c (beta, ctx->v, t, dh);
-  VecAXPY (dh, 1.0, t);
+  compute_c (beta, ctx->v, ctx->t, dh);
+  VecAXPY (dh, 1.0, ctx->t);
 
   /*
     dh := h    - h
