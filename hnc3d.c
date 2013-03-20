@@ -180,7 +180,6 @@ static void compute_t (real rho, Vec c_fft, Vec t_fft)
 }
 
 
-#ifdef HNC3D_T
 /*
   HNC iteration for an indirect correlation γ = h - c (here denoted by
   t) where other intermediates are considered a function of that:
@@ -226,7 +225,7 @@ static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
   VecAXPY (dt, -1.0, t);
 }
 
-#else
+
 /*
   HNC iteration for a direct correlation where the total correlation
   is considered a function of that:
@@ -271,17 +270,16 @@ static void iterate_c2 (Ctx_c2 *ctx, Vec c, Vec dc)
 
   VecAXPY (dc, -1.0, c);
 }
-#endif
 
-#ifdef HNC3D_T
+
 /*
   Solving for indirect  correlation γ = h - c  and other quantities of
   HNC equation.  Indirect correlation  γ appears as a primary variable
   here:
 */
-void hnc3d_solvent_solve (const ProblemData *PD,
-                          int m, const Site solvent[m],
-                          Vec g[m][m])
+static void solvent_solve_t2 (const ProblemData *PD,
+                              int m, const Site solvent[m],
+                              Vec g[m][m])
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -345,12 +343,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   g[0][0] = t;
 }
 
-#else
+
 /* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
    appears as a primary variable here: */
-void hnc3d_solvent_solve (const ProblemData *PD,
-                          int m, const Site solvent[m],
-                          Vec g[m][m])
+static void solvent_solve_c2 (const ProblemData *PD,
+                              int m, const Site solvent[m],
+                              Vec g[m][m])
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -411,7 +409,20 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   /* Return just one distribution. bgy3d_vec_destroy (&) it! */
   g[0][0] = t;
 }
-#endif
+
+
+/* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
+   appears as a primary variable here: */
+void hnc3d_solvent_solve (const ProblemData *PD,
+                          int m, const Site solvent[m],
+                          Vec g[m][m])
+{
+  if (1)
+    solvent_solve_c2 (PD, m, solvent, g);
+  else
+    solvent_solve_t2 (PD, m, solvent, g);
+}
+
 
 /*
   Solving  for c  and  h(c)  of HNC  equation  with non-linear  solver
