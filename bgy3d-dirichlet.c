@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include "bgy3d.h"
+#include "bgy3d-getopt.h"       /* bgy3d_getopt_test() */
 #include "bgy3d-vec.h"          /* bgy3d_da_ref() */
 #include "bgy3d-dirichlet.h"
 
@@ -807,6 +808,9 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
  */
 void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec x)
 {
+  if (bgy3d_getopt_test ("--no-cage"))
+    return;                     /* FIXME! */
+
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is
     a linear, albeit not invertible projection operation:
