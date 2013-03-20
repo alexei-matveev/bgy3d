@@ -455,7 +455,7 @@ typedef struct Ctx_h1
 {
   State *HD;
   Vec v, t;                     /* real */
-  Vec c_fft, h_fft, ch_fft;     /* complex */
+  Vec c_fft, h_fft, t_fft;      /* complex */
 } Ctx_h1;
 
 
@@ -464,9 +464,9 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   const ProblemData *PD = ctx->HD->PD;
 
   Vec t = ctx->t;           /* temp */
-  Vec c_fft = ctx->c_fft;       /* fixed solvent kernel */
-  Vec h_fft = ctx->h_fft;       /* temp */
-  Vec ch_fft = ctx->ch_fft;     /* temp */
+  Vec c_fft = ctx->c_fft;   /* fixed solvent kernel */
+  Vec h_fft = ctx->h_fft;   /* temp */
+  Vec t_fft = ctx->t_fft;   /* temp */
 
   const real rho = PD->rho;
   const real beta = PD->beta;
@@ -479,10 +479,10 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
   {
     return x * y;
   }
-  bgy3d_vec_fft_map2 (ch_fft, mul, c_fft, h_fft);
+  bgy3d_vec_fft_map2 (t_fft, mul, c_fft, h_fft);
 
   /* v = fft^-1(fft(c)*fft(h)) */
-  MatMultTranspose (ctx->HD->fft_mat, ch_fft, t);
+  MatMultTranspose (ctx->HD->fft_mat, t_fft, t);
 
   VecScale (t, PD->h[0] * PD->h[1] * PD->h[2] / PD->N[0] / PD->N[1] / PD->N[2]);
 
@@ -539,7 +539,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   Vec t = bgy3d_vec_create (HD->da);
   Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
   Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  Vec ch_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec t_fft = bgy3d_vec_create (HD->dc);  /* complex */
 
   Vec v[m];
   bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
@@ -590,7 +590,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .t = t,
         .c_fft = c_fft,
         .h_fft = h_fft,
-        .ch_fft = ch_fft,
+        .t_fft = t_fft,
       };
 
     bgy3d_snes_default (PD, &ctx, (Function) iterate_h1, h);
@@ -601,7 +601,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy (&t);
   bgy3d_vec_destroy (&h_fft);
   bgy3d_vec_destroy (&c_fft);
-  bgy3d_vec_destroy (&ch_fft);
+  bgy3d_vec_destroy (&t_fft);
   bgy3d_vec_destroy1 (m, v);
 
   bgy3d_state_destroy (HD);
