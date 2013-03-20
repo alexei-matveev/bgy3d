@@ -287,11 +287,11 @@ static void solvent_solve_t2 (const ProblemData *PD,
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  Vec c = bgy3d_vec_create (HD->da);
-  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
+  local Vec c = bgy3d_vec_create (HD->da);
+  local Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+  local Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
 
-  Vec v[m][m];
+  local Vec v[m][m];
   bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
 
   /* Get solvent-solvent site-site interactions: */
@@ -300,7 +300,7 @@ static void solvent_solve_t2 (const ProblemData *PD,
       pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /* Create intial guess: */
-  Vec t = bgy3d_vec_create (HD->da);
+  Vec t = bgy3d_vec_create (HD->da); /* FIXME: not deallocated */
   VecSet (t, 0.0);
 
   assert (m == 1);
@@ -354,11 +354,11 @@ static void solvent_solve_c2 (const ProblemData *PD,
   bgy3d_problem_data_print (PD);
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  Vec t = bgy3d_vec_create (HD->da);
-  Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
-  Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+  Vec t = bgy3d_vec_create (HD->da); /* FIXME: not deallocated */
+  local Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
+  local Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
 
-  Vec v[m][m];
+  local Vec v[m][m];
   bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
 
   /* Get solvent-solvent site-site interactions: */
@@ -367,7 +367,7 @@ static void solvent_solve_c2 (const ProblemData *PD,
       pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /* Create intial guess: */
-  Vec c = bgy3d_vec_create (HD->da);
+  local Vec c = bgy3d_vec_create (HD->da);
   VecSet (c, 0.0);
 
   assert (m == 1);
@@ -565,12 +565,12 @@ void hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_problem_data_print (PD);
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  Vec t = bgy3d_vec_create (HD->da);
-  Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  Vec t_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  local Vec t = bgy3d_vec_create (HD->da);
+  local Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  local Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
+  local Vec t_fft = bgy3d_vec_create (HD->dc);  /* complex */
 
-  Vec v[m];
+  local Vec v[m];
   bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
   /*
@@ -593,7 +593,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   assert (m == 1);
 
   /* Create global vectors */
-  Vec h = bgy3d_vec_duplicate (v[0]);
+  Vec h = bgy3d_vec_duplicate (v[0]); /* FIXME: not deallocated */
 
   /* Set initial guess */
   compute_h (HD->PD->beta, v[0], h);
