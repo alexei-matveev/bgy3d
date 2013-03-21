@@ -964,7 +964,8 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   /* Original code used to print solvent params: */
   bgy3d_sites_show ("Solvent", m, solvent);
 
-  PetscPrintf(PETSC_COMM_WORLD, "Solving BGY3dM (H2O) equation with Fourier ansatz...\n");
+  PetscPrintf (PETSC_COMM_WORLD,
+               "Solving BGY3d-M %d-site equation with Fourier ansatz...\n", m);
 
   /* allocation for local work vectors */
   Vec f[m][m][3], f_l[m][m][3]; /* full and long range pair force */
