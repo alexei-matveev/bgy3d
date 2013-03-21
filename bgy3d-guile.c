@@ -535,6 +535,10 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
 }
 
 
+#define EXPORT(name, req, opt, rst, func)               \
+  (scm_c_define_gsubr (name, req, opt, rst, func),      \
+   scm_c_export (name, NULL))
+
 static void state_init_type (void)
 {
   /*
@@ -548,8 +552,8 @@ static void state_init_type (void)
   scm_set_smob_print (state_tag, state_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  scm_c_define_gsubr ("state-make", 1, 0, 0, state_make);
-  scm_c_define_gsubr ("state-destroy", 1, 0, 0, state_destroy);
+  EXPORT ("state-make", 1, 0, 0, state_make);
+  EXPORT ("state-destroy", 1, 0, 0, state_destroy);
 }
 
 
@@ -562,21 +566,21 @@ static void vec_init_type (void)
   scm_set_smob_print (vec_tag, vec_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  scm_c_define_gsubr ("vec-make", 1, 0, 0, vec_make);
-  scm_c_define_gsubr ("vec-make-complex", 1, 0, 0, vec_make_complex);
-  scm_c_define_gsubr ("vec-destroy", 1, 0, 0, vec_destroy);
+  EXPORT ("vec-make", 1, 0, 0, vec_make);
+  EXPORT ("vec-make-complex", 1, 0, 0, vec_make_complex);
+  EXPORT ("vec-destroy", 1, 0, 0, vec_destroy);
 
-  scm_c_define_gsubr ("vec-save", 2, 0, 0, vec_save);
-  scm_c_define_gsubr ("vec-load", 1, 0, 0, vec_load);
-  scm_c_define_gsubr ("vec-length", 1, 0, 0, vec_length);
-  scm_c_define_gsubr ("vec-ref", 2, 0, 0, vec_ref);
-  scm_c_define_gsubr ("vec-set-random", 1, 0, 0, vec_set_random);
-  scm_c_define_gsubr ("vec-dot", 2, 0, 0, vec_dot);
-  scm_c_define_gsubr ("vec-fft", 2, 0, 0, vec_fft);
-  scm_c_define_gsubr ("vec-ifft", 2, 0, 0, vec_ifft);
-  scm_c_define_gsubr ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
-  scm_c_define_gsubr ("vec-map1", 2, 0, 0, vec_map1);
-  scm_c_define_gsubr ("vec-map2", 3, 0, 0, vec_map2);
+  EXPORT ("vec-save", 2, 0, 0, vec_save);
+  EXPORT ("vec-load", 1, 0, 0, vec_load);
+  EXPORT ("vec-length", 1, 0, 0, vec_length);
+  EXPORT ("vec-ref", 2, 0, 0, vec_ref);
+  EXPORT ("vec-set-random", 1, 0, 0, vec_set_random);
+  EXPORT ("vec-dot", 2, 0, 0, vec_dot);
+  EXPORT ("vec-fft", 2, 0, 0, vec_fft);
+  EXPORT ("vec-ifft", 2, 0, 0, vec_ifft);
+  EXPORT ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
+  EXPORT ("vec-map1", 2, 0, 0, vec_map1);
+  EXPORT ("vec-map2", 3, 0, 0, vec_map2);
 }
 
 
@@ -846,29 +850,39 @@ static void finalize (void)
 
 
 
-/* Calling this will define a few bgy3d-* gsubrs introduced above: */
-static SCM guile_bgy3d_module_init (void)
+/*
+  Calling this will define a  few bgy3d-*, hnc3d-*, vec-*, and state-*
+  gsubrs introduced above.  This  callback is run by Guile interpreter
+  at the latest when the module is imported/compiled.  See the call to
+  scm_c_define_module() below.
+*/
+static void module_init (void* unused)
 {
-  /* If Scheme executes this code  inside a module (which we do), then
-     all these gsubrs will be  module procedures available only in the
-     module itself or by an explicit (use-modules ...): */
-  scm_c_define_gsubr ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
-  scm_c_define_gsubr ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
-  scm_c_define_gsubr ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
-  scm_c_define_gsubr ("bgy3d-run-solute", 3, 1, 0, guile_bgy3d_solute);
-  scm_c_define_gsubr ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
-  scm_c_define_gsubr ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
-  scm_c_define_gsubr ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
-  scm_c_define_gsubr ("bgy3d-rank", 0, 0, 0, guile_rank);
-  scm_c_define_gsubr ("bgy3d-size", 0, 0, 0, guile_size);
-  scm_c_define_gsubr ("bgy3d-test", 3, 0, 0, guile_test);
+  (void) unused;
+
+  /*
+    If Scheme executes  this code inside a module  (which we do), then
+    all these gsubrs  will be module procedures available  only in the
+    module itself  or by an  explicit (use-modules ...). To  make them
+    usable outside of the module one needs to export them. EXPORT() is
+    a macro that does both.
+  */
+  EXPORT ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
+  EXPORT ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
+  EXPORT ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
+  EXPORT ("bgy3d-run-solute", 3, 1, 0, guile_bgy3d_solute);
+  EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
+  EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
+  EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
+  EXPORT ("bgy3d-rank", 0, 0, 0, guile_rank);
+  EXPORT ("bgy3d-size", 0, 0, 0, guile_size);
+  EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
   state_init_type();
   vec_init_type();
-
-  return SCM_UNSPECIFIED;
 }
+
 
 void bgy3d_guile_init (int argc, char **argv)
 {
@@ -910,15 +924,28 @@ void bgy3d_guile_init (int argc, char **argv)
   verbosity = bgy3d_getopt_test ("-v"); /* extern */
 
   /*
-   * Note  that  the names  defined  here  are  put into  the  private
-   * namespace  of (guile-user)  module. If  you want  to call  any of
-   * these you may need to "steal" it from there by dereferencing them
-   * as e.g. (@@ (guile-user) guile-bgy3d-module-init).
-   *
-   * Calling this will define bgy3d-* gsubrs:
-   */
-  scm_c_define_gsubr ("guile-bgy3d-module-init", 0, 0, 0, guile_bgy3d_module_init);
+   Note that  the names that would  be defined here were  put into the
+   private name space of (guile-user) module. For example if you do
+
+     scm_c_define_gsubr ("module-init", 0, 0, 0, module_init);
+
+   (after  adapting interface  of module_init()  accordingly)  then in
+   order to  call that  from scheme  you may need  to "steal"  it from
+   there by dereferencing as in e.g.
+
+     (@@ (guile-user) module-init).
+
+   Instead we define an internal module (guile bgy3d internal) and put
+   all definitions here. When  initialization is actually performed is
+   left  to the  interpreter.  In  this way  there  no warnings  about
+   "possibly undefined symbols" at compilation stage with Guile 2.0.
+  */
+
+  /* scm_c_define_module (const char *name, void (*init)(void *), void
+     *data) */
+  scm_c_define_module ("guile bgy3d internal", module_init, NULL);
 }
+
 
 static void inner_main (void *closure, int argc, char **argv)
 {
@@ -928,6 +955,7 @@ static void inner_main (void *closure, int argc, char **argv)
 
   scm_shell (argc, argv);     /* never returns */
 }
+
 
 int bgy3d_guile_main (int argc, char **argv)
 {

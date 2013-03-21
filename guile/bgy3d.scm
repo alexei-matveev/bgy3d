@@ -8,36 +8,31 @@
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
   #:use-module (ice-9 getopt-long)
-  #:export (new-main
-            old-main
-            state-make
-            state-destroy
-            vec-make
-            vec-make-complex
-            vec-destroy
-            vec-save
-            vec-set-random
-            vec-dot
-            vec-norm
-            vec-fft
-            vec-ifft
-            vec-fft-interp
-            vec-map1
-            vec-map2
-            vec-print
-            bgy3d-api-version
-            bgy3d-run-solvent
-            bgy3d-run-solute
-            bgy3d-solvent
-            bgy3d-solute
-            bgy3d-test))
-
-;;;
-;;; This name has to be defined on guile startup, see the C sources of
-;;; bgy3d_guile_init() in bgy3d-guile.c:
-;;;
-(define guile-bgy3d-module-init
-  (@@ (guile-user) guile-bgy3d-module-init))
+  #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
+  #:re-export                           ; from (guile bgy3d internal)
+  (state-make
+   state-destroy
+   vec-make
+   vec-make-complex
+   vec-destroy
+   vec-save
+   vec-set-random
+   vec-dot
+   vec-fft
+   vec-ifft
+   vec-fft-interp
+   vec-map1
+   vec-map2
+   bgy3d-run-solvent
+   bgy3d-run-solute)
+  #:export
+  (new-main
+   old-main
+   vec-print
+   vec-norm
+   bgy3d-api-version
+   bgy3d-solvent
+   bgy3d-solute))
 
 ;;;
 ;;; Functionality is  in the  flux. QM  code may want  to check  if it
@@ -48,7 +43,7 @@
 (define bgy3d-api-version '(1 0 0))
 
 ;;;
-;;; The list of the procedures defined by the next call includes:
+;;; The list of the procedures defined in bgy3d-guile.c includes
 ;;;
 ;;;   hnc3d-run-solvent
 ;;;   hnc3d-run-solute
@@ -76,9 +71,21 @@
 ;;;   state-make
 ;;;   state-destroy
 ;;;
-;;; and posissibly more, depending on the compilation options.
+;;; and  possibly more,  depending on  the compilation  options. The
+;;; definitions are  put into (guile bgy3d  internal) module, imported
+;;; here  and  re-exported  selectively  (see use-modules  form).   An
+;;; earlier  version actively  invoked the  procedure to  define those
+;;; symbols. However, this caused annoying warnings with Guile 2 which
+;;; complains about "possibly undefined  symbols" at compile time. The
+;;; boilerplate is left here for reference:
 ;;;
-(guile-bgy3d-module-init)
+;;; OUTDATED: This name has to be defined on guile start up, see the C
+;;; sources of bgy3d_guile_init() in bgy3d-guile.c:
+;;;
+;; (define guile-bgy3d-module-init
+;;   (@@ (guile-user) guile-bgy3d-module-init))
+;;
+;; (guile-bgy3d-module-init)
 
 ;;;
 ;;; This  may become  define-syntax some  time, so  do not  assume the
