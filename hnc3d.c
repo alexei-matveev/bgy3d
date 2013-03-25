@@ -324,13 +324,21 @@ static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
 typedef struct Ctx_c2
 {
   State *HD;
-  Vec v, t;                     /* real */
-  Vec t_fft, c_fft;             /* complex */
+  int m;
+  Vec *v, *t;                   /* [m][m], real */
+  Vec *t_fft, *c_fft;           /* [m][m], complex */
 } Ctx_c2;
 
 
-static void iterate_c2 (Ctx_c2 *ctx, Vec c, Vec dc)
+static void iterate_c2 (Ctx_c2 *ctx, Vec C, Vec dC)
 {
+  /* aliases of the right shape: */
+  const int m = ctx->m;
+  Vec (*c_fft)[m] = (void*) ctx->c_fft;
+  Vec (*t_fft)[m] = (void*) ctx->t_fft;
+  Vec (*t)[m] = (void*) ctx->t;
+  Vec (*v)[m] = (void*) ctx->v;
+
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
   const real rho = PD->rho;
@@ -338,26 +346,44 @@ static void iterate_c2 (Ctx_c2 *ctx, Vec c, Vec dc)
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  MatMult (HD->fft_mat, c, ctx->c_fft);
+  /* Establish aliases to the subsections of the long Vec C and dC: */
+  local Vec c[m][m], dc[m][m];
+  bgy3d_vec_aliases_create2 (C, m, c);
+  bgy3d_vec_aliases_create2 (dC, m, dc);
 
-  /* Translate distribution to the grid corner. */
-  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->c_fft);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
-  VecScale (ctx->c_fft, h3);
+        /* Translate distribution to the grid corner. */
+        bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
 
-  /* FIXME: compute_t() expects Vec[m][m]: */
-  compute_t (1, rho, (void*) &ctx->c_fft, (void*) &ctx->t_fft);
+        VecScale (c_fft[i][j], h3);
+      }
 
-  /* Translate distribution to the grid center. */
-  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
+  /* Solves the linear equation for t_fft[][]: */
+  compute_t (m, rho, c_fft, t_fft);
 
-  MatMultTranspose (HD->fft_mat, ctx->t_fft, ctx->t);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* Translate distribution to the grid center. */
+        bgy3d_vec_fft_trans (HD->dc, PD->N, t_fft[i][j]);
 
-  VecScale (ctx->t, 1.0/L/L/L);
+        MatMultTranspose (HD->fft_mat, t_fft[i][j], t[i][j]);
 
-  compute_c (beta, ctx->v, ctx->t, dc);
+        VecScale (t[i][j], 1.0/L/L/L);
 
-  VecAXPY (dc, -1.0, c);
+        compute_c (beta, v[i][j], t[i][j], dc[i][j]);
+      }
+
+  /* This  destroys the  aliases, but  does  not free  the memory,  of
+     course. The actuall data is owned by Vec C and Vec dC: */
+  bgy3d_vec_aliases_destroy2 (m, c);
+  bgy3d_vec_aliases_destroy2 (m, dc);
+
+  VecAXPY (dC, -1.0, C);
 }
 
 
@@ -461,17 +487,23 @@ static void solvent_solve_c2 (const ProblemData *PD,
     for (int j = 0; j <= i; j++)
       pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
-  /* Create intial guess: */
-  local Vec c[m][m];
-  bgy3d_vec_create2 (HD->da, m, c); /* real */
+  /*
+    For primary  variable there are two  ways to access  the data: via
+    the long  Vec and  m * (m  + 1)  / 2 shorter  Vecs aliased  to the
+    subsections of the longer one.
+  */
+  local Vec C = bgy3d_vec_pack_create2 (HD->da, m); /* long Vec */
 
+  local Vec c[m][m];
+  bgy3d_vec_aliases_create2 (C, m, c); /* aliases to subsections */
+
+  /* Create intial guess: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       VecSet (c[i][j], 0.0);
 
-  assert (m == 1);
   /*
-    Find a c  such that dc as returned by iterate_c2  (&ctx, c, dc) is
+    Find a C  such that dC as returned by iterate_c2  (&ctx, C, dC) is
     zero. Cast is  there to silence the mismatch in  the type of first
     pointer argument: struct Ctx_c2* vs. void*:
   */
@@ -479,12 +511,13 @@ static void solvent_solve_c2 (const ProblemData *PD,
     Ctx_c2 ctx =
       {
         .HD = HD,
-        .v = v[0][0],
-        .t = t[0][0],
-        .t_fft = t_fft[0][0],
-        .c_fft = c_fft[0][0],
+        .m = m,
+        .v = (void*) v,
+        .t = (void*) t,
+        .t_fft = (void*) t_fft,
+        .c_fft = (void*) c_fft,
       };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, c[0][0]);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, C);
   }
 
   bgy3d_vec_save2 ("t%d%d.bin", m, t);
@@ -503,9 +536,11 @@ static void solvent_solve_c2 (const ProblemData *PD,
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&t); */
   bgy3d_vec_destroy2 (m, t_fft);
-  bgy3d_vec_destroy2 (m, c);
   bgy3d_vec_destroy2 (m, c_fft);
   bgy3d_vec_destroy2 (m, v);
+
+  bgy3d_vec_aliases_destroy2 (m, c);
+  bgy3d_vec_pack_destroy2 (&C);
 
   bgy3d_state_destroy (HD);
 
