@@ -11,6 +11,7 @@
 #define G 1.2
 #include "bgy3d-force.h"        /* Lennard_Jones() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
+#include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
 
@@ -156,6 +157,12 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
 }
 
 
+static int delta (int i, int j)
+{
+  return (i == j) ? 1 : 0;
+}
+
+
 /*
   Use the k-representation of Ornstein-Zernike (OZ) equation
 
@@ -163,20 +170,100 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
 
   to compute γ =  h - c form c:
 
-          2
-    γ = ρc  / (1 - ρc)
+                 -1                -1   2
+    γ =  (1 - ρc)   c - c = (1 - ρc)  ρc
 
   If you scale  c by h3 beforehand or  pass rho' = rho *  h3 and scale
   the  result by h3  in addition,  you will  compute exactly  what the
   older version of the function did:
 */
-static void compute_t (real rho, Vec c_fft, Vec t_fft)
+static void compute_t_1 (real rho, Vec c_fft, Vec t_fft)
 {
   complex pure f (complex c)
   {
+    /* return c / (1.0 - rho * c) - c; */
     return rho * (c * c) / (1.0 - rho * c);
   }
   bgy3d_vec_fft_map1 (t_fft, f, c_fft);
+}
+
+
+/* So far rho is scalar, it could be different for all sites: */
+static void compute_t_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+{
+  complex *c_fft_[m][m], *t_fft_[m][m];
+
+  /* for j <= i only: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* FIXME: vec_get_array() returns real*: */
+        c_fft_[i][j] = (void*) vec_get_array (c_fft[i][j]);
+        t_fft_[i][j] = (void*) vec_get_array (t_fft[i][j]);
+
+        assert (c_fft[i][j] == c_fft[j][i]);
+        assert (t_fft[i][j] == t_fft[j][i]);
+      }
+
+  if (m == 0) return;           /* see ref to c_fft[0][0] */
+
+  const int n = vec_local_size (c_fft[0][0]);
+  assert (n % 2 == 0);
+
+  {
+    complex C[m][m], A[m][m], B[m][m];
+
+    for (int k = 0; k < n / 2; k++)
+      {
+        /* for j <= i only: */
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j <= i; j++)
+            {
+              /*
+                A := 1 - ρc
+                B := c
+              */
+              C[i][j] = C[j][i] = c_fft_[i][j][k];
+              B[i][j] = B[j][i] = C[i][j];
+              A[i][j] = A[j][i] = delta (i, j) - rho * C[i][j];
+            }
+
+        /*      -1                -1
+          B := A   * B == (1 - ρc)   * c
+        */
+        hnc3d_sles_zgesv (m, A, B);
+
+        /*                     -1    2
+          A := B * C = (1 - ρc)   * c
+        */
+        hnc3d_sles_zgemm (m, B, C, A); /* FIXME: O(m^3)! */
+
+        /*                  -1     2
+          t := ρA = (1 - ρc)   * ρc
+        */
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j <= i; j++)
+            t_fft_[i][j][k] = rho * A[i][j];
+      }
+  }
+
+  /* for j <= i only: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* FIXME: VecRestoreArray() expects real***: */
+        VecRestoreArray (c_fft[i][j], (void*) &c_fft_[i][j]);
+        VecRestoreArray (t_fft[i][j], (void*) &t_fft_[i][j]);
+      }
+}
+
+
+static void compute_t (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+{
+  if (m == 1)
+    compute_t_1 (rho, c_fft[0][0], t_fft[0][0]); /* faster */
+  else
+    compute_t_m (m, rho, c_fft, t_fft); /* works for any m */
 }
 
 
@@ -213,7 +300,8 @@ static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
 
   VecScale (ctx->c_fft, h3);
 
-  compute_t (rho, ctx->c_fft, ctx->t_fft);
+  /* FIXME: compute_t() expects Vec[m][m]: */
+  compute_t (1, rho, (void*) &ctx->c_fft, (void*) &ctx->t_fft);
 
   /* Translate distribution to the grid center. */
   bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
@@ -257,7 +345,8 @@ static void iterate_c2 (Ctx_c2 *ctx, Vec c, Vec dc)
 
   VecScale (ctx->c_fft, h3);
 
-  compute_t (rho, ctx->c_fft, ctx->t_fft);
+  /* FIXME: compute_t() expects Vec[m][m]: */
+  compute_t (1, rho, (void*) &ctx->c_fft, (void*) &ctx->t_fft);
 
   /* Translate distribution to the grid center. */
   bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
