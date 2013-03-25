@@ -103,7 +103,7 @@
 ;;; (two larges ones) convere when  treated by QM one needs about 1500
 ;;; iterations (well, we should make the solver better).
 ;;;
-(define bgy3d-settings
+(define *default-settings*
   (let ((half-size 10.0))
     (quasiquote
      ((N . 64)                          ; grid dimension
@@ -382,7 +382,7 @@ computes the sum of all vector elements."
 ;;; These hooks, bgy3d-solvent and bgy3d-solute, are called from PG:
 ;;;
 (define (bgy3d-solvent)
-  (let ((settings	bgy3d-settings)
+  (let ((settings	*default-settings*)
         (solvent	(find-molecule *default-molecule*)))
     ;;
     ;; At the moment the function bgy3d-run-solvent echos settings as
@@ -401,7 +401,7 @@ computes the sum of all vector elements."
 
 (define (bgy3d-solute name sites funptr restart)
   "To be called from QM code."
-  (let ((settings	bgy3d-settings)
+  (let ((settings	*default-settings*)
         (solvent	(find-molecule *default-molecule*))
         (solute		(make-molecule name
                                        (update-sites name
@@ -452,7 +452,7 @@ computes the sum of all vector elements."
   (let ((numeric (map (lambda (op)
                         (quasiquote
                          ((unquote op) (value #t) (predicate (unquote string->number)))))
-                      (map car bgy3d-settings)))) ; all of them are numbers
+                      (map car *default-settings*)))) ; all of them are numbers
     (quasiquote
      ((solvent          (value #t)
                         (predicate ,find-molecule)) ; a string
@@ -599,7 +599,7 @@ computes the sum of all vector elements."
           (solvent	(find-molecule (option-ref options 'solvent *default-molecule*)))
           (solute	(find-molecule (option-ref options 'solute *default-molecule*)))
           (save-binary	(option-ref options 'save-binary #f))
-          (settings	(update-settings bgy3d-settings options))) ; defaults updated from command line
+          (settings	(update-settings *default-settings* options))) ; defaults updated from command line
       (match cmd
         ("solvent"
          ;;
