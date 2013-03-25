@@ -443,9 +443,15 @@ static void solvent_solve_c2 (const ProblemData *PD,
   bgy3d_problem_data_print (PD);
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  Vec t = bgy3d_vec_create (HD->da); /* FIXME: not deallocated */
-  local Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
-  local Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
+
+  Vec t[m][m];                  /* FIXME: not deallocated */
+  bgy3d_vec_create2 (HD->da, m, t);
+
+  local Vec t_fft[m][m];
+  bgy3d_vec_create2 (HD->dc, m, t_fft); /* complex */
+
+  local Vec c_fft[m][m];
+  bgy3d_vec_create2 (HD->dc, m, c_fft); /* complex */
 
   local Vec v[m][m];
   bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
@@ -456,8 +462,12 @@ static void solvent_solve_c2 (const ProblemData *PD,
       pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /* Create intial guess: */
-  local Vec c = bgy3d_vec_create (HD->da);
-  VecSet (c, 0.0);
+  local Vec c[m][m];
+  bgy3d_vec_create2 (HD->da, m, c); /* real */
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecSet (c[i][j], 0.0);
 
   assert (m == 1);
   /*
@@ -470,33 +480,39 @@ static void solvent_solve_c2 (const ProblemData *PD,
       {
         .HD = HD,
         .v = v[0][0],
-        .t = t,
-        .t_fft = t_fft,
-        .c_fft = c_fft,
+        .t = t[0][0],
+        .t_fft = t_fft[0][0],
+        .c_fft = c_fft[0][0],
       };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, c);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, c[0][0]);
   }
 
-  bgy3d_vec_save ("t00.bin", t);
+  bgy3d_vec_save2 ("t%d%d.bin", m, t);
 
   /* g = γ + c + 1, store in Vec t: */
-  VecAXPY (t, 1.0, c);
-  VecShift (t, 1.0);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        VecAXPY (t[i][j], 1.0, c[i][j]);
+        VecShift (t[i][j], 1.0);
+      }
 
-  bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", t);
+  bgy3d_vec_save2 ("c%d%d.bin", m, c);
+  bgy3d_vec_save2 ("g%d%d.bin", m, t);
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&t); */
-  bgy3d_vec_destroy (&t_fft);
-  bgy3d_vec_destroy (&c);
-  bgy3d_vec_destroy (&c_fft);
+  bgy3d_vec_destroy2 (m, t_fft);
+  bgy3d_vec_destroy2 (m, c);
+  bgy3d_vec_destroy2 (m, c_fft);
   bgy3d_vec_destroy2 (m, v);
 
   bgy3d_state_destroy (HD);
 
-  /* Return just one distribution. bgy3d_vec_destroy (&) it! */
-  g[0][0] = t;
+  /* Dont forget to bgy3d_vec_destroy2() it! */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      g[i][j] = g[j][i] = t[i][j];
 }
 
 
