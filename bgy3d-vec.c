@@ -135,24 +135,44 @@ void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 }
 
 
-void bgy3d_vec_aliases_create (Vec gs, int m, Vec g[m])
+void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m])
 {
   /*
-    The  length  of  Vec gs  should  be  divisible  by m.   Though  in
-    principle any Vec gs satisfying this should be accepted, this code
-    is  only used  for  Vecs created  by bgy3d_vec_pack_create(),  see
-    below:
+    The length of Vec X should be divisible by m.  Though in principle
+    any Vec  X satisfying this should  be accepted, this  code is only
+    used for Vecs created by bgy3d_vec_pack_create1(), see below:
   */
-  const int mn = vec_local_size (gs);
+  const int mn = vec_local_size (X);
   const int n = mn / m;
   assert (m * n == mn);
 
   /* Enough space for m Vecs: */
-  real *buf = vec_get_array (gs);
+  real *buf = vec_get_array (X);
 
   /* Create m Vecs with the storage from buf: */
   for (int i = 0; i < m; i++)
-    g[i] = vec_from_array (n, buf + i * n);
+    x[i] = vec_from_array (n, buf + i * n);
+}
+
+
+void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
+{
+  /* The length of Vec X should be divisible by m * (m + 1) / 2!*/
+  const int nm2 = vec_local_size (X);
+  const int m2 = m * (m + 1) / 2;
+  const int n = nm2 / m2;
+  assert (n * m2 == nm2);
+
+  /* Enough space for m2 Vecs: */
+  real *buf = vec_get_array (X);
+
+  /* Create m2 Vecs with the storage from buf: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        x[i][j] = x[j][i] = vec_from_array (n, buf);
+        buf += n;
+      }
 }
 
 
@@ -163,7 +183,7 @@ void bgy3d_vec_aliases_create (Vec gs, int m, Vec g[m])
   bgy3d_vec_destroy()  instead relying  on the  magic  of VecDestroy()
   that alone knows how a Vec was created.
 */
-void bgy3d_vec_aliases_destroy (int m, Vec g[m])
+void bgy3d_vec_aliases_destroy1 (int m, Vec g[m])
 {
   for (int i = 0; i < m; i++)
     {
@@ -173,9 +193,20 @@ void bgy3d_vec_aliases_destroy (int m, Vec g[m])
 }
 
 
+void bgy3d_vec_aliases_destroy2 (int m, Vec g[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        VecDestroy (g[i][j]);   /* should not free() */
+        g[i][j] = NULL;
+      }
+}
+
+
 /* Create  a   vector  m-times   longer  that  the   array  descriptor
    specification. See bgy3d_vec_alias_create(): */
-Vec bgy3d_vec_pack_create (const DA da, int m)
+Vec bgy3d_vec_pack_create1 (const DA da, int m)
 {
   /* Allocate space for m Vecs: */
   const int mn = m * da_local_size (da);
@@ -184,13 +215,27 @@ Vec bgy3d_vec_pack_create (const DA da, int m)
 }
 
 
+/* Nearly the same as bgy3d_vec_pack_create1(): */
+Vec bgy3d_vec_pack_create2 (const DA da, int m)
+{
+  return bgy3d_vec_pack_create1 (da, m * (m + 1) / 2);
+}
+
+
 /* VecDestroy() will  not free the storage  if it was  provided by the
    user. We do it ourselves: */
-void bgy3d_vec_pack_destroy (Vec *x)
+void bgy3d_vec_pack_destroy1 (Vec *X)
 {
-  free (vec_get_array (*x));    /* free() the whole */
-  VecDestroy (*x);              /* should not free() */
-  *x = NULL;
+  free (vec_get_array (*X));    /* free() the whole */
+  VecDestroy (*X);              /* should not free() */
+  *X = NULL;
+}
+
+
+/* Same as bgy3d_vec_pack_destroy1() */
+void bgy3d_vec_pack_destroy2 (Vec *X)
+{
+  bgy3d_vec_pack_destroy1 (X);
 }
 
 

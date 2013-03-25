@@ -788,8 +788,8 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   /* Establish  aliases to  the subsections  of  the long  Vec us  and
      dus */
   local Vec u[m], du[m];
-  bgy3d_vec_aliases_create (us, m, u);
-  bgy3d_vec_aliases_create (dus, m, du);
+  bgy3d_vec_aliases_create1 (us, m, u);
+  bgy3d_vec_aliases_create1(dus, m, du);
 
   /* Iterate u[] -> du[]: */
   iterate (s->BHD,              /*  1 in */
@@ -810,8 +810,8 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
 
   /* This  destroys the  aliases, but  does  not free  the memory,  of
      course. The actuall data is owned by Vec us and Vec dus: */
-  bgy3d_vec_aliases_destroy (m, u);
-  bgy3d_vec_aliases_destroy (m, du);
+  bgy3d_vec_aliases_destroy1 (m, u);
+  bgy3d_vec_aliases_destroy1 (m, du);
 }
 
 
@@ -820,7 +820,7 @@ void bgy3d_restart_destroy (Restart *restart)
   /* Restart info  is just a (long)  Vec that happens to  fit into (or
      *rather is*) a pointer: */
   local Vec us = (Vec) restart;
-  bgy3d_vec_pack_destroy (&us);
+  bgy3d_vec_pack_destroy1 (&us);
 }
 
 
@@ -923,12 +923,12 @@ static void solute_solve (State *BHD,
     the long Vec and m shorter  Vecs aliased to the subsections of the
     longer one.
   */
-  local Vec us = bgy3d_vec_pack_create (BHD->da, m);  /* long Vec */
-  local Vec dus = bgy3d_vec_pack_create (BHD->da, m); /* long Vec */
+  local Vec us = bgy3d_vec_pack_create1 (BHD->da, m);  /* long Vec */
+  local Vec dus = bgy3d_vec_pack_create1 (BHD->da, m); /* long Vec */
 
   local Vec u[m], du[m];   /* in- and output of the BGY3D iteration */
-  bgy3d_vec_aliases_create (us, m, u);   /* aliases to subsections */
-  bgy3d_vec_aliases_create (dus, m, du); /* aliases to subsections */
+  bgy3d_vec_aliases_create1 (us, m, u);   /* aliases to subsections */
+  bgy3d_vec_aliases_create1 (dus, m, du); /* aliases to subsections */
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -1071,12 +1071,12 @@ static void solute_solve (State *BHD,
     bgy3d_pot_destroy (ret);
 
   /* Clean up and exit ... */
-  bgy3d_vec_aliases_destroy (m, u);
-  bgy3d_vec_aliases_destroy (m, du);
+  bgy3d_vec_aliases_destroy1 (m, u);
+  bgy3d_vec_aliases_destroy1 (m, du);
 
   if (us)
-    bgy3d_vec_pack_destroy (&us);  /* not bgy3d_vec_destroy()! */
-  bgy3d_vec_pack_destroy (&dus); /* not bgy3d_vec_destroy()! */
+    bgy3d_vec_pack_destroy1 (&us);  /* not bgy3d_vec_destroy()! */
+  bgy3d_vec_pack_destroy1 (&dus); /* not bgy3d_vec_destroy()! */
 
   bgy3d_vec_destroy1 (m, u0);
   bgy3d_vec_destroy1 (m, g_fft);
