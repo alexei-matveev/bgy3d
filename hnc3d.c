@@ -731,26 +731,31 @@ static void iterate_t1 (Ctx_t1 *ctx, Vec t, Vec dt)
 }
 
 
-static void solvent_kernel (State *HD, Vec c_fft)
+/* Reads c2[][] as previousely written by solvent solver. */
+static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
 {
-  local Vec c = bgy3d_vec_create (HD->da);
+  local Vec c[m][m];
+  bgy3d_vec_create2 (HD->da, m, c);
 
   /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
-    bgy3d_vec_read_radial (HD->da, HD->PD, "c1dfile", c);
+    bgy3d_vec_read_radial2 (HD->da, HD->PD, "c%d%d.txt", m, c);
   else
-    bgy3d_vec_read ("c00.bin", c);
+    bgy3d_vec_read2 ("c%d%d.bin", m, c);
 
-  MatMult (HD->fft_mat, c, c_fft);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
-  bgy3d_vec_destroy (&c);
-
-  /*
-    Translate the  distribution to the  grid corner. This is  what one
-    expects in convolution integrals. FIXME: or should we rather store
-    the convolution kernel on disk in ready form?
-  */
-  bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft);
+        /*
+          Translate the distribution to  the grid corner. This is what
+          one expects  in convolution  integrals. FIXME: or  should we
+          rather store the convolution kernel on disk in ready form?
+        */
+        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
+      }
+  bgy3d_vec_destroy2 (m, c);
 }
 
 
@@ -781,7 +786,7 @@ static void solute_solve_h1 (const ProblemData *PD,
     get  the  rest.   There  is  no  guarantee  the  two  sources  are
     consistent.
   */
-  solvent_kernel (HD, c_fft);
+  solvent_kernel (HD, 1, (void*) &c_fft);
 
   /*
     Get  solute-solvent interaction.   Fill v[]  with  the short-range
@@ -867,7 +872,7 @@ static void solute_solve_t1 (const ProblemData *PD,
     get  the  rest.   There  is  no  guarantee  the  two  sources  are
     consistent.
   */
-  solvent_kernel (HD, c_fft);
+  solvent_kernel (HD, 1, (void*) &c_fft);
 
   /*
     Get  solute-solvent interaction.   Fill v[]  with  the short-range
