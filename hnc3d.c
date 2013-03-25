@@ -852,19 +852,26 @@ static void solute_solve_t1 (const ProblemData *PD,
                              const int n, const Site solute[n],
                              Vec g[m])
 {
-  assert (m == 1);
-
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  local Vec t = bgy3d_vec_create (HD->da);
-  local Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  local Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  local Vec t_fft = bgy3d_vec_create (HD->dc);  /* complex */
+
+  local Vec t[m];
+  bgy3d_vec_create1 (HD->da, m, t);
+
+  local Vec h_fft[m];
+  bgy3d_vec_create1 (HD->dc, m, h_fft); /* complex */
+
+  local Vec t_fft[m];
+  bgy3d_vec_create1 (HD->dc, m, t_fft); /* complex */
 
   local Vec v[m];
   bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
+
+  /* This should be the only pair quantity: */
+  local Vec c_fft[m][m];
+  bgy3d_vec_create2 (HD->dc, m, c_fft);        /* complex */
 
   /*
     Get  the solvent-solvent direct  correlation function.   FIXME: we
@@ -872,7 +879,7 @@ static void solute_solve_t1 (const ProblemData *PD,
     get  the  rest.   There  is  no  guarantee  the  two  sources  are
     consistent.
   */
-  solvent_kernel (HD, 1, (void*) &c_fft);
+  solvent_kernel (HD, m, c_fft);
 
   /*
     Get  solute-solvent interaction.   Fill v[]  with  the short-range
@@ -883,13 +890,15 @@ static void solute_solve_t1 (const ProblemData *PD,
                       NULL, NULL, /* no coulomb */
                       NULL);      /* no electrons */
 
-  assert (m == 1);
-
   /* Create global vectors */
-  Vec h = bgy3d_vec_duplicate (v[0]); /* FIXME: not deallocated */
+  Vec h[m];
+  bgy3d_vec_create1 (HD->da, m, h); /* FIXME: not deallocated */
 
   /* Set initial guess */
-  compute_h (HD->PD->beta, v[0], h);
+  for (int i = 0; i < m; i++)
+    compute_h (HD->PD->beta, v[i], h[i]);
+
+  assert (m == 1);
 
   /*
     Find a  t such that  dt as returned  by iterate_t1 (HD, t,  dt) is
@@ -902,13 +911,13 @@ static void solute_solve_t1 (const ProblemData *PD,
       {
         .HD = HD,
         .v = v[0],
-        .h = h,
-        .c_fft = c_fft,
-        .h_fft = h_fft,
-        .t_fft = t_fft,
+        .h = h[0],
+        .c_fft = c_fft[0][0],
+        .h_fft = h_fft[0],
+        .t_fft = t_fft[0],
       };
 
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, t);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, t[0]);
   }
   /*
     FIXME: by ignoring the value of  Vec t and using Vec h instead, we
@@ -919,21 +928,25 @@ static void solute_solve_t1 (const ProblemData *PD,
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&h) */
-  bgy3d_vec_destroy (&t);
-  bgy3d_vec_destroy (&h_fft);
-  bgy3d_vec_destroy (&c_fft);
-  bgy3d_vec_destroy (&t_fft);
+  bgy3d_vec_destroy1 (m, t);
+  bgy3d_vec_destroy1 (m, h_fft);
+  bgy3d_vec_destroy1 (m, t_fft);
   bgy3d_vec_destroy1 (m, v);
+
+  /* This should be the only pair quantity: */
+  bgy3d_vec_destroy2 (m, c_fft);
 
   bgy3d_state_destroy (HD);
 
   /* g := h + 1 */
-  VecShift (h, 1.0);
+  for (int i = 0; i < m; i++)
+    VecShift (h[i], 1.0);
 
-  bgy3d_vec_save ("g0.bin", h);
+  bgy3d_vec_save1 ("g%d.bin", m, h);
 
-  /* Just one distribution so far. bgy3d_vec_destroy (&) it! */
-  g[0] = h;
+  /* Caller is supposed to destroy it! */
+  for (int i = 0; i < m; i++)
+    g[i] = h[i];
 }
 
 
