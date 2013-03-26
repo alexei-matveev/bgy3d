@@ -302,47 +302,38 @@ static void kernel (const DA dc,
   bgy3d_vec_fft_trans (dc, N, dfg);
 }
 
+
 /*
- * This applies the kernel compured by  kernel() to FFT of g to obtain
- * an increment to "dg". The latter probably needs a better name. Dont
- * forget to clear "dg" early enough.
- *
- * Complex Vec dg is intent(inout).
- */
-static void apply (const DA dc,
-                   Vec ker,          /* kernel, intent(in) */
-                   Vec g,            /* current g, intent(in) */
-                   const real scale, /* overall scale */
-                   Vec dg)           /* incremented, intent(inout) */
+  This applies the  kernel compured by kernel() to FFT  of g to obtain
+  an increment to du. Such a product in the k-space
+
+    du  := du  + scale * K  * g
+      k      k            k    k
+
+  corresponds to convolution in the real space.
+
+  The kernel was derived from  the Fourier transform of the divergence
+  of  the "weighted  force" vector  div (F  g). The  additional factor
+  -k^(-2)  effectively included  in  the kernel  recovers the  Fourier
+  transform of the corresponding  Poisson solution. The factor scale =
+  βρ is not included, on the other hand. See kernel() for details.
+
+  The convolution  kernel in BGY3dM  serves role similar to  that pure
+  solvent direct correlation c in HNC3d equations.
+
+  Complex  Vec du  is intent(inout).   Dont forget  to clear  it early
+  enough.
+*/
+static void apply (Vec ker_fft, Vec g_fft, const real scale, /* in */
+                   Vec du_fft)  /* inout */
 {
-  int x[3], n[3];
+  /* FMA stays for "fused multiply-add" */
+  complex pure fma (complex du, complex c, complex g)
+  {
+    return du + scale * (c * g);
+  }
 
-  /* Get local portion of the grid */
-  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  complex ***ker_, ***g_, ***dg_;
-  DAVecGetArray (dc, ker, &ker_);
-  DAVecGetArray (dc, dg, &dg_);
-  DAVecGetArray (dc, g, &g_);
-
-  /*
-    Retrive the  precomuted Fourier transform of of  the divergence of
-    the  "weighted  force"  vector  div   (F  g)  which  serves  as  a
-    convolution  kernel in  BGY3dM equations.   The  additional factor
-    -k^(-2) effectively  included in  the kernel recovers  the Fourier
-    transform of the corresponding Poisson solution.  The factor scale
-    = βρ is not included, on the other hand. See kernel() for details:
-
-    Loop over local portion of grid:
-  */
-  for (int k = x[2]; k < x[2] + n[2]; k++)
-    for (int j = x[1]; j < x[1] + n[1]; j++)
-      for (int i = x[0]; i < x[0] + n[0]; i++)
-        dg_[k][j][i] += scale * (ker_[k][j][i] * g_[k][j][i]); /* complex */
-
-  DAVecRestoreArray (dc, ker, &ker_);
-  DAVecRestoreArray (dc, dg, &dg_);
-  DAVecRestoreArray (dc, g, &g_);
+  bgy3d_vec_fft_map3 (du_fft, fma, du_fft, ker_fft, g_fft); /* aliasing! */
 }
 
 /*
@@ -712,8 +703,7 @@ static void iterate (State *BHD,
       VecSet (du_acc_fft, 0.0);
 
       for (int j = 0; j < m; j++) /* This increments the accumulator: */
-        apply (BHD->dc, kernel_fft[i][j], g_fft[j], beta * rhos[j],
-               du_acc_fft); /* incremented! */
+        apply (kernel_fft[i][j], g_fft[j], beta * rhos[j], du_acc_fft);
 
       /*
         Compute  IFFT  of  du_acc_fft  for the  current  site.   Other
@@ -1326,7 +1316,7 @@ static void Compute_H2O_interS_C (const State *BHD,
   VecSet (dg_fft, 0.0);
 
   /* Apply the kernel, Put result into the complex temp Vec dg_fft: */
-  apply (BHD->dc, kernel_fft, g_fft, scale, dg_fft);
+  apply (kernel_fft, g_fft, scale, dg_fft);
 
   /* ifft(dg) */
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
