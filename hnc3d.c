@@ -315,7 +315,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  /* Establish aliases to the subsections of the long Vec C and dC: */
+  /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m][m], dt[m][m];
   bgy3d_vec_aliases_create2 (T, m, t);
   bgy3d_vec_aliases_create2 (dT, m, dt);
@@ -348,7 +348,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
       }
 
   /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec C and Vec dC: */
+     course. The actuall data is owned by Vec T and Vec dT: */
   bgy3d_vec_aliases_destroy2 (m, t);
   bgy3d_vec_aliases_destroy2 (m, dt);
 
