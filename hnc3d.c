@@ -678,18 +678,29 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
 typedef struct Ctx_t1
 {
   State *HD;
-  Vec v, h;                     /* real */
-  Vec c_fft, h_fft, t_fft;      /* complex */
+  int m;
+  Vec *v, *h;                   /* [m], real */
+  Vec *h_fft, *t_fft;           /* [m], complex */
+  Vec *c_fft;                   /* [m][m], complex */
 } Ctx_t1;
 
 
-static void iterate_t1 (Ctx_t1 *ctx, Vec t, Vec dt)
+static void iterate_t1 (Ctx_t1 *ctx, Vec T, Vec dT)
 {
+  /* alias of the right shape: */
+  const int m = ctx->m;
+  Vec (*c_fft)[m] = (void*) ctx->c_fft;
+
   const ProblemData *PD = ctx->HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
+
+  /* Establish aliases to the subsections of the long Vec T and dT: */
+  local Vec t[m], dt[m];
+  bgy3d_vec_aliases_create1 (T, m, t);
+  bgy3d_vec_aliases_create1 (dT, m, dt);
 
   /*
     The new candidate for the total correlation
@@ -703,31 +714,53 @@ static void iterate_t1 (Ctx_t1 *ctx, Vec t, Vec dt)
 
     See comments on the use of closure in iterate_h1().
   */
-  compute_c (beta, ctx->v, t, ctx->h);
-  VecAXPY (ctx->h, 1.0, t);
+  for (int i = 0; i < m; i++)
+    {
+      compute_c (beta, ctx->v[i], t[i], ctx->h[i]);
+      VecAXPY (ctx->h[i], 1.0, t[i]);
 
-  /* fft(h).  Here h is the 3d  unknown hole density h1 of the solvent
-     sites. */
-  MatMult (ctx->HD->fft_mat, ctx->h, ctx->h_fft);
+      /* fft(h).   Here h is  the 3d  unknown hole  density h1  of the
+         solvent sites. */
+      MatMult (ctx->HD->fft_mat, ctx->h[i], ctx->h_fft[i]);
+    }
 
-  /* fft(h)  *  fft(c).  Here   c  is  the  constant  (radial)  direct
-     correlation c2 of the pure solvent. */
-  complex pure mul (complex x, complex y)
+  /*
+    fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
+    correlation  c2  of  the  pure solvent.   The  "convolution  star"
+    corresponds to a matrix multiplication in the k-space.
+  */
+  complex pure fma (complex ti, complex cij, complex hj)
   {
-    return x * y;
+    /* FMA stays for "fused multiply-add" */
+    return ti + cij * hj;
   }
-  bgy3d_vec_fft_map2 (ctx->t_fft, mul, ctx->c_fft, ctx->h_fft);
 
-  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
-  MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft, dt);
+  /* For each solvent site ... */
+  for (int i = 0; i < m; i++)
+    {
+      /* ... sum over solvent sites: */
+      VecSet (ctx->t_fft[i], 0.0);
+      for (int j = 0; j < m; j++)
+        bgy3d_vec_fft_map3 (ctx->t_fft[i], /* argument aliasing! */
+                            fma,
+                            ctx->t_fft[i], c_fft[i][j], ctx->h_fft[j]);
 
-  VecScale (dt, rho * h3 / N3);
+      /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
+      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
+
+      VecScale (dt[i], rho * h3 / N3);
+    }
+
+  /* This  destroys the  aliases, but  does  not free  the memory,  of
+     course. The actuall data is owned by Vec T and Vec dT: */
+  bgy3d_vec_aliases_destroy1 (m, t);
+  bgy3d_vec_aliases_destroy1 (m, dt);
 
   /*
     dt := t    - t
            out    in
   */
-  VecAXPY (dt, -1.0, t);
+  VecAXPY (dT, -1.0, T);
 }
 
 
@@ -857,9 +890,6 @@ static void solute_solve_t1 (const ProblemData *PD,
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
-  local Vec t[m];
-  bgy3d_vec_create1 (HD->da, m, t);
-
   local Vec h_fft[m];
   bgy3d_vec_create1 (HD->dc, m, h_fft); /* complex */
 
@@ -898,7 +928,15 @@ static void solute_solve_t1 (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     compute_h (HD->PD->beta, v[i], h[i]);
 
-  assert (m == 1);
+  /*
+    For primary  variable there are two  ways to access  the data: via
+    the long Vec and m shorter  Vecs aliased to the subsections of the
+    longer one.
+  */
+  local Vec T = bgy3d_vec_pack_create1 (HD->da, m); /* long Vec */
+
+  local Vec t[m];
+  bgy3d_vec_aliases_create1 (T, m, t); /* aliases to subsections */
 
   /*
     Find a  t such that  dt as returned  by iterate_t1 (HD, t,  dt) is
@@ -910,14 +948,15 @@ static void solute_solve_t1 (const ProblemData *PD,
     Ctx_t1 ctx =
       {
         .HD = HD,
-        .v = v[0],
-        .h = h[0],
-        .c_fft = c_fft[0][0],
-        .h_fft = h_fft[0],
-        .t_fft = t_fft[0],
+        .m = m,
+        .v = (void*) v,
+        .h = (void*) h,
+        .c_fft = (void*) c_fft, /* pair quantitity */
+        .h_fft = (void*) h_fft,
+        .t_fft = (void*) t_fft,
       };
 
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, t[0]);
+    bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, T);
   }
   /*
     FIXME: by ignoring the value of  Vec t and using Vec h instead, we
@@ -928,10 +967,12 @@ static void solute_solve_t1 (const ProblemData *PD,
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&h) */
-  bgy3d_vec_destroy1 (m, t);
   bgy3d_vec_destroy1 (m, h_fft);
   bgy3d_vec_destroy1 (m, t_fft);
   bgy3d_vec_destroy1 (m, v);
+
+  bgy3d_vec_aliases_destroy1 (m, t);
+  bgy3d_vec_pack_destroy1 (&T);
 
   /* This should be the only pair quantity: */
   bgy3d_vec_destroy2 (m, c_fft);
