@@ -31,7 +31,8 @@ HNC-FLAGS = \
 # In case $(EXE) is not defined, assume the executable is one level up
 # in directory structure:
 #
-EXE ?= ../bgy3d
+TOP ?= ..
+EXE ?= $(TOP)/bgy3d
 
 solutes = \
 	hydrogen_chloride \
@@ -102,7 +103,7 @@ out/%:
 # file(s). Darcs does not track file attributes, so that the *.py file
 # will not always have an execution bit set in a fresh repository:
 #
-moments = python ../python/moments.py
+moments = python $(TOP)/python/moments.py
 
 #
 # This script is also used in QM regression tests, see ../test-qm:
@@ -118,22 +119,22 @@ make-summary = $(SHELL) ./summary.sh
 #
 # Testing HNC3d code is not as elaborate, thus the special case.
 #
-%.hnc3d.g2: ../bgy3d
+%.hnc3d.g2: $(TOP)/bgy3d
 	$(EXE) $(base-flags) | tee $(@).out
 	$(moments) g00.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.hnc3d.g1: ../bgy3d OW.hnc3d.g2
+%.hnc3d.g1: $(TOP)/bgy3d OW.hnc3d.g2
 	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.g1: ../bgy3d hydrogen_chloride.g2
+%.g1: $(TOP)/bgy3d hydrogen_chloride.g2
 	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.g2: ../bgy3d
+%.g2: $(TOP)/bgy3d
 	$(EXE) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
@@ -141,12 +142,12 @@ make-summary = $(SHELL) ./summary.sh
 
 # This only works if ../bgy3d executable was built WITH_GUILE:
 %.m: %.bin
-	../guile/runbgy.scm dump $(<) > $(@)
+	$(TOP)/guile/runbgy.scm dump $(<) > $(@)
 
 # This pops a graphics window for  a second. Is there a way to disable
 # that?
 %.m.png: %.m
-	../octave/bgy3d_plot.m $(<)
+	$(TOP)/octave/bgy3d_plot.m $(<)
 
 # Do  not delte  intermediate  ascii *.m  files  produced when  making
 # figures:
