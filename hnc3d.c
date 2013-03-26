@@ -268,22 +268,46 @@ static void compute_t (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
 
 
 /*
-  HNC iteration for an indirect correlation γ = h - c (here denoted by
-  t) where other intermediates are considered a function of that:
+  There are currently two types of HNC iterations for pure solvent.
 
-  t    ->  dt = t    - t
-    in           out    in
+  a) HNC iteration for an indirect correlation γ = h - c (here denoted
+     by t)
+
+     t    ->  dt = t    - t
+      in           out    in
+
+     where other  intermediates are considered a function  of that. In
+     particular  in this case  another important  intermediate is  y =
+     c(t).
+
+  b) HNC iteration for a direct correlation where the total correlation
+     is considered a function of that:
+
+     c    ->  dc = c    - c
+      in           out    in
+
+     In this case the indirect  correlation γ is considered a function
+     of c and is stored in y = γ(c).
 */
-typedef struct Ctx_t2
+typedef struct Ctx2
 {
   State *HD;
-  Vec v, c;                     /* real */
-  Vec t_fft, c_fft;             /* complex */
-} Ctx_t2;
+  int m;
+  Vec *v;                    /* [m][m], real, const */
+  Vec *y;                    /* [m][m], real, either y = c or y = t */
+  Vec *t_fft, *c_fft;        /* [m][m], complex */
+} Ctx2;
 
 
-static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
+static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 {
+  /* aliases of the right shape: */
+  const int m = ctx->m;
+  Vec (*c_fft)[m] = (void*) ctx->c_fft;
+  Vec (*t_fft)[m] = (void*) ctx->t_fft;
+  Vec (*c)[m] = (void*) ctx->y; /* y = c(t) here */
+  Vec (*v)[m] = (void*) ctx->v;
+
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
   const real rho = PD->rho;
@@ -291,52 +315,54 @@ static void iterate_t2 (Ctx_t2 *ctx, Vec t, Vec dt)
   const real L = PD->interval[1] - PD->interval[0];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  compute_c (beta, ctx->v, t, ctx->c);
+  /* Establish aliases to the subsections of the long Vec C and dC: */
+  local Vec t[m][m], dt[m][m];
+  bgy3d_vec_aliases_create2 (T, m, t);
+  bgy3d_vec_aliases_create2 (dT, m, dt);
 
-  MatMult (HD->fft_mat, ctx->c, ctx->c_fft);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        compute_c (beta, v[i][j], t[i][j], c[i][j]);
 
-  /* Translate distribution to the grid corner. */
-  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->c_fft);
+        MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
-  VecScale (ctx->c_fft, h3);
+        /* Translate distribution to the grid corner. */
+        bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
 
-  /* FIXME: compute_t() expects Vec[m][m]: */
-  compute_t (1, rho, (void*) &ctx->c_fft, (void*) &ctx->t_fft);
+        VecScale (c_fft[i][j], h3);
+      }
 
-  /* Translate distribution to the grid center. */
-  bgy3d_vec_fft_trans (HD->dc, PD->N, ctx->t_fft);
+  /* Solves the linear equation for t_fft[][]: */
+  compute_t (m, rho, c_fft, t_fft);
 
-  MatMultTranspose (HD->fft_mat, ctx->t_fft, dt);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        /* Translate distribution to the grid center. */
+        bgy3d_vec_fft_trans (HD->dc, PD->N, t_fft[i][j]);
 
-  VecScale (dt, 1.0/L/L/L);
+        MatMultTranspose (HD->fft_mat, t_fft[i][j], dt[i][j]);
 
-  VecAXPY (dt, -1.0, t);
+        VecScale (dt[i][j], 1.0/L/L/L);
+      }
+
+  /* This  destroys the  aliases, but  does  not free  the memory,  of
+     course. The actuall data is owned by Vec C and Vec dC: */
+  bgy3d_vec_aliases_destroy2 (m, t);
+  bgy3d_vec_aliases_destroy2 (m, dt);
+
+  VecAXPY (dT, -1.0, T);
 }
 
 
-/*
-  HNC iteration for a direct correlation where the total correlation
-  is considered a function of that:
-
-  c    ->  dc = c    - c
-    in           out    in
-*/
-typedef struct Ctx_c2
-{
-  State *HD;
-  int m;
-  Vec *v, *t;                   /* [m][m], real */
-  Vec *t_fft, *c_fft;           /* [m][m], complex */
-} Ctx_c2;
-
-
-static void iterate_c2 (Ctx_c2 *ctx, Vec C, Vec dC)
+static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
 {
   /* aliases of the right shape: */
   const int m = ctx->m;
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
-  Vec (*t)[m] = (void*) ctx->t;
+  Vec (*t)[m] = (void*) ctx->y; /* y = t(c) here */
   Vec (*v)[m] = (void*) ctx->v;
 
   const State *HD = ctx->HD;
@@ -388,90 +414,36 @@ static void iterate_c2 (Ctx_c2 *ctx, Vec C, Vec dC)
 
 
 /*
-  Solving for indirect  correlation γ = h - c  and other quantities of
-  HNC equation.  Indirect correlation  γ appears as a primary variable
-  here:
+  Solving  for  either  indirect correlation  γ  =  h  - c  or  direct
+  correlation c  and other quantities of HNC  equation.  Either direct
+  correlation  c  or  indirect  correlation  γ appears  as  a  primary
+  variable x here. All other unknowns are functionals of that.
 */
-static void solvent_solve_t2 (const ProblemData *PD,
-                              int m, const Site solvent[m],
-                              Vec g[m][m])
+void hnc3d_solvent_solve (const ProblemData *PD,
+                          int m, const Site solvent[m],
+                          Vec g[m][m])
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
-  PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
-
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  local Vec c = bgy3d_vec_create (HD->da);
-  local Vec c_fft = bgy3d_vec_create (HD->dc); /* complex */
-  local Vec t_fft = bgy3d_vec_create (HD->dc); /* complex */
 
-  local Vec v[m][m];
-  bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
+  /* Flip this to switch between c and t as primary variables: true =>
+     c, false => t: */
+  const bool yes = true;
 
-  /* Get solvent-solvent site-site interactions: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
+  if (yes)
+    PetscPrintf (PETSC_COMM_WORLD, "(iterations for c)\n");
+  else
+    PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
-  /* Create intial guess: */
-  Vec t = bgy3d_vec_create (HD->da); /* FIXME: not deallocated */
-  VecSet (t, 0.0);
-
-  assert (m == 1);
   /*
-    Find a t  such that dt as returned by iterate_t2  (&ctx, t, dt) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_t2* vs. void*:
+    This will be a functional y(x) of primary variable, either y(x) ==
+    t(c)  or  vice  versa, y(x)  =  c(t).  Depending  on the  type  of
+    iteration.
   */
-  {
-    Ctx_t2 ctx =
-      {
-        .HD = HD,
-        .v = v[0][0],
-        .c = c,
-        .t_fft = t_fft,
-        .c_fft = c_fft,
-      };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_t2, t);
-  }
-
-  bgy3d_vec_save ("t00.bin", t);
-
-  /* g = γ + c + 1, store in Vec t: */
-  VecAXPY (t, 1.0, c);
-  VecShift (t, 1.0);
-
-  bgy3d_vec_save ("c00.bin", c);
-  bgy3d_vec_save ("g00.bin", t);
-
-  /* free stuff */
-  /* Delegated to the caller: bgy3d_vec_destroy (&t); */
-  bgy3d_vec_destroy (&c);
-  bgy3d_vec_destroy (&c_fft);
-  bgy3d_vec_destroy (&t_fft);
-  bgy3d_vec_destroy2 (m, v);
-
-  bgy3d_state_destroy (HD);
-
-  /* Return just one distribution. bgy3d_vec_destroy (&) it! */
-  g[0][0] = t;
-}
-
-
-/* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
-   appears as a primary variable here: */
-static void solvent_solve_c2 (const ProblemData *PD,
-                              int m, const Site solvent[m],
-                              Vec g[m][m])
-{
-  /* Code used to be verbose: */
-  bgy3d_problem_data_print (PD);
-
-  State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-
-  Vec t[m][m];                  /* FIXME: not deallocated */
-  bgy3d_vec_create2 (HD->da, m, t);
+  Vec y[m][m];                  /* FIXME: not deallocated */
+  bgy3d_vec_create2 (HD->da, m, y);
 
   local Vec t_fft[m][m];
   bgy3d_vec_create2 (HD->dc, m, t_fft); /* complex */
@@ -488,50 +460,74 @@ static void solvent_solve_c2 (const ProblemData *PD,
       pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /*
-    For primary  variable there are two  ways to access  the data: via
-    the long  Vec and  m * (m  + 1)  / 2 shorter  Vecs aliased  to the
-    subsections of the longer one.
+    For primary variable x there are  two ways to access the data: via
+    the long Vec X and m * (m  + 1) / 2 shorter Vec x[m][m] aliased to
+    the subsections of the longer one.
   */
-  local Vec C = bgy3d_vec_pack_create2 (HD->da, m); /* long Vec */
+  local Vec X = bgy3d_vec_pack_create2 (HD->da, m); /* long Vec */
 
-  local Vec c[m][m];
-  bgy3d_vec_aliases_create2 (C, m, c); /* aliases to subsections */
+  local Vec x[m][m];
+  bgy3d_vec_aliases_create2 (X, m, x); /* aliases to subsections */
 
-  /* Create intial guess: */
+  /* Zero as intial guess  for x == t is not the  same as zero initial
+     guess for x == c: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      VecSet (c[i][j], 0.0);
+      VecSet (x[i][j], 0.0);
 
   /*
-    Find a C  such that dC as returned by iterate_c2  (&ctx, C, dC) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: struct Ctx_c2* vs. void*:
+    Find an X such that dX  as returned by iterate_c2/t2 (&ctx, X, dX)
+    is zero.  Cast is  there to  silence the mismatch  in the  type of
+    first pointer argument: struct Ctx2* vs. void*:
   */
   {
-    Ctx_c2 ctx =
+    Ctx2 ctx =
       {
         .HD = HD,
         .m = m,
-        .v = (void*) v,
-        .t = (void*) t,
+        .v = (void*) v,     /* in */
+        .y = (void*) y,     /* t(c) or c(t) */
         .t_fft = (void*) t_fft,
         .c_fft = (void*) c_fft,
       };
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, C);
+
+    if (yes)
+      bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, X);
+    else
+      bgy3d_snes_default (PD, &ctx, (Function) iterate_t2, X);
   }
 
-  bgy3d_vec_save2 ("t%d%d.bin", m, t);
+  /*
+    This  saves   c??.bin  to  disk  to  be   used  in  solute/solvent
+    calculations. The  other one  is not futhre  used, saved  just for
+    info.
+  */
+  if (yes)
+    {
+      /* In  this branch  the primary  variable x  == c,  the indirect
+         correlation t(c) is a dependent quantity y(x)! */
+      bgy3d_vec_save2 ("c%d%d.bin", m, x);
+      bgy3d_vec_save2 ("t%d%d.bin", m, y);
+    }
+  else
+    {
+      /* In  this branch  the  primary  variable x  ==  t, the  direct
+         correlation c(t) is a dependent quantity y(x)! */
+      bgy3d_vec_save2 ("t%d%d.bin", m, x);
+      bgy3d_vec_save2 ("c%d%d.bin", m, y);
+    }
 
-  /* g = γ + c + 1, store in Vec t: */
+  /*
+    g  =  γ +  c  +  1,  store in  Vec  y.   The expression  is  valid
+    irrespective of whether  (x, y) == (c,  γ) or (x, y) ==  (γ, c) as
+    both appear as a sum x + y == γ + c here:
+  */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        VecAXPY (t[i][j], 1.0, c[i][j]);
-        VecShift (t[i][j], 1.0);
+        VecAXPY (y[i][j], 1.0, x[i][j]);
+        VecShift (y[i][j], 1.0);
       }
-
-  bgy3d_vec_save2 ("c%d%d.bin", m, c);
-  bgy3d_vec_save2 ("g%d%d.bin", m, t);
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&t); */
@@ -539,28 +535,17 @@ static void solvent_solve_c2 (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, c_fft);
   bgy3d_vec_destroy2 (m, v);
 
-  bgy3d_vec_aliases_destroy2 (m, c);
-  bgy3d_vec_pack_destroy2 (&C);
+  bgy3d_vec_aliases_destroy2 (m, x);
+  bgy3d_vec_pack_destroy2 (&X);
 
   bgy3d_state_destroy (HD);
 
   /* Dont forget to bgy3d_vec_destroy2() it! */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      g[i][j] = g[j][i] = t[i][j];
-}
+      g[i][j] = g[j][i] = y[i][j];
 
-
-/* Solving  for c  and h(c)  of  HNC equation.   Direct correlation  c
-   appears as a primary variable here: */
-void hnc3d_solvent_solve (const ProblemData *PD,
-                          int m, const Site solvent[m],
-                          Vec g[m][m])
-{
-  if (1)
-    solvent_solve_c2 (PD, m, solvent, g);
-  else
-    solvent_solve_t2 (PD, m, solvent, g);
+  bgy3d_vec_save2 ("g%d%d.bin", m, g);
 }
 
 
