@@ -195,50 +195,75 @@ static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Ve
 
 /* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
    in-place transform: */
-static inline void bgy3d_vec_fft_map1 (Vec y, complex (*f)(complex x), Vec x)
+static inline void bgy3d_vec_fft_map1 (Vec y, /* out */
+                                       complex (*f)(complex x),
+                                       Vec x) /* in */
 {
-  real *x_ = vec_get_array (x);
-  real *y_ = vec_get_array (y);
+  complex *x_ = (complex*) vec_get_array (x);
+  complex *y_ = (complex*) vec_get_array (y);
 
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
   assert (n % 2 == 0);
 
-  complex *xs_ = (complex*) x_;
-  complex *ys_ = (complex*) y_;
-
   for (int i = 0; i < n / 2; i++)
-    ys_[i] = f (xs_[i]);
+    y_[i] = f (x_[i]);
 
-  VecRestoreArray (x, &x_);
-  VecRestoreArray (y, &y_);
+  VecRestoreArray (x, (void*) &x_);
+  VecRestoreArray (y, (void*) &y_);
 }
 
 
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
-static inline void bgy3d_vec_fft_map2 (Vec z, complex (*f)(complex x, complex y), Vec x, Vec y)
+static inline void bgy3d_vec_fft_map2 (Vec z, /* out */
+                                       complex (*f)(complex x, complex y),
+                                       Vec x, Vec y) /* in */
 {
-  real *x_ = vec_get_array (x);
-  real *y_ = vec_get_array (y);
-  real *z_ = vec_get_array (z);
+  complex *x_ = (complex*) vec_get_array (x);
+  complex *y_ = (complex*) vec_get_array (y);
+  complex *z_ = (complex*) vec_get_array (z);
 
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
   assert (vec_local_size (z) == n);
   assert (n % 2 == 0);
 
-  complex *xs_ = (complex*) x_;
-  complex *ys_ = (complex*) y_;
-  complex *zs_ = (complex*) z_;
+  for (int i = 0; i < n / 2; i++)
+    z_[i] = f (x_[i], y_[i]);
+
+  VecRestoreArray (x, (void*) &x_);
+  VecRestoreArray (y, (void*) &y_);
+  VecRestoreArray (z, (void*) &z_);
+}
+
+
+/* ws = map (f, xs, ys,  zs).  Should also work with aliased arguments
+   for in-place transform: */
+static inline void bgy3d_vec_fft_map3 (Vec w, /* out */
+                                       complex (*f)(complex x, complex y, complex z),
+                                       Vec x, Vec y, Vec z) /* in */
+{
+  complex *x_ = (complex*) vec_get_array (x);
+  complex *y_ = (complex*) vec_get_array (y);
+  complex *z_ = (complex*) vec_get_array (z);
+  complex *w_ = (complex*) vec_get_array (w);
+
+  const int n = vec_local_size (x);
+  assert (vec_local_size (y) == n);
+  assert (vec_local_size (z) == n);
+  assert (vec_local_size (w) == n);
+  assert (n % 2 == 0);
 
   for (int i = 0; i < n / 2; i++)
-    zs_[i] = f (xs_[i], ys_[i]);
+    w_[i] = f (x_[i], y_[i], z_[i]);
 
-  VecRestoreArray (x, &x_);
-  VecRestoreArray (y, &y_);
-  VecRestoreArray (z, &z_);
+  VecRestoreArray (x, (void*) &x_);
+  VecRestoreArray (y, (void*) &y_);
+  VecRestoreArray (z, (void*) &z_);
+  VecRestoreArray (w, (void*) &w_);
 }
+
 
 /* "Integrates" f(v(x), x) with the grid data v(x): */
 static inline real bgy3d_vec_integrate (DA da, real (*f)(real v, int i, int j, int k), Vec v)
