@@ -582,6 +582,44 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 
 
 /*
+  In k-space compute
+
+   t = ρ c * h
+
+  Here ρ  is a scalar  overall factor proportional to  solvent density
+  and  should  include  convolution/FFT  renormalization in  order  to
+  interprete the result as an FFT of t literally:
+*/
+static void compute_t1 (int m, real rho,
+                        Vec c_fft[m][m], Vec h_fft[m], /* in */
+                        Vec t_fft[m])                  /* out */
+{
+  /*
+    fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
+    correlation  c2  of  the  pure solvent.   The  "convolution  star"
+    corresponds to a matrix multiplication in the k-space.
+  */
+  complex pure fma (complex ti, complex cij, complex hj)
+  {
+    /* FMA stays for "fused multiply-add" */
+    return ti + cij * hj;
+  }
+
+  /* For each solvent site ... */
+  for (int i = 0; i < m; i++)
+    {
+      /* ... sum over solvent sites: */
+      VecSet (t_fft[i], 0.0);
+      for (int j = 0; j < m; j++)
+        bgy3d_vec_fft_map3 (t_fft[i], /* argument aliasing! */
+                            fma,
+                            t_fft[i], c_fft[i][j], h_fft[j]);
+
+      VecScale (t_fft[i], rho);
+    }
+}
+
+/*
   HNC3d   iteration   for  a   fixed   direct   correlation  of   pure
   solvent. There are two cases:
 
@@ -634,28 +672,16 @@ static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
     fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
     correlation  c2  of  the  pure solvent.   The  "convolution  star"
     corresponds to a matrix multiplication in the k-space.
+
+    For  each solvent  site sum  over solvent  sites. Let  the overall
+    scale include  a factor for  inverse FFT and  convolution integral
+    right away:
   */
-  complex pure fma (complex ti, complex cij, complex hj)
-  {
-    /* FMA stays for "fused multiply-add" */
-    return ti + cij * hj;
-  }
+  compute_t1 (m, rho * h3 / N3, c_fft, ctx->h_fft, ctx->t_fft);
 
-  /* For each solvent site ... */
+  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
-    {
-      /* ... sum over solvent sites: */
-      VecSet (ctx->t_fft[i], 0.0);
-      for (int j = 0; j < m; j++)
-        bgy3d_vec_fft_map3 (ctx->t_fft[i], /* argument aliasing! */
-                            fma,
-                            ctx->t_fft[i], c_fft[i][j], ctx->h_fft[j]);
-
-      /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
-      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], t[i]);
-
-      VecScale (t[i], rho * h3 / N3);
-    }
+    MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], t[i]);
 
   /*
     The new candidate for the total correlation
@@ -743,28 +769,16 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
     correlation  c2  of  the  pure solvent.   The  "convolution  star"
     corresponds to a matrix multiplication in the k-space.
+
+    For  each solvent  site sum  over solvent  sites. Let  the overall
+    scale include  a factor for  inverse FFT and  convolution integral
+    right away:
   */
-  complex pure fma (complex ti, complex cij, complex hj)
-  {
-    /* FMA stays for "fused multiply-add" */
-    return ti + cij * hj;
-  }
+  compute_t1 (m, rho * h3 / N3, c_fft, ctx->h_fft, ctx->t_fft);
 
-  /* For each solvent site ... */
+  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
-    {
-      /* ... sum over solvent sites: */
-      VecSet (ctx->t_fft[i], 0.0);
-      for (int j = 0; j < m; j++)
-        bgy3d_vec_fft_map3 (ctx->t_fft[i], /* argument aliasing! */
-                            fma,
-                            ctx->t_fft[i], c_fft[i][j], ctx->h_fft[j]);
-
-      /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
-      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
-
-      VecScale (dt[i], rho * h3 / N3);
-    }
+    MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
   /* This  destroys the  aliases, but  does  not free  the memory,  of
      course. The actuall data is owned by Vec T and Vec dT: */
