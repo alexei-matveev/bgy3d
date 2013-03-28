@@ -177,7 +177,7 @@ static int delta (int i, int j)
   the  result by h3  in addition,  you will  compute exactly  what the
   older version of the function did:
 */
-static void compute_t_1 (real rho, Vec c_fft, Vec t_fft)
+static void compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
 {
   complex pure f (complex c)
   {
@@ -189,7 +189,7 @@ static void compute_t_1 (real rho, Vec c_fft, Vec t_fft)
 
 
 /* So far rho is scalar, it could be different for all sites: */
-static void compute_t_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
 {
   complex *c_fft_[m][m], *t_fft_[m][m];
 
@@ -258,12 +258,12 @@ static void compute_t_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
 }
 
 
-static void compute_t (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+static void compute_t2 (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
 {
   if (m == 1)
-    compute_t_1 (rho, c_fft[0][0], t_fft[0][0]); /* faster */
+    compute_t2_1 (rho, c_fft[0][0], t_fft[0][0]); /* faster */
   else
-    compute_t_m (m, rho, c_fft, t_fft); /* works for any m */
+    compute_t2_m (m, rho, c_fft, t_fft); /* works for any m */
 }
 
 
@@ -334,7 +334,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
       }
 
   /* Solves the linear equation for t_fft[][]: */
-  compute_t (m, rho, c_fft, t_fft);
+  compute_t2 (m, rho, c_fft, t_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -389,7 +389,7 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
       }
 
   /* Solves the linear equation for t_fft[][]: */
-  compute_t (m, rho, c_fft, t_fft);
+  compute_t2 (m, rho, c_fft, t_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
