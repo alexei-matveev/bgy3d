@@ -62,18 +62,6 @@ static void pair (const DA da, const ProblemData *PD,
 }
 
 
-/* h := exp (-β v) - 1 */
-static void compute_h (real beta, Vec v, Vec h)
-{
-  real pure f (real v)
-  {
-    /* exp (-beta * v) - 1 */
-    return expm1 (-beta * v);
-  }
-  bgy3d_vec_map1 (h, f, v);
-}
-
-
 /*
   There  are several  closure  relations, all  must  satisfy the  same
   interface. Vec c is intent(out) the rest is input.
@@ -154,6 +142,54 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
       PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
       exit (1);
     }
+}
+
+
+/*
+  Compute
+
+    h = c'(t) + t
+
+  In particular  for t =  0 returns  h = exp(-βv)  - 1 (except  for KH
+  closure).   Used  to  compute   the  new  candidate  for  the  total
+  correlation with the original expression being
+
+    h = exp (-βv + t) - 1
+
+  where
+
+    t = ρ (c *  h)
+
+  is computed  using the current input  h in HNC3d  model.  To compute
+  that we re-use the closure  relation, which, in case of HNC closure,
+  outputs
+
+    exp (-βv + t) - 1.0 - t
+
+  (I am somewhat reluctant to call  the expression above "c" as in the
+  closure definition  to avoid the necessity  to differentiate between
+  pair and singleton c = c2  and c' = c1).  It is questionable whether
+  we should  always use HNC closure  here or respect the  input of the
+  user  (--closure switch).  There  is  only a  chance  for solute  ==
+  solvent to produce the same result as the pure solvent if we use the
+  "native" closure here:
+*/
+static void compute_h (real beta, Vec v, Vec t, Vec h)
+{
+  compute_c (beta, v, t, h);
+  VecAXPY (h, 1.0, t);
+}
+
+
+/* h := exp (-β v) - 1. A kind of special case of the above. */
+static void compute_h0 (real beta, Vec v, Vec h)
+{
+  real pure f (real v)
+  {
+    /* exp (-beta * v) - 1 */
+    return expm1 (-beta * v);
+  }
+  bgy3d_vec_map1 (h, f, v);
 }
 
 
@@ -686,31 +722,12 @@ static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
   /*
     The new candidate for the total correlation
 
-      h = exp (-βv + t) - 1
+      h ~ exp (-βv + t) - 1
 
-    with
-
-      t = ρ (c * h)
-
-    computed using the input h.  Resulting new h will be stored in Vec
-    dh. To compute that we re-use the closure relation, which, in case
-    of HNC closure, outputs
-
-      exp (-βv + t) - 1.0 - t
-
-    (I dont call the expression above "c" as in the closure definition
-    to avoid the necessity to differentiate between pair and singleton
-    c2 and c1).   It is questionable whether we  should always use HNC
-    closure  here  or  respect   the  input  of  the  user  (--closure
-    switch). There is  only a chance for solute  == solvent to produce
-    the same result as the pure solvent if we use the "native" closure
-    here:
+    See comments to compute_h() for the meaning of "~".
   */
   for (int i = 0; i < m; i++)
-    {
-      compute_c (beta, ctx->v[i], t[i], dh[i]);
-      VecAXPY (dh[i], 1.0, t[i]);
-    }
+    compute_h (beta, ctx->v[i], t[i], dh[i]);
 
   /* This  destroys the  aliases, but  does  not free  the memory,  of
      course. The actuall data is owned by Vec H and Vec dH: */
@@ -746,19 +763,13 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   /*
     The new candidate for the total correlation
 
-      h = exp (-βv + t) - 1
+      h ~ exp (-βv + t) - 1
 
-    computed using the input t.  To compute that we re-use the closure
-    relation, which, in case of HNC closure, outputs
-
-      exp (-βv + t) - 1.0 - t
-
-    See comments on the use of closure in iterate_h1().
+    See comments to compute_h() for the meaning of "~".
   */
   for (int i = 0; i < m; i++)
     {
-      compute_c (beta, ctx->v[i], t[i], h[i]);
-      VecAXPY (h[i], 1.0, t[i]);
+      compute_h (beta, ctx->v[i], t[i], h[i]);
 
       /* fft(h).   Here h is  the 3d  unknown hole  density h1  of the
          solvent sites. */
@@ -906,7 +917,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
      - 1 initial guess for x == h: */
   if (yes)
     for (int i = 0; i < m; i++)
-      compute_h (HD->PD->beta, v[i], x[i]);
+      compute_h0 (HD->PD->beta, v[i], x[i]);
   else
     for (int i = 0; i < m; i++)
       VecSet (x[i], 0.0);
