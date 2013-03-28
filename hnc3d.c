@@ -582,43 +582,80 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 
 
 /*
-  HNC iteration for a fixed direct correlation:
+  HNC3d   iteration   for  a   fixed   direct   correlation  of   pure
+  solvent. There are two cases:
 
-  h    ->  dh = h    - h
-    in           out    in
+  a)  Iteration  with   an  (almost  discontinous)  total  correlation
+     function h as a primary variable
+
+     h    ->  dh = h    - h
+      in            out    in
+
+  b) Iteration with the indirect correlation t as a primary variable
+
+     t    ->  dt = t    - t
+      in           out    in
 */
-typedef struct Ctx_h1
+typedef struct Ctx1
 {
   State *HD;
-  Vec v, t;                     /* real */
-  Vec c_fft, h_fft, t_fft;      /* complex */
-} Ctx_h1;
+  int m;
+  Vec *v;                       /* [m], real, fixed */
+  Vec *y;                       /* [m], real, either h(t) or t(h) */
+  Vec *h_fft, *t_fft;           /* [m], complex */
+  Vec *c_fft;                   /* [m][m], complex, fixed */
+} Ctx1;
 
 
-static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
+static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
 {
+  /* alias of the right shape: */
+  const int m = ctx->m;
+  Vec (*c_fft)[m] = (void*) ctx->c_fft;
+  Vec *t = (void*) ctx->y;      /* [m], here y = t(h) */
+
   const ProblemData *PD = ctx->HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
 
+  /* Establish aliases to the subsections of the long Vec H and dH: */
+  local Vec h[m], dh[m];
+  bgy3d_vec_aliases_create1 (H, m, h);
+  bgy3d_vec_aliases_create1 (dH, m, dh);
+
   /* fft(h).  Here h is the 3d  unknown hole density h1 of the solvent
      sites. */
-  MatMult (ctx->HD->fft_mat, h, ctx->h_fft);
+  for (int i = 0; i < m; i++)
+    MatMult (ctx->HD->fft_mat, h[i], ctx->h_fft[i]);
 
-  /* fft(h)  *  fft(c).  Here   c  is  the  constant  (radial)  direct
-     correlation c2 of the pure solvent. */
-  complex pure mul (complex x, complex y)
+  /*
+    fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
+    correlation  c2  of  the  pure solvent.   The  "convolution  star"
+    corresponds to a matrix multiplication in the k-space.
+  */
+  complex pure fma (complex ti, complex cij, complex hj)
   {
-    return x * y;
+    /* FMA stays for "fused multiply-add" */
+    return ti + cij * hj;
   }
-  bgy3d_vec_fft_map2 (ctx->t_fft, mul, ctx->c_fft, ctx->h_fft);
 
-  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
-  MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft, ctx->t);
+  /* For each solvent site ... */
+  for (int i = 0; i < m; i++)
+    {
+      /* ... sum over solvent sites: */
+      VecSet (ctx->t_fft[i], 0.0);
+      for (int j = 0; j < m; j++)
+        bgy3d_vec_fft_map3 (ctx->t_fft[i], /* argument aliasing! */
+                            fma,
+                            ctx->t_fft[i], c_fft[i][j], ctx->h_fft[j]);
 
-  VecScale (ctx->t, rho * h3 / N3);
+      /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
+      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], t[i]);
+
+      VecScale (t[i], rho * h3 / N3);
+    }
 
   /*
     The new candidate for the total correlation
@@ -643,38 +680,31 @@ static void iterate_h1 (Ctx_h1 *ctx, Vec h, Vec dh)
     the same result as the pure solvent if we use the "native" closure
     here:
   */
-  compute_c (beta, ctx->v, ctx->t, dh);
-  VecAXPY (dh, 1.0, ctx->t);
+  for (int i = 0; i < m; i++)
+    {
+      compute_c (beta, ctx->v[i], t[i], dh[i]);
+      VecAXPY (dh[i], 1.0, t[i]);
+    }
+
+  /* This  destroys the  aliases, but  does  not free  the memory,  of
+     course. The actuall data is owned by Vec H and Vec dH: */
+  bgy3d_vec_aliases_destroy1 (m, h);
+  bgy3d_vec_aliases_destroy1 (m, dh);
 
   /*
     dh := h    - h
            out    in
   */
-  VecAXPY (dh, -1.0, h);
+  VecAXPY (dH, -1.0, H);
 }
 
 
-/*
-  HNC iteration for a fixed direct correlation:
-
-  t    ->  dt = t    - t
-    in           out    in
-*/
-typedef struct Ctx_t1
-{
-  State *HD;
-  int m;
-  Vec *v, *h;                   /* [m], real */
-  Vec *h_fft, *t_fft;           /* [m], complex */
-  Vec *c_fft;                   /* [m][m], complex */
-} Ctx_t1;
-
-
-static void iterate_t1 (Ctx_t1 *ctx, Vec T, Vec dT)
+static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
+  Vec *h = (void*) ctx->y;      /* [m], here y = h(t) */
 
   const ProblemData *PD = ctx->HD->PD;
   const real rho = PD->rho;
@@ -701,12 +731,12 @@ static void iterate_t1 (Ctx_t1 *ctx, Vec T, Vec dT)
   */
   for (int i = 0; i < m; i++)
     {
-      compute_c (beta, ctx->v[i], t[i], ctx->h[i]);
-      VecAXPY (ctx->h[i], 1.0, t[i]);
+      compute_c (beta, ctx->v[i], t[i], h[i]);
+      VecAXPY (h[i], 1.0, t[i]);
 
       /* fft(h).   Here h is  the 3d  unknown hole  density h1  of the
          solvent sites. */
-      MatMult (ctx->HD->fft_mat, ctx->h[i], ctx->h_fft[i]);
+      MatMult (ctx->HD->fft_mat, h[i], ctx->h_fft[i]);
     }
 
   /*
@@ -777,103 +807,46 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
 }
 
 
-/* Solving for h only of HNC equation. Direct correlation c appears as
-   an input here */
-static void solute_solve_h1 (const ProblemData *PD,
-                             const int m, const Site solvent[m],
-                             const int n, const Site solute[n],
-                             Vec g[m])
-{
-  assert (m == 1);
+/*
+  Solving  HNC3d  equations.  Direct  correlation  c  of pure  solvent
+  appears as a fixed input here. A  primary variable is either h = g -
+  1 or t related to h by one of the closure relations.
 
-  /* Code used to be verbose: */
-  bgy3d_problem_data_print (PD);
-
-  State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
-  local Vec t = bgy3d_vec_create (HD->da);
-  local Vec c_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  local Vec h_fft = bgy3d_vec_create (HD->dc);  /* complex */
-  local Vec t_fft = bgy3d_vec_create (HD->dc);  /* complex */
-
-  local Vec v[m];
-  bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
-
-  /*
-    Get  the solvent-solvent direct  correlation function.   FIXME: we
-    get the solvent  description as an argument, but  read the file to
-    get  the  rest.   There  is  no  guarantee  the  two  sources  are
-    consistent.
-  */
-  solvent_kernel (HD, 1, (void*) &c_fft);
-
-  /*
-    Get  solute-solvent interaction.   Fill v[]  with  the short-range
-    potential. FIXME: long-range Coulomb is ignored yet:
-  */
-  bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v,          /* out */
-                      NULL, NULL, /* no coulomb */
-                      NULL);      /* no electrons */
-
-  assert (m == 1);
-
-  /* Create global vectors */
-  Vec h = bgy3d_vec_duplicate (v[0]); /* FIXME: not deallocated */
-
-  /* Set initial guess */
-  compute_h (HD->PD->beta, v[0], h);
-
-  /*
-    Find  an h such  that dh  as returned  by iterate  (HD, h,  dh) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: Ctx_h1* vs. void*:
-  */
-  {
-    /* Work area for iterate_h1(): */
-    Ctx_h1 ctx =
-      {
-        .HD = HD,
-        .v = v[0],
-        .t = t,
-        .c_fft = c_fft,
-        .h_fft = h_fft,
-        .t_fft = t_fft,
-      };
-
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_h1, h);
-  }
-
-  /* free stuff */
-  /* Delegated to the caller: bgy3d_vec_destroy (&h) */
-  bgy3d_vec_destroy (&t);
-  bgy3d_vec_destroy (&h_fft);
-  bgy3d_vec_destroy (&c_fft);
-  bgy3d_vec_destroy (&t_fft);
-  bgy3d_vec_destroy1 (m, v);
-
-  bgy3d_state_destroy (HD);
-
-  /* g := h + 1 */
-  VecShift (h, 1.0);
-
-  bgy3d_vec_save ("g0.bin", h);
-
-  /* Just one distribution so far. bgy3d_vec_destroy (&) it! */
-  g[0] = h;
-}
-
-
-/* Solving for h only of HNC equation. Direct correlation c appears as
-   an input here */
-static void solute_solve_t1 (const ProblemData *PD,
-                             const int m, const Site solvent[m],
-                             const int n, const Site solute[n],
-                             Vec g[m])
+  At least for  water in OW solvent (water-like  model, just a neutral
+  oxygen with LJ parameters of water) Newton iteration over t ~ log [g
+  exp(βv)] converges, whereas iteration over h  = g - 1 does not.  The
+  problem with h  as a primary variable cannot be  severe as the Jager
+  solver  manages  that. On  the  other  hand h  =  g  -  1 is  nearly
+  discontinuous at the cavity border and formally constrained h >= -1.
+  Intuitively  this does  not make  the  task of  the fxipoint  solver
+  easier.
+*/
+void hnc3d_solute_solve (const ProblemData *PD,
+                         const int m, const Site solvent[m],
+                         const int n, const Site solute[n],
+                         Vec g[m])
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
+  /* Flip this to switch between h and t as primary variables: true =>
+     h, false => t: */
+  const bool yes = false;
+
+  if (yes)
+    PetscPrintf (PETSC_COMM_WORLD, "(iterations for h)\n");
+  else
+    PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
+
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
+
+  /*
+    This will be a functional y(x) of primary variable, either y(x) ==
+    t(h)  or  vice  versa, y(x)  =  h(t).  Depending  on the  type  of
+    iteration.
+  */
+  Vec y[m];                     /* FIXME: not deallocated */
+  bgy3d_vec_create1 (HD->da, m, y);
 
   local Vec h_fft[m];
   bgy3d_vec_create1 (HD->dc, m, h_fft); /* complex */
@@ -905,50 +878,67 @@ static void solute_solve_t1 (const ProblemData *PD,
                       NULL, NULL, /* no coulomb */
                       NULL);      /* no electrons */
 
-  /* Create global vectors */
-  Vec h[m];
-  bgy3d_vec_create1 (HD->da, m, h); /* FIXME: not deallocated */
-
-  /* Set initial guess */
-  for (int i = 0; i < m; i++)
-    compute_h (HD->PD->beta, v[i], h[i]);
-
   /*
-    For primary  variable there are two  ways to access  the data: via
-    the long Vec and m shorter  Vecs aliased to the subsections of the
-    longer one.
+    For primary variable x there are  two ways to access the data: via
+    the long Vec  X and m shorter Vec x[m]  aliased to the subsections
+    of the longer one.
   */
-  local Vec T = bgy3d_vec_pack_create1 (HD->da, m); /* long Vec */
+  local Vec X = bgy3d_vec_pack_create1 (HD->da, m); /* long Vec */
 
-  local Vec t[m];
-  bgy3d_vec_aliases_create1 (T, m, t); /* aliases to subsections */
+  local Vec x[m];
+  bgy3d_vec_aliases_create1 (X, m, x); /* aliases to subsections */
+
+  /* Zero as intial guess for x == t is (almost?) the same as exp(-βv)
+     - 1 initial guess for x == h: */
+  if (yes)
+    for (int i = 0; i < m; i++)
+      compute_h (HD->PD->beta, v[i], x[i]);
+  else
+    for (int i = 0; i < m; i++)
+      VecSet (x[i], 0.0);
 
   /*
     Find a  t such that  dt as returned  by iterate_t1 (HD, t,  dt) is
     zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: Ctx_t1* vs. void*:
+    pointer argument: Ctx1* vs. void*:
   */
   {
     /* Work area for iterate_h1(): */
-    Ctx_t1 ctx =
+    Ctx1 ctx =
       {
         .HD = HD,
         .m = m,
         .v = (void*) v,
-        .h = (void*) h,
+        .y = (void*) y,         /* h(t) or t(h) */
         .c_fft = (void*) c_fft, /* pair quantitity */
         .h_fft = (void*) h_fft,
         .t_fft = (void*) t_fft,
       };
 
-    bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, T);
+    if (yes)
+      bgy3d_snes_default (PD, &ctx, (Function) iterate_h1, X);
+    else
+      bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, X);
   }
+
+  /* Vec  y[]  will  be  returned  to  the caller,  Vec  x[]  will  be
+     destroyed: */
+  if (yes)
+    for (int i = 0; i < m; i++)
+      VecCopy (x[i], y[i]);
   /*
-    FIXME: by ignoring the value of  Vec t and using Vec h instead, we
-    assume  that the two  are consistent.   Hopefully the  SNES solver
-    does not  return "untested" solutions.  A call  to iterate_t1() to
-    "test" a solution would update Vec h, namely.
+    else nothing, but read the note ...
+
+    FIXME: by ignoring the value of Vec x == t and using Vec y == h(t)
+    instead, we  assume that the  two are consistent  as in y  = y(x).
+    Hopefully the SNES solver does not return "untested" solutions.  A
+    call to iterate_t1/h1() to "test"  a solution would update Vec y =
+    y(x), namely.
   */
+
+  /* g := h + 1 */
+  for (int i = 0; i < m; i++)
+    VecShift (y[i], 1.0);
 
   /* free stuff */
   /* Delegated to the caller: bgy3d_vec_destroy (&h) */
@@ -956,42 +946,19 @@ static void solute_solve_t1 (const ProblemData *PD,
   bgy3d_vec_destroy1 (m, t_fft);
   bgy3d_vec_destroy1 (m, v);
 
-  bgy3d_vec_aliases_destroy1 (m, t);
-  bgy3d_vec_pack_destroy1 (&T);
+  bgy3d_vec_aliases_destroy1 (m, x);
+  bgy3d_vec_pack_destroy1 (&X);
 
   /* This should be the only pair quantity: */
   bgy3d_vec_destroy2 (m, c_fft);
 
   bgy3d_state_destroy (HD);
 
-  /* g := h + 1 */
-  for (int i = 0; i < m; i++)
-    VecShift (h[i], 1.0);
-
-  bgy3d_vec_save1 ("g%d.bin", m, h);
-
   /* Caller is supposed to destroy it! */
   for (int i = 0; i < m; i++)
-    g[i] = h[i];
-}
+    g[i] = y[i];
 
-
-void hnc3d_solute_solve (const ProblemData *PD,
-                         const int m, const Site solvent[m],
-                         const int n, const Site solute[n],
-                         Vec g[m])
-{
-  /*
-    At least for water in OW solvent (water-like model, just a neutral
-    oxygen with LJ parameters of  water) Newton iteration over t = log
-    [g exp(βv)] converges, whereas iteration over  h = g - 1 does not.
-    The problem with  h as a primary variable cannot  be severe as the
-    Jager solver manages that.
-  */
-  if (0)
-    solute_solve_h1 (PD, m, solvent, n, solute, g);
-  else
-    solute_solve_t1 (PD, m, solvent, n, solute, g);
+  bgy3d_vec_save1 ("g%d.bin", m, g);
 }
 
 
