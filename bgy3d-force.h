@@ -6,6 +6,13 @@
 // #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
 // #include "bgy3d-solvents.h"     /* G */
 
+void bgy3d_force (State *BHD,
+                  const Site a, const Site b, /* struct by value? */
+                  Vec f_short[3], Vec f_long[3],
+                  Vec u_ini, Vec c2,
+                  Vec u2, Vec u2_fft,
+                  real damp, real damp_LJ);
+
 static inline real Lennard_Jones (real r, real epsilon, real sigma)
 {
   const real sr = sigma / r;

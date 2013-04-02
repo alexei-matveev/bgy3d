@@ -91,10 +91,10 @@
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* needs Site */
-#include "bgy3d-force.h"        /* Coulomb_short_grad() */
+#include "bgy3d-force.h"        /* bgy3d_force() */
 #include "bgy3d-getopt.h"
 #include "bgy3d-vec.h"
-#include "bgy3d-pure.h"
+#include "bgy3d-pure.h"         /* bgy3d_nssa_intra_log() */
 #include "bgy3d-poisson.h"      /* bgy3d_poisson() */
 #include "bgy3d-dirichlet.h"    /* Laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
@@ -130,8 +130,8 @@ static void  pair (State *BHD,
 {
   /* Compute  forces  and long-range  Coulomb  (in  both  reps) for  a
      pair: */
-  bgy3d_pair (BHD, a, b, f_short, f_long, NULL, NULL, u2, u2_fft,
-              1.0, 1.0);
+  bgy3d_force (BHD, a, b, f_short, f_long, NULL, NULL, u2, u2_fft,
+               1.0, 1.0);
 
   /*
     Compute weighted forces FFT(F *  g^2). Here star is a product, not
