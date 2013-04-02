@@ -6,6 +6,11 @@
 // #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
 // #include "bgy3d-solvents.h"     /* G */
 
+/* Computes a pair potential. See also bgy3d_force(). */
+void bgy3d_pair_potential (const DA da, const ProblemData *PD,
+                           const Site a, const Site b, /* by value? */
+                           Vec pot);
+
 void bgy3d_force (State *BHD,
                   const Site a, const Site b, /* struct by value? */
                   Vec f_short[3], Vec f_long[3],

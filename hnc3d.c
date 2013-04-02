@@ -9,57 +9,11 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
 #include "bgy3d-solutes.h"      /* struct Site */
 #define G 1.2
-#include "bgy3d-force.h"        /* Lennard_Jones() */
-#include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
+#include "bgy3d-force.h"        /* bgy3d_pair_potential() */
+#include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "hnc3d.h"
 #include <math.h>               /* expm1() */
-
-// #define HNC3D_T                 /* use γ as primary variable */
-
-
-static void pair (const DA da, const ProblemData *PD,
-                  const Site a, const Site b, /* by value? */
-                  Vec pot)
-{
-  /* Pair   interaction  parameters:  geometric   average,  arithmetic
-     average, and charge product. Site coordinates are not used. */
-  const real epsilon = sqrt (a.epsilon * b.epsilon);
-  const real sigma = 0.5 * (a.sigma + b.sigma);
-  const real q2 = a.charge * b.charge;
-
-  real interval[2];
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
-
-  real h[3];
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  VecSet (pot, 0.0);
-
-  real ***pot_;
-  DAVecGetArray (da, pot, &pot_);
-
-  int n[3], x[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          real r[3];
-          FOR_DIM
-            r[dim] = i[dim] * h[dim] + interval[0];
-
-          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
-
-          pot_[i[2]][i[1]][i[0]] +=
-            Lennard_Jones (r_s, epsilon, sigma) + Coulomb_short (r_s, q2);
-        }
-  DAVecRestoreArray (da, pot, &pot_);
-}
 
 
 /*
@@ -493,7 +447,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   /* Get solvent-solvent site-site interactions: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      pair (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
+      bgy3d_pair_potential (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
 
   /*
     For primary variable x there are  two ways to access the data: via
