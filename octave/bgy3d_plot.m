@@ -43,23 +43,26 @@ function bgy3d_plot (path)
   ## Axis for border:
   x = linspace (interval(1), interval(2), N);
 
+  ## This may not be divisible by two:
+  N2 = int32(N) / int32(2);
+
   ## Contourf plot bgy vectors:
   ## Cut the yz plane, squeeze(v(x0, 1:y, 1:z)) actually get vx(1:z,
   ## 1:y) at plane x = x0
   subplot (2, 2, 1);
-  bgy3d_contour (x, x, squeeze (vec3d(N/2, :, :)), "yz-plane", path);
+  bgy3d_contour (x, x, squeeze (vec3d(N2, :, :)), "yz-plane", path);
 
   subplot (2, 2, 2);
-  bgy3d_contour (x, x, squeeze (vec3d(:, N/2, :)), "xz-plane", path);
+  bgy3d_contour (x, x, squeeze (vec3d(:, N2, :)), "xz-plane", path);
 
   subplot (2, 2, 3);
-  bgy3d_contour (x, x, squeeze (vec3d(:, :, N/2)), "xy-plane", path);
+  bgy3d_contour (x, x, squeeze (vec3d(:, :, N2)), "xy-plane", path);
 
   ## Now plot 1d projections along x-, y-, and z-axes throuth the middle
   ## of the grid:
-  zray = squeeze (vec3d(N/2, N/2, :));
-  yray = squeeze (vec3d(N/2, :, N/2));
-  xray = squeeze (vec3d(:, N/2, N/2));
+  zray = squeeze (vec3d(N2, N2, :));
+  yray = squeeze (vec3d(N2, :, N2));
+  xray = squeeze (vec3d(:, N2, N2));
 
   subplot (2, 2, 4);
   plot (x, xray, "-+;x;", x, yray, "-x;y;", x, zray, "-o;z;");
