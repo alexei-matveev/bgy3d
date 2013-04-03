@@ -293,25 +293,22 @@ static real ljc (const Site *A, int n, const Site S[n])
   /* Sum force field contribution from all solute sites: */
   real field = 0.0;
 
-  for (int site = 0; site < n; site++)
+  for (int i = 0; i < n; i++)
     {
+      const Site *B = &S[i];    /* shorter alias */
 
       /* Interaction parameters for a pair of LJ sites: */
-      real e2 = sqrt (A->epsilon * S[site].epsilon);
-      real s2 = 0.5 * (A->sigma + S[site].sigma);
+      real e2 = sqrt (A->epsilon * B->epsilon);
+      real s2 = 0.5 * (A->sigma + B->sigma);
+      real q2 = A->charge * B->charge;
 
       /* Distance from a grid point to this site: */
-      real r_s = sqrt (SQR(A->x[0] - S[site].x[0]) +
-                       SQR(A->x[1] - S[site].x[1]) +
-                       SQR(A->x[2] - S[site].x[2]));
+      real r_s = sqrt (SQR(A->x[0] - B->x[0]) +
+                       SQR(A->x[1] - B->x[1]) +
+                       SQR(A->x[2] - B->x[2]));
 
-      /* 1. Lennard-Jones */
-      field += Lennard_Jones (r_s, e2, s2);
-
-      /* 2.  Coulomb, short  range part.   For historical  reasons the
-         overall scaling  factor, the  product of solvent-  and solute
-         site charges, is handled by the function itself: */
-      field += Coulomb_short (r_s, A->charge * S[site].charge);
+      /* Lennard-Jones + Coulomb, short range part: */
+      field += lennard_jones_coulomb_short (r_s, s2, e2, q2);
     }
 
   return field;
