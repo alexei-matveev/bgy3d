@@ -182,10 +182,9 @@ static inline real Coulomb_grad (real r, real rx, real q2)
   pass the  arithmetic average of  two sigmas, a geometric  average of
   two epsilons and the charge product as arguments
  */
-static inline real lennard_jones_coulomb_short (real r,
-                                                real sigma,
-                                                real epsilon,
-                                                real charge)
+static inline real
+lennard_jones_coulomb_short (real r,
+                             real sigma, real epsilon, real charge)
 {
   /*
     1.   Lennard-Jones  and  2.    Coulomb,  short  range  part.   For
@@ -193,5 +192,17 @@ static inline real lennard_jones_coulomb_short (real r,
     of  solvent-  and  solute  site  charges  q,  is  handled  by  the
     elementary functions:
   */
-  return Lennard_Jones (r, epsilon, sigma) + Coulomb_short (r, charge);
+  return                                        \
+    Lennard_Jones (r, epsilon, sigma) +         \
+    Coulomb_short (r, charge);
+}
+
+
+static inline real
+lennard_jones_coulomb_short_grad (real r, real rx,
+                                  real sigma, real epsilon, real charge)
+{
+  return                                                \
+    Lennard_Jones_grad (r, rx, epsilon, sigma) +        \
+    Coulomb_short_grad (r, rx, charge);
 }
