@@ -174,3 +174,24 @@ static inline real Coulomb_grad (real r, real rx, real q2)
         return re;
     }
 }
+
+
+/*
+  Short-range part of  the interaction of two charged  LJ site (sigma,
+  epsilon, charge).  Note that for  pair interaction one  will usually
+  pass the  arithmetic average of  two sigmas, a geometric  average of
+  two epsilons and the charge product as arguments
+ */
+static inline real lennard_jones_coulomb_short (real r,
+                                                real sigma,
+                                                real epsilon,
+                                                real charge)
+{
+  /*
+    1.   Lennard-Jones  and  2.    Coulomb,  short  range  part.   For
+    historical reasons  the overall scaling factors,  e.g. the product
+    of  solvent-  and  solute  site  charges  q,  is  handled  by  the
+    elementary functions:
+  */
+  return Lennard_Jones (r, epsilon, sigma) + Coulomb_short (r, charge);
+}
