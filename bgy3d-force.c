@@ -156,11 +156,14 @@ void bgy3d_force (State *BHD,
                   Vec u2, Vec u2_fft,
                   real damp, real damp_LJ)
 {
-  /* Pair   interaction  parameters:  geometric   average,  arithmetic
-     average, and charge product: */
-  const real epsilon = sqrt (a.epsilon * b.epsilon);
+  /*
+    Pair   interaction  parameters:   arithmetic   average,  geometric
+    average, and  charge product.   Parameters that define  the energy
+    scale are scaled by damping factors.
+  */
   const real sigma = 0.5 * (a.sigma + b.sigma);
-  const real q2 = a.charge * b.charge;
+  const real epsilon = damp_LJ * sqrt (a.epsilon * b.epsilon);
+  const real q2 = damp * (a.charge * b.charge);
 
   const ProblemData *PD = BHD->PD;
   const DA da = BHD->da;
@@ -214,7 +217,7 @@ void bgy3d_force (State *BHD,
     FOR_DIM
       f_long_fft[dim] = bgy3d_vec_pop (BHD->dc);
 
-    ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2 * damp);
+    ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2);
 
     FOR_DIM
       bgy3d_vec_push (BHD->dc, &f_long_fft[dim]);
@@ -260,18 +263,18 @@ void bgy3d_force (State *BHD,
             */
             if (u_ini)
               u_ini_[i[2]][i[1]][i[0]] +=
-                lennard_jones_coulomb_short (r_s, sigma, damp_LJ * epsilon, damp * q2);
+                lennard_jones_coulomb_short (r_s, sigma, epsilon, q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
               f_short_[dim][i[2]][i[1]][i[0]] +=
-                Lennard_Jones_grad (r_s, r[dim], damp_LJ * epsilon, sigma) +
-                Coulomb_short_grad (r_s, r[dim], damp * q2);
+                Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
+                Coulomb_short_grad (r_s, r[dim], q2);
 
             /*
-              Deterministic   correction.    FIXME:  assignment,   not
-              increment  here as a  sum over  cells would  imply, why?
-              Also no dumping factors like above?
+              Deterministic  correction.   Original  version  did  not
+              respect the  damp factors for  this.  FIXME: assignment,
+              not increment here as a sum over cells would imply, why?
             */
             if (c2)
               c2_[i[2]][i[1]][i[0]] =
