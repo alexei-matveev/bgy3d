@@ -262,14 +262,13 @@ void bgy3d_force (State *BHD,
               by the respective factors:
             */
             if (u_ini)
-              u_ini_[i[2]][i[1]][i[0]] +=
+              u_ini_[i[2]][i[1]][i[0]] +=                               \
                 lennard_jones_coulomb_short (r_s, sigma, epsilon, q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
-              f_short_[dim][i[2]][i[1]][i[0]] +=
-                Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
-                Coulomb_short_grad (r_s, r[dim], q2);
+              f_short_[dim][i[2]][i[1]][i[0]] +=                        \
+              lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, q2);
 
             /*
               Deterministic  correction.   Original  version  did  not
