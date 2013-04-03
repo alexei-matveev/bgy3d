@@ -142,7 +142,7 @@ void bgy3d_pair_potential (const DA da, const ProblemData *PD,
           const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
           pot_[i[2]][i[1]][i[0]] +=
-            Lennard_Jones (r_s, epsilon, sigma) + Coulomb_short (r_s, q2);
+            lennard_jones_coulomb_short (r_s, sigma, epsilon, q2);
         }
   DAVecRestoreArray (da, pot, &pot_);
 }
@@ -253,20 +253,26 @@ void bgy3d_force (State *BHD,
 
             const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-            /* Lennard-Jones and Coulomb short potential: */
+            /*
+              Lennard-Jones and Coulomb short potential. Note that the
+              strength of LJ and Coulomb contributions has been scaled
+              by the respective factors:
+            */
             if (u_ini)
               u_ini_[i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones (r_s, epsilon, sigma) +
-                damp * Coulomb_short (r_s, q2);
+                lennard_jones_coulomb_short (r_s, sigma, damp_LJ * epsilon, damp * q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
               f_short_[dim][i[2]][i[1]][i[0]] +=
-                damp_LJ * Lennard_Jones_grad (r_s, r[dim], epsilon, sigma) +
-                damp * Coulomb_short_grad (r_s, r[dim], q2);
+                Lennard_Jones_grad (r_s, r[dim], damp_LJ * epsilon, sigma) +
+                Coulomb_short_grad (r_s, r[dim], damp * q2);
 
-            /* Deterministic   correction.   FIXME:   assignment,  not
-               increment here as a sum over cells would imply, why?*/
+            /*
+              Deterministic   correction.    FIXME:  assignment,   not
+              increment  here as a  sum over  cells would  imply, why?
+              Also no dumping factors like above?
+            */
             if (c2)
               c2_[i[2]][i[1]][i[0]] =
                 exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
