@@ -19,22 +19,62 @@
 #undef qO
 
 
-/*
-  Long range  pair potential Vec uc  is intent(out) here,  same as its
-  FFT  transform uc_fft.  Vec  fc[] is  filled with  the corresponding
-  force derived by means of FFT from the potential uc.
-
-  No side effects.
-*/
-static void ComputeFFTfromCoulomb (State *BHD,
-                                   Vec uc, Vec fc[3], /* intent(out) */
-                                   Vec uc_fft,    /* complex, intent(out) */
-                                   Vec fc_fft[3], /* complex, intent(out) */
-                                   real factor)
+/* Long range pair potential Vec uc_fft is intent(out) here: */
+static void coulomb_long_fft (const State *BHD, Vec uc_fft)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
   const real L = PD->interval[1] - PD->interval[0];
+
+  /* Get local portion of the k-grid */
+  int x[3], n[3], i[3];
+  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+
+  complex ***uc_fft_;
+  DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
+
+   /* loop over local portion of grid */
+  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
+    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
+      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+        {
+          int ic[3];
+
+          /* Take negative frequencies for i > N/2: */
+          FOR_DIM
+            ic[dim] = KFREQ (i[dim], N[dim]);
+
+          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
+            uc_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
+          else
+            {
+              const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
+              const real fac = EPSILON0INV / M_PI / k2;
+
+              /* Potential, complex with zero imaginary part: */
+              uc_fft_[i[2]][i[1]][i[0]] = fac * exp(- k2 * SQR(M_PI) / SQR(G));
+            }
+        }
+  DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
+
+  /*
+    Translate  the Coulomb long  field uc_fft  so that  the real-space
+    representation  is localized at  the grid  center like  other grid
+    representations  and not  at  the grid  corner.   This amounts  to
+    scaling the k-components by a phase factor:
+  */
+  bgy3d_vec_fft_trans (BHD->dc, N, uc_fft);
+}
+
+
+/* Computes FFT of the gradients  from FFT of a scalar.  FIXME: rather
+   these are forces! */
+static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
+{
+  const ProblemData *PD = BHD->PD;
+  const int *N = PD->N;         /* N[3] */
+  const real L = PD->interval[1] - PD->interval[0];
+  const real fac = 2.0 * M_PI / L;
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -56,45 +96,46 @@ static void ComputeFFTfromCoulomb (State *BHD,
           FOR_DIM
             ic[dim] = KFREQ (i[dim], N[dim]);
 
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            {
-              uc_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-              FOR_DIM
-                fc_fft_[dim][i[2]][i[1]][i[0]] = 0; /* complex */
-            }
-          else
-            {
-              const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-              const real fac = EPSILON0INV / M_PI / k2;
-
-              /* Potential, complex with zero imaginary part: */
-              uc_fft_[i[2]][i[1]][i[0]] = factor * fac * exp(- k2 * SQR(M_PI) / SQR(G));
-
-              /* Force, imaginary: */
-              FOR_DIM
-                fc_fft_[dim][i[2]][i[1]][i[0]] = 2.0 * M_PI * ic[dim] / L * (I * uc_fft_[i[2]][i[1]][i[0]]);
-            }
+          /* Force  is purely imaginary  if Vec  uc_fft happens  to be
+             real: */
+          FOR_DIM
+            fc_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] * ((fac * I) * uc_fft_[i[2]][i[1]][i[0]]);
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
     DAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
+}
 
-  /*
-    Translate  the Coulomb  long  field uc_fft  and the  corresponding
-    derivatives so  that the real-space  representations are localized
-    at the grid center like  other grid representations and not at the
-    grid corner.  This amounts to  scaling the k-components by a phase
-    factor:
-  */
-  bgy3d_vec_fft_trans (BHD->dc, N, uc_fft);
-  FOR_DIM
-    bgy3d_vec_fft_trans (BHD->dc, N, fc_fft[dim]);
+
+/*
+  Long range  pair potential Vec uc  is intent(out) here,  same as its
+  FFT  transform uc_fft.  Vec  fc[] is  filled with  the corresponding
+  force derived by means of FFT from the potential uc.
+
+  No side effects.
+*/
+static void ComputeFFTfromCoulomb (State *BHD,
+                                   Vec uc, Vec fc[3], /* intent(out) */
+                                   Vec uc_fft,    /* complex, intent(out) */
+                                   Vec fc_fft[3], /* complex, intent(out) */
+                                   real factor)
+{
+  /* Potential of a unit charge located at the grid center: */
+  coulomb_long_fft (BHD, uc_fft);
+
+  VecScale (uc_fft, factor);
+
+  /* Corresponding forces: */
+  grad_fft (BHD, uc_fft, fc_fft);
+
+  const ProblemData *PD = BHD->PD;
+  const real L = PD->interval[1] - PD->interval[0];
 
   /* FFT^-1 potential ... */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
   VecScale (uc, 1./L/L/L);
 
-  /* ... and the corresponding force: */
+  /* FFT^-1 of the corresponding force: */
   FOR_DIM
     {
       MatMultTranspose (BHD->fft_mat, fc_fft[dim], fc[dim]);
