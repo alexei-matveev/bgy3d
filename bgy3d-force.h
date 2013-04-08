@@ -17,7 +17,8 @@ void bgy3d_force (State *BHD,
                   Vec u2, Vec u2_fft,
                   real damp, real damp_LJ);
 
-static inline real Lennard_Jones (real r, real epsilon, real sigma)
+static inline real
+lennard_jones (real r, real epsilon, real sigma)
 {
   const real sr = sigma / r;
   const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
@@ -30,7 +31,8 @@ static inline real Lennard_Jones (real r, real epsilon, real sigma)
     return re;
 }
 
-static inline real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma)
+static inline real
+lennard_jones_grad (real r, real xr, real epsilon, real sigma)
 {
   if (xr == 0.0)
     return 0.0;
@@ -52,7 +54,8 @@ static inline real Lennard_Jones_grad (real r, real xr, real epsilon, real sigma
 
 /* This  one  is only  used  for  some  kind of  pre-conditioning,  or
    regularization inside the solvent excluded volume: */
-static inline real LJ_repulsive (real r, real epsilon, real sigma)
+static inline real
+lennard_jones_repulsive (real r, real epsilon, real sigma)
 {
   const real sr = sigma / r;
   const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
@@ -67,7 +70,8 @@ static inline real LJ_repulsive (real r, real epsilon, real sigma)
 
 /* NOTE: so far  in all cases the returned  result contains the factor
    q2. */
-static inline real Coulomb_short (real r, real q2, real G)
+static inline real
+coulomb_short (real r, real q2, real G)
 {
   if (r == 0.0)
     return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
@@ -83,7 +87,8 @@ static inline real Coulomb_short (real r, real q2, real G)
     }
 }
 
-static inline real Coulomb_short_grad (real r, real rx, real q2, real G)
+static inline real
+coulomb_short_grad (real r, real rx, real q2, real G)
 {
   if (rx == 0)
     return 0.0;
@@ -106,14 +111,15 @@ static inline real Coulomb_short_grad (real r, real rx, real q2, real G)
 /*
   In the most general case
 
-  Coulomb_long (r, 1.0, G) = (1/ε₀) erf (G r) / r
+  coulomb_long (r, 1.0, G) = (1/ε₀) erf (G r) / r
 
   An  extra   argument  q2  is   the  overall  scaling   factor.   The
   corresponding Fourier transform is
 
-  Coulomb_long_Fourier (k, 1.0, G) = (4π/ε₀) exp (- k² / 4G²)
+  coulomb_long_Fourier (k, 1.0, G) = (4π/ε₀) exp (- k² / 4G²)
 */
-static inline real Coulomb_long_Fourier (real k, real q2, real G)
+static inline real
+coulomb_long_fourier (real k, real q2, real G)
 {
   const real k2 = SQR (k);
 
@@ -124,7 +130,8 @@ static inline real Coulomb_long_Fourier (real k, real q2, real G)
 }
 
 
-static inline real Coulomb_long (real r, real q2, real G)
+static inline real
+coulomb_long (real r, real q2, real G)
 {
    if (r == 0.0)
      return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
@@ -140,7 +147,8 @@ static inline real Coulomb_long (real r, real q2, real G)
      }
 }
 
-static inline real Coulomb_long_grad (real r, real rx, real q2, real G)
+static inline real
+coulomb_long_grad (real r, real rx, real q2, real G)
 {
   if (r == 0.0)
     return 0.0;
@@ -156,7 +164,8 @@ static inline real Coulomb_long_grad (real r, real rx, real q2, real G)
     }
 }
 
-static inline real Coulomb (real r, real q2)
+static inline real
+coulomb (real r, real q2)
 {
    if (r == 0.0)
      return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
@@ -171,7 +180,8 @@ static inline real Coulomb (real r, real q2)
      }
 }
 
-static inline real Coulomb_grad (real r, real rx, real q2)
+static inline real
+coulomb_grad (real r, real rx, real q2)
 {
   if (rx == 0)
     return 0;
@@ -207,9 +217,9 @@ lennard_jones_coulomb_short (real r,
     of  solvent-  and  solute  site  charges  q,  is  handled  by  the
     elementary functions:
   */
-  return                                        \
-    Lennard_Jones (r, epsilon, sigma) +         \
-    Coulomb_short (r, charge, G);
+  return
+    lennard_jones (r, epsilon, sigma) +
+    coulomb_short (r, charge, G);
 }
 
 
@@ -218,7 +228,7 @@ lennard_jones_coulomb_short_grad (real r, real rx,
                                   real sigma, real epsilon,
                                   real G, real charge)
 {
-  return                                                \
-    Lennard_Jones_grad (r, rx, epsilon, sigma) +        \
-    Coulomb_short_grad (r, rx, charge, G);
+  return
+    lennard_jones_grad (r, rx, epsilon, sigma) +
+    coulomb_short_grad (r, rx, charge, G);
 }

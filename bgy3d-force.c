@@ -53,7 +53,7 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
             interesting case the Coulomb long is ~k^2 anyway:
           */
           uc_fft_[i[2]][i[1]][i[0]] =
-            Coulomb_long_Fourier ((2 * M_PI / L) * sqrt (k2), 1.0, G);
+            coulomb_long_fourier ((2 * M_PI / L) * sqrt (k2), 1.0, G);
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
 
@@ -323,7 +323,7 @@ void bgy3d_force (State *BHD,
             */
             if (c2)
               c2_[i[2]][i[1]][i[0]] =
-                exp (-beta * LJ_repulsive (r_s, epsilon, sigma));
+                exp (-beta * lennard_jones_repulsive (r_s, epsilon, sigma));
           }
 
   if (u_ini)
