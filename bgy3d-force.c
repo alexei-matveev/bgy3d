@@ -5,7 +5,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* struct Site */
-#include "bgy3d-solvents.h"     /* needs Site */
+#include "bgy3d-solvents.h"     /* G_COULOMB_INVERSE_RANGE, needs Site */
 #include "bgy3d-vec.h"          /* bgy3d_vec_map*() */
 #include <complex.h>            /* after fftw.h */
 #include "bgy3d-force.h"        /* Coulomb_short() etc. */
@@ -20,7 +20,7 @@
 
 
 /* Long range pair potential Vec uc_fft is intent(out) here: */
-static void coulomb_long_fft (const State *BHD, Vec uc_fft)
+static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* N[3] */
@@ -121,8 +121,10 @@ static void ComputeFFTfromCoulomb (State *BHD,
                                    Vec fc_fft[3], /* complex, intent(out) */
                                    real factor)
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
+
   /* Potential of a unit charge located at the grid center: */
-  coulomb_long_fft (BHD, uc_fft);
+  coulomb_long_fft (BHD, G, uc_fft);
 
   VecScale (uc_fft, factor);
 
@@ -150,6 +152,8 @@ void bgy3d_pair_potential (const DA da, const ProblemData *PD,
                            const Site a, const Site b, /* by value? */
                            Vec pot)
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
+
   /* Pair   interaction  parameters:  geometric   average,  arithmetic
      average, and charge product. Site coordinates are not used. */
   const real epsilon = sqrt (a.epsilon * b.epsilon);
@@ -184,7 +188,7 @@ void bgy3d_pair_potential (const DA da, const ProblemData *PD,
           const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
           pot_[i[2]][i[1]][i[0]] +=
-            lennard_jones_coulomb_short (r_s, sigma, epsilon, q2);
+            lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
         }
   DAVecRestoreArray (da, pot, &pot_);
 }
@@ -198,6 +202,7 @@ void bgy3d_force (State *BHD,
                   Vec u2, Vec u2_fft,
                   real damp, real damp_LJ)
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
   /*
     Pair   interaction  parameters:   arithmetic   average,  geometric
     average, and  charge product.   Parameters that define  the energy
@@ -305,12 +310,12 @@ void bgy3d_force (State *BHD,
             */
             if (u_ini)
               u_ini_[i[2]][i[1]][i[0]] +=                               \
-                lennard_jones_coulomb_short (r_s, sigma, epsilon, q2);
+                lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
               f_short_[dim][i[2]][i[1]][i[0]] +=                        \
-              lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, q2);
+              lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, G, q2);
 
             /*
               Deterministic  correction.   Original  version  did  not

@@ -8,7 +8,6 @@
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
 #include "bgy3d-solutes.h"      /* struct Site */
-#define G 1.2
 #include "bgy3d-force.h"        /* bgy3d_pair_potential() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */

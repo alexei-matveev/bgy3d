@@ -27,7 +27,7 @@
 #define r_HO  1.1
 
 /* smoothing parameter */
-#define G   1.2 //1.2
+#define G_COULOMB_INVERSE_RANGE 1.2 //1.2
 
 
 
@@ -52,7 +52,7 @@
 #define r_HO  1.257 //1.3
 
 /* smoothing parameter */
-#define G   1.2 //1.2
+#define G_COULOMB_INVERSE_RANGE 1.2 //1.2
 
 
 
@@ -90,7 +90,7 @@
 #define r_HO  0.9572
 
 /* smoothing parameter */
-#define G   1.2 //1.2
+#define G_COULOMB_INVERSE_RANGE 1.2 //1.2
 
 #endif
 
@@ -119,7 +119,7 @@
 #define r_HO  1.56
 
 /* smoothing parameter */
-#define G   0.8 //1.2
+#define G_COULOMB_INVERSE_RANGE 0.8 //1.2
 
 
 #endif
@@ -148,7 +148,7 @@
 #define r_HO  1.57
 
 /* smoothing parameter */
-#define G   0.8 //1.2
+#define G_COULOMB_INVERSE_RANGE 0.8 //1.2
 
 
 #endif
@@ -177,7 +177,7 @@
 #define r_HO  1.54
 
 /* smoothing parameter */
-#define G   0.8 //1.2
+#define G_COULOMB_INVERSE_RANGE 0.8 //1.2
 
 
 #endif
@@ -213,7 +213,7 @@
 #define r_HO2
 
 /* smoothing parameter */
-#define G   1.2 //1.2
+#define G_COULOMB_INVERSE_RANGE 1.2 //1.2
 
 #endif
 

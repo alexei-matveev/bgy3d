@@ -4,7 +4,6 @@
 /*==========================================================*/
 
 // #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
-// #include "bgy3d-solvents.h"     /* G */
 
 /* Computes a pair potential. See also bgy3d_force(). */
 void bgy3d_pair_potential (const DA da, const ProblemData *PD,
@@ -66,12 +65,9 @@ static inline real LJ_repulsive (real r, real epsilon, real sigma)
     return re;
 }
 
-/* FIXME:   this  is  ugly,   the  code   uses  constant   G  #defined
-   elsewhere: */
-#ifdef G
 /* NOTE: so far  in all cases the returned  result contains the factor
    q2. */
-static inline real Coulomb_short (real r, real q2)
+static inline real Coulomb_short (real r, real q2, real G)
 {
   if (r == 0.0)
     return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
@@ -87,7 +83,7 @@ static inline real Coulomb_short (real r, real q2)
     }
 }
 
-static inline real Coulomb_short_grad (real r, real rx, real q2)
+static inline real Coulomb_short_grad (real r, real rx, real q2, real G)
 {
   if (rx == 0)
     return 0.0;
@@ -109,7 +105,7 @@ static inline real Coulomb_short_grad (real r, real rx, real q2)
 /* Coulomb_long  (r, 1.0) =  EPSILON0INV *  erf (G  * r)  / r  in most
    general  case.   An  extra  argument  q2  is  the  overall  scaling
    factor. */
-static inline real Coulomb_long (real r, real q2)
+static inline real Coulomb_long (real r, real q2, real G)
 {
    if (r == 0.0)
      return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
@@ -125,7 +121,7 @@ static inline real Coulomb_long (real r, real q2)
      }
 }
 
-static inline real Coulomb_long_grad (real r, real rx, real q2)
+static inline real Coulomb_long_grad (real r, real rx, real q2, real G)
 {
   if (r == 0.0)
     return 0.0;
@@ -140,7 +136,6 @@ static inline real Coulomb_long_grad (real r, real rx, real q2)
         return re;
     }
 }
-#endif  /* ifdef G */
 
 static inline real Coulomb (real r, real q2)
 {
@@ -184,7 +179,8 @@ static inline real Coulomb_grad (real r, real rx, real q2)
  */
 static inline real
 lennard_jones_coulomb_short (real r,
-                             real sigma, real epsilon, real charge)
+                             real sigma, real epsilon,
+                             real G, real charge)
 {
   /*
     1.   Lennard-Jones  and  2.    Coulomb,  short  range  part.   For
@@ -194,15 +190,16 @@ lennard_jones_coulomb_short (real r,
   */
   return                                        \
     Lennard_Jones (r, epsilon, sigma) +         \
-    Coulomb_short (r, charge);
+    Coulomb_short (r, charge, G);
 }
 
 
 static inline real
 lennard_jones_coulomb_short_grad (real r, real rx,
-                                  real sigma, real epsilon, real charge)
+                                  real sigma, real epsilon,
+                                  real G, real charge)
 {
   return                                                \
     Lennard_Jones_grad (r, rx, epsilon, sigma) +        \
-    Coulomb_short_grad (r, rx, charge);
+    Coulomb_short_grad (r, rx, charge, G);
 }

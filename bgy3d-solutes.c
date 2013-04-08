@@ -19,8 +19,17 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-poisson.h"      /* bgy3d_poisson() */
 #include "bgy3d-solutes.h"      /* struct Site */
-#include "bgy3d-solvents.h"     /* #define G for gf_density() */
-#include "bgy3d-force.h"        /* Coulomb_short(), refers to G */
+#include "bgy3d-solvents.h"     /* G_COULOMB_INVERSE_RANGE */
+#include "bgy3d-force.h"        /* lennard_jones_coulomb_short() */
+
+/* FIXME: bgy3d-solvents.h pollutes the namespace: */
+#undef sH
+#undef eH
+#undef qH
+#undef sO
+#undef eO
+#undef qO
+
 
 /* Solute is  isomorphic to an  array of sites.  Consider  handling it
    like that in the code.   Structs with flexible array members may be
@@ -290,6 +299,8 @@ static void grid_map (DA da, const ProblemData *PD,
 */
 static real ljc (const Site *A, int n, const Site S[n])
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
+
   /* Sum force field contribution from all solute sites: */
   real field = 0.0;
 
@@ -308,7 +319,7 @@ static real ljc (const Site *A, int n, const Site S[n])
                        SQR(A->x[2] - B->x[2]));
 
       /* Lennard-Jones + Coulomb, short range part: */
-      field += lennard_jones_coulomb_short (r_s, s2, e2, q2);
+      field += lennard_jones_coulomb_short (r_s, s2, e2, G, q2);
     }
 
   return field;
@@ -328,7 +339,8 @@ static real ljc (const Site *A, int n, const Site S[n])
 */
 static void gf_density (int m, const real x[m][3], /* coordinates */
                         real rho[m],            /* output densities */
-                        int n, const Site S[n]) /* solute description */
+                        int n, const Site S[n], /* solute description */
+                        real G)                 /* inverse coulomb range */
 {
   /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
      a property of the (solute) site  in the same way as the charge of
@@ -478,6 +490,8 @@ void bgy3d_solute_field (const State *BHD,
                          Vec uc, Vec uc_rho,           /* out, optional */
                          void (*density)(int k, const real x[k][3], real rho[k]))
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
+
   PetscPrintf (PETSC_COMM_WORLD, "Computing solute data\n");
 
 
@@ -558,7 +572,7 @@ void bgy3d_solute_field (const State *BHD,
         /* Bind solute description  from the enclosing scope.  Compute
            the  (positive)   charge  density  of  (gaussian-broadened)
            cores: */
-        gf_density (m, x, rho, n, solute);
+        gf_density (m, x, rho, n, solute, G);
 
         /* If not NULL, add charge density of electrons: */
         if (density)
