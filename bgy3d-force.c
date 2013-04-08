@@ -47,14 +47,13 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
 
-          real fac;
-          if (unlikely (k2 == 0))
-            fac = 0.0;         /* 1/k2 is undefined */
-          else
-            fac = (EPSILON0INV / M_PI * SQR(L)) / k2;
-
-          /* Potential, complex with zero imaginary part: */
-          uc_fft_[i[2]][i[1]][i[0]] = fac * exp(-k2 * (SQR(M_PI) / (SQR(L) * SQR(G))));
+          /*
+            Potential,  a  complex number  with  zero imaginary  part.
+            FIXME:  we  take a  square  root  here,  but in  the  most
+            interesting case the Coulomb long is ~k^2 anyway:
+          */
+          uc_fft_[i[2]][i[1]][i[0]] =
+            Coulomb_long_Fourier ((2 * M_PI / L) * sqrt (k2), 1.0, G);
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
 

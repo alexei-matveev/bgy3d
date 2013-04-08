@@ -102,9 +102,28 @@ static inline real Coulomb_short_grad (real r, real rx, real q2, real G)
     }
 }
 
-/* Coulomb_long  (r, 1.0) =  EPSILON0INV *  erf (G  * r)  / r  in most
-   general  case.   An  extra  argument  q2  is  the  overall  scaling
-   factor. */
+
+/*
+  In the most general case
+
+  Coulomb_long (r, 1.0, G) = (1/ε₀) erf (G r) / r
+
+  An  extra   argument  q2  is   the  overall  scaling   factor.   The
+  corresponding Fourier transform is
+
+  Coulomb_long_Fourier (k, 1.0, G) = (4π/ε₀) exp (- k² / 4G²)
+*/
+static inline real Coulomb_long_Fourier (real k, real q2, real G)
+{
+  const real k2 = SQR (k);
+
+  if (unlikely (k2 == 0.0))
+    return 0.0;         /* 1/k2 is undefined */
+  else
+    return (4 * M_PI * EPSILON0INV) * q2 * exp (-k2 / (4 * SQR (G))) / k2;
+}
+
+
 static inline real Coulomb_long (real r, real q2, real G)
 {
    if (r == 0.0)
