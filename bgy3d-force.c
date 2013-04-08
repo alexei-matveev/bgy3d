@@ -44,16 +44,17 @@ static void coulomb_long_fft (const State *BHD, Vec uc_fft)
           FOR_DIM
             ic[dim] = KFREQ (i[dim], N[dim]);
 
-          if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-            uc_fft_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-          else
-            {
-              const real k2 = (SQR(ic[2]) + SQR(ic[1]) + SQR(ic[0])) / SQR(L);
-              const real fac = EPSILON0INV / M_PI / k2;
+          /* FIXME: integer sum of squares will overflow for N >> 20000! */
+          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
 
-              /* Potential, complex with zero imaginary part: */
-              uc_fft_[i[2]][i[1]][i[0]] = fac * exp(- k2 * SQR(M_PI) / SQR(G));
-            }
+          real fac;
+          if (unlikely (k2 == 0))
+            fac = 0.0;         /* 1/k2 is undefined */
+          else
+            fac = (EPSILON0INV / M_PI * SQR(L)) / k2;
+
+          /* Potential, complex with zero imaginary part: */
+          uc_fft_[i[2]][i[1]][i[0]] = fac * exp(-k2 * (SQR(M_PI) / (SQR(L) * SQR(G))));
         }
   DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
 
