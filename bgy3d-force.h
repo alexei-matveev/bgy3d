@@ -141,7 +141,12 @@ coulomb_long_fourier (real k, real q2, real G)
 }
 
 
-static inline real
+/*
+  FIXME: Functions marked as deprecated are actually unused. They also
+  should not be used as  long-range interactions are best specified on
+  the k-grid and not on the r-grid.
+*/
+static inline real deprecated
 coulomb_long (real r, real q2, real G)
 {
    if (r == 0.0)
@@ -158,7 +163,7 @@ coulomb_long (real r, real q2, real G)
      }
 }
 
-static inline real
+static inline real deprecated
 coulomb_long_grad (real r, real rx, real q2, real G)
 {
   if (r == 0.0)
@@ -175,7 +180,7 @@ coulomb_long_grad (real r, real rx, real q2, real G)
     }
 }
 
-static inline real
+static inline real deprecated
 coulomb (real r, real q2)
 {
    if (r == 0.0)
@@ -191,7 +196,7 @@ coulomb (real r, real q2)
      }
 }
 
-static inline real
+static inline real deprecated
 coulomb_grad (real r, real rx, real q2)
 {
   if (rx == 0)
