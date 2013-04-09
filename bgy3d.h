@@ -28,7 +28,9 @@
 #ifndef BGY3d_H
 #define BGY3d_H
 
+/* This macro is used for both reals and integers: */
 #define SQR(a)   ((a)*(a))
+
 #define FOR_DIM for(int dim = 0; dim < 3; dim++)
 
 /*
