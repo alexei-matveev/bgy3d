@@ -111,12 +111,23 @@ coulomb_short_grad (real r, real rx, real q2, real G)
 /*
   In the most general case
 
-  coulomb_long (r, 1.0, G) = (1/ε₀) erf (G r) / r
+    coulomb_long (r, 1.0, G) = (1/ε₀) erf (G r) / r
 
   An  extra   argument  q2  is   the  overall  scaling   factor.   The
   corresponding Fourier transform is
 
-  coulomb_long_Fourier (k, 1.0, G) = (4π/ε₀) exp (- k² / 4G²)
+    coulomb_long_fourier (k, 1.0, G) = (4π/ε₀) exp (- k² / 4G²) / k²
+
+  Note that the long-range Coulomb is regular in real space:
+
+                            2           4
+    erf(x) / x = 2 / √π - 2x / 3√π + O(x )
+
+  So that for a typical value of G = 1.2 the long range potential at r
+  = 0  is 331.84164 * 1.2 *  1.12837916709551 ~ 449 kcal  for two unit
+  charges. By doing a finite-size FFT of the k-gitter appriximation of
+  the  above  Fourier representation  you  will  likely get  something
+  different.
 */
 static inline real
 coulomb_long_fourier (real k, real q2, real G)
