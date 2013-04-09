@@ -4,6 +4,8 @@
 /*==========================================================*/
 
 // #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
+#define CUTOFF 1.0e+8           /* was ealrier #defined in bgy3d.h */
+
 
 /* Computes a pair potential. See also bgy3d_force(). */
 void bgy3d_pair_potential (const DA da, const ProblemData *PD,

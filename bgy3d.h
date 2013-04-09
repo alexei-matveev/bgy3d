@@ -90,8 +90,6 @@
 */
 #define BOHR 0.52917706
 
-#define CUTOFF 1.0e+8
-
 /*
   Pick one harmonic  among the many aliased ones  with the integer FFT
   frequencies k + m * N  and arbitrary m.  Effectively this is used to
