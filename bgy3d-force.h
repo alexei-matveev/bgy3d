@@ -22,6 +22,8 @@ void bgy3d_force (State *BHD,
 static inline real
 lennard_jones (real r, real epsilon, real sigma)
 {
+  if (unlikely (r == 0.0 && epsilon == 0.0))
+    return 0.0;                 /* 0/0 == nan */
   const real sr = sigma / r;
   const real sr6 = SQR (sr) * SQR (sr) * SQR (sr);
 
