@@ -144,8 +144,8 @@ make-summary = $(SHELL) ./summary.sh
 %.m: %.bin
 	$(TOP)/guile/runbgy.scm dump $(<) > $(@)
 
-# This pops a graphics window for  a second. Is there a way to disable
-# that?
+# This may pop  a graphics window for a second,  unless you use figure
+# ("visible", "off").
 %.m.png: %.m
 	$(TOP)/octave/bgy3d_plot.m $(<)
 

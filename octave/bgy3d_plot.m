@@ -46,6 +46,7 @@ function bgy3d_plot (path)
   ## This may not be divisible by two:
   N2 = int32(N) / int32(2);
 
+  figure ("visible", "off");
   ## Contourf plot bgy vectors:
   ## Cut the yz plane, squeeze(v(x0, 1:y, 1:z)) actually get vx(1:z,
   ## 1:y) at plane x = x0
