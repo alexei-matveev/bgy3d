@@ -183,7 +183,8 @@ void bgy3d_problem_data_print (const ProblemData *PD)
   PetscPrintf (PETSC_COMM_WORLD, "h = %g x %g x %g\n", PD->h[0], PD->h[1], PD->h[2]);
   PetscPrintf (PETSC_COMM_WORLD, "β = %g (%5.1f K)\n", PD->beta, 1.0 / PD->beta / KBOLTZMANN);
   PetscPrintf (PETSC_COMM_WORLD, "ρ = %g (%g per cell)\n", PD->rho, PD->rho * L * L * L);
-  PetscPrintf (PETSC_COMM_WORLD, "λ = %g\n", PD->lambda);
+  PetscPrintf (PETSC_COMM_WORLD, "a = %g (Seitz radius)\n", pow ((4 * M_PI / 3) * PD->rho, -1.0 / 3.0));
+  PetscPrintf (PETSC_COMM_WORLD, "λ = %g (mixing ratio)\n", PD->lambda);
   PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);
   PetscPrintf (PETSC_COMM_WORLD, "max-iter = %d\n", PD->max_iter);
   PetscPrintf (PETSC_COMM_WORLD, "zpad = %g\n", PD->zpad);
