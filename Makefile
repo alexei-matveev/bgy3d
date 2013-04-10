@@ -64,6 +64,7 @@ srcdir = .
 # Compiler and compiler options
 CC       = gcc
 CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS) $(if $(shared), -fPIC)
+FFLAGS   = -Wall
 LDFLAGS  =
 
 
@@ -140,6 +141,8 @@ libbgy3d.so: $(libbgy3d.a)
 bgy3d: $(OBJECTS) $(if $(shared), libbgy3d.so, libbgy3d.a)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) -L. -lbgy3d $(LIBS)
 
+rism: rism.o $(if $(shared), libbgy3d.so, libbgy3d.a)
+	$(FC) $(FFLAGS) $(LDFLAGS) -o $@ rism.o -L. -lbgy3d $(LIBS)
 #
 # Dont call the target "test" because we have a directory called so:
 #
@@ -177,6 +180,9 @@ include $(libbgy3d.a:.o=.d)
 # The next two rules are fairly portable across compilers.
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -o $(*).o -c $(<)
+
+%.o: %.f90
+	$(FC) $(FFLAGS) -o $(*).o -c $(<)
 
 # node capital D here, this rule has no effect:
 %.D: %.c
