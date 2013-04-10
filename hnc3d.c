@@ -419,7 +419,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* Flip this to switch between c and t as primary variables: true =>
      c, false => t: */
-  const bool yes = true;
+  const bool yes = false;
 
   if (yes)
     PetscPrintf (PETSC_COMM_WORLD, "(iterations for c)\n");
