@@ -15,13 +15,18 @@ program rism
      end subroutine rism_dst
   end interface
 
+  real(rk), parameter :: pi = 4 * atan (1.0_rk)
+
   integer :: i
-
-  call rism1d (rho=0.5d0, beta=1.0d0, rmax=10.0d0, n=32)
-
-  do i = 1, 10**4
+  do i = 1, 10**0
      call test_dst (2**12)
   end do
+  call test_ft (rmax=10.d0, n=2**14)
+  ! stop
+
+  ! FIXME: why 4π?
+  ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=10.0d0, n=256)
+  call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**10)
 
 contains
 
@@ -31,16 +36,21 @@ contains
     integer, intent(in) :: n
     ! *** end of interface ***
 
-    real(rk), parameter :: pi = 4 * atan (1.0_rk)
     real(rk), parameter :: half = 0.5, alpha = 0.02
-    real(rk) :: r(n), k(n), v(n), t(n), c(n), t1(n)
-    real(rk) :: diff, factor
+    real(rk) :: r(n), k(n), v(n), t(n), c(n), t1(n), g(n)
+    real(rk) :: diff, dr, dk
     integer :: i, iter
     logical :: converged
 
-    forall (i = 1:n) r(i) = (i - half) * rmax / n
-    forall (i = 1:n) k(i) = (i - half) * pi / rmax
+    call print_info (rho=rho, beta=beta)
 
+    ! dr * dk = 2π/2n:
+    dr = rmax / n
+    dk = pi / rmax
+    forall (i = 1:n)
+       r(i) = (i - half) * dr
+       k(i) = (i - half) * dk
+    end forall
 
     ! LJ potential, sigma=1, epsilon=1:
     v = lj (r)
@@ -56,30 +66,31 @@ contains
 
        c = closure_hnc (beta, v, t)
 
-       ! Forward DST, unnormalized:
-       c = dst (r * c) / k
+       ! Forward FT via DST:
+       c = dst (r * c) / k * (dr / sqrt (2 * pi))
 
-       ! OZ equation, convolution integral. FIXME: what is the correct
-       ! value of factor here?
-       factor = 1.0
-       stop "FIX the factor here!"
-       t1 = oz_equation_c_t (rho, c * factor)
+       ! OZ equation, involves "convolutions", take care of the
+       ! normalization here:
+       t1 = oz_equation_c_t (rho, c)
 
-       ! Inverse DST, renormalized:
-       t1 = dst (k * t1) / r / (2 * n)
+       ! Inverse FT via DST:
+       t1 = dst (k * t1) / r * (dk / sqrt (2 * pi))
 
        diff = maxval (abs (t1 - t))
-       converged = (diff < 1.0e-10)
+       converged = (diff < 1.0e-12)
 
        t = alpha * t1 + (1 - alpha) * t
-       print *, "iter=", iter, "diff=", diff
+       print *, "# iter=", iter, "diff=", diff
     end do
 
     ! It was overwritten with c(k):
     c = closure_hnc (beta, v, t)
+    g = 1 + c + t
 
+    print *, "# rho=", rho, "beta=", beta, "n=", n
+    print *, "# r, v, t, c, g"
     do i = 1, n
-       print *, t(i), c(i)
+       print *, r(i), v(i), t(i), c(i), g(i)
     enddo
   end subroutine rism1d
 
@@ -124,8 +135,8 @@ contains
     real(rk) :: t
     ! *** end of interface ***
 
-    ! t = c / (1.0 - rho * c) - c
-    t = rho * (c * c) / (1.0 - rho * c)
+    ! Alternatively: t = c / (1 - rho * c) - c
+    t = rho * (c * c) / (1 - rho * c)
   end function oz_equation_c_t
 
 
@@ -142,7 +153,7 @@ contains
 
     sr6 = 1 / r**6
 
-    f = 4 * sr6 * ( sr6 - 1)
+    f = 4 * sr6 * (sr6 - 1)
   end function lj
 
 
@@ -162,6 +173,19 @@ contains
   end function dst
 
 
+  function ndst (a) result (b)
+    implicit none
+    real(rk), intent(in) :: a(:)
+    real(rk) :: b(size (a))
+    ! *** end of interface ***
+
+    real(rk) :: norm
+
+    norm = 2 * size (b)         ! cast to real
+    b = dst (a) / sqrt (norm)
+  end function ndst
+
+
   subroutine test_dst (n)
     implicit none
     integer, intent(in) :: n
@@ -175,7 +199,122 @@ contains
     ! RODFT11 (DST-IV) is self inverse up to a normalization factor:
     if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
        print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
-       stop "does not match"
+       stop "unnormalized dst does not match"
+    endif
+
+    if (maxval (abs (a - ndst (ndst (a)))) > 1.0e-10) then
+       print *, "diff=", maxval (abs (a - ndst (ndst (a))))
+       stop "normalized does not match"
     endif
   end subroutine test_dst
+
+  subroutine test_ft (rmax, n)
+    implicit none
+    integer, intent(in) :: n
+    real(rk), intent(in) :: rmax
+    ! *** end of interface ***
+
+    real(rk) :: r(n), k(n), f(n), g(n), h(n)
+    real(rk) :: dr, dk
+    integer :: i
+
+    !
+    ! The 3d analytical unitary FT of the function
+    !
+    !   f = exp(-r²)
+    !
+    ! is the function
+    !
+    !   g = exp(-k²/4), FIXME!
+    !
+    dr = rmax / n
+    dk = pi / rmax
+    forall (i = 1:n)
+       r(i) = (i - 0.5) * dr
+       k(i) = (i - 0.5) * dk
+    end forall
+
+    ! Gaussian:
+    f = exp (-r**2 / 2)
+
+    ! L2-normalized:
+    f = f / sqrt (sum ((r * f)**2) * 4 * pi * dr)
+
+    ! Unitary forward transform:
+    g = dr * dst (r * f) / k / sqrt (2 * pi)
+
+    ! Unitary backward transform:
+    h = dk * dst (k * g) / r / sqrt (2 * pi)
+
+    print *, "# int(f)=", sum ((r * f)**2) * 4 * pi * dr
+    print *, "# int(g)=", sum ((k * g)**2) * 4 * pi * dk
+    print *, "# int(h)=", sum ((r * h)**2) * 4 * pi * dr
+    print *, "# |f - h|=", maxval (abs (f - h))
+    print *, "# sigma(f)=", sum (r**2 * (r * f)**2) * 4 * pi * dr
+    print *, "# sigma(g)=", sum (k**2 * (k * g)**2) * 4 * pi * dk
+
+    ! print *, "# n=", n
+    ! print *, "# r, f, k, g"
+    ! do i = 1, n
+    !    print *, r(i), f(i), k(i), g(i)
+    ! enddo
+  end subroutine test_ft
+
+  subroutine print_info (rho, beta)
+    !
+    ! van der Hoef (Ref. [6] Eqs. 25 and 26):
+    !
+    !          -1/4                          2         3         4         5
+    ! ρ      =β    [0.92302-0.09218β+0.62381β -0.82672β +0.49124β -0.10847β ]
+    !  solid
+    !          -1/4                          2         3         4         5
+    ! ρ      =β    [0.91070-0.25124β+0.85861β -1.08918β +0.63932β -0.14433β ]
+    !  liquid
+    !
+    ! Mastny and de Pablo (Ref [7] Eqs. 20 and 21):
+    !
+    !          -1/4                             2          3          4          5
+    ! ρ      =β    [0.908629-0.041510β+0.514632β -0.708590β +0.428351β -0.095229β ]
+    !  solid
+    !          -1/4                          2         3         4         5
+    ! ρ      =β    [0.90735-0.27120β+0.91784β -1.16270β +0.68012β -0.15284β ]
+    !  liquid
+    !
+    implicit none
+    real(rk), intent(in) :: rho, beta
+    ! *** end of interface ***
+
+    real(rk), parameter :: psol_hoef(6) = [0.92302d0, -0.09218d0, +0.62381d0, -0.82672d0, +0.49124d0, -0.10847d0]
+    real(rk), parameter :: pliq_hoef(6) = [0.91070d0, -0.25124d0, +0.85861d0, -1.08918d0, +0.63932d0, -0.14433d0]
+    real(rk), parameter :: psol_mast(6) = [0.908629d0, -0.041510d0, +0.514632d0, -0.708590d0, +0.428351d0, -0.095229d0]
+    real(rk), parameter :: pliq_mast(6) = [0.90735d0, -0.27120d0, +0.91784d0, -1.16270d0, +0.68012d0, -0.15284d0]
+
+    print *, "# rho =", rho, "rs =", (4 * pi * rho / 3)**(-1d0/3d0)
+    print *, "# beta =", beta, "T =", 1 / beta
+    print *, "#"
+    print *, "# At this temperature ..."
+    print *, "#"
+    print *, "# According to Hoef"
+    print *, "# rho solid  =", beta**(-0.25d0) * poly (psol_hoef, beta)
+    print *, "# rho liquid =", beta**(-0.25d0) * poly (pliq_hoef, beta)
+    print *, "#"
+    print *, "# According to Mastny and de Pablo"
+    print *, "# rho solid  =", beta**(-0.25d0) * poly (psol_mast, beta)
+    print *, "# rho liquid =", beta**(-0.25d0) * poly (pliq_mast, beta)
+    print *, "#"
+  end subroutine print_info
+
+  function poly (p, x) result (y)
+    implicit none
+    real(rk), intent(in) :: p(0:), x
+    real(rk) :: y
+    ! *** end of interface ***
+
+    integer :: n
+
+    y = 0.0
+    do n = 0, size (p) - 1
+       y = y + p(n) * x**n
+    enddo
+  end function poly
 end program
