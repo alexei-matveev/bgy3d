@@ -23,6 +23,22 @@ program rism
 
 contains
 
+  elemental function lj (r) result (f)
+    !
+    ! To be called as in eps * lj (r / sigma)
+    !
+    implicit none
+    real(rk), intent(in) :: r   ! r / sigma, in general
+    real(rk) :: f
+    ! *** end of interfce ***
+
+    real(rk) :: sr6
+
+    sr6 = 1 / r**6
+
+    f = 4 * sr6 * ( sr6 - 1)
+  end function lj
+
   function dst (a) result (b)
     use iso_c_binding, only: c_size_t
     implicit none
@@ -46,8 +62,12 @@ contains
     real(RK) :: a(n)
 
     call random_number (a)
+    a = lj (a + 0.5)
 
-    ! RODFT11 (DST-IV) is self inverse up to this normalization factor:
-    if (maxval (a - dst (dst (a)) / (2 * n)) > 1.0e-14) stop "does not match"
+    ! RODFT11 (DST-IV) is self inverse up to a normalization factor:
+    if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
+       print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
+       stop "does not match"
+    endif
   end subroutine test_dst
 end program
