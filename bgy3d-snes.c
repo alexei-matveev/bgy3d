@@ -101,7 +101,14 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x)
     SNESGetKSP (snes, &ksp);    /* no need to destroy, apparently */
 
     /* set rtol, atol, dtol, maxits */
-    KSPSetTolerances (ksp, 1.0e-5, 1.0e-50, 1.0e+5, 1000);
+    {
+      real rtol, abstol, dtol;
+      int maxits;
+      KSPGetTolerances (ksp, &rtol, &abstol, &dtol, &maxits);
+      /* Defaults are at the mercy of the library: rtol = 1e-5, abstol
+         = 1e-50, dtol = 1e+4, maxits = 10000  */
+      KSPSetTolerances (ksp, rtol, abstol, 10 * dtol, maxits / 10);
+    }
 
     /*
       Though the manual says:
