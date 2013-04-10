@@ -81,6 +81,7 @@ LIBS = $(fftw3-libs) -lm $(PETSC_LIB)
 libbgy3d.a = \
 	hnc3d.o \
 	hnc3d-sles.o \
+	rism-dst.o \
 	bgy3d.o \
 	bgy3d-force.o \
 	bgy3d-pure.o \
