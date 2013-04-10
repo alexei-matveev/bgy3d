@@ -19,7 +19,8 @@
 #undef qO
 
 
-/* Long range pair potential Vec uc_fft is intent(out) here: */
+/* Long  range  pair potential  Vec  uc_fft  is intent(out),  complex,
+   centered Vec: */
 static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 {
   const ProblemData *PD = BHD->PD;
@@ -146,10 +147,11 @@ static void ComputeFFTfromCoulomb (State *BHD,
 }
 
 
-/* Computes a pair potential. See also bgy3d_force(). */
-void bgy3d_pair_potential (const DA da, const ProblemData *PD,
+/* Computes a pair potential. Centered. See also bgy3d_force(). */
+void bgy3d_pair_potential (const State *BHD,
                            const Site a, const Site b, /* by value? */
-                           Vec pot)
+                           Vec v_short,    /* out, real, center */
+                           Vec v_long_fft) /* out, complex, center */
 {
   const real G = G_COULOMB_INVERSE_RANGE;
 
@@ -160,20 +162,20 @@ void bgy3d_pair_potential (const DA da, const ProblemData *PD,
   const real q2 = a.charge * b.charge;
 
   real interval[2];
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
+  interval[0] = BHD->PD->interval[0];
+  interval[1] = BHD->PD->interval[1];
 
   real h[3];
   FOR_DIM
-    h[dim] = PD->h[dim];
+    h[dim] = BHD->PD->h[dim];
 
-  VecSet (pot, 0.0);
+  VecSet (v_short, 0.0);
 
-  real ***pot_;
-  DAVecGetArray (da, pot, &pot_);
+  real ***v_short_;
+  DAVecGetArray (BHD->da, v_short, &v_short_);
 
   int n[3], x[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -186,10 +188,14 @@ void bgy3d_pair_potential (const DA da, const ProblemData *PD,
 
           const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-          pot_[i[2]][i[1]][i[0]] +=
+          v_short_[i[2]][i[1]][i[0]] +=
             lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
         }
-  DAVecRestoreArray (da, pot, &pot_);
+  DAVecRestoreArray (BHD->da, v_short, &v_short_);
+
+  /* Long-range part of the potential is best represented by FFT: */
+  coulomb_long_fft (BHD, G, v_long_fft);
+  VecScale (v_long_fft, q2);
 }
 
 

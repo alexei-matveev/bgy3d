@@ -282,7 +282,8 @@ typedef struct Ctx2
 {
   State *HD;
   int m;
-  Vec *v;                    /* [m][m], real, const */
+  Vec *v_short;              /* [m][m], real, center, const */
+  Vec *v_long_fft;           /* [m][m], complex, center, const */
   Vec *y;                    /* [m][m], real, either y = c or y = t */
   Vec *t_fft, *c_fft;        /* [m][m], complex */
 } Ctx2;
@@ -290,12 +291,14 @@ typedef struct Ctx2
 
 static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 {
-  /* aliases of the right shape: */
   const int m = ctx->m;
+
+  /* aliases of the correct [m][m] shape: */
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
   Vec (*c)[m] = (void*) ctx->y; /* y = c(t) here */
-  Vec (*v)[m] = (void*) ctx->v;
+  Vec (*v_short)[m] = (void*) ctx->v_short;
+  Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
 
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
@@ -312,9 +315,19 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        compute_c (beta, v[i][j], t[i][j], c[i][j]);
+        compute_c (beta, v_short[i][j], t[i][j], c[i][j]);
 
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
+
+        /*
+          The real-space  representation encodes only  the short-range
+          part  of  the  direct  corrlation. The  (fixed)  long  range
+          contribution is added here:
+
+            C := C  - βV
+                  S     L
+        */
+        VecAXPY (c_fft[i][j], -beta, v_long_fft[i][j]);
 
         /* Translate distribution to the grid corner. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
@@ -322,7 +335,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
         VecScale (c_fft[i][j], h3);
       }
 
-  /* Solves the linear equation for t_fft[][]: */
+  /* Solves the OZ linear equation for t_fft[][].: */
   compute_t2 (m, rho, c_fft, t_fft);
 
   for (int i = 0; i < m; i++)
@@ -330,6 +343,18 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
       {
         /* Translate distribution to the grid center. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, t_fft[i][j]);
+
+        /*
+          Since we plugged in the Fourier transform of the full direct
+          correlation  including  the  long  range part  into  the  OZ
+          equation what  we get out  is the full  indirect correlation
+          including the  long-range part.   The menmonic is  C +  T is
+          short range.  Take it out:
+
+            T := T - βV
+             S         L
+        */
+        VecAXPY (t_fft[i][j], -beta, v_long_fft[i][j]);
 
         MatMultTranspose (HD->fft_mat, t_fft[i][j], dt[i][j]);
 
@@ -347,12 +372,14 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
 static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
 {
-  /* aliases of the right shape: */
   const int m = ctx->m;
+
+  /* aliases of the correct [m][m] shape: */
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
   Vec (*t)[m] = (void*) ctx->y; /* y = t(c) here */
-  Vec (*v)[m] = (void*) ctx->v;
+  Vec (*v_short)[m] = (void*) ctx->v_short;
+  Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
 
   const State *HD = ctx->HD;
   const ProblemData *PD = HD->PD;
@@ -371,13 +398,23 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
       {
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
+        /*
+          The real-space  representation encodes only  the short-range
+          part  of  the  direct  corrlation. The  (fixed)  long  range
+          contribution is added here:
+
+            C := C  - βV
+                  S     L
+        */
+        VecAXPY (c_fft[i][j], -beta, v_long_fft[i][j]);
+
         /* Translate distribution to the grid corner. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
 
         VecScale (c_fft[i][j], h3);
       }
 
-  /* Solves the linear equation for t_fft[][]: */
+  /* Solves the OZ linear equation for t_fft[][].: */
   compute_t2 (m, rho, c_fft, t_fft);
 
   for (int i = 0; i < m; i++)
@@ -386,11 +423,23 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
         /* Translate distribution to the grid center. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, t_fft[i][j]);
 
+        /*
+          Since we plugged in the Fourier transform of the full direct
+          correlation  including  the  long  range part  into  the  OZ
+          equation what  we get out  is the full  indirect correlation
+          including the  long-range part.   The menmonic is  C +  T is
+          short range.  Take it out:
+
+            T := T - βV
+             S         L
+        */
+        VecAXPY (t_fft[i][j], -beta, v_long_fft[i][j]);
+
         MatMultTranspose (HD->fft_mat, t_fft[i][j], t[i][j]);
 
         VecScale (t[i][j], 1.0/L/L/L);
 
-        compute_c (beta, v[i][j], t[i][j], dc[i][j]);
+        compute_c (beta, v_short[i][j], t[i][j], dc[i][j]);
       }
 
   /* This  destroys the  aliases, but  does  not free  the memory,  of
@@ -440,13 +489,19 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   local Vec c_fft[m][m];
   bgy3d_vec_create2 (HD->dc, m, c_fft); /* complex */
 
-  local Vec v[m][m];
-  bgy3d_vec_create2 (HD->da, m, v); /* solvent-solvent interaction */
+  /* Solvent-solvent interaction  is a  sum of two  terms, short-range
+     and long-range: */
+  local Vec v_short[m][m];      /* real */
+  bgy3d_vec_create2 (HD->da, m, v_short);
+
+  local Vec v_long_fft[m][m];   /* complex */
+  bgy3d_vec_create2 (HD->dc, m, v_long_fft);
 
   /* Get solvent-solvent site-site interactions: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      bgy3d_pair_potential (HD->da, HD->PD, solvent[i], solvent[j], v[i][j]);
+      bgy3d_pair_potential (HD, solvent[i], solvent[j],
+                            v_short[i][j], v_long_fft[i][j]);
 
   /*
     For primary variable x there are  two ways to access the data: via
@@ -474,8 +529,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       {
         .HD = HD,
         .m = m,
-        .v = (void*) v,     /* in */
-        .y = (void*) y,     /* t(c) or c(t) */
+        .v_short = (void*) v_short,       /* in */
+        .v_long_fft = (void*) v_long_fft, /* in */
+        .y = (void*) y,                   /* t(c) or c(t) */
         .t_fft = (void*) t_fft,
         .c_fft = (void*) c_fft,
       };
@@ -522,7 +578,8 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   /* Delegated to the caller: bgy3d_vec_destroy (&t); */
   bgy3d_vec_destroy2 (m, t_fft);
   bgy3d_vec_destroy2 (m, c_fft);
-  bgy3d_vec_destroy2 (m, v);
+  bgy3d_vec_destroy2 (m, v_short);
+  bgy3d_vec_destroy2 (m, v_long_fft);
 
   bgy3d_vec_aliases_destroy2 (m, x);
   bgy3d_vec_pack_destroy2 (&X);

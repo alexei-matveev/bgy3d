@@ -8,9 +8,10 @@
 
 
 /* Computes a pair potential. See also bgy3d_force(). */
-void bgy3d_pair_potential (const DA da, const ProblemData *PD,
+void bgy3d_pair_potential (const State *BHD,
                            const Site a, const Site b, /* by value? */
-                           Vec pot);
+                           Vec v_short,                /* out, real */
+                           Vec v_long_fft); /* out, complex */
 
 void bgy3d_force (State *BHD,
                   const Site a, const Site b, /* struct by value? */
