@@ -153,5 +153,8 @@ make-summary = $(SHELL) ./summary.sh
 # figures:
 .PRECIOUS: %.m
 
+all-bin=$(wildcard *.bin)
+all-png: $(all-bin:.bin=.m.png)
+
 clean:
 	rm -f *.g1 *.g2 *.bin *.info *.m *.out
