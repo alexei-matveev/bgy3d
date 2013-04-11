@@ -7,6 +7,11 @@ module rism
   real(rk), parameter, public :: pi = 4 * atan (1.0_rk)
   ! *** end of interface ***
 
+  !                              2
+  ! These should obey: ab = 2π, a b = 1:
+  !
+  real(rk), parameter :: a = 1 / (2 * pi), b = (2 * pi)**2
+
   !
   ! This defines two  iterator interfaces x -> dx  for use in fixpoint
   ! non-linear problems.  One is  the type of Fortran closures another
@@ -94,12 +99,11 @@ contains
     do i = 1, 10**0
        call test_dst (2**12)
     end do
-    call test_ft (rmax=10.d0, n=2**14)
+    call test_ft (rmax=10.d0, n=2**10)
     ! stop
 
-    ! FIXME: why 4π?
-    ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=10.0d0, n=256)
-    call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**14)
+    call rism1d (rho=0.85d0, beta=0.34722d0, rmax=20.0d0, n=2**14)
+    ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=20.0d0, n=2**14)
   end subroutine rism_main
 
   subroutine rism1d (rho, beta, rmax, n)
@@ -110,6 +114,7 @@ contains
 
     real(rk), parameter :: half = 0.5, alpha = 0.02
     real(rk) :: r(n), k(n), v(n), t(n), c(n), g(n)
+    real(rk) :: ck(n), tk(n)
     real(rk) :: dr, dk
     integer :: i
 
@@ -160,14 +165,14 @@ contains
       c = closure_hnc (beta, v, t)
 
       ! Forward FT via DST:
-      c = dst (r * c) / k * (dr / sqrt (2 * pi))
+      ck = fourier (c) * (dr**3 * (n/pi) / a)
 
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
-      dt = oz_equation_c_t (rho, c)
+      tk = oz_equation_c_t (rho, ck)
 
       ! Inverse FT via DST:
-      dt = dst (k * dt) / r * (dk / sqrt (2 * pi))
+      dt = fourier (tk) * (dk**3 * (n/pi) / b)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -367,6 +372,29 @@ contains
   end subroutine test_dst
 
 
+  function fourier (f) result (g)
+    implicit none
+    real(rk), intent(in) :: f(:)
+    real(rk) :: g(size (f))
+    ! *** end of interface ***
+
+    real(rk), parameter :: half = 0.5
+    integer :: i, n
+
+    n = size (f)
+
+    do i = 1, n
+       g(i) = f(i) * (i - half)
+    enddo
+
+    g = dst (g)
+
+    do i = 1, n
+       g(i) = g(i) / (i - half)
+    enddo
+  end function fourier
+
+
   subroutine test_ft (rmax, n)
     implicit none
     integer, intent(in) :: n
@@ -375,6 +403,7 @@ contains
 
     real(rk) :: r(n), k(n), f(n), g(n), h(n)
     real(rk) :: dr, dk
+
     integer :: i
 
     !
@@ -396,26 +425,39 @@ contains
     ! Gaussian:
     f = exp (-r**2 / 2)
 
-    ! L2-normalized:
-    f = f / sqrt (sum ((r * f)**2) * 4 * pi * dr)
+    ! Unit "charge", a "fat" delta function:
+    f = f / (sum (r**2 * f) * 4 * pi * dr)
 
-    ! Unitary forward transform:
-    g = dst (r * f) / k * (dr / sqrt (2 * pi))
+    ! Forward transform:
+    g = fourier (f) * (dr**3 * (n/pi) / a)
 
-    ! Unitary backward transform:
-    h = dst (k * g) / r * (dk / sqrt (2 * pi))
+    ! Backward transform:
+    h = fourier (g) * (dk**3 * (n/pi) / b) ! a * b = 2pi
 
-    print *, "# int(f)=", sum ((r * f)**2) * 4 * pi * dr
-    print *, "# int(g)=", sum ((k * g)**2) * 4 * pi * dk
-    print *, "# int(h)=", sum ((r * h)**2) * 4 * pi * dr
-    print *, "# |f - h|=", maxval (abs (f - h))
-    print *, "# sigma(f)=", sum (r**2 * (r * f)**2) * 4 * pi * dr
-    print *, "# sigma(g)=", sum (k**2 * (k * g)**2) * 4 * pi * dk
+    print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
+    print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
+    print *, "# norm (f')^2 =", sum ((r * h)**2) * 4 * pi * dr
+
+    print *, "# |f - f'| =", maxval (abs (f - h))
+
+    print *, "# int (f') =", sum (r**2 * h) * 4 * pi * dr
+    print *, "# int (f ) =", sum (r**2 * f) * 4 * pi * dr
+
+    ! This should correspond  to the convolution (f *  f) which should
+    ! be again a gaussian, twice as "fat":
+    h = g * g
+    h = fourier (h) * (dk**3 * (n/pi) / b) ! a*a*b = 1
+
+    print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
+
+    ! Compare width as <r^2>:
+    print *, "# sigma (f) =", sum (r**4 * f) * 4 * pi * dr
+    print *, "# sigma (h) =", sum (r**4 * h) * 4 * pi * dr
 
     ! print *, "# n=", n
-    ! print *, "# r, f, k, g"
+    ! print *, "# r, f, k, g, h = (f*f)"
     ! do i = 1, n
-    !    print *, r(i), f(i), k(i), g(i)
+    !    print *, r(i), f(i), k(i), g(i), h(i)
     ! enddo
   end subroutine test_ft
 
