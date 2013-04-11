@@ -1,11 +1,44 @@
 module rism
-  use iso_c_binding, only: rk => c_double
+  use iso_c_binding, only: c_int, c_double, c_char
   implicit none
   private
 
-  public :: rism_main           ! ()
+  integer, parameter :: ik = c_int, rk = c_double
+
+  public :: rism_main
+  public :: bgy3d_problem_data
+
   real(rk), parameter, public :: pi = 4 * atan (1.0_rk)
+
+  ! Keep this in sync with bgy3d-solutes.h:
+  type, public, bind (c) :: site
+     character(kind=c_char, len=5) :: name ! atom types. What are they used for?
+     real(c_double) :: x(3)                ! coordinates
+     real(c_double) :: sigma               ! sigma for LJ
+     real(c_double) :: epsilon             ! epsilon for LJ
+     real(c_double) :: charge              ! charge
+  end type site
+
+  ! Keep this in sync with bgy3d.h:
+  type, public, bind (c) :: problem_data
+     real(c_double) :: interval(2) ! min and max of the domain: 3d-box*/
+     real(c_double) :: h(3)        ! mesh width
+     real(c_double) :: beta        ! inverse temperature, 1/kT
+     real(c_double) :: rho         ! solvent density
+     integer(c_int) :: N(3), N3    ! global Grid size
+
+     ! Other staff  that was retrieved by the  solvers themselves from
+     ! the (Petsc) environment:
+     real(c_double) :: lambda   ! Mixing parameter.
+     real(c_double) :: damp     ! Scaling factor.
+     integer(c_int) :: max_iter ! Maximal number of iterations.
+     real(c_double) :: norm_tol ! Convergence threshold.
+     real(c_double) :: zpad     ! FIXME: ???
+  end type problem_data
+
+  !
   ! *** end of interface ***
+  !
 
   !                              2
   ! These should obey: ab = 2π, a b = 1:
@@ -76,6 +109,12 @@ module rism
        integer(c_int), intent (in), value :: n
        real(c_double), intent (inout) :: x(n)
      end subroutine rism_snes
+
+     function bgy3d_problem_data () result (pd) bind (c)
+       import problem_data
+       implicit none
+       type(problem_data) :: pd
+     end function bgy3d_problem_data
   end interface
 
   !
@@ -91,32 +130,60 @@ module rism
 
 contains
 
-  subroutine rism_main () bind (c)
+  subroutine rism_main (pd, m, sites) bind (c)
+    use iso_c_binding, only: c_int
     implicit none
+    type(problem_data), intent(in) :: pd ! no VALUE!
+    integer(c_int), intent(in), value :: m
+    type(site), intent(in) :: sites(m)
     ! *** end of interface ***
 
-    integer :: i
-    do i = 1, 10**0
-       call test_dst (2**12)
-    end do
-    call test_ft (rmax=10.d0, n=2**10)
+    integer :: i, n
+    real(rk) :: rmax
+
+    rmax = 0.5 * (pd % interval(2) - pd % interval(1))
+    n = maxval (pd % n)
+
+    print *, "# rho=", pd % rho
+    print *, "# beta=", pd % beta
+    print *, "# L=", rmax
+    print *, "# n=", n
+    print *, "# Sites:"
+    do i = 1, m
+       print *, "#", i, &
+            &        pad (sites(i) % name), &
+            &        sites(i) % sigma, &
+            &        sites(i) % epsilon, &
+            &        sites(i) % charge
+    enddo
+
+    ! do i = 1, 10**0
+    !    call test_dst (2**12)
+    ! end do
+    ! call test_ft (rmax=10.d0, n=2**10)
     ! stop
 
-    call rism1d (rho=0.85d0, beta=0.34722d0, rmax=20.0d0, n=2**14)
+    call rism1d (rho = pd % rho, beta = pd % beta, rmax = rmax, n=n, &
+         &       sites = sites)
+    ! call rism1d (rho=0.85d0, beta=0.34722d0, rmax=20.0d0, n=2**14)
     ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=20.0d0, n=2**14)
   end subroutine rism_main
 
-  subroutine rism1d (rho, beta, rmax, n)
+
+  subroutine rism1d (rho, beta, rmax, n, sites)
     implicit none
     real(rk), intent(in) :: rho, beta, rmax
     integer, intent(in) :: n
+    type(site), intent(in) :: sites(:)
     ! *** end of interface ***
 
     real(rk), parameter :: half = 0.5, alpha = 0.02
     real(rk) :: r(n), k(n), v(n), t(n), c(n), g(n)
     real(rk) :: ck(n), tk(n)
     real(rk) :: dr, dk
-    integer :: i
+    integer :: i, m
+
+    m = size (sites)
 
     call print_info (rho=rho, beta=beta)
 
@@ -520,12 +587,36 @@ contains
        y = y + p(n) * x**n
     enddo
   end function poly
+
+
+  function pad (s) result (t)
+    use iso_c_binding, only: c_null_char
+    implicit none
+    character(len=*), intent(in) :: s
+    character(len=len(s)) :: t
+    ! *** end of interface ***
+
+    integer :: i
+
+    t = s
+    do i = 1, len (t)
+       if (t(i:i) /= c_null_char) cycle
+       t(i:) = " "
+       exit
+    enddo
+  end function pad
 end module rism
 
 
 program rism_prog
-  use rism, only: rism_main
+  use rism, only: rism_main, site, problem_data, bgy3d_problem_data
   implicit none
 
-  call rism_main ()
+  type(problem_data) :: pd
+  type(site), parameter :: a(1) = &
+       [site ("lj", [0.0d0, 0.0d0, 0.0d0], 1.0d0, 1.0d0, 0.0d0)]
+
+  pd = bgy3d_problem_data()
+
+  call rism_main (pd, size (a), a)
 end program rism_prog
