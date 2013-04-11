@@ -23,14 +23,23 @@
    vec-fft-interp
    vec-map1
    vec-map2
+   f64dst
+   f64+
+   f64*
+   f64scale
+   hnc3d-run-solvent
+   hnc3d-run-solute
    bgy3d-run-solvent
    bgy3d-run-solute)
   #:export
-  (new-main
+  (find-molecule
+   new-main
    old-main
    vec-print
    vec-norm
+   *default-settings*
    bgy3d-api-version
+   bgy3d-test
    bgy3d-solvent
    bgy3d-solute))
 
@@ -649,3 +658,7 @@ computes the sum of all vector elements."
                        (vec-print v)
                        (vec-destroy v)))
                    args))))))
+
+(define (bgy3d-test)
+  (let ((solvent (find-molecule "OW")))
+    (hnc3d-run-solvent solvent *default-settings*)))
