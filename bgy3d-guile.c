@@ -14,6 +14,7 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_save, bgy3d_vec_load */
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
+#include "rism-dst.h"           /* rism_dst() */
 #include "bgy3d-guile.h"
 
 
@@ -534,6 +535,110 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
   return 1;                     /* non-zero means success */
 }
 
+#if 1   /* FIXME: move them out of the way into a separate file ... */
+static inline SCM app1 (void (*f)(size_t n, double y[n], const double x[n]),
+                        SCM x)
+{
+  scm_t_array_handle hx, hy;
+  size_t nx, ny;
+  ssize_t dx, dy;
+
+  const double *x_ = scm_uniform_vector_elements (x, &hx, &nx, &dx);
+  assert (dx == 1);
+
+  SCM y = scm_make_f64vector (scm_from_int (nx), SCM_UNDEFINED);
+
+  double *y_ = scm_uniform_vector_writable_elements (y, &hy, &ny, &dy);
+  assert (dy == 1);
+  assert (ny == nx);
+
+  f (nx, y_, x_);
+
+  scm_array_handle_release (&hy);
+  scm_array_handle_release (&hx);
+
+  return y;
+}
+
+
+static inline SCM f64_map1 (double (*f)(double), SCM x)
+{
+  void g (size_t n, double y[n], const double x[n])
+  {
+    for (size_t i = 0; i < n; i++)
+      y[i] = f (x[i]);
+  }
+  return app1 (g, x);
+}
+
+
+static inline SCM f64_map2 (double (*f)(double, double), SCM x, SCM y)
+{
+  scm_t_array_handle hx, hy, hz;
+  size_t nx, ny, nz;
+  ssize_t dx, dy, dz;
+
+  const double *x_ = scm_uniform_vector_elements (x, &hx, &nx, &dx);
+  assert (dx == 1);
+
+  const double *y_ = scm_uniform_vector_elements (y, &hy, &ny, &dy);
+  assert (dy == 1);
+  assert (ny == nx);
+
+  SCM z = scm_make_f64vector (scm_from_int (nx), SCM_UNDEFINED);
+
+  double *z_ = scm_uniform_vector_writable_elements (z, &hz, &nz, &dz);
+  assert (dz == 1);
+  assert (nz == nx);
+
+  for (size_t i = 0; i < nz; i++)
+    z_[i] = f (x_[i], y_[i]);
+
+  scm_array_handle_release (&hz);
+  scm_array_handle_release (&hy);
+  scm_array_handle_release (&hx);
+
+  return z;
+}
+
+
+static SCM guile_f64_scale (SCM a, SCM x)
+{
+  const double a_ = scm_to_double (a);
+  double f (double x)
+  {
+    return a_ * x;
+  }
+  return f64_map1 (f, x);
+}
+
+
+static SCM guile_f64_add (SCM x, SCM y)
+{
+  double f (double x, double y)
+  {
+    return x + y;
+  }
+  return f64_map2 (f, x, y);
+}
+
+
+static SCM guile_f64_mul (SCM x, SCM y)
+{
+  double f (double x, double y)
+  {
+    return x * y;
+  }
+  return f64_map2 (f, x, y);
+}
+
+
+static SCM guile_f64_dst (SCM x)
+{
+  return app1 (rism_dst, x);
+}
+#endif  /* ... staff that belongs elsewhere. */
+
 
 #define EXPORT(name, req, opt, rst, func)               \
   (scm_c_define_gsubr (name, req, opt, rst, func),      \
@@ -581,6 +686,11 @@ static void vec_init_type (void)
   EXPORT ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
   EXPORT ("vec-map1", 2, 0, 0, vec_map1);
   EXPORT ("vec-map2", 3, 0, 0, vec_map2);
+
+  EXPORT ("f64dst", 1, 0, 0, guile_f64_dst);
+  EXPORT ("f64+", 2, 0, 0, guile_f64_add);
+  EXPORT ("f64*", 2, 0, 0, guile_f64_mul);
+  EXPORT ("f64scale", 2, 0, 0, guile_f64_scale);
 }
 
 
