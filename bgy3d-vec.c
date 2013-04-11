@@ -44,15 +44,6 @@ static int da_local_size (const DA da)
 }
 
 
-static Vec vec_from_array (int n, real x_[n])
-{
-  Vec x;
-  /* FIXME: interface changed in 3.3! */
-  VecCreateMPIWithArray (PETSC_COMM_WORLD, n, PETSC_DECIDE, x_, &x);
-  return x;
-}
-
-
 Vec bgy3d_vec_duplicate (const Vec x)
 {
   Vec y;

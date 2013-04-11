@@ -93,6 +93,14 @@ static inline Mat bgy3d_mat_ref (Mat m)
   return m;
 }
 
+static inline Vec vec_from_array (int n, real x_[n])
+{
+  Vec x;
+  /* FIXME: interface changed in 3.3! */
+  VecCreateMPIWithArray (PETSC_COMM_WORLD, n, PETSC_DECIDE, x_, &x);
+  return x;
+}
+
 static inline real* vec_get_array (Vec x)
 {
   real *x_;
