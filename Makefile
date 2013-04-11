@@ -64,7 +64,7 @@ srcdir = .
 # Compiler and compiler options
 CC       = gcc
 CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS) $(if $(shared), -fPIC)
-FFLAGS   = -Wall
+FFLAGS   = -std=f2008 -Wall $(if $(shared), -fPIC)
 LDFLAGS  =
 
 
