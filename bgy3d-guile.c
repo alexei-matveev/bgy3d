@@ -15,6 +15,7 @@
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "rism-dst.h"           /* rism_dst() */
+#include "rism.h"               /* rism_main() */
 #include "bgy3d-guile.h"
 
 
@@ -901,6 +902,32 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
   return scm_values (scm_list_2 (gs, v));
 }
 
+
+static SCM guile_rism_main (SCM solvent, SCM settings)
+{
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  const ProblemData PD = problem_data (settings);
+
+  int m;                        /* number of solvent sites */
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
+
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
+
+  rism_main (&PD, m, solvent_sites);
+
+  free (solvent_name);
+  free (solvent_sites);
+
+  return SCM_UNSPECIFIED;
+}
+
 
 
 static SCM guile_pot_interp (SCM iter, SCM x)
@@ -986,6 +1013,7 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
   EXPORT ("bgy3d-rank", 0, 0, 0, guile_rank);
   EXPORT ("bgy3d-size", 0, 0, 0, guile_size);
+  EXPORT ("rism-main", 2, 0, 0, guile_rism_main);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
