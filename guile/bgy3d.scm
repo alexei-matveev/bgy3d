@@ -27,6 +27,7 @@
    f64+
    f64*
    f64scale
+   rism-main
    hnc3d-run-solvent
    hnc3d-run-solute
    bgy3d-run-solvent
@@ -494,6 +495,7 @@ computes the sum of all vector elements."
   (quasiquote
    ((bgy        (value #f))
     (hnc        (value #f))
+    (rism       (value #f))
     (closure    (value #t)
                 (predicate ,(lambda (x)
                               (member x '("HNC" "PY" "KH")))))
@@ -589,6 +591,12 @@ computes the sum of all vector elements."
             ;; Pure solvent:
             ;;
             (bgy3d-run-solvent solvent '()))))
+     ;;
+     ;; 1d-RISM, very experimental:
+     ;;
+     ((option-ref opts 'rism #f)
+      (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
+        (rism-main solvent '())))  ; use Petsc env
      ;;
      ;; Fall through to the new variant:
      ;;
