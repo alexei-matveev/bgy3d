@@ -537,9 +537,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       };
 
     if (yes)
-      bgy3d_snes_default (PD, &ctx, (Function) iterate_c2, X);
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_c2, X);
     else
-      bgy3d_snes_default (PD, &ctx, (Function) iterate_t2, X);
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, X);
   }
 
   /*
@@ -951,9 +951,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
       };
 
     if (yes)
-      bgy3d_snes_default (PD, &ctx, (Function) iterate_h1, X);
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_h1, X);
     else
-      bgy3d_snes_default (PD, &ctx, (Function) iterate_t1, X);
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, X);
   }
 
   /* Vec  y[]  will  be  returned  to  the caller,  Vec  x[]  will  be

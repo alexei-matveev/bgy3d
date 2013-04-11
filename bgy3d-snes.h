@@ -9,21 +9,30 @@
     r = x    - x
          out    in
 */
-typedef void (*Function) (void *ctx, Vec x, Vec r);
+typedef void (*ArrayFunc) (void *ctx, int n,  const real x[n],  real r[n]);
+typedef void (*VectorFunc) (void *ctx, /* const */ Vec x, /* out */ Vec r);
 
 /*
-  Solver for non-linear equations, either Newton or fixpoint Picard
-  Uiterations:
+  Solvers for  non-linear equations, either Newton  or fixpoint Picard
+  iterations:
 
-  typedef void (*Solver) (const ProblemData *PD, void *ctx, Function F, Vec x);
+  typedef void (*VectorSolver) (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
+  typedef void (*ArraySolver) (void *ctx, ArrayFunc f, int n, real x[n]);
 */
 
 /*
-  A few solvers for F(x) = 0 taking a Function, its execution context,
-  initial guess, and some  user input eventually affecting convergence
-  criteria:
+  A solver for  an untyped (array) form ArrayFunc.  Finds an x_[] such
+  that dx_[] as returned by ArrayFunc f (ctx, n, x_, dx_) is zero.
 */
-void bgy3d_snes_default (const ProblemData *PD, void *ctx, Function F, Vec x);
-void bgy3d_snes_newton (const ProblemData *PD, void *ctx, Function F, Vec x);
-void bgy3d_snes_picard (const ProblemData *PD, void *ctx, Function F, Vec x);
-void bgy3d_snes_jager (const ProblemData *PD, void *ctx, Function F, Vec x);
+void rism_snes (void *ctx, ArrayFunc f, int n, real x_[n]);
+
+/*
+  A  few solvers  for  F(x) =  0  taking a  VectorFunc, its  execution
+  context,  initial guess,  and some  user input  eventually affecting
+  convergence criteria:
+*/
+void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
+void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
+void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
+void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VectorFunc F, Vec x);
