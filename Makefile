@@ -83,6 +83,7 @@ libbgy3d.a = \
 	hnc3d.o \
 	hnc3d-sles.o \
 	rism-dst.o \
+	rism.o \
 	bgy3d.o \
 	bgy3d-force.o \
 	bgy3d-pure.o \
@@ -180,6 +181,9 @@ include $(libbgy3d.a:.o=.d)
 # The next two rules are fairly portable across compilers.
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -o $(*).o -c $(<)
+
+%.d: %.f90
+	touch $(@)
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -o $(*).o -c $(<)
