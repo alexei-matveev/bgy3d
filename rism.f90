@@ -1,6 +1,11 @@
-program rism
+module rism
   use iso_c_binding, only: rk => c_double
   implicit none
+  private
+
+  public :: main                ! ()
+  real(rk), parameter, public :: pi = 4 * atan (1.0_rk)
+  ! *** end of interface ***
 
   interface
      subroutine rism_dst (n, out, in) bind (c)
@@ -15,20 +20,23 @@ program rism
      end subroutine rism_dst
   end interface
 
-  real(rk), parameter :: pi = 4 * atan (1.0_rk)
-
-  integer :: i
-  do i = 1, 10**0
-     call test_dst (2**12)
-  end do
-  call test_ft (rmax=10.d0, n=2**14)
-  ! stop
-
-  ! FIXME: why 4π?
-  ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=10.0d0, n=256)
-  call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**10)
-
 contains
+
+  subroutine main ()
+    implicit none
+    ! *** end of interface ***
+
+    integer :: i
+    do i = 1, 10**0
+       call test_dst (2**12)
+    end do
+    call test_ft (rmax=10.d0, n=2**14)
+    ! stop
+
+    ! FIXME: why 4π?
+    ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=10.0d0, n=256)
+    call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**9)
+  end subroutine main
 
   subroutine rism1d (rho, beta, rmax, n)
     implicit none
@@ -37,10 +45,9 @@ contains
     ! *** end of interface ***
 
     real(rk), parameter :: half = 0.5, alpha = 0.02
-    real(rk) :: r(n), k(n), v(n), t(n), c(n), t1(n), g(n)
-    real(rk) :: diff, dr, dk
-    integer :: i, iter
-    logical :: converged
+    real(rk) :: r(n), k(n), v(n), t(n), c(n), g(n)
+    real(rk) :: dr, dk
+    integer :: i
 
     call print_info (rho=rho, beta=beta)
 
@@ -55,33 +62,11 @@ contains
     ! LJ potential, sigma=1, epsilon=1:
     v = lj (r)
 
-    ! print *, "r=", r
-    ! print *, "v=", v
-
-    iter = 0
-    converged = .false.
+    ! Intirial guess:
     t = 0.0
-    do while (.not. converged)
-       iter = iter + 1
 
-       c = closure_hnc (beta, v, t)
-
-       ! Forward FT via DST:
-       c = dst (r * c) / k * (dr / sqrt (2 * pi))
-
-       ! OZ equation, involves "convolutions", take care of the
-       ! normalization here:
-       t1 = oz_equation_c_t (rho, c)
-
-       ! Inverse FT via DST:
-       t1 = dst (k * t1) / r * (dk / sqrt (2 * pi))
-
-       diff = maxval (abs (t1 - t))
-       converged = (diff < 1.0e-12)
-
-       t = alpha * t1 + (1 - alpha) * t
-       print *, "# iter=", iter, "diff=", diff
-    end do
+    ! Find t such that iterate_t (t) == 0:
+    call snes (iterate_t, t)
 
     ! It was overwritten with c(k):
     c = closure_hnc (beta, v, t)
@@ -92,7 +77,72 @@ contains
     do i = 1, n
        print *, r(i), v(i), t(i), c(i), g(i)
     enddo
+
+  contains
+
+    function iterate_t (t) result (dt)
+      !
+      ! Closure over host variables: r, k, dr, dk, v, c, beta, rho,
+      ! ...
+      !
+      implicit none
+      real(rk), intent(in) :: t(:)
+      real(rk) :: dt(size (t))
+      ! *** end of interface ***
+
+      c = closure_hnc (beta, v, t)
+
+      ! Forward FT via DST:
+      c = dst (r * c) / k * (dr / sqrt (2 * pi))
+
+      ! OZ equation, involves "convolutions", take care of the
+      ! normalization here:
+      dt = oz_equation_c_t (rho, c)
+
+      ! Inverse FT via DST:
+      dt = dst (k * dt) / r * (dk / sqrt (2 * pi))
+
+      ! Return the increment that vanishes at convergence:
+      dt = dt - t
+    end function iterate_t
   end subroutine rism1d
+
+
+  subroutine snes (f, x)
+    implicit none
+    real(rk), intent(inout) :: x(:)
+
+    interface
+       function f (x) result (dx)
+         import rk
+         implicit none
+         real(rk), intent(in) :: x(:)
+         real(rk) :: dx(size (x))
+       end function f
+    end interface
+    ! *** end of interface ***
+
+    real(rk), parameter :: alpha = 0.02
+    real(rk) :: dx(size (x))
+    real(rk) :: diff
+    integer :: iter
+    logical :: converged
+
+    iter = 0
+    converged = .false.
+    do while (.not. converged)
+       iter = iter + 1
+
+       dx = f (x)
+
+       diff = maxval (abs (dx))
+       converged = (diff < 1.0e-12)
+
+       x = x + alpha * dx
+       print *, "# iter=", iter, "diff=", diff
+    end do
+  end subroutine snes
+
 
   !
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
@@ -199,12 +249,12 @@ contains
     ! RODFT11 (DST-IV) is self inverse up to a normalization factor:
     if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
        print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
-       stop "unnormalized dst does not match"
+       stop "unnormalized DST does not match"
     endif
 
     if (maxval (abs (a - ndst (ndst (a)))) > 1.0e-10) then
        print *, "diff=", maxval (abs (a - ndst (ndst (a))))
-       stop "normalized does not match"
+       stop "normalized DST does not match"
     endif
   end subroutine test_dst
 
@@ -221,11 +271,11 @@ contains
     !
     ! The 3d analytical unitary FT of the function
     !
-    !   f = exp(-r²)
+    !   f = exp(-r²/2)
     !
     ! is the function
     !
-    !   g = exp(-k²/4), FIXME!
+    !   g = exp(-k²/2), FIXME!
     !
     dr = rmax / n
     dk = pi / rmax
@@ -241,10 +291,10 @@ contains
     f = f / sqrt (sum ((r * f)**2) * 4 * pi * dr)
 
     ! Unitary forward transform:
-    g = dr * dst (r * f) / k / sqrt (2 * pi)
+    g = dst (r * f) / k * (dr / sqrt (2 * pi))
 
     ! Unitary backward transform:
-    h = dk * dst (k * g) / r / sqrt (2 * pi)
+    h = dst (k * g) / r * (dk / sqrt (2 * pi))
 
     print *, "# int(f)=", sum ((r * f)**2) * 4 * pi * dr
     print *, "# int(g)=", sum ((k * g)**2) * 4 * pi * dk
@@ -317,4 +367,11 @@ contains
        y = y + p(n) * x**n
     enddo
   end function poly
-end program
+end module rism
+
+program rism_prog
+  use rism, only: main
+  implicit none
+
+  call main ()
+end program rism_prog
