@@ -3,14 +3,47 @@ module rism
   implicit none
   private
 
-  public :: main                ! ()
+  public :: rism_main           ! ()
   real(rk), parameter, public :: pi = 4 * atan (1.0_rk)
   ! *** end of interface ***
 
+  !
+  ! This defines two  iterator interfaces x -> dx  for use in fixpoint
+  ! non-linear problems.  One is  the type of Fortran closures another
+  ! is the corresponding type of C closures. Such an iterator function
+  ! is supposed to return array of zeros (ok, rather small numbers) at
+  ! convergence.
+  !
+  abstract interface
+     function f_iterator (x) result (dx)
+       import rk
+       implicit none
+       real(rk), intent(in) :: x(:)
+       real(rk) :: dx(size (x))
+     end function f_iterator
+
+     subroutine c_iterator (ctx, n, x, dx) bind (c)
+       use iso_c_binding, only: c_ptr, c_int, c_double
+       implicit none
+       type(c_ptr), intent(in), value :: ctx
+       integer(c_int), intent(in), value :: n
+       real(c_double), intent(in) :: x(n)
+       real(c_double), intent(out) :: dx(n)
+     end subroutine c_iterator
+  end interface
+
+  !
+  ! These are concrete functions, implemented in C:
+  !
   interface
      subroutine rism_dst (n, out, in) bind (c)
        !
-       ! See rism-dst.c
+       ! Performs DST. In FFTW terms this is RODFT11 (or DST-IV) which
+       ! is is self inverse up to a normalization factor.
+       !
+       ! void rism_dst (size_t n, double out[n], const double in[n])
+       !
+       ! See ./rism-dst.c
        !
        use iso_c_binding, only: c_size_t, c_double
        implicit none
@@ -18,11 +51,42 @@ module rism
        real(c_double), intent(out) :: out (n)
        real(c_double), intent(in) :: in (n)
      end subroutine rism_dst
+
+     subroutine rism_snes (ctx, f, n, x) bind (c)
+       !
+       ! void rism_snes (void *ctx, ArrayFunc f,
+       !                 int n, real x_[n])
+       !
+       ! using procedure(c_iterator) or in C-lang ArrayFunc:
+       !
+       ! typedef void (*ArrayFunc) (void *ctx,
+       !                            int n, const real x[n], real r[n]);
+       !
+       ! See ./bgy3d-snes.c
+       !
+       use iso_c_binding, only: c_ptr, c_int, c_double
+       implicit none
+       type(c_ptr), intent (in), value :: ctx
+       procedure(c_iterator) :: f
+       integer(c_int), intent (in), value :: n
+       real(c_double), intent (inout) :: x(n)
+     end subroutine rism_snes
   end interface
+
+  !
+  ! A pointer to to the structure of this type will serve as a closure
+  ! context to  be passed to  the C-world. Upon callback  the fourtran
+  ! sub  implementing a  procedure(c_iterator) can  use  the procedure
+  ! pointer to perform the actual  work. I wish closures could be made
+  ! simpler than that.
+  !
+  type context
+     procedure (f_iterator), pointer, nopass :: f
+  end type context
 
 contains
 
-  subroutine main ()
+  subroutine rism_main () bind (c)
     implicit none
     ! *** end of interface ***
 
@@ -35,8 +99,8 @@ contains
 
     ! FIXME: why 4π?
     ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=10.0d0, n=256)
-    call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**9)
-  end subroutine main
+    call rism1d (rho=(4 * pi * 1.054796d0), beta=0.261610d0, rmax=20.0d0, n=2**14)
+  end subroutine rism_main
 
   subroutine rism1d (rho, beta, rmax, n)
     implicit none
@@ -65,10 +129,13 @@ contains
     ! Intirial guess:
     t = 0.0
 
-    ! Find t such that iterate_t (t) == 0:
-    call snes (iterate_t, t)
+    ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
+    ! function  as a  callback is  an F2008  feature. GFortran  4.3 on
+    ! Debian Lenny does not support that:
+    call snes_default (iterate_t, t)
 
-    ! It was overwritten with c(k):
+    ! Do not assume c has a meaningfull value, it was overwritten with
+    ! c(k):
     c = closure_hnc (beta, v, t)
     g = 1 + c + t
 
@@ -82,8 +149,8 @@ contains
 
     function iterate_t (t) result (dt)
       !
-      ! Closure over host variables: r, k, dr, dk, v, c, beta, rho,
-      ! ...
+      ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
+      ! ... Implements procedure(f_iterator).
       !
       implicit none
       real(rk), intent(in) :: t(:)
@@ -108,18 +175,16 @@ contains
   end subroutine rism1d
 
 
-  subroutine snes (f, x)
+  subroutine snes_picard (f, x)
+    !
+    ! Simple Picard iteration
+    !
+    !   x    = x + α f(x )
+    !    n+1    n       n
+    !
     implicit none
+    procedure(f_iterator) :: f  ! (x) -> dx
     real(rk), intent(inout) :: x(:)
-
-    interface
-       function f (x) result (dx)
-         import rk
-         implicit none
-         real(rk), intent(in) :: x(:)
-         real(rk) :: dx(size (x))
-       end function f
-    end interface
     ! *** end of interface ***
 
     real(rk), parameter :: alpha = 0.02
@@ -141,8 +206,51 @@ contains
        x = x + alpha * dx
        print *, "# iter=", iter, "diff=", diff
     end do
-  end subroutine snes
+  end subroutine snes_picard
 
+
+  subroutine snes_default (f, x)
+    !
+    ! Delegates the actual work to Petsc by way of C-func rism_snes().
+    !
+    use iso_c_binding
+    implicit none
+    procedure(f_iterator) :: f  ! (x) -> dx
+    real(rk), intent(inout) :: x(:)
+    ! *** end of interface ***
+
+    type(context), target :: f_ctx
+    type(c_ptr) :: ctx
+
+    f_ctx % f => f
+    ctx = c_loc (f_ctx)
+
+    call rism_snes (ctx, iterator, size (x), x)
+  end subroutine snes_default
+
+
+  subroutine iterator (ctx, n, x, dx) bind (c)
+    !
+    ! Implements  procedure(c_iterator)  and  will  be passed  to  the
+    ! rism_snes()   together   with    the   suitable   context.   See
+    ! snes_default().
+    !
+    use iso_c_binding
+    implicit none
+    type(c_ptr), intent(in), value :: ctx
+    integer(c_int), intent(in), value :: n
+    real(rk), intent(in) :: x(n)
+    real(rk), intent(out) :: dx(n)
+    ! *** end of interface ***
+
+    type(context), pointer :: f_ctx
+
+    ! We  dont  so any  work  ourselves,  just  extract a  pointer  to
+    ! procedure(f_iterator) an let it do the rest:
+    call c_f_pointer (ctx, f_ctx)
+
+    dx = f_ctx % f (x)
+  end subroutine iterator
 
   !
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
@@ -258,6 +366,7 @@ contains
     endif
   end subroutine test_dst
 
+
   subroutine test_ft (rmax, n)
     implicit none
     integer, intent(in) :: n
@@ -309,6 +418,7 @@ contains
     !    print *, r(i), f(i), k(i), g(i)
     ! enddo
   end subroutine test_ft
+
 
   subroutine print_info (rho, beta)
     !
@@ -369,9 +479,10 @@ contains
   end function poly
 end module rism
 
+
 program rism_prog
-  use rism, only: main
+  use rism, only: rism_main
   implicit none
 
-  call main ()
+  call rism_main ()
 end program rism_prog
