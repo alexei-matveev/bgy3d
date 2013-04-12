@@ -114,7 +114,7 @@ module rism
      subroutine rism_dst (n, out, in) bind (c)
        !
        ! Performs DST. In FFTW terms this is RODFT11 (or DST-IV) which
-       ! is is self inverse up to a normalization factor.
+       ! is self inverse up to a normalization factor.
        !
        ! void rism_dst (size_t n, double out[n], const double in[n])
        !
@@ -156,10 +156,10 @@ module rism
 
   !
   ! A pointer to to the structure of this type will serve as a closure
-  ! context to  be passed to  the C-world. Upon callback  the fourtran
-  ! sub  implementing a  procedure(c_iterator) can  use  the procedure
-  ! pointer to perform the actual  work. I wish closures could be made
-  ! simpler than that.
+  ! context to be passed to the C-world. Upon callback the Fortran sub
+  ! implementing a procedure(c_iterator) can use the procedure pointer
+  ! to perform the actual work.  I wish closures could be made simpler
+  ! than that.
   !
   type context
      integer :: shape(3)
@@ -245,8 +245,8 @@ contains
     t = 0.0
 
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
-    ! function  as a  callback is  an F2008  feature. GFortran  4.3 on
-    ! Debian Lenny does not support that:
+    ! function as a callback is an F08 feature. GFortran 4.3 on Debian
+    ! Lenny does not support that:
     call snes_default (iterate_t, t)
 
     ! Do not assume c has a meaningfull value, it was overwritten with
@@ -410,8 +410,7 @@ contains
   !
   ! Note that the long-range Coulomb is regular in real space:
   !
-  !                           2           4
-  !   erf(x) / x = 2 / √π - 2x / 3√π + O(x )
+  !   erf(x) / x = 2 / √π - 2x² / 3√π + O(x⁴)
   !
   ! So that for a typical value of a = 1.2 the long range potential at r
   ! = 0  is 331.84164 * 1.2 *  1.12837916709551 ~ 449 kcal  for two unit
