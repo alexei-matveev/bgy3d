@@ -198,29 +198,8 @@ contains
        k(i) = (i - half) * dk
     end forall
 
-    block
-       real (rk) :: epsilon, sigma, charge
-       integer :: i, j
-       type (site) :: a, b
-
-       ! LJ potential:
-       do j = 1, m
-          b = sites(j)
-          do i = 1, m
-             a = sites(i)
-
-             epsilon = sqrt (a % epsilon * b % epsilon)
-             sigma = (a % sigma + b % sigma) / 2
-             charge = a % charge * b % charge
-
-             if (sigma /= 0.0) then
-                v(:, i, j) = epsilon * lj (r / sigma)
-             else
-                v(:, i, j) = 0.0
-             endif
-          enddo
-       enddo
-    end block
+    ! Tabulate pairwise potential v() on the r-grid:
+    call force_field (sites, r, v)
 
     ! Intitial guess:
     t = 0.0
@@ -287,6 +266,39 @@ contains
       dt = dt - t
     end function iterate_t
   end subroutine rism1d
+
+
+  subroutine force_field (sites, r, v)
+    implicit none
+    type (site), intent (in) :: sites(:) ! (m)
+    real (rk), intent (in) :: r(:)       ! (n)
+    real (rk), intent (out) :: v(:, :, :) ! (n, m, m)
+    ! *** end of inteface ***
+
+    real (rk) :: epsilon, sigma, charge
+    integer :: i, j, m
+    type (site) :: a, b
+
+    m = size (sites)
+
+    ! LJ potential:
+    do j = 1, m
+       b = sites(j)
+       do i = 1, m
+          a = sites(i)
+
+          epsilon = sqrt (a % epsilon * b % epsilon)
+          sigma = (a % sigma + b % sigma) / 2
+          charge = a % charge * b % charge
+
+          if (sigma /= 0.0) then
+             v(:, i, j) = epsilon * lj (r / sigma)
+          else
+             v(:, i, j) = 0.0
+          endif
+       enddo
+    enddo
+  end subroutine force_field
 
 
   subroutine snes_picard (f, x)
