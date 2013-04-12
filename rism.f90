@@ -47,6 +47,42 @@ module rism
   real (rk), parameter :: DST_BW = (2 * pi)**2  ! == b
 
   !
+  ! The interaction energy of two unit charges separated by 1 A is
+  !                  -1
+  !   E = 1 * 1 / 1 A   = 0.529 au = 332 kcal [/ mol]
+  !
+  ! The next parameter appears to have the meaning of this interaction
+  ! energy of such two unit charges:
+  !
+  !   EPSILON0INV = 1 / ε₀
+  !
+  ! and  is  used  to  covert electrostatic  interaction  energies  to
+  ! working units.   It has  to be consistent  with other  force field
+  ! parameters defined in bgy3d-solvents.h, notably with Lennard-Jones
+  ! parameters σ and ε (FIXME: so maybe it was not a good idea to move
+  ! it here). These are the original comments:
+  !
+  !   You have: e^2/4/pi/epsilon0/angstrom, you want: kcal/avogadro/mol
+  !
+  !   => 331.84164
+  !
+  ! Again, the code appears to use the IT-calorie to define 1/ε₀. Keep
+  ! this in sync with bgy3d.h:
+  !
+  real (rk), parameter :: EPSILON0INV = 331.84164d0
+
+  !
+  ! Inverse range parameter for  separation of the Coulomb into short-
+  ! and long range components. The  inverse of this number 1/α has the
+  ! dimension of length. FIXME: with the hardwired parameter like this
+  ! the  short-range  Coulomb is  effectively  killed alltogether  for
+  ! water-like particles  --- a water-like  particle has a  typical LJ
+  ! radius σ = 3.16 A. There are no visible changes in the RDF with or
+  ! without short range Coulomb and the charges of the order ±1.
+  !
+  real (rk), parameter :: ALPHA = 1.2
+
+  !
   ! This defines two  iterator interfaces x -> dx  for use in fixpoint
   ! non-linear problems.  One is  the type of Fortran closures another
   ! is the corresponding type of C closures. Such an iterator function
@@ -182,10 +218,12 @@ contains
     real (rk), parameter :: half = 0.5
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
-    real (rk), dimension (n, size (sites), size (sites)) :: v, t, c, g
+    real (rk), dimension (n, size (sites), size (sites)) :: &
+         v, vk, t, c, g
 
     ! Radial grids:
     real (rk) :: r(n), dr, dk
+    real (rk) :: k(n)
 
     integer :: i, m
 
@@ -196,10 +234,12 @@ contains
     dk = pi / rmax
     forall (i = 1:n)
        r(i) = (i - half) * dr
+       k(i) = (i - half) * dk
     end forall
 
-    ! Tabulate pairwise potential v() on the r-grid:
-    call force_field (sites, r, v)
+    ! Tabulate short-range  pairwise potential  v() on the  r-grid and
+    ! long-range pairwise potential vk() on the k-grid:
+    call force_field (sites, r, k, v, vk)
 
     ! Intitial guess:
     t = 0.0
@@ -252,9 +292,33 @@ contains
          enddo
       enddo
 
+      !
+      ! The  real-space representation  encodes  only the  short-range
+      ! part  of  the  direct   corrlation.  The  (fixed)  long  range
+      ! contribution is added here:
+      !
+      !   C := C  - βV
+      !         S     L
+      !
+      c = c - beta * vk
+
+      !
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
+      !
       dt = oz_equation_c_t (rho, c)
+
+      !
+      ! Since we plugged  in the Fourier transform of  the full direct
+      ! correlation including the long range part into the OZ equation
+      ! what we get out is the full indirect correlation including the
+      ! long-range part.  The menmonic is  C + T is short range.  Take
+      ! it out:
+      !
+      !   T  := T - βV
+      !    S          L
+      !
+      dt = dt - beta * vk
 
       ! Inverse FT via DST:
       do j = 1, m
@@ -269,11 +333,19 @@ contains
   end subroutine rism1d
 
 
-  subroutine force_field (sites, r, v)
+  subroutine force_field (sites, r, k, vr, vk)
+    !
+    ! Force field  is represented by two contributions,  the first one
+    ! is (hopefully) of short range and is returned in array vr on the
+    ! r-grid. The other term is  then of long range and, naturally, is
+    ! represented by array vk on the k-grid.
+    !
     implicit none
-    type (site), intent (in) :: sites(:) ! (m)
-    real (rk), intent (in) :: r(:)       ! (n)
-    real (rk), intent (out) :: v(:, :, :) ! (n, m, m)
+    type (site), intent (in) :: sites(:)   ! (m)
+    real (rk), intent (in) :: r(:)         ! (n)
+    real (rk), intent (in) :: k(:)         ! (n)
+    real (rk), intent (out) :: vr(:, :, :) ! (n, m, m)
+    real (rk), intent (out) :: vk(:, :, :) ! (n, m, m)
     ! *** end of inteface ***
 
     real (rk) :: epsilon, sigma, charge
@@ -292,11 +364,18 @@ contains
           sigma = (a % sigma + b % sigma) / 2
           charge = a % charge * b % charge
 
+          ! Short range on the r-grid:
           if (sigma /= 0.0) then
-             v(:, i, j) = epsilon * lj (r / sigma)
+             vr(:, i, j) = epsilon * lj (r / sigma) + &
+                  EPSILON0INV * charge * coulomb_short (r, ALPHA)
           else
-             v(:, i, j) = 0.0
+             vr(:, i, j) = &
+                  EPSILON0INV * charge * coulomb_short (r, ALPHA)
           endif
+
+          ! Long range on the k-grid:
+          vk(:, i, j) = &
+               EPSILON0INV * charge * coulomb_long_fourier (k, ALPHA)
        enddo
     enddo
 
