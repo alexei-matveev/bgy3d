@@ -288,7 +288,7 @@ contains
       ! Forward FT via DST:
       do j = 1, m
          do i = 1, m
-            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 * (n/pi) / DST_FW)
+            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / (2 * pi) / DST_FW)
          enddo
       enddo
 
@@ -323,7 +323,7 @@ contains
       ! Inverse FT via DST:
       do j = 1, m
          do i = 1, m
-            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 * (n/pi) / DST_BW)
+            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / (2 * pi) / DST_BW)
          enddo
       enddo
 
@@ -779,7 +779,7 @@ contains
        g(i) = f(i) * (2 * i - 1)
     enddo
 
-    g = dst (g)
+    g = 2 * n * dst (g)
 
     do i = 1, n
        g(i) = g(i) / (2 * i - 1)
@@ -821,10 +821,10 @@ contains
     f = f / (sum (r**2 * f) * 4 * pi * dr)
 
     ! Forward transform:
-    g = fourier (f) * (dr**3 * (n/pi) / DST_FW)
+    g = fourier (f) * (dr**3 / (2 * pi) / DST_FW)
 
     ! Backward transform:
-    h = fourier (g) * (dk**3 * (n/pi) / DST_BW) ! a * b = 2pi
+    h = fourier (g) * (dk**3 / (2 * pi) / DST_BW) ! a * b = 2pi
 
     print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
     print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
@@ -838,7 +838,7 @@ contains
     ! This should correspond  to the convolution (f *  f) which should
     ! be again a gaussian, twice as "fat":
     h = g * g
-    h = fourier (h) * (dk**3 * (n/pi) / DST_BW) ! a*a*b = 1
+    h = fourier (h) * (dk**3 / (2 * pi) / DST_BW) ! a*a*b = 1
 
     print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
 
