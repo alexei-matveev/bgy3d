@@ -46,8 +46,8 @@ module rism
   ! inverse,  whereas the  second equation  will make  the convolution
   ! theorem factor-less as in FT(f * g) = FT(f) FT(g):
   !
-  real (rk), parameter :: DST_FW = 1           ! == a
-  real (rk), parameter :: DST_BW = (2 * pi)**3 ! == b
+  real (rk), parameter :: FT_FW = 1           ! == a
+  real (rk), parameter :: FT_BW = (2 * pi)**3 ! == b
 
   !
   ! The interaction energy of two unit charges separated by 1 A is
@@ -291,7 +291,7 @@ contains
       ! Forward FT via DST:
       do j = 1, m
          do i = 1, m
-            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / DST_FW)
+            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / FT_FW)
          enddo
       enddo
 
@@ -326,7 +326,7 @@ contains
       ! Inverse FT via DST:
       do j = 1, m
          do i = 1, m
-            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / DST_BW)
+            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / FT_BW)
          enddo
       enddo
 
@@ -824,10 +824,10 @@ contains
     f = f / (sum (r**2 * f) * 4 * pi * dr)
 
     ! Forward transform:
-    g = fourier (f) * (dr**3 / DST_FW)
+    g = fourier (f) * (dr**3 / FT_FW)
 
     ! Backward transform:
-    h = fourier (g) * (dk**3 / DST_BW)
+    h = fourier (g) * (dk**3 / FT_BW)
 
     print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
     print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
@@ -841,7 +841,7 @@ contains
     ! This should correspond  to the convolution (f *  f) which should
     ! be again a gaussian, twice as "fat":
     h = g * g
-    h = fourier (h) * (dk**3 / DST_BW)
+    h = fourier (h) * (dk**3 / FT_BW)
 
     print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
 
