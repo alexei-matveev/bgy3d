@@ -86,8 +86,8 @@ module rism
        use iso_c_binding, only: c_size_t, c_double
        implicit none
        integer (c_size_t), intent (in), value :: n
-       real (c_double), intent (out) :: out (n)
-       real (c_double), intent (in) :: in (n)
+       real (c_double), intent (out) :: out(n)
+       real (c_double), intent (in) :: in(n)
      end subroutine rism_dst
 
      subroutine rism_snes (ctx, f, n, x) bind (c)
@@ -213,6 +213,7 @@ contains
     c = closure_hnc (beta, v, t)
     g = 1 + c + t
 
+    ! Done with it, print results:
     block
        integer :: p, i, j
        print *, "# rho=", rho, "beta=", beta, "n=", n
@@ -622,7 +623,7 @@ contains
 
     !
     ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
-    ! around  j =  n -  0.5".  Here  use integer  arithmetics  and the
+    ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
     do i = 1, n
