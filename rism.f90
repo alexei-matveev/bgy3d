@@ -40,11 +40,14 @@ module rism
   ! *** END OF INTERFACE ***
   !
 
-  !                              2
-  ! These should obey: ab = 2π, a b = 1:
   !
-  real (rk), parameter :: DST_FW = 1 / (2 * pi) ! == a
-  real (rk), parameter :: DST_BW = (2 * pi)**2  ! == b
+  ! These should  obey: ab  = (2π)³, a²b  = (2π)³. The  first equality
+  ! guarantees  that that the  forward- and  backward FT  are mutually
+  ! inverse,  whereas the  second equation  will make  the convolution
+  ! theorem factor-less as in FT(f * g) = FT(f) FT(g):
+  !
+  real (rk), parameter :: DST_FW = 1           ! == a
+  real (rk), parameter :: DST_BW = (2 * pi)**3 ! == b
 
   !
   ! The interaction energy of two unit charges separated by 1 A is
@@ -288,7 +291,7 @@ contains
       ! Forward FT via DST:
       do j = 1, m
          do i = 1, m
-            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / (2 * pi) / DST_FW)
+            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / DST_FW)
          enddo
       enddo
 
@@ -323,7 +326,7 @@ contains
       ! Inverse FT via DST:
       do j = 1, m
          do i = 1, m
-            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / (2 * pi) / DST_BW)
+            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / DST_BW)
          enddo
       enddo
 
@@ -821,10 +824,10 @@ contains
     f = f / (sum (r**2 * f) * 4 * pi * dr)
 
     ! Forward transform:
-    g = fourier (f) * (dr**3 / (2 * pi) / DST_FW)
+    g = fourier (f) * (dr**3 / DST_FW)
 
     ! Backward transform:
-    h = fourier (g) * (dk**3 / (2 * pi) / DST_BW) ! a * b = 2pi
+    h = fourier (g) * (dk**3 / DST_BW)
 
     print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
     print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
@@ -838,7 +841,7 @@ contains
     ! This should correspond  to the convolution (f *  f) which should
     ! be again a gaussian, twice as "fat":
     h = g * g
-    h = fourier (h) * (dk**3 / (2 * pi) / DST_BW) ! a*a*b = 1
+    h = fourier (h) * (dk**3 / DST_BW)
 
     print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
 
