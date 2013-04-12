@@ -37,7 +37,7 @@ module rism
   end type problem_data
 
   !
-  ! *** end of interface ***
+  ! *** END OF INTERFACE ***
   !
 
   !                              2
@@ -56,8 +56,8 @@ module rism
      function f_iterator (x) result (dx)
        import rk
        implicit none
-       real(rk), intent(in) :: x(:)
-       real(rk) :: dx(size (x))
+       real (rk), intent (in) :: x(:, :, :)
+       real (rk) :: dx(size (x, 1), size (x, 2), size (x, 3))
      end function f_iterator
 
      subroutine c_iterator (ctx, n, x, dx) bind (c)
@@ -125,6 +125,7 @@ module rism
   ! simpler than that.
   !
   type context
+     integer :: shape(3)
      procedure (f_iterator), pointer, nopass :: f
   end type context
 
@@ -139,8 +140,10 @@ contains
     ! *** end of interface ***
 
     integer :: i, n
-    real(rk) :: rmax
+    real (rk) :: rmax
+    real (rk) :: rho(m)
 
+    rho = pd % rho              ! all site densities are the same
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     n = maxval (pd % n)
 
@@ -154,38 +157,38 @@ contains
             &        pad (sites(i) % name), &
             &        sites(i) % sigma, &
             &        sites(i) % epsilon, &
-            &        sites(i) % charge
+            &        sites(i) % charge, &
+            &        rho(i)
     enddo
 
-    ! do i = 1, 10**0
-    !    call test_dst (2**12)
-    ! end do
-    ! call test_ft (rmax=10.d0, n=2**10)
-    ! stop
+    ! This is applicable to LJ only, and should take reduced
+    ! density/temperature:
+    ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism1d (rho = pd % rho, beta = pd % beta, rmax = rmax, n=n, &
-         &       sites = sites)
-    ! call rism1d (rho=0.85d0, beta=0.34722d0, rmax=20.0d0, n=2**14)
-    ! call rism1d (rho=1.054796d0, beta=0.261610d0, rmax=20.0d0, n=2**14)
+    call rism1d (n, rmax, beta= pd % beta, rho= rho, sites= sites)
   end subroutine rism_main
 
 
-  subroutine rism1d (rho, beta, rmax, n, sites)
+  subroutine rism1d (n, rmax, beta, rho, sites)
     implicit none
-    real(rk), intent(in) :: rho, beta, rmax
-    integer, intent(in) :: n
-    type(site), intent(in) :: sites(:)
+    integer, intent (in) :: n            ! grid size
+    real (rk), intent (in) :: rmax       ! cell size
+    real (rk), intent (in) :: beta       ! inverse temp
+    real (rk), intent (in) :: rho(:)     ! (m)
+    type (site), intent (in) :: sites(:) ! (m)
     ! *** end of interface ***
 
-    real(rk), parameter :: half = 0.5, alpha = 0.02
-    real(rk) :: r(n), k(n), v(n), t(n), c(n), g(n)
-    real(rk) :: ck(n), tk(n)
-    real(rk) :: dr, dk
+    real (rk), parameter :: half = 0.5
+
+    ! Pair quantities. FIXME: they are symmetric, one should use that:
+    real (rk), dimension (n, size (sites), size (sites)) :: v, t, c, g
+
+    ! Radial grids:
+    real (rk) :: r(n), k(n), dr, dk
+
     integer :: i, m
 
     m = size (sites)
-
-    call print_info (rho=rho, beta=beta)
 
     ! dr * dk = 2π/2n:
     dr = rmax / n
@@ -195,10 +198,31 @@ contains
        k(i) = (i - half) * dk
     end forall
 
-    ! LJ potential, sigma=1, epsilon=1:
-    v = lj (r)
+    block
+       real (rk) :: epsilon, sigma, charge
+       integer :: i, j
+       type (site) :: a, b
 
-    ! Intirial guess:
+       ! LJ potential:
+       do j = 1, m
+          b = sites(j)
+          do i = 1, m
+             a = sites(i)
+
+             epsilon = sqrt (a % epsilon * b % epsilon)
+             sigma = (a % sigma + b % sigma) / 2
+             charge = a % charge * b % charge
+
+             if (sigma /= 0.0) then
+                v(:, i, j) = epsilon * lj (r / sigma)
+             else
+                v(:, i, j) = 0.0
+             endif
+          enddo
+       enddo
+    end block
+
+    ! Intitial guess:
     t = 0.0
 
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
@@ -211,11 +235,19 @@ contains
     c = closure_hnc (beta, v, t)
     g = 1 + c + t
 
-    print *, "# rho=", rho, "beta=", beta, "n=", n
-    print *, "# r, v, t, c, g"
-    do i = 1, n
-       print *, r(i), v(i), t(i), c(i), g(i)
-    enddo
+    block
+       integer :: p, i, j
+       print *, "# rho=", rho, "beta=", beta, "n=", n
+       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs"
+       do p = 1, n
+          write (*, *) r(p), &
+               &     ((v(p, i, j), i=1,j), j=1,m), &
+               &     ((t(p, i, j), i=1,j), j=1,m), &
+               &     ((c(p, i, j), i=1,j), j=1,m), &
+               &     ((g(p, i, j), i=1,j), j=1,m)
+
+       enddo
+    end block
 
   contains
 
@@ -225,21 +257,31 @@ contains
       ! ... Implements procedure(f_iterator).
       !
       implicit none
-      real(rk), intent(in) :: t(:)
-      real(rk) :: dt(size (t))
+      real (rk), intent (in) :: t(:, :, :) ! (n, m, m)
+      real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
+
+      integer :: i, j
 
       c = closure_hnc (beta, v, t)
 
       ! Forward FT via DST:
-      ck = fourier (c) * (dr**3 * (n/pi) / a)
+      do j = 1, m
+         do i = 1, m
+            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 * (n/pi) / a)
+         enddo
+      enddo
 
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
-      tk = oz_equation_c_t (rho, ck)
+      dt = oz_equation_c_t (rho, c)
 
       ! Inverse FT via DST:
-      dt = fourier (tk) * (dk**3 * (n/pi) / b)
+      do j = 1, m
+         do i = 1, m
+            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 * (n/pi) / b)
+         enddo
+      enddo
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -255,13 +297,13 @@ contains
     !    n+1    n       n
     !
     implicit none
-    procedure(f_iterator) :: f  ! (x) -> dx
-    real(rk), intent(inout) :: x(:)
+    procedure (f_iterator) :: f  ! (x) -> dx
+    real (rk), intent (inout) :: x(:, :, :)
     ! *** end of interface ***
 
-    real(rk), parameter :: alpha = 0.02
-    real(rk) :: dx(size (x))
-    real(rk) :: diff
+    real (rk), parameter :: alpha = 0.02
+    real (rk) :: dx(size (x, 1), size (x, 2), size (x, 3))
+    real (rk) :: diff
     integer :: iter
     logical :: converged
 
@@ -287,14 +329,15 @@ contains
     !
     use iso_c_binding, only: c_ptr, c_loc
     implicit none
-    procedure(f_iterator) :: f  ! (x) -> dx
-    real(rk), intent(inout) :: x(:)
+    procedure (f_iterator) :: f  ! (x) -> dx
+    real (rk), intent (inout) :: x(:, :, :)
     ! *** end of interface ***
 
-    type(context), target :: f_ctx
-    type(c_ptr) :: ctx
+    type (context), target :: f_ctx
+    type (c_ptr) :: ctx
 
     f_ctx % f => f
+    f_ctx % shape = shape (x)
     ctx = c_loc (f_ctx)
 
     call rism_snes (ctx, iterator, size (x), x)
@@ -309,19 +352,31 @@ contains
     !
     use iso_c_binding, only: c_f_pointer, c_ptr, c_int
     implicit none
-    type(c_ptr), intent(in), value :: ctx
-    integer(c_int), intent(in), value :: n
-    real(rk), intent(in) :: x(n)
-    real(rk), intent(out) :: dx(n)
+    type (c_ptr), intent (in), value :: ctx
+    integer (c_int), intent (in), value :: n
+    real (rk), intent (in) :: x(n)
+    real (rk), intent (out) :: dx(n)
     ! *** end of interface ***
 
     type(context), pointer :: f_ctx
+    integer :: shape(3)
 
     ! We  dont  so any  work  ourselves,  just  extract a  pointer  to
     ! procedure(f_iterator) an let it do the rest:
     call c_f_pointer (ctx, f_ctx)
 
-    dx = f_ctx % f (x)
+    shape = f_ctx % shape
+
+    block
+       real (rk) :: y(shape(1), shape(2), shape(3))
+       real (rk) :: dy(shape(1), shape(2), shape(3))
+
+       y = reshape (x, shape)
+
+       dy = f_ctx % f (y)
+
+       dx = reshape (dy, [n])
+    end block
   end subroutine iterator
 
   !
@@ -359,15 +414,120 @@ contains
   ! the result  by h3 in addition,  you will compute  exactly what the
   ! older version of the function did:
   !
-  elemental function oz_equation_c_t (rho, c) result (t)
+  function oz_equation_c_t (rho, C) result (T)
+    implicit none
+    real (rk), intent (in) :: rho(:), C(:, :, :) ! (m), (n, m, m)
+    real (rk) :: T(size (C, 1), size (C, 2), size (C, 3))
+    ! *** end of interface ***
+
+    integer :: i
+
+    if (size (rho) == 1) then
+       do i = 1, size (C, 1)
+          T(i, 1, 1) = oz_equation_c_t_1x1 (rho(1), C(i, 1, 1))
+       enddo
+    else
+       do i = 1, size (C, 1)
+          T(i, :, :) = oz_equation_c_t_MxM (rho(:), C(i, :, :))
+       enddo
+    endif
+  end function oz_equation_c_t
+
+
+  elemental function oz_equation_c_t_1x1 (rho, c) result (t)
     implicit none
     real(rk), intent(in) :: rho, c
     real(rk) :: t
     ! *** end of interface ***
 
-    ! Alternatively: t = c / (1 - rho * c) - c
+    !
+    ! The actual (matrix) expression
+    !
+    !                  -1
+    !   t = (1 - ρ * c)  * c - c
+    !
+    ! simplifies in the 1x1 case to this:
+    !
     t = rho * (c * c) / (1 - rho * c)
-  end function oz_equation_c_t
+  end function oz_equation_c_t_1x1
+
+
+  function oz_equation_c_t_MxM (rho, C) result (T)
+    !
+    ! So far  rho is the same for  all sites, we may  have mixed left-
+    ! and right-side multiplies.
+    !
+    implicit none
+    real (rk), intent (in) :: rho(:)  ! (m)
+    real (rk), intent (in) :: C(:, :) ! (m, m)
+    real (rk) :: T(size (rho), size (rho)) ! (m, m)
+    ! *** end of interface ***
+
+    real (rk), dimension (size (rho), size (rho)) :: H
+    integer :: i, j, m
+
+    m = size (rho)
+
+    ! T :=  1 - ρC, H  := C. The  latter will be owerwritten  with the
+    ! real H after  solving the linear equations. The  output matrix T
+    ! is used here as a free work array:
+    do j = 1, m
+       do i = 1, m
+          H(i, j) = C(i, j)
+          T(i, j) = delta (i, j) - rho(i) * C(i, j)
+       enddo
+    enddo
+
+    !
+    ! Solving the linear equation makes  H have the literal meaning of
+    ! the total correlation matrix (input T is destroyed):
+    !
+    !       -1                -1
+    ! H := T   * H == (1 - ρC)   * C
+    !
+    call sles (m, T, H)
+
+    !
+    ! The  same  effect  is  achieved  in  1x1  version  of  the  code
+    ! differently:
+    !
+    ! T := H - C
+    !
+    T = H - C
+
+  contains
+
+    function delta (i, j) result (d)
+      implicit none
+      integer, intent (in) :: i, j
+      integer :: d
+      ! *** end of interface ***
+
+      if (i == j) then
+         d = 1
+      else
+         d = 0
+      endif
+    end function delta
+
+    subroutine sles (m, a, b)
+      !
+      ! Solve linear equations  A X = B. As in LAPACK  the matrix A is
+      ! destroyed and the result is returned in B.
+      !
+      implicit none
+      integer, intent (in) :: m
+      real (rk), intent (inout) :: a(m, m), b(m, m)
+      ! *** end of interface ***
+
+      integer ipiv(m), info
+
+      ! B will  be overwriten with  the result, A will  be overwritten
+      ! with its factorization:
+      call dgesv (m, m, a, m, ipiv, b, m, info)
+      if (info /= 0) stop "dgesv failed"
+    end subroutine sles
+  end function oz_equation_c_t_MxM
 
 
   elemental function lj (r) result (f)
