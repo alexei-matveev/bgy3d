@@ -427,15 +427,10 @@ contains
     real (rk) :: f
     ! *** end of interface ***
 
-    real (rk) :: k2, a2
-
-    k2 = k**2
-    a2 = alpha**2
-
-    if (k2 == 0.0) then
-       f = 0.0                  ! 1/k2 is undefined
+    if (k == 0.0) then
+       f = 0.0                  ! 1/k² is undefined
     else
-       f = 4 * pi * exp (-k2 / (4 * a2)) / k2
+       f = 4 * pi * exp (-k**2 / (4 * alpha**2)) / k**2
     endif
   end function coulomb_long_fourier
 
