@@ -319,6 +319,76 @@ contains
   end subroutine force_field
 
 
+  !
+  ! In the most general case
+  !
+  !   coulomb_long (r, a) = (1/ε₀) erf (a r) / r
+  !
+  ! The corresponding Fourier transform is
+  !
+  !   coulomb_long_fourier (k, a) = (4π/ε₀) exp (- k² / 4a²) / k²
+  !
+  ! Note that the long-range Coulomb is regular in real space:
+  !
+  !                           2           4
+  !   erf(x) / x = 2 / √π - 2x / 3√π + O(x )
+  !
+  ! So that for a typical value of a = 1.2 the long range potential at r
+  ! = 0  is 331.84164 * 1.2 *  1.12837916709551 ~ 449 kcal  for two unit
+  ! charges. By doing a finite-size FFT of the k-gitter appriximation of
+  ! the  above  Fourier representation  you  will  likely get  something
+  ! different.
+  !
+  elemental function coulomb_long_fourier (k, alpha) result (f)
+    implicit none
+    real (rk), intent (in) :: k, alpha
+    real (rk) :: f
+    ! *** end of interface ***
+
+    real (rk) :: k2, a2
+
+    k2 = k**2
+    a2 = alpha**2
+
+    if (k2 == 0.0) then
+       f = 0.0                  ! 1/k2 is undefined
+    else
+       f = 4 * pi * exp (-k2 / (4 * a2)) / k2
+    endif
+  end function coulomb_long_fourier
+
+
+  elemental function coulomb_long (r, alpha) result (f)
+    !
+    ! It is unlikely that you  need this function as as the long-range
+    ! interactions are  best specified  on the k-grid  and not  on the
+    ! r-grid. See coulomb_long_fourier() instead.
+    !
+    implicit none
+    real (rk), intent (in) :: r, alpha
+    real (rk) :: f
+    ! *** end of interface ***
+
+    ! ERF() is F08 and later:
+    if (r == 0.0) then
+       f = alpha * 2 / sqrt (pi)
+    else
+       f = erf (alpha * r) / r
+    endif
+  end function coulomb_long
+
+
+  elemental function coulomb_short (r, alpha) result (f)
+    implicit none
+    real (rk), intent (in) :: r, alpha
+    real (rk) :: f
+    ! *** end of interface ***
+
+    ! This will return infinity for r = 0. ERFC() is F08 and later:
+    f = erfc (alpha * r) / r
+  end function coulomb_short
+
+
   subroutine snes_picard (f, x)
     !
     ! Simple Picard iteration
