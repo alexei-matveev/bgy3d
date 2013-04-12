@@ -531,28 +531,27 @@ contains
     implicit none
     type (c_ptr), intent (in), value :: ctx
     integer (c_int), intent (in), value :: n
-    real (rk), intent (in) :: x(n)
-    real (rk), intent (out) :: dx(n)
+    real (rk), intent (in), target :: x(n)
+    real (rk), intent (out), target :: dx(n)
     ! *** end of interface ***
 
     type (context), pointer :: f_ctx
-    integer :: shape(3)
 
     ! We  dont  so any  work  ourselves,  just  extract a  pointer  to
     ! procedure(f_iterator) an let it do the rest:
     call c_f_pointer (ctx, f_ctx)
 
-    shape = f_ctx % shape
-
     block
-       real (rk) :: y(shape(1), shape(2), shape(3))
-       real (rk) :: dy(shape(1), shape(2), shape(3))
+       real (rk), pointer :: y(:, :, :), dy(:, :, :)
+       integer :: n(3)
 
-       y = reshape (x, shape)
+       n = f_ctx % shape
+
+       ! F03 pointer association with contiguous array:
+       y(1:n(1), 1:n(2), 1:n(3)) => x
+       dy(1:n(1), 1:n(2), 1:n(3)) => dx
 
        dy = f_ctx % f (y)
-
-       dx = reshape (dy, [n])
     end block
   end subroutine iterator
 
