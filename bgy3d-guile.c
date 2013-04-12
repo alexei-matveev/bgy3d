@@ -905,6 +905,16 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 
 static SCM guile_rism_main (SCM solvent, SCM settings)
 {
+#ifndef WITH_FORTRAN
+  /*
+    The working  horse rism_main() is  implemented in Fortan,  GCC 4.3
+    cannot  handle that source.   FIXME: maybe  one should  rather use
+    GCC_VERSION?
+  */
+  (void) solvent;
+  (void) settings;
+  assert (false);
+#else
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -924,6 +934,7 @@ static SCM guile_rism_main (SCM solvent, SCM settings)
 
   free (solvent_name);
   free (solvent_sites);
+#endif
 
   return SCM_UNSPECIFIED;
 }

@@ -26,6 +26,13 @@ SHELL = /bin/sh
 WITH_GUILE = 0
 
 #
+# Some  code  is  written  in  Fortran using  F2008  features.   Older
+# compilers   including   GFortran   4.3   on  Lenny   cannot   handle
+# that. Disable those features:
+#
+WITH_FORTRAN = 0
+
+#
 # Compile rarely used solvers.   These solvers have not beed converted
 # to direct  use of  FFTW MPI API  and rely  on the wrappers  by Steve
 # Plimpton,  see  ./fft  directory.    The  fft_3d.h  header  needs  a
@@ -83,7 +90,6 @@ libbgy3d.a = \
 	hnc3d.o \
 	hnc3d-sles.o \
 	rism-dst.o \
-	rism.o \
 	bgy3d.o \
 	bgy3d-force.o \
 	bgy3d-pure.o \
@@ -104,6 +110,11 @@ ifeq ($(WITH_GUILE),1)
 	LIBS += $(shell guile-config link)
 	INCDIRS += $(shell guile-config compile)
 	USERFLAGS += -DWITH_GUILE
+endif
+
+ifeq ($(WITH_FORTRAN),1)
+	libbgy3d.a += rism.o
+	USERFLAGS += -DWITH_FORTRAN
 endif
 
 bgy3d-extra-objs = \
