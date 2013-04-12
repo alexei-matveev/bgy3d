@@ -616,19 +616,23 @@ contains
     real (rk) :: g(size (f))
     ! *** end of interface ***
 
-    real (rk), parameter :: half = 0.5
     integer :: i, n
 
     n = size (f)
 
+    !
+    ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
+    ! around  j =  n -  0.5".  Here  use integer  arithmetics  and the
+    ! identity (2 * j - 1) / 2 == j - 0.5.
+    !
     do i = 1, n
-       g(i) = f(i) * (i - half)
+       g(i) = f(i) * (2 * i - 1)
     enddo
 
     g = dst (g)
 
     do i = 1, n
-       g(i) = g(i) / (i - half)
+       g(i) = g(i) / (2 * i - 1)
     enddo
   end function fourier
 
