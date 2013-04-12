@@ -8,32 +8,32 @@ module rism
   public :: rism_main
   public :: bgy3d_problem_data
 
-  real(rk), parameter, public :: pi = 4 * atan (1.0_rk)
+  real (rk), parameter, public :: pi = 4 * atan (1.0_rk)
 
   ! Keep this in sync with bgy3d-solutes.h:
   type, public, bind (c) :: site
-     character(kind=c_char, len=5) :: name ! atom types. What are they used for?
-     real(c_double) :: x(3)                ! coordinates
-     real(c_double) :: sigma               ! sigma for LJ
-     real(c_double) :: epsilon             ! epsilon for LJ
-     real(c_double) :: charge              ! charge
+     character (kind=c_char, len=5) :: name ! atom types. What are they used for?
+     real (c_double) :: x(3)                ! coordinates
+     real (c_double) :: sigma               ! sigma for LJ
+     real (c_double) :: epsilon             ! epsilon for LJ
+     real (c_double) :: charge              ! charge
   end type site
 
   ! Keep this in sync with bgy3d.h:
   type, public, bind (c) :: problem_data
-     real(c_double) :: interval(2) ! min and max of the domain: 3d-box*/
-     real(c_double) :: h(3)        ! mesh width
-     real(c_double) :: beta        ! inverse temperature, 1/kT
-     real(c_double) :: rho         ! solvent density
-     integer(c_int) :: N(3), N3    ! global Grid size
+     real (c_double) :: interval(2) ! min and max of the domain: 3d-box*/
+     real (c_double) :: h(3)        ! mesh width
+     real (c_double) :: beta        ! inverse temperature, 1/kT
+     real (c_double) :: rho         ! solvent density
+     integer (c_int) :: N(3), N3    ! global Grid size
 
      ! Other staff  that was retrieved by the  solvers themselves from
      ! the (Petsc) environment:
-     real(c_double) :: lambda   ! Mixing parameter.
-     real(c_double) :: damp     ! Scaling factor.
-     integer(c_int) :: max_iter ! Maximal number of iterations.
-     real(c_double) :: norm_tol ! Convergence threshold.
-     real(c_double) :: zpad     ! FIXME: ???
+     real (c_double) :: lambda   ! Mixing parameter.
+     real (c_double) :: damp     ! Scaling factor.
+     integer (c_int) :: max_iter ! Maximal number of iterations.
+     real (c_double) :: norm_tol ! Convergence threshold.
+     real (c_double) :: zpad     ! FIXME: ???
   end type problem_data
 
   !
@@ -43,7 +43,7 @@ module rism
   !                              2
   ! These should obey: ab = 2π, a b = 1:
   !
-  real(rk), parameter :: a = 1 / (2 * pi), b = (2 * pi)**2
+  real (rk), parameter :: a = 1 / (2 * pi), b = (2 * pi)**2
 
   !
   ! This defines two  iterator interfaces x -> dx  for use in fixpoint
@@ -63,10 +63,10 @@ module rism
      subroutine c_iterator (ctx, n, x, dx) bind (c)
        use iso_c_binding, only: c_ptr, c_int, c_double
        implicit none
-       type(c_ptr), intent(in), value :: ctx
-       integer(c_int), intent(in), value :: n
-       real(c_double), intent(in) :: x(n)
-       real(c_double), intent(out) :: dx(n)
+       type (c_ptr), intent (in), value :: ctx
+       integer (c_int), intent (in), value :: n
+       real (c_double), intent (in) :: x(n)
+       real (c_double), intent (out) :: dx(n)
      end subroutine c_iterator
   end interface
 
@@ -85,9 +85,9 @@ module rism
        !
        use iso_c_binding, only: c_size_t, c_double
        implicit none
-       integer(c_size_t), intent(in), value :: n
-       real(c_double), intent(out) :: out (n)
-       real(c_double), intent(in) :: in (n)
+       integer (c_size_t), intent (in), value :: n
+       real (c_double), intent (out) :: out (n)
+       real (c_double), intent (in) :: in (n)
      end subroutine rism_dst
 
      subroutine rism_snes (ctx, f, n, x) bind (c)
@@ -95,7 +95,7 @@ module rism
        ! void rism_snes (void *ctx, ArrayFunc f,
        !                 int n, real x_[n])
        !
-       ! using procedure(c_iterator) or in C-lang ArrayFunc:
+       ! using procedure (c_iterator) or in C-lang ArrayFunc:
        !
        ! typedef void (*ArrayFunc) (void *ctx,
        !                            int n, const real x[n], real r[n]);
@@ -104,16 +104,16 @@ module rism
        !
        use iso_c_binding, only: c_ptr, c_int, c_double
        implicit none
-       type(c_ptr), intent (in), value :: ctx
-       procedure(c_iterator) :: f
-       integer(c_int), intent (in), value :: n
-       real(c_double), intent (inout) :: x(n)
+       type (c_ptr), intent (in), value :: ctx
+       procedure (c_iterator) :: f
+       integer (c_int), intent (in), value :: n
+       real (c_double), intent (inout) :: x(n)
      end subroutine rism_snes
 
      function bgy3d_problem_data () result (pd) bind (c)
        import problem_data
        implicit none
-       type(problem_data) :: pd
+       type (problem_data) :: pd
      end function bgy3d_problem_data
   end interface
 
@@ -134,9 +134,9 @@ contains
   subroutine rism_main (pd, m, sites) bind (c)
     use iso_c_binding, only: c_int
     implicit none
-    type(problem_data), intent(in) :: pd ! no VALUE!
-    integer(c_int), intent(in), value :: m
-    type(site), intent(in) :: sites(m)
+    type (problem_data), intent (in) :: pd ! no VALUE!
+    integer (c_int), intent (in), value :: m
+    type (site), intent (in) :: sites(m)
     ! *** end of interface ***
 
     integer :: i, n
@@ -347,7 +347,7 @@ contains
   subroutine iterator (ctx, n, x, dx) bind (c)
     !
     ! Implements  procedure(c_iterator)  and  will  be passed  to  the
-    ! rism_snes()   together   with    the   suitable   context.   See
+    ! rism_snes()   together   with   the   suitable   context.    See
     ! snes_default().
     !
     use iso_c_binding, only: c_f_pointer, c_ptr, c_int
@@ -358,7 +358,7 @@ contains
     real (rk), intent (out) :: dx(n)
     ! *** end of interface ***
 
-    type(context), pointer :: f_ctx
+    type (context), pointer :: f_ctx
     integer :: shape(3)
 
     ! We  dont  so any  work  ourselves,  just  extract a  pointer  to
@@ -391,8 +391,8 @@ contains
   !
   elemental function closure_hnc (beta, v, t) result (c)
     implicit none
-    real(rk), intent(in) :: beta, v, t
-    real(rk) :: c
+    real (rk), intent (in) :: beta, v, t
+    real (rk) :: c
     ! *** end of interface ***
 
     ! exp (-beta * v + t) - 1.0 - t:
@@ -436,8 +436,8 @@ contains
 
   elemental function oz_equation_c_t_1x1 (rho, c) result (t)
     implicit none
-    real(rk), intent(in) :: rho, c
-    real(rk) :: t
+    real (rk), intent (in) :: rho, c
+    real (rk) :: t
     ! *** end of interface ***
 
     !
@@ -535,11 +535,11 @@ contains
     ! To be called as in eps * lj (r / sigma)
     !
     implicit none
-    real(rk), intent(in) :: r   ! r / sigma, in general
-    real(rk) :: f
+    real (rk), intent (in) :: r   ! r / sigma, in general
+    real (rk) :: f
     ! *** end of interfce ***
 
-    real(rk) :: sr6
+    real (rk) :: sr6
 
     sr6 = 1 / r**6
 
@@ -550,11 +550,11 @@ contains
   function dst (a) result (b)
     use iso_c_binding, only: c_size_t
     implicit none
-    real(rk), intent(in) :: a(:)
-    real(rk) :: b(size (a))
+    real (rk), intent (in) :: a(:)
+    real (rk) :: b(size (a))
     ! *** end of interface ***
 
-    integer(c_size_t) :: n
+    integer (c_size_t) :: n
 
     ! cast to size_t
     n = size (a)
@@ -565,11 +565,11 @@ contains
 
   function ndst (a) result (b)
     implicit none
-    real(rk), intent(in) :: a(:)
-    real(rk) :: b(size (a))
+    real (rk), intent (in) :: a(:)
+    real (rk) :: b(size (a))
     ! *** end of interface ***
 
-    real(rk) :: norm
+    real (rk) :: norm
 
     norm = 2 * size (b)         ! cast to real
     b = dst (a) / sqrt (norm)
@@ -578,10 +578,10 @@ contains
 
   subroutine test_dst (n)
     implicit none
-    integer, intent(in) :: n
+    integer, intent (in) :: n
     ! *** end of interface ***
 
-    real(rk) :: a(n)
+    real (rk) :: a(n)
 
     call random_number (a)
     a = lj (a + 0.5)
@@ -601,11 +601,11 @@ contains
 
   function fourier (f) result (g)
     implicit none
-    real(rk), intent(in) :: f(:)
-    real(rk) :: g(size (f))
+    real (rk), intent (in) :: f(:)
+    real (rk) :: g(size (f))
     ! *** end of interface ***
 
-    real(rk), parameter :: half = 0.5
+    real (rk), parameter :: half = 0.5
     integer :: i, n
 
     n = size (f)
@@ -624,12 +624,12 @@ contains
 
   subroutine test_ft (rmax, n)
     implicit none
-    integer, intent(in) :: n
-    real(rk), intent(in) :: rmax
+    integer, intent (in) :: n
+    real (rk), intent (in) :: rmax
     ! *** end of interface ***
 
-    real(rk) :: r(n), k(n), f(n), g(n), h(n)
-    real(rk) :: dr, dk
+    real (rk) :: r(n), k(n), f(n), g(n), h(n)
+    real (rk) :: dr, dk
 
     integer :: i
 
@@ -710,10 +710,10 @@ contains
     !  liquid
     !
     implicit none
-    real(rk), intent(in) :: rho, beta
+    real (rk), intent (in) :: rho, beta
     ! *** end of interface ***
 
-    real(rk), parameter :: &
+    real (rk), parameter :: &
          psol_hoef(6) = [0.92302d0, -0.09218d0, +0.62381d0, -0.82672d0, +0.49124d0, -0.10847d0], &
          pliq_hoef(6) = [0.91070d0, -0.25124d0, +0.85861d0, -1.08918d0, +0.63932d0, -0.14433d0], &
          psol_mast(6) = [0.908629d0, -0.041510d0, +0.514632d0, -0.708590d0, +0.428351d0, -0.095229d0], &
@@ -736,8 +736,8 @@ contains
 
   function poly (p, x) result (y)
     implicit none
-    real(rk), intent(in) :: p(0:), x
-    real(rk) :: y
+    real (rk), intent (in) :: p(0:), x
+    real (rk) :: y
     ! *** end of interface ***
 
     integer :: n
@@ -752,8 +752,8 @@ contains
   function pad (s) result (t)
     use iso_c_binding, only: c_null_char
     implicit none
-    character(len=*), intent(in) :: s
-    character(len=len(s)) :: t
+    character (len=*), intent (in) :: s
+    character (len=len (s)) :: t
     ! *** end of interface ***
 
     integer :: i
@@ -772,8 +772,8 @@ program rism_prog
   use rism, only: rism_main, site, problem_data, bgy3d_problem_data
   implicit none
 
-  type(problem_data) :: pd
-  type(site), parameter :: a(1) = &
+  type (problem_data) :: pd
+  type (site), parameter :: a(1) = &
        [site ("lj", [0.0d0, 0.0d0, 0.0d0], 1.0d0, 1.0d0, 0.0d0)]
 
   pd = bgy3d_problem_data()
