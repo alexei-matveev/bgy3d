@@ -184,7 +184,7 @@ contains
     real (rk), dimension (n, size (sites), size (sites)) :: v, t, c, g
 
     ! Radial grids:
-    real (rk) :: r(n), k(n), dr, dk
+    real (rk) :: r(n), dr, dk
 
     integer :: i, m
 
@@ -195,7 +195,6 @@ contains
     dk = pi / rmax
     forall (i = 1:n)
        r(i) = (i - half) * dr
-       k(i) = (i - half) * dk
     end forall
 
     ! Tabulate pairwise potential v() on the r-grid:
