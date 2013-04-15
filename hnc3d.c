@@ -200,7 +200,7 @@ static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
   assert (n % 2 == 0);
 
   {
-    complex C[m][m], A[m][m], B[m][m];
+    complex H[m][m], C[m][m], T[m][m];
 
     for (int k = 0; k < n / 2; k++)
       {
@@ -209,30 +209,33 @@ static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
           for (int j = 0; j <= i; j++)
             {
               /*
-                A := 1 - ρc
-                B := c
+                T :=  1 - ρc, H  := c. The latter  will be owerwritten
+                with the real H after solving the linear equations.
               */
               C[i][j] = C[j][i] = c_fft_[i][j][k];
-              B[i][j] = B[j][i] = C[i][j];
-              A[i][j] = A[j][i] = delta (i, j) - rho * C[i][j];
+              H[i][j] = H[j][i] = C[i][j];
+              T[i][j] = T[j][i] = delta (i, j) - rho * C[i][j];
             }
 
-        /*      -1                -1
-          B := A   * B == (1 - ρc)   * c
-        */
-        hnc3d_sles_zgesv (m, A, B);
+        /*
+          Solving the linear equation makes H have the literal meaning
+          of the total correlation matrix (input T is destroyed):
 
-        /*                     -1    2
-          A := B * C = (1 - ρc)   * c
+                -1                -1
+          H := T   * H == (1 - ρc)   * c
         */
-        hnc3d_sles_zgemm (m, B, C, A); /* FIXME: O(m^3)! */
+        hnc3d_sles_zgesv (m, T, H);
 
-        /*                  -1     2
-          t := ρA = (1 - ρc)   * ρc
+
+        /*
+          The  same  effect  is  achieved  in  1x1  version  of  the  code
+          differently:
+
+          T := H - C
         */
         for (int i = 0; i < m; i++)
           for (int j = 0; j <= i; j++)
-            t_fft_[i][j][k] = rho * A[i][j];
+            t_fft_[i][j][k] = H[i][j] - C[i][j];
       }
   }
 
