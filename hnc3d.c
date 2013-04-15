@@ -322,6 +322,8 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
+        VecScale (c_fft[i][j], h3);
+
         /*
           The real-space  representation encodes only  the short-range
           part  of  the  direct  corrlation. The  (fixed)  long  range
@@ -334,8 +336,6 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
         /* Translate distribution to the grid corner. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
-
-        VecScale (c_fft[i][j], h3);
       }
 
   /* Solves the OZ linear equation for t_fft[][].: */
@@ -401,6 +401,8 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
       {
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
+        VecScale (c_fft[i][j], h3);
+
         /*
           The real-space  representation encodes only  the short-range
           part  of  the  direct  corrlation. The  (fixed)  long  range
@@ -413,8 +415,6 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
 
         /* Translate distribution to the grid corner. */
         bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
-
-        VecScale (c_fft[i][j], h3);
       }
 
   /* Solves the OZ linear equation for t_fft[][].: */
