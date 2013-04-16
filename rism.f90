@@ -373,13 +373,11 @@ contains
 end module snes
 
 
-module rism
+module foreign
   use iso_c_binding, only: c_int, c_double, c_char
-  use kinds, only: rk
   implicit none
   private
 
-  public :: rism_main
   public :: bgy3d_problem_data
 
   ! Keep this in sync with bgy3d-solutes.h:
@@ -408,6 +406,25 @@ module rism
      real (c_double) :: zpad     ! FIXME: ???
   end type problem_data
 
+  !
+  ! These are concrete functions, implemented in C:
+  !
+  interface
+     function bgy3d_problem_data () result (pd) bind (c)
+       import problem_data
+       implicit none
+       type (problem_data) :: pd
+     end function bgy3d_problem_data
+  end interface
+end module foreign
+
+
+module rism
+  use kinds, only: rk
+  implicit none
+  private
+
+  public :: rism_main
   !
   ! *** END OF INTERFACE ***
   !
@@ -450,21 +467,11 @@ module rism
   !
   real (rk), parameter :: ALPHA = 1.2
 
-  !
-  ! These are concrete functions, implemented in C:
-  !
-  interface
-     function bgy3d_problem_data () result (pd) bind (c)
-       import problem_data
-       implicit none
-       type (problem_data) :: pd
-     end function bgy3d_problem_data
-  end interface
-
 contains
 
   subroutine rism_main (pd, m, sites) bind (c)
     use iso_c_binding, only: c_int
+    use foreign, only: problem_data, site
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: m
@@ -504,6 +511,7 @@ contains
   subroutine rism1d (n, rmax, beta, rho, sites)
     use fft, only: fourier, FT_FW, FT_BW
     use snes, only: snes_default
+    use foreign, only: site
     implicit none
     integer, intent (in) :: n            ! grid size
     real (rk), intent (in) :: rmax       ! cell size
@@ -644,6 +652,7 @@ contains
     !
     !   ω(r) = δ(r - R) / 4πR²
     !
+    use foreign, only: site
     implicit none
     type (site), intent (in) :: sites(:)                  ! (m)
     real (rk), intent (in) :: k(:)                        ! (n)
@@ -694,6 +703,7 @@ contains
     ! r-grid. The other term is  then of long range and, naturally, is
     ! represented by array vk on the k-grid.
     !
+    use foreign, only: site
     implicit none
     type (site), intent (in) :: sites(:)   ! (m)
     real (rk), intent (in) :: r(:)         ! (n)
@@ -1087,7 +1097,8 @@ end module rism
 
 
 program rism_prog
-  use rism, only: rism_main, site, problem_data, bgy3d_problem_data
+  use foreign, only: site, problem_data, bgy3d_problem_data
+  use rism, only: rism_main
   implicit none
 
   type (problem_data) :: pd
