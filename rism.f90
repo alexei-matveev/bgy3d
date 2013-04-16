@@ -778,7 +778,7 @@ contains
       real (rk), intent (inout) :: a(m, m), b(m, m)
       ! *** end of interface ***
 
-      integer ipiv(m), info
+      integer :: ipiv(m), info
 
       ! B will  be overwriten with  the result, A will  be overwritten
       ! with its factorization:
