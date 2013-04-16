@@ -7,6 +7,197 @@ module kinds
 end module kinds
 
 
+module fft
+  use kinds, only: rk
+  implicit none
+  private
+
+  real (rk), parameter, public :: pi = 4 * atan (1.0_rk)
+
+  !
+  ! These should  obey: ab  = (2π)³, a²b  = (2π)³. The  first equality
+  ! guarantees  that that the  forward- and  backward FT  are mutually
+  ! inverse,  whereas the  second equation  will make  the convolution
+  ! theorem factor-less as in FT(f * g) = FT(f) FT(g):
+  !
+  real (rk), parameter, public :: FT_FW = 1           ! == a
+  real (rk), parameter, public :: FT_BW = (2 * pi)**3 ! == b
+
+  public :: fourier             ! x(1:n) -> y(1:n)
+
+  !
+  ! *** END OF INTERFACE ***
+  !
+
+  !
+  ! This is a concrete function, implemented in C:
+  !
+  interface
+     subroutine rism_dst (n, out, in) bind (c)
+       !
+       ! Performs DST. In FFTW terms this is RODFT11 (or DST-IV) which
+       ! is self inverse up to a normalization factor.
+       !
+       ! void rism_dst (size_t n, double out[n], const double in[n])
+       !
+       ! See ./rism-dst.c
+       !
+       use iso_c_binding, only: c_size_t, c_double
+       implicit none
+       integer (c_size_t), intent (in), value :: n
+       real (c_double), intent (out) :: out(n)
+       real (c_double), intent (in) :: in(n)
+     end subroutine rism_dst
+  end interface
+
+contains
+
+  function fourier (f) result (g)
+    implicit none
+    real (rk), intent (in) :: f(:)
+    real (rk) :: g(size (f))
+    ! *** end of interface ***
+
+    integer :: i, n
+
+    n = size (f)
+
+    !
+    ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
+    ! around j  = n - 0.5".   Here we use integer  arithmetics and the
+    ! identity (2 * j - 1) / 2 == j - 0.5.
+    !
+    forall (i = 1:n)
+       g(i) = f(i) * (2 * i - 1)
+    end forall
+
+    g = 2 * n * dst (g)
+
+    forall (i = 1:n)
+       g(i) = g(i) / (2 * i - 1)
+    end forall
+  end function fourier
+
+
+  function dst (a) result (b)
+    use iso_c_binding, only: c_size_t
+    implicit none
+    real (rk), intent (in) :: a(:)
+    real (rk) :: b(size (a))
+    ! *** end of interface ***
+
+    integer (c_size_t) :: n
+
+    ! cast to size_t
+    n = size (a)
+
+    call rism_dst (n, b, a)
+  end function dst
+
+
+  function ndst (a) result (b)
+    implicit none
+    real (rk), intent (in) :: a(:)
+    real (rk) :: b(size (a))
+    ! *** end of interface ***
+
+    real (rk) :: norm
+
+    norm = 2 * size (b)         ! cast to real
+    b = dst (a) / sqrt (norm)
+  end function ndst
+
+
+  subroutine test_dst (n)
+    implicit none
+    integer, intent (in) :: n
+    ! *** end of interface ***
+
+    real (rk) :: a(n)
+
+    call random_number (a)
+
+    ! RODFT11 (DST-IV) is self inverse up to a normalization factor:
+    if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
+       print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
+       stop "unnormalized DST does not match"
+    endif
+
+    if (maxval (abs (a - ndst (ndst (a)))) > 1.0e-10) then
+       print *, "diff=", maxval (abs (a - ndst (ndst (a))))
+       stop "normalized DST does not match"
+    endif
+  end subroutine test_dst
+
+
+  subroutine test_ft (rmax, n)
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: rmax
+    ! *** end of interface ***
+
+    real (rk) :: r(n), k(n), f(n), g(n), h(n)
+    real (rk) :: dr, dk
+
+    integer :: i
+
+    !
+    ! The 3d analytical unitary FT of the function
+    !
+    !   f = exp(-r²/2)
+    !
+    ! is the function
+    !
+    !   g = exp(-k²/2), FIXME!
+    !
+    dr = rmax / n
+    dk = pi / rmax
+    forall (i = 1:n)
+       r(i) = (i - 0.5) * dr
+       k(i) = (i - 0.5) * dk
+    end forall
+
+    ! Gaussian:
+    f = exp (-r**2 / 2)
+
+    ! Unit "charge", a "fat" delta function:
+    f = f / (sum (r**2 * f) * 4 * pi * dr)
+
+    ! Forward transform:
+    g = fourier (f) * (dr**3 / FT_FW)
+
+    ! Backward transform:
+    h = fourier (g) * (dk**3 / FT_BW)
+
+    print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
+    print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
+    print *, "# norm (f')^2 =", sum ((r * h)**2) * 4 * pi * dr
+
+    print *, "# |f - f'| =", maxval (abs (f - h))
+
+    print *, "# int (f') =", sum (r**2 * h) * 4 * pi * dr
+    print *, "# int (f ) =", sum (r**2 * f) * 4 * pi * dr
+
+    ! This should correspond  to the convolution (f *  f) which should
+    ! be again a gaussian, twice as "fat":
+    h = g * g
+    h = fourier (h) * (dk**3 / FT_BW)
+
+    print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
+
+    ! Compare width as <r^2>:
+    print *, "# sigma (f) =", sum (r**4 * f) * 4 * pi * dr
+    print *, "# sigma (h) =", sum (r**4 * h) * 4 * pi * dr
+
+    ! print *, "# n=", n
+    ! print *, "# r, f, k, g, h = (f*f)"
+    ! do i = 1, n
+    !    print *, r(i), f(i), k(i), g(i), h(i)
+    ! enddo
+  end subroutine test_ft
+end module fft
+
+
 module snes
   use kinds, only: rk
   implicit none
@@ -184,8 +375,6 @@ module rism
   public :: rism_main
   public :: bgy3d_problem_data
 
-  real (rk), parameter, public :: pi = 4 * atan (1.0_rk)
-
   ! Keep this in sync with bgy3d-solutes.h:
   type, public, bind (c) :: site
      character (kind=c_char, len=5) :: name ! atom types. What are they used for?
@@ -216,14 +405,7 @@ module rism
   ! *** END OF INTERFACE ***
   !
 
-  !
-  ! These should  obey: ab  = (2π)³, a²b  = (2π)³. The  first equality
-  ! guarantees  that that the  forward- and  backward FT  are mutually
-  ! inverse,  whereas the  second equation  will make  the convolution
-  ! theorem factor-less as in FT(f * g) = FT(f) FT(g):
-  !
-  real (rk), parameter :: FT_FW = 1           ! == a
-  real (rk), parameter :: FT_BW = (2 * pi)**3 ! == b
+  real (rk), parameter :: pi = 4 * atan (1.0_rk)
 
   !
   ! The interaction energy of two unit charges separated by 1 A is
@@ -265,22 +447,6 @@ module rism
   ! These are concrete functions, implemented in C:
   !
   interface
-     subroutine rism_dst (n, out, in) bind (c)
-       !
-       ! Performs DST. In FFTW terms this is RODFT11 (or DST-IV) which
-       ! is self inverse up to a normalization factor.
-       !
-       ! void rism_dst (size_t n, double out[n], const double in[n])
-       !
-       ! See ./rism-dst.c
-       !
-       use iso_c_binding, only: c_size_t, c_double
-       implicit none
-       integer (c_size_t), intent (in), value :: n
-       real (c_double), intent (out) :: out(n)
-       real (c_double), intent (in) :: in(n)
-     end subroutine rism_dst
-
      function bgy3d_problem_data () result (pd) bind (c)
        import problem_data
        implicit none
@@ -329,6 +495,7 @@ contains
 
 
   subroutine rism1d (n, rmax, beta, rho, sites)
+    use fft, only: fourier, FT_FW, FT_BW
     use snes, only: snes_default
     implicit none
     integer, intent (in) :: n            ! grid size
@@ -830,151 +997,6 @@ contains
       endif
     end subroutine sles
   end function oz_equation_c_t_MxM
-
-
-  function dst (a) result (b)
-    use iso_c_binding, only: c_size_t
-    implicit none
-    real (rk), intent (in) :: a(:)
-    real (rk) :: b(size (a))
-    ! *** end of interface ***
-
-    integer (c_size_t) :: n
-
-    ! cast to size_t
-    n = size (a)
-
-    call rism_dst (n, b, a)
-  end function dst
-
-
-  function ndst (a) result (b)
-    implicit none
-    real (rk), intent (in) :: a(:)
-    real (rk) :: b(size (a))
-    ! *** end of interface ***
-
-    real (rk) :: norm
-
-    norm = 2 * size (b)         ! cast to real
-    b = dst (a) / sqrt (norm)
-  end function ndst
-
-
-  subroutine test_dst (n)
-    implicit none
-    integer, intent (in) :: n
-    ! *** end of interface ***
-
-    real (rk) :: a(n)
-
-    call random_number (a)
-
-    ! RODFT11 (DST-IV) is self inverse up to a normalization factor:
-    if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
-       print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
-       stop "unnormalized DST does not match"
-    endif
-
-    if (maxval (abs (a - ndst (ndst (a)))) > 1.0e-10) then
-       print *, "diff=", maxval (abs (a - ndst (ndst (a))))
-       stop "normalized DST does not match"
-    endif
-  end subroutine test_dst
-
-
-  function fourier (f) result (g)
-    implicit none
-    real (rk), intent (in) :: f(:)
-    real (rk) :: g(size (f))
-    ! *** end of interface ***
-
-    integer :: i, n
-
-    n = size (f)
-
-    !
-    ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
-    ! around j  = n - 0.5".   Here we use integer  arithmetics and the
-    ! identity (2 * j - 1) / 2 == j - 0.5.
-    !
-    forall (i = 1:n)
-       g(i) = f(i) * (2 * i - 1)
-    end forall
-
-    g = 2 * n * dst (g)
-
-    forall (i = 1:n)
-       g(i) = g(i) / (2 * i - 1)
-    end forall
-  end function fourier
-
-
-  subroutine test_ft (rmax, n)
-    implicit none
-    integer, intent (in) :: n
-    real (rk), intent (in) :: rmax
-    ! *** end of interface ***
-
-    real (rk) :: r(n), k(n), f(n), g(n), h(n)
-    real (rk) :: dr, dk
-
-    integer :: i
-
-    !
-    ! The 3d analytical unitary FT of the function
-    !
-    !   f = exp(-r²/2)
-    !
-    ! is the function
-    !
-    !   g = exp(-k²/2), FIXME!
-    !
-    dr = rmax / n
-    dk = pi / rmax
-    forall (i = 1:n)
-       r(i) = (i - 0.5) * dr
-       k(i) = (i - 0.5) * dk
-    end forall
-
-    ! Gaussian:
-    f = exp (-r**2 / 2)
-
-    ! Unit "charge", a "fat" delta function:
-    f = f / (sum (r**2 * f) * 4 * pi * dr)
-
-    ! Forward transform:
-    g = fourier (f) * (dr**3 / FT_FW)
-
-    ! Backward transform:
-    h = fourier (g) * (dk**3 / FT_BW)
-
-    print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
-    print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
-    print *, "# norm (f')^2 =", sum ((r * h)**2) * 4 * pi * dr
-
-    print *, "# |f - f'| =", maxval (abs (f - h))
-
-    print *, "# int (f') =", sum (r**2 * h) * 4 * pi * dr
-    print *, "# int (f ) =", sum (r**2 * f) * 4 * pi * dr
-
-    ! This should correspond  to the convolution (f *  f) which should
-    ! be again a gaussian, twice as "fat":
-    h = g * g
-    h = fourier (h) * (dk**3 / FT_BW)
-
-    print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
-
-    ! Compare width as <r^2>:
-    print *, "# sigma (f) =", sum (r**4 * f) * 4 * pi * dr
-    print *, "# sigma (h) =", sum (r**4 * h) * 4 * pi * dr
-
-    ! print *, "# n=", n
-    ! print *, "# r, f, k, g, h = (f*f)"
-    ! do i = 1, n
-    !    print *, r(i), f(i), k(i), g(i), h(i)
-    ! enddo
-  end subroutine test_ft
 
 
   subroutine print_info (rho, beta)
