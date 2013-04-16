@@ -216,6 +216,13 @@ module snes
   ! is supposed to return array of zeros (ok, rather small numbers) at
   ! convergence.
   !
+  ! Well, "iterator"  is probably a  bad name.  These  "iterators" are
+  ! supoosed  to be pure  functions of  the respective  arguments. The
+  ! closure context is supposed to be used read-only (or only to store
+  ! intermediate quantities derived from the argument at pre-allocated
+  ! positions).  Violation of  these constraints will eventually break
+  ! the carefully designed logic of some non-linear solvers.
+  !
   abstract interface
      function f_iterator (x) result (dx)
        import rk
