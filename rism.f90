@@ -594,7 +594,7 @@ contains
 
     type (context), pointer :: f_ctx
 
-    ! We  dont  so any  work  ourselves,  just  extract a  pointer  to
+    ! We  dont  do any  work  ourselves,  just  extract a  pointer  to
     ! procedure(f_iterator) an let it do the rest:
     call c_f_pointer (ctx, f_ctx)
 
