@@ -105,9 +105,25 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       real rtol, abstol, dtol;
       int maxits;
       KSPGetTolerances (ksp, &rtol, &abstol, &dtol, &maxits);
-      /* Defaults are at the mercy of the library: rtol = 1e-5, abstol
-         = 1e-50, dtol = 1e+4, maxits = 10000  */
-      KSPSetTolerances (ksp, rtol, abstol, 10 * dtol, maxits / 10);
+      /*
+        Defaults are at the mercy  of the library: rtol = 1e-5, abstol
+        = 1e-50, dtol = 1e+4, maxits = 10000.
+
+        Note that  these convergence criteria control  the accuracy of
+        the Jacobian sub-problems used to determine the "direction" of
+        the  line search  for the  non-linear equation  system.  Thus,
+        these convergence  criteria will  probably affect the  rate of
+        SNES convergence, but not  the accuracy of SNES solution. With
+        the default  convergence criteria the impression  was that the
+        solver  wastes  unnecessarily much  time  refining  δx in  the
+        equivalent of linear equation J δx = -r in the region far from
+        SNES convergence.  Therefore,  the somewhat drastic factor 100
+        here.   With the defaults  above the  code below  requires the
+        norm of  the residual of the *linear*  Jacobian sub-problem to
+        be reduced  by at  least factor  1000 in order  to be  used as
+        search direction:
+      */
+      KSPSetTolerances (ksp, 100 * rtol, abstol, 10 * dtol, maxits / 10);
     }
 
     /*
