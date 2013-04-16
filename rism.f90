@@ -1049,22 +1049,23 @@ contains
     print *, "# rho solid  =", beta**(-0.25d0) * poly (psol_mast, beta)
     print *, "# rho liquid =", beta**(-0.25d0) * poly (pliq_mast, beta)
     print *, "#"
+
+  contains
+
+    function poly (p, x) result (y)
+      implicit none
+      real (rk), intent (in) :: p(0:), x
+      real (rk) :: y
+      ! *** end of interface ***
+
+      integer :: n
+
+      y = 0.0
+      do n = 0, size (p) - 1
+         y = y + p(n) * x**n
+      enddo
+    end function poly
   end subroutine print_info
-
-  function poly (p, x) result (y)
-    implicit none
-    real (rk), intent (in) :: p(0:), x
-    real (rk) :: y
-    ! *** end of interface ***
-
-    integer :: n
-
-    y = 0.0
-    do n = 0, size (p) - 1
-       y = y + p(n) * x**n
-    enddo
-  end function poly
-
 
   function pad (s) result (t)
     use iso_c_binding, only: c_null_char
