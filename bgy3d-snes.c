@@ -32,7 +32,7 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   For solving HNC equation with Newton. Except of x everything else in
   the  closure context is  considered read  only input  or intemediate
   terms depending  on x.  That  is when looking for  total correlation
-  function h,  the direct correlation  function should be fixed  (or a
+  function h, the direct correlation function should be fixed (or be a
   function of h).
 */
 void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
@@ -162,11 +162,11 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   SNESSolve (snes, PETSC_NULL, x);
 
   /*
-    I  looks like SNESGetSolution()  is only  good for  callbacks that
-    need to  extract intermediate solution from the  SNES object. Here
-    it is fully redundant.   Do not bgy3d_vec_destroy (&y), check this
-    assert out. Appears to hold  even when SNES does not converge, say
-    due to iteration limit:
+    It looks like SNESGetSolution() is only of any value for callbacks
+    that need  to extract intermediate solution from  the SNES object.
+    Here it is fully  redundant.  Do not bgy3d_vec_destroy (&y), check
+    this assert out. Appears to hold even when SNES does not converge,
+    say due to iteration limit:
   */
   {
     Vec y;
