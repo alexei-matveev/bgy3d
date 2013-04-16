@@ -783,7 +783,22 @@ contains
       ! B will  be overwriten with  the result, A will  be overwritten
       ! with its factorization:
       call dgesv (m, m, a, m, ipiv, b, m, info)
-      if (info /= 0) stop "dgesv failed"
+
+      if (info /= 0) then
+         block
+            integer :: i
+            print *, "a="
+            do i = 1, m
+               print *, a(i, :)
+            enddo
+            print *, "b="
+            do i = 1, m
+               print *, b(i, :)
+            enddo
+            print *, "info=", info
+         end block
+         stop "dgesv failed, see tty"
+      endif
     end subroutine sles
   end function oz_equation_c_t_MxM
 
