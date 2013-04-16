@@ -854,15 +854,15 @@ contains
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
-    do i = 1, n
+    forall (i = 1:n)
        g(i) = f(i) * (2 * i - 1)
-    enddo
+    end forall
 
     g = 2 * n * dst (g)
 
-    do i = 1, n
+    forall (i = 1:n)
        g(i) = g(i) / (2 * i - 1)
-    enddo
+    end forall
   end function fourier
 
 
