@@ -222,11 +222,11 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (n, size (sites), size (sites)) :: &
-         v, vk, t, c, g
+         v, vk, t, c, g, wk
 
     ! Radial grids:
-    real (rk) :: r(n), dr, dk
-    real (rk) :: k(n)
+    real (rk) :: r(n), dr
+    real (rk) :: k(n), dk
 
     integer :: i, m
 
@@ -243,6 +243,9 @@ contains
     ! Tabulate short-range  pairwise potential  v() on the  r-grid and
     ! long-range pairwise potential vk() on the k-grid:
     call force_field (sites, r, k, v, vk)
+
+    ! Rigid-bond correlations on the k-grid:
+    wk = omega_fourier (sites, k)
 
     ! Intitial guess:
     t = 0.0
@@ -309,7 +312,7 @@ contains
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
       !
-      dt = oz_equation_c_t (rho, c)
+      dt = oz_equation_c_t (rho, c, wk)
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
@@ -334,6 +337,60 @@ contains
       dt = dt - t
     end function iterate_t
   end subroutine rism1d
+
+
+  function omega_fourier (sites, k) result (wk)
+    !
+    ! The  intra-molecular force-field  amounts to  rigid  bonds. This
+    ! function computes the Fourier representation
+    !
+    !   ω(k) = sinc (kR)
+    !
+    ! of the corresponding δ-like correlation functions:
+    !
+    !   ω(r) = δ(r - R) / 4πR²
+    !
+    implicit none
+    type (site), intent (in) :: sites(:)                  ! (m)
+    real (rk), intent (in) :: k(:)                        ! (n)
+    real (rk) :: wk(size (k), size (sites), size (sites)) ! (n, m, m)
+    ! *** end of inteface ***
+
+    real (rk) :: xa(3), xb(3), rab
+    integer :: i, j, m
+
+    m = size (sites)
+
+    ! Site-site bond lengths are derived from site coordinates:
+    do j = 1, m
+       xb = sites(j) % x
+       do i = 1, m
+          xa = sites(i) % x
+
+          ! Site-site distance vanishes (at least) for i == j, so that
+          ! sinc(kr) == 1 in this case. NORM2() is an F08 intrinsic.
+          rab = norm2 (xa - xb)
+
+          ! Rigid bond correlation on a k-grid:
+          wk(:, i, j) = sinc (k * rab)
+       enddo
+    enddo
+
+  contains
+
+    elemental function sinc (x) result (f)
+      implicit none
+      real (rk), intent (in) :: x
+      real (rk) :: f
+      ! *** end of interface ***
+
+      if (x == 0.0) then
+         f = 1.0
+      else
+         f = sin (x) / x
+      endif
+    end function sinc
+  end function omega_fourier
 
 
   subroutine force_field (sites, r, k, vr, vk)
@@ -592,21 +649,27 @@ contains
   ! the result  by h3 in addition,  you will compute  exactly what the
   ! older version of the function did:
   !
-  function oz_equation_c_t (rho, C) result (T)
+  function oz_equation_c_t (rho, C, W) result (T)
     implicit none
-    real (rk), intent (in) :: rho(:), C(:, :, :) ! (m), (n, m, m)
+    real (rk), intent (in) :: rho(:)             ! (m)
+    real (rk), intent (in) :: C(:, :, :)         ! (n, m, m)
+    real (rk), intent (in) :: W(:, :, :)         ! (n, m, m)
     real (rk) :: T(size (C, 1), size (C, 2), size (C, 3))
     ! *** end of interface ***
 
     integer :: i
 
+    ! There is  no reason to  handle the 1x1 case  differently, except
+    ! clarity.  The MxM branch should be able to handle that case too.
     if (size (rho) == 1) then
+       ! FIXME: it  is implied here  that W =  1. See comments  on the
+       ! value of ω(k) for i == j in omega_fourier().
        do i = 1, size (C, 1)
           T(i, 1, 1) = oz_equation_c_t_1x1 (rho(1), C(i, 1, 1))
        enddo
     else
        do i = 1, size (C, 1)
-          T(i, :, :) = oz_equation_c_t_MxM (rho(:), C(i, :, :))
+          T(i, :, :) = oz_equation_c_t_MxM (rho(:), C(i, :, :), W(i, :, :))
        enddo
     endif
   end function oz_equation_c_t
@@ -630,14 +693,28 @@ contains
   end function oz_equation_c_t_1x1
 
 
-  function oz_equation_c_t_MxM (rho, C) result (T)
+  function oz_equation_c_t_MxM (rho, C, W) result (T)
     !
     ! So far  rho is the same for  all sites, we may  have mixed left-
     ! and right-side multiplies.
     !
+    ! RISM equation, here for h and c:
+    !
+    !   h = ω * c * ω + ρ ω * c * h
+    !
+    ! or
+    !                    -1
+    !   h = (1 - ρ ω * c)   * ω * c * ω
+    !
+    ! To use  this code for  mixtures of otherwise  uncorrelated sites
+    ! supply  unity matrix  for  ω. A  mixture  of molecular  solvents
+    ! should  be represented  by  an ω-matrix  with  a suitable  block
+    ! structure.
+    !
     implicit none
     real (rk), intent (in) :: rho(:)  ! (m)
     real (rk), intent (in) :: C(:, :) ! (m, m)
+    real (rk), intent (in) :: W(:, :) ! (m, m)
     real (rk) :: T(size (rho), size (rho)) ! (m, m)
     ! *** end of interface ***
 
@@ -646,24 +723,27 @@ contains
 
     m = size (rho)
 
-    ! T :=  1 - ρC, H  := C. The  latter will be owerwritten  with the
-    ! real H after  solving the linear equations. The  output matrix T
-    ! is used here as a free work array:
-    do j = 1, m
-       do i = 1, m
-          H(i, j) = C(i, j)
-          T(i, j) = delta (i, j) - rho(i) * C(i, j)
-       enddo
-    enddo
+    ! H := WC, temporarily:
+    H = matmul (W, C)
+
+    ! T := 1  - ρWC. The output matrix  T is used here as  a free work
+    ! array:
+    forall (i = 1:m, j = 1:m)
+       T(i, j) = delta (i, j) - rho(i) * H(i, j)
+    end forall
+
+    ! H := WCW.  Still temporarily --- it will be overwritten with the
+    ! real H after solving the linear equations.
+    H = matmul (H, W)
 
     !
     ! Solving the linear equation makes  H have the literal meaning of
     ! the total correlation matrix (input T is destroyed):
     !
-    !       -1                -1
-    ! H := T   * H == (1 - ρC)   * C
+    !       -1                 -1
+    ! H := T   * H == (1 - ρWC)   * WCW
     !
-    call sles (m, T, H)
+    call sles (m, T, H)         ! FIXME: copy in/out.
 
     !
     ! The  same  effect  is  achieved  in  1x1  version  of  the  code
@@ -675,7 +755,7 @@ contains
 
   contains
 
-    function delta (i, j) result (d)
+    pure function delta (i, j) result (d)
       implicit none
       integer, intent (in) :: i, j
       integer :: d
