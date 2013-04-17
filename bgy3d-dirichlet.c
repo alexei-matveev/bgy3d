@@ -205,31 +205,15 @@ static void msizes (const Mat A, int *n3, int *N3)
 */
 static void asizes (const DA da, int *n3, int *N3)
 {
-  /* Get dimensions and other vector properties: */
-  int x[3], n[3], N[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  /* Grid shape: */
+  int N[3];
+  da_shape (da, N);
 
-  /* Get grid dimensions N[3], sanity checks: */
-  {
-    int dim, dof, sw;
-    DAPeriodicType wrap;
-    DAStencilType st;
-    DAGetInfo (da, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, &sw, &wrap, &st);
+  /* Usually dof == 1 */
+  *N3 = N[2] * N[1] * N[0] * da_dof (da);
 
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 1);               /* degrees of freedom */
-    assert (sw >= 1);                /* stencil width */
-    assert (st == DA_STENCIL_STAR);  /* stencil type */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
-
-  *n3 = n[2] * n[1] * n[0];
-  *N3 = N[2] * N[1] * N[0];
+  /* This includes dof factor: */
+  *n3 = da_local_size (da);
 }
 
 
@@ -285,24 +269,16 @@ static Mat lap_mat_create (const DA da, const real h[3],
   int x[3], n[3], N[3];
   DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  /* Get grid dimensions N[3], sanity checks: */
-  {
-    int dim, dof, sw;
-    DAPeriodicType wrap;
-    DAStencilType st;
-    DAGetInfo (da, &dim,
-               &N[0], &N[1], &N[2], /* need this, rest for checks */
-               NULL, NULL, NULL,
-               &dof, &sw, &wrap, &st);
+  /* Get grid dimensions N[3]: */
+  da_shape (da, N);
 
-    /* It may  or may  not work  for other settings  too, it  was only
-       tested with these: */
-    assert (dim == 3);               /* 3d Vec */
-    assert (dof == 1);               /* degrees of freedom */
-    assert (sw >= 1);                /* stencil width */
-    assert (st == DA_STENCIL_STAR);  /* stencil type */
-    assert (wrap == DA_XYZPERIODIC); /* periodicity */
-  }
+  /* It may or may not work for other settings too, it was only tested
+     with these: */
+  // assert (dim == 3);               /* 3d Vec */
+  // assert (dof == 1);               /* degrees of freedom */
+  // assert (sw >= 1);                /* stencil width */
+  // assert (st == DA_STENCIL_STAR);  /* stencil type */
+  // assert (wrap == DA_XYZPERIODIC); /* periodicity */
 
   /* Loop over local portion of grid: */
   for (int k = x[2]; k < x[2] + n[2]; k++)
