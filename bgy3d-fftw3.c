@@ -37,10 +37,13 @@ typedef struct {
 */
 static void shape (const FFT *fft, int *NI, int *NJ, int *NK)
 {
-  int dim;
-  DAGetInfo (fft->da, &dim, NI, NJ, NK,
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-  assert (dim == 3);
+  int N[3];
+
+  da_shape (fft->da, N);
+
+  *NI = N[0];
+  *NJ = N[1];
+  *NK = N[2];
 }
 
 static const int debug = 0;
