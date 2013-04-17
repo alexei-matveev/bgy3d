@@ -1,8 +1,5 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 #include <libguile.h>
-#include <stdbool.h>
-#include "petscda.h"            /* PetscInitialize */
-
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_test() */
 #include "bgy3d-solutes.h"      /* struct Site */
