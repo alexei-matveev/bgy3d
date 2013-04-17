@@ -7,43 +7,6 @@
 #define MY_MALLOC_FREE false
 
 
-/* Shape of the grid: */
-static void da_shape (const DA da, int N[static 3])
-{
-  int dim;
-  DAGetInfo (da, &dim, &N[0], &N[1], &N[2],
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-  assert (dim == 3);
-}
-
-
-/* Degrees of freedom, usually 1. For complex vectors -- 2: */
-static int da_dof (const DA da)
-{
-  int n;
-  DAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-             &n, NULL, NULL, NULL);
-  return n;
-}
-
-
-/*
-  To create  a new  Vec one needs  the local  size. The total  size is
-  computable.   This is  how  to get  the  local size  from the  array
-  descriptor:
-*/
-static int da_local_size (const DA da)
-{
-  /* Get dimensions and other vector properties: */
-  int x[3], n[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  const int dof = da_dof (da);  /* dof == 2 for complex Vecs */
-
-  return dof * n[2] * n[1] * n[0];
-}
-
-
 Vec bgy3d_vec_duplicate (const Vec x)
 {
   Vec y;
