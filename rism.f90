@@ -236,8 +236,8 @@ module snes
        implicit none
        type (c_ptr), intent (in), value :: ctx
        integer (c_int), intent (in), value :: n
-       real (c_double), intent (in) :: x(n)
-       real (c_double), intent (out) :: dx(n)
+       real (c_double), intent (in), target :: x(n)
+       real (c_double), intent (out), target :: dx(n)
      end subroutine c_iterator
   end interface
 
