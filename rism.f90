@@ -391,7 +391,7 @@ module foreign
 
   ! Keep this in sync with bgy3d.h:
   type, public, bind (c) :: problem_data
-     real (c_double) :: interval(2) ! min and max of the domain: 3d-box*/
+     real (c_double) :: interval(2) ! min and max of the domain: 3d-box
      real (c_double) :: h(3)        ! mesh width
      real (c_double) :: beta        ! inverse temperature, 1/kT
      real (c_double) :: rho         ! solvent density
