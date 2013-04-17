@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <fftw3.h>
 #include <fftw3-mpi.h>
-#include "petscda.h"            /* DA, Vec */
 #include "bgy3d-vec.h"          /* bgy3d_da_ref() */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 #include <complex.h>            /* after fftw.h */

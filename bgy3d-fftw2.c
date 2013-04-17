@@ -8,7 +8,6 @@
 #include "bgy3d.h"              /* KFREQ(), M_PI */
 #include <assert.h>
 #include <rfftw_mpi.h>
-#include "petscda.h"            /* DA, Vec */
 #include "bgy3d-vec.h"          /* bgy3d_da_ref() */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 #include <complex.h>            /* after fftw.h */
