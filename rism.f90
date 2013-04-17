@@ -357,13 +357,13 @@ contains
 
     block
        real (rk), pointer :: y(:, :, :), dy(:, :, :)
-       integer :: n(3)
 
-       n = f_ctx % shape
-
-       ! F03 pointer association with contiguous array:
-       y(1:n(1), 1:n(2), 1:n(3)) => x
-       dy(1:n(1), 1:n(2), 1:n(3)) => dx
+       ! F03 way to create aliases:
+       associate (n => f_ctx % shape)
+         ! F03 pointer association with contiguous array:
+         y(1:n(1), 1:n(2), 1:n(3)) => x
+         dy(1:n(1), 1:n(2), 1:n(3)) => dx
+       end associate
 
        ! The warning by GF 4.6 is incorrect:
        ! http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55855
