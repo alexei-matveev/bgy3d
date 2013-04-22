@@ -127,7 +127,8 @@
 ;;; Fake single-site  LJ water model. With  β = 1.6889  the reduced LJ
 ;;; temperature,  T* =  T/ε, is  ~3.8 (the  corresponding β*  =  βε is
 ;;; ~0.26) The reduced density, ρ* =  ρσ³, at water number density ρ =
-;;; 0.033427745 is ~1.05.
+;;; 0.033427745 is ~1.05. For  reference, the Wigner-Seitz radius rs =
+;;; 1.92575678516970 A for this density.
 ;;;
 ("OW" (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
 
