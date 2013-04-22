@@ -108,6 +108,61 @@
   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 
 ;;
+;; SPC/E (extended simple point charge model):
+;;
+;;   r(OH) = 0.1 nm
+;;   θ(HOH) = 109.47 deg [2 atan (√2), thetrahedral]
+;;   q(O) = -0.8476 e
+;;   q(H) = 0.4238 e
+;;   A = 0.37122 (kJ/mol)^(1/6) * nm
+;;   B = 0.3428 (kJ/mol)^(1/12) * nm
+;;   d = 2.35 D [dipole moment]
+;;
+;; Here  A and  B  parametrize LJ  as  -(A/r)^6 +  (B/r)^12, cf.   the
+;; dimensions.  Hydrogen bond of a pair is -30.0 kJ/mol which slightly
+;; more than -27.6 kJ/mol of the original SPC model [1].
+;;
+;; * AB-form to σε-form:
+;;
+;;   σ = B^2/A = 0.316555789019988 nm
+;;   ε = (A/B)^12 / 4 = 0.650169580818749 kJ/mol
+;;                    = 0.155290336490577 kcal/mol
+;;
+;;   (assuming IT calorie 4.1868 J)
+;;
+;; For use with RISM "[t]he original SPC solvent potential is modified
+;; to include core repulsion  for the interactions associated with the
+;; hydrogen site in  a way that does not alter  the physical nature of
+;; intermolecular interactions.   The van der Waals parameters  of σ =
+;; 1.0 A  and ε  = 0.0545 kcal/mol  are assigned  to the H  site". See
+;; footnote in Ref. [2].
+;;
+;; In this form thus modified SPC/E potential was used in Ref. [3].
+;;
+;; References:
+;;
+;; [1] "The Missing Term in Effective Pair Potentials", H.  J.  C.
+;;     Berendsen, J.  R.  Grigera, and T.  P.  Straatsma, J.  Phys.
+;;     Chem 1987, 91, 6269-6271. http://dx.doi.org/10.1021/j100308a038
+;;
+;; [2] "Theoretical study for the basicities of methylamines in
+;;     aqueous solution: A RISM-SCF calculation of solvation
+;;     thermodynamics", Masaaki Kawata, Seiichiro Ten-no, Shigeki
+;;     Kato, Fumio Hirata, Chemical Physics, 203, 1996, 53–67,
+;;     http://dx.doi.org/10.1016/0301-0104(95)00352-5
+;;
+;; [3] "Comparative Study on Solvation Free Energy Expressions in
+;;     Reference Interaction Site Model Integral Equation Theory",
+;;     Kazuto Sato, Hiroshi Chuman, and Seiichiro Ten-no,
+;;     J. Phys. Chem. B, 2005, 109 (36), pp 17290–17295,
+;;     http://dx.doi.org/10.1021/jp053259i
+;;
+("water, SPC/E"
+ (("O" (-0.288675134594813  0.000000000000000 0.0) 3.1656 0.1553 -0.8476)
+  ("OH" (0.288675134594813  0.816496580927726 0.0) 1.0    0.0545  0.4238)
+  ("OH" (0.288675134594813 -0.816496580927726 0.0) 1.0    0.0545  0.4238)))
+
+;;
 ;; Two-site model water :
 ;;
 ;; Dyer, K. M., Perkyns, J. S., Stell, G. & Montgomery Pettitt, B.
