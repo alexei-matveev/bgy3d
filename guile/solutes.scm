@@ -1,6 +1,11 @@
-;;
-;; Simplest species, single neutral site LJ particle:
-;;
+;;;
+;;; Simplest  species,  single  neutral   site  LJ  particle.   To  be
+;;; comparable  to  water  one  might   set  β  =  0.261610  and  ρ  =
+;;; 1.054796. These  numbers have been  derived from LJ  parameters of
+;;; oxygen  center  of the  two-site  water  model  (see below),  room
+;;; temperature  and water density  (see comments  on the  TIP3P water
+;;; model).
+;;;
 ("LJ" (("LJ" (0.0 0.0 0.0) 1.0 1.0 0.0)))
 
 ;;
