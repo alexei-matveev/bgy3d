@@ -76,7 +76,14 @@ void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m])
   const int n = mn / m;
   assert (m * n == mn);
 
-  /* Enough space for m Vecs: */
+  /*
+    This  buf has  enough space  for m  Vecs.  Note  that there  is no
+    corresponding vec_restore_array() call in  this scope and the lack
+    of the "local"  attribute. The contents of the  long Vec X remains
+    "checked  out"  for  the  whole  lifetime of  the  aliases.   This
+    lifetime ends upon call to bgy3d_vec_aliases_destroy1(). Only then
+    (a copy of) the pointer will be "returned".
+  */
   real *buf = vec_get_array (X);
 
   /* Create m Vecs with the storage from buf: */
@@ -93,7 +100,8 @@ void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
   const int n = nm2 / m2;
   assert (n * m2 == nm2);
 
-  /* Enough space for m2 Vecs: */
+  /* Enough   space    for   m2    Vecs.   See   also    comments   in
+     bgy3d_vec_aliases_create1(): */
   real *buf = vec_get_array (X);
 
   /* Create m2 Vecs with the storage from buf: */
@@ -108,25 +116,39 @@ void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
 
 /*
   This and the next function  should not attempt to free() the storage
-  of the aliases.  It is owned  by another longer Vec.  We are relying
-  on the magic of VecDestroy() that  alone knows how a Vec was created
-  --- it  should  not  free()  the  storage  if  Vec  was  created  by
+  of  the aliases  x[].  It  is owned  by the  longer Vec  X.   We are
+  relying on the magic of VecDestroy()  that alone knows how a Vec was
+  created --- it  should not free() the storage if  Vec was created by
   vec_from_array().
 */
-void bgy3d_vec_aliases_destroy1 (int m, Vec g[m])
+void bgy3d_vec_aliases_destroy1 (Vec X, int m, Vec x[m])
 {
-  bgy3d_vec_destroy1 (m, g);    /* should not free() */
+  bgy3d_vec_destroy1 (m, x);    /* should not free() */
+
+  /*
+    The epoch  of accessing the  content of Vec  X via the  aliases is
+    over. Signal to PETSC that the  content of the Vec X may have been
+    changed,  so  that  it  invalidates eventually  cached  derivative
+    values such as the vector norm. It is assumed that vec_get_array()
+    is idempotent (returns the same value on succesive calls).
+  */
+  local real *X_ = vec_get_array (X);
+  vec_restore_array (X, &X_);
 }
 
 
-void bgy3d_vec_aliases_destroy2 (int m, Vec g[m][m])
+void bgy3d_vec_aliases_destroy2 (Vec X, int m, Vec x[m][m])
 {
-  bgy3d_vec_destroy2 (m, g);    /* should not free() */
+  bgy3d_vec_destroy2 (m, x);    /* should not free() */
+
+  /* See comments in bgy3d_vec_aliases_destroy1(): */
+  local real *X_ = vec_get_array (X);
+  vec_restore_array (X, &X_);
 }
 
 
 /*
-  Create   a  vector   m-times  longer   that  the   array  descriptor
+  Create   a  vector   m-times  longer   than  the   array  descriptor
   specification. See  bgy3d_vec_aliases_create*() for what  may happen
   to such Vec later.
 */

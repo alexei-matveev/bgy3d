@@ -767,7 +767,7 @@ typedef struct Ctx
 } Ctx;
 
 
-static void iterate_u (Ctx *s, Vec us, Vec dus)
+static void iterate_u (Ctx *s, Vec U, Vec dU)
 {
   const int m = s->m;           /* number of solvent sites */
 
@@ -775,11 +775,10 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
   Vec (*kernel_fft)[m] = (void*) s->kernel_fft;
   Vec (*omega_fft)[m] = (void*) s->omega_fft;
 
-  /* Establish  aliases to  the subsections  of  the long  Vec us  and
-     dus */
+  /* Establish aliases to the subsections of the long Vec U and dU: */
   local Vec u[m], du[m];
-  bgy3d_vec_aliases_create1 (us, m, u);
-  bgy3d_vec_aliases_create1(dus, m, du);
+  bgy3d_vec_aliases_create1 (U, m, u);
+  bgy3d_vec_aliases_create1 (dU, m, du);
 
   /* Iterate u[] -> du[]: */
   iterate (s->BHD,              /*  1 in */
@@ -798,10 +797,13 @@ static void iterate_u (Ctx *s, Vec us, Vec dus)
            s->work,             /* 14 work */
            du);                 /* 15 out <- here */
 
-  /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec us and Vec dus: */
-  bgy3d_vec_aliases_destroy1 (m, u);
-  bgy3d_vec_aliases_destroy1 (m, du);
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec U and Vec dU. From now on
+    one may access U and dU directly again.
+  */
+  bgy3d_vec_aliases_destroy1 (U, m, u);
+  bgy3d_vec_aliases_destroy1 (dU, m, du);
 }
 
 
@@ -809,8 +811,8 @@ void bgy3d_restart_destroy (Restart *restart)
 {
   /* Restart info  is just a (long)  Vec that happens to  fit into (or
      *rather is*) a pointer: */
-  local Vec us = (Vec) restart;
-  bgy3d_vec_pack_destroy1 (&us);
+  local Vec U = (Vec) restart;
+  bgy3d_vec_pack_destroy1 (&U);
 }
 
 
@@ -913,7 +915,7 @@ static void solute_solve (State *BHD,
     the long Vec and m shorter  Vecs aliased to the subsections of the
     longer one.
   */
-  local Vec us = bgy3d_vec_pack_create1 (BHD->da, m);  /* long Vec */
+  local Vec U = bgy3d_vec_pack_create1 (BHD->da, m); /* long Vec */
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -962,17 +964,17 @@ static void solute_solve (State *BHD,
             be used for resuming iterations.  So far this data is just
             a ref to a long Vec that happens to fit into a pointer:
           */
-          Vec us_old = (Vec) (*restart);
+          Vec U_old = (Vec) (*restart);
 
-          /* Initialize long  Vec us by copying restart  data from the
+          /* Initialize long  Vec U by  copying restart data  from the
              last run: */
-          VecCopy (us_old, us);
+          VecCopy (U_old, U);
           bgy3d_restart_destroy (*restart);
         }
       else
         {
           local Vec u[m];       /* aliases to subsections */
-          bgy3d_vec_aliases_create1 (us, m, u);
+          bgy3d_vec_aliases_create1 (U, m, u);
 
           if (bgy3d_getopt_test ("--load-guess"))
             bgy3d_vec_read1 ("u%d.bin", m, u);
@@ -986,7 +988,7 @@ static void solute_solve (State *BHD,
                   VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
                 }
             }
-          bgy3d_vec_aliases_destroy1 (m, u);
+          bgy3d_vec_aliases_destroy1 (U, m, u);
         }
 
       {
@@ -1024,7 +1026,7 @@ static void solute_solve (State *BHD,
           bgy3d_snes_jager(),
           bgy3d_snes_newton().
         */
-        bgy3d_snes_jager (PD, &ctx, (VectorFunc) iterate_u, us);
+        bgy3d_snes_jager (PD, &ctx, (VectorFunc) iterate_u, U);
       }
 
       /*
@@ -1035,11 +1037,11 @@ static void solute_solve (State *BHD,
       if (bgy3d_getopt_test ("--save-guess"))
         {
           local Vec u[m];       /* aliases to subsections */
-          bgy3d_vec_aliases_create1 (us, m, u);
+          bgy3d_vec_aliases_create1 (U, m, u);
 
           bgy3d_vec_save1 ("u%d.bin", m, u);
 
-          bgy3d_vec_aliases_destroy1 (m, u);
+          bgy3d_vec_aliases_destroy1 (U, m, u);
         }
     } /* for (damp = ... ) */
 
@@ -1047,14 +1049,14 @@ static void solute_solve (State *BHD,
     {
       /*
         This is probably QM code  calling, eventually this will not be
-        the last call during SCF.  Pass  the PMF Vec us (the long Vec)
+        the last call  during SCF.  Pass the PMF Vec  U (the long Vec)
         to help us restart iterations  in the next SCF round.  At this
-        point we  give up ownersip of  the long Vec us  to the caller.
+        point we  give up ownersip  of the long  Vec U to  the caller.
         The caller will eventually have to dispose of it, unless it is
         passed back to this function.
       */
-      *restart = (void*) us;
-      us = NULL;
+      *restart = (void*) U;
+      U = NULL;
     }
 
   /*
@@ -1069,8 +1071,8 @@ static void solute_solve (State *BHD,
     bgy3d_pot_destroy (ret);
 
   /* Clean up and exit ... */
-  if (us)
-    bgy3d_vec_pack_destroy1 (&us);  /* not bgy3d_vec_destroy()! */
+  if (U)
+    bgy3d_vec_pack_destroy1 (&U); /* not bgy3d_vec_destroy()! */
 
   bgy3d_vec_destroy1 (m, u0);
   bgy3d_vec_destroy1 (m, g_fft);

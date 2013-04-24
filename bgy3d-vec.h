@@ -14,10 +14,10 @@ void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m]);
 void bgy3d_vec_destroy2 (int m, Vec g[m][m]);
 
 void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m]);
-void bgy3d_vec_aliases_destroy1 (int m, Vec x[m]);
+void bgy3d_vec_aliases_destroy1 (Vec X, int m, Vec x[m]);
 
 void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m]);
-void bgy3d_vec_aliases_destroy2 (int m, Vec x[m][m]);
+void bgy3d_vec_aliases_destroy2 (Vec X, int m, Vec x[m][m]);
 
 Vec bgy3d_vec_pack_create1 (const DA da, int m);
 void bgy3d_vec_pack_destroy1 (Vec *X);

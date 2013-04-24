@@ -364,10 +364,13 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
         VecScale (dt[i][j], 1.0/L/L/L);
       }
 
-  /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec T and Vec dT: */
-  bgy3d_vec_aliases_destroy2 (m, t);
-  bgy3d_vec_aliases_destroy2 (m, dt);
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec T and Vec dT. From now on
+    one may access T and dT directly again.
+  */
+  bgy3d_vec_aliases_destroy2 (T, m, t);
+  bgy3d_vec_aliases_destroy2 (dT, m, dt);
 
   VecAXPY (dT, -1.0, T);
 }
@@ -445,10 +448,13 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
         compute_c (beta, v_short[i][j], t[i][j], dc[i][j]);
       }
 
-  /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec C and Vec dC: */
-  bgy3d_vec_aliases_destroy2 (m, c);
-  bgy3d_vec_aliases_destroy2 (m, dc);
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec C and Vec dC. From now on
+    one may access C and dC directly again.
+  */
+  bgy3d_vec_aliases_destroy2 (C, m, c);
+  bgy3d_vec_aliases_destroy2 (dC, m, dc);
 
   VecAXPY (dC, -1.0, C);
 }
@@ -584,7 +590,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, v_short);
   bgy3d_vec_destroy2 (m, v_long_fft);
 
-  bgy3d_vec_aliases_destroy2 (m, x);
+  bgy3d_vec_aliases_destroy2 (X, m, x);
   bgy3d_vec_pack_destroy2 (&X);
 
   bgy3d_state_destroy (HD);
@@ -742,10 +748,13 @@ static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
   for (int i = 0; i < m; i++)
     compute_h (beta, ctx->v[i], t[i], dh[i]);
 
-  /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec H and Vec dH: */
-  bgy3d_vec_aliases_destroy1 (m, h);
-  bgy3d_vec_aliases_destroy1 (m, dh);
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec H and Vec dH. From now on
+    one may access H and dH directly again.
+  */
+  bgy3d_vec_aliases_destroy1 (H, m, h);
+  bgy3d_vec_aliases_destroy1 (dH, m, dh);
 
   /*
     dh := h    - h
@@ -804,10 +813,13 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   for (int i = 0; i < m; i++)
     MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
-  /* This  destroys the  aliases, but  does  not free  the memory,  of
-     course. The actuall data is owned by Vec T and Vec dT: */
-  bgy3d_vec_aliases_destroy1 (m, t);
-  bgy3d_vec_aliases_destroy1 (m, dt);
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec T and Vec dT. From now on
+    one may access T and dT directly again.
+  */
+  bgy3d_vec_aliases_destroy1 (T, m, t);
+  bgy3d_vec_aliases_destroy1 (dT, m, dt);
 
   /*
     dt := t    - t
@@ -984,7 +996,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy1 (m, t_fft);
   bgy3d_vec_destroy1 (m, v);
 
-  bgy3d_vec_aliases_destroy1 (m, x);
+  bgy3d_vec_aliases_destroy1 (X, m, x);
   bgy3d_vec_pack_destroy1 (&X);
 
   /* This should be the only pair quantity: */
