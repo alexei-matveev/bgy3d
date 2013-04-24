@@ -49,7 +49,7 @@ Vec bgy3d_vec_create (const DA da)
 void bgy3d_vec_destroy (Vec *g)
 {
   /* VecDestroy() will not free() the buffer if the Vec was created by
-     vec_from_array(): */
+     vec_from_array().  FIXME: should we also vec_restore_array()? */
   if (MY_MALLOC_FREE)
     free (vec_get_array (*g));
 
@@ -180,6 +180,7 @@ Vec bgy3d_vec_pack_create2 (const DA da, int m)
    user. We do it ourselves: */
 void bgy3d_vec_pack_destroy1 (Vec *X)
 {
+  /* FIXME: should we also vec_restore_array()? */
   free (vec_get_array (*X));    /* free() the whole */
   VecDestroy (*X);              /* should not free() */
   *X = NULL;
