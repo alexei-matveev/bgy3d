@@ -915,9 +915,6 @@ static void solute_solve (State *BHD,
   */
   local Vec us = bgy3d_vec_pack_create1 (BHD->da, m);  /* long Vec */
 
-  local Vec u[m];        /* primary variable of the BGY3D iteration */
-  bgy3d_vec_aliases_create1 (us, m, u);   /* aliases to subsections */
-
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
       /*
@@ -972,17 +969,24 @@ static void solute_solve (State *BHD,
           VecCopy (us_old, us);
           bgy3d_restart_destroy (*restart);
         }
-      else if (bgy3d_getopt_test ("--load-guess"))
-        bgy3d_vec_read1 ("u%d.bin", m, u);
       else
         {
-          /* The very first iteration! */
-          for (int i = 0; i < m; i++)
+          local Vec u[m];       /* aliases to subsections */
+          bgy3d_vec_aliases_create1 (us, m, u);
+
+          if (bgy3d_getopt_test ("--load-guess"))
+            bgy3d_vec_read1 ("u%d.bin", m, u);
+          else
             {
-              const real eps = 80.0; /* FIXME: literal */
-              VecCopy (uc, u[i]);
-              VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
+              /* The very first iteration! */
+              for (int i = 0; i < m; i++)
+                {
+                  const real eps = 80.0; /* FIXME: literal */
+                  VecCopy (uc, u[i]);
+                  VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
+                }
             }
+          bgy3d_vec_aliases_destroy1 (m, u);
         }
 
       {
@@ -1029,8 +1033,14 @@ static void solute_solve (State *BHD,
         initial guess.  See above.
       */
       if (bgy3d_getopt_test ("--save-guess"))
-        bgy3d_vec_save1 ("u%d.bin", m, u);
+        {
+          local Vec u[m];       /* aliases to subsections */
+          bgy3d_vec_aliases_create1 (us, m, u);
 
+          bgy3d_vec_save1 ("u%d.bin", m, u);
+
+          bgy3d_vec_aliases_destroy1 (m, u);
+        }
     } /* for (damp = ... ) */
 
   if (restart)
@@ -1059,8 +1069,6 @@ static void solute_solve (State *BHD,
     bgy3d_pot_destroy (ret);
 
   /* Clean up and exit ... */
-  bgy3d_vec_aliases_destroy1 (m, u);
-
   if (us)
     bgy3d_vec_pack_destroy1 (&us);  /* not bgy3d_vec_destroy()! */
 
