@@ -139,12 +139,25 @@ static inline Vec vec_from_array (int n, real x_[n])
   return x;
 }
 
+
+/* Dont forget to vec_restore_array()! */
 static inline real* vec_get_array (Vec x)
 {
   real *x_;
   VecGetArray (x, &x_);
   return x_;
 }
+
+/* Emulates  the behaviour  of the  VecRestoreArray() in  recent PETSC
+   versions. */
+static inline void vec_restore_array (Vec x, real **x_)
+{
+  VecRestoreArray (x, x_);
+  /* FIXME: More recent PETSC versions nullify the pointer by
+     themselves. */
+  *x_ = NULL;
+}
+
 
 static inline int vec_local_size (Vec x)
 {
@@ -205,37 +218,37 @@ static inline real bgy3d_vec_min (Vec x)
    in-place transform: */
 static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 {
-  real *xs_ = vec_get_array (xs);
-  real *ys_ = vec_get_array (ys);
-
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
+
+  local real *xs_ = vec_get_array (xs);
+  local real *ys_ = vec_get_array (ys);
 
   for (int i = 0; i < n; i++)
     ys_[i] = f (xs_[i]);
 
-  VecRestoreArray (xs, &xs_);
-  VecRestoreArray (ys, &ys_);
+  vec_restore_array (xs, &xs_);
+  vec_restore_array (ys, &ys_);
 }
 
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
 static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 {
-  real *xs_ = vec_get_array (xs);
-  real *ys_ = vec_get_array (ys);
-  real *zs_ = vec_get_array (zs);
-
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
   assert (vec_local_size (zs) == n);
 
+  local real *xs_ = vec_get_array (xs);
+  local real *ys_ = vec_get_array (ys);
+  local real *zs_ = vec_get_array (zs);
+
   for (int i = 0; i < n; i++)
     zs_[i] = f (xs_[i], ys_[i]);
 
-  VecRestoreArray (xs, &xs_);
-  VecRestoreArray (ys, &ys_);
-  VecRestoreArray (zs, &zs_);
+  vec_restore_array (xs, &xs_);
+  vec_restore_array (ys, &ys_);
+  vec_restore_array (zs, &zs_);
 }
 
 
@@ -245,18 +258,18 @@ static inline void bgy3d_vec_fft_map1 (Vec y, /* out */
                                        complex (*f)(complex x),
                                        Vec x) /* in */
 {
-  complex *x_ = (complex*) vec_get_array (x);
-  complex *y_ = (complex*) vec_get_array (y);
-
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
   assert (n % 2 == 0);
 
+  local complex *x_ = (complex*) vec_get_array (x);
+  local complex *y_ = (complex*) vec_get_array (y);
+
   for (int i = 0; i < n / 2; i++)
     y_[i] = f (x_[i]);
 
-  VecRestoreArray (x, (void*) &x_);
-  VecRestoreArray (y, (void*) &y_);
+  vec_restore_array (x, (void*) &x_);
+  vec_restore_array (y, (void*) &y_);
 }
 
 
@@ -266,21 +279,21 @@ static inline void bgy3d_vec_fft_map2 (Vec z, /* out */
                                        complex (*f)(complex x, complex y),
                                        Vec x, Vec y) /* in */
 {
-  complex *x_ = (complex*) vec_get_array (x);
-  complex *y_ = (complex*) vec_get_array (y);
-  complex *z_ = (complex*) vec_get_array (z);
-
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
   assert (vec_local_size (z) == n);
   assert (n % 2 == 0);
 
+  local complex *x_ = (complex*) vec_get_array (x);
+  local complex *y_ = (complex*) vec_get_array (y);
+  local complex *z_ = (complex*) vec_get_array (z);
+
   for (int i = 0; i < n / 2; i++)
     z_[i] = f (x_[i], y_[i]);
 
-  VecRestoreArray (x, (void*) &x_);
-  VecRestoreArray (y, (void*) &y_);
-  VecRestoreArray (z, (void*) &z_);
+  vec_restore_array (x, (void*) &x_);
+  vec_restore_array (y, (void*) &y_);
+  vec_restore_array (z, (void*) &z_);
 }
 
 
@@ -290,24 +303,24 @@ static inline void bgy3d_vec_fft_map3 (Vec w, /* out */
                                        complex (*f)(complex x, complex y, complex z),
                                        Vec x, Vec y, Vec z) /* in */
 {
-  complex *x_ = (complex*) vec_get_array (x);
-  complex *y_ = (complex*) vec_get_array (y);
-  complex *z_ = (complex*) vec_get_array (z);
-  complex *w_ = (complex*) vec_get_array (w);
-
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
   assert (vec_local_size (z) == n);
   assert (vec_local_size (w) == n);
   assert (n % 2 == 0);
 
+  local complex *x_ = (complex*) vec_get_array (x);
+  local complex *y_ = (complex*) vec_get_array (y);
+  local complex *z_ = (complex*) vec_get_array (z);
+  local complex *w_ = (complex*) vec_get_array (w);
+
   for (int i = 0; i < n / 2; i++)
     w_[i] = f (x_[i], y_[i], z_[i]);
 
-  VecRestoreArray (x, (void*) &x_);
-  VecRestoreArray (y, (void*) &y_);
-  VecRestoreArray (z, (void*) &z_);
-  VecRestoreArray (w, (void*) &w_);
+  vec_restore_array (x, (void*) &x_);
+  vec_restore_array (y, (void*) &y_);
+  vec_restore_array (z, (void*) &z_);
+  vec_restore_array (w, (void*) &w_);
 }
 
 
