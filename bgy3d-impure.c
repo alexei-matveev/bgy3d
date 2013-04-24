@@ -914,11 +914,9 @@ static void solute_solve (State *BHD,
     longer one.
   */
   local Vec us = bgy3d_vec_pack_create1 (BHD->da, m);  /* long Vec */
-  local Vec dus = bgy3d_vec_pack_create1 (BHD->da, m); /* long Vec */
 
-  local Vec u[m], du[m];   /* in- and output of the BGY3D iteration */
+  local Vec u[m];        /* primary variable of the BGY3D iteration */
   bgy3d_vec_aliases_create1 (us, m, u);   /* aliases to subsections */
-  bgy3d_vec_aliases_create1 (dus, m, du); /* aliases to subsections */
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -1062,11 +1060,9 @@ static void solute_solve (State *BHD,
 
   /* Clean up and exit ... */
   bgy3d_vec_aliases_destroy1 (m, u);
-  bgy3d_vec_aliases_destroy1 (m, du);
 
   if (us)
     bgy3d_vec_pack_destroy1 (&us);  /* not bgy3d_vec_destroy()! */
-  bgy3d_vec_pack_destroy1 (&dus); /* not bgy3d_vec_destroy()! */
 
   bgy3d_vec_destroy1 (m, u0);
   bgy3d_vec_destroy1 (m, g_fft);
