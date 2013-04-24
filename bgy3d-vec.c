@@ -4,26 +4,10 @@
 #include "bgy3d-vec.h"
 
 
-#define MY_MALLOC_FREE false
-
-
 Vec bgy3d_vec_duplicate (const Vec x)
 {
   Vec y;
-
-  if (MY_MALLOC_FREE)
-    {
-      /*
-        bgy3d_vec_destroy() cannot distinguish between Vecs created by
-        bgy3d_vec_create()  and   by  bgy3d_vec_duplicate().  It  will
-        attempt to free() the buffer:
-      */
-      const int n = vec_local_size (x);
-      y = vec_from_array (n, malloc (n * sizeof (real)));
-    }
-  else
-    VecDuplicate (x, &y);
-
+  VecDuplicate (x, &y);
   return y;
 }
 
@@ -31,16 +15,7 @@ Vec bgy3d_vec_duplicate (const Vec x)
 Vec bgy3d_vec_create (const DA da)
 {
   Vec x;
-
-  if (MY_MALLOC_FREE)
-    {
-      /* We allocate the storage for data ourselves: */
-      const int n = da_local_size (da);
-      x = vec_from_array (n, malloc (n * sizeof (real)));
-    }
-  else
-    DACreateGlobalVector (da, &x);
-
+  DACreateGlobalVector (da, &x);
   return x;
 }
 
@@ -49,10 +24,7 @@ Vec bgy3d_vec_create (const DA da)
 void bgy3d_vec_destroy (Vec *g)
 {
   /* VecDestroy() will not free() the buffer if the Vec was created by
-     vec_from_array().  FIXME: should we also vec_restore_array()? */
-  if (MY_MALLOC_FREE)
-    free (vec_get_array (*g));
-
+     vec_from_array(): */
   VecDestroy (*g); /* FIXME: Petsc 3.2 and above? */
   *g = NULL;
 }
@@ -132,10 +104,10 @@ void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
 
 /*
   This  function should  not  attempt  to free()  the  storage of  the
-  aliases.   It  is   owned  by   another  longer   Vec.    FIXME:  If
-  MY_MALLOC_FREE    is   always    false   one    could    have   used
-  bgy3d_vec_destroy()  instead relying  on the  magic  of VecDestroy()
-  that alone knows how a Vec was created.
+  aliases.  It is owned by another  longer Vec.  We are relying on the
+  magic of VecDestroy() that alone knows  how a Vec was created --- it
+  should   not   free()   the   storage   if  Vec   was   created   by
+  vec_from_array().
 */
 void bgy3d_vec_aliases_destroy1 (int m, Vec g[m])
 {
