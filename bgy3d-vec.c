@@ -103,35 +103,29 @@ void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
 
 
 /*
-  This  function should  not  attempt  to free()  the  storage of  the
-  aliases.  It is owned by another  longer Vec.  We are relying on the
-  magic of VecDestroy() that alone knows  how a Vec was created --- it
-  should   not   free()   the   storage   if  Vec   was   created   by
+  This and the next function  should not attempt to free() the storage
+  of the aliases.  It is owned  by another longer Vec.  We are relying
+  on the magic of VecDestroy() that  alone knows how a Vec was created
+  --- it  should  not  free()  the  storage  if  Vec  was  created  by
   vec_from_array().
 */
 void bgy3d_vec_aliases_destroy1 (int m, Vec g[m])
 {
-  for (int i = 0; i < m; i++)
-    {
-      VecDestroy (g[i]);        /* should not free() */
-      g[i] = NULL;
-    }
+  bgy3d_vec_destroy1 (m, g);    /* should not free() */
 }
 
 
 void bgy3d_vec_aliases_destroy2 (int m, Vec g[m][m])
 {
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        VecDestroy (g[i][j]);   /* should not free() */
-        g[i][j] = NULL;
-      }
+  bgy3d_vec_destroy2 (m, g);    /* should not free() */
 }
 
 
-/* Create  a   vector  m-times   longer  that  the   array  descriptor
-   specification. See bgy3d_vec_alias_create(): */
+/*
+  Create   a  vector   m-times  longer   that  the   array  descriptor
+  specification. See  bgy3d_vec_aliases_create*() for what  may happen
+  to such Vec later.
+*/
 Vec bgy3d_vec_pack_create1 (const DA da, int m)
 {
   /* Allocate space for m Vecs: */
