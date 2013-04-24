@@ -57,7 +57,11 @@ void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 {
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      bgy3d_vec_destroy (&g[i][j]);
+      {
+        assert (g[i][j] == g[j][i]);
+        bgy3d_vec_destroy (&g[i][j]);
+        g[j][i] = NULL;
+      }
 }
 
 
