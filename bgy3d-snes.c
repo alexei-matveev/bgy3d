@@ -42,7 +42,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   SNESCreate (PETSC_COMM_WORLD, &snes);
 
   /* SNES needs a place to store residual: */
-  Vec r = bgy3d_vec_duplicate (x);
+  local Vec r = bgy3d_vec_duplicate (x);
 
   /* SNES form-functions should obey this interface: */
   PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
@@ -170,7 +170,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   */
   {
     Vec y;
-    SNESGetSolution (snes, &y);
+    SNESGetSolution (snes, &y); /* borrow Vec */
     assert (x == y);
   }
 
@@ -191,7 +191,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   const real norm_tol = PD->norm_tol;
 
   /* A place to store residual: */
-  Vec dx = bgy3d_vec_duplicate (x);
+  local Vec dx = bgy3d_vec_duplicate (x);
 
   /* Find an x such that dx as returned by F (ctx, x, dx) is zero: */
   for (int k = 0; k < max_iter; k++)
@@ -224,7 +224,7 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   const real norm_tol = PD->norm_tol;
 
   /* A place to store residual: */
-  Vec dx = bgy3d_vec_duplicate (x);
+  local Vec dx = bgy3d_vec_duplicate (x);
 
   /* Not sure if 0.0 as inital value is right. */
   real norm_old = 0.0;
@@ -324,14 +324,14 @@ void rism_snes (void *ctx, ArrayFunc f, int n, real x_[n])
   /* Implements VectorFunc interface: */
   void F (void *ctx, Vec y, Vec dy)
   {
-    real *y_ = vec_get_array (y);
-    real *dy_ = vec_get_array (dy);
+    local real *y_ = vec_get_array (y);
+    local real *dy_ = vec_get_array (dy);
 
     /* Implements ArrayFunc interface: */
     f (ctx, n, y_, dy_);
 
-    VecRestoreArray (y, &y_);
-    VecRestoreArray (dy, &dy_);
+    vec_restore_array (y, &y_);
+    vec_restore_array (dy, &dy_);
   }
 
   /* The result depends on the command line and affects the solver: */
