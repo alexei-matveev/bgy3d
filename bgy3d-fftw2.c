@@ -406,10 +406,17 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
       column major. So that the leading dimension along which the work
       is shared appears  last here. As of Petsc  3 the library refuses
       (loudly) to handle  zero range for any worker.   This limits the
-      maximum number of workers by N[2]:
+      maximum  number  of  workers  by  N[2]. The  boundary  type  was
+      non-periodic in  the very first  version. FIXME: I assume  it is
+      only necessary  for the  Dirichlet boundary conditions  that run
+      finite stencil over the grid.
     */
     DACreate3d (PETSC_COMM_WORLD,
-                DA_XYZPERIODIC,    /* was DA_NONPERIODIC */
+#if PETSC_VERSION >= 30200
+                DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC,
+#else
+                DA_XYZPERIODIC,
+#endif
                 DA_STENCIL_STAR,
                 N[0], N[1], N[2],
                 1, 1, np,
@@ -420,7 +427,11 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
     /* For complex vectors: */
     int l0half[1] = {N[0] / 2 + 1};
     DACreate3d (PETSC_COMM_WORLD,
-                DA_XYZPERIODIC,    /* was DA_NONPERIODIC */
+#if PETSC_VERSION >= 30200
+                DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC,
+#else
+                DA_XYZPERIODIC,
+#endif
                 DA_STENCIL_STAR,
                 N[0] / 2 + 1, N[1], N[2], /* ~half as many, but ... */
                 1, 1, np,
