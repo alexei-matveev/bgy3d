@@ -164,13 +164,7 @@ rism: rism.o $(if $(shared), libbgy3d.so, libbgy3d.a)
 test-all:
 	$(MAKE) -C ./test
 
-#
-# One of the include files defines a target named clean already, we
-# augment its prerequisites here:
-#
-clean: myclean
-
-myclean:
+clean:
 	rm -f *.a *.so *.o fft/*.o *.bin *.info
 	rm -f bgy3d
 .PHONY: myclean
