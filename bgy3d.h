@@ -48,7 +48,11 @@ typedef PetscBool PetscTruth;
 #  define DAVecGetArray         DMDAVecGetArray
 #  define DAVecRestoreArray     DMDAVecRestoreArray
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
-#  define DA_STENCIL_STAR       DMDA_STENCIL_STAR
+#  define STENCIL_TYPE          DMDA_STENCIL_STAR
+#  define BOUNDARY_TYPE         DMDA_BOUNDARY_PERIODIC
+#else
+#  define STENCIL_TYPE          DA_STENCIL_STAR
+#  define BOUNDARY_TYPE         DA_XYZPERIODIC
 #endif
 
 

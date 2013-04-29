@@ -335,15 +335,16 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
       maximum  number  of  workers  by  N[2]. The  boundary  type  was
       non-periodic in  the very first  version. FIXME: I assume  it is
       only necessary  for the  Dirichlet boundary conditions  that run
-      finite stencil over the grid.
+      finite stencil over the  grid. See bgy3d.h for BOUNDARY_TYPE and
+      STENCIL_TYPE macros.
     */
     DACreate3d (PETSC_COMM_WORLD,
 #if PETSC_VERSION >= 30200
-                DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC,
+                BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
 #else
-                DA_XYZPERIODIC,
+                BOUNDARY_TYPE,
 #endif
-                DA_STENCIL_STAR,
+                STENCIL_TYPE,
                 N[0], N[1], N[2],
                 1, 1, np,
                 1, stencil_width,
@@ -353,11 +354,11 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
     /* For complex vectors: */
     DACreate3d (PETSC_COMM_WORLD,
 #if PETSC_VERSION >= 30200
-                DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC, DMDA_BOUNDARY_PERIODIC,
+                BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
 #else
-                DA_XYZPERIODIC,
+                BOUNDARY_TYPE,
 #endif
-                DA_STENCIL_STAR,
+                STENCIL_TYPE,
                 N[0], N[1], N[2], /* just as many, but ... */
                 1, 1, np,
                 2, stencil_width, /* ... with two DOF */
