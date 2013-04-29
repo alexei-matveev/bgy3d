@@ -330,11 +330,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
       column major. So that the leading dimension along which the work
       is shared appears  last here. As of Petsc  3 the library refuses
       (loudly) to handle  zero range for any worker.   This limits the
-      maximum  number  of  workers  by  N[2]. The  boundary  type  was
-      non-periodic in  the very first  version. FIXME: I assume  it is
-      only necessary  for the  Dirichlet boundary conditions  that run
-      finite stencil over the  grid. See bgy3d.h for BOUNDARY_TYPE and
-      STENCIL_TYPE macros.
+      maximum number of workers by N[2].
     */
     fft->da = da_create (1, 1, l0, 1, l1, np, l2);
 
