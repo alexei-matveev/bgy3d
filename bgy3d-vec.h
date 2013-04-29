@@ -99,7 +99,12 @@ static inline void da_shape (const DA da, int N[static 3])
 {
   int dim;
   DAGetInfo (da, &dim, &N[0], &N[1], &N[2],
-             NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+             NULL, NULL, NULL, NULL, NULL,
+             NULL,
+#if PETSC_VERSION >= 30200
+             NULL, NULL,
+#endif
+             NULL);
   assert (dim == 3);
 }
 
@@ -109,7 +114,12 @@ static inline int da_dof (const DA da)
 {
   int n;
   DAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-             &n, NULL, NULL, NULL);
+             &n, NULL,
+             NULL,
+#if PETSC_VERSION >= 30200
+             NULL, NULL,
+#endif
+             NULL);
   return n;
 }
 
