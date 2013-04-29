@@ -14,7 +14,7 @@ all: bgy3d
 # Petsc relies on a lot of  libraries. The easiest way to set compiler
 # flags is to use the  variables defined by Petsc makefiles. For Petsc
 # 2.3  this file  defines PETSC_CC_INCLUDES,  PETSC_LIB.   The configs
-# changed in later versions --- adapt the includes accordignly:
+# changed in later versions --- adapt the includes accordingly:
 #
 include $(PETSC_DIR)/bmake/common/variables # on Lenny
 # include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
