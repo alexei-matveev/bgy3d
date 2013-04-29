@@ -231,7 +231,13 @@ Vec bgy3d_vec_load (const char file[])
   PetscViewer viewer;
 
   PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+# if PETSC_VERSION < 30200
   VecLoad (viewer, VECMPI, &vec); /* creates it */
+#else
+  /* FIXME: how to make it distributed? */
+  VecCreate (PETSC_COMM_WORLD, &vec);
+  VecLoad (vec, viewer);
+#endif
   PetscViewerDestroy (viewer);
 
   return vec;
