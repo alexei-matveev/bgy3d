@@ -73,7 +73,7 @@ LDFLAGS  =
 
 
 
-INCDIRS = $(PETSC_INCLUDE) -I./fft
+INCDIRS = $(PETSC_CC_INCLUDES) -I./fft
 fftw3-libs = -lfftw3_mpi -lfftw3
 fftw2-libs = -lfftw_mpi -lfftw
 rfftw2-libs = -lrfftw_mpi -lfftw_mpi -lrfftw -lfftw
