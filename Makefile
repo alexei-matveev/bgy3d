@@ -1,23 +1,25 @@
 #
-# Include Slepc and Petsc.  On Debian derivatives do
+# Include Slepc and  Petsc.  Petsc relies on a  lot of libraries.  The
+# easiest way to set compiler flags is to use the variables defined by
+# Petsc  makefiles. For  Petsc  2.3 the  file  included below  defines
+# PETSC_CC_INCLUDES  and  PETSC_LIB  among  other things.   On  Debian
+# derivatives do
 #
 #   export PETSC_DIR=/usr/lib/petsc
 #
 # This should  be a  symbolic link to  the actual location  managed by
-# update-alternatives.  Then execute
+# update-alternatives.   The  structure  of config  directory  changed
+# around Petsc 3.0 --- adapt the path accordingly:
+#
+include $(PETSC_DIR)/bmake/common/variables # on Lenny
+# include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
+
+#
+# Finally, execute
 #
 #   make -s
 #
 all: bgy3d
-
-#
-# Petsc relies on a lot of  libraries. The easiest way to set compiler
-# flags is to use the  variables defined by Petsc makefiles. For Petsc
-# 2.3  this file  defines PETSC_CC_INCLUDES,  PETSC_LIB.   The configs
-# changed in later versions --- adapt the includes accordingly:
-#
-include $(PETSC_DIR)/bmake/common/variables # on Lenny
-# include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
 
 # Shell
 SHELL = /bin/sh
