@@ -221,14 +221,14 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 
 /* The following  code declares a  State SMOB primarily to  make array
    descriptors, FFT, and laplace matrices available to Scheme: */
-static scm_t_bits state_tag;
-static scm_t_bits vec_tag;
+static scm_t_bits guile_state_tag;
+static scm_t_bits guile_vec_tag;
 
 
 static SCM from_state (const State *BHD)
 {
   SCM obj;
-  SCM_NEWSMOB (obj, state_tag, BHD);
+  SCM_NEWSMOB (obj, guile_state_tag, BHD);
   return obj;
 }
 
@@ -236,7 +236,7 @@ static SCM from_state (const State *BHD)
 static SCM from_vec (Vec vec)
 {
   SCM obj;
-  SCM_NEWSMOB (obj, vec_tag, vec);
+  SCM_NEWSMOB (obj, guile_vec_tag, vec);
   return obj;
 }
 
@@ -253,7 +253,7 @@ static SCM from_vec1 (int m, const Vec g[m])
 
 static State* to_state (SCM state)
 {
-  scm_assert_smob_type (state_tag, state);
+  scm_assert_smob_type (guile_state_tag, state);
 
   return (State*) SCM_SMOB_DATA (state);
 }
@@ -261,24 +261,24 @@ static State* to_state (SCM state)
 
 static Vec to_vec (SCM vec)
 {
-  scm_assert_smob_type (vec_tag, vec);
+  scm_assert_smob_type (guile_vec_tag, vec);
 
   return (Vec) SCM_SMOB_DATA (vec);
 }
 
 
-static SCM state_make (SCM alist)
+static SCM guile_state_make (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
-  ProblemData *PD = malloc (sizeof *PD); /* free() in state_free() */
+  ProblemData *PD = malloc (sizeof *PD); /* free() in guile_state_free() */
   *PD = problem_data (alist);
 
   return from_state (bgy3d_state_make (PD));
 }
 
 
-static SCM vec_make (SCM state)
+static SCM guile_vec_make (SCM state)
 {
   State *BHD = to_state (state);
   Vec vec = bgy3d_vec_create (BHD->da);
@@ -286,7 +286,7 @@ static SCM vec_make (SCM state)
 }
 
 
-static SCM vec_make_complex (SCM state)
+static SCM guile_vec_make_complex (SCM state)
 {
   State *BHD = to_state (state);
   Vec vec = bgy3d_vec_create (BHD->dc);
@@ -294,7 +294,7 @@ static SCM vec_make_complex (SCM state)
 }
 
 
-static size_t state_free (SCM state)
+static size_t guile_state_free (SCM state)
 {
   State *BHD = to_state (state);
   /*
@@ -311,7 +311,7 @@ static size_t state_free (SCM state)
 }
 
 
-static size_t vec_free (SCM vec)
+static size_t guile_vec_free (SCM vec)
 {
   Vec c_vec = to_vec (vec);
   if (c_vec)
@@ -320,19 +320,19 @@ static size_t vec_free (SCM vec)
 }
 
 
-static SCM state_destroy (SCM state)
+static SCM guile_state_destroy (SCM state)
 {
   assert (to_state (state) != NULL);
-  state_free (state);
+  guile_state_free (state);
   SCM_SET_SMOB_DATA (state, NULL);
   return SCM_UNSPECIFIED;
 }
 
 
-static SCM vec_destroy (SCM vec)
+static SCM guile_vec_destroy (SCM vec)
 {
   assert (to_vec (vec) != NULL);
-  vec_free (vec);
+  guile_vec_free (vec);
   SCM_SET_SMOB_DATA (vec, NULL);
   return SCM_UNSPECIFIED;
 }
@@ -346,7 +346,7 @@ static SCM noop_mark (SCM smob)
 }
 
 
-static SCM vec_save (SCM path, SCM vec)
+static SCM guile_vec_save (SCM path, SCM vec)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
@@ -358,7 +358,7 @@ static SCM vec_save (SCM path, SCM vec)
 }
 
 
-static SCM vec_load (SCM path)
+static SCM guile_vec_load (SCM path)
 {
   char *c_path = scm_to_locale_string (path); /* free() it! */
 
@@ -370,7 +370,7 @@ static SCM vec_load (SCM path)
 }
 
 
-static SCM vec_length (SCM vec)
+static SCM guile_vec_length (SCM vec)
 {
   int len;
   VecGetSize (to_vec (vec), &len);
@@ -380,7 +380,7 @@ static SCM vec_length (SCM vec)
 
 /* An inefficient way of getting just one value, vec[ix], even if that
    value is not stored locally. Collective. */
-static SCM vec_ref (SCM vec, SCM ix)
+static SCM guile_vec_ref (SCM vec, SCM ix)
 {
   assert (sizeof(real) == sizeof(double)); /* See MPI_DOUBLE */
 
@@ -404,16 +404,16 @@ static SCM vec_ref (SCM vec, SCM ix)
 }
 
 
-static SCM vec_dot (SCM x, SCM y)
+static SCM guile_vec_dot (SCM x, SCM y)
 {
   return scm_from_double (bgy3d_vec_dot (to_vec (x), to_vec (y)));
 }
 
 
-static SCM vec_fft (SCM state, SCM x)
+static SCM guile_vec_fft (SCM state, SCM x)
 {
   State *BHD = to_state (state);
-  SCM y = vec_make_complex (state);
+  SCM y = guile_vec_make_complex (state);
   Vec y_ = to_vec (y);
 
   MatMult (BHD->fft_mat, to_vec (x), y_);
@@ -423,10 +423,10 @@ static SCM vec_fft (SCM state, SCM x)
 }
 
 
-static SCM vec_ifft (SCM state, SCM y)
+static SCM guile_vec_ifft (SCM state, SCM y)
 {
   State *BHD = to_state (state);
-  SCM x = vec_make (state);
+  SCM x = guile_vec_make (state);
 
   Vec x_ = to_vec (x);
   MatMultTranspose (BHD->fft_mat, to_vec (y), x_);
@@ -436,7 +436,7 @@ static SCM vec_ifft (SCM state, SCM y)
 }
 
 
-static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
+static SCM guile_vec_fft_interp (SCM state, SCM Y, SCM x)
 {
   State *BHD = to_state (state);
   Vec Y_ = to_vec (Y);
@@ -455,7 +455,7 @@ static SCM vec_fft_interp (SCM state, SCM Y, SCM x)
 }
 
 
-static SCM vec_set_random (SCM x)
+static SCM guile_vec_set_random (SCM x)
 {
   VecSetRandom (to_vec (x), NULL);
 
@@ -467,7 +467,7 @@ static SCM vec_set_random (SCM x)
   garbage. A  good thing  about it is  that it  also causes GC  to run
   regularly and collect Vec smobs.
 */
-static SCM vec_map1 (SCM f, SCM x)
+static SCM guile_vec_map1 (SCM f, SCM x)
 {
   Vec x_ = to_vec (x);
   Vec y_ = bgy3d_vec_duplicate (x_);
@@ -482,7 +482,7 @@ static SCM vec_map1 (SCM f, SCM x)
 }
 
 
-static SCM vec_map2 (SCM f, SCM x, SCM y)
+static SCM guile_vec_map2 (SCM f, SCM x, SCM y)
 {
   Vec x_ = to_vec (x);
   Vec y_ = to_vec (y);
@@ -498,7 +498,7 @@ static SCM vec_map2 (SCM f, SCM x, SCM y)
 }
 
 
-static int state_print (SCM state, SCM port, scm_print_state *pstate)
+static int guile_state_print (SCM state, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
   const State *BHD = to_state (state);
@@ -519,7 +519,7 @@ static int state_print (SCM state, SCM port, scm_print_state *pstate)
 }
 
 
-static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
+static int guile_vec_print (SCM vec, SCM port, scm_print_state *pstate)
 {
   (void) pstate;
   const Vec c_vec = to_vec (vec);
@@ -527,7 +527,7 @@ static int vec_print (SCM vec, SCM port, scm_print_state *pstate)
   scm_puts ("#<vec addr: ", port);
   scm_display (from_pointer (c_vec), port);
   scm_puts (", length: ", port);
-  scm_display (vec_length (vec), port);
+  scm_display (guile_vec_length (vec), port);
   scm_puts (">", port);
   scm_remember_upto_here_1 (vec);
   return 1;                     /* non-zero means success */
@@ -642,48 +642,48 @@ static SCM guile_f64_dst (SCM x)
   (scm_c_define_gsubr (name, req, opt, rst, func),      \
    scm_c_export (name, NULL))
 
-static void state_init_type (void)
+static void guile_init_state_type (void)
 {
   /*
     This is the size of the struct, the actual memory pressure is much
     higher and  invisible to Guile garbage  collector. Temporary Vecs,
     matrices and such:
   */
-  state_tag = scm_make_smob_type ("state", sizeof (State));
-  scm_set_smob_mark (state_tag, noop_mark);
-  scm_set_smob_free (state_tag, state_free);
-  scm_set_smob_print (state_tag, state_print);
+  guile_state_tag = scm_make_smob_type ("state", sizeof (State));
+  scm_set_smob_mark (guile_state_tag, noop_mark);
+  scm_set_smob_free (guile_state_tag, guile_state_free);
+  scm_set_smob_print (guile_state_tag, guile_state_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  EXPORT ("state-make", 1, 0, 0, state_make);
-  EXPORT ("state-destroy", 1, 0, 0, state_destroy);
+  EXPORT ("state-make", 1, 0, 0, guile_state_make);
+  EXPORT ("state-destroy", 1, 0, 0, guile_state_destroy);
 }
 
 
-static void vec_init_type (void)
+static void guile_init_vec_type (void)
 {
   /* The actual memory pressure is much higher. */
-  vec_tag = scm_make_smob_type ("vec", sizeof (Vec));
-  scm_set_smob_mark (vec_tag, noop_mark);
-  scm_set_smob_free (vec_tag, vec_free);
-  scm_set_smob_print (vec_tag, vec_print);
+  guile_vec_tag = scm_make_smob_type ("vec", sizeof (Vec));
+  scm_set_smob_mark (guile_vec_tag, noop_mark);
+  scm_set_smob_free (guile_vec_tag, guile_vec_free);
+  scm_set_smob_print (guile_vec_tag, guile_vec_print);
 
   /* Destroy state explicitly, when producing much garbage: */
-  EXPORT ("vec-make", 1, 0, 0, vec_make);
-  EXPORT ("vec-make-complex", 1, 0, 0, vec_make_complex);
-  EXPORT ("vec-destroy", 1, 0, 0, vec_destroy);
+  EXPORT ("vec-make", 1, 0, 0, guile_vec_make);
+  EXPORT ("vec-make-complex", 1, 0, 0, guile_vec_make_complex);
+  EXPORT ("vec-destroy", 1, 0, 0, guile_vec_destroy);
 
-  EXPORT ("vec-save", 2, 0, 0, vec_save);
-  EXPORT ("vec-load", 1, 0, 0, vec_load);
-  EXPORT ("vec-length", 1, 0, 0, vec_length);
-  EXPORT ("vec-ref", 2, 0, 0, vec_ref);
-  EXPORT ("vec-set-random", 1, 0, 0, vec_set_random);
-  EXPORT ("vec-dot", 2, 0, 0, vec_dot);
-  EXPORT ("vec-fft", 2, 0, 0, vec_fft);
-  EXPORT ("vec-ifft", 2, 0, 0, vec_ifft);
-  EXPORT ("vec-fft-interp", 3, 0, 0, vec_fft_interp);
-  EXPORT ("vec-map1", 2, 0, 0, vec_map1);
-  EXPORT ("vec-map2", 3, 0, 0, vec_map2);
+  EXPORT ("vec-save", 2, 0, 0, guile_vec_save);
+  EXPORT ("vec-load", 1, 0, 0, guile_vec_load);
+  EXPORT ("vec-length", 1, 0, 0, guile_vec_length);
+  EXPORT ("vec-ref", 2, 0, 0, guile_vec_ref);
+  EXPORT ("vec-set-random", 1, 0, 0, guile_vec_set_random);
+  EXPORT ("vec-dot", 2, 0, 0, guile_vec_dot);
+  EXPORT ("vec-fft", 2, 0, 0, guile_vec_fft);
+  EXPORT ("vec-ifft", 2, 0, 0, guile_vec_ifft);
+  EXPORT ("vec-fft-interp", 3, 0, 0, guile_vec_fft_interp);
+  EXPORT ("vec-map1", 2, 0, 0, guile_vec_map1);
+  EXPORT ("vec-map2", 3, 0, 0, guile_vec_map2);
 
   EXPORT ("f64dst", 1, 0, 0, guile_f64_dst);
   EXPORT ("f64+", 2, 0, 0, guile_f64_add);
@@ -1025,8 +1025,8 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
-  state_init_type();
-  vec_init_type();
+  guile_init_state_type ();
+  guile_init_vec_type ();
 }
 
 
