@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 #include <assert.h>
 #include "petscsys.h"
+#include "bgy3d.h"
 #include "bgy3d-getopt.h"
 
 int bgy3d_getopt_test (const char key[])
