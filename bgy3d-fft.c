@@ -122,7 +122,7 @@ double bgy3d_fft_test (int m, int n, int p)
   /* This corresponds to direct FFT, y = fft(x): */
   MatMult (A, x, y);
 
-  /* This corresponds to inverse FFT, z = fft(y): */
+  /* This corresponds to inverse FFT, z = ifft(y): */
   MatMultTranspose (A, y, z);
 
   /*
