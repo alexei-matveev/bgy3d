@@ -14,8 +14,43 @@
 #include <stdbool.h>            /* bool, true, false */
 #include <float.h>              /* DBL_MAX */
 
-#include "petscda.h"            /* Vec, Mat, DA, ... */
+#include "petsc.h"
+#define PETSC_VERSION (PETSC_VERSION_MAJOR * 10000 + PETSC_VERSION_MINOR * 100)
+
+#if PETSC_VERSION >= 30200
+#  include "petscdmda.h"        /* Vec, Mat, DA, ... */
+#else
+#  include "petscda.h"          /* Vec, Mat, DA, ... */
+#endif
+
 #include "petscdmmg.h"          /* KSP, ... */
+
+/* FIXME: PETSC 3.2 */
+#if PETSC_VERSION >= 30200
+typedef DM DA;
+typedef PetscBool PetscTruth;
+#  define VecDestroy(x)         (VecDestroy)(&(x))
+#  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
+#  define MatDestroy(x)         (MatDestroy)(&(x))
+#  define ISDestroy(x)          (ISDestroy)(&(x))
+#  define KSPDestroy(x)         (KSPDestroy)(&(x))
+#  define SNESDestroy(x)        (SNESDestroy)(&(x))
+#  define PetscViewerDestroy(x) (PetscViewerDestroy)(&(x))
+#  define PCDestroy(x)          (PCDestroy)(&(x))
+#  define DADestroy(x)          (DMDestroy)(&(x))
+#  define DAGetCorners          DMDAGetCorners
+#  define DACreate3d            DMDACreate3d
+#  define DACreateGlobalVector  DMCreateGlobalVector
+#  define DAGetGlobalVector     DMGetGlobalVector
+#  define DAGetInfo             DMDAGetInfo
+#  define DAGetMatrix           DMGetMatrix
+#  define DARestoreGlobalVector DMRestoreGlobalVector
+#  define DAVecGetArray         DMDAVecGetArray
+#  define DAVecRestoreArray     DMDAVecRestoreArray
+#  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
+#  define DA_STENCIL_STAR       DMDA_STENCIL_STAR
+#endif
+
 
 /*
  * C99 standards removes M_PI from math.h, the digits were copied from
