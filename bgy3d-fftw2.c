@@ -399,8 +399,6 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
           printf ("%d: l0[%d] = %d\n", id, p, l2[p]);
       }
 
-    const PetscInt stencil_width = 1;
-
     /*
       Petsc  appears to  use different  convention similar  to fortran
       column major. So that the leading dimension along which the work
@@ -412,33 +410,15 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
       finite stencil over the  grid. See bgy3d.h for BOUNDARY_TYPE and
       STENCIL_TYPE macros.
     */
-    DACreate3d (PETSC_COMM_WORLD,
-#if PETSC_VERSION >= 30200
-                BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
-#else
-                BOUNDARY_TYPE,
-#endif
-                STENCIL_TYPE,
-                N[0], N[1], N[2],
-                1, 1, np,
-                1, stencil_width,
-                l0, l1, l2,
-                &fft->da);
+    fft->da = da_create (1, 1, l0, 1, l1, np, l2);
 
-    /* For complex vectors: */
+    /*
+      For complex  vectors the minor  dimension is about half  as long
+      (think padding). Instead there are two degrees of freedom:
+    */
     int l0half[1] = {N[0] / 2 + 1};
-    DACreate3d (PETSC_COMM_WORLD,
-#if PETSC_VERSION >= 30200
-                BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
-#else
-                BOUNDARY_TYPE,
-#endif
-                STENCIL_TYPE,
-                N[0] / 2 + 1, N[1], N[2], /* ~half as many, but ... */
-                1, 1, np,
-                2, stencil_width, /* ... with two DOF */
-                l0half, l1, l2,
-                &fft->dc);
+
+    fft->dc = da_create (2, 1, l0half, 1, l1, np, l2);
   }
 
   /* Get local dimensions: */

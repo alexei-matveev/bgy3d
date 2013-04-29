@@ -366,3 +366,46 @@ static inline real bgy3d_vec_hole (Vec g)
   /* FIXME: loss of precision possible here: */
   return bgy3d_vec_size (g) - bgy3d_vec_sum (g);
 }
+
+
+/*
+  Create  descriptor of  a distributed  M x  N x  P array  with lx[m],
+  ly[n], and lz[p] being partitions of M, N, and P, respectively.
+*/
+static inline DA da_create (int dof,
+                            int m, /* const */ int lx[m],
+                            int n, /* const */ int ly[n],
+                            int p, /* const */ int lz[p])
+{
+  const PetscInt stencil_width = 1;
+
+  /* No need to sum over workers, everyone provides the same input: */
+  const int M = isum (m, lx);
+  const int N = isum (n, ly);
+  const int P = isum (p, lz);
+
+  /*
+    As of  Petsc 3 the library  refuses (loudly) to  handle zero range
+    for any worker.  This limits the  maximum number of workers by P =
+    sum(lz).   The boundary type  was non-periodic  in the  very first
+    version. FIXME:  I assume it  is only necessary for  the Dirichlet
+    boundary  conditions that run  finite stencil  over the  grid. See
+    bgy3d.h for BOUNDARY_TYPE and STENCIL_TYPE macros.
+  */
+  DA da;
+  DACreate3d (PETSC_COMM_WORLD,
+#if PETSC_VERSION >= 30200
+              BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
+#else
+              BOUNDARY_TYPE,
+#endif
+              STENCIL_TYPE,
+              M, N, P,          /* grid dimensions */
+              m, n, p,          /* m = 1, n = 1, p = NP, usually */
+              dof,              /* 1 or 2, usually */
+              stencil_width,    /* 1 */
+              lx, ly, lz,       /* partitions of M, N, and P */
+              &da);
+
+  return da;
+}
