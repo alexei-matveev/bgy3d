@@ -167,7 +167,6 @@ test-all:
 clean:
 	rm -f *.a *.so *.o fft/*.o *.bin *.info
 	rm -f bgy3d
-.PHONY: myclean
 
 distclean:
 	rm -f *.o *.so *.d  fft/*.o fft/*.d
