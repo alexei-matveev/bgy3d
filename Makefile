@@ -1,13 +1,10 @@
-# Include Slepc and Petsc
-# on Debian Lenny do
 #
-#   export PETSC_DIR=/usr/lib/petscdir/2.3.3
+# Include Slepc and Petsc.  on Debian-derived distributions do
 #
-# On Ubuntu 12.04 LTS do
+#   export PETSC_DIR=/usr/lib/petsc
 #
-#   export PETSC_DIR=/usr/lib/petscdir/3.1
-#
-# Then
+# This should  be a  symbolic link to  the actual location  managed by
+# update-alternatiaves.  Then execute
 #
 #   make -s
 #
