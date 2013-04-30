@@ -29,7 +29,6 @@
 #if PETSC_VERSION >= 30200
 typedef DM DA;
 typedef PetscBool PetscTruth;
-#  define VecDestroy(x)         (VecDestroy)(&(x))
 #  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
 #  define MatDestroy(x)         (MatDestroy)(&(x))
 #  define ISDestroy(x)          (ISDestroy)(&(x))
@@ -53,6 +52,7 @@ typedef PetscBool PetscTruth;
 #else
 #  define STENCIL_TYPE          DA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DA_XYZPERIODIC
+#  define VecDestroy(x)         (VecDestroy)(*(x))
 #endif
 
 

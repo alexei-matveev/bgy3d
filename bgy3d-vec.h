@@ -66,9 +66,10 @@ Vec bgy3d_vec_create (const DA da)
 static inline
 void bgy3d_vec_destroy (Vec *g)
 {
-  /* VecDestroy() will not free() the buffer if the Vec was created by
-     vec_from_array(): */
-  VecDestroy (*g); /* FIXME: Petsc 3.2 and above? */
+  /* Since Petsc 3.2, VecDestroy() also zeroed out the buffer and
+   * takes the address instead of vector as input argument */
+  VecDestroy (g);
+  /* FIXME: only needed before Petsc 3.2 */
   *g = NULL;
 }
 

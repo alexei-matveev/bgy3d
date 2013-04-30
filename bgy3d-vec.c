@@ -113,7 +113,10 @@ void bgy3d_vec_pack_destroy1 (Vec *X)
 {
   /* FIXME: should we also vec_restore_array()? */
   free (vec_get_array (*X));    /* free() the whole */
-  VecDestroy (*X);              /* should not free() */
+
+  /* take the address of vector as input since Petsc 3.2 */
+  VecDestroy (X);
+  /* FIXME: only needed before Petsc 3.2 */
   *X = NULL;
 }
 
