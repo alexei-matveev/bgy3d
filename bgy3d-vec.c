@@ -4,67 +4,6 @@
 #include "bgy3d-vec.h"
 
 
-Vec bgy3d_vec_duplicate (const Vec x)
-{
-  Vec y;
-  VecDuplicate (x, &y);
-  return y;
-}
-
-
-Vec bgy3d_vec_create (const DA da)
-{
-  Vec x;
-  DACreateGlobalVector (da, &x);
-  return x;
-}
-
-/* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
-   they take the pointer to a Petsc object and nullify it: */
-void bgy3d_vec_destroy (Vec *g)
-{
-  /* VecDestroy() will not free() the buffer if the Vec was created by
-     vec_from_array(): */
-  VecDestroy (*g); /* FIXME: Petsc 3.2 and above? */
-  *g = NULL;
-}
-
-
-void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
-{
-  for (int i = 0; i < m; i++)
-    g[i] = bgy3d_vec_create (da);
-}
-
-
-void bgy3d_vec_destroy1 (int m, Vec g[m])
-{
-  for (int i = 0; i < m; i++)
-    bgy3d_vec_destroy (&g[i]);
-}
-
-
-/* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
-void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
-{
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      g[j][i] = g[i][j] = bgy3d_vec_create (da);
-}
-
-
-void bgy3d_vec_destroy2 (int m, Vec g[m][m])
-{
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        assert (g[i][j] == g[j][i]);
-        bgy3d_vec_destroy (&g[i][j]);
-        g[j][i] = NULL;
-      }
-}
-
-
 void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m])
 {
   /*

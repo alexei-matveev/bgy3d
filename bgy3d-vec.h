@@ -3,16 +3,6 @@
 /* FIXME: any better way? */
 #include <complex.h>
 
-Vec bgy3d_vec_duplicate (const Vec x);
-Vec bgy3d_vec_create (const DA da);
-void bgy3d_vec_destroy (Vec *g);
-
-void bgy3d_vec_create1 (const DA da, int m, Vec g[m]);
-void bgy3d_vec_destroy1 (int m, Vec g[m]);
-
-void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m]);
-void bgy3d_vec_destroy2 (int m, Vec g[m][m]);
-
 void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m]);
 void bgy3d_vec_aliases_destroy1 (Vec X, int m, Vec x[m]);
 
@@ -51,6 +41,75 @@ void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
 
 void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
+
+
+static inline
+Vec bgy3d_vec_duplicate (const Vec x)
+{
+  Vec y;
+  VecDuplicate (x, &y);
+  return y;
+}
+
+
+static inline
+Vec bgy3d_vec_create (const DA da)
+{
+  Vec x;
+  DACreateGlobalVector (da, &x);
+  return x;
+}
+
+
+/* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
+   they take the pointer to a Petsc object and nullify it: */
+static inline
+void bgy3d_vec_destroy (Vec *g)
+{
+  /* VecDestroy() will not free() the buffer if the Vec was created by
+     vec_from_array(): */
+  VecDestroy (*g); /* FIXME: Petsc 3.2 and above? */
+  *g = NULL;
+}
+
+
+static inline
+void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
+{
+  for (int i = 0; i < m; i++)
+    g[i] = bgy3d_vec_create (da);
+}
+
+
+static inline
+void bgy3d_vec_destroy1 (int m, Vec g[m])
+{
+  for (int i = 0; i < m; i++)
+    bgy3d_vec_destroy (&g[i]);
+}
+
+
+/* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
+static inline
+void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      g[j][i] = g[i][j] = bgy3d_vec_create (da);
+}
+
+
+static inline
+void bgy3d_vec_destroy2 (int m, Vec g[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        assert (g[i][j] == g[j][i]);
+        bgy3d_vec_destroy (&g[i][j]);
+        g[j][i] = NULL;
+      }
+}
 
 
 static inline Vec vec_pop (DA da)
