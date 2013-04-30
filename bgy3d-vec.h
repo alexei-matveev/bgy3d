@@ -56,7 +56,7 @@ static inline
 Vec bgy3d_vec_create (const DA da)
 {
   Vec x;
-  DACreateGlobalVector (da, &x);
+  DMCreateGlobalVector (da, &x);
   return x;
 }
 
@@ -116,7 +116,7 @@ void bgy3d_vec_destroy2 (int m, Vec g[m][m])
 static inline Vec vec_pop (DA da)
 {
   Vec work;
-  DAGetGlobalVector (da, &work);
+  DMGetGlobalVector (da, &work);
 
   return work;
 }
@@ -124,7 +124,7 @@ static inline Vec vec_pop (DA da)
 
 static inline void vec_push (DA da, Vec *work)
 {
-  DARestoreGlobalVector (da, work);
+  DMRestoreGlobalVector (da, work);
   *work = NULL;
 }
 
@@ -158,7 +158,7 @@ static inline Mat mat_ref (Mat m)
 static inline void da_shape (const DA da, int N[static 3])
 {
   int dim;
-  DAGetInfo (da, &dim, &N[0], &N[1], &N[2],
+  DMDAGetInfo (da, &dim, &N[0], &N[1], &N[2],
              NULL, NULL, NULL, NULL, NULL,
              NULL,
 #if PETSC_VERSION >= 30200
@@ -173,7 +173,7 @@ static inline void da_shape (const DA da, int N[static 3])
 static inline int da_dof (const DA da)
 {
   int n;
-  DAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  DMDAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
              &n, NULL,
              NULL,
 #if PETSC_VERSION >= 30200

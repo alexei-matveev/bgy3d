@@ -29,11 +29,6 @@
 #if PETSC_VERSION >= 30200
 typedef DM DA;
 typedef PetscBool PetscTruth;
-#  define DACreateGlobalVector  DMCreateGlobalVector
-#  define DAGetGlobalVector     DMGetGlobalVector
-#  define DAGetInfo             DMDAGetInfo
-#  define DAGetMatrix           DMGetMatrix
-#  define DARestoreGlobalVector DMRestoreGlobalVector
 #  define DAVecGetArray         DMDAVecGetArray
 #  define DAVecRestoreArray     DMDAVecRestoreArray
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
@@ -54,6 +49,11 @@ typedef PetscBool PetscTruth;
 #  define PCDestroy(x)          (PCDestroy)(*(x))
 #  define DMDAGetCorners        DAGetCorners
 #  define DMDACreate3d          DACreate3d
+#  define DMCreateGlobalVector  DACreateGlobalVector
+#  define DMGetGlobalVector     DAGetGlobalVector
+#  define DMDAGetInfo           DAGetInfo
+#  define DMGetMatrix           DAGetMatrix
+#  define DMRestoreGlobalVector DARestoreGlobalVector
 #endif
 
 

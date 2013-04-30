@@ -250,7 +250,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
 
   /* Create Matrix with appropriate non-zero structure */
   Mat M;
-  DAGetMatrix (da, MATMPIAIJ, &M);
+  DMGetMatrix (da, MATMPIAIJ, &M);
 
   MatZeroEntries (M);
 
