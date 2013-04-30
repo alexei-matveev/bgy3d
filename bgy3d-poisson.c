@@ -148,7 +148,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   /* Loop over local portion of the k-grid */
   {
     int x[3], n[3], i[3];
-    DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+    DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     complex ***work_;
     DAVecGetArray (BHD->dc, work, &work_);
@@ -224,7 +224,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   /* Loop over local portion of the k-grid */
   {
     int i0, j0, k0, ni, nj, nk;
-    DAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
+    DMDAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
     complex ***work_;
     DAVecGetArray (BHD->dc, work, &work_);

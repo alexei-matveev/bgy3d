@@ -29,7 +29,7 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***uc_fft_;
   DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
@@ -79,7 +79,7 @@ static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***uc_fft_, ***fc_fft_[3];
   DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
@@ -175,7 +175,7 @@ void bgy3d_pair_potential (const State *BHD,
   DAVecGetArray (BHD->da, v_short, &v_short_);
 
   int n[3], x[3], i[3];
-  DAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -293,7 +293,7 @@ void bgy3d_force (State *BHD,
 
   /* Get local portion of the grid */
   int x[3], n[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)

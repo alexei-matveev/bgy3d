@@ -98,7 +98,7 @@ static void kapply (const State *BHD,
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -248,7 +248,7 @@ void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***w_fft_;
   DAVecGetArray (dc, w_fft, &w_fft_);
@@ -473,7 +473,7 @@ static void Compute_dg_intra (State *BHD,
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
-  DAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***wbc_fft_, ***dg_fft_, ***cac_fft_;
   complex ***fg2_fft_[3];

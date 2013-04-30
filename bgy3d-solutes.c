@@ -192,7 +192,7 @@ static void field (DA da, const ProblemData *PD,
     h[dim] = PD->h[dim];
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   DAVecGetArray (da, v, &vec);
 
@@ -231,7 +231,7 @@ static void grid_map (DA da, const ProblemData *PD,
   int ni, nj, nk;
 
   /* Get local portion of the grid */
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* MEMORY: huge arrays here: */
   int m = ni * nj * nk;
@@ -432,7 +432,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
       z[i] *= BOHR;
     }
 
-  DAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners(da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   FOR_DIM
     h[dim] = PD->h[dim];

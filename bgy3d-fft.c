@@ -21,7 +21,7 @@ static void unpack (DA da, Vec g, complex *restrict g_fft)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
   DAVecGetArray (da, g, &g_);
@@ -42,7 +42,7 @@ static void pack (DA da, Vec g, const complex *restrict g_fft)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
   DAVecGetArray (da, g, &g_);
@@ -63,7 +63,7 @@ FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
   int x[3], n[3];
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   if(g_fft==NULL)
     g_fft = (FFT_DATA*) calloc(n[0] * n[1] * n[2], sizeof(*g_fft));

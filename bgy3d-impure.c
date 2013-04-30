@@ -219,7 +219,7 @@ static void kernel (const DA dc,
   const real scale = fac / L3;
 
   /* Get local portion of the grid */
-  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
   complex ***fg_[3], ***dfg_, ***coul_;

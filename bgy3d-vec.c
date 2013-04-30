@@ -355,7 +355,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
   /* interpolate to 3d grid */
 
   /* Get local portion of the grid */
-  DAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   DAVecGetArray(da, g2, &g2_vec);
 
@@ -473,7 +473,7 @@ void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
   int x[3], n[3], i[3];
 
   /* Get local portion of the grid */
-  DAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Loop over local portion of grid: */
   complex ***v_;

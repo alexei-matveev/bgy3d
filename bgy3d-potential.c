@@ -101,7 +101,7 @@ Context* bgy3d_pot_create (const State *BHD, Vec v)
   DAVecGetArray (s->da, s->v, &s->v_);
 
   /* Get local portion of the grid */
-  DAGetCorners (s->da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
+  DMDAGetCorners (s->da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
 
   /* copy N3 and h3 from PD */
   FOR_DIM

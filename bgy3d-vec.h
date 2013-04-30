@@ -193,7 +193,7 @@ static inline int da_local_size (const DA da)
 {
   /* Get dimensions and other vector properties: */
   int x[3], n[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   const int dof = da_dof (da);  /* dof == 2 for complex Vecs */
 
@@ -405,7 +405,7 @@ static inline real vec_integrate (DA da, real (*f)(real v, int i, int j, int k),
 
   /* Loop over local portion of grid */
   int x[3], n[3], i[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -453,7 +453,7 @@ static inline DA da_create (int dof,
     bgy3d.h for BOUNDARY_TYPE and STENCIL_TYPE macros.
   */
   DA da;
-  DACreate3d (PETSC_COMM_WORLD,
+  DMDACreate3d (PETSC_COMM_WORLD,
 #if PETSC_VERSION >= 30200
               BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
 #else

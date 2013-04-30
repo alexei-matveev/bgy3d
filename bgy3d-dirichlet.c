@@ -79,7 +79,7 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_, ***b_;
   DAVecGetArray (da, g, &g_);
@@ -108,7 +108,7 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
   DAVecGetArray (da, g, &g_);
@@ -267,7 +267,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
 
   /* Get local portion of the grid */
   int x[3], n[3], N[3];
-  DAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* Get grid dimensions N[3]: */
   da_shape (da, N);
@@ -320,7 +320,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
                   DMDACreateXXX() or MatSetStencil().
 
                 See (commented) asserts above  and compare to the call
-                to   DACreate3d()  in   bgy3d-vec.h,   especially  the
+                to DMDACreate3d()  in   bgy3d-vec.h,   especially  the
                 periodicity and stencil options there.
 
                 If you wrap the  indices modulo N, Petsc will complain
@@ -489,7 +489,7 @@ static PetscErrorCode mat_mult_op_lap (Mat A, Vec x, Vec y)
 
     /* Get local portion of the grid */
     int i0, j0, k0, ni, nj, nk;
-    DAGetCorners (lap->da, &i0, &j0, &k0, &ni, &nj, &nk);
+    DMDAGetCorners (lap->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
     // printf ("LOCAL: x = %d %d %d, n = %d %d %d\n", i0, j0, k0, ni, nj, nk);
     // DAGetGhostCorners (lap->da, &i0, &j0, &k0, &ni, &nj, &nk);
