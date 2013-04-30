@@ -433,7 +433,7 @@ static real ComputeCharge (const ProblemData *PD,
 
   real total = 0.0;
   for (int i = 0; i < m; i++)
-    total += solvent[i].charge * bgy3d_vec_sum (g[i]);
+    total += solvent[i].charge * vec_sum (g[i]);
 
   /* FIXME: different rhos[]? */
   return total * h3 * PD->rho;
@@ -602,8 +602,8 @@ static Context* info (const State *BHD,
   {
     /* Dot-product is an integral over space (up to a factor): */
     const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
-    val2 = h3 * bgy3d_vec_dot (ve, uc_rho);
-    val3 = h3 * bgy3d_vec_dot (uc, ve_rho);
+    val2 = h3 * vec_dot (ve, uc_rho);
+    val3 = h3 * vec_dot (uc, ve_rho);
   }
 
   PetscPrintf (PETSC_COMM_WORLD,

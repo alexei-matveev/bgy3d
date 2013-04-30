@@ -176,47 +176,47 @@ static inline int vec_local_size (Vec x)
   return n;
 }
 
-static inline int bgy3d_vec_size (Vec x)
+static inline int vec_size (Vec x)
 {
   int n;
   VecGetSize (x, &n);
   return n;
 }
 
-static inline real bgy3d_vec_sum (Vec x)
+static inline real vec_sum (Vec x)
 {
   real sum;
   VecSum (x, &sum);
   return sum;
 }
 
-static inline real bgy3d_vec_avg (Vec x)
+static inline real vec_avg (Vec x)
 {
-  return bgy3d_vec_sum (x) / bgy3d_vec_size (x);
+  return vec_sum (x) / vec_size (x);
 }
 
-static inline real bgy3d_vec_norm (Vec x)
+static inline real vec_norm (Vec x)
 {
   real norm;
   VecNorm (x, NORM_INFINITY, &norm);
   return norm;
 }
 
-static inline real bgy3d_vec_dot (Vec x, Vec y)
+static inline real vec_dot (Vec x, Vec y)
 {
   real dot;
   VecDot (x, y, &dot);
   return dot;
 }
 
-static inline real bgy3d_vec_max (Vec x)
+static inline real vec_max (Vec x)
 {
   real max;
   VecMax (x, NULL, &max);      /* dont want location */
   return max;
 }
 
-static inline real bgy3d_vec_min (Vec x)
+static inline real vec_min (Vec x)
 {
   real min;
   VecMin (x, NULL, &min);      /* dont want location */
@@ -361,10 +361,10 @@ static inline real bgy3d_vec_integrate (DA da, real (*f)(real v, int i, int j, i
 }
 
 /* Returns sum (1 - g): */
-static inline real bgy3d_vec_hole (Vec g)
+static inline real vec_hole (Vec g)
 {
   /* FIXME: loss of precision possible here: */
-  return bgy3d_vec_size (g) - bgy3d_vec_sum (g);
+  return vec_size (g) - vec_sum (g);
 }
 
 

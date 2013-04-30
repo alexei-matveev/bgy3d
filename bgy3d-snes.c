@@ -201,7 +201,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       /* Simple mixing: x = lambda * x + (1 - lambda) * x_old */
       VecAXPY (x, lambda, dx);
 
-      const real norm = bgy3d_vec_norm (dx);
+      const real norm = vec_norm (dx);
 
       PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
                    k + 1, norm, lambda);
@@ -237,7 +237,7 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       /* Calculate residual: */
       F (ctx, x, dx);
 
-      const real norm = bgy3d_vec_norm (dx);
+      const real norm = vec_norm (dx);
 
       /*
         Most  of  the  logic  below  is  to  control  how  the  mixing

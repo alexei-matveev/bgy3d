@@ -406,7 +406,7 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
 
 static SCM guile_vec_dot (SCM x, SCM y)
 {
-  return scm_from_double (bgy3d_vec_dot (to_vec (x), to_vec (y)));
+  return scm_from_double (vec_dot (to_vec (x), to_vec (y)));
 }
 
 

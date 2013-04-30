@@ -1116,7 +1116,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
                        "h(%s-%s)=% f ",
                        solvent[i].name,
                        solvent[j].name,
-                       dN * bgy3d_vec_hole (g[i][j]));
+                       dN * vec_hole (g[i][j]));
 
       PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
       PetscPrintf (PETSC_COMM_WORLD, "\n");
