@@ -636,7 +636,7 @@ static PetscErrorCode mat_destroy_inv (Mat A)
 
   KSP ksp = context (A);
 
-  KSPDestroy (ksp);
+  KSPDestroy (&ksp);
 
   return 0;
 }
