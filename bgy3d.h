@@ -29,9 +29,6 @@
 #if PETSC_VERSION >= 30200
 typedef DM DA;
 typedef PetscBool PetscTruth;
-#  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
-#  define ISDestroy(x)          (ISDestroy)(&(x))
-#  define PCDestroy(x)          (PCDestroy)(&(x))
 #  define DAGetCorners          DMDAGetCorners
 #  define DACreate3d            DMDACreate3d
 #  define DACreateGlobalVector  DMCreateGlobalVector
@@ -44,6 +41,7 @@ typedef PetscBool PetscTruth;
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
 #  define STENCIL_TYPE          DMDA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DMDA_BOUNDARY_PERIODIC
+/* before PETSC 3.2 */
 #else
 #  define STENCIL_TYPE          DA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DA_XYZPERIODIC
@@ -53,6 +51,9 @@ typedef PetscBool PetscTruth;
 #  define SNESDestroy(x)        (SNESDestroy)(*(x))
 #  define PetscViewerDestroy(x) (PetscViewerDestroy)(*(x))
 #  define DMDestroy(x)          (DADestroy)(*(x))
+#  define VecScatterDestroy(x)  (VecScatterDestroy)(*(x))
+#  define ISDestroy(x)          (ISDestroy)(*(x))
+#  define PCDestroy(x)          (PCDestroy)(*(x))
 #endif
 
 
