@@ -29,7 +29,6 @@
 #if PETSC_VERSION >= 30200
 typedef DM DA;
 typedef PetscBool PetscTruth;
-#  define DACreate3d            DMDACreate3d
 #  define DACreateGlobalVector  DMCreateGlobalVector
 #  define DAGetGlobalVector     DMGetGlobalVector
 #  define DAGetInfo             DMDAGetInfo
@@ -54,6 +53,7 @@ typedef PetscBool PetscTruth;
 #  define ISDestroy(x)          (ISDestroy)(*(x))
 #  define PCDestroy(x)          (PCDestroy)(*(x))
 #  define DMDAGetCorners        DAGetCorners
+#  define DMDACreate3d          DACreate3d
 #endif
 
 
