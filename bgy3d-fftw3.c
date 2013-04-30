@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <fftw3.h>
 #include <fftw3-mpi.h>
-#include "bgy3d-vec.h"          /* bgy3d_da_ref() */
+#include "bgy3d-vec.h"          /* da_ref() */
 #include "bgy3d-fftw.h"         /* Common interface for two impls */
 #include <complex.h>            /* after fftw.h */
 
@@ -479,8 +479,8 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
     too. The  user code  is still responsible  to call  DADestroy() on
     both objects.  Otherwise the refcount will never reach zero:
   */
-  *da = bgy3d_da_ref (fft->da);
-  *dc = bgy3d_da_ref (fft->dc);
+  *da = da_ref (fft->da);
+  *dc = da_ref (fft->dc);
 }
 
 

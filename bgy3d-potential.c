@@ -32,7 +32,7 @@
 */
 
 #include "bgy3d.h"
-#include "bgy3d-vec.h"          /* bgy3d_vec_ref(), ... */
+#include "bgy3d-vec.h"          /* vec_ref(), ... */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "bgy3d-potential.h"
 
@@ -78,19 +78,19 @@ Context* bgy3d_pot_create (const State *BHD, Vec v)
 
   /* Increment refcounts  and save a  ref in the  Context. DADestroy()
      them! */
-  s->da = bgy3d_da_ref (BHD->da);
-  s->dc = bgy3d_da_ref (BHD->dc);
+  s->da = da_ref (BHD->da);
+  s->dc = da_ref (BHD->dc);
 
   /* This     will     only      be     used     for     trigonometric
      interpolation. MatDestroy() it! */
-  s->fft_mat = bgy3d_mat_ref (BHD->fft_mat);
+  s->fft_mat = mat_ref (BHD->fft_mat);
 
   /*
     Do not copy the input vector, save a reference instead, but also
     Uincrement the refcount. We will have to bgy3d_vec_destroy() it
     too:
   */
-  s->v = bgy3d_vec_ref (v);
+  s->v = vec_ref (v);
 
   /* The first  time interpolation is requested we  put here something
      more usefull: */

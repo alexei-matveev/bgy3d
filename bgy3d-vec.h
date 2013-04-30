@@ -71,7 +71,7 @@ static inline void vec_push (DA da, Vec *work)
 
 /* Increment  the  reference count,  and  return  the descriptor,  the
    caller is obliged to DADestroy() it. Do not abuse!. */
-static inline DA bgy3d_da_ref (DA da)
+static inline DA da_ref (DA da)
 {
   PetscObjectReference ((PetscObject) da);
   return da;
@@ -79,7 +79,7 @@ static inline DA bgy3d_da_ref (DA da)
 
 /* Increment the reference count, and return the vector, the caller is
    obliged to VecDestroy() it. Do not abuse!. */
-static inline Vec bgy3d_vec_ref (Vec x)
+static inline Vec vec_ref (Vec x)
 {
   PetscObjectReference ((PetscObject) x);
   return x;
@@ -87,7 +87,7 @@ static inline Vec bgy3d_vec_ref (Vec x)
 
 /* Increment the reference count, and return the matrix, the caller is
    obliged to MatDestroy() it. Do not abuse!. */
-static inline Mat bgy3d_mat_ref (Mat m)
+static inline Mat mat_ref (Mat m)
 {
   PetscObjectReference ((PetscObject) m);
   return m;

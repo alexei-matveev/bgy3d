@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_test() */
-#include "bgy3d-vec.h"          /* bgy3d_da_ref() */
+#include "bgy3d-vec.h"          /* da_ref() */
 #include "bgy3d-dirichlet.h"
 
 // #define MATRIX_FREE
@@ -413,7 +413,7 @@ static Operator* op_create (const DA da, const real h[3],
 
   /* We will  DADestroy() it  in op_destroy(), but  it came  from user
      space, so increment the refcount: */
-  op->da = bgy3d_da_ref (da);
+  op->da = da_ref (da);
 
   /* This is used to copy  over the boundary values: */
   if (vol)
@@ -737,7 +737,7 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
   Dirichlet *op = malloc (sizeof *op);
 
   /* Save the input for later and do the minumum initialization: */
-  op->da = bgy3d_da_ref (da);    /* DADestroy() it! */
+  op->da = da_ref (da);    /* DADestroy() it! */
   FOR_DIM
     op->h[dim] = PD->h[dim];
 
