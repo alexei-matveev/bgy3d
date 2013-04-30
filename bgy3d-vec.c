@@ -509,10 +509,10 @@ void bgy3d_vec_moments (const DA da, Vec v,
     return v * (k - 0.5 * N[2]);
   }
 
-  *q = bgy3d_vec_integrate (da, m0, v);
-  *x = bgy3d_vec_integrate (da, mx, v);
-  *y = bgy3d_vec_integrate (da, my, v);
-  *z = bgy3d_vec_integrate (da, mz, v);
+  *q = vec_integrate (da, m0, v);
+  *x = vec_integrate (da, mx, v);
+  *y = vec_integrate (da, my, v);
+  *z = vec_integrate (da, mz, v);
 }
 
 

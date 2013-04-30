@@ -335,7 +335,7 @@ static inline void vec_fft_map3 (Vec w, /* out */
 
 
 /* "Integrates" f(v(x), x) with the grid data v(x): */
-static inline real bgy3d_vec_integrate (DA da, real (*f)(real v, int i, int j, int k), Vec v)
+static inline real vec_integrate (DA da, real (*f)(real v, int i, int j, int k), Vec v)
 {
   /* Clear accumulator: */
   real acc = 0.0;
