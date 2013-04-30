@@ -401,7 +401,7 @@ static inline real vec_integrate (DA da, real (*f)(real v, int i, int j, int k),
   real acc = 0.0;
 
   real ***v_;
-  DAVecGetArray (da, v, &v_);
+  DMDAVecGetArray (da, v, &v_);
 
   /* Loop over local portion of grid */
   int x[3], n[3], i[3];

@@ -357,7 +357,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
   /* Get local portion of the grid */
   DMDAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-  DAVecGetArray(da, g2, &g2_vec);
+  DMDAVecGetArray(da, g2, &g2_vec);
 
   /* loop over local portion of grid */
   for(i[2]=x[2]; i[2]<x[2]+n[2]; i[2]++)
@@ -477,7 +477,7 @@ void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
 
   /* Loop over local portion of grid: */
   complex ***v_;
-  DAVecGetArray (dc, v, &v_);
+  DMDAVecGetArray (dc, v, &v_);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)

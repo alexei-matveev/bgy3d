@@ -194,7 +194,7 @@ static void field (DA da, const ProblemData *PD,
   /* Get local portion of the grid */
   DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
-  DAVecGetArray (da, v, &vec);
+  DMDAVecGetArray (da, v, &vec);
 
   /* loop over local portion of grid */
   for (int k = k0; k < k0 + nk; k++)
@@ -268,7 +268,7 @@ static void grid_map (DA da, const ProblemData *PD,
   /* Copy contents of fx[] to the output vector: */
   {
     PetscScalar ***vec;
-    DAVecGetArray (da, v, &vec);
+    DMDAVecGetArray (da, v, &vec);
     int ijk = 0;
     for (int k = k0; k < k0 + nk; k++)
       for (int j = j0; j < j0 + nj; j++)
@@ -450,7 +450,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
       exit(1);
     }
 
-  DAVecGetArray(da, v, &vec);
+  DMDAVecGetArray(da, v, &vec);
 
   /* electron density scaled by BOHR^3 in python script */
   real invB3 = 1. / BOHR / BOHR / BOHR;

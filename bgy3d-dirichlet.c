@@ -82,8 +82,8 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
   DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_, ***b_;
-  DAVecGetArray (da, g, &g_);
-  DAVecGetArray (da, b, &b_);
+  DMDAVecGetArray (da, g, &g_);
+  DMDAVecGetArray (da, b, &b_);
 
   /* loop over local portion of grid */
   for (int k = k0; k < k0 + nk; k++)
@@ -111,7 +111,7 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
   DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   PetscScalar ***g_;
-  DAVecGetArray (da, g, &g_);
+  DMDAVecGetArray (da, g, &g_);
 
   /* loop over local portion of grid */
   for (int k = k0; k < k0 + nk; k++)
@@ -484,8 +484,8 @@ static PetscErrorCode mat_mult_op_lap (Mat A, Vec x, Vec y)
     DAGlobalToLocalEnd (lap->da, x, INSERT_VALUES, w);
 
     real ***w_, ***y_;
-    DAVecGetArray (lap->da, w, &w_);
-    DAVecGetArray (lap->da, y, &y_);
+    DMDAVecGetArray (lap->da, w, &w_);
+    DMDAVecGetArray (lap->da, y, &y_);
 
     /* Get local portion of the grid */
     int i0, j0, k0, ni, nj, nk;

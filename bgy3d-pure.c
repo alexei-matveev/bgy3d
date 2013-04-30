@@ -90,11 +90,11 @@ static void kapply (const State *BHD,
   const real fac = L / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
 
   complex ***g_fft_, ***dg_fft_, ***coul_fft_, ***fg2_fft_[3];
-  DAVecGetArray (BHD->dc, g_fft, &g_fft_);
-  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
+  DMDAVecGetArray (BHD->dc, g_fft, &g_fft_);
+  DMDAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecGetArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
-    DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -251,7 +251,7 @@ void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
   DMDAGetCorners (dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***w_fft_;
-  DAVecGetArray (dc, w_fft, &w_fft_);
+  DMDAVecGetArray (dc, w_fft, &w_fft_);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -477,11 +477,11 @@ static void Compute_dg_intra (State *BHD,
 
   complex ***wbc_fft_, ***dg_fft_, ***cac_fft_;
   complex ***fg2_fft_[3];
-  DAVecGetArray (BHD->dc, wbc_fft, &wbc_fft_);
-  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecGetArray (BHD->dc, cac_fft, &cac_fft_);
+  DMDAVecGetArray (BHD->dc, wbc_fft, &wbc_fft_);
+  DMDAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecGetArray (BHD->dc, cac_fft, &cac_fft_);
   FOR_DIM
-    DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -549,9 +549,9 @@ static void Compute_dg_intra (State *BHD,
     vec_push (BHD->da, &work);
   }
 
-  DAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecGetArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
-    DAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecGetArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)

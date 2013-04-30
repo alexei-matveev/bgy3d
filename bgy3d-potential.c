@@ -98,7 +98,7 @@ Context* bgy3d_pot_create (const State *BHD, Vec v)
 
   /* From  now  on  v_[k][j][i]  can   be  used  to  access  a  vector
      element: */
-  DAVecGetArray (s->da, s->v, &s->v_);
+  DMDAVecGetArray (s->da, s->v, &s->v_);
 
   /* Get local portion of the grid */
   DMDAGetCorners (s->da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
@@ -194,7 +194,7 @@ bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *np)
 /* clean up the memory for public *pcontext */
 void bgy3d_pot_destroy (Context *s)
 {
-  /* Required complement of DAVecGetArray(): */
+  /* Required complement of DMDAVecGetArray(): */
   DAVecRestoreArray (s->da, s->v, &s->v_);
 
   /* Decrement  refcounts and  destroy  them if  the refcount  reached

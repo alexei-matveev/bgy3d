@@ -223,11 +223,11 @@ static void kernel (const DA dc,
 
   /* Loop over local portion of grid: */
   complex ***fg_[3], ***dfg_, ***coul_;
-  DAVecGetArray (dc, dfg, &dfg_);
+  DMDAVecGetArray (dc, dfg, &dfg_);
   if (coul)
-    DAVecGetArray (dc, coul, &coul_);
+    DMDAVecGetArray (dc, coul, &coul_);
   FOR_DIM
-    DAVecGetArray (dc, fg[dim], &fg_[dim]);
+    DMDAVecGetArray (dc, fg[dim], &fg_[dim]);
 
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)

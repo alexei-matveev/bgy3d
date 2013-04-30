@@ -72,7 +72,7 @@ static void unpack_real (FFT *fft, Vec g, double *restrict doubl)
   /* loop over local portion of grid */
   {
     double ***g_;
-    DAVecGetArray (fft->da, g, &g_);
+    DMDAVecGetArray (fft->da, g, &g_);
 
     /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
@@ -109,7 +109,7 @@ static void pack_real (FFT *fft, Vec g, const double *restrict doubl)
   /* loop over local portion of grid */
   {
     double ***g_;
-    DAVecGetArray (fft->da, g, &g_);
+    DMDAVecGetArray (fft->da, g, &g_);
 
     /* NOTE: array pointed at by view is padded: */
     for (int k = 0; k < nk; k++)
@@ -154,7 +154,7 @@ static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
   {
     complex ***g_;
 
-    DAVecGetArray (fft->dc, g, &g_);
+    DMDAVecGetArray (fft->dc, g, &g_);
 
     /* loop over local portion of grid */
     for (int k = 0; k < nk; k++)
@@ -200,7 +200,7 @@ static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
   {
     complex ***g_;
 
-    DAVecGetArray (fft->dc, g, &g_);
+    DMDAVecGetArray (fft->dc, g, &g_);
 
     for (int k = 0; k < nk; k++)
       for (int j = 0; j < nj; j++)
@@ -296,7 +296,7 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   stored in the column major order with the stride-1 dimension NI:
 
     DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-    DAVecGetArray (da, vec, &layout);
+    DMDAVecGetArray (da, vec, &layout);
 
     int ijk = 0;
     for (int k = k0; k < k0 + nk; k++)
@@ -516,7 +516,7 @@ void bgy3d_fft_interp (const Mat A,
   DMDAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
 
   complex ***Y_;
-  DAVecGetArray (fft->dc, Y, &Y_);
+  DMDAVecGetArray (fft->dc, Y, &Y_);
 
   int k[3];
   for (k[2] = c[2]; k[2] < c[2] + n[2]; k[2]++)

@@ -29,7 +29,6 @@
 #if PETSC_VERSION >= 30200
 typedef DM DA;
 typedef PetscBool PetscTruth;
-#  define DAVecGetArray         DMDAVecGetArray
 #  define DAVecRestoreArray     DMDAVecRestoreArray
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
 #  define STENCIL_TYPE          DMDA_STENCIL_STAR
@@ -54,6 +53,7 @@ typedef PetscBool PetscTruth;
 #  define DMDAGetInfo           DAGetInfo
 #  define DMGetMatrix           DAGetMatrix
 #  define DMRestoreGlobalVector DARestoreGlobalVector
+#  define DMDAVecGetArray       DAVecGetArray
 #endif
 
 

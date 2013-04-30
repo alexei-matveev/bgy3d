@@ -151,7 +151,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     complex ***work_;
-    DAVecGetArray (BHD->dc, work, &work_);
+    DMDAVecGetArray (BHD->dc, work, &work_);
 
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -227,7 +227,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     DMDAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
     complex ***work_;
-    DAVecGetArray (BHD->dc, work, &work_);
+    DMDAVecGetArray (BHD->dc, work, &work_);
 
     for (int k = k0; k < k0 + nk; k++)
       for (int j = j0; j < j0 + nj; j++)
