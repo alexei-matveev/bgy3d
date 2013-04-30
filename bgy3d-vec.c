@@ -394,7 +394,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
           if(g2_vec[i[2]][i[1]][i[0]]<0)
             g2_vec[i[2]][i[1]][i[0]]=0;
         }
-  DAVecRestoreArray(da, g2, &g2_vec);
+  DMDAVecRestoreArray(da, g2, &g2_vec);
 
   free(xg);
   free(g);
@@ -494,5 +494,5 @@ void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
 
           v_[i[2]][i[1]][i[0]] *= sign;
         }
-  DAVecRestoreArray (dc, v, &v_);
+  DMDAVecRestoreArray (dc, v, &v_);
 }

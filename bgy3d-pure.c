@@ -133,11 +133,11 @@ static void kapply (const State *BHD,
             }
           dg_fft_[i[2]][i[1]][i[0]] = div;
         }
-  DAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
-  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
+  DMDAVecRestoreArray (BHD->dc, g_fft, &g_fft_);
+  DMDAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecRestoreArray (BHD->dc, coul_fft, &coul_fft_);
   FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   /*
     Translate  the dg_fft  so  that the  real-space representation  is
@@ -271,7 +271,7 @@ void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
           /* Compute ω(k): */
           w_fft_[i[2]][i[1]][i[0]] = h3 * sinc (kr);
         }
-  DAVecRestoreArray (dc, w_fft, &w_fft_);
+  DMDAVecRestoreArray (dc, w_fft, &w_fft_);
 }
 
 /*
@@ -519,11 +519,11 @@ static void Compute_dg_intra (State *BHD,
           FOR_DIM
             fg2_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] / scale * (I * cac_fft_[i[2]][i[1]][i[0]]) * sinc_kr;
         }
-  DAVecRestoreArray (BHD->dc, wbc_fft, &wbc_fft_);
-  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
-  DAVecRestoreArray (BHD->dc, cac_fft, &cac_fft_);
+  DMDAVecRestoreArray (BHD->dc, wbc_fft, &wbc_fft_);
+  DMDAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecRestoreArray (BHD->dc, cac_fft, &cac_fft_);
   FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
@@ -578,9 +578,9 @@ static void Compute_dg_intra (State *BHD,
 
           dg_fft_[i[2]][i[1]][i[0]] = div;
         }
-  DAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
+  DMDAVecRestoreArray (BHD->dc, dg_fft, &dg_fft_);
   FOR_DIM
-    DAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
+    DMDAVecRestoreArray (BHD->dc, fg2_fft[dim], &fg2_fft_[dim]);
 
   FOR_DIM
     vec_push (BHD->dc, &fg2_fft[dim]);

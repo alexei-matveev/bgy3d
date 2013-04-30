@@ -287,11 +287,11 @@ static void kernel (const DA dc,
           if (coul)
             dfg_[i[2]][i[1]][i[0]] += (h3 / L3) * coul_[i[2]][i[1]][i[0]];
         }
-  DAVecRestoreArray (dc, dfg, &dfg_);
+  DMDAVecRestoreArray (dc, dfg, &dfg_);
   if (coul)
-    DAVecRestoreArray (dc, coul, &coul_);
+    DMDAVecRestoreArray (dc, coul, &coul_);
   FOR_DIM
-    DAVecRestoreArray (dc, fg[dim], &fg_[dim]);
+    DMDAVecRestoreArray (dc, fg[dim], &fg_[dim]);
 
   /*
     Translate  the kernel  so  that the  real-space representation  is

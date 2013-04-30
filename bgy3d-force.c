@@ -32,7 +32,7 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
   DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***uc_fft_;
-  DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
+  DMDAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
 
    /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -56,7 +56,7 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
           uc_fft_[i[2]][i[1]][i[0]] =
             coulomb_long_fourier ((2 * M_PI / L) * sqrt (k2), 1.0, G);
         }
-  DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
+  DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
 
   /*
     Translate  the Coulomb long  field uc_fft  so that  the real-space
@@ -82,9 +82,9 @@ static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
   DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   complex ***uc_fft_, ***fc_fft_[3];
-  DAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
+  DMDAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
-    DAVecGetArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
+    DMDAVecGetArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
 
    /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -102,9 +102,9 @@ static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
           FOR_DIM
             fc_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] * ((fac * I) * uc_fft_[i[2]][i[1]][i[0]]);
         }
-  DAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
+  DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
-    DAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
+    DMDAVecRestoreArray (BHD->dc, fc_fft[dim], &fc_fft_[dim]);
 }
 
 
@@ -172,7 +172,7 @@ void bgy3d_pair_potential (const State *BHD,
   VecSet (v_short, 0.0);
 
   real ***v_short_;
-  DAVecGetArray (BHD->da, v_short, &v_short_);
+  DMDAVecGetArray (BHD->da, v_short, &v_short_);
 
   int n[3], x[3], i[3];
   DMDAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
@@ -191,7 +191,7 @@ void bgy3d_pair_potential (const State *BHD,
           v_short_[i[2]][i[1]][i[0]] +=
             lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
         }
-  DAVecRestoreArray (BHD->da, v_short, &v_short_);
+  DMDAVecRestoreArray (BHD->da, v_short, &v_short_);
 
   /* Long-range part of the potential is best represented by FFT: */
   coulomb_long_fft (BHD, G, v_long_fft);
@@ -281,15 +281,15 @@ void bgy3d_force (State *BHD,
   */
   PetscScalar ***u_ini_;
   if (u_ini)
-    DAVecGetArray (da, u_ini, &u_ini_);
+    DMDAVecGetArray (da, u_ini, &u_ini_);
 
   PetscScalar ***c2_;
   if (c2)
-    DAVecGetArray (da, c2, &c2_);
+    DMDAVecGetArray (da, c2, &c2_);
 
   PetscScalar ***(f_short_[3]);
   FOR_DIM
-    DAVecGetArray (da, f_short[dim], &f_short_[dim]);
+    DMDAVecGetArray (da, f_short[dim], &f_short_[dim]);
 
   /* Get local portion of the grid */
   int x[3], n[3], i[3];
@@ -333,9 +333,9 @@ void bgy3d_force (State *BHD,
           }
 
   if (u_ini)
-    DAVecRestoreArray (da, u_ini, &u_ini_);
+    DMDAVecRestoreArray (da, u_ini, &u_ini_);
   if (c2)
-    DAVecRestoreArray (da, c2, &c2_);
+    DMDAVecRestoreArray (da, c2, &c2_);
   FOR_DIM
-    DAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
+    DMDAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
 }

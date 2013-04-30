@@ -195,7 +195,7 @@ bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *np)
 void bgy3d_pot_destroy (Context *s)
 {
   /* Required complement of DMDAVecGetArray(): */
-  DAVecRestoreArray (s->da, s->v, &s->v_);
+  DMDAVecRestoreArray (s->da, s->v, &s->v_);
 
   /* Decrement  refcounts and  destroy  them if  the refcount  reached
      zero: */

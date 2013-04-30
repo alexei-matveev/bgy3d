@@ -218,7 +218,7 @@ static void field (DA da, const ProblemData *PD,
             }
         }
     }
-  DAVecRestoreArray (da, v, &vec);
+  DMDAVecRestoreArray (da, v, &vec);
 }
 
 /* Callback here  is that of  gf_density() closure over all  but three
@@ -278,7 +278,7 @@ static void grid_map (DA da, const ProblemData *PD,
             ijk++;
           }
     assert (ijk == m);
-    DAVecRestoreArray (da, v, &vec);
+    DMDAVecRestoreArray (da, v, &vec);
   }
 
   /* remember to free! */
@@ -464,7 +464,7 @@ static void read_charge_density (DA da, const ProblemData *PD,
         }
 
   fclose(fp);
-  DAVecRestoreArray(da, v, &vec);
+  DMDAVecRestoreArray(da, v, &vec);
 }
 
 

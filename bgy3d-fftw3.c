@@ -80,7 +80,7 @@ static void unpack_real (FFT *fft, Vec g, double *restrict doubl)
         for (int i = 0; i < ni; i++)
           (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
 
-    DAVecRestoreArray (fft->da, g, &g_);
+    DMDAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
@@ -117,7 +117,7 @@ static void pack_real (FFT *fft, Vec g, const double *restrict doubl)
         for (int i = 0; i < ni; i++)
           g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
 
-    DAVecRestoreArray (fft->da, g, &g_);
+    DMDAVecRestoreArray (fft->da, g, &g_);
   }
 }
 
@@ -162,7 +162,7 @@ static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
         for (int i = 0; i < nip; i++)
           g_[k0 + k][j0 + j][i0 + i] = (*view)[k][j][i];
 
-    DAVecRestoreArray (fft->dc, g, &g_);
+    DMDAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
@@ -207,7 +207,7 @@ static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
         for (int i = 0; i < nip; i++)
           (*view)[k][j][i] = g_[k0 + k][j0 + j][i0 + i];
 
-    DAVecRestoreArray (fft->dc, g, &g_);
+    DMDAVecRestoreArray (fft->dc, g, &g_);
   }
 }
 
@@ -555,7 +555,7 @@ void bgy3d_fft_interp (const Mat A,
               y[p] += yk * wkx + conj (yk * wkx);
             }
         }
-  DAVecRestoreArray (fft->dc, Y, &Y_);
+  DMDAVecRestoreArray (fft->dc, Y, &Y_);
 
   /* Each  worker summed  only over  its own  range of  K[],  sum over
      workers: */

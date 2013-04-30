@@ -92,8 +92,8 @@ static void copy_boundary (DA da, const Boundary *vol, Vec g, Vec b)
         if (unlikely (!inside_boundary (vol, i, j, k)))
           b_[k][j][i] = g_[k][j][i];
 
-  DAVecRestoreArray (da, g, &g_);
-  DAVecRestoreArray (da, b, &b_);
+  DMDAVecRestoreArray (da, g, &g_);
+  DMDAVecRestoreArray (da, b, &b_);
 }
 
 
@@ -120,7 +120,7 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
         if (unlikely (!inside_boundary (vol, i, j, k)))
           g_[k][j][i] = value;
 
-  DAVecRestoreArray (da, g, &g_);
+  DMDAVecRestoreArray (da, g, &g_);
 }
 
 /*
@@ -518,8 +518,8 @@ static PetscErrorCode mat_mult_op_lap (Mat A, Vec x, Vec y)
                ((w_[k + 1][j][i] - w_kji) +
                 (w_[k - 1][j][i] - w_kji)));
           }
-    DAVecRestoreArray (lap->da, w, &w_);
-    DAVecRestoreArray (lap->da, y, &y_);
+    DMDAVecRestoreArray (lap->da, w, &w_);
+    DMDAVecRestoreArray (lap->da, y, &y_);
 
     /* The  counterpart to  DAGetLocalVector(), do  not  destroy, just
        give it back: */

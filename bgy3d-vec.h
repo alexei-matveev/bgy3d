@@ -412,7 +412,7 @@ static inline real vec_integrate (DA da, real (*f)(real v, int i, int j, int k),
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         acc += f (v_[i[2]][i[1]][i[0]], i[0], i[1], i[2]);
 
-  DAVecRestoreArray (da, v, &v_);
+  DMDAVecRestoreArray (da, v, &v_);
 
   /* Sum accumulator over workers: */
   bgy3d_comm_allreduce (1, &acc);

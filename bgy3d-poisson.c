@@ -185,7 +185,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
                 work_[i[2]][i[1]][i[0]] *= fac; /* complex */
               }
           }
-    DAVecRestoreArray (BHD->dc, work, &work_);
+    DMDAVecRestoreArray (BHD->dc, work, &work_);
   }
 
   /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
@@ -254,7 +254,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
                rho(kx, ky, kz) / k^2 */
             work_[k][j][i] *= fac; /* complex */
           }
-    DAVecRestoreArray (BHD->dc, work, &work_);
+    DMDAVecRestoreArray (BHD->dc, work, &work_);
   }
 
   /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
