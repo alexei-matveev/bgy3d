@@ -176,7 +176,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 
   bgy3d_vec_destroy (&r);
 
-  SNESDestroy (snes);
+  SNESDestroy (&snes);
 }
 
 void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
