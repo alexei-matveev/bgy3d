@@ -162,7 +162,7 @@ void bgy3d_vec_save (const char file[], const Vec vec)
 
   PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
   VecView (vec, viewer);
-  PetscViewerDestroy (viewer);
+  PetscViewerDestroy (&viewer);
 }
 
 
@@ -180,7 +180,7 @@ Vec bgy3d_vec_load (const char file[])
   VecCreate (PETSC_COMM_WORLD, &vec);
   VecLoad (vec, viewer);
 #endif
-  PetscViewerDestroy (viewer);
+  PetscViewerDestroy (&viewer);
 
   return vec;
 }
@@ -194,7 +194,7 @@ void bgy3d_vec_read (const char file[], Vec vec)
 
   PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
   VecLoadIntoVector (viewer, vec);
-  PetscViewerDestroy (viewer);
+  PetscViewerDestroy (&viewer);
 }
 
 
@@ -209,7 +209,7 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
   /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */
   PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_COMMON);
   VecView (vec, viewer);
-  PetscViewerDestroy (viewer);
+  PetscViewerDestroy (&viewer);
 }
 
 

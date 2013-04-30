@@ -31,7 +31,6 @@ typedef DM DA;
 typedef PetscBool PetscTruth;
 #  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
 #  define ISDestroy(x)          (ISDestroy)(&(x))
-#  define PetscViewerDestroy(x) (PetscViewerDestroy)(&(x))
 #  define PCDestroy(x)          (PCDestroy)(&(x))
 #  define DADestroy(x)          (DMDestroy)(&(x))
 #  define DAGetCorners          DMDAGetCorners
@@ -53,6 +52,7 @@ typedef PetscBool PetscTruth;
 #  define MatDestroy(x)         (MatDestroy)(*(x))
 #  define KSPDestroy(x)         (KSPDestroy)(*(x))
 #  define SNESDestroy(x)        (SNESDestroy)(*(x))
+#  define PetscViewerDestroy(x) (PetscViewerDestroy)(*(x))
 #endif
 
 
