@@ -319,9 +319,9 @@ static Mat lap_mat_create (const DA da, const real h[3],
                   ghost  region  of  the  given process  as  set  with
                   DMDACreateXXX() or MatSetStencil().
 
-                See  asserts  above an  the  call  to DACreate3d()  in
-                bgy3d-fftw.c,  especially the periodicity  and stencil
-                options there.
+                See (commented) asserts above  and compare to the call
+                to   DACreate3d()  in   bgy3d-vec.h,   especially  the
+                periodicity and stencil options there.
 
                 If you wrap the  indices modulo N, Petsc will complain
                 that  they are not  in the  (local) range  in parallel
