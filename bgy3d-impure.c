@@ -333,7 +333,7 @@ static void apply (Vec ker_fft, Vec g_fft, const real scale, /* in */
     return du + scale * (c * g);
   }
 
-  bgy3d_vec_fft_map3 (du_fft, fma, du_fft, ker_fft, g_fft); /* aliasing! */
+  vec_fft_map3 (du_fft, fma, du_fft, ker_fft, g_fft); /* aliasing! */
 }
 
 /*

@@ -291,7 +291,7 @@ static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
     return w * x;
   }
   for (int i = 0; i < n; i++)
-    bgy3d_vec_fft_map2 (y[i], f, w, x[i]);
+    vec_fft_map2 (y[i], f, w, x[i]);
 }
 
 /*

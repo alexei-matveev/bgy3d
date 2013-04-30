@@ -264,9 +264,9 @@ static inline void vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 
 /* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
    in-place transform: */
-static inline void bgy3d_vec_fft_map1 (Vec y, /* out */
-                                       complex (*f)(complex x),
-                                       Vec x) /* in */
+static inline void vec_fft_map1 (Vec y, /* out */
+                                 complex (*f)(complex x),
+                                 Vec x) /* in */
 {
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
@@ -285,9 +285,9 @@ static inline void bgy3d_vec_fft_map1 (Vec y, /* out */
 
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
-static inline void bgy3d_vec_fft_map2 (Vec z, /* out */
-                                       complex (*f)(complex x, complex y),
-                                       Vec x, Vec y) /* in */
+static inline void vec_fft_map2 (Vec z, /* out */
+                                 complex (*f)(complex x, complex y),
+                                 Vec x, Vec y) /* in */
 {
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);
@@ -309,9 +309,9 @@ static inline void bgy3d_vec_fft_map2 (Vec z, /* out */
 
 /* ws = map (f, xs, ys,  zs).  Should also work with aliased arguments
    for in-place transform: */
-static inline void bgy3d_vec_fft_map3 (Vec w, /* out */
-                                       complex (*f)(complex x, complex y, complex z),
-                                       Vec x, Vec y, Vec z) /* in */
+static inline void vec_fft_map3 (Vec w, /* out */
+                                 complex (*f)(complex x, complex y, complex z),
+                                 Vec x, Vec y, Vec z) /* in */
 {
   const int n = vec_local_size (x);
   assert (vec_local_size (y) == n);

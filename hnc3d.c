@@ -173,7 +173,7 @@ static void compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
     /* return c / (1.0 - rho * c) - c; */
     return rho * (c * c) / (1.0 - rho * c);
   }
-  bgy3d_vec_fft_map1 (t_fft, f, c_fft);
+  vec_fft_map1 (t_fft, f, c_fft);
 }
 
 
@@ -666,9 +666,9 @@ static void compute_t1 (int m, real rho,
       /* ... sum over solvent sites: */
       VecSet (t_fft[i], 0.0);
       for (int j = 0; j < m; j++)
-        bgy3d_vec_fft_map3 (t_fft[i], /* argument aliasing! */
-                            fma,
-                            t_fft[i], c_fft[i][j], h_fft[j]);
+        vec_fft_map3 (t_fft[i], /* argument aliasing! */
+                      fma,
+                      t_fft[i], c_fft[i][j], h_fft[j]);
 
       VecScale (t_fft[i], rho);
     }
