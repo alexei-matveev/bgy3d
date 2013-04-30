@@ -36,7 +36,7 @@ static void compute_c_HNC (real beta, Vec v, Vec t, Vec c)
     /* exp (-beta * v + t) - 1.0 - t */
     return expm1 (-beta * v + t) - t;
   }
-  bgy3d_vec_map2 (c, f, v, t);
+  vec_map2 (c, f, v, t);
 }
 
 
@@ -59,7 +59,7 @@ static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
     /* Note that lexpm1() /= expm1(): */
     return lexpm1 (-beta * v + t) - t;
   }
-  bgy3d_vec_map2 (c, f, v, t);
+  vec_map2 (c, f, v, t);
 }
 
 
@@ -75,7 +75,7 @@ static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
   {
     return exp (-beta * v) * (1 + t) - 1 - t;
   }
-  bgy3d_vec_map2 (c, f, v, t);
+  vec_map2 (c, f, v, t);
 }
 
 
@@ -142,7 +142,7 @@ static void compute_h0 (real beta, Vec v, Vec h)
     /* exp (-beta * v) - 1 */
     return expm1 (-beta * v);
   }
-  bgy3d_vec_map1 (h, f, v);
+  vec_map1 (h, f, v);
 }
 
 

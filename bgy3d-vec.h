@@ -226,7 +226,7 @@ static inline real vec_min (Vec x)
 
 /* ys  = map  (f, xs).  Should also  work with  aliased  arguments for
    in-place transform: */
-static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
+static inline void vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 {
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
@@ -243,7 +243,7 @@ static inline void bgy3d_vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
-static inline void bgy3d_vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
+static inline void vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 {
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);

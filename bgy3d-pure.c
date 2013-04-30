@@ -10,7 +10,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-potential.h"    /* Context */
 #include "bgy3d-dirichlet.h"    /* Laplace staff */
-#include "bgy3d-vec.h"          /* bgy3d_vec_map*() */
+#include "bgy3d-vec.h"          /* vec_map*() */
 #include "bgy3d-pure.h"
 #include <complex.h>            /* after fftw.h */
 
@@ -36,7 +36,7 @@ static void compute_g (Vec g, Vec u0, Vec du)
     assert (!isnan (z));
     return z;
   }
-  bgy3d_vec_map2 (g, f, u0, du);
+  vec_map2 (g, f, u0, du);
 }
 
 
@@ -223,7 +223,7 @@ static void safe_pointwise_divide (Vec w,        /* intent(out) */
     else
       return x / y;
   }
-  bgy3d_vec_map2 (w, f, x, y);
+  vec_map2 (w, f, x, y);
 }
 
 
@@ -354,7 +354,7 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
       return x;
   }
   /* Transfrom in-place: */
-  bgy3d_vec_map1 (nab, f, nab); /* argument aliasing! */
+  vec_map1 (nab, f, nab); /* argument aliasing! */
 }
 
 /* Set the x[0, 0, 0] component of the Vec x to 0.0: */
@@ -626,7 +626,7 @@ static void Compute_dg_intra_ln (State *BHD, Vec gac, Vec wbc_fft, Vec dg)
     return - log (x);
   }
   /* Transfrom in-place: */
-  bgy3d_vec_map1 (dg, f, dg); /* argument aliasing! */
+  vec_map1 (dg, f, dg); /* argument aliasing! */
 
   /* Ensure normalization condition int(u)=0 */
   /* VecSum (dg, &k); */
@@ -675,7 +675,7 @@ static void nssa_gamma_cond (State *BHD, Vec gac_fft, Vec wbc_fft, Vec gab,
     else
       return x / y;
   }
-  bgy3d_vec_map2 (tab, f, gab, tab); /* argument aliasing */
+  vec_map2 (tab, f, gab, tab); /* argument aliasing */
 }
 
 /*

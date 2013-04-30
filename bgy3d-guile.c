@@ -476,7 +476,7 @@ static SCM guile_vec_map1 (SCM f, SCM x)
   {
     return scm_to_double (scm_call_1 (f, scm_from_double (x)));
   }
-  bgy3d_vec_map1 (y_, f_, x_);
+  vec_map1 (y_, f_, x_);
 
   return from_vec (y_);
 }
@@ -492,7 +492,7 @@ static SCM guile_vec_map2 (SCM f, SCM x, SCM y)
   {
     return scm_to_double (scm_call_2 (f, scm_from_double (x), scm_from_double (y)));
   }
-  bgy3d_vec_map2 (z_, f_, x_, y_);
+  vec_map2 (z_, f_, x_, y_);
 
   return from_vec (z_);
 }

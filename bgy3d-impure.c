@@ -631,7 +631,7 @@ static void mexp (Vec g, Vec u)
   {
     return exp (-u);
   }
-  bgy3d_vec_map1 (g, f, u);
+  vec_map1 (g, f, u);
 }
 
 
