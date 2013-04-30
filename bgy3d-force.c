@@ -267,12 +267,12 @@ void bgy3d_force (State *BHD,
   {
     local Vec f_long_fft[3];
     FOR_DIM
-      f_long_fft[dim] = bgy3d_vec_pop (BHD->dc);
+      f_long_fft[dim] = vec_pop (BHD->dc);
 
     ComputeFFTfromCoulomb (BHD, u2, f_long, u2_fft, f_long_fft, q2);
 
     FOR_DIM
-      bgy3d_vec_push (BHD->dc, &f_long_fft[dim]);
+      vec_push (BHD->dc, &f_long_fft[dim]);
   }
 
   /*

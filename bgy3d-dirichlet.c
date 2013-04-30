@@ -703,7 +703,7 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
     }
 
   /* Work vector to hold projection on the boundary: */
-  Vec b = bgy3d_vec_pop (op->da); /* get temp Vec */
+  Vec b = vec_pop (op->da); /* get temp Vec */
 
   /*
     Get boundary b of v, the rest  of b is set to zero. Together it is
@@ -722,7 +722,7 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
   */
   MatMult (op->A, b, x);
 
-  bgy3d_vec_push (op->da, &b);  /* release temp Vec */
+  vec_push (op->da, &b);  /* release temp Vec */
 
   /* If you preserve the value of  x until the next call the iterative
      solver will re-use it as initial approximation for the next x. */

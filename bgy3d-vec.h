@@ -53,7 +53,7 @@ void bgy3d_vec_moments (const DA da, Vec v,
 void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
 
 
-static inline Vec bgy3d_vec_pop (DA da)
+static inline Vec vec_pop (DA da)
 {
   Vec work;
   DAGetGlobalVector (da, &work);
@@ -62,7 +62,7 @@ static inline Vec bgy3d_vec_pop (DA da)
 }
 
 
-static inline void bgy3d_vec_push (DA da, Vec *work)
+static inline void vec_push (DA da, Vec *work)
 {
   DARestoreGlobalVector (da, work);
   *work = NULL;
