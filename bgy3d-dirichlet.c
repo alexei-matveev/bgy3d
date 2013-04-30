@@ -676,7 +676,7 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 
   /* Only if the matrix was really used: */
   if (op->A)
-    MatDestroy (op->A);         /* FIXME: change in 3.2 */
+    MatDestroy (&op->A);         /* FIXME: take the address in 3.2 */
 
   free (op);
 
@@ -699,7 +699,7 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
 
       /* ...   so  I  will  destroy  you  too  (Mat  A  holds  another
          reference): */
-      MatDestroy (B);
+      MatDestroy (&B);
     }
 
   /* Work vector to hold projection on the boundary: */

@@ -159,7 +159,7 @@ void bgy3d_state_destroy (State *BHD)
 
 #ifdef L_BOUNDARY
   assert (BHD->dirichlet_mat != NULL);
-  MatDestroy (BHD->dirichlet_mat);
+  MatDestroy (&BHD->dirichlet_mat);
 #endif
 
 #ifdef L_BOUNDARY_MG
@@ -168,7 +168,7 @@ void bgy3d_state_destroy (State *BHD)
 
   DADestroy (BHD->da);
   DADestroy (BHD->dc);
-  MatDestroy (BHD->fft_mat);
+  MatDestroy (&BHD->fft_mat);
 
   free (BHD);
 }

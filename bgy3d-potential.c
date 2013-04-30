@@ -201,7 +201,7 @@ void bgy3d_pot_destroy (Context *s)
      zero: */
   DADestroy (s->da);
   DADestroy (s->dc);
-  MatDestroy (s->fft_mat);
+  MatDestroy (&s->fft_mat);
   bgy3d_vec_destroy (&s->v);
 
   /* Only if interpolation was really used: */

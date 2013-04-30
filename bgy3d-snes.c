@@ -79,7 +79,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       The last argument is a user context for jacobian evaluation:
     */
     SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
-    MatDestroy (J);         /* I hope SNES saved a ref to that Mat? */
+    MatDestroy (&J);         /* I hope SNES saved a ref to that Mat? */
   }
 
   /* set atol, rtol, stol , its, fct. eval. */

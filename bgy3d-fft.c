@@ -146,7 +146,7 @@ double bgy3d_fft_test (int m, int n, int p)
     vectors.  With proper reference  counting the  finalization order
     should not matter:
   */
-  MatDestroy (A);               /* FIXME: petsc 3.2! */
+  MatDestroy (&A);               /* FIXME: petsc 3.2 takes the address! */
 
   return norm;
 }

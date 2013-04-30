@@ -30,7 +30,6 @@
 typedef DM DA;
 typedef PetscBool PetscTruth;
 #  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
-#  define MatDestroy(x)         (MatDestroy)(&(x))
 #  define ISDestroy(x)          (ISDestroy)(&(x))
 #  define KSPDestroy(x)         (KSPDestroy)(&(x))
 #  define SNESDestroy(x)        (SNESDestroy)(&(x))
@@ -53,6 +52,7 @@ typedef PetscBool PetscTruth;
 #  define STENCIL_TYPE          DA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DA_XYZPERIODIC
 #  define VecDestroy(x)         (VecDestroy)(*(x))
+#  define MatDestroy(x)         (MatDestroy)(*(x))
 #endif
 
 
