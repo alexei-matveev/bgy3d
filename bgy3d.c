@@ -166,8 +166,8 @@ void bgy3d_state_destroy (State *BHD)
   DMMGDestroy (BHD->dmmg);
 #endif
 
-  DADestroy (BHD->da);
-  DADestroy (BHD->dc);
+  DMDestroy (&BHD->da);
+  DMDestroy (&BHD->dc);
   MatDestroy (&BHD->fft_mat);
 
   free (BHD);

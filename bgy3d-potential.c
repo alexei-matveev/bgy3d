@@ -199,8 +199,8 @@ void bgy3d_pot_destroy (Context *s)
 
   /* Decrement  refcounts and  destroy  them if  the refcount  reached
      zero: */
-  DADestroy (s->da);
-  DADestroy (s->dc);
+  DMDestroy (&s->da);
+  DMDestroy (&s->dc);
   MatDestroy (&s->fft_mat);
   bgy3d_vec_destroy (&s->v);
 

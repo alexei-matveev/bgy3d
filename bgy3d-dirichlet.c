@@ -425,7 +425,7 @@ static Operator* op_create (const DA da, const real h[3],
 
 static void op_destroy (Operator *op)
 {
-  DADestroy (op->da);           /* destroys or decrements refcount */
+  DMDestroy (&op->da);           /* destroys or decrements refcount */
 
   free (op);
 }
@@ -672,7 +672,7 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 
   Dirichlet *op = context (A);
 
-  DADestroy (op->da);
+  DMDestroy (&op->da);
 
   /* Only if the matrix was really used: */
   if (op->A)

@@ -113,8 +113,8 @@ double bgy3d_fft_test (int m, int n, int p)
     descriptors right away. They are  still referenced by and used by
     FFT matrix:
   */
-  DADestroy (da);
-  DADestroy (dc);
+  DMDestroy (&da);
+  DMDestroy (&dc);
 
   VecSetRandom (x, NULL);
   /* VecSet (x, 1.0); */

@@ -32,7 +32,6 @@ typedef PetscBool PetscTruth;
 #  define VecScatterDestroy(x)  (VecScatterDestroy)(&(x))
 #  define ISDestroy(x)          (ISDestroy)(&(x))
 #  define PCDestroy(x)          (PCDestroy)(&(x))
-#  define DADestroy(x)          (DMDestroy)(&(x))
 #  define DAGetCorners          DMDAGetCorners
 #  define DACreate3d            DMDACreate3d
 #  define DACreateGlobalVector  DMCreateGlobalVector
@@ -53,6 +52,7 @@ typedef PetscBool PetscTruth;
 #  define KSPDestroy(x)         (KSPDestroy)(*(x))
 #  define SNESDestroy(x)        (SNESDestroy)(*(x))
 #  define PetscViewerDestroy(x) (PetscViewerDestroy)(*(x))
+#  define DMDestroy(x)          (DADestroy)(*(x))
 #endif
 
 
