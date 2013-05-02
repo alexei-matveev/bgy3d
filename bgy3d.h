@@ -48,12 +48,22 @@ typedef PetscBool PetscTruth;
 #  define DMDAGetCorners        DAGetCorners
 #  define DMDACreate3d          DACreate3d
 #  define DMCreateGlobalVector  DACreateGlobalVector
-#  define DMGetGlobalVector     DAGetGlobalVector
 #  define DMDAGetInfo           DAGetInfo
 #  define DMGetMatrix           DAGetMatrix
-#  define DMRestoreGlobalVector DARestoreGlobalVector
 #  define DMDAVecGetArray       DAVecGetArray
 #  define DMDAVecRestoreArray   DAVecRestoreArray
+/*
+  DAGet/RestoreGlobalVector()  is a function-like  macro in  Petsc 3.1
+  that expands  to a call to DMGet/RestoreGlobalVector()  with DA cast
+  to DM:
+*/
+#  if PETSC_VERSION < 30100
+#    define DMGetGlobalVector     DAGetGlobalVector
+#    define DMRestoreGlobalVector DARestoreGlobalVector
+#  else
+#    define DMGetGlobalVector(da, x)     (DMGetGlobalVector)((DM)(da), x)
+#    define DMRestoreGlobalVector(da, x) (DMRestoreGlobalVector)((DM)(da), x)
+#  endif
 #endif
 
 
