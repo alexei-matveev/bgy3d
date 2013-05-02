@@ -20,6 +20,8 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
     bgy3d_snes_picard (PD, ctx, F, x);
   else if (strcmp (solver, "jager") == 0)
     bgy3d_snes_jager (PD, ctx, F, x);
+  else if (strcmp (solver, "trial") == 0)
+    bgy3d_snes_trial (PD, ctx, F, x);
   else
     {
       PetscPrintf (PETSC_COMM_WORLD, "No such SNES solver: %s\n", solver);
@@ -211,6 +213,21 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
     }
   bgy3d_vec_destroy (&dx);
 }
+
+
+void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+{
+  /* First do a few "slow" iterations: */
+  {
+    ProblemData pd = *PD;       /* modify a copy, not the original */
+    pd.max_iter = 100;
+    pd.lambda = 0.02;
+    bgy3d_snes_picard (&pd, ctx, F, x);
+  }
+  /* Then continue with Newton: */
+  bgy3d_snes_newton (PD, ctx, F, x);
+}
+
 
 void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 {
