@@ -565,14 +565,28 @@ contains
     ! Done with it, print results:
     block
        integer :: p, i, j
+       real  (rk) :: cl(n, m, m)
+       real  (rk) :: mu_dens(n), mu
+
+       ! Real-space rep of the long-range correlation:
+       forall (p = 1:n, i = 1:m, j = 1:m)
+          cl(p, i, j) = -beta * sites(i) % charge * sites(j) % charge * coulomb_long (r(p), ALPHA)
+       end forall
+
+       ! Chemical potential to be integrated:
+       mu_dens = chempot_density (rho, c + t, c, cl)
+       mu = 4 * pi * sum (r**2 * mu_dens) * dr / beta
+
        print *, "# rho=", rho, "beta=", beta, "n=", n
-       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs"
+       print *, "# mu=", mu, "(kcal)"
+       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs, then mu"
        do p = 1, n
           write (*, *) r(p), &
                &     ((v(p, i, j), i=1,j), j=1,m), &
                &     ((t(p, i, j), i=1,j), j=1,m), &
                &     ((c(p, i, j), i=1,j), j=1,m), &
-               &     ((g(p, i, j), i=1,j), j=1,m)
+               &     ((g(p, i, j), i=1,j), j=1,m), &
+               &       4 * pi * r(p)**2 * mu_dens(p)
 
        enddo
     end block
@@ -1093,6 +1107,71 @@ contains
        exit
     enddo
   end function pad
+
+  function chempot_density (rho, h, cs, cl) result (mu)
+    !
+    ! Returns the β-scaled "density" of the chemical potential, βμ(r).
+    ! To  get the  excess  chemical potential  integrate  it over  the
+    ! volume and divide by β, cf.:
+    !
+    !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+    !
+    ! The first h²-term in the definition of the chemical potential is
+    ! of  short  range  and  should  not present  any  difficulty  for
+    ! integration.
+    !
+    ! Assuming that the long-range component of the direct correlation
+    ! c₁₂(r)  of two sites,  1 and  2, is  proportional to  the charge
+    ! product q₁ and  q₂ as in -βq₁q₂v(r) one may  deduce that ρ₁c₁₁ +
+    ! ρ₂c₂₁ vanishes identically for  *neutral* systems.  In this case
+    ! the Coulomb tails of the direct correlation in the second c-term
+    ! do not  contribute to  the chemical potential.   This is  a good
+    ! thing, because otherwise an integral 4π∫r²dr/r would diverge.
+    !
+    ! The third  hc-term is of the  short range due to  h. However the
+    ! long-range  Coulomb-type correction  to the  direct correlation,
+    ! since weighted  by a pair  specific total correlation  h₁₂, does
+    ! not vanish in such a sum.
+    !
+    ! To get an idea about the order of magnitude of such a long-range
+    ! correction:  for water  using the  short-range  correlation with
+    ! range  separation parameter α  = 1.2  gives the  excess chemical
+    ! potential  μ  =  8.118   kcal.   By  including  the  long  range
+    ! correlation into the hc-term one obtains 8.074 kcal instead.
+    !
+    ! FIXME: what do we do for charged systems?
+    !
+    implicit none
+    real (rk), intent (in) :: rho(:)      ! (m)
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, m)
+    real (rk), intent (in) :: cs(:, :, :) ! (n, m, m)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, m)
+    real (rk) :: mu(size (h, 1))
+    ! *** end of interface ***
+
+    integer :: i, j, m
+    integer :: p, n
+    real (rk) :: muH, muS, muL
+
+    m = size (rho)
+    n = size (h, 1)
+
+    do p = 1, n
+       muH = 0.0
+       muS = 0.0
+       muL = 0.0
+       do j = 1, m
+          do i = 1, m
+             muH = muH + rho(i) * h(p, i, j)**2 / 2
+
+             muS = muS + rho(i) * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
+             muL = muL + rho(i) * (             - h(p, i, j) * cl(p, i, j) / 2)
+          enddo
+       enddo
+
+       mu(p) = muH + muS + muL
+    enddo
+  end function chempot_density
 end module rism
 
 
