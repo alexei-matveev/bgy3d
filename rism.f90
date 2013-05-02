@@ -365,7 +365,7 @@ contains
          dy(1:n(1), 1:n(2), 1:n(3)) => dx
        end associate
 
-       ! The warning by GF 4.6 is incorrect:
+       ! The warning by GF 4.6 and 4.7 is incorrect:
        ! http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55855
        dy = f_ctx % f (y)
     end block
