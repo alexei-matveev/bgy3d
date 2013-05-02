@@ -473,7 +473,7 @@ computes the sum of all vector elements."
       (load-guess       (value #f))
       (snes-solver      (value #t)
                         (predicate ,(lambda (x)
-                                      (member x '("jager" "newton" "picard")))))
+                                      (member x '("jager" "newton" "picard" "trial")))))
       (verbose          (single-char #\v)
                         (value #f)) ; verbosity
       (no-cage          (value #f)) ; turns off metallic cage boundary
