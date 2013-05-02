@@ -6,7 +6,7 @@
 
 int bgy3d_getopt_test (const char key[])
 {
-  PetscTruth test;
+  PetscBool test;
 
   /* Petsc insists  on keys  having a leading  dash. The  prefix (here
      PETSC_NULL) cannot have a leading dash. Go figure ... */
@@ -18,7 +18,7 @@ int bgy3d_getopt_test (const char key[])
 
 int bgy3d_getopt_int (const char key[], int *val)
 {
-  PetscTruth test;
+  PetscBool test;
 
   PetscErrorCode ierr = PetscOptionsGetInt (PETSC_NULL, key, val, &test);
   assert (!ierr);
@@ -28,7 +28,7 @@ int bgy3d_getopt_int (const char key[], int *val)
 
 int bgy3d_getopt_real (const char key[], double *val)
 {
-  PetscTruth test;
+  PetscBool test;
 
   PetscErrorCode ierr = PetscOptionsGetReal (PETSC_NULL, key, val, &test);
   assert (!ierr);
@@ -38,7 +38,7 @@ int bgy3d_getopt_real (const char key[], double *val)
 
 int bgy3d_getopt_string (const char key[], char *val, size_t len)
 {
-  PetscTruth test;
+  PetscBool test;
 
   PetscErrorCode ierr = PetscOptionsGetString (PETSC_NULL, key, val, len, &test);
   assert (!ierr);
