@@ -1184,6 +1184,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   bgy3d_vec_destroy (&du_new2);
   bgy3d_vec_destroy (&work);
 
+  /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&omega[i][j]);

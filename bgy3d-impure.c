@@ -1163,6 +1163,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, g2);
   bgy3d_vec_destroy2 (m, kernel_fft);
 
+  /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&omega_fft[i][j]);
