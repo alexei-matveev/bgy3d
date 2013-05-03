@@ -1128,6 +1128,10 @@ void bgy3d_solute_solve (const ProblemData *PD,
   local Vec omega_fft[m][m];    /* diagonal will be NULL */
   bgy3d_omega_fft_create (BHD, m, solvent, omega_fft); /* creates them */
 
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      VecScale (omega_fft[i][j], PD->h[0] * PD->h[1] * PD->h[2]); /* historically */
+
   /*
     These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as
     complex vectors in momentum  space.  Note that kernel_fft[i][j] ==

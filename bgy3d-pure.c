@@ -295,7 +295,6 @@ void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
       {
         omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
         omega_intra (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
-        VecScale (omega_fft[j][i], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
       }
 
   /*
@@ -882,6 +881,10 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
   local Vec omega[m][m];        /* diagonal will by NULL */
   bgy3d_omega_fft_create (BHD, m, solvent, omega); /* creates them */
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      VecScale (omega[i][j], PD->h[0] * PD->h[1] * PD->h[2]); /* historically */
 
   VecSet(du_new,0.0);
 
