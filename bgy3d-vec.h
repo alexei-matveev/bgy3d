@@ -210,20 +210,33 @@ static inline Vec vec_from_array (int n, real x_[n])
 }
 
 
-/* Dont forget to vec_restore_array()! */
+/* Maybe Vec -> Maybe Ptr.  Dont forget to vec_restore_array()! */
 static inline real* vec_get_array (Vec x)
 {
+  /* Some Vec y[m][m] are NULL on the diagonal. This hack is to handle
+     them transparently: */
+  if (x == NULL)
+    return NULL;
+
   real *x_;
   VecGetArray (x, &x_);
   return x_;
 }
 
-/* Emulates  the behaviour  of the  VecRestoreArray() in  recent PETSC
-   versions. */
+
+/*
+  Maybe Vec -> Ptr (Maybe Ptr) -> Void.  Nullifies *x_ which otherwise
+  would be  dangling semantically.  This behaviour  is consistent with
+  that of the VecRestoreArray() in recent PETSC versions.
+*/
 static inline void vec_restore_array (Vec x, real **x_)
 {
+  /* The couterpart to the hack in vec_get_array(): */
+  if (x == NULL && *x_ == NULL)
+    return;
+
   VecRestoreArray (x, x_);
-  /* FIXME: More recent PETSC versions nullify the pointer by
+  /* FIXME:  More  recent  PETSC   versions  nullify  the  pointer  by
      themselves. */
   *x_ = NULL;
 }
