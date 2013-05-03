@@ -1125,24 +1125,8 @@ void bgy3d_solute_solve (const ProblemData *PD,
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);
 
-  local Vec omega_fft[m][m];
-  {
-    /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
-       well.  Diagonal zeros are never referenced: */
-    real r[m][m];
-    bgy3d_sites_dist_mat (m, solvent, r);
-
-    /* Precompute omega_fft[][]: */
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j <= i; j++)
-        if (i != j)
-          {
-            omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
-            bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
-          }
-        else
-          omega_fft[i][j] = NULL;
-  }
+  local Vec omega_fft[m][m];    /* diagonal will be NULL */
+  bgy3d_omega_fft_create (BHD, m, solvent, omega_fft); /* creates them */
 
   /*
     These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as

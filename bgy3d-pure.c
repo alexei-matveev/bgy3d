@@ -240,6 +240,7 @@ static double pure sinc (double x)
   it appears that  time to compute sinc(k) is  measurable, it may make
   sense to precompute ω(k) for all distinct r's.
 */
+static
 void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 {
   const int *N = PD->N;         /* N[3] */
@@ -273,6 +274,35 @@ void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
         }
   DMDAVecRestoreArray (dc, w_fft, &w_fft_);
 }
+
+
+/* Allocates and initializes  a matrix of intra-molecular correlations
+   except of diagonal elements that are implicitly 1: */
+void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
+                             Vec omega_fft[m][m]) /* out, creates them */
+{
+  /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
+     well.  Diagonal zeros are never referenced: */
+  real r[m][m];
+  bgy3d_sites_dist_mat (m, solvent, r);
+
+  /* Precompute omega[][]: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      {
+        omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
+        bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
+      }
+
+  /*
+    One could  have allocated  them too and  fill with ones,  but this
+    would waste  space. Insted a  NULL on the  diagonal implies ω  = 1
+    identically:
+  */
+  for (int i = 0; i < m; i++)
+    omega_fft[i][i] = NULL;
+}
+
 
 /*
   Output y(k)  is the  convolution of x(k)  with ω(x)  = δ(|x| -  r) /
@@ -846,21 +876,8 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
       VecSet (x_lapl[i][j], 0.0);
 #endif
 
-  Vec omega[m][m];
-  {
-    /* FIXME: m  x m  distance matrix does  not handle  equivalent sites
-       well.  Diagonal zeros are never referenced: */
-    real r[m][m];
-    bgy3d_sites_dist_mat (m, solvent, r);
-
-    /* Precompute omega[][]: */
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j < i; j++)
-        {
-          omega[j][i] = omega[i][j] = bgy3d_vec_create (BHD->dc);
-          bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega[i][j]);
-        }
-  }
+  local Vec omega[m][m];        /* diagonal will by NULL */
+  bgy3d_omega_fft_create (BHD, m, solvent, omega); /* creates them */
 
   VecSet(du_new,0.0);
 
