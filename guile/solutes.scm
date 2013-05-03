@@ -102,13 +102,13 @@
 ;; density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3
 ;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
 ;;
-;; Here the non-zero sigma and epsilon parameter for hydrogen is
+;; Here  the non-zero  sigma  and epsilon  parameter  for hydrogen  is
 ;; introduced by Pettitt and Rossky [1] to "avoid catastrophic overlap
-;; of the corresponding site charges in the calculations". But it be
-;; noted that in [1], these non-zero parameter only contribute to the
+;; of the corresponding  site charges in the calculations".  But it be
+;; noted that in [1], these  non-zero parameter only contribute to the
 ;; C_12 term of O-H pair and "present in a 6-12 potential with a depth
-;; of 0.2 kcal/mol and effective diameters of 2.8 Å for oxygen and
-;; 0.4 Å for hydrogen"
+;; of 0.2 kcal/mol and effective diameters of 2.8 Å for oxygen and 0.4
+;; Å for hydrogen"
 ;;
 ;; FIXME: no idea how could obtain epsilon_H = 0.046.
 ;; In [1], C_12(OH) = 225.180 kcal Å^12 / mol, and LJ potential is
@@ -128,8 +128,9 @@
 ;; Reference:
 ;;
 ;; [1] Integral equation predictions of liquid state structure for
-;; waterlike intermolecular potentials, B. M. Pettitt and P. J. Rossky,
-;; The Journal of Chemical Physics, 1982, 77 (3), 1451-1457
+;;     waterlike intermolecular potentials, B.  M.  Pettitt and P.  J.
+;;     Rossky, The Journal of Chemical Physics, 1982, 77 (3),
+;;     1451-1457, http://dx.doi.org/10.1063/1.443972
 ;;
 ;;
 ("water"
