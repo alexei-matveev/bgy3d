@@ -186,21 +186,13 @@ compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m]
 
   local complex *c_fft_[m][m], *w_fft_[m][m], *t_fft_[m][m];
 
-  /* for j <= i only: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        /* FIXME: vec_get_array() returns real*: */
-        c_fft_[i][j] = (void*) vec_get_array (c_fft[i][j]);
-        t_fft_[i][j] = (void*) vec_get_array (t_fft[i][j]);
+  /* Here ij  and ji are aliased.   We ask to put  real* into complex*
+     slots: */
+  vec_get_array2 (m, c_fft, (void*) c_fft_);
+  vec_get_array2 (m, t_fft, (void*) t_fft_);
 
-        /* Diagonals are NULL, vec_get_array() passes them through: */
-        w_fft_[i][j] = (void*) vec_get_array (w_fft[i][j]);
-
-        assert (c_fft[i][j] == c_fft[j][i]);
-        assert (t_fft[i][j] == t_fft[j][i]);
-        assert (w_fft[i][j] == w_fft[j][i]);
-      }
+  /* Diagonals are NULL, vec_get_array() passes them through: */
+  vec_get_array2 (m, w_fft, (void*) w_fft_);
 
   const int n = vec_local_size (c_fft[0][0]);
   assert (n % 2 == 0);
@@ -274,18 +266,13 @@ compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m]
       }
   }
 
-  /* for j <= i only: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        /* FIXME:   vec_restore_array()  expects   real**,   we  offer
-           complex** instead: */
-        vec_restore_array (c_fft[i][j], (void*) &c_fft_[i][j]);
-        vec_restore_array (t_fft[i][j], (void*) &t_fft_[i][j]);
+  /* Here vec_restore_array2() expects array  of real*, we offer array
+     of complex* instead: */
+  vec_restore_array2 (m, c_fft, (void*) c_fft_);
+  vec_restore_array2 (m, t_fft, (void*) t_fft_);
 
-        /* The case when both are NULL is handled gracefully: */
-        vec_restore_array (w_fft[i][j], (void*) &w_fft_[i][j]);
-      }
+  /* The case with NULL on the diagonal is handled gracefully: */
+  vec_restore_array2 (m, w_fft, (void*) w_fft_);
 }
 
 
