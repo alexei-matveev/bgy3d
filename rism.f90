@@ -570,7 +570,8 @@ contains
 
        ! Real-space rep of the long-range correlation:
        forall (p = 1:n, i = 1:m, j = 1:m)
-          cl(p, i, j) = -beta * sites(i) % charge * sites(j) % charge * coulomb_long (r(p), ALPHA)
+          cl(p, i, j) = -beta * sites(i) % charge * sites(j) % charge &
+               * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
        ! Chemical potential to be integrated:
@@ -1134,12 +1135,22 @@ contains
     ! not vanish in such a sum.
     !
     ! To get an idea about the order of magnitude of such a long-range
-    ! correction:  for water  using the  short-range  correlation with
-    ! range  separation parameter α  = 1.2  gives the  excess chemical
-    ! potential  μ  =  8.118   kcal.   By  including  the  long  range
-    ! correlation into the hc-term one obtains 8.074 kcal instead.
+    ! correction:  for SPC/E water  using the  short-range correlation
+    ! with range  separation parameter α  = 1.2 A^-1 gives  the excess
+    ! chemical potential μ =  6.86 kcal (wrong because positive!).  By
+    ! including  the  long  range  correlation into  the  hc-term  one
+    ! obtains -4.19 kcal instead (N =  4096, L = 80 A, ρ = 0.033427745
+    ! A^-3, β  = 1.6889  kcal^-1).  At least  one source quotes  yet a
+    ! different number  -3.41 kcal [1]. The  corresponding numbers for
+    ! modified TIP3P water are 8.11 and -6.35 kcal, respectively.
     !
     ! FIXME: what do we do for charged systems?
+    !
+    ! [1] "Comparative  Study on Solvation Free  Energy Expressions in
+    !     Reference Interaction Site  Model Integral Equation Theory",
+    !     Kazuto   Sato,  Hiroshi   Chuman,   and  Seiichiro   Ten-no,
+    !     J.  Phys.   Chem.  B,   2005,  109  (36),   pp  17290–17295,
+    !     http://dx.doi.org/10.1021/jp053259i
     !
     implicit none
     real (rk), intent (in) :: rho(:)      ! (m)
