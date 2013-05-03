@@ -194,8 +194,8 @@ compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m]
         c_fft_[i][j] = (void*) vec_get_array (c_fft[i][j]);
         t_fft_[i][j] = (void*) vec_get_array (t_fft[i][j]);
 
-        /* Diagonals are NULL: */
-        w_fft_[i][j] = (i == j) ? NULL : (void*) vec_get_array (w_fft[i][j]);
+        /* Diagonals are NULL, vec_get_array() passes them through: */
+        w_fft_[i][j] = (void*) vec_get_array (w_fft[i][j]);
 
         assert (c_fft[i][j] == c_fft[j][i]);
         assert (t_fft[i][j] == t_fft[j][i]);
@@ -282,8 +282,9 @@ compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m]
            complex** instead: */
         vec_restore_array (c_fft[i][j], (void*) &c_fft_[i][j]);
         vec_restore_array (t_fft[i][j], (void*) &t_fft_[i][j]);
-        if (i != j)
-          vec_restore_array (w_fft[i][j], (void*) &w_fft_[i][j]);
+
+        /* The case when both are NULL is handled gracefully: */
+        vec_restore_array (w_fft[i][j], (void*) &w_fft_[i][j]);
       }
 }
 
