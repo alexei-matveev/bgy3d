@@ -1192,18 +1192,3 @@ contains
     enddo
   end function chempot_density
 end module rism
-
-
-program rism_prog
-  use foreign, only: site, problem_data, bgy3d_problem_data
-  use rism, only: rism_main
-  implicit none
-
-  type (problem_data) :: pd
-  type (site), parameter :: a(1) = &
-       [site ("lj", [0.0d0, 0.0d0, 0.0d0], 1.0d0, 1.0d0, 0.0d0)]
-
-  pd = bgy3d_problem_data()
-
-  call rism_main (pd, size (a), a)
-end program rism_prog
