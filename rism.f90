@@ -1135,14 +1135,22 @@ contains
     ! not vanish in such a sum.
     !
     ! To get an idea about the order of magnitude of such a long-range
-    ! correction:  for SPC/E water  using the  short-range correlation
-    ! with range  separation parameter α  = 1.2 A^-1 gives  the excess
-    ! chemical potential μ =  6.86 kcal (wrong because positive!).  By
-    ! including  the  long  range  correlation into  the  hc-term  one
-    ! obtains -4.19 kcal instead (N =  4096, L = 80 A, ρ = 0.033427745
-    ! A^-3, β  = 1.6889  kcal^-1).  At least  one source quotes  yet a
-    ! different number  -3.41 kcal [1]. The  corresponding numbers for
-    ! modified TIP3P water are 8.11 and -6.35 kcal, respectively.
+    ! correction: for  SPC/E water  with σ(H) =  1.0 A, ε(H)  = 0.0545
+    ! kcal  [1],  and using  the  short-range  correlation with  range
+    ! separation  parameter α  = 1.2  A^-1 gives  the  excess chemical
+    ! potential μ = 6.86 kcal (wrong because positive!).  By including
+    ! the long  range correlation into  the hc-term one  obtains -4.19
+    ! kcal instead.  Here N = 4096, L  = 80 A, ρ = 0.033427745 A^-3, β
+    ! = 1.6889 kcal^-1.
+    !
+    ! Note  that,   contrary  to  what  is  being   suggested  in  the
+    ! literature, these  numbers depend strongly on  the LJ parameters
+    ! of hydrogens. With σ(H) = 0.8  A and ε(H) = 0.046 kcal [Leipzig]
+    ! one gets  μ = -4.97  kcal and  with σ(H) =  1.1656 A and  ε(H) =
+    ! 0.01553  kcal [Amber] one  gets μ  = -3.66  kcal.  At  least one
+    ! source  quotes  yet a  different  number  -3.41  kcal [1].   The
+    ! corresponding result for modified TIP3P water with σ(H) = 0.4 A,
+    ! and ε(H) = 0.046 kcal is -6.35 kcal.
     !
     ! FIXME: what do we do for charged systems?
     !
