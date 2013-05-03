@@ -158,8 +158,6 @@ libbgy3d.so: $(libbgy3d.a)
 bgy3d: $(OBJECTS) $(if $(shared), libbgy3d.so, libbgy3d.a)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) -L. -lbgy3d $(LIBS)
 
-rism: rism.o $(if $(shared), libbgy3d.so, libbgy3d.a)
-	$(FC) $(FFLAGS) $(LDFLAGS) -o $@ rism.o -L. -lbgy3d $(LIBS)
 #
 # Dont call the target "test" because we have a directory called so:
 #
