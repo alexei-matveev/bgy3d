@@ -9,6 +9,7 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_create() */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-force.h"        /* bgy3d_pair_potential() */
+#include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "hnc3d.h"
@@ -178,9 +179,12 @@ static void compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
 
 
 /* So far rho is scalar, it could be different for all sites: */
-static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+static void
+compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
 {
-  complex *c_fft_[m][m], *t_fft_[m][m];
+  if (m == 0) return;           /* see ref to c_fft[0][0] */
+
+  complex *c_fft_[m][m], *w_fft_[m][m], *t_fft_[m][m];
 
   /* for j <= i only: */
   for (int i = 0; i < m; i++)
@@ -190,17 +194,21 @@ static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
         c_fft_[i][j] = (void*) vec_get_array (c_fft[i][j]);
         t_fft_[i][j] = (void*) vec_get_array (t_fft[i][j]);
 
+        if (i != j)
+          w_fft_[i][j] = (void*) vec_get_array (w_fft[i][j]);
+        else
+          w_fft_[i][j] = NULL;
+
         assert (c_fft[i][j] == c_fft[j][i]);
         assert (t_fft[i][j] == t_fft[j][i]);
+        assert (w_fft[i][j] == w_fft[j][i]);
       }
-
-  if (m == 0) return;           /* see ref to c_fft[0][0] */
 
   const int n = vec_local_size (c_fft[0][0]);
   assert (n % 2 == 0);
 
   {
-    complex H[m][m], C[m][m], T[m][m];
+    complex H[m][m], C[m][m], W[m][m], WC[m][m], T[m][m];
 
     for (int k = 0; k < n / 2; k++)
       {
@@ -209,13 +217,42 @@ static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
           for (int j = 0; j <= i; j++)
             {
               /*
-                T :=  1 - ρc, H  := c. The latter  will be owerwritten
-                with the real H after solving the linear equations.
+                Extract C  and W for  this particular momentum  k from
+                scattered arrays into contiguous matrices.
               */
               C[i][j] = C[j][i] = c_fft_[i][j][k];
-              H[i][j] = H[j][i] = C[i][j];
-              T[i][j] = T[j][i] = delta (i, j) - rho * C[i][j];
+
+              /* Diagonal is implicitly 1: */
+              W[i][j] = W[j][i] = (i == j) ? 1.0 : w_fft_[i][j][k];
             }
+
+        /* WC,  an  intermediate.  See  comment  on  layout of  result
+           below.  The input is symmetric, though: */
+        hnc3d_sles_zgemm (m, W, C, WC);
+
+        /* T :=  1 - ρWC.  The  matrix T is  used here as a  free work
+           array: */
+        for (int i = 0; i < m; i++)
+          for (int j = 0; j < m; j++)
+            T[i][j] = delta (i, j) - rho * WC[i][j];
+
+        /*
+          H := WCW.  Temporarily ---  it will be overwritten with the
+          real H  after solving the  linear equations.
+
+          Note that  the matrix multiplication is  performed using the
+          Fortran  (column major) interpetation  of the  matrix memory
+          layout. In Fortran notation:
+
+            H(i, j) = Σ  WC(i, k) * W(k, j)
+                       k
+
+          or, in C-notation:
+
+            H[j][i] = Σ  WC[k][i] * W[j][k]
+                       k
+        */
+        hnc3d_sles_zgemm (m, WC, W, H);
 
         /*
           Solving the linear equation makes H have the literal meaning
@@ -246,16 +283,20 @@ static void compute_t2_m (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
         /* FIXME: VecRestoreArray() expects real***: */
         VecRestoreArray (c_fft[i][j], (void*) &c_fft_[i][j]);
         VecRestoreArray (t_fft[i][j], (void*) &t_fft_[i][j]);
+        if (i != j)
+          VecRestoreArray (w_fft[i][j], (void*) &w_fft_[i][j]);
       }
 }
 
 
-static void compute_t2 (int m, real rho, Vec c_fft[m][m], Vec t_fft[m][m])
+static void
+compute_t2 (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
 {
   if (m == 1)
+    /* Here w = 1, identically: */
     compute_t2_1 (rho, c_fft[0][0], t_fft[0][0]); /* faster */
   else
-    compute_t2_m (m, rho, c_fft, t_fft); /* works for any m */
+    compute_t2_m (m, rho, c_fft, w_fft, t_fft); /* works for any m */
 }
 
 
@@ -289,6 +330,7 @@ typedef struct Ctx2
   Vec *v_long_fft;           /* [m][m], complex, center, const */
   Vec *y;                    /* [m][m], real, either y = c or y = t */
   Vec *t_fft, *c_fft;        /* [m][m], complex */
+  Vec *w_fft;                /* [m][m], complex, NULL diagonal */
 } Ctx2;
 
 
@@ -299,6 +341,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   /* aliases of the correct [m][m] shape: */
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
+  Vec (*w_fft)[m] = (void*) ctx->w_fft;
   Vec (*c)[m] = (void*) ctx->y; /* y = c(t) here */
   Vec (*v_short)[m] = (void*) ctx->v_short;
   Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
@@ -339,7 +382,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
       }
 
   /* Solves the OZ linear equation for t_fft[][].: */
-  compute_t2 (m, rho, c_fft, t_fft);
+  compute_t2 (m, rho, c_fft, w_fft, t_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -383,6 +426,7 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
   /* aliases of the correct [m][m] shape: */
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
+  Vec (*w_fft)[m] = (void*) ctx->w_fft;
   Vec (*t)[m] = (void*) ctx->y; /* y = t(c) here */
   Vec (*v_short)[m] = (void*) ctx->v_short;
   Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
@@ -421,7 +465,7 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
       }
 
   /* Solves the OZ linear equation for t_fft[][].: */
-  compute_t2 (m, rho, c_fft, t_fft);
+  compute_t2 (m, rho, c_fft, w_fft, t_fft);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -512,6 +556,10 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       bgy3d_pair_potential (HD, solvent[i], solvent[j],
                             v_short[i][j], v_long_fft[i][j]);
 
+  /* Prepare intra-molecular correlations: */
+  local Vec w_fft[m][m];        /* diagonal will by NULL */
+  bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
+
   /*
     For primary variable x there are  two ways to access the data: via
     the long Vec X and m * (m  + 1) / 2 shorter Vec x[m][m] aliased to
@@ -540,9 +588,10 @@ void hnc3d_solvent_solve (const ProblemData *PD,
         .m = m,
         .v_short = (void*) v_short,       /* in */
         .v_long_fft = (void*) v_long_fft, /* in */
-        .y = (void*) y,                   /* t(c) or c(t) */
-        .t_fft = (void*) t_fft,
-        .c_fft = (void*) c_fft,
+        .y = (void*) y,                   /* work, t(c) or c(t) */
+        .t_fft = (void*) t_fft,           /* work */
+        .c_fft = (void*) c_fft,           /* work */
+        .w_fft = (void*) w_fft,           /* in */
       };
 
     if (yes)
@@ -589,6 +638,11 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   bgy3d_vec_destroy2 (m, c_fft);
   bgy3d_vec_destroy2 (m, v_short);
   bgy3d_vec_destroy2 (m, v_long_fft);
+
+  /* Diagonal is NULL: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < i; j++)
+      bgy3d_vec_destroy (&w_fft[i][j]);
 
   bgy3d_vec_aliases_destroy2 (X, m, x);
   bgy3d_vec_pack_destroy2 (&X);
