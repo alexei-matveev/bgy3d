@@ -235,16 +235,17 @@ static double pure sinc (double x)
     return sin (x) / x;
 }
 
+
 /*
-  Output ω(k) is the Fourier image of of ω(x) = δ(|x| - r) / 4πr².  As
-  it appears that  time to compute sinc(k) is  measurable, it may make
-  sense to precompute ω(k) for all distinct r's.
+  Output ω(k)  = sinc(kr), the  Fourier image of  ω(x) = δ(|x| -  r) /
+  4πr².  As it appears that  time to compute sinc(k) is measurable, it
+  may make sense  to precompute ω(k) for all  distinct r's. The origin
+  is at the corner.
 */
 static
-void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
+void omega_intra (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 {
   const int *N = PD->N;         /* N[3] */
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
   /* Get local portion of the k-grid */
@@ -270,14 +271,16 @@ void bgy3d_omega (const ProblemData *PD, const DA dc, real r, Vec w_fft)
           const real kr = (2.0 * M_PI * r / L) * sqrt (k2);
 
           /* Compute ω(k): */
-          w_fft_[i[2]][i[1]][i[0]] = h3 * sinc (kr);
+          w_fft_[i[2]][i[1]][i[0]] = sinc (kr);
         }
   DMDAVecRestoreArray (dc, w_fft, &w_fft_);
 }
 
 
-/* Allocates and initializes  a matrix of intra-molecular correlations
-   except of diagonal elements that are implicitly 1: */
+/*
+  Allocates and initializes  a matrix of intra-molecular correlations
+  except of diagonal elements that are implicitly 1:
+*/
 void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
                              Vec omega_fft[m][m]) /* out, creates them */
 {
@@ -291,7 +294,8 @@ void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
     for (int j = 0; j < i; j++)
       {
         omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
-        bgy3d_omega (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
+        omega_intra (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
+        VecScale (omega_fft[j][i], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
       }
 
   /*
@@ -1307,8 +1311,12 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
   omega[0][0] = bgy3d_vec_create (BHD->dc);
   omega[1][0] = omega[0][1];
   omega[1][1] = NULL;
-  bgy3d_omega (BHD->PD, BHD->dc, r_HO, omega[0][1]);
-  bgy3d_omega (BHD->PD, BHD->dc, r_HH, omega[0][0]);
+
+  omega_intra (BHD->PD, BHD->dc, r_HO, omega[0][1]);
+  omega_intra (BHD->PD, BHD->dc, r_HH, omega[0][0]);
+
+  VecScale (omega[0][1], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
+  VecScale (omega[0][0], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
 
   /* Set initial guess, either here or by reading from file: */
   if (bgy3d_getopt_test ("--load-guess"))
