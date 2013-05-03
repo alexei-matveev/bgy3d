@@ -242,6 +242,30 @@ static inline void vec_restore_array (Vec x, real **x_)
 }
 
 
+static inline void vec_get_array2 (int m, Vec x[m][m], real *x_[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        x_[i][j] = x_[j][i] = vec_get_array (x[i][j]);
+        assert (x[i][j] == x[j][i]);
+      }
+}
+
+
+static inline void vec_restore_array2 (int m, Vec x[m][m], real *x_[m][m])
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        assert (x[i][j] == x[j][i]);
+        assert (x_[i][j] == x_[j][i]);
+        vec_restore_array (x[i][j], &x_[i][j]);
+        x_[j][i] = NULL;
+      }
+}
+
+
 static inline int vec_local_size (Vec x)
 {
   int n;
