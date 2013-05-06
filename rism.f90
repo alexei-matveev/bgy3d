@@ -559,7 +559,9 @@ contains
        ! Solvent susceptibility χ = ω + ρh:
        real (rk) :: chi(nrad, m, m)
 
-       call rism_vv (nrad, rmax, pd % beta, rho, solvent, chi = chi)
+       call rism_vv (nrad, rmax, pd % beta, rho, solvent, chi)
+
+       call rism_uv (nrad, rmax, pd % beta, rho, solvent, chi, solute)
     end block
   end subroutine rism_solute
 
@@ -728,6 +730,161 @@ contains
       dt = dt - t
     end function iterate_t
   end subroutine rism_vv
+
+
+  subroutine rism_uv (nrad, rmax, beta, rho, solvent, chi, solute)
+    use fft, only: fourier, FT_FW, FT_BW
+    use snes, only: snes_default
+    use foreign, only: site
+    implicit none
+    integer, intent (in) :: nrad           ! grid size
+    real (rk), intent (in) :: rmax         ! cell size
+    real (rk), intent (in) :: beta         ! inverse temp
+    real (rk), intent (in) :: rho(:)       ! (m)
+    type (site), intent (in) :: solvent(:) ! (m)
+    real (rk), intent(in) :: chi(:, :, :)  ! (nrad, m, m)
+    type (site), intent (in) :: solute(:)  ! (n)
+    ! *** end of interface ***
+
+    real (rk), parameter :: half = 0.5
+
+    ! Solute-solvent pair quantities:
+    real (rk), dimension (nrad, size (solute), size (solvent)) :: &
+         v, vk, t, c, g
+
+    ! Solute-solute pair quantities:
+    real (rk), dimension (nrad, size (solute), size (solute)) :: &
+         wk
+
+    ! Radial grids:
+    real (rk) :: r(nrad), dr
+    real (rk) :: k(nrad), dk
+
+    integer :: i, m, n
+
+    n = size (solute)
+    m = size (solvent)
+
+    ! dr * dk = 2π/2n:
+    dr = rmax / nrad
+    dk = pi / rmax
+    forall (i = 1:nrad)
+       r(i) = (i - half) * dr
+       k(i) = (i - half) * dk
+    end forall
+
+    ! Tabulate short-range  pairwise potentials v() on  the r-grid and
+    ! long-range pairwise potential vk() on the k-grid:
+    call force_field (solute, solvent, r, k, v, vk)
+
+    ! Rigid-bond solute-solute correlations on the k-grid:
+    wk = omega_fourier (solute, k)
+
+    ! Intitial guess:
+    t = 0.0
+
+    ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
+    ! function as a callback is an F08 feature. GFortran 4.3 on Debian
+    ! Lenny does not support that:
+    call snes_default (iterate_t, t)
+
+    ! Do not assume c has a meaningfull value, it was overwritten with
+    ! c(k):
+    c = closure_hnc (beta, v, t)
+    g = 1 + c + t
+
+    ! Done with it, print results:
+    block
+       integer :: p, i, j
+       real  (rk) :: cl(nrad, n, m)
+       real  (rk) :: mu_dens(nrad), mu
+
+       ! Real-space rep of the long-range correlation:
+       forall (p = 1:nrad, i = 1:n, j = 1:m)
+          cl(p, i, j) = -beta * solute(i) % charge * solvent(j) % charge &
+               * EPSILON0INV * coulomb_long (r(p), ALPHA)
+       end forall
+
+       ! Chemical potential to be integrated:
+       mu_dens = chempot_density (rho, c + t, c, cl)
+       mu = 4 * pi * sum (r**2 * mu_dens) * dr / beta
+
+       print *, "# rho=", rho, "beta=", beta, "n=", nrad
+       print *, "# mu=", mu, "(kcal)"
+       print *, "# r, and v, t, c, g, each for m * n pairs, then mu"
+       do p = 1, nrad
+          write (*, *) r(p), &
+               &     ((v(p, i, j), i=1,n), j=1,m), &
+               &     ((t(p, i, j), i=1,n), j=1,m), &
+               &     ((c(p, i, j), i=1,n), j=1,m), &
+               &     ((g(p, i, j), i=1,n), j=1,m), &
+               &       4 * pi * r(p)**2 * mu_dens(p)
+
+       enddo
+    end block
+
+  contains
+
+    function iterate_t (t) result (dt)
+      !
+      ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
+      ! ... Implements procedure(f_iterator).
+      !
+      implicit none
+      real (rk), intent (in) :: t(:, :, :) ! (n, m, m)
+      real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
+      ! *** end of interface ***
+
+      integer :: i, j
+
+      c = closure_hnc (beta, v, t)
+
+      ! Forward FT via DST:
+      do j = 1, size (c, 3)
+         do i = 1, size (c, 2)
+            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / FT_FW)
+         enddo
+      enddo
+
+      !
+      ! The  real-space representation  encodes  only the  short-range
+      ! part  of  the  direct   corrlation.  The  (fixed)  long  range
+      ! contribution is added here:
+      !
+      !   C := C  - βV
+      !         S     L
+      !
+      c = c - beta * vk
+
+      !
+      ! OZ equation, involves "convolutions", take care of the
+      ! normalization here:
+      !
+      dt = oz_uv_equation_c_t (c, wk, chi)
+
+      !
+      ! Since we plugged  in the Fourier transform of  the full direct
+      ! correlation including the long range part into the OZ equation
+      ! what we get out is the full indirect correlation including the
+      ! long-range part.  The menmonic is  C + T is short range.  Take
+      ! it out:
+      !
+      !   T  := T - βV
+      !    S          L
+      !
+      dt = dt - beta * vk
+
+      ! Inverse FT via DST:
+      do j = 1, size (dt, 3)
+         do i = 1, size (dt, 2)
+            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / FT_BW)
+         enddo
+      enddo
+
+      ! Return the increment that vanishes at convergence:
+      dt = dt - t
+    end function iterate_t
+  end subroutine rism_uv
 
 
   function omega_fourier (sites, k) result (wk)
@@ -1102,6 +1259,23 @@ contains
       endif
     end subroutine sles
   end function oz_vv_equation_c_t_MxM
+
+
+  function oz_uv_equation_c_t (cuv, wuu, xvv) result (tuv)
+    implicit none
+    real (rk), intent (in) :: cuv(:, :, :)         ! (nrad, n, m)
+    real (rk), intent (in) :: wuu(:, :, :)         ! (nrad, n, n)
+    real (rk), intent (in) :: xvv(:, :, :)         ! (nrad, m, m)
+    real (rk) :: tuv(size (cuv, 1), size (cuv, 2), size (cuv, 3))
+    ! *** end of interface ***
+
+    integer :: p
+
+    ! Many associative matrix multiplies: NxN * (NxM * MxM)
+    do p = 1, size (cuv, 1)
+       tuv(p, :, :) = matmul (wuu(p, :, :), matmul (cuv(p, :, :), xvv(p, :, :))) - cuv(p, :, :)
+    enddo
+  end function oz_uv_equation_c_t
 
 
   subroutine print_info (rho, beta)
