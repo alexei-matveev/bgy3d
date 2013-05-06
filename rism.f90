@@ -676,7 +676,7 @@ contains
       ! ... Implements procedure(f_iterator).
       !
       implicit none
-      real (rk), intent (in) :: t(:, :, :) ! (n, m, m)
+      real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
@@ -831,7 +831,7 @@ contains
       ! ... Implements procedure(f_iterator).
       !
       implicit none
-      real (rk), intent (in) :: t(:, :, :) ! (n, m, m)
+      real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
@@ -901,8 +901,8 @@ contains
     use foreign, only: site
     implicit none
     type (site), intent (in) :: sites(:)                  ! (m)
-    real (rk), intent (in) :: k(:)                        ! (n)
-    real (rk) :: wk(size (k), size (sites), size (sites)) ! (n, m, m)
+    real (rk), intent (in) :: k(:)                        ! (nrad)
+    real (rk) :: wk(size (k), size (sites), size (sites)) ! (nrad, m, m)
     ! *** end of inteface ***
 
     real (rk) :: xa(3), xb(3), rab
@@ -951,19 +951,18 @@ contains
     !
     use foreign, only: site
     implicit none
-    type (site), intent (in) :: asites(:)  ! (m)
-    type (site), intent (in) :: bsites(:)  ! (n)
+    type (site), intent (in) :: asites(:)  ! (n)
+    type (site), intent (in) :: bsites(:)  ! (m)
     real (rk), intent (in) :: r(:)         ! (nrad)
     real (rk), intent (in) :: k(:)         ! (nrad)
-    real (rk), intent (out) :: vr(:, :, :) ! (nrad, m, n)
-    real (rk), intent (out) :: vk(:, :, :) ! (nrad, m, n)
+    real (rk), intent (out) :: vr(:, :, :) ! (nrad, n, m)
+    real (rk), intent (out) :: vk(:, :, :) ! (nrad, n, m)
     ! *** end of inteface ***
 
     real (rk) :: epsilon, sigma, charge
     integer :: i, j
     type (site) :: a, b
 
-    ! LJ potential:
     do j = 1, size (bsites)
        b = bsites(j)
        do i = 1, size (asites)
@@ -1110,8 +1109,8 @@ contains
   function oz_vv_equation_c_t (rho, C, W) result (T)
     implicit none
     real (rk), intent (in) :: rho(:)             ! (m)
-    real (rk), intent (in) :: C(:, :, :)         ! (n, m, m)
-    real (rk), intent (in) :: W(:, :, :)         ! (n, m, m)
+    real (rk), intent (in) :: C(:, :, :)         ! (nrad, m, m)
+    real (rk), intent (in) :: W(:, :, :)         ! (nrad, m, m)
     real (rk) :: T(size (C, 1), size (C, 2), size (C, 3))
     ! *** end of interface ***
 
