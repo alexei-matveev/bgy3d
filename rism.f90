@@ -424,7 +424,7 @@ module rism
   implicit none
   private
 
-  public :: rism_main
+  public :: rism_solvent
   !
   ! *** END OF INTERFACE ***
   !
@@ -469,13 +469,13 @@ module rism
 
 contains
 
-  subroutine rism_main (pd, m, sites) bind (c)
+  subroutine rism_solvent (pd, m, solvent) bind (c)
     use iso_c_binding, only: c_int
     use foreign, only: problem_data, site
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: m
-    type (site), intent (in) :: sites(m)
+    type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
     integer :: i, n
@@ -490,13 +490,13 @@ contains
     print *, "# beta=", pd % beta
     print *, "# L=", rmax
     print *, "# n=", n
-    print *, "# Sites:"
+    print *, "# Solvent:"
     do i = 1, m
        print *, "#", i, &
-            &        pad (sites(i) % name), &
-            &        sites(i) % sigma, &
-            &        sites(i) % epsilon, &
-            &        sites(i) % charge, &
+            &        pad (solvent(i) % name), &
+            &        solvent(i) % sigma, &
+            &        solvent(i) % epsilon, &
+            &        solvent(i) % charge, &
             &        rho(i)
     enddo
 
@@ -504,8 +504,8 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism1d (n, rmax, beta= pd % beta, rho= rho, sites= sites)
-  end subroutine rism_main
+    call rism1d (n, rmax, beta = pd % beta, rho = rho, sites = solvent)
+  end subroutine rism_solvent
 
 
   subroutine rism1d (n, rmax, beta, rho, sites)

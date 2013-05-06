@@ -27,7 +27,7 @@
    f64+
    f64*
    f64scale
-   rism-main
+   rism-solvent
    hnc3d-run-solvent
    hnc3d-run-solute
    bgy3d-run-solvent
@@ -596,7 +596,7 @@ computes the sum of all vector elements."
      ;;
      ((option-ref opts 'rism #f)
       (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
-        (rism-main solvent '())))  ; use Petsc env
+        (rism-solvent solvent '())))  ; use Petsc env
      ;;
      ;; Fall through to the new variant:
      ;;

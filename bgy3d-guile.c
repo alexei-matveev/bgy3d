@@ -12,7 +12,7 @@
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "rism-dst.h"           /* rism_dst() */
-#include "rism.h"               /* rism_main() */
+#include "rism.h"               /* rism_solvent() */
 #include "bgy3d-guile.h"
 
 
@@ -900,11 +900,11 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 }
 
 
-static SCM guile_rism_main (SCM solvent, SCM settings)
+static SCM guile_rism_solvent (SCM solvent, SCM settings)
 {
 #ifndef WITH_FORTRAN
   /*
-    The working  horse rism_main() is  implemented in Fortan,  GCC 4.3
+    The working horse rism_solvent() is implemented in Fortan, GCC 4.3
     cannot  handle that source.   FIXME: maybe  one should  rather use
     GCC_VERSION?
   */
@@ -927,7 +927,7 @@ static SCM guile_rism_main (SCM solvent, SCM settings)
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
 
-  rism_main (&PD, m, solvent_sites);
+  rism_solvent (&PD, m, solvent_sites);
 
   free (solvent_name);
   free (solvent_sites);
@@ -1021,7 +1021,7 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
   EXPORT ("bgy3d-rank", 0, 0, 0, guile_rank);
   EXPORT ("bgy3d-size", 0, 0, 0, guile_size);
-  EXPORT ("rism-main", 2, 0, 0, guile_rism_main);
+  EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
