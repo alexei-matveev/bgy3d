@@ -1235,29 +1235,25 @@ contains
     !
     implicit none
     real (rk), intent (in) :: rho(:)      ! (m)
-    real (rk), intent (in) :: h(:, :, :)  ! (n, m, m)
-    real (rk), intent (in) :: cs(:, :, :) ! (n, m, m)
-    real (rk), intent (in) :: cl(:, :, :) ! (n, m, m)
+    real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
+    real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
     real (rk) :: mu(size (h, 1))
     ! *** end of interface ***
 
-    integer :: i, j, m
-    integer :: p, n
+    integer :: p, i, j
     real (rk) :: muH, muS, muL
 
-    m = size (rho)
-    n = size (h, 1)
-
-    do p = 1, n
+    do p = 1, size (h, 1)       ! nrad
        muH = 0.0
        muS = 0.0
        muL = 0.0
-       do j = 1, m
-          do i = 1, m
-             muH = muH + rho(i) * h(p, i, j)**2 / 2
+       do j = 1, size (h, 3)    ! m
+          do i = 1, size (h, 2) ! n
+             muH = muH + rho(j) * h(p, i, j)**2 / 2
 
-             muS = muS + rho(i) * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
-             muL = muL + rho(i) * (             - h(p, i, j) * cl(p, i, j) / 2)
+             muS = muS + rho(j) * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
+             muL = muL + rho(j) * (             - h(p, i, j) * cl(p, i, j) / 2)
           enddo
        enddo
 
