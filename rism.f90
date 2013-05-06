@@ -630,7 +630,7 @@ contains
           do i = 1, m
              do j = 1, m
                 chi(:, i, j) = wk(:, i, j) + &
-                     rho(i) * fourier (c(:, i, j) + t(:, i, j)) / FT_FW
+                     rho(i) * fourier (c(:, i, j) + t(:, i, j)) * (dr**3 / FT_FW)
              enddo
           enddo
        end block
