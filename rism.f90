@@ -505,7 +505,7 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism1d (n, rmax, beta = pd % beta, rho = rho, sites = solvent)
+    call rism_vv (n, rmax, pd % beta, rho, solvent)
   end subroutine rism_solvent
 
 
@@ -555,40 +555,47 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism1d (np, rmax, beta = pd % beta, rho = rho, sites = solvent)
+    block
+       ! Solvent susceptibility χ = ω + ρh:
+       real (rk) :: chi(np, m, m)
+
+       call rism_vv (np, rmax, pd % beta, rho, solvent, chi = chi)
+    end block
   end subroutine rism_solute
 
 
-  subroutine rism1d (n, rmax, beta, rho, sites)
+  subroutine rism_vv (nrad, rmax, beta, rho, sites, chi)
     use fft, only: fourier, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site
     implicit none
-    integer, intent (in) :: n            ! grid size
-    real (rk), intent (in) :: rmax       ! cell size
-    real (rk), intent (in) :: beta       ! inverse temp
-    real (rk), intent (in) :: rho(:)     ! (m)
-    type (site), intent (in) :: sites(:) ! (m)
+    integer, intent (in) :: nrad           ! grid size
+    real (rk), intent (in) :: rmax         ! cell size
+    real (rk), intent (in) :: beta         ! inverse temp
+    real (rk), intent (in) :: rho(:)       ! (m)
+    type (site), intent (in) :: sites(:)   ! (m)
+    real (rk), intent(out) :: chi(:, :, :) ! (nrad, m, m)
+    optional :: chi
     ! *** end of interface ***
 
     real (rk), parameter :: half = 0.5
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
-    real (rk), dimension (n, size (sites), size (sites)) :: &
+    real (rk), dimension (nrad, size (sites), size (sites)) :: &
          v, vk, t, c, g, wk
 
     ! Radial grids:
-    real (rk) :: r(n), dr
-    real (rk) :: k(n), dk
+    real (rk) :: r(nrad), dr
+    real (rk) :: k(nrad), dk
 
     integer :: i, m
 
     m = size (sites)
 
     ! dr * dk = 2π/2n:
-    dr = rmax / n
+    dr = rmax / nrad
     dk = pi / rmax
-    forall (i = 1:n)
+    forall (i = 1:nrad)
        r(i) = (i - half) * dr
        k(i) = (i - half) * dk
     end forall
@@ -613,14 +620,30 @@ contains
     c = closure_hnc (beta, v, t)
     g = 1 + c + t
 
+    !
+    ! When requested  by the caller return the  susceptibility χ(k) in
+    ! Fourier rep:
+    !
+    if (present (chi)) then
+       block
+          integer :: i, j
+          do i = 1, m
+             do j = 1, m
+                chi(:, i, j) = wk(:, i, j) + &
+                     rho(i) * fourier (c(:, i, j) + t(:, i, j)) / FT_FW
+             enddo
+          enddo
+       end block
+    endif
+
     ! Done with it, print results:
     block
        integer :: p, i, j
-       real  (rk) :: cl(n, m, m)
-       real  (rk) :: mu_dens(n), mu
+       real  (rk) :: cl(nrad, m, m)
+       real  (rk) :: mu_dens(nrad), mu
 
        ! Real-space rep of the long-range correlation:
-       forall (p = 1:n, i = 1:m, j = 1:m)
+       forall (p = 1:nrad, i = 1:m, j = 1:m)
           cl(p, i, j) = -beta * sites(i) % charge * sites(j) % charge &
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
@@ -629,10 +652,10 @@ contains
        mu_dens = chempot_density (rho, c + t, c, cl)
        mu = 4 * pi * sum (r**2 * mu_dens) * dr / beta
 
-       print *, "# rho=", rho, "beta=", beta, "n=", n
+       print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
        print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs, then mu"
-       do p = 1, n
+       do p = 1, nrad
           write (*, *) r(p), &
                &     ((v(p, i, j), i=1,j), j=1,m), &
                &     ((t(p, i, j), i=1,j), j=1,m), &
@@ -704,7 +727,7 @@ contains
       ! Return the increment that vanishes at convergence:
       dt = dt - t
     end function iterate_t
-  end subroutine rism1d
+  end subroutine rism_vv
 
 
   function omega_fourier (sites, k) result (wk)
