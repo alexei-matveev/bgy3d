@@ -803,16 +803,13 @@ contains
     ! *** end of inteface ***
 
     real (rk) :: epsilon, sigma, charge
-    integer :: i, j, m, n
+    integer :: i, j
     type (site) :: a, b
 
-    m = size (asites)
-    n = size (bsites)
-
     ! LJ potential:
-    do j = 1, m
+    do j = 1, size (bsites)
        b = bsites(j)
-       do i = 1, m
+       do i = 1, size (asites)
           a = asites(i)
 
           epsilon = sqrt (a % epsilon * b % epsilon)
