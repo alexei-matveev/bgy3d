@@ -938,6 +938,54 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
 
 
 
+static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
+{
+#ifndef WITH_FORTRAN
+  /*
+    The working horse rism_solute()  is implemented in Fortan, GCC 4.3
+    cannot  handle that source.   FIXME: maybe  one should  rather use
+    GCC_VERSION?
+  */
+  (void) solute;
+  (void) solvent;
+  (void) settings;
+  assert (false);
+#else
+  /* This sets defaults, eventually modified from the command line and
+     updated by the entries from the association list: */
+  const ProblemData PD = problem_data (settings);
+
+  int m;                        /* number of solvent sites */
+  Site *solvent_sites;          /* solvent_sites[m] */
+  char *solvent_name;
+
+  int n;                        /* number of solute sites */
+  Site *solute_sites;           /* solute_sites[n] */
+  char *solute_name;
+
+  /* Get  the  number  of   sites  and  their  parameters.   Allocates
+     sol*_sites, sol*_name: */
+  to_sites (solvent, &m, &solvent_sites, &solvent_name);
+  to_sites (solute, &n, &solute_sites, &solute_name);
+
+  /* Code used to be verbose: */
+  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
+  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
+
+  rism_solute (&PD, n, solute_sites, m, solvent_sites);
+
+  free (solvent_name);
+  free (solvent_sites);
+
+  free (solute_name);
+  free (solute_sites);
+#endif
+
+  return SCM_UNSPECIFIED;
+}
+
+
+
 static SCM guile_pot_interp (SCM iter, SCM x)
 {
   double x_[1][3], v_[1];
@@ -1022,6 +1070,7 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-rank", 0, 0, 0, guile_rank);
   EXPORT ("bgy3d-size", 0, 0, 0, guile_size);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
+  EXPORT ("rism-solute", 3, 0, 0, guile_rism_solute);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */

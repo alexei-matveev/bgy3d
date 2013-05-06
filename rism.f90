@@ -425,6 +425,7 @@ module rism
   private
 
   public :: rism_solvent
+  public :: rism_solute
   !
   ! *** END OF INTERFACE ***
   !
@@ -506,6 +507,56 @@ contains
 
     call rism1d (n, rmax, beta = pd % beta, rho = rho, sites = solvent)
   end subroutine rism_solvent
+
+
+  subroutine rism_solute (pd, n, solute, m, solvent) bind (c)
+    use iso_c_binding, only: c_int
+    use foreign, only: problem_data, site
+    implicit none
+    type (problem_data), intent (in) :: pd ! no VALUE!
+    integer (c_int), intent (in), value :: n, m
+    type (site), intent (in) :: solute(n)
+    type (site), intent (in) :: solvent(m)
+    ! *** end of interface ***
+
+    integer :: i, np
+    real (rk) :: rmax
+    real (rk) :: rho(m)
+
+    rho = pd % rho              ! all site densities are the same
+    rmax = 0.5 * (pd % interval(2) - pd % interval(1))
+    np = maxval (pd % n)
+
+    print *, "# rho=", pd % rho
+    print *, "# beta=", pd % beta
+    print *, "# L=", rmax
+    print *, "# n=", np
+
+    print *, "# Solvent:"
+    do i = 1, m
+       print *, "#", i, &
+            &        pad (solvent(i) % name), &
+            &        solvent(i) % sigma, &
+            &        solvent(i) % epsilon, &
+            &        solvent(i) % charge, &
+            &        rho(i)
+    enddo
+
+    print *, "# Solute:"
+    do i = 1, n
+       print *, "#", i, &
+            &        pad (solute(i) % name), &
+            &        solute(i) % sigma, &
+            &        solute(i) % epsilon, &
+            &        solute(i) % charge
+    enddo
+
+    ! This is applicable to LJ only, and should take reduced
+    ! density/temperature:
+    ! call print_info (rho = pd % rho, beta = pd % beta)
+
+    call rism1d (np, rmax, beta = pd % beta, rho = rho, sites = solvent)
+  end subroutine rism_solute
 
 
   subroutine rism1d (n, rmax, beta, rho, sites)
