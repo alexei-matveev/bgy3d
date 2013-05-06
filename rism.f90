@@ -23,7 +23,7 @@ module fft
   real (rk), parameter, public :: FT_FW = 1           ! == a
   real (rk), parameter, public :: FT_BW = (2 * pi)**3 ! == b
 
-  public :: fourier             ! x(1:n) -> y(1:n)
+  public :: fourier_many        ! x(1:n, *) -> y(1:n, *)
 
   !
   ! *** END OF INTERFACE ***
@@ -51,6 +51,22 @@ module fft
   end interface
 
 contains
+
+  function fourier_many (f) result (g)
+    implicit none
+    real (rk), intent (in) :: f(:, :, :)
+    real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
+    ! *** end of interface ***
+
+    integer :: i, j
+
+    do j = 1, size (f, 3)
+       do i = 1, size (f, 2)
+          g(:, i, j) = fourier (f(:, i, j))
+       enddo
+    enddo
+  end function fourier_many
+
 
   function fourier (f) result (g)
     implicit none
@@ -549,7 +565,7 @@ contains
 
 
   subroutine rism_vv (nrad, rmax, beta, rho, sites, chi)
-    use fft, only: fourier, FT_FW, FT_BW
+    use fft, only: fourier_many, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site
     implicit none
@@ -610,11 +626,14 @@ contains
     !
     if (present (chi)) then
        block
+          real (rk) :: h(nrad, m, m)
           integer :: i, j
+
+          h = fourier_many (c + t) * (dr**3 / FT_FW)
+
           do i = 1, m
              do j = 1, m
-                chi(:, i, j) = wk(:, i, j) + &
-                     rho(i) * fourier (c(:, i, j) + t(:, i, j)) * (dr**3 / FT_FW)
+                chi(:, i, j) = wk(:, i, j) + rho(i) * h(:, i, j)
              enddo
           enddo
        end block
@@ -662,16 +681,10 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      integer :: i, j
-
       c = closure_hnc (beta, v, t)
 
       ! Forward FT via DST:
-      do j = 1, size (c, 3)
-         do i = 1, size (c, 2)
-            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / FT_FW)
-         enddo
-      enddo
+      c = fourier_many (c) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -702,11 +715,7 @@ contains
       dt = dt - beta * vk
 
       ! Inverse FT via DST:
-      do j = 1, size (dt, 3)
-         do i = 1, size (dt, 2)
-            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / FT_BW)
-         enddo
-      enddo
+      dt = fourier_many (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -715,7 +724,6 @@ contains
 
 
   subroutine rism_uv (nrad, rmax, beta, rho, solvent, chi, solute)
-    use fft, only: fourier, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site
     implicit none
@@ -812,21 +820,16 @@ contains
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
       ! ... Implements procedure(f_iterator).
       !
+      use fft, only: fourier_many, FT_FW, FT_BW
       implicit none
       real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      integer :: i, j
-
       c = closure_hnc (beta, v, t)
 
       ! Forward FT via DST:
-      do j = 1, size (c, 3)
-         do i = 1, size (c, 2)
-            c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / FT_FW)
-         enddo
-      enddo
+      c = fourier_many (c) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -857,11 +860,7 @@ contains
       dt = dt - beta * vk
 
       ! Inverse FT via DST:
-      do j = 1, size (dt, 3)
-         do i = 1, size (dt, 2)
-            dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / FT_BW)
-         enddo
-      enddo
+      dt = fourier_many (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
