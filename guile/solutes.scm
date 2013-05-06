@@ -125,12 +125,37 @@
 ;; now we have
 ;;   ε(H) = ε(OH)^2 / ε(O) = 0.04 / 0.1521 = 0.2630
 ;;
+;; Updates: By checking some papers using this modified TIP3P, found
+;; the paper introducing the protein parameters used in CHARMM22 [2],
+;; which is hopefully the original source of modified TIP3P. From the
+;; discussion in CHARMM official forum [3], some people metioned that
+;; this modified TIP3P, naming CHARMM TIP3P, is only for practical
+;; purposes (to avoid electrostatic catastrophe). In my opinion the
+;; details of the refinement should be found in the PhD thesis [4] since
+;; it is cited in [2], but unfortunately I have no way to access it.
+;;
 ;; Reference:
 ;;
 ;; [1] Integral equation predictions of liquid state structure for
 ;;     waterlike intermolecular potentials, B.  M.  Pettitt and P.  J.
 ;;     Rossky, The Journal of Chemical Physics, 1982, 77 (3),
 ;;     1451-1457, http://dx.doi.org/10.1063/1.443972
+;;
+;; [2] All-Atom Empirical Potential for Molecular Modeling and Dynamics
+;;     Studies of Proteins, A. D. MacKerell, D. Bashford, Bellott, R. L.
+;;     Dunbrack, J. D. Evanseck, M. J. Field, S. Fischer, J. Gao, H. Guo
+;;     , S. Ha, D. Joseph-McCarthy, L. Kuchnir, K. Kuczera, F. T. K. Lau
+;;     , C. Mattos, S. Michnick, T. Ngo, D. T. Nguyen, B. Prodhom, W. E.
+;;     Reiher, B. Roux, M. Schlenkrich, J. C. Smith, R. Stote, J. Straub
+;;     , M. Watanabe, J. Wiórkiewicz-Kuczera, D. Yin and M. Karplus, The
+;;     Journal of Physical Chemistry B 1998, 102 (18), 3586-3616.
+;;     http://dx.doi.org/10.1021/jp973084f
+;;
+;; [3] http://goo.gl/ldmC8
+;;
+;; [4] Theoretical Studies of Hydrogen Bonding, Reiher, III., W.E.,
+;;     Ph.D. Thesis, Department of Chemistry, Harvard University,
+;;     Cambridge, MA, USA, 1985
 ;;
 ;;
 ("water"
