@@ -479,18 +479,18 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
-    integer :: i, n
+    integer :: i, nrad
     real (rk) :: rmax
     real (rk) :: rho(m)
 
     rho = pd % rho              ! all site densities are the same
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
-    n = maxval (pd % n)
+    nrad = maxval (pd % n)
 
     print *, "# rho=", pd % rho
     print *, "# beta=", pd % beta
     print *, "# L=", rmax
-    print *, "# n=", n
+    print *, "# n=", nrad
     print *, "# Solvent:"
     do i = 1, m
        print *, "#", i, &
@@ -505,7 +505,7 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism_vv (n, rmax, pd % beta, rho, solvent)
+    call rism_vv (nrad, rmax, pd % beta, rho, solvent)
   end subroutine rism_solvent
 
 
