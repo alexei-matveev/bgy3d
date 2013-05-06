@@ -703,7 +703,7 @@ contains
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
       !
-      dt = oz_equation_c_t (rho, c, wk)
+      dt = oz_vv_equation_c_t (rho, c, wk)
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
@@ -950,7 +950,7 @@ contains
   ! the result  by h3 in addition,  you will compute  exactly what the
   ! older version of the function did:
   !
-  function oz_equation_c_t (rho, C, W) result (T)
+  function oz_vv_equation_c_t (rho, C, W) result (T)
     implicit none
     real (rk), intent (in) :: rho(:)             ! (m)
     real (rk), intent (in) :: C(:, :, :)         ! (n, m, m)
@@ -966,17 +966,17 @@ contains
        ! FIXME: it  is implied here  that W =  1. See comments  on the
        ! value of ω(k) for i == j in omega_fourier().
        do i = 1, size (C, 1)
-          T(i, 1, 1) = oz_equation_c_t_1x1 (rho(1), C(i, 1, 1))
+          T(i, 1, 1) = oz_vv_equation_c_t_1x1 (rho(1), C(i, 1, 1))
        enddo
     else
        do i = 1, size (C, 1)
-          T(i, :, :) = oz_equation_c_t_MxM (rho(:), C(i, :, :), W(i, :, :))
+          T(i, :, :) = oz_vv_equation_c_t_MxM (rho(:), C(i, :, :), W(i, :, :))
        enddo
     endif
-  end function oz_equation_c_t
+  end function oz_vv_equation_c_t
 
 
-  elemental function oz_equation_c_t_1x1 (rho, c) result (t)
+  elemental function oz_vv_equation_c_t_1x1 (rho, c) result (t)
     implicit none
     real (rk), intent (in) :: rho, c
     real (rk) :: t
@@ -991,10 +991,10 @@ contains
     ! simplifies in the 1x1 case to this:
     !
     t = rho * (c * c) / (1 - rho * c)
-  end function oz_equation_c_t_1x1
+  end function oz_vv_equation_c_t_1x1
 
 
-  function oz_equation_c_t_MxM (rho, C, W) result (T)
+  function oz_vv_equation_c_t_MxM (rho, C, W) result (T)
     !
     ! So far  rho is the same for  all sites, we may  have mixed left-
     ! and right-side multiplies.
@@ -1101,7 +1101,7 @@ contains
          stop "dgesv failed, see tty"
       endif
     end subroutine sles
-  end function oz_equation_c_t_MxM
+  end function oz_vv_equation_c_t_MxM
 
 
   subroutine print_info (rho, beta)
