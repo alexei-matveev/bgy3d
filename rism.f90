@@ -48,6 +48,14 @@ module fft
        real (c_double), intent (out) :: out(n)
        real (c_double), intent (in) :: in(n)
      end subroutine rism_dst
+
+     subroutine rism_dst_many (m, n, out, in) bind (c)
+       use iso_c_binding, only: c_int, c_double
+       implicit none
+       integer (c_int), intent (in), value :: m, n
+       real (c_double), intent (out) :: out(n, m)
+       real (c_double), intent (in) :: in(n, m)
+     end subroutine rism_dst_many
   end interface
 
 contains
@@ -105,18 +113,19 @@ contains
 
 
   function dst_many (f) result (g)
+    use iso_c_binding, only: c_int
     implicit none
     real (rk), intent (in) :: f(:, :, :)
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
     ! *** end of interface ***
 
-    integer :: i, j
+    integer (c_int) :: m, n
 
-    do j = 1, size (f, 3)
-       do i = 1, size (f, 2)
-          g(:, i, j) = dst (f(:, i, j))
-       enddo
-    enddo
+    ! cast to c_int
+    n = size (f, 1)
+    m = size (f) / n
+
+    call rism_dst_many (m, n, g, f)
   end function dst_many
 
 
