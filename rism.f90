@@ -58,13 +58,22 @@ contains
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
     ! *** end of interface ***
 
-    integer :: i, j
+    integer :: p, i, j
 
-    do j = 1, size (f, 3)
-       do i = 1, size (f, 2)
-          g(:, i, j) = fourier (f(:, i, j))
-       enddo
-    enddo
+    !
+    ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
+    ! around j  = n - 0.5".   Here we use integer  arithmetics and the
+    ! identity (2 * j - 1) / 2 == j - 0.5.
+    !
+    forall (p = 1:size (f, 1), i = 1:size (f, 2), j = 1:size (f, 3))
+       g(p, i, j) = f(p, i, j) * (2 * p - 1)
+    end forall
+
+    g = 2 * size (g, 1) * dst_many (g)
+
+    forall (p = 1:size (g, 1), i = 1:size (g, 2), j = 1:size (g, 3))
+       g(p, i, j) = g(p, i, j) / (2 * p - 1)
+    end forall
   end function fourier_many
 
 
@@ -93,6 +102,22 @@ contains
        g(i) = g(i) / (2 * i - 1)
     end forall
   end function fourier
+
+
+  function dst_many (f) result (g)
+    implicit none
+    real (rk), intent (in) :: f(:, :, :)
+    real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
+    ! *** end of interface ***
+
+    integer :: i, j
+
+    do j = 1, size (f, 3)
+       do i = 1, size (f, 2)
+          g(:, i, j) = dst (f(:, i, j))
+       enddo
+    enddo
+  end function dst_many
 
 
   function dst (a) result (b)
