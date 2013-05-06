@@ -95,19 +95,6 @@ contains
   end function dst
 
 
-  function ndst (a) result (b)
-    implicit none
-    real (rk), intent (in) :: a(:)
-    real (rk) :: b(size (a))
-    ! *** end of interface ***
-
-    real (rk) :: norm
-
-    norm = 2 * size (b)         ! cast to real
-    b = dst (a) / sqrt (norm)
-  end function ndst
-
-
   subroutine test_dst (n)
     implicit none
     integer, intent (in) :: n
@@ -121,11 +108,6 @@ contains
     if (maxval (abs (a - dst (dst (a)) / (2 * n))) > 1.0e-10) then
        print *, "diff=", maxval (abs (a - dst (dst (a)) / (2 * n)))
        stop "unnormalized DST does not match"
-    endif
-
-    if (maxval (abs (a - ndst (ndst (a)))) > 1.0e-10) then
-       print *, "diff=", maxval (abs (a - ndst (ndst (a))))
-       stop "normalized DST does not match"
     endif
   end subroutine test_dst
 
