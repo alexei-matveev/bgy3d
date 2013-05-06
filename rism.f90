@@ -685,8 +685,8 @@ contains
       c = closure_hnc (beta, v, t)
 
       ! Forward FT via DST:
-      do j = 1, m
-         do i = 1, m
+      do j = 1, size (c, 3)
+         do i = 1, size (c, 2)
             c(:, i, j) = fourier (c(:, i, j)) * (dr**3 / FT_FW)
          enddo
       enddo
@@ -720,8 +720,8 @@ contains
       dt = dt - beta * vk
 
       ! Inverse FT via DST:
-      do j = 1, m
-         do i = 1, m
+      do j = 1, size (dt, 3)
+         do i = 1, size (dt, 2)
             dt(:, i, j) = fourier (dt(:, i, j)) * (dk**3 / FT_BW)
          enddo
       enddo
