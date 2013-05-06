@@ -519,18 +519,18 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
-    integer :: i, np
+    integer :: i, nrad
     real (rk) :: rmax
     real (rk) :: rho(m)
 
     rho = pd % rho              ! all site densities are the same
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
-    np = maxval (pd % n)
+    nrad = maxval (pd % n)
 
     print *, "# rho=", pd % rho
     print *, "# beta=", pd % beta
     print *, "# L=", rmax
-    print *, "# n=", np
+    print *, "# n=", nrad
 
     print *, "# Solvent:"
     do i = 1, m
@@ -557,9 +557,9 @@ contains
 
     block
        ! Solvent susceptibility χ = ω + ρh:
-       real (rk) :: chi(np, m, m)
+       real (rk) :: chi(nrad, m, m)
 
-       call rism_vv (np, rmax, pd % beta, rho, solvent, chi = chi)
+       call rism_vv (nrad, rmax, pd % beta, rho, solvent, chi = chi)
     end block
   end subroutine rism_solute
 
