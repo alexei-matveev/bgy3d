@@ -600,9 +600,9 @@ contains
        k(i) = (i - half) * dk
     end forall
 
-    ! Tabulate short-range  pairwise potential  v() on the  r-grid and
+    ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (sites, r, k, v, vk)
+    call force_field (sites, sites, r, k, v, vk)
 
     ! Rigid-bond correlations on the k-grid:
     wk = omega_fourier (sites, k)
@@ -785,7 +785,7 @@ contains
   end function omega_fourier
 
 
-  subroutine force_field (sites, r, k, vr, vk)
+  subroutine force_field (asites, bsites, r, k, vr, vk)
     !
     ! Force field  is represented by two contributions,  the first one
     ! is (hopefully) of short range and is returned in array vr on the
@@ -794,24 +794,26 @@ contains
     !
     use foreign, only: site
     implicit none
-    type (site), intent (in) :: sites(:)   ! (m)
-    real (rk), intent (in) :: r(:)         ! (n)
-    real (rk), intent (in) :: k(:)         ! (n)
-    real (rk), intent (out) :: vr(:, :, :) ! (n, m, m)
-    real (rk), intent (out) :: vk(:, :, :) ! (n, m, m)
+    type (site), intent (in) :: asites(:)  ! (m)
+    type (site), intent (in) :: bsites(:)  ! (n)
+    real (rk), intent (in) :: r(:)         ! (nrad)
+    real (rk), intent (in) :: k(:)         ! (nrad)
+    real (rk), intent (out) :: vr(:, :, :) ! (nrad, m, n)
+    real (rk), intent (out) :: vk(:, :, :) ! (nrad, m, n)
     ! *** end of inteface ***
 
     real (rk) :: epsilon, sigma, charge
-    integer :: i, j, m
+    integer :: i, j, m, n
     type (site) :: a, b
 
-    m = size (sites)
+    m = size (asites)
+    n = size (bsites)
 
     ! LJ potential:
     do j = 1, m
-       b = sites(j)
+       b = bsites(j)
        do i = 1, m
-          a = sites(i)
+          a = asites(i)
 
           epsilon = sqrt (a % epsilon * b % epsilon)
           sigma = (a % sigma + b % sigma) / 2
