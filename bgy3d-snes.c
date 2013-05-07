@@ -205,8 +205,9 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 
       const real norm = vec_norm (dx);
 
-      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f\n",
-                   k + 1, norm, lambda);
+      if (verbosity > 0)
+        PetscPrintf (PETSC_COMM_WORLD, " # %03d: norm of difference: %e\t%f\n",
+                     k + 1, norm, lambda);
 
       if (norm < norm_tol)
         break;
@@ -309,17 +310,21 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
         }
       /* otherwise leave "a1" and "mycount" unchanged */
 
-      PetscPrintf (PETSC_COMM_WORLD, "%03d: norm of difference: %e\t%f",
-                   iter + 1, norm, a);
-      PetscPrintf (PETSC_COMM_WORLD, " count=%3d upwards=%1d", mycount, upwards);
-      PetscPrintf (PETSC_COMM_WORLD, "\n");
+      if (verbosity > 0)
+        {
+          PetscPrintf (PETSC_COMM_WORLD, " # %03d: norm of difference: %e\t%f",
+                       iter + 1, norm, a);
+          PetscPrintf (PETSC_COMM_WORLD, " count=%3d upwards=%1d", mycount, upwards);
+          PetscPrintf (PETSC_COMM_WORLD, "\n");
+        }
 
       /* Exit when residual norm does not exceed norm_tol: */
       if (norm <= norm_tol)
         {
-          PetscPrintf (PETSC_COMM_WORLD,
-                       "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
-                       norm, norm_tol, iter + 1, max_iter);
+          if (verbosity > 0)
+            PetscPrintf (PETSC_COMM_WORLD,
+                         " # norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+                         norm, norm_tol, iter + 1, max_iter);
           break;
         }
     } /* for (iter = ... ) */
