@@ -50,6 +50,13 @@ module fft
      end subroutine rism_dst
 
      subroutine rism_dst_many (m, n, buf) bind (c)
+       !
+       ! Performs DST  of size n in-place  for each of the  m rows. In
+       ! FFTW terms this is RODFT11  (or DST-IV) which is self inverse
+       ! up to a normalization factor.
+       !
+       ! See ./rism-dst.c
+       !
        use iso_c_binding, only: c_int, c_double
        implicit none
        integer (c_int), intent (in), value :: m, n
