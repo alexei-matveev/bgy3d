@@ -14,14 +14,13 @@ void rism_dst (size_t n, double out[n], const double in[n])
 }
 
 
-void rism_dst_many (int m, int n, double out[m][n], const double in[m][n])
+void rism_dst_many (int m, int n, double buf[m][n])
 {
-  /* FIXME: does it write to in[]?  */
   const fftw_r2r_kind kind = FFTW_RODFT11;
 
   fftw_plan plan = fftw_plan_many_r2r (1, &n, m,
-                                       (double*) in, NULL, 1, n,
-                                       (double*) out, NULL, 1, n,
+                                       (double*) buf, NULL, 1, n,
+                                       (double*) buf, NULL, 1, n,
                                        &kind, FFTW_ESTIMATE);
 
   fftw_execute (plan);

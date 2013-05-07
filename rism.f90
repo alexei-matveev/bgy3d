@@ -49,12 +49,11 @@ module fft
        real (c_double), intent (in) :: in(n)
      end subroutine rism_dst
 
-     subroutine rism_dst_many (m, n, out, in) bind (c)
+     subroutine rism_dst_many (m, n, buf) bind (c)
        use iso_c_binding, only: c_int, c_double
        implicit none
        integer (c_int), intent (in), value :: m, n
-       real (c_double), intent (out) :: out(n, m)
-       real (c_double), intent (in) :: in(n, m)
+       real (c_double), intent (inout) :: buf(n, m)
      end subroutine rism_dst_many
   end interface
 
@@ -66,20 +65,21 @@ contains
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
     ! *** end of interface ***
 
-    integer :: p, i, j
+    integer :: p, i, j, n
 
+    n = size (f, 1)
     !
     ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
-    forall (p = 1:size (f, 1), i = 1:size (f, 2), j = 1:size (f, 3))
-       g(p, i, j) = f(p, i, j) * (2 * p - 1)
+    forall (p = 1:n, i = 1:size (f, 2), j = 1:size (f, 3))
+       g(p, i, j) =  f(p, i, j) * (2 * n * (2 * p - 1))
     end forall
 
-    g = 2 * size (g, 1) * dst_many (g)
+    call dst_many (g)
 
-    forall (p = 1:size (g, 1), i = 1:size (g, 2), j = 1:size (g, 3))
+    forall (p = 1:n, i = 1:size (g, 2), j = 1:size (g, 3))
        g(p, i, j) = g(p, i, j) / (2 * p - 1)
     end forall
   end function fourier_many
@@ -112,11 +112,10 @@ contains
   end function fourier
 
 
-  function dst_many (f) result (g)
+  subroutine dst_many (f)
     use iso_c_binding, only: c_int
     implicit none
-    real (rk), intent (in) :: f(:, :, :)
-    real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
+    real (rk), intent (inout) :: f(:, :, :)
     ! *** end of interface ***
 
     integer (c_int) :: m, n
@@ -125,8 +124,8 @@ contains
     n = size (f, 1)
     m = size (f) / n
 
-    call rism_dst_many (m, n, g, f)
-  end function dst_many
+    call rism_dst_many (m, n, f)
+  end subroutine dst_many
 
 
   function dst (a) result (b)
