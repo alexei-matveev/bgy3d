@@ -969,8 +969,8 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
+  PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
+  PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
 
   rism_solute (&PD, n, solute_sites, m, solvent_sites);
 
