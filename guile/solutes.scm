@@ -102,15 +102,17 @@
 ;; density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3
 ;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
 ;;
-;; Here  the non-zero  sigma  and epsilon  parameter  for hydrogen  is
-;; introduced by Pettitt and Rossky [1] to "avoid catastrophic overlap
-;; of the corresponding  site charges in the calculations".  But it be
-;; noted that in [1], these  non-zero parameter only contribute to the
-;; C_12 term of O-H pair and "present in a 6-12 potential with a depth
-;; of 0.2 kcal/mol and effective diameters of 2.8 Å for oxygen and 0.4
-;; Å for hydrogen"
+;; Here are two sources for the non-zero  sigma  and epsilon  parameter
+;; for hydrogen:
 ;;
-;; FIXME: no idea how could obtain epsilon_H = 0.046.
+;; I. The one introduced by Pettitt and Rossky [1] to "avoid
+;; catastrophic overlap of the corresponding  site charges in the
+;; calculations".  But it be noted that in [1], these  non-zero
+;; parameter only contribute to the C_12 term of O-H pair and "present
+;; in a 6-12 potential with a depth of 0.2 kcal/mol and effective
+;; diameters of 2.8 Å for oxygen and 0.4 Å for hydrogen", but in this
+;; model ε(H) is quite different from what we used here:
+;;
 ;; In [1], C_12(OH) = 225.180 kcal Å^12 / mol, and LJ potential is
 ;;   u = C_12/r^12 + C_6/r^6
 ;; considering the other form of LJ potential
@@ -125,14 +127,17 @@
 ;; now we have
 ;;   ε(H) = ε(OH)^2 / ε(O) = 0.04 / 0.1521 = 0.2630
 ;;
-;; Updates: By checking some papers using this modified TIP3P, found
-;; the paper introducing the protein parameters used in CHARMM22 [2],
+;; II. By checking some papers using this modified TIP3P, found the
+;; paper introducing the protein parameters used in CHARMM22 [2],
 ;; which is hopefully the original source of modified TIP3P. From the
 ;; discussion in CHARMM official forum [3], some people metioned that
 ;; this modified TIP3P, naming CHARMM TIP3P, is only for practical
-;; purposes (to avoid electrostatic catastrophe). In my opinion the
-;; details of the refinement should be found in the PhD thesis [4] since
-;; it is cited in [2], but unfortunately I have no way to access it.
+;; purposes (to avoid electrostatic catastrophe). Further details of
+;; the refinement of CHARMM TIP3P could be found in the Ph.D. thesis
+;; of Reiner [4] (check the path of local copy on wiki page). In my
+;; opinion we should cite this or the CHARMM paper instead of [1] for
+;; future usage. (in the PhD thesis, ε(H) = 0.04598 kcal / mol and
+;; σ(H) = 0.4490 Å)
 ;;
 ;; Reference:
 ;;
