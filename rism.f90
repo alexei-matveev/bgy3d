@@ -51,7 +51,7 @@ module fft
 
      subroutine rism_dst_many (m, n, buf) bind (c)
        !
-       ! Performs DST  of size n in-place  for each of the  m rows. In
+       ! Performs DST of size n in-place for each of the m columns. In
        ! FFTW terms this is RODFT11  (or DST-IV) which is self inverse
        ! up to a normalization factor.
        !
