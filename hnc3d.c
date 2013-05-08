@@ -406,96 +406,16 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 }
 
 
-static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
-{
-  const int m = ctx->m;
-
-  /* aliases of the correct [m][m] shape: */
-  Vec (*c_fft)[m] = (void*) ctx->c_fft;
-  Vec (*t_fft)[m] = (void*) ctx->t_fft;
-  Vec (*w_fft)[m] = (void*) ctx->w_fft;
-  Vec (*t)[m] = (void*) ctx->y; /* y = t(c) here */
-  Vec (*v_short)[m] = (void*) ctx->v_short;
-  Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
-
-  const State *HD = ctx->HD;
-  const ProblemData *PD = HD->PD;
-  const real rho = PD->rho;
-  const real beta = PD->beta;
-  const real L = PD->interval[1] - PD->interval[0];
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  /* Establish aliases to the subsections of the long Vec C and dC: */
-  local Vec c[m][m], dc[m][m];
-  vec_aliases_create2 (C, m, c);
-  vec_aliases_create2 (dC, m, dc);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
-
-        VecScale (c_fft[i][j], h3);
-
-        /*
-          The real-space  representation encodes only  the short-range
-          part  of  the  direct  corrlation. The  (fixed)  long  range
-          contribution is added here:
-
-            C := C  - βV
-                  S     L
-        */
-        VecAXPY (c_fft[i][j], -beta, v_long_fft[i][j]);
-
-        /* Translate distribution to the grid corner. */
-        bgy3d_vec_fft_trans (HD->dc, PD->N, c_fft[i][j]);
-      }
-
-  /* Solves the OZ linear equation for t_fft[][].: */
-  compute_t2 (m, rho, c_fft, w_fft, t_fft);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        /* Translate distribution to the grid center. */
-        bgy3d_vec_fft_trans (HD->dc, PD->N, t_fft[i][j]);
-
-        /*
-          Since we plugged in the Fourier transform of the full direct
-          correlation  including  the  long  range part  into  the  OZ
-          equation what  we get out  is the full  indirect correlation
-          including the  long-range part.   The menmonic is  C +  T is
-          short range.  Take it out:
-
-            T := T - βV
-             S         L
-        */
-        VecAXPY (t_fft[i][j], -beta, v_long_fft[i][j]);
-
-        MatMultTranspose (HD->fft_mat, t_fft[i][j], t[i][j]);
-
-        VecScale (t[i][j], 1.0/L/L/L);
-
-        compute_c (beta, v_short[i][j], t[i][j], dc[i][j]);
-      }
-
-  /*
-    This  destroys the  aliases,  but  does not  free  the memory,  of
-    course. The actuall data is owned by Vec C and Vec dC. From now on
-    one may access C and dC directly again.
-  */
-  vec_aliases_destroy2 (C, m, c);
-  vec_aliases_destroy2 (dC, m, dc);
-
-  VecAXPY (dC, -1.0, C);
-}
-
-
 /*
-  Solving  for  either  indirect correlation  γ  =  h  - c  or  direct
-  correlation c  and other quantities of HNC  equation.  Either direct
-  correlation  c  or  indirect  correlation  γ appears  as  a  primary
-  variable x here. All other unknowns are functionals of that.
+  Solving for indirect correlation t = h - c and thus, also for direct
+  correlation c  and other quantities  of HNC equation.   The indirect
+  correlation  t appears  as  a  primary variable  x  here. All  other
+  unknowns, including the direction  correlation c, are functionals of
+  that.
+
+  Historically  this  code supported  another  mode  where the  direct
+  correlation  c served as  a primary  variable x.   In that  cast the
+  indirect correlation t was a functional of that.
 */
 void hnc3d_solvent_solve (const ProblemData *PD,
                           int m, const Site solvent[m],
@@ -506,19 +426,13 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
-  /* Flip this to switch between c and t as primary variables: true =>
-     c, false => t: */
-  const bool yes = false;
-
-  if (yes)
-    PetscPrintf (PETSC_COMM_WORLD, "(iterations for c)\n");
-  else
-    PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
+  PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   /*
-    This will be a functional y(x) of primary variable, either y(x) ==
-    t(c)  or  vice  versa, y(x)  =  c(t).  Depending  on the  type  of
-    iteration.
+    This  will be  a functional  y(x) of  primary variable  x,  y(x) =
+    c(t). Earlier versions supported direct correlation c as a primary
+    variable  so  that  in that  case  one  had  y(x)  == t(c)  as  an
+    alternative.
   */
   Vec y[m][m];                  /* FIXME: not deallocated */
   vec_create2 (HD->da, m, y);
@@ -575,37 +489,25 @@ void hnc3d_solvent_solve (const ProblemData *PD,
         .m = m,
         .v_short = (void*) v_short,       /* in */
         .v_long_fft = (void*) v_long_fft, /* in */
-        .y = (void*) y,                   /* work, t(c) or c(t) */
+        .y = (void*) y,                   /* work, c(t), not t(c) */
         .t_fft = (void*) t_fft,           /* work */
         .c_fft = (void*) c_fft,           /* work */
         .w_fft = (void*) w_fft,           /* in */
       };
 
-    if (yes)
-      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_c2, X);
-    else
-      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, X);
+    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, X);
   }
 
   /*
     This  saves   c??.bin  to  disk  to  be   used  in  solute/solvent
-    calculations. The  other one  is not futhre  used, saved  just for
+    calculations. The  other one  is not futher  used, saved  just for
     info.
+
+    The approach with the primary variable  x == t won over time.  The
+    direct correlation c(t) is a dependent quantity y(x)!
   */
-  if (yes)
-    {
-      /* In  this branch  the primary  variable x  == c,  the indirect
-         correlation t(c) is a dependent quantity y(x)! */
-      bgy3d_vec_save2 ("c%d%d.bin", m, x);
-      bgy3d_vec_save2 ("t%d%d.bin", m, y);
-    }
-  else
-    {
-      /* In  this branch  the  primary  variable x  ==  t, the  direct
-         correlation c(t) is a dependent quantity y(x)! */
-      bgy3d_vec_save2 ("t%d%d.bin", m, x);
-      bgy3d_vec_save2 ("c%d%d.bin", m, y);
-    }
+  bgy3d_vec_save2 ("t%d%d.bin", m, x);
+  bgy3d_vec_save2 ("c%d%d.bin", m, y);
 
   /*
     g  =  γ +  c  +  1,  store in  Vec  y.   The expression  is  valid
