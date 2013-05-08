@@ -1285,20 +1285,20 @@ contains
     !
     ! RISM equation, here for h and c:
     !
-    !    uv     u    uv     v     vv
     !   h   =  ω  * c   * [ω + ρ h  ]
+    !    uv     u    uv     v     vv
     !
     ! The term  is square brackets  is the solvent property  (fixed by
     ! the assumption  of the infinite  dilution) and is passed  as the
     ! solvent susceptibility
     !
-    !    vv     v     vv
     !   χ   =  ω + ρ h
+    !    vv     v     vv
     !
     ! The returned value is the indirect correlation
     !
-    !    uv     uv    uv
     !   t   =  h  -  c
+    !    uv     uv    uv
     !
     implicit none
     real (rk), intent (in) :: cuv(:, :, :)         ! (nrad, n, m)
