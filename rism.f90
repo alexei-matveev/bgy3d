@@ -1190,9 +1190,9 @@ contains
     ! structure.
     !
     implicit none
-    real (rk), intent (in) :: rho(:)  ! (m)
-    real (rk), intent (in) :: C(:, :) ! (m, m)
-    real (rk), intent (in) :: W(:, :) ! (m, m)
+    real (rk), intent (in) :: rho(:)       ! (m)
+    real (rk), intent (in) :: C(:, :)      ! (m, m)
+    real (rk), intent (in) :: W(:, :)      ! (m, m)
     real (rk) :: T(size (rho), size (rho)) ! (m, m)
     ! *** end of interface ***
 
@@ -1282,6 +1282,24 @@ contains
 
 
   function oz_uv_equation_c_t (cuv, wuu, xvv) result (tuv)
+    !
+    ! RISM equation, here for h and c:
+    !
+    !    uv     u    uv     v     vv
+    !   h   =  ω  * c   * [ω + ρ h  ]
+    !
+    ! The term  is square brackets  is the solvent property  (fixed by
+    ! the assumption  of the infinite  dilution) and is passed  as the
+    ! solvent susceptibility
+    !
+    !    vv     v     vv
+    !   χ   =  ω + ρ h
+    !
+    ! The returned value is the indirect correlation
+    !
+    !    uv     uv    uv
+    !   t   =  h  -  c
+    !
     implicit none
     real (rk), intent (in) :: cuv(:, :, :)         ! (nrad, n, m)
     real (rk), intent (in) :: wuu(:, :, :)         ! (nrad, n, n)
@@ -1291,7 +1309,7 @@ contains
 
     integer :: p
 
-    ! Many associative matrix multiplies: NxN * (NxM * MxM)
+    ! Many associative matrix multiplies: NxN * (NxM * MxM) - NxM
     do p = 1, size (cuv, 1)
        tuv(p, :, :) = matmul (wuu(p, :, :), matmul (cuv(p, :, :), xvv(p, :, :))) - cuv(p, :, :)
     enddo
