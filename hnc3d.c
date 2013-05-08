@@ -342,8 +342,8 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m][m], dt[m][m];
-  bgy3d_vec_aliases_create2 (T, m, t);
-  bgy3d_vec_aliases_create2 (dT, m, dt);
+  vec_aliases_create2 (T, m, t);
+  vec_aliases_create2 (dT, m, dt);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -399,8 +399,8 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
     course. The actuall data is owned by Vec T and Vec dT. From now on
     one may access T and dT directly again.
   */
-  bgy3d_vec_aliases_destroy2 (T, m, t);
-  bgy3d_vec_aliases_destroy2 (dT, m, dt);
+  vec_aliases_destroy2 (T, m, t);
+  vec_aliases_destroy2 (dT, m, dt);
 
   VecAXPY (dT, -1.0, T);
 }
@@ -427,8 +427,8 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
 
   /* Establish aliases to the subsections of the long Vec C and dC: */
   local Vec c[m][m], dc[m][m];
-  bgy3d_vec_aliases_create2 (C, m, c);
-  bgy3d_vec_aliases_create2 (dC, m, dc);
+  vec_aliases_create2 (C, m, c);
+  vec_aliases_create2 (dC, m, dc);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -484,8 +484,8 @@ static void iterate_c2 (Ctx2 *ctx, Vec C, Vec dC)
     course. The actuall data is owned by Vec C and Vec dC. From now on
     one may access C and dC directly again.
   */
-  bgy3d_vec_aliases_destroy2 (C, m, c);
-  bgy3d_vec_aliases_destroy2 (dC, m, dc);
+  vec_aliases_destroy2 (C, m, c);
+  vec_aliases_destroy2 (dC, m, dc);
 
   VecAXPY (dC, -1.0, C);
 }
@@ -552,10 +552,10 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     the long Vec X and m * (m  + 1) / 2 shorter Vec x[m][m] aliased to
     the subsections of the longer one.
   */
-  local Vec X = bgy3d_vec_pack_create2 (HD->da, m); /* long Vec */
+  local Vec X = vec_pack_create2 (HD->da, m); /* long Vec */
 
   local Vec x[m][m];
-  bgy3d_vec_aliases_create2 (X, m, x); /* aliases to subsections */
+  vec_aliases_create2 (X, m, x); /* aliases to subsections */
 
   /* Zero as intial guess  for x == t is not the  same as zero initial
      guess for x == c: */
@@ -631,8 +631,8 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     for (int j = 0; j < i; j++)
       bgy3d_vec_destroy (&w_fft[i][j]);
 
-  bgy3d_vec_aliases_destroy2 (X, m, x);
-  bgy3d_vec_pack_destroy2 (&X);
+  vec_aliases_destroy2 (X, m, x);
+  vec_pack_destroy2 (&X);
 
   bgy3d_state_destroy (HD);
 
@@ -756,8 +756,8 @@ static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
 
   /* Establish aliases to the subsections of the long Vec H and dH: */
   local Vec h[m], dh[m];
-  bgy3d_vec_aliases_create1 (H, m, h);
-  bgy3d_vec_aliases_create1 (dH, m, dh);
+  vec_aliases_create1 (H, m, h);
+  vec_aliases_create1 (dH, m, dh);
 
   /* fft(h).  Here h is the 3d  unknown hole density h1 of the solvent
      sites. */
@@ -794,8 +794,8 @@ static void iterate_h1 (Ctx1 *ctx, Vec H, Vec dH)
     course. The actuall data is owned by Vec H and Vec dH. From now on
     one may access H and dH directly again.
   */
-  bgy3d_vec_aliases_destroy1 (H, m, h);
-  bgy3d_vec_aliases_destroy1 (dH, m, dh);
+  vec_aliases_destroy1 (H, m, h);
+  vec_aliases_destroy1 (dH, m, dh);
 
   /*
     dh := h    - h
@@ -820,8 +820,8 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m], dt[m];
-  bgy3d_vec_aliases_create1 (T, m, t);
-  bgy3d_vec_aliases_create1 (dT, m, dt);
+  vec_aliases_create1 (T, m, t);
+  vec_aliases_create1 (dT, m, dt);
 
   /*
     The new candidate for the total correlation
@@ -859,8 +859,8 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     course. The actuall data is owned by Vec T and Vec dT. From now on
     one may access T and dT directly again.
   */
-  bgy3d_vec_aliases_destroy1 (T, m, t);
-  bgy3d_vec_aliases_destroy1 (dT, m, dt);
+  vec_aliases_destroy1 (T, m, t);
+  vec_aliases_destroy1 (dT, m, dt);
 
   /*
     dt := t    - t
@@ -974,10 +974,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
     the long Vec  X and m shorter Vec x[m]  aliased to the subsections
     of the longer one.
   */
-  local Vec X = bgy3d_vec_pack_create1 (HD->da, m); /* long Vec */
+  local Vec X = vec_pack_create1 (HD->da, m); /* long Vec */
 
   local Vec x[m];
-  bgy3d_vec_aliases_create1 (X, m, x); /* aliases to subsections */
+  vec_aliases_create1 (X, m, x); /* aliases to subsections */
 
   /* Zero as intial guess for x == t is (almost?) the same as exp(-βv)
      - 1 initial guess for x == h: */
@@ -1037,8 +1037,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_vec_destroy1 (m, t_fft);
   bgy3d_vec_destroy1 (m, v);
 
-  bgy3d_vec_aliases_destroy1 (X, m, x);
-  bgy3d_vec_pack_destroy1 (&X);
+  vec_aliases_destroy1 (X, m, x);
+  vec_pack_destroy1 (&X);
 
   /* This should be the only pair quantity: */
   bgy3d_vec_destroy2 (m, c_fft);

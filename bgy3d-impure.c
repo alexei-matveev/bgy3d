@@ -777,8 +777,8 @@ static void iterate_u (Ctx *s, Vec U, Vec dU)
 
   /* Establish aliases to the subsections of the long Vec U and dU: */
   local Vec u[m], du[m];
-  bgy3d_vec_aliases_create1 (U, m, u);
-  bgy3d_vec_aliases_create1 (dU, m, du);
+  vec_aliases_create1 (U, m, u);
+  vec_aliases_create1 (dU, m, du);
 
   /* Iterate u[] -> du[]: */
   iterate (s->BHD,              /*  1 in */
@@ -802,8 +802,8 @@ static void iterate_u (Ctx *s, Vec U, Vec dU)
     course. The actuall data is owned by Vec U and Vec dU. From now on
     one may access U and dU directly again.
   */
-  bgy3d_vec_aliases_destroy1 (U, m, u);
-  bgy3d_vec_aliases_destroy1 (dU, m, du);
+  vec_aliases_destroy1 (U, m, u);
+  vec_aliases_destroy1 (dU, m, du);
 }
 
 
@@ -812,7 +812,7 @@ void bgy3d_restart_destroy (Restart *restart)
   /* Restart info  is just a (long)  Vec that happens to  fit into (or
      *rather is*) a pointer: */
   local Vec U = (Vec) restart;
-  bgy3d_vec_pack_destroy1 (&U);
+  vec_pack_destroy1 (&U);
 }
 
 
@@ -915,7 +915,7 @@ static void solute_solve (State *BHD,
     the long Vec and m shorter  Vecs aliased to the subsections of the
     longer one.
   */
-  local Vec U = bgy3d_vec_pack_create1 (BHD->da, m); /* long Vec */
+  local Vec U = vec_pack_create1 (BHD->da, m); /* long Vec */
 
   for (real damp = damp_start; damp <= 1.0; damp += 0.1)
     {
@@ -974,7 +974,7 @@ static void solute_solve (State *BHD,
       else
         {
           local Vec u[m];       /* aliases to subsections */
-          bgy3d_vec_aliases_create1 (U, m, u);
+          vec_aliases_create1 (U, m, u);
 
           if (bgy3d_getopt_test ("--load-guess"))
             bgy3d_vec_read1 ("u%d.bin", m, u);
@@ -988,7 +988,7 @@ static void solute_solve (State *BHD,
                   VecScale (u[i], - ((eps - 1) / eps) * solvent[i].charge);
                 }
             }
-          bgy3d_vec_aliases_destroy1 (U, m, u);
+          vec_aliases_destroy1 (U, m, u);
         }
 
       {
@@ -1037,11 +1037,11 @@ static void solute_solve (State *BHD,
       if (bgy3d_getopt_test ("--save-guess"))
         {
           local Vec u[m];       /* aliases to subsections */
-          bgy3d_vec_aliases_create1 (U, m, u);
+          vec_aliases_create1 (U, m, u);
 
           bgy3d_vec_save1 ("u%d.bin", m, u);
 
-          bgy3d_vec_aliases_destroy1 (U, m, u);
+          vec_aliases_destroy1 (U, m, u);
         }
     } /* for (damp = ... ) */
 
@@ -1072,7 +1072,7 @@ static void solute_solve (State *BHD,
 
   /* Clean up and exit ... */
   if (U)
-    bgy3d_vec_pack_destroy1 (&U); /* not bgy3d_vec_destroy()! */
+    vec_pack_destroy1 (&U); /* not bgy3d_vec_destroy()! */
 
   bgy3d_vec_destroy1 (m, u0);
   bgy3d_vec_destroy1 (m, g_fft);
