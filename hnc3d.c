@@ -3,6 +3,116 @@
 /*  $Id: hnc3d.c,v 1.13 2006-12-14 17:35:38 jager Exp $ */
 /*==========================================================*/
 
+/*
+  For simple liquids the matrix OZ equation reads
+
+    h = c * [1 + ρ h]
+
+  where the expression in the  square brackets is susceptibility χ = 1
+  +  ρh of  the mixture.   The matrix  ρ is  diagonal.  Only  when the
+  density of all sites is the same the equation simplifies to the more
+  recognizable form
+
+    h = c + ρ c * h.
+
+  However, consider a solute/solvent  mixture in the limit of infinite
+  dilution where the  density of the solute is  vanishingly small. The
+  corresponding blocks of the matrix equation read:
+
+    h   = c   [1 + ρ  h  ] + c   ρ  h                              (1)
+     vv    vv       v  vv     vu  u  uv
+
+  The second  term in  Eq. (1)  vanishes and the  OZ equation  for the
+  solvent   structure  becomes   independent  of   the   solute.   The
+  solute-solute  correlations are,  of course,  affected by  the dense
+  medium even in the infinite dilution limit:
+
+    h   = c   [1 + ρ  h  ] + c   ρ  h                              (2)
+     uu    uu       u  uu     uv  v  vu
+
+  Now the remaining two equations
+
+    h   = c   [1 + ρ  h  ] + c   ρ  h                              (3)
+     uv    uv       v  vv     uu  u  uv
+
+  and
+
+    h   = c   [1 + ρ  h  ] + c   ρ  h                              (4)
+     vu    vu       u  uu     vv  v  vu
+
+  though necessarily  redundant seem to differ. By  removing the terms
+  proportional  to  the solute  density  one  gets  two different  but
+  equivalent relations:
+
+    h   = c   + c   ρ  h                                           (5)
+     uv    uv    uv  v  vv
+
+  and
+
+    h   = c   + c   ρ  h                                           (6)
+     vu    vu    vv  v  vu
+
+  For  practical application  these two  equations  may be  used as  a
+  relation between the  solute-solvent indirect correlation t =  h - c
+  and a another solute-solvent property as a complement to the closure
+  relation.  Both equation use the solvent structure as a parameter:
+
+    t   = c   ρ  h                                                 (7)
+     uv    uv  v  vv
+
+  or
+
+    t   = c   ρ  h                                                 (8)
+     vu    vv  v  vu
+
+  In  the first  case the  structure of  the pure  solvent  (or rather
+  infinitely  diluted mixture) is  represented by  the solvent-solvent
+  total  correlation  h,  whereas  in  the  second  case  the  solvent
+  structure is  represented by the  solvent-solvent direct correlation
+  c. The second  of these two forms, Eq.  (8), was originally proposed
+  for  use  in 3d  HNC  equations  [1].  However other  (more  recent)
+  literature  appears  to prefer  to  start  with  a formulation  that
+  resembles more  Eq.  (7) e.g.  Ref. [2].   This alternative approach
+  assumes that the structure of the pure solvent is represented by the
+  solvent  susceptibility χ  that  mediates the  relation between  the
+  total and direct solute-solvent correlations:
+
+    h   = c   χ
+     uv    uv  vv
+
+  with
+
+    χ   = 1 + ρ  h
+     uv        v  vv
+
+  which is equivalent  to Eq. (7).
+
+  The discussion  above deals  with a special  case of a  more general
+  molecular RISM equation
+
+    h   =  ω  * c   * [ω + ρ  h  ]
+     uv     u    uv     v   v  vv
+
+  Where  again the  term is  square brackets  is the  property  of the
+  molecular solvent fixed by  the assumption of the infinite dilution,
+  and is a generalization  of the solvent susceptibility for molecular
+  solvents:
+
+    χ   =  ω  + ρ  h
+     vv     v    v  vv
+
+  [1] Numerical solution of the hypernetted chain equation for a
+      solute of arbitrary geometry in three dimensions, Dmitrii Beglov
+      and Benoît Roux , J.  Chem.  Phys.  103, 360 (1995);
+      http://dx.doi.org/10.1063/1.469602
+
+  [2] Three-Dimensional Molecular Theory of Solvation Coupled with
+      Molecular Dynamics in Amber, Tyler Luchko, Sergey Gusarov,
+      Daniel R. Roe, Carlos Simmerling, David A. Case , Jack Tuszynski
+      and Andriy Kovalenko, J. Chem. Theory Comput., 2010, 6 (3), pp
+      607–624 http://dx.doi.org/10.1021/ct900460m
+*/
+
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
