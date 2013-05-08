@@ -3,18 +3,6 @@
 /* FIXME: any better way? */
 #include <complex.h>
 
-void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m]);
-void bgy3d_vec_aliases_destroy1 (Vec X, int m, Vec x[m]);
-
-void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m]);
-void bgy3d_vec_aliases_destroy2 (Vec X, int m, Vec x[m][m]);
-
-Vec bgy3d_vec_pack_create1 (const DA da, int m);
-void bgy3d_vec_pack_destroy1 (Vec *X);
-
-Vec bgy3d_vec_pack_create2 (const DA da, int m);
-void bgy3d_vec_pack_destroy2 (Vec *X);
-
 real bgy3d_vec_mix (Vec dg, Vec dg_new, real a, Vec work);
 
 void bgy3d_vec_save (const char file[], const Vec vec);
@@ -462,6 +450,138 @@ static inline real vec_hole (Vec g)
 {
   /* FIXME: loss of precision possible here: */
   return vec_size (g) - vec_sum (g);
+}
+
+
+static inline
+void bgy3d_vec_aliases_create1 (Vec X, int m, Vec x[m])
+{
+  /*
+    The length of Vec X should be divisible by m.  Though in principle
+    any Vec  X satisfying this should  be accepted, this  code is only
+    used for Vecs created by bgy3d_vec_pack_create1(), see below:
+  */
+  const int mn = vec_local_size (X);
+  const int n = mn / m;
+  assert (m * n == mn);
+
+  /*
+    This  buf has  enough space  for m  Vecs.  Note  that there  is no
+    corresponding vec_restore_array() call in  this scope and the lack
+    of the "local"  attribute. The contents of the  long Vec X remains
+    "checked  out"  for  the  whole  lifetime of  the  aliases.   This
+    lifetime ends upon call to bgy3d_vec_aliases_destroy1(). Only then
+    (a copy of) the pointer will be "returned".
+  */
+  real *buf = vec_get_array (X);
+
+  /* Create m Vecs with the storage from buf: */
+  for (int i = 0; i < m; i++)
+    x[i] = vec_from_array (n, buf + i * n);
+}
+
+
+static inline
+void bgy3d_vec_aliases_create2 (Vec X, int m, Vec x[m][m])
+{
+  /* The length of Vec X should be divisible by m * (m + 1) / 2!*/
+  const int nm2 = vec_local_size (X);
+  const int m2 = m * (m + 1) / 2;
+  const int n = nm2 / m2;
+  assert (n * m2 == nm2);
+
+  /* Enough   space    for   m2    Vecs.   See   also    comments   in
+     bgy3d_vec_aliases_create1(): */
+  real *buf = vec_get_array (X);
+
+  /* Create m2 Vecs with the storage from buf: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        x[i][j] = x[j][i] = vec_from_array (n, buf);
+        buf += n;
+      }
+}
+
+
+/*
+  This and the next function  should not attempt to free() the storage
+  of  the aliases  x[].  It  is owned  by the  longer Vec  X.   We are
+  relying on the magic of VecDestroy()  that alone knows how a Vec was
+  created --- it  should not free() the storage if  Vec was created by
+  vec_from_array().
+*/
+static inline
+void bgy3d_vec_aliases_destroy1 (Vec X, int m, Vec x[m])
+{
+  bgy3d_vec_destroy1 (m, x);    /* should not free() */
+
+  /*
+    The epoch  of accessing the  content of Vec  X via the  aliases is
+    over. Signal to PETSC that the  content of the Vec X may have been
+    changed,  so  that  it  invalidates eventually  cached  derivative
+    values such as the vector norm. It is assumed that vec_get_array()
+    is idempotent (returns the same value on succesive calls).
+  */
+  local real *X_ = vec_get_array (X);
+  vec_restore_array (X, &X_);
+}
+
+
+static inline
+void bgy3d_vec_aliases_destroy2 (Vec X, int m, Vec x[m][m])
+{
+  bgy3d_vec_destroy2 (m, x);    /* should not free() */
+
+  /* See comments in bgy3d_vec_aliases_destroy1(): */
+  local real *X_ = vec_get_array (X);
+  vec_restore_array (X, &X_);
+}
+
+
+/*
+  Create   a  vector   m-times  longer   than  the   array  descriptor
+  specification. See  bgy3d_vec_aliases_create*() for what  may happen
+  to such Vec later.
+*/
+static inline
+Vec bgy3d_vec_pack_create1 (const DA da, int m)
+{
+  /* Allocate space for m Vecs: */
+  const int mn = m * da_local_size (da);
+
+  return vec_from_array (mn, malloc (mn * sizeof (real)));
+}
+
+
+/* Nearly the same as bgy3d_vec_pack_create1(): */
+static inline
+Vec bgy3d_vec_pack_create2 (const DA da, int m)
+{
+  return bgy3d_vec_pack_create1 (da, m * (m + 1) / 2);
+}
+
+
+/* VecDestroy() will  not free the storage  if it was  provided by the
+   user. We do it ourselves: */
+static inline
+void bgy3d_vec_pack_destroy1 (Vec *X)
+{
+  /* FIXME: should we also vec_restore_array()? */
+  free (vec_get_array (*X));    /* free() the whole */
+
+  /* take the address of vector as input since Petsc 3.2 */
+  VecDestroy (X);
+  /* FIXME: only needed before Petsc 3.2 */
+  *X = NULL;
+}
+
+
+/* Same as bgy3d_vec_pack_destroy1() */
+static inline
+void bgy3d_vec_pack_destroy2 (Vec *X)
+{
+  bgy3d_vec_pack_destroy1 (X);
 }
 
 
