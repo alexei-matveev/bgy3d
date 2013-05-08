@@ -67,9 +67,8 @@ static void divmod (const int n, const int N, int *j, int *i)
 
   Vec v is saved in the returned iterator context by reference, not by
   copying.  User  code should  not change the  contents of  the vector
-  while  iterating over  it.   It may  though bgy3d_vec_destroy()  the
-  vector right  after calling this  function as we will  increment the
-  refcount.
+  while  iterating over it.   It may  though vec_destroy()  the vector
+  right after calling this function as we will increment the refcount.
 */
 Context* bgy3d_pot_create (const State *BHD, Vec v)
 {
@@ -87,7 +86,7 @@ Context* bgy3d_pot_create (const State *BHD, Vec v)
 
   /*
     Do not copy the input vector, save a reference instead, but also
-    Uincrement the refcount. We will have to bgy3d_vec_destroy() it
+    Uincrement the refcount. We will have to vec_destroy() it
     too:
   */
   s->v = vec_ref (v);
@@ -122,7 +121,7 @@ void bgy3d_pot_interp (Context *s, int n, /* const */ real x[n][3], real v[n])
   /* Prepare Fourier coefficients, if not has been already done: */
   if (s->v_fft == NULL)
     {
-      s->v_fft = bgy3d_vec_create (s->dc); /* complex */
+      s->v_fft = vec_create (s->dc); /* complex */
       MatMult (s->fft_mat, s->v, s->v_fft);
     }
 
@@ -202,11 +201,11 @@ void bgy3d_pot_destroy (Context *s)
   DMDestroy (&s->da);
   DMDestroy (&s->dc);
   MatDestroy (&s->fft_mat);
-  bgy3d_vec_destroy (&s->v);
+  vec_destroy (&s->v);
 
   /* Only if interpolation was really used: */
   if (s->v_fft)
-    bgy3d_vec_destroy (&s->v_fft);
+    vec_destroy (&s->v_fft);
 
   /* free the whole context */
   free (s);

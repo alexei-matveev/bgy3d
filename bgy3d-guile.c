@@ -281,7 +281,7 @@ static SCM guile_state_make (SCM alist)
 static SCM guile_vec_make (SCM state)
 {
   State *BHD = to_state (state);
-  Vec vec = bgy3d_vec_create (BHD->da);
+  Vec vec = vec_create (BHD->da);
   return from_vec (vec);
 }
 
@@ -289,7 +289,7 @@ static SCM guile_vec_make (SCM state)
 static SCM guile_vec_make_complex (SCM state)
 {
   State *BHD = to_state (state);
-  Vec vec = bgy3d_vec_create (BHD->dc);
+  Vec vec = vec_create (BHD->dc);
   return from_vec (vec);
 }
 
@@ -315,7 +315,7 @@ static size_t guile_vec_free (SCM vec)
 {
   Vec c_vec = to_vec (vec);
   if (c_vec)
-    bgy3d_vec_destroy (&c_vec);
+    vec_destroy (&c_vec);
   return 0;
 }
 
@@ -470,7 +470,7 @@ static SCM guile_vec_set_random (SCM x)
 static SCM guile_vec_map1 (SCM f, SCM x)
 {
   Vec x_ = to_vec (x);
-  Vec y_ = bgy3d_vec_duplicate (x_);
+  Vec y_ = vec_duplicate (x_);
 
   double f_ (double x)
   {
@@ -486,7 +486,7 @@ static SCM guile_vec_map2 (SCM f, SCM x, SCM y)
 {
   Vec x_ = to_vec (x);
   Vec y_ = to_vec (y);
-  Vec z_ = bgy3d_vec_duplicate (x_);
+  Vec z_ = vec_duplicate (x_);
 
   double f_ (double x, double y)
   {
@@ -744,7 +744,7 @@ static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
   free (solvent_name);
   free (solvent_sites);
 
-  bgy3d_vec_destroy2 (m, g);
+  vec_destroy2 (m, g);
 
   return settings;
 }

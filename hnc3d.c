@@ -6,7 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
-#include "bgy3d-vec.h"          /* bgy3d_vec_create() */
+#include "bgy3d-vec.h"          /* vec_create() */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-force.h"        /* bgy3d_pair_potential() */
 #include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
@@ -521,21 +521,21 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     iteration.
   */
   Vec y[m][m];                  /* FIXME: not deallocated */
-  bgy3d_vec_create2 (HD->da, m, y);
+  vec_create2 (HD->da, m, y);
 
   local Vec t_fft[m][m];
-  bgy3d_vec_create2 (HD->dc, m, t_fft); /* complex */
+  vec_create2 (HD->dc, m, t_fft); /* complex */
 
   local Vec c_fft[m][m];
-  bgy3d_vec_create2 (HD->dc, m, c_fft); /* complex */
+  vec_create2 (HD->dc, m, c_fft); /* complex */
 
   /* Solvent-solvent interaction  is a  sum of two  terms, short-range
      and long-range: */
   local Vec v_short[m][m];      /* real */
-  bgy3d_vec_create2 (HD->da, m, v_short);
+  vec_create2 (HD->da, m, v_short);
 
   local Vec v_long_fft[m][m];   /* complex */
-  bgy3d_vec_create2 (HD->dc, m, v_long_fft);
+  vec_create2 (HD->dc, m, v_long_fft);
 
   /* Get solvent-solvent site-site interactions: */
   for (int i = 0; i < m; i++)
@@ -620,23 +620,23 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       }
 
   /* free stuff */
-  /* Delegated to the caller: bgy3d_vec_destroy (&t); */
-  bgy3d_vec_destroy2 (m, t_fft);
-  bgy3d_vec_destroy2 (m, c_fft);
-  bgy3d_vec_destroy2 (m, v_short);
-  bgy3d_vec_destroy2 (m, v_long_fft);
+  /* Delegated to the caller: vec_destroy (&t); */
+  vec_destroy2 (m, t_fft);
+  vec_destroy2 (m, c_fft);
+  vec_destroy2 (m, v_short);
+  vec_destroy2 (m, v_long_fft);
 
   /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      bgy3d_vec_destroy (&w_fft[i][j]);
+      vec_destroy (&w_fft[i][j]);
 
   vec_aliases_destroy2 (X, m, x);
   vec_pack_destroy2 (&X);
 
   bgy3d_state_destroy (HD);
 
-  /* Dont forget to bgy3d_vec_destroy2() it! */
+  /* Dont forget to vec_destroy2() it! */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       g[i][j] = g[j][i] = y[i][j];
@@ -673,7 +673,7 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   hnc3d_solvent_solve (PD, m, solvent, g);
 
   assert (m == 1);
-  return g[0][0];               /* bgy3d_vec_destroy (&) it! */
+  return g[0][0];               /* vec_destroy (&) it! */
 }
 
 
@@ -874,7 +874,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
 {
   local Vec c[m][m];
-  bgy3d_vec_create2 (HD->da, m, c);
+  vec_create2 (HD->da, m, c);
 
   /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
@@ -894,7 +894,7 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
         */
         bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
       }
-  bgy3d_vec_destroy2 (m, c);
+  vec_destroy2 (m, c);
 }
 
 
@@ -937,20 +937,20 @@ void hnc3d_solute_solve (const ProblemData *PD,
     iteration.
   */
   Vec y[m];                     /* FIXME: not deallocated */
-  bgy3d_vec_create1 (HD->da, m, y);
+  vec_create1 (HD->da, m, y);
 
   local Vec h_fft[m];
-  bgy3d_vec_create1 (HD->dc, m, h_fft); /* complex */
+  vec_create1 (HD->dc, m, h_fft); /* complex */
 
   local Vec t_fft[m];
-  bgy3d_vec_create1 (HD->dc, m, t_fft); /* complex */
+  vec_create1 (HD->dc, m, t_fft); /* complex */
 
   local Vec v[m];
-  bgy3d_vec_create1 (HD->da, m, v); /* solute-solvent interaction */
+  vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
   /* This should be the only pair quantity: */
   local Vec c_fft[m][m];
-  bgy3d_vec_create2 (HD->dc, m, c_fft);        /* complex */
+  vec_create2 (HD->dc, m, c_fft);        /* complex */
 
   /*
     Get  the solvent-solvent direct  correlation function.   FIXME: we
@@ -1032,16 +1032,16 @@ void hnc3d_solute_solve (const ProblemData *PD,
     VecShift (y[i], 1.0);
 
   /* free stuff */
-  /* Delegated to the caller: bgy3d_vec_destroy (&h) */
-  bgy3d_vec_destroy1 (m, h_fft);
-  bgy3d_vec_destroy1 (m, t_fft);
-  bgy3d_vec_destroy1 (m, v);
+  /* Delegated to the caller: vec_destroy (&h) */
+  vec_destroy1 (m, h_fft);
+  vec_destroy1 (m, t_fft);
+  vec_destroy1 (m, v);
 
   vec_aliases_destroy1 (X, m, x);
   vec_pack_destroy1 (&X);
 
   /* This should be the only pair quantity: */
-  bgy3d_vec_destroy2 (m, c_fft);
+  vec_destroy2 (m, c_fft);
 
   bgy3d_state_destroy (HD);
 

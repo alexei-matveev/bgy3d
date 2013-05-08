@@ -11,7 +11,7 @@
 #endif
 
 #include "bgy3d.h"
-#include "bgy3d-vec.h"          /* bgy3d_vec_destroy() */
+#include "bgy3d-vec.h"          /* vec_destroy() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
 #include <complex.h>            /* after fftw.h */
@@ -102,11 +102,11 @@ double bgy3d_fft_test (int m, int n, int p)
 
   bgy3d_fft_mat_create (N, &A, &da, &dc);
 
-  Vec x = bgy3d_vec_create (da); /* real */
-  Vec z = bgy3d_vec_create (da); /* real */
+  Vec x = vec_create (da); /* real */
+  Vec z = vec_create (da); /* real */
 
   /* This one is complex, note use of another array descriptor: */
-  Vec y = bgy3d_vec_create (dc); /* complex */
+  Vec y = vec_create (dc); /* complex */
 
   /*
     To  test  if  reference  counting  works, let  us  destroy  array
@@ -137,9 +137,9 @@ double bgy3d_fft_test (int m, int n, int p)
   double norm;
   VecNorm (z, NORM_INFINITY, &norm);
 
-  bgy3d_vec_destroy (&x);
-  bgy3d_vec_destroy (&y);
-  bgy3d_vec_destroy (&z);
+  vec_destroy (&x);
+  vec_destroy (&y);
+  vec_destroy (&z);
 
   /*
     Also   destroys   array   descriptors   for  real   and   complex

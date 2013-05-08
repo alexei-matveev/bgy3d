@@ -4,7 +4,7 @@
 /*==========================================================*/
 
 #include "bgy3d.h"
-#include "bgy3d-vec.h"          /* bgy3d_vec_duplicate() */
+#include "bgy3d-vec.h"          /* vec_duplicate() */
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_string() */
 #include "bgy3d-snes.h"         /* VectorFunc, ArrayFunc */
 
@@ -44,7 +44,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   SNESCreate (PETSC_COMM_WORLD, &snes);
 
   /* SNES needs a place to store residual: */
-  local Vec r = bgy3d_vec_duplicate (x);
+  local Vec r = vec_duplicate (x);
 
   /* SNES form-functions should obey this interface: */
   PetscErrorCode F1 (SNES snes, Vec x, Vec r, void *ctx)
@@ -166,9 +166,9 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   /*
     It looks like SNESGetSolution() is only of any value for callbacks
     that need  to extract intermediate solution from  the SNES object.
-    Here it is fully  redundant.  Do not bgy3d_vec_destroy (&y), check
-    this assert out. Appears to hold even when SNES does not converge,
-    say due to iteration limit:
+    Here it is  fully redundant.  Do not vec_destroy  (&y), check this
+    assert out. Appears to hold  even when SNES does not converge, say
+    due to iteration limit:
   */
   {
     Vec y;
@@ -176,7 +176,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
     assert (x == y);
   }
 
-  bgy3d_vec_destroy (&r);
+  vec_destroy (&r);
 
   SNESDestroy (&snes);
 }
@@ -193,7 +193,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   const real norm_tol = PD->norm_tol;
 
   /* A place to store residual: */
-  local Vec dx = bgy3d_vec_duplicate (x);
+  local Vec dx = vec_duplicate (x);
 
   /* Find an x such that dx as returned by F (ctx, x, dx) is zero: */
   for (int k = 0; k < max_iter; k++)
@@ -212,7 +212,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       if (norm < norm_tol)
         break;
     }
-  bgy3d_vec_destroy (&dx);
+  vec_destroy (&dx);
 }
 
 
@@ -242,7 +242,7 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   const real norm_tol = PD->norm_tol;
 
   /* A place to store residual: */
-  local Vec dx = bgy3d_vec_duplicate (x);
+  local Vec dx = vec_duplicate (x);
 
   /* Not sure if 0.0 as inital value is right. */
   real norm_old = 0.0;
@@ -328,7 +328,7 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
           break;
         }
     } /* for (iter = ... ) */
-  bgy3d_vec_destroy (&dx);
+  vec_destroy (&dx);
 }
 
 
@@ -362,5 +362,5 @@ void rism_snes (void *ctx, ArrayFunc f, int n, real x_[n])
   /* Petsc does real work: */
   bgy3d_snes_default (&pd, ctx, F, x);
 
-  bgy3d_vec_destroy (&x);       /*  should  not free() */
+  vec_destroy (&x);       /*  should  not free() */
 }

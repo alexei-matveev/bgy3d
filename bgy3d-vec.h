@@ -32,7 +32,7 @@ void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
 
 
 static inline
-Vec bgy3d_vec_duplicate (const Vec x)
+Vec vec_duplicate (const Vec x)
 {
   Vec y;
   VecDuplicate (x, &y);
@@ -41,7 +41,7 @@ Vec bgy3d_vec_duplicate (const Vec x)
 
 
 static inline
-Vec bgy3d_vec_create (const DA da)
+Vec vec_create (const DA da)
 {
   Vec x;
   DMCreateGlobalVector (da, &x);
@@ -52,7 +52,7 @@ Vec bgy3d_vec_create (const DA da)
 /* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
    they take the pointer to a Petsc object and nullify it: */
 static inline
-void bgy3d_vec_destroy (Vec *g)
+void vec_destroy (Vec *g)
 {
   /* Since Petsc 3.2, VecDestroy() also zeroed out the buffer and
    * takes the address instead of vector as input argument */
@@ -63,39 +63,39 @@ void bgy3d_vec_destroy (Vec *g)
 
 
 static inline
-void bgy3d_vec_create1 (const DA da, int m, Vec g[m])
+void vec_create1 (const DA da, int m, Vec g[m])
 {
   for (int i = 0; i < m; i++)
-    g[i] = bgy3d_vec_create (da);
+    g[i] = vec_create (da);
 }
 
 
 static inline
-void bgy3d_vec_destroy1 (int m, Vec g[m])
+void vec_destroy1 (int m, Vec g[m])
 {
   for (int i = 0; i < m; i++)
-    bgy3d_vec_destroy (&g[i]);
+    vec_destroy (&g[i]);
 }
 
 
 /* Allocates g[m][m] with g[j][i] being aliased to g[i][j]: */
 static inline
-void bgy3d_vec_create2 (const DA da, int m, Vec g[m][m])
+void vec_create2 (const DA da, int m, Vec g[m][m])
 {
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      g[j][i] = g[i][j] = bgy3d_vec_create (da);
+      g[j][i] = g[i][j] = vec_create (da);
 }
 
 
 static inline
-void bgy3d_vec_destroy2 (int m, Vec g[m][m])
+void vec_destroy2 (int m, Vec g[m][m])
 {
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
         assert (g[i][j] == g[j][i]);
-        bgy3d_vec_destroy (&g[i][j]);
+        vec_destroy (&g[i][j]);
         g[j][i] = NULL;
       }
 }
@@ -459,7 +459,7 @@ void vec_aliases_create1 (Vec X, int m, Vec x[m])
   /*
     The length of Vec X should be divisible by m.  Though in principle
     any Vec  X satisfying this should  be accepted, this  code is only
-    used for Vecs created by bgy3d_vec_pack_create1(), see below:
+    used for Vecs created by vec_pack_create1(), see below:
   */
   const int mn = vec_local_size (X);
   const int n = mn / m;
@@ -514,7 +514,7 @@ void vec_aliases_create2 (Vec X, int m, Vec x[m][m])
 static inline
 void vec_aliases_destroy1 (Vec X, int m, Vec x[m])
 {
-  bgy3d_vec_destroy1 (m, x);    /* should not free() */
+  vec_destroy1 (m, x);    /* should not free() */
 
   /*
     The epoch  of accessing the  content of Vec  X via the  aliases is
@@ -531,7 +531,7 @@ void vec_aliases_destroy1 (Vec X, int m, Vec x[m])
 static inline
 void vec_aliases_destroy2 (Vec X, int m, Vec x[m][m])
 {
-  bgy3d_vec_destroy2 (m, x);    /* should not free() */
+  vec_destroy2 (m, x);    /* should not free() */
 
   /* See comments in vec_aliases_destroy1(): */
   local real *X_ = vec_get_array (X);

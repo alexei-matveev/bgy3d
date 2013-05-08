@@ -350,17 +350,17 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 {
   /* Real  work  vectors,  re-used   for  all  m(m+1)/2  solvent  site
      pairs. */
-  local Vec u2 = bgy3d_vec_create (BHD->da);
+  local Vec u2 = vec_create (BHD->da);
   local Vec fs[3], fl[3];
-  bgy3d_vec_create1 (BHD->da, 3, fs); /* 3-vector */
-  bgy3d_vec_create1 (BHD->da, 3, fl); /* 3-vector */
+  vec_create1 (BHD->da, 3, fs); /* 3-vector */
+  vec_create1 (BHD->da, 3, fl); /* 3-vector */
 
   /* Complex work vectors, re-used for all pairs: */
-  local Vec kl_fft = bgy3d_vec_create (BHD->dc);
-  local Vec u2_fft = bgy3d_vec_create (BHD->dc);
+  local Vec kl_fft = vec_create (BHD->dc);
+  local Vec u2_fft = vec_create (BHD->dc);
   local Vec fs_g2_fft[3], fl_g2_fft[3];
-  bgy3d_vec_create1 (BHD->dc, 3, fs_g2_fft); /* 3-vector */
-  bgy3d_vec_create1 (BHD->dc, 3, fl_g2_fft); /* 3-vector */
+  vec_create1 (BHD->dc, 3, fs_g2_fft); /* 3-vector */
+  vec_create1 (BHD->dc, 3, fl_g2_fft); /* 3-vector */
 
   /* Over all pairs: */
   for (int i = 0; i < m; i++)
@@ -389,13 +389,13 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
       }
 
   /* Clean up and exit: */
-  bgy3d_vec_destroy (&u2);
-  bgy3d_vec_destroy (&u2_fft);
-  bgy3d_vec_destroy (&kl_fft);
-  bgy3d_vec_destroy1 (3, fs);
-  bgy3d_vec_destroy1 (3, fl);
-  bgy3d_vec_destroy1 (3, fs_g2_fft);
-  bgy3d_vec_destroy1 (3, fl_g2_fft);
+  vec_destroy (&u2);
+  vec_destroy (&u2_fft);
+  vec_destroy (&kl_fft);
+  vec_destroy1 (3, fs);
+  vec_destroy1 (3, fl);
+  vec_destroy1 (3, fs_g2_fft);
+  vec_destroy1 (3, fl_g2_fft);
 }
 
 /* Dipole of the cores of a single specie: */
@@ -482,7 +482,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    electrostatic field and a surface charge on that metallic cage:
   */
   {
-    local Vec x = bgy3d_vec_create (BHD->da);
+    local Vec x = vec_create (BHD->da);
 
     /*
       Correction is  a linear function  of potential on  the boundary.
@@ -495,7 +495,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
     /* Subtract it, making ve vanish at the boundary: */
     VecAXPY (ve, -1.0, x);
 
-    bgy3d_vec_destroy (&x);
+    vec_destroy (&x);
   }
 
   bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
@@ -529,10 +529,10 @@ static Context* info (const State *BHD,
                       Vec uc, Vec uc_rho) /* in */
 {
   /* Solvent electrostatic potential field: */
-  local Vec ve = bgy3d_vec_create (BHD->da);
+  local Vec ve = vec_create (BHD->da);
 
   /* Keep solvent charge density for integration: */
-  local Vec ve_rho = bgy3d_vec_create (BHD->da);
+  local Vec ve_rho = vec_create (BHD->da);
 
   /* This fills Vec ve with solvent electrostatic potential: */
   bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
@@ -617,8 +617,8 @@ static Context* info (const State *BHD,
   PetscPrintf (PETSC_COMM_WORLD,
                "     diff = % lf\n", val3 - val2);
 
-  bgy3d_vec_destroy (&ve);            /* yes, we do! */
-  bgy3d_vec_destroy (&ve_rho);
+  vec_destroy (&ve);            /* yes, we do! */
+  vec_destroy (&ve_rho);
 
   return v;
 }
@@ -869,7 +869,7 @@ static void solute_solve (State *BHD,
     in bgy3d-poisson.c:
   */
   local Vec x_lapl[m];          /* real */
-  bgy3d_vec_create1 (BHD->da, m, x_lapl);
+  vec_create1 (BHD->da, m, x_lapl);
   for (int i = 0; i < m; i++)
     VecSet (x_lapl[i], 0.0);
 #endif
@@ -885,22 +885,22 @@ static void solute_solve (State *BHD,
     loop.
   */
   local Vec g_fft[m];
-  bgy3d_vec_create1 (BHD->dc, m, g_fft); /* complex */
+  vec_create1 (BHD->dc, m, g_fft); /* complex */
 
   /*
     There is no  point to transform each contribution  computed in the
     momentum space back, accumulate them on the k-grid in this complex
     Vec:
   */
-  local Vec du_acc_fft = bgy3d_vec_create (BHD->dc); /* complex */
+  local Vec du_acc_fft = vec_create (BHD->dc); /* complex */
 
-  local Vec work = bgy3d_vec_create (BHD->da);
+  local Vec work = vec_create (BHD->da);
 
   /* Coulomb long, common for all sites: */
-  local Vec uc = bgy3d_vec_create (BHD->da);
+  local Vec uc = vec_create (BHD->da);
 
   /* Electron density for integration: */
-  local Vec uc_rho = bgy3d_vec_create (BHD->da);
+  local Vec uc_rho = vec_create (BHD->da);
 
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
@@ -908,7 +908,7 @@ static void solute_solve (State *BHD,
     filled with data yet, I assume.
   */
   local Vec u0[m];                    /* real */
-  bgy3d_vec_create1 (BHD->da, m, u0); /* real */
+  vec_create1 (BHD->da, m, u0); /* real */
 
   /*
     For primary  variable there are two  ways to access  the data: via
@@ -1072,16 +1072,16 @@ static void solute_solve (State *BHD,
 
   /* Clean up and exit ... */
   if (U)
-    vec_pack_destroy1 (&U); /* not bgy3d_vec_destroy()! */
+    vec_pack_destroy1 (&U); /* not vec_destroy()! */
 
-  bgy3d_vec_destroy1 (m, u0);
-  bgy3d_vec_destroy1 (m, g_fft);
-  bgy3d_vec_destroy1 (m, x_lapl);
+  vec_destroy1 (m, u0);
+  vec_destroy1 (m, g_fft);
+  vec_destroy1 (m, x_lapl);
 
-  bgy3d_vec_destroy (&du_acc_fft);
-  bgy3d_vec_destroy (&work);
-  bgy3d_vec_destroy (&uc);
-  bgy3d_vec_destroy (&uc_rho);
+  vec_destroy (&du_acc_fft);
+  vec_destroy (&work);
+  vec_destroy (&uc);
+  vec_destroy (&uc_rho);
 }
 
 
@@ -1112,7 +1112,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   /* Pair quantities  here, use symmetry wrt  (i <-> j)  to save space
      and work: */
   local Vec g2[m][m];               /* solvent-solvent pair distributions */
-  bgy3d_vec_create2 (BHD->da, m, g2);
+  vec_create2 (BHD->da, m, g2);
 
   /*
     Get g2[][] e.g. from a  previous pure solvent calculation. For CS2
@@ -1138,7 +1138,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
     kernel_fft[j][i].
   */
   local Vec kernel_fft[m][m];
-  bgy3d_vec_create2 (BHD->dc, m, kernel_fft); /* complex */
+  vec_create2 (BHD->dc, m, kernel_fft); /* complex */
 
   /*
     Returns div (F * g2).  Note the calculation of F is divided due to
@@ -1151,7 +1151,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   /* Here the  storage for  the output is  allocated, the  caller will
      have to destroy them: */
-  bgy3d_vec_create1 (BHD->da, m, g); /* real */
+  vec_create1 (BHD->da, m, g); /* real */
 
   solute_solve (BHD,
                 m, solvent, kernel_fft, omega_fft, /* in */
@@ -1160,15 +1160,15 @@ void bgy3d_solute_solve (const ProblemData *PD,
                 restart);                          /* inout */
 
   /* Clean up and exit. Pair quantities here: */
-  bgy3d_vec_destroy2 (m, g2);
-  bgy3d_vec_destroy2 (m, kernel_fft);
+  vec_destroy2 (m, g2);
+  vec_destroy2 (m, kernel_fft);
 
   /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      bgy3d_vec_destroy (&omega_fft[i][j]);
+      vec_destroy (&omega_fft[i][j]);
 
-  /* Delegated to the caller: bgy3d_vec_destroy1 (m, g); */
+  /* Delegated to the caller: vec_destroy1 (m, g); */
 
   bgy3d_state_destroy (BHD);
 }
@@ -1214,7 +1214,7 @@ Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini)
   /* Save final distribution, use binary format: */
   bgy3d_vec_save1 ("g%d.bin", m, g);
 
-  bgy3d_vec_destroy1 (m, g);
+  vec_destroy1 (m, g);
 
   return PETSC_NULL;            /* fake, interface obligation */
 }
@@ -1248,8 +1248,8 @@ void RecomputeInitialFFTs (State *BHD,
   /* FIXME: maybe use BHD->v[3] for one of them? */
   Vec force_short[3];           /* work vectors for pair() */
   Vec force_long[3];            /* work vectors for pair() */
-  bgy3d_vec_create1 (BHD->da, 3, force_short);
-  bgy3d_vec_create1 (BHD->da, 3, force_long);
+  vec_create1 (BHD->da, 3, force_short);
+  vec_create1 (BHD->da, 3, force_long);
 
 
   /* Over all distinct solvent site pairs: */
@@ -1265,8 +1265,8 @@ void RecomputeInitialFFTs (State *BHD,
       }
 
   /* Clean up and exit: */
-  bgy3d_vec_destroy1 (3, force_short);
-  bgy3d_vec_destroy1 (3, force_long);
+  vec_destroy1 (3, force_short);
+  vec_destroy1 (3, force_long);
 }
 
 /*
@@ -1292,9 +1292,9 @@ static void Compute_H2O_interS_C (const State *BHD,
   /************************************************/
 
   /* FIXME: move allocations out of the loop: */
-  Vec kernel_fft = bgy3d_vec_create (BHD->dc);
-  Vec g_fft = bgy3d_vec_create (BHD->dc);
-  Vec dg_fft = bgy3d_vec_create (BHD->dc);
+  Vec kernel_fft = vec_create (BHD->dc);
+  Vec g_fft = vec_create (BHD->dc);
+  Vec dg_fft = vec_create (BHD->dc);
 
   /*
     FIXME:  Move   computation  of  the  kernel  out   of  the  BGY3dM
@@ -1316,9 +1316,9 @@ static void Compute_H2O_interS_C (const State *BHD,
   /* ifft(dg) */
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  bgy3d_vec_destroy (&kernel_fft);
-  bgy3d_vec_destroy (&g_fft);
-  bgy3d_vec_destroy (&dg_fft);
+  vec_destroy (&kernel_fft);
+  vec_destroy (&g_fft);
+  vec_destroy (&dg_fft);
 }
 
 /*
@@ -1431,7 +1431,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
     in bgy3d-poisson.c:
   */
   Vec x_lapl[2];                /* real */
-  bgy3d_vec_create1 (BHD->da, 2, x_lapl);
+  vec_create1 (BHD->da, 2, x_lapl);
   for (int i = 0; i < 2; i++)
     VecSet (x_lapl[i], 0.0);
 #endif
@@ -1441,30 +1441,30 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   InitializeDMMGSolver(&BHD);
 #endif
 
-  g[0] = bgy3d_vec_create (BHD.da);
-  g[1] = bgy3d_vec_create (BHD.da);
-  dgH = bgy3d_vec_create (BHD.da);
-  dgO = bgy3d_vec_create (BHD.da);
-  dg_new = bgy3d_vec_create (BHD.da);
-  dg_new2 = bgy3d_vec_create (BHD.da);
-  work = bgy3d_vec_create (BHD.da);
+  g[0] = vec_create (BHD.da);
+  g[1] = vec_create (BHD.da);
+  dgH = vec_create (BHD.da);
+  dgO = vec_create (BHD.da);
+  dg_new = vec_create (BHD.da);
+  dg_new2 = vec_create (BHD.da);
+  work = vec_create (BHD.da);
 
-  tH = bgy3d_vec_create (BHD.da);
-  tO = bgy3d_vec_create (BHD.da);
+  tH = vec_create (BHD.da);
+  tO = vec_create (BHD.da);
 
-  dg_newH = bgy3d_vec_create (BHD.da);
-  dg_newO = bgy3d_vec_create (BHD.da);
+  dg_newH = vec_create (BHD.da);
+  dg_newO = vec_create (BHD.da);
 
-  uc = bgy3d_vec_create (BHD.da); /* common for all sites */
+  uc = vec_create (BHD.da); /* common for all sites */
 
-  dg_histO = bgy3d_vec_create (BHD.da);
-  dg_histH = bgy3d_vec_create (BHD.da);
+  dg_histO = vec_create (BHD.da);
+  dg_histH = vec_create (BHD.da);
   VecSet(dg_histH, 0.0);
   VecSet(dg_histO, 0.0);
 
   Vec g0[2];
   for (int i = 0; i < 2; i++)
-    g0[i] = bgy3d_vec_create (BHD.da);
+    g0[i] = vec_create (BHD.da);
 
   /* set initial guess*/
   VecSet(dgH,0);
@@ -1690,24 +1690,24 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
       }
     }
 
-  bgy3d_vec_destroy1 (2, g);
-  bgy3d_vec_destroy1 (2, g0);
+  vec_destroy1 (2, g);
+  vec_destroy1 (2, g0);
 
-  bgy3d_vec_destroy (&dgH);
-  bgy3d_vec_destroy (&dgO);
-  bgy3d_vec_destroy (&dg_new);
-  bgy3d_vec_destroy (&dg_new2);
-  bgy3d_vec_destroy (&work);
+  vec_destroy (&dgH);
+  vec_destroy (&dgO);
+  vec_destroy (&dg_new);
+  vec_destroy (&dg_new2);
+  vec_destroy (&work);
 
-  bgy3d_vec_destroy (&tH);
-  bgy3d_vec_destroy (&tO);
+  vec_destroy (&tH);
+  vec_destroy (&tO);
 
-  bgy3d_vec_destroy (&uc);
+  vec_destroy (&uc);
 
-  bgy3d_vec_destroy (&dg_newH);
-  bgy3d_vec_destroy (&dg_newO);
-  bgy3d_vec_destroy (&dg_histH);
-  bgy3d_vec_destroy (&dg_histO);
+  vec_destroy (&dg_newH);
+  vec_destroy (&dg_newO);
+  vec_destroy (&dg_histH);
+  vec_destroy (&dg_histO);
 
   finalize_state (&BHD);
 

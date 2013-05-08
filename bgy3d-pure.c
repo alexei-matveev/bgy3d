@@ -293,7 +293,7 @@ void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
       {
-        omega_fft[j][i] = omega_fft[i][j] = bgy3d_vec_create (BHD->dc);
+        omega_fft[j][i] = omega_fft[i][j] = vec_create (BHD->dc);
         omega_intra (BHD->PD, BHD->dc, r[i][j], omega_fft[i][j]);
       }
 
@@ -791,8 +791,8 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
-          f[j][i][dim] = f[i][j][dim] = bgy3d_vec_create (BHD->da);
-          f_l[j][i][dim] = f_l[i][j][dim] = bgy3d_vec_create (BHD->da);
+          f[j][i][dim] = f[i][j][dim] = vec_create (BHD->da);
+          f_l[j][i][dim] = f_l[i][j][dim] = vec_create (BHD->da);
         }
 
   /*
@@ -803,8 +803,8 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   Vec u0[m][m];
   Vec c2[m][m];                 /* exp(- beta * LJ_repulsive(i, j) */
 
-  bgy3d_vec_create2 (BHD->da, m, u0);
-  bgy3d_vec_create2 (BHD->da, m, c2);
+  vec_create2 (BHD->da, m, u0);
+  vec_create2 (BHD->da, m, c2);
 
   /*
     Long-range Coulomb interaction for  solvent site pairs. So far the
@@ -814,11 +814,11 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   */
   Vec u2[m][m], u2_fft[m][m];
 
-  bgy3d_vec_create2 (BHD->da, m, u2);
-  bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
+  vec_create2 (BHD->da, m, u2);
+  vec_create2 (BHD->dc, m, u2_fft); /* complex */
 
   /* Allocate more memory for fft */
-  Vec gfg2_fft = bgy3d_vec_create (BHD->dc); /* complex */
+  Vec gfg2_fft = vec_create (BHD->dc); /* complex */
 
   /* end of allocation */
 
@@ -856,14 +856,14 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
   Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
-  bgy3d_vec_create2 (BHD->da, m, g);
-  bgy3d_vec_create2 (BHD->dc, m, g_fft); /* complex */
-  bgy3d_vec_create2 (BHD->da, m, du);
-  bgy3d_vec_create2 (BHD->da, m, t);
+  vec_create2 (BHD->da, m, g);
+  vec_create2 (BHD->dc, m, g_fft); /* complex */
+  vec_create2 (BHD->da, m, du);
+  vec_create2 (BHD->da, m, t);
 
-  Vec du_new = bgy3d_vec_create (BHD->da);
-  Vec du_new2 = bgy3d_vec_create (BHD->da);
-  Vec work = bgy3d_vec_create (BHD->da);
+  Vec du_new = vec_create (BHD->da);
+  Vec du_new2 = vec_create (BHD->da);
+  Vec work = vec_create (BHD->da);
 
 #ifdef L_BOUNDARY
   /*
@@ -872,7 +872,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
     in bgy3d-poisson.c:
   */
   Vec x_lapl[m][m];             /* real */
-  bgy3d_vec_create2 (BHD->da, m, x_lapl);
+  vec_create2 (BHD->da, m, x_lapl);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -1174,34 +1174,34 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
     } /* for (dump = ... ) */
 
   /* deallocation of work vectors */
-  bgy3d_vec_destroy2 (m, g);
-  bgy3d_vec_destroy2 (m, g_fft);
-  bgy3d_vec_destroy2 (m, t);
-  bgy3d_vec_destroy2 (m, du);
-  bgy3d_vec_destroy2 (m, x_lapl);
+  vec_destroy2 (m, g);
+  vec_destroy2 (m, g_fft);
+  vec_destroy2 (m, t);
+  vec_destroy2 (m, du);
+  vec_destroy2 (m, x_lapl);
 
-  bgy3d_vec_destroy (&du_new);
-  bgy3d_vec_destroy (&du_new2);
-  bgy3d_vec_destroy (&work);
+  vec_destroy (&du_new);
+  vec_destroy (&du_new2);
+  vec_destroy (&work);
 
   /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      bgy3d_vec_destroy (&omega[i][j]);
+      vec_destroy (&omega[i][j]);
 
-  bgy3d_vec_destroy2 (m, u2);
-  bgy3d_vec_destroy2 (m, u2_fft);
-  bgy3d_vec_destroy2 (m, u0);
-  bgy3d_vec_destroy2 (m, c2);
+  vec_destroy2 (m, u2);
+  vec_destroy2 (m, u2_fft);
+  vec_destroy2 (m, u0);
+  vec_destroy2 (m, c2);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        bgy3d_vec_destroy1 (3, f[i][j]);
-        bgy3d_vec_destroy1 (3, f_l[i][j]);
+        vec_destroy1 (3, f[i][j]);
+        vec_destroy1 (3, f_l[i][j]);
       }
 
-  bgy3d_vec_destroy (&gfg2_fft);
+  vec_destroy (&gfg2_fft);
 
   bgy3d_state_destroy (BHD);
 }
@@ -1238,21 +1238,21 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
   Vec u0[m][m], c2[m][m];
   Vec u2[m][m], u2_fft[m][m];
 
-  bgy3d_vec_create2 (BHD->da, m, u2);
-  bgy3d_vec_create2 (BHD->dc, m, u2_fft); /* complex */
-  bgy3d_vec_create2 (BHD->da, m, c2);
-  bgy3d_vec_create2 (BHD->da, m, u0);
+  vec_create2 (BHD->da, m, u2);
+  vec_create2 (BHD->dc, m, u2_fft); /* complex */
+  vec_create2 (BHD->da, m, c2);
+  vec_create2 (BHD->da, m, u0);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       FOR_DIM
         {
-          f[j][i][dim] = f[i][j][dim] = bgy3d_vec_create (BHD->da);
-          f_l[j][i][dim] = f_l[i][j][dim] = bgy3d_vec_create (BHD->da);
+          f[j][i][dim] = f[i][j][dim] = vec_create (BHD->da);
+          f_l[j][i][dim] = f_l[i][j][dim] = vec_create (BHD->da);
         }
 
   /* Allocate more memory for fft */
-  Vec gfg2_fft = bgy3d_vec_create (BHD->dc); /* complex */
+  Vec gfg2_fft = vec_create (BHD->dc); /* complex */
 
   /* end of allocation */
 
@@ -1287,14 +1287,14 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
 
   Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
   Vec g_fft[m][m];                /* complex, ij = ji */
-  bgy3d_vec_create2 (BHD->da, m, g);
-  bgy3d_vec_create2 (BHD->dc, m, g_fft); /* complex */
-  bgy3d_vec_create2 (BHD->da, m, du);
-  bgy3d_vec_create2 (BHD->da, m, t);
+  vec_create2 (BHD->da, m, g);
+  vec_create2 (BHD->dc, m, g_fft); /* complex */
+  vec_create2 (BHD->da, m, du);
+  vec_create2 (BHD->da, m, t);
 
-  du_new = bgy3d_vec_create (BHD->da);
-  du_new2 = bgy3d_vec_create (BHD->da);
-  work = bgy3d_vec_create (BHD->da);
+  du_new = vec_create (BHD->da);
+  du_new2 = vec_create (BHD->da);
+  work = vec_create (BHD->da);
 
 #ifdef L_BOUNDARY
   /*
@@ -1303,7 +1303,7 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
     in bgy3d-poisson.c:
   */
   Vec x_lapl[2][2];             /* real */
-  bgy3d_vec_create2 (BHD->da, 2, x_lapl);
+  vec_create2 (BHD->da, 2, x_lapl);
 
   for (int i = 0; i < 2; i++)
     for (int j = 0; j <= i; j++)
@@ -1311,8 +1311,8 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
 #endif
 
   Vec omega[2][2];
-  omega[0][1] = bgy3d_vec_create (BHD->dc);
-  omega[0][0] = bgy3d_vec_create (BHD->dc);
+  omega[0][1] = vec_create (BHD->dc);
+  omega[0][0] = vec_create (BHD->dc);
   omega[1][0] = omega[0][1];
   omega[1][1] = NULL;
 
@@ -1582,32 +1582,32 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
 
     } /* for (damp = ...) */
 
-  bgy3d_vec_destroy2 (m, g);
-  bgy3d_vec_destroy2 (m, g_fft);
-  bgy3d_vec_destroy2 (m, t);
-  bgy3d_vec_destroy2 (m, du);
-  bgy3d_vec_destroy2 (m, x_lapl);
+  vec_destroy2 (m, g);
+  vec_destroy2 (m, g_fft);
+  vec_destroy2 (m, t);
+  vec_destroy2 (m, du);
+  vec_destroy2 (m, x_lapl);
 
-  bgy3d_vec_destroy (&du_new);
-  bgy3d_vec_destroy (&du_new2);
-  bgy3d_vec_destroy (&work);
+  vec_destroy (&du_new);
+  vec_destroy (&du_new2);
+  vec_destroy (&work);
 
-  bgy3d_vec_destroy (&omega[0][1]);
-  bgy3d_vec_destroy (&omega[0][0]);
+  vec_destroy (&omega[0][1]);
+  vec_destroy (&omega[0][0]);
 
-  bgy3d_vec_destroy2 (m, u2);
-  bgy3d_vec_destroy2 (m, u2_fft);
-  bgy3d_vec_destroy2 (m, u0);
-  bgy3d_vec_destroy2 (m, c2);
+  vec_destroy2 (m, u2);
+  vec_destroy2 (m, u2_fft);
+  vec_destroy2 (m, u0);
+  vec_destroy2 (m, c2);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        bgy3d_vec_destroy1 (3, f[i][j]);
-        bgy3d_vec_destroy1 (3, f_l[i][j]);
+        vec_destroy1 (3, f[i][j]);
+        vec_destroy1 (3, f_l[i][j]);
       }
 
-  bgy3d_vec_destroy (&gfg2_fft);
+  vec_destroy (&gfg2_fft);
 
   bgy3d_state_destroy (BHD);
 

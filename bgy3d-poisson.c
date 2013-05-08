@@ -72,7 +72,7 @@
 
 #include <stdbool.h>
 #include "bgy3d.h"
-#include "bgy3d-vec.h"          /* bgy3d_vec_destroy() */
+#include "bgy3d-vec.h"          /* vec_destroy() */
 #include "bgy3d-poisson.h"
 #include <complex.h>            /* after fftw.h */
 
@@ -110,7 +110,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   const int NNN = N[0] * N[1] * N[2];
 
   /* Scratch complex vector: */
-  Vec work = bgy3d_vec_create (BHD->dc);
+  Vec work = vec_create (BHD->dc);
 
   /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
      complex work: */
@@ -191,7 +191,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
   MatMultTranspose (BHD->fft_mat, work, uc);
 
-  bgy3d_vec_destroy (&work);
+  vec_destroy (&work);
 }
 #else
 /*
@@ -212,7 +212,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   const int NNN = N[0] * N[1] * N[2];
 
   /* Scratch complex vector: */
-  Vec work = bgy3d_vec_create (BHD->dc);
+  Vec work = vec_create (BHD->dc);
 
   /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
      complex work: */
@@ -260,6 +260,6 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
   MatMultTranspose (BHD->fft_mat, work, uc);
 
-  bgy3d_vec_destroy (&work);
+  vec_destroy (&work);
 }
 #endif
