@@ -288,10 +288,10 @@ compute_t2 (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
 
 
 /*
-  There are currently two types of HNC iterations for pure solvent.
+  There  were  historically  two  types  of HNC  iterations  for  pure
+  solvent:
 
-  a) HNC iteration for an indirect correlation γ = h - c (here denoted
-     by t)
+  a) HNC iteration for an indirect correlation t = h - c
 
      t    ->  dt = t    - t
       in           out    in
@@ -307,7 +307,10 @@ compute_t2 (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
       in           out    in
 
      In this case the indirect  correlation γ is considered a function
-     of c and is stored in y = γ(c).
+     of c and is stored in y = t(c).
+
+  The case (a)  with indirect correlation t as  a primary variable won
+  over time. Maintaining two  cases appeared infeasible at some point.
 */
 typedef struct Ctx2
 {
@@ -315,7 +318,7 @@ typedef struct Ctx2
   int m;
   Vec *v_short;              /* [m][m], real, center, const */
   Vec *v_long_fft;           /* [m][m], complex, center, const */
-  Vec *y;                    /* [m][m], real, either y = c or y = t */
+  Vec *y;                    /* [m][m], real, y = c(t), not t(c) */
   Vec *t_fft, *c_fft;        /* [m][m], complex */
   Vec *w_fft;                /* [m][m], complex, NULL diagonal */
 } Ctx2;
@@ -548,9 +551,8 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
 
 /*
-  Solving  for c  and  h(c)  of HNC  equation  with non-linear  solver
-  specified by  the --snes-solver flag.  Direct  correlation c appears
-  as a primary variable here:
+  Solving for  g of HNC  equation with non-linear solver  specified by
+  the --snes-solver flag.
 */
 Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 {
