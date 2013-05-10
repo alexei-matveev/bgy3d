@@ -333,6 +333,66 @@ void bgy3d_vec_moments (const DA da, Vec v,
   *z = vec_integrate (da, mz, v);
 }
 
+/*
+ * Second moments
+ */
+void bgy3d_vec_moments2 (const DA da, Vec v,
+                         real *xy, real *yz, real *zx,
+                         real *z2, real *x2y2, real *r2)
+{
+  /* Historically the grid origin is at 0.5 N[]: */
+  int N[3];
+  da_shape (da, N);
+
+  /* < x * y > */
+  real mxy (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * (i - 0.5 * N[0]) * (j - 0.5 * N[1]);
+  }
+  /* < y * z > */
+  real myz (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * (j - 0.5 * N[1]) * (k - 0.5 * N[2]);
+  }
+  /* < z * x > */
+  real mzx (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * (k - 0.5 * N[2]) * (i - 0.5 * N[0]);
+  }
+  /* < z^2 - 1 / 3 * r^2 > */
+  real mz2 (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * (2.0 * (k - 0.5 * N[2]) * (k - 0.5 * N[2])
+           - (i - 0.5 * N[0]) * (i - 0.5 * N[0])
+           - (j - 0.5 * N[1]) * (j - 0.5 * N[1])) / 3.0;
+  }
+  /* < x^2 - y^2 > */
+  real mx2y2 (real v, int i, int j, int k)
+  {
+    (void) i; (void) j; (void) k;
+    return v * ((i - 0.5 * N[0]) * (i - 0.5 * N[0])
+           - (j - 0.5 * N[1]) * (j - 0.5 * N[1]));
+  }
+  /* < x^2 + y^2 + z^2 > */
+  real mr2 (real v, int i, int j, int k)
+  {
+    return v * ((i - 0.5 * N[0]) * (i - 0.5 * N[0])
+              + (j - 0.5 * N[1]) * (j - 0.5 * N[1])
+              + (k - 0.5 * N[2]) * (k - 0.5 * N[2]));
+  }
+
+  *xy   = vec_integrate (da, mxy, v);
+  *yz   = vec_integrate (da, myz, v);
+  *zx   = vec_integrate (da, mzx, v);
+  *z2   = vec_integrate (da, mz2, v);
+  *x2y2 = vec_integrate (da, mx2y2, v);
+  *r2   = vec_integrate (da, mr2, v);
+}
+
 
 /*
   By scaling k-components of the FFT Vec v along each dimension by

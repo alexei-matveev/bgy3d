@@ -27,6 +27,9 @@ void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
 
 void bgy3d_vec_moments (const DA da, Vec v,
                         real *q, real *x, real *y, real *z);
+void bgy3d_vec_moments2 (const DA da, Vec v,
+                         real *xy, real *yz, real *zx,
+                         real *z2, real *x2y2, real *r2);
 
 void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v);
 
