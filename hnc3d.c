@@ -506,6 +506,50 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   VecAXPY (dT, -1.0, T);
 }
 
+/*
+ * h(r) = c(r) + γ(r)
+ * μ := ½h²(r) - c(r) - ½h(r)c(r)
+ */
+static void compute_mu (Vec c, Vec t, Vec mu)
+{
+  real pure f (real c, real t)
+  {
+    /* h = c + γ */
+    return 0.5 * (c + t) * (c + t) - c - 0.5 * (c + t) * c;
+  }
+  vec_map2 (mu, f, c, t);
+}
+
+/*
+  Returns the β-scaled "density" of the chemical potential, βμ(r).
+  To  get the  excess  chemical potential  integrate  it over  the
+  volume and divide by β, cf.:
+
+  βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+
+  Here we pass c(r) and γ(r) = h(r) - c(r)
+
+  Volume integral in cartesian grid is actually:
+
+  Vol(D) = ∫∫∫dxdydz
+            D
+*/
+static void chempot_density (int m,
+                            Vec c[m][m], Vec t[m][m], /* in */
+                            Vec mu)                   /* out */
+{
+  /* increment for all solvent sites */
+  local Vec dmu = vec_duplicate (mu);
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+    {
+      compute_mu (c[i][j], t[i][j], dmu);
+      VecAXPY (mu, 1.0, dmu);
+    }
+
+  vec_destroy (&dmu);
+}
 
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
@@ -609,6 +653,27 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   */
   bgy3d_vec_save2 ("t%d%d.bin", m, x);
   bgy3d_vec_save2 ("c%d%d.bin", m, y);
+
+  /* chemical potential */
+  {
+    /* FIXME: these three are not used */
+    real mx, my, mz;
+    real mu;
+    real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+    local Vec mu_dens = vec_create (HD->da);
+    /* x == t; y == c */
+    chempot_density (m, y, x, mu_dens);
+    /* volume integral (without scaling) */
+    bgy3d_vec_moments (HD->da, mu_dens,
+                        &mu, &mx, &my, &mz);
+    /* apply scaling factor */
+    mu *= h3 * PD->rho / PD->beta;
+    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+
+    bgy3d_vec_save ("mu_dens.bin", mu_dens);
+    vec_destroy (&mu_dens);
+  }
+
 
   /*
     g  =  γ +  c  +  1,  store in  Vec  y.   The expression  is  valid
