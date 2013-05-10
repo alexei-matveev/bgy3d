@@ -190,7 +190,7 @@ int main (int argc, char **argv)
               PetscPrintf (PETSC_COMM_WORLD, "Result written to file \"g.bin\".\n");
             }
 
-          bgy3d_vec_destroy (&g);
+          vec_destroy (&g);
         }
   }
   else
