@@ -650,7 +650,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     c(t) is a dependent quantity y(x)!
   */
   {
-    Vec (*c)[m] = y;            /* alias */
+    Vec (*c)[m] = y;            /* read-only alias */
     const real dV = PD->h[0] * PD->h[1] * PD->h[2];
 
      /*
@@ -778,11 +778,24 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 /*
   In k-space compute
 
-   t = ρ c * h
+   t   = ρ c   *  h
+    vu      vv     vu
 
-  Here ρ  is a scalar overall  factor equal to solvent  density if the
-  convolution  theorem is  factorless.   The caller  may (ab)use  this
-  factor to further scale the result.
+  Compare  to Eq.  (8) in  the  header comments.  Here ρ  is a  scalar
+  overall factor  equal to solvent density if  the convolution theorem
+  is factorless.  The caller may  (ab)use this factor to further scale
+  the result.
+
+  Note that the solvent-solvent  site-site correlation c is eventually
+  long-range.  In Fourier rep that would  mean c(k) is singular at k =
+  0. Here  there are no  special precautions to treat  the assymptotic
+  interactions of the (so far neutral) solute species with the charged
+  solvent sites. Note that in 3d solute/solvent case we do not operate
+  with  site-site   distributions/potentials,  but  rather   with  the
+  "solvent site"-"compound solute" quantities. If the physics works as
+  expected the assymptotic decay  of such potentials and distributions
+  is "fast"  for neutral solutes. FIXME:  this is not  true anymore if
+  the solute is charged.
 */
 static void compute_t1 (int m, real rho,
                         Vec c_fft[m][m], Vec h_fft[m], /* in */
@@ -1037,13 +1050,13 @@ void hnc3d_solute_solve (const ProblemData *PD,
     pointer argument: Ctx1* vs. void*:
   */
   {
-    /* Work area for iterate_h1(): */
+    /* Work area for iterate_t1(): */
     Ctx1 ctx =
       {
         .HD = HD,
         .m = m,
         .v = (void*) v,
-        .y = (void*) y,         /* h(t) or t(h) */
+        .y = (void*) y,         /* h(t), not t(h) */
         .c_fft = (void*) c_fft, /* pair quantitity */
         .h_fft = (void*) h_fft,
         .t_fft = (void*) t_fft,
