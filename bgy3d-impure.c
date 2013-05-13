@@ -417,9 +417,12 @@ static void moments (const State *BHD, Vec v,
   const real *h = BHD->PD->h;   /* h[3] */
   const real h3 = h[0] * h[1] * h[2];
 
-  bgy3d_vec_moments (BHD->da, v, q, x, y, z);
+  /* 0th moment: */
+  *q = h3 * vec_sum (v);
 
-  *q *= h3 * 1;
+  /* 1st moments: */
+  bgy3d_vec_moments1 (BHD->da, v, x, y, z);
+
   *x *= h3 * h[0];
   *y *= h3 * h[1];
   *z *= h3 * h[2];

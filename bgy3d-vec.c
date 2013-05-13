@@ -299,18 +299,12 @@ void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
   PetscPrintf (PETSC_COMM_WORLD, "done.\n");
 }
 
-void bgy3d_vec_moments (const DA da, Vec v,
-                        real *q, real *x, real *y, real *z)
+void bgy3d_vec_moments1 (const DA da, Vec v, real *x, real *y, real *z)
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
   da_shape (da, N);
 
-  real m0 (real v, int i, int j, int k)
-  {
-    (void) i; (void) j; (void) k;
-    return v * 1;
-  }
   real mx (real v, int i, int j, int k)
   {
     (void) j; (void) k;
@@ -327,7 +321,6 @@ void bgy3d_vec_moments (const DA da, Vec v,
     return v * (k - 0.5 * N[2]);
   }
 
-  *q = vec_integrate (da, m0, v);
   *x = vec_integrate (da, mx, v);
   *y = vec_integrate (da, my, v);
   *z = vec_integrate (da, mz, v);
