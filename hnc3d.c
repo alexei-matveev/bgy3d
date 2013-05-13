@@ -559,7 +559,7 @@ static void chempot_density (int m,
   that.
 
   Historically  this  code supported  another  mode  where the  direct
-  correlation  c served as  a primary  variable x.   In that  cast the
+  correlation  c served as  a primary  variable x.   In that  case the
   indirect correlation t was a functional of that.
 */
 void hnc3d_solvent_solve (const ProblemData *PD,
