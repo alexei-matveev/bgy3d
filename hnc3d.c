@@ -653,12 +653,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     Vec (*c)[m] = y;            /* read-only alias */
     const real dV = PD->h[0] * PD->h[1] * PD->h[2];
 
-     /*
-       The  real-space rep  of the  short-range direct  correlation is
-       only usefull for debug and visualization:
+    /*
+      The real-space rep of the short-range direct correlation is only
+      usefull for debug and visualization:
 
-       bgy3d_vec_save2 ("c%d%d.bin", m, c);
-     */
+      bgy3d_vec_save2 ("c%d%d.bin", m, c);
+    */
 
     for (int i = 0; i < m; i++)
       for (int j = 0; j <= i; j++)
