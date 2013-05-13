@@ -347,25 +347,24 @@ void bgy3d_vec_moments2 (const DA da, Vec v,
   /* < x * y > */
   real mxy (real v, int i, int j, int k)
   {
-    (void) i; (void) j; (void) k;
+    (void) k;
     return v * (i - 0.5 * N[0]) * (j - 0.5 * N[1]);
   }
   /* < y * z > */
   real myz (real v, int i, int j, int k)
   {
-    (void) i; (void) j; (void) k;
+    (void) i;
     return v * (j - 0.5 * N[1]) * (k - 0.5 * N[2]);
   }
   /* < z * x > */
   real mzx (real v, int i, int j, int k)
   {
-    (void) i; (void) j; (void) k;
+    (void) j;
     return v * (k - 0.5 * N[2]) * (i - 0.5 * N[0]);
   }
   /* < z^2 - 1 / 3 * r^2 > */
   real mz2 (real v, int i, int j, int k)
   {
-    (void) i; (void) j; (void) k;
     return v * (2 * SQR (k - 0.5 * N[2]) -
                 SQR (i - 0.5 * N[0]) -
                 SQR (j - 0.5 * N[1])) / 3.0;
@@ -373,7 +372,7 @@ void bgy3d_vec_moments2 (const DA da, Vec v,
   /* < x^2 - y^2 > */
   real mx2y2 (real v, int i, int j, int k)
   {
-    (void) i; (void) j; (void) k;
+    (void) k;
     return v * (SQR (i - 0.5 * N[0]) - SQR (j - 0.5 * N[1]));
   }
   /* < x^2 + y^2 + z^2 > */
