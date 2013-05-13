@@ -656,18 +656,15 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* chemical potential */
   {
-    /* FIXME: these three are not used */
-    real mx, my, mz;
-    real mu;
-    real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+    const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
     local Vec mu_dens = vec_create (HD->da);
+
     /* x == t; y == c */
     chempot_density (m, y, x, mu_dens);
-    /* volume integral (without scaling) */
-    bgy3d_vec_moments (HD->da, mu_dens,
-                        &mu, &mx, &my, &mz);
-    /* apply scaling factor */
-    mu *= h3 * PD->rho / PD->beta;
+
+    /* Volume integral scaled by a factor: */
+    const real mu = PD->rho * vec_sum (mu_dens) * h3 / PD->beta;
+
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
 
     bgy3d_vec_save ("mu_dens.bin", mu_dens);
