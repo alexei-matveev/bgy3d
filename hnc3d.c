@@ -969,8 +969,8 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
   primary  variable  cannot be  severe  as  the  Jager solver  manages
   that. On  the other hand h  = g -  1 is nearly discontinuous  at the
   cavity border and formally constrained by h >= -1.  Intuitively this
-  does  not make  the  task of  the  fxipoint solver  easier. So  that
-  alternative has been abandoned in favor of indirect correaltion t as
+  does  not make  the  task of  the  fixpoint solver  easier. So  that
+  alternative has been abandoned in favor of indirect correlation t as
   a primary variable.
 */
 void hnc3d_solute_solve (const ProblemData *PD,
