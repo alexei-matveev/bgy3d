@@ -748,9 +748,9 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 
    t = ρ c * h
 
-  Here ρ  is a scalar  overall factor proportional to  solvent density
-  and  should  include  convolution/FFT  renormalization in  order  to
-  interprete the result as an FFT of t literally:
+  Here ρ  is a scalar overall  factor equal to solvent  density if the
+  convolution  theorem is  factorless.   The caller  may (ab)use  this
+  factor to further scale the result.
 */
 static void compute_t1 (int m, real rho,
                         Vec c_fft[m][m], Vec h_fft[m], /* in */
@@ -822,7 +822,6 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   const ProblemData *PD = ctx->HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
@@ -852,10 +851,9 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     corresponds to a matrix multiplication in the k-space.
 
     For  each solvent  site sum  over solvent  sites. Let  the overall
-    scale include  a factor for  inverse FFT and  convolution integral
-    right away:
+    scale include a factor for inverse FFT right away:
   */
-  compute_t1 (m, rho * h3 / N3, c_fft, ctx->h_fft, ctx->t_fft);
+  compute_t1 (m, rho / N3, c_fft, ctx->h_fft, ctx->t_fft);
 
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
@@ -880,6 +878,8 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 /* Reads c2[][] as previousely written by solvent solver. */
 static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
 {
+  const real dV = HD->PD->h[0] * HD->PD->h[1] * HD->PD->h[2];
+
   local Vec c[m][m];
   vec_create2 (HD->da, m, c);
 
@@ -893,6 +893,7 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
     for (int j = 0; j <= i; j++)
       {
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
+        VecScale (c_fft[i][j], dV);
 
         /*
           Translate the distribution to  the grid corner. This is what
