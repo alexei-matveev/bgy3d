@@ -644,15 +644,47 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   }
 
   /*
-    This  saves   c??.bin  to  disk  to  be   used  in  solute/solvent
-    calculations. The  other one  is not futher  used, saved  just for
-    info.
-
-    The approach with the primary variable  x == t won over time.  The
-    direct correlation c(t) is a dependent quantity y(x)!
+    This saves c??-fft.bin (including  the long-range part) to disk to
+    be  used in  solute/solvent calculations.   The approach  with the
+    primary variable  x ==  t won over  time.  The  direct correlation
+    c(t) is a dependent quantity y(x)!
   */
-  bgy3d_vec_save2 ("t%d%d.bin", m, x);
-  bgy3d_vec_save2 ("c%d%d.bin", m, y);
+  {
+    Vec (*c)[m] = y;            /* alias */
+    const real dV = PD->h[0] * PD->h[1] * PD->h[2];
+
+     /*
+       The  real-space rep  of the  short-range direct  correlation is
+       only usefull for debug and visualization:
+
+       bgy3d_vec_save2 ("c%d%d.bin", m, c);
+     */
+
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        {
+          MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
+          VecScale (c_fft[i][j], dV);
+
+          /*
+            The real-space representation encodes only the short-range
+            part  of the  direct  corrlation. The  (fixed) long  range
+            contribution is added here:
+
+              C := C  - βV
+                    S     L
+          */
+          VecAXPY (c_fft[i][j], -PD->beta, v_long_fft[i][j]);
+
+          /* Translate the  distribution to the grid  corner.  This is
+             what one expects in convolution integrals: */
+          bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
+        }
+
+    /* The Fourier  rep is what is actually  read in solvent_kernel(),
+       see below: */
+    bgy3d_vec_save2 ("c%d%d-fft.bin", m, c_fft);
+  }
 
   /* chemical potential */
   {
@@ -875,34 +907,39 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
-/* Reads c2[][] as previousely written by solvent solver. */
+/* Reads  c_fft[][]  as previousely  written  by  solvent solver.  See
+   hnc3d_solvent_solve() above. */
 static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
 {
-  const real dV = HD->PD->h[0] * HD->PD->h[1] * HD->PD->h[2];
-
-  local Vec c[m][m];
-  vec_create2 (HD->da, m, c);
-
-  /* Load c_1d from file: */
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
-    bgy3d_vec_read_radial2 (HD->da, HD->PD, "c%d%d.txt", m, c);
+    {
+      /*
+        Load  radial  direct   correlation  from  text  file.   FIXME:
+        representing long-range on  a real-space grid is intrinsically
+        broken!
+      */
+      const real dV = HD->PD->h[0] * HD->PD->h[1] * HD->PD->h[2];
+
+      local Vec c[m][m];
+      vec_create2 (HD->da, m, c);
+
+      bgy3d_vec_read_radial2 (HD->da, HD->PD, "c%d%d.txt", m, c);
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          {
+            MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
+            VecScale (c_fft[i][j], dV);
+
+            /* Translate the distribution to  the grid corner. This is
+               what one expects in convolution integrals. */
+            bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
+          }
+      vec_destroy2 (m, c);
+    }
   else
-    bgy3d_vec_read2 ("c%d%d.bin", m, c);
+    bgy3d_vec_read2 ("c%d%d-fft.bin", m, c_fft); /* ready for use as is */
 
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
-        VecScale (c_fft[i][j], dV);
-
-        /*
-          Translate the distribution to  the grid corner. This is what
-          one expects  in convolution  integrals. FIXME: or  should we
-          rather store the convolution kernel on disk in ready form?
-        */
-        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
-      }
-  vec_destroy2 (m, c);
 }
 
 
