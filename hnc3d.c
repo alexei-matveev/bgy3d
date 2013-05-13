@@ -673,16 +673,18 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
 
   /*
-    g  =  γ +  c  +  1,  store in  Vec  y.   The expression  is  valid
-    irrespective of whether  (x, y) == (c,  γ) or (x, y) ==  (γ, c) as
-    both appear as a sum x + y == γ + c here:
+    h = c  + t, store in Vec y.  The  expression is valid irrespective
+    of whether (x, y) == (c, t) or  (x, y) == (t, c) as both appear as
+    a sum x + y == t + c here:
   */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      {
-        VecAXPY (y[i][j], 1.0, x[i][j]);
-        VecShift (y[i][j], 1.0);
-      }
+      VecAXPY (y[i][j], 1.0, x[i][j]);
+
+  /* g = 1 + h, store in Vec y for output: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecShift (y[i][j], 1.0);
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&t); */
