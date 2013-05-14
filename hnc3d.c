@@ -726,7 +726,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       VecAXPY (y[i][j], 1.0, x[i][j]);
 
   /*
-    Compute  the  solvent susceptibility,  χ  =  1  + ρh,  in  Fourier
+    Compute  the  solvent susceptibility,  χ  =  ω  + ρh,  in  Fourier
     representation for  future use in  solute/solvent calculations. It
     appears to be more  convenient to operate with δχ = χ  - 1 so this
     is what is actually saved to disk.
@@ -745,7 +745,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     for (int i = 0; i < m; i++)
       for (int j = 0; j <= i; j++)
         {
-          /* δχ = χ - 1 = ρh */
+          /*
+              δχ = χ -  1 = (ω - 1) + ρh.
+
+            The first ω-term is  only well representable on the k-grid
+            and will be added later:
+          */
           VecSet (chi[i][j], 0.0);
           VecAXPY (chi[i][j], PD->rho, h[i][j]);
 
@@ -756,6 +761,16 @@ void hnc3d_solvent_solve (const ProblemData *PD,
           /* Translate the  distribution to the grid  corner.  This is
              what one expects in convolution integrals: */
           bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
+
+          /*
+            Intra-molecular correlation  ω(k) is centered  at the grid
+            corner, so add this only after translating chi_fft[][]:
+          */
+          if (w_fft[i][j])
+            VecAXPY (chi_fft[i][j], 1.0, w_fft[i][j]);
+          else
+            /* ω - 1 == 0 identically, nothing to do! */
+            assert (i == j);
         }
 
     /* The Fourier  rep is what is actually  read in solvent_kernel(),
