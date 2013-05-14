@@ -472,15 +472,27 @@ static void read_charge_density (DA da, const ProblemData *PD,
 /*
   Create initial solute field.
 
-  See Eqs.  (5.106) and (5.08) in  the thesis.  Fill  us[0] and us[1],
-  for H and O in that order with short-range, VM_LJ + VM_coulomb_short
-  and uc with long range  potential VM_coulomb_long (not scaled by the
-  charges  of  the solvent  sites).   Returns  both, the  (long-range)
-  electrostatic potential  Vec uc and the  corresponding (diffuse part
-  of the) charge density Vec uc_rho.
+  See Eqs.  (5.106)  and (5.08) in the thesis.   Fill us[0] and us[1],
+  for H and O in that order with short-range,
+
+    us = v   + v
+          LJ    CS
+
+  and  uc  with  long   range  (or  rather  asymptotic)  electrostatic
+  potential
+
+    uc = v
+          CL
+
+  not scaled by the charges of the solvent sites.
+
+  Returns both, the asymptotic  electrostatic potential Vec uc and the
+  corresponding (diffuse  part of the)  charge density Vec  uc_rho. If
+  both, uc  and uc_rho, are NULL  the asymptotic Coulomb  field is not
+  computed. FIXME: Otherwise both must be non-NULL.
 
   The  function pointer density()  passed to  bgy3d_solute_field(), if
-  not  NULL, is  used to  compute the  density of  (negively charged!)
+  not NULL,  is used to  compute the density of  (negatively charged!)
   electrons at arbitrary point in space.
 */
 void bgy3d_solute_field (const State *BHD,
