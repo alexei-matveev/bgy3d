@@ -713,6 +713,44 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     for (int j = 0; j <= i; j++)
       VecAXPY (y[i][j], 1.0, x[i][j]);
 
+  /*
+    Compute  the  solvent susceptibility,  χ  =  1  + ρh,  in  Fourier
+    representation for  future use in  solute/solvent calculations. It
+    appears to be more  convenient to operate with δχ = χ  - 1 so this
+    is what is actually saved to disk.
+  */
+  {
+    /*
+      FIXME:  temp aliases  as better  names.  Real  space rep  in Vec
+      v_short[][],  Fourier  rep in  Vec  v_long_fft[][]. Contents  of
+      v_short[][] and v_long_fft[][] will be overwritten!
+    */
+    Vec (*h)[m] = y;            /* read-only */
+    Vec (*chi)[m] = v_short;
+    Vec (*chi_fft)[m] = v_long_fft;
+    const real dV = PD->h[0] * PD->h[1] * PD->h[2];
+
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        {
+          /* δχ = χ - 1 = ρh */
+          VecSet (chi[i][j], 0.0);
+          VecAXPY (chi[i][j], PD->rho, h[i][j]);
+
+          /* δχ(k) = FFT(δχ(r)) */
+          MatMult (HD->fft_mat, chi[i][j], chi_fft[i][j]);
+          VecScale (chi_fft[i][j], dV);
+
+          /* Translate the  distribution to the grid  corner.  This is
+             what one expects in convolution integrals: */
+          bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
+        }
+
+    /* The Fourier  rep is what is actually  read in solvent_kernel(),
+       see below: */
+    bgy3d_vec_save2 ("x%d%d-fft.bin", m, chi_fft);
+  }
+
   /* g = 1 + h, store in Vec y for output: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
