@@ -348,6 +348,31 @@ static inline void vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
   vec_restore_array (zs, &zs_);
 }
 
+/* ws = map (f, xs, ys, zs).   Should also work with aliased arguments for
+   in-place transform: */
+static inline void vec_map3 (Vec ws,
+                             real (*f)(real x, real y, real z),
+                             Vec xs, Vec ys, Vec zs)
+{
+  const int n = vec_local_size (xs);
+  assert (vec_local_size (ys) == n);
+  assert (vec_local_size (zs) == n);
+  assert (vec_local_size (ws) == n);
+
+  local real *xs_ = vec_get_array (xs);
+  local real *ys_ = vec_get_array (ys);
+  local real *zs_ = vec_get_array (zs);
+  local real *ws_ = vec_get_array (ws);
+
+  for (int i = 0; i < n; i++)
+    ws_[i] = f (xs_[i], ys_[i], zs_[i]);
+
+  vec_restore_array (xs, &xs_);
+  vec_restore_array (ys, &ys_);
+  vec_restore_array (zs, &zs_);
+  vec_restore_array (ws, &ws_);
+}
+
 
 /* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
    in-place transform: */
