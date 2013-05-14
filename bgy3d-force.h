@@ -4,7 +4,10 @@
 /*==========================================================*/
 
 // #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
-#define CUTOFF 1.0e+8           /* was ealrier #defined in bgy3d.h */
+
+/* Was ealrier  #defined in bgy3d.h.  Used only  here, #undef'ed below
+   after last use: */
+#define CUTOFF 1.0e+8
 
 
 /* Computes a pair potential. See also bgy3d_force(). */
@@ -219,6 +222,8 @@ coulomb_grad (real r, real rx, real q2)
         return re;
     }
 }
+
+#undef CUTOFF
 
 
 /*
