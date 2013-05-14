@@ -425,11 +425,11 @@ typedef struct Ctx2
 {
   State *HD;
   int m;
-  Vec *v_short;              /* [m][m], real, center, const */
-  Vec *v_long_fft;           /* [m][m], complex, center, const */
-  Vec *y;                    /* [m][m], real, y = c(t), not t(c) */
-  Vec *t_fft, *c_fft;        /* [m][m], complex */
-  Vec *w_fft;                /* [m][m], complex, NULL diagonal */
+  Vec *v_short;       /* [m][m], in, real, center */
+  Vec *v_long_fft;    /* [m][m], in, complex, center */
+  Vec *y;             /* [m][m], work, real, y = c(t), not t(c) */
+  Vec *t_fft, *c_fft; /* [m][m], work, complex */
+  Vec *w_fft;         /* [m][m], in, complex, corner, NULL diagonal */
 } Ctx2;
 
 
@@ -440,8 +440,8 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   /* aliases of the correct [m][m] shape: */
   Vec (*c_fft)[m] = (void*) ctx->c_fft;
   Vec (*t_fft)[m] = (void*) ctx->t_fft;
-  Vec (*w_fft)[m] = (void*) ctx->w_fft;
-  Vec (*c)[m] = (void*) ctx->y; /* y = c(t) here */
+  Vec (*w_fft)[m] = (void*) ctx->w_fft; /* corner */
+  Vec (*c)[m] = (void*) ctx->y;         /* y = c(t) here */
   Vec (*v_short)[m] = (void*) ctx->v_short;
   Vec (*v_long_fft)[m] = (void*) ctx->v_long_fft;
 
@@ -613,8 +613,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       bgy3d_pair_potential (HD, solvent[i], solvent[j],
                             v_short[i][j], v_long_fft[i][j]);
 
-  /* Prepare intra-molecular correlations: */
-  local Vec w_fft[m][m];        /* diagonal will be NULL */
+  /* Prepare intra-molecular correlations. The origin is at the corner
+     as suitable for convolutions. Diagonal will be NULL: */
+  local Vec w_fft[m][m];
   bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
 
   /*

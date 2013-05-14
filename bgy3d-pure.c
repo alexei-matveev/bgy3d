@@ -278,8 +278,9 @@ void omega_intra (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 
 
 /*
-  Allocates and initializes  a matrix of intra-molecular correlations
-  except of diagonal elements that are implicitly 1:
+  Allocates and  initializes a matrix  of intra-molecular correlations
+  except of diagonal elements that  are implicitly 1.  The origins are
+  at the corner as these are only used for convolutions.
 */
 void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
                              Vec omega_fft[m][m]) /* out, creates them */
