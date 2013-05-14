@@ -77,12 +77,12 @@
   solvent  susceptibility χ  that  mediates the  relation between  the
   total and direct solute-solvent correlations:
 
-    h   = c   χ
+    h   = c   χ                                                    (9)
      uv    uv  vv
 
   with
 
-    χ   = 1 + ρ  h
+    χ   = 1 + ρ  h                                                 (10)
      uv        v  vv
 
   which is equivalent  to Eq. (7).
@@ -90,7 +90,7 @@
   The discussion  above deals  with a special  case of a  more general
   molecular RISM equation
 
-    h   =  ω  * c   * [ω + ρ  h  ]
+    h   =  ω  * c   * [ω + ρ  h  ]                                (11)
      uv     u    uv     v   v  vv
 
   Where  again the  term is  square brackets  is the  property  of the
@@ -98,8 +98,17 @@
   and is a generalization  of the solvent susceptibility for molecular
   solvents:
 
-    χ   =  ω  + ρ  h
+    χ   =  ω  + ρ  h                                              (12)
      vv     v    v  vv
+
+  With this definition, the expression for the indirect solute-solvent
+  correlation
+
+    t   = h   - c   = c   (χ   - 1)                               (13)
+     uv    uv    uv    uv   vv
+
+  does  not simplify  to  Eq. (7)  directly  though still  has a  very
+  similar structure.
 
   [1] Numerical solution of the hypernetted chain equation for a
       solute of arbitrary geometry in three dimensions, Dmitrii Beglov
@@ -816,15 +825,27 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 
 
 /*
-  In k-space compute
+  In k-space compute either
 
-   t   = ρ c   *  h
-    vu      vv     vu
+    t   = ρ c   *  h
+     vu      vv     vu
 
-  Compare  to Eq.  (8) in  the  header comments.  Here ρ  is a  scalar
-  overall factor  equal to solvent density if  the convolution theorem
-  is factorless.  The caller may  (ab)use this factor to further scale
-  the result.
+  or
+
+    t   = (χ   - 1) * c
+     vu     vv         vu
+
+  Compare to Eqs.   (8) and (7) in the  header comments, respectively.
+  Given that the solute index  "u" is redundant, both expressions have
+  the structure of the matrix-vector product of a (fixed) solvent pair
+  quantitiy  and a  (variable) "vector"  of site  distributions around
+  solute impurity to give another "vector" of site distributions. That
+  is why the code re-use.
+
+  Here ρ  is a scalar overall  factor equal to solvent  density in one
+  case or just 1 in the other case (only if the convolution theorem is
+  factorless).  The caller may (and does) abuse this factor to further
+  scale the result.
 
   Note that the solvent-solvent  site-site correlation c is eventually
   long-range.  In Fourier rep that would  mean c(k) is singular at k =
