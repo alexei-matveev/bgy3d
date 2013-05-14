@@ -126,6 +126,8 @@
 #include <math.h>               /* expm1() */
 
 
+const bool eq8 = false;         /* Eq. (8) vs. Eq. (7) */
+
 /*
   There  are several  closure  relations, all  must  satisfy the  same
   interface. Vec c is intent(out) the rest is input.
@@ -895,7 +897,7 @@ typedef struct Ctx1
 } Ctx1;
 
 
-static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
+static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
@@ -958,6 +960,72 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
+static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
+{
+  /* alias of the right shape: */
+  const int m = ctx->m;
+  Vec (*chi_fft)[m] = (void*) ctx->c_fft; /* [m][m], complex, in */
+  Vec *c = (void*) ctx->y;                /* [m], real, work */
+  Vec *c_fft = (void*) ctx->h_fft;        /* [m], complex, work */
+
+  const ProblemData *PD = ctx->HD->PD;
+  // const real rho = PD->rho;
+  const real beta = PD->beta;
+  const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
+
+  /* Establish aliases to the subsections of the long Vec T and dT: */
+  local Vec t[m], dt[m];
+  vec_aliases_create1 (T, m, t);
+  vec_aliases_create1 (dT, m, dt);
+
+  /*
+    The  new  candidate for  the  direct  uv-correlation  c using  the
+    closure relation:
+  */
+  for (int i = 0; i < m; i++)
+    {
+      compute_c (beta, ctx->v[i], t[i], c[i]);
+
+      /* fft(c).  Here  c is the  3d unknown direct  uv-correlation of
+         the solvent sites and the solute species as the whole: */
+      MatMult (ctx->HD->fft_mat, c[i], c_fft[i]);
+    }
+
+  /*
+    Now
+
+      t   = (χ - 1) * c
+       vu     vv       vu
+
+    Here  here  χ  is   the  constatnt  solvent  susceptibility.   The
+    "convolution star"  corresponds to a matrix  multiplication in the
+    k-space. Note that the input in chi_fft[][] corresponds to χ - 1.
+
+    For  each solvent  site sum  over solvent  sites. Let  the overall
+    scale include a factor for inverse FFT right away:
+  */
+  compute_t1 (m, 1.0 / N3, chi_fft, c_fft, ctx->t_fft);
+
+  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
+  for (int i = 0; i < m; i++)
+    MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
+
+  /*
+    This  destroys the  aliases,  but  does not  free  the memory,  of
+    course. The actuall data is owned by Vec T and Vec dT. From now on
+    one may access T and dT directly again.
+  */
+  vec_aliases_destroy1 (T, m, t);
+  vec_aliases_destroy1 (dT, m, dt);
+
+  /*
+    dt := t    - t
+           out    in
+  */
+  VecAXPY (dT, -1.0, T);
+}
+
+
 /* Reads  c_fft[][]  as previousely  written  by  solvent solver.  See
    hnc3d_solvent_solve() above. */
 static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
@@ -989,7 +1057,12 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
       vec_destroy2 (m, c);
     }
   else
-    bgy3d_vec_read2 ("c%d%d-fft.bin", m, c_fft); /* ready for use as is */
+    {
+      if (eq8)
+        bgy3d_vec_read2 ("x%d%d-fft.bin", m, c_fft); /* ready for use as is */
+      else
+        bgy3d_vec_read2 ("c%d%d-fft.bin", m, c_fft); /* ready for use as is */
+    }
 
 }
 
@@ -1096,7 +1169,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .t_fft = (void*) t_fft,
       };
 
-    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, X);
+    if (eq8)
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq8, X);
+    else
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq7, X);
   }
 
   /*
