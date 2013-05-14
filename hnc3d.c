@@ -85,7 +85,7 @@
     χ   = 1 + ρ  h                                                 (10)
      uv        v  vv
 
-  which is equivalent  to Eq. (7).
+  which is equivalent to Eq. (7).
 
   The discussion  above deals  with a special  case of a  more general
   molecular RISM equation
@@ -614,7 +614,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
                             v_short[i][j], v_long_fft[i][j]);
 
   /* Prepare intra-molecular correlations: */
-  local Vec w_fft[m][m];        /* diagonal will by NULL */
+  local Vec w_fft[m][m];        /* diagonal will be NULL */
   bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
 
   /*
@@ -629,9 +629,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   VecSet (X, 0.0);
 
   /*
-    Find an X such that dX  as returned by iterate_c2/t2 (&ctx, X, dX)
-    is zero.  Cast is  there to  silence the mismatch  in the  type of
-    first pointer argument: struct Ctx2* vs. void*:
+    Find an X such that dX  as returned by iterate_t2 (&ctx, X, dX) is
+    zero.  Cast is there to silence  the mismatch in the type of first
+    pointer argument: struct Ctx2* vs. void*:
   */
   {
     Ctx2 ctx =
