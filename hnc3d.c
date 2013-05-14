@@ -613,14 +613,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   */
   local Vec X = vec_pack_create2 (HD->da, m); /* long Vec */
 
-  local Vec x[m][m];
-  vec_aliases_create2 (X, m, x); /* aliases to subsections */
-
   /* Zero as intial guess  for x == t is not the  same as zero initial
      guess for x == c: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecSet (x[i][j], 0.0);
+  VecSet (X, 0.0);
 
   /*
     Find an X such that dX  as returned by iterate_c2/t2 (&ctx, X, dX)
@@ -642,6 +637,11 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
     bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, X);
   }
+
+  /* Now that  X = T has  converged we will post-process  it using the
+     aliases x[][]: */
+  local Vec x[m][m];
+  vec_aliases_create2 (X, m, x); /* aliases to subsections */
 
   /*
     This saves c??-fft.bin (including  the long-range part) to disk to
@@ -1036,13 +1036,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
   */
   local Vec X = vec_pack_create1 (HD->da, m); /* long Vec */
 
-  local Vec x[m];
-  vec_aliases_create1 (X, m, x); /* aliases to subsections */
-
   /* Zero as intial guess for x == t is (almost?) the same as exp(-βv)
      - 1 initial guess for x == h: */
-  for (int i = 0; i < m; i++)
-    VecSet (x[i], 0.0);
+  VecSet (X, 0.0);
 
   /*
     Find a  t such that  dt as returned  by iterate_t1 (HD, t,  dt) is
@@ -1066,12 +1062,19 @@ void hnc3d_solute_solve (const ProblemData *PD,
   }
 
   /*
-    FIXME: by ignoring the value of Vec x == t and using Vec y == h(t)
-    instead, we  assume that the  two are consistent  as in y  = y(x).
-    Hopefully the SNES solver does not return "untested" solutions.  A
-    call to iterate_t1/h1() to "test"  a solution would update Vec y =
-    y(x), namely.
+    Now that the  solution X = T has converged, use  it to compute the
+    rest of  the quantities. (Re)evaluate  y := h(t)  without assuming
+    that Vec y already has any meaningful value.
   */
+  {
+    local Vec x[m];
+    vec_aliases_create1 (X, m, x); /* aliases to subsections */
+
+    for (int i = 0; i < m; i++)
+      compute_h (PD->beta, v[i], x[i], y[i]);
+
+    vec_aliases_destroy1 (X, m, x);
+  }
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
@@ -1083,8 +1086,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   vec_destroy1 (m, t_fft);
   vec_destroy1 (m, v);
 
-  vec_aliases_destroy1 (X, m, x);
-  vec_pack_destroy1 (&X);
+  vec_pack_destroy1 (&X);       /* not vec_destroy()! */
 
   /* This should be the only pair quantity: */
   vec_destroy2 (m, c_fft);
