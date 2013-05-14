@@ -126,7 +126,7 @@
 #include <math.h>               /* expm1() */
 
 
-const bool eq8 = false;         /* Eq. (8) vs. Eq. (7) */
+const bool eq7 = false;         /* Eq. (7) vs. Eq. (8) */
 
 /*
   There  are several  closure  relations, all  must  satisfy the  same
@@ -897,7 +897,7 @@ typedef struct Ctx1
 } Ctx1;
 
 
-static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
+static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
@@ -960,7 +960,7 @@ static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
-static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
+static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
@@ -1058,7 +1058,7 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
     }
   else
     {
-      if (eq8)
+      if (eq7)
         bgy3d_vec_read2 ("x%d%d-fft.bin", m, c_fft); /* ready for use as is */
       else
         bgy3d_vec_read2 ("c%d%d-fft.bin", m, c_fft); /* ready for use as is */
@@ -1169,10 +1169,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .t_fft = (void*) t_fft,
       };
 
-    if (eq8)
-      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq8, X);
-    else
+    if (eq7)
       bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq7, X);
+    else
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq8, X);
   }
 
   /*
