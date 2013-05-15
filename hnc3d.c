@@ -521,14 +521,16 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
  * h(r) = c(r) + γ(r)
  * μ := ½h²(r) - c(r) - ½h(r)c(r)
  */
-static void compute_mu (Vec c, Vec t, Vec mu)
+static void compute_mu (Vec c_s, Vec h, Vec c_l, Vec mu)
 {
-  real pure f (real c, real t)
+  real pure f (real c_s, real h, real c_l)
   {
     /* h = c + γ */
-    return 0.5 * (c + t) * (c + t) - c - 0.5 * (c + t) * c;
+    return 0.5 * SQR(h)         /* h2 term */
+          - c_s - 0.5 * h * c_s /* short range part of hc */
+          - 0.5 * h * c_l;      /* long range part of hc */
   }
-  vec_map2 (mu, f, c, t);
+  vec_map3 (mu, f, c_s, h, c_l);
 }
 
 /*
@@ -546,8 +548,9 @@ static void compute_mu (Vec c, Vec t, Vec mu)
             D
 */
 static void chempot_density (int m,
-                            Vec c[m][m], Vec t[m][m], /* in */
-                            Vec mu)                   /* out */
+                            Vec c_s[m][m], Vec h[m][m], /* in */
+                            Vec c_l[m][m],  /* in, long range */
+                            Vec mu)         /* out */
 {
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
@@ -555,7 +558,9 @@ static void chempot_density (int m,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
     {
-      compute_mu (c[i][j], t[i][j], dmu);
+
+      compute_mu (c_s[i][j], h[i][j], c_l[i][j], dmu);
+
       VecAXPY (mu, 1.0, dmu);
     }
 
