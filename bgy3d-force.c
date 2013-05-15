@@ -169,8 +169,6 @@ void bgy3d_pair_potential (const State *BHD,
   FOR_DIM
     h[dim] = BHD->PD->h[dim];
 
-  VecSet (v_short, 0.0);
-
   real ***v_short_;
   DMDAVecGetArray (BHD->da, v_short, &v_short_);
 
@@ -188,8 +186,7 @@ void bgy3d_pair_potential (const State *BHD,
 
           const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-          v_short_[i[2]][i[1]][i[0]] +=
-            lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
+          v_short_[i[2]][i[1]][i[0]] = lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
         }
   DMDAVecRestoreArray (BHD->da, v_short, &v_short_);
 
