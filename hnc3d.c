@@ -623,7 +623,7 @@ static real chempot (const State *HD, int m,
   that.
 
   Historically  this  code supported  another  mode  where the  direct
-  correlation  c served as  a primary  variable x.   In that  case the
+  correlation  c served  as  a  primary variable.   In  that case  the
   indirect correlation t was a functional of that.
 */
 void hnc3d_solvent_solve (const ProblemData *PD,
@@ -638,13 +638,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   /*
-    This  will be  a functional  y(x) of  primary variable  x,  y(x) =
-    c(t). Earlier versions supported direct correlation c as a primary
-    variable  so  that  in that  case  one  had  y(x)  == t(c)  as  an
-    alternative.
+    Most of these  Vecs will be a functional of  primary variable t or
+    constant.  Earlier  versions supported  direct correlation c  as a
+    primary variable.
   */
-  Vec y[m][m];                  /* FIXME: not deallocated */
-  vec_create2 (HD->da, m, y);
+  Vec c[m][m];                  /* FIXME: not deallocated */
+  vec_create2 (HD->da, m, c);
 
   local Vec t_fft[m][m];
   vec_create2 (HD->dc, m, t_fft); /* complex */
@@ -672,18 +671,18 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
 
   /*
-    For primary variable x there are  two ways to access the data: via
-    the long Vec X and m * (m  + 1) / 2 shorter Vec x[m][m] aliased to
-    the subsections of the longer one.
+    For primary variable  t there will be two  excusive ways to access
+    the data:  via the  long Vec  T or  m * (m  + 1)  / 2  shorter Vec
+    t[m][m] aliased to the subsections of the longer one.
   */
-  local Vec X = vec_pack_create2 (HD->da, m); /* long Vec */
+  local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
 
-  /* Zero as intial guess  for x == t is not the  same as zero initial
-     guess for x == c: */
-  VecSet (X, 0.0);
+  /* Zero as intial guess for t  is not the same as zero initial guess
+     for c: */
+  VecSet (T, 0.0);
 
   /*
-    Find an X such that dX  as returned by iterate_t2 (&ctx, X, dX) is
+    Find a T  such that dT as returned by iterate_t2  (&ctx, T, dT) is
     zero.  Cast is there to silence  the mismatch in the type of first
     pointer argument: struct Ctx2* vs. void*:
   */
@@ -694,28 +693,30 @@ void hnc3d_solvent_solve (const ProblemData *PD,
         .m = m,
         .v_short = (void*) v_short,       /* in */
         .v_long_fft = (void*) v_long_fft, /* in */
-        .y = (void*) y,                   /* work, c(t), not t(c) */
-        .t_fft = (void*) t_fft,           /* work */
-        .c_fft = (void*) c_fft,           /* work */
+        .y = (void*) c,                   /* work, c(t)*/
+        .t_fft = (void*) t_fft,           /* work, fft(t) */
+        .c_fft = (void*) c_fft,           /* work, fft(c(t)) */
         .w_fft = (void*) w_fft,           /* in */
       };
 
-    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, X);
+    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, T);
   }
 
-  /* Now that  X = T has  converged we will post-process  it using the
-     aliases x[][]: */
-  local Vec x[m][m];
-  vec_aliases_create2 (X, m, x); /* aliases to subsections */
+  /* Now  that T  has  converged  we will  post-process  it using  the
+     aliases t[][]: */
+  local Vec t[m][m];
+  vec_aliases_create2 (T, m, t); /* aliases to subsections */
 
   /*
+    The approach with the primary variable  x == t won over time.  The
+    direct correlation c(t) is  a dependent quantity! FIXME: we assume
+    that the  value of c on  exit from the SNES  solver corresponds to
+    the final t. If not, recompute it with compute_c() again.
+
     This saves c??-fft.bin (including  the long-range part) to disk to
-    be  used in  solute/solvent calculations.   The approach  with the
-    primary variable  x ==  t won over  time.  The  direct correlation
-    c(t) is a dependent quantity y(x)!
+    be used in solute/solvent calculations:
   */
   {
-    Vec (*c)[m] = y;            /* read-only alias */
     const real dV = PD->h[0] * PD->h[1] * PD->h[2];
 
     /*
@@ -751,22 +752,21 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     bgy3d_vec_save2 ("c%d%d-fft.bin", m, c_fft);
   }
 
-  /* chemical potential */
+  /* Chemical potential */
   {
-    /* c = y, t = x */
-    const real mu = chempot (HD, m, y, x, v_long_fft);
+    const real mu = chempot (HD, m, c, t, v_long_fft);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
   }
 
 
-  /*
-    h = c  + t, store in Vec y.  The  expression is valid irrespective
-    of whether (x, y) == (c, t) or  (x, y) == (t, c) as both appear as
-    a sum x + y == t + c here:
-  */
+  /* h = c + t, store in Vec c: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      VecAXPY (y[i][j], 1.0, x[i][j]);
+      VecAXPY (c[i][j], 1.0, t[i][j]); /* FIXME: misnomer! */
+
+  /*
+   * From this point on Vec c[][] holds h[][]!
+   */
 
   /*
     Compute  the  solvent susceptibility,  χ  =  ω  + ρh,  in  Fourier
@@ -780,7 +780,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       v_short[][],  Fourier  rep in  Vec  v_long_fft[][]. Contents  of
       v_short[][] and v_long_fft[][] will be overwritten!
     */
-    Vec (*h)[m] = y;            /* read-only */
+    Vec (*h)[m] = c;            /* read-only */
     Vec (*chi)[m] = v_short;
     Vec (*chi_fft)[m] = v_long_fft;
     const real dV = PD->h[0] * PD->h[1] * PD->h[2];
@@ -821,10 +821,10 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     bgy3d_vec_save2 ("x%d%d-fft.bin", m, chi_fft);
   }
 
-  /* g = 1 + h, store in Vec y for output: */
+  /* g = 1 + h, store in Vec c for output: */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      VecShift (y[i][j], 1.0);
+      VecShift (c[i][j], 1.0);  /* FIXME: misnomer! */
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&t); */
@@ -838,15 +838,15 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     for (int j = 0; j < i; j++)
       vec_destroy (&w_fft[i][j]);
 
-  vec_aliases_destroy2 (X, m, x);
-  vec_pack_destroy2 (&X);
+  vec_aliases_destroy2 (T, m, t);
+  vec_pack_destroy2 (&T);
 
   bgy3d_state_destroy (HD);
 
   /* Dont forget to vec_destroy2() it! */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      g[i][j] = g[j][i] = y[i][j];
+      g[i][j] = g[j][i] = c[i][j]; /* FIXME: misnomer! */
 
   bgy3d_vec_save2 ("g%d%d.bin", m, g);
 }
