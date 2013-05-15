@@ -1218,13 +1218,31 @@ void hnc3d_solute_solve (const ProblemData *PD,
   solvent_kernel (HD, m, c_fft);
 
   /*
-    Get  solute-solvent interaction.   Fill v[]  with  the short-range
-    potential. FIXME: long-range Coulomb is ignored yet:
+    Get  solute-solvent interaction.  Fill  v[i] with  the short-range
+    potential acting on solvent site "i". FIXME: asymptotic Coulomb is
+    assumed to be short-range and is added to to total potential:
   */
-  bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v,          /* out */
-                      NULL, NULL, /* no coulomb */
-                      NULL);      /* no electrons */
+  {
+    /* Asymptotic Coulomb field of the (often neutral) solute: */
+    local Vec uc = vec_create (HD->da);
+    local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
+
+    bgy3d_solute_field (HD, m, solvent, n, solute,
+                        v, uc,  /* out */
+                        uc_rho, /* smeared core density, discarded */
+                        NULL);  /* no electronic density */
+
+    /*
+      If   the  solute  is   neutral,  asymptotic   electrostatics  is
+      short-range  (if  you  dare   to  call  dipole  field  that,  of
+      course). Add it to the rest:
+    */
+    for (int i = 0; i < m; i++)
+      VecAXPY (v[i], solvent[i].charge, uc);
+
+    vec_destroy (&uc);
+    vec_destroy (&uc_rho);
+  }
 
   /*
     For primary variable x there are  two ways to access the data: via
