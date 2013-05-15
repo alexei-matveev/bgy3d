@@ -221,30 +221,8 @@ void bgy3d_force (State *BHD,
   FOR_DIM
     h[dim] = PD->h[dim];
 
-  const real L = PD->interval[1] - PD->interval[0];
   const real off = PD->interval[0];
   const real beta = PD->beta;
-
-  /* FIXME: only periodic[0] == {0.0, 0.0, 0.0} appears to be used: */
-  real periodic[27][3] = \
-    {{0, 0, 0},
-     {L, 0, 0}, {-L, 0, 0}, {0, L, 0}, {0, -L, 0}, {0, 0, L}, {0, 0, -L},
-     {L, L, 0}, {-L, L, 0}, {L, -L, 0}, {-L, -L, 0},
-     {L, L, L}, {-L, L, L}, {L, -L, L}, {-L, -L, L},
-     {L, L, -L}, {-L, L, -L}, {L, -L, -L}, {-L, -L, -L},
-     {0, L, L}, {0, -L, L}, {0, L, -L}, {0, -L, -L},
-     {L, 0, L}, {-L, 0, L}, {L, 0, -L}, {-L, 0, -L}};
-
-  FOR_DIM
-    {
-      VecSet (f_short[dim], 0.0);
-      VecSet (f_long[dim], 0.0);
-    }
-
-  if (u_ini)
-    VecSet (u_ini, 0.0);
-
-  /* FIXME: see how c2 is being assigned, not incremented! */
 
   /*
     Compute long-range  Coulomb potential and  corresponding forces by
@@ -296,12 +274,11 @@ void bgy3d_force (State *BHD,
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        for (int cell = 0; cell < 1; cell++) /* FIXME: one of 27 unit cells */
           {
             /* set force vectors */
             real r[3];
             FOR_DIM
-              r[dim] = i[dim] * h[dim] + off + periodic[cell][dim];
+              r[dim] = i[dim] * h[dim] + off;
 
             const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
@@ -311,18 +288,17 @@ void bgy3d_force (State *BHD,
               by the respective factors:
             */
             if (u_ini)
-              u_ini_[i[2]][i[1]][i[0]] +=                               \
+              u_ini_[i[2]][i[1]][i[0]] =
                 lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
 
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
-              f_short_[dim][i[2]][i[1]][i[0]] +=                        \
-              lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, G, q2);
+              f_short_[dim][i[2]][i[1]][i[0]] =
+                lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, G, q2);
 
             /*
               Deterministic  correction.   Original  version  did  not
-              respect the  damp factors for  this.  FIXME: assignment,
-              not increment here as a sum over cells would imply, why?
+              respect the damp factors for this.
             */
             if (c2)
               c2_[i[2]][i[1]][i[0]] =
