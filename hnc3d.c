@@ -403,7 +403,7 @@ compute_t2 (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
   a) HNC iteration for an indirect correlation t = h - c
 
      t    ->  dt = t    - t
-      in           out    in
+      in            out    in
 
      where other  intermediates are considered a function  of that. In
      particular  in this case  another important  intermediate is  y =
@@ -413,7 +413,7 @@ compute_t2 (int m, real rho, Vec c_fft[m][m], Vec w_fft[m][m], Vec t_fft[m][m])
      is considered a function of that:
 
      c    ->  dc = c    - c
-      in           out    in
+      in            out    in
 
      In this case the indirect  correlation γ is considered a function
      of c and is stored in y = t(c).
@@ -1013,10 +1013,13 @@ static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
   /*
     fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
     correlation  c2  of  the  pure solvent.   The  "convolution  star"
-    corresponds to a matrix multiplication in the k-space.
+    corresponds to  a matrix multiplication  in the k-space:  for each
+    solvent site sum over solvent sites.
 
-    For  each solvent  site sum  over solvent  sites. Let  the overall
-    scale include a factor for inverse FFT right away:
+    Let the overall  scale include a factor for  forward & inverse FFT
+    right away  --- check how  we (i) conveniently forgot  to multiply
+    h_fft[] with grid weight h³  after forward FFT and (ii) the result
+    of inverse FFT is also not divided by L³ as everywhere else:
   */
   compute_t1 (m, rho / N3, c_fft, ctx->h_fft, ctx->t_fft);
 
@@ -1077,12 +1080,15 @@ static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
       t   = (χ - 1) * c
        vu     vv       vu
 
-    Here  here  χ  is   the  constatnt  solvent  susceptibility.   The
-    "convolution star"  corresponds to a matrix  multiplication in the
-    k-space. Note that the input in chi_fft[][] corresponds to χ - 1.
+    Here χ  is the constant solvent  susceptibility.  The "convolution
+    star" corresponds  to a matrix multiplication in  the k-space: for
+    each solvent site sum over  solvent sites.  Note that the input in
+    chi_fft[][] corresponds to χ - 1.
 
-    For  each solvent  site sum  over solvent  sites. Let  the overall
-    scale include a factor for inverse FFT right away:
+    Let the overall  scale include a factor for  forward & inverse FFT
+    right away  --- check how  we (i) conveniently forgot  to multiply
+    c_fft[] with grid weight h³  after forward FFT and (ii) the result
+    of inverse FFT is also not divided by L³ as everywhere else:
   */
   compute_t1 (m, 1.0 / N3, chi_fft, c_fft, ctx->t_fft);
 
