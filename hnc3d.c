@@ -567,6 +567,54 @@ static void chempot_density (int m,
   vec_destroy (&dmu);
 }
 
+/* interface to get chemical potential from Vector c, t, and
+ * v_long_fft, return the value of chemical potential  */
+static real chempot (const State *HD, int m,
+                     Vec c[m][m], Vec t[m][m],
+                     Vec v_long_fft[m][m])
+{
+  const ProblemData *PD = HD->PD;
+  const real beta = PD->beta;
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L = PD->interval[1] - PD->interval[0];
+
+  /* vector for chemical potential density */
+  local Vec mu_dens = vec_create (HD->da);
+  local Vec v_h[m][m];         /* vector for h */
+  local Vec v_long_real[m][m]; /* vector for long-range correction */
+  vec_create2 (HD->da, m, v_long_real);
+  vec_create2 (HD->da, m, v_h);
+
+  /* h = c + t */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+    {
+      /* VecAXPBYPCZ(z, alpha, beta, gamma, x, y)
+       * z = alpha * x + beta *y + gamms * z */
+      VecAXPBYPCZ (v_h[i][j], 1.0, 1.0, 0.0, c[i][j], t[i][j]);
+
+      /* Get real representation of long-range coulomb potential */
+      MatMultTranspose (HD->fft_mat, v_long_fft[i][j],
+                        v_long_real[i][j]);
+
+      /* scale v_long_real to get long-range correction of c
+       * c_l := -beta * v_long_real */
+      VecScale (v_long_real[i][j], -beta/L/L/L);
+    }
+
+  /* get β-scaled chemical potential density */
+  chempot_density (m, c, v_h, v_long_real, mu_dens);
+
+  /* Volume integral scaled by a factor: */
+  const real mu = PD->rho * vec_sum (mu_dens) * h3 / PD->beta;
+
+  vec_destroy (&mu_dens);
+  vec_destroy2 (m, v_long_real);
+  vec_destroy2 (m, v_h);
+
+  return mu;
+}
+
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
   correlation c  and other quantities  of HNC equation.   The indirect
@@ -705,19 +753,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* chemical potential */
   {
-    const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-    local Vec mu_dens = vec_create (HD->da);
-
-    /* x == t; y == c */
-    chempot_density (m, y, x, mu_dens);
-
-    /* Volume integral scaled by a factor: */
-    const real mu = PD->rho * vec_sum (mu_dens) * h3 / PD->beta;
-
+    /* c = y, t = x */
+    const real mu = chempot (HD, m, y, x, v_long_fft);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
-
-    bgy3d_vec_save ("mu_dens.bin", mu_dens);
-    vec_destroy (&mu_dens);
   }
 
 
