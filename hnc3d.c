@@ -556,7 +556,7 @@ static void chempot_density (int m,
   local Vec dmu = vec_duplicate (mu);
 
   for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
+    for (int j = 0; j < m; j++)
     {
 
       compute_mu (c_s[i][j], h[i][j], c_l[i][j], dmu);
