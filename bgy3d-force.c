@@ -95,40 +95,15 @@ static void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
    centered Vec: */
 static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 {
-  const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-
-  /* Get local portion of the k-grid */
-  int x[3], n[3], i[3];
-  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  complex ***uc_fft_;
-  DMDAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
-
-   /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          int ic[3];
-
-          /* Take negative frequencies for i > N/2: */
-          FOR_DIM
-            ic[dim] = KFREQ (i[dim], N[dim]);
-
-          /* FIXME: integer sum of squares will overflow for N >> 20000! */
-          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
-
-          /*
-            Potential,  a  complex number  with  zero imaginary  part.
-            FIXME:  we  take a  square  root  here,  but in  the  most
-            interesting case the Coulomb long is ~k^2 anyway:
-          */
-          uc_fft_[i[2]][i[1]][i[0]] =
-            coulomb_long_fourier ((2 * M_PI / L) * sqrt (k2), 1.0, G);
-        }
-  DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
+  /*
+    Tabulate  spherically  symmetric   function  around  grid  corner.
+    Potential is a complex number with zero imaginary part.
+  */
+  complex pure f (real k)
+  {
+    return coulomb_long_fourier (k, 1.0, G);
+  }
+  vec_kmap (BHD, f, uc_fft);
 
   /*
     Translate  the Coulomb long  field uc_fft  so that  the real-space
@@ -136,7 +111,7 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
     representations  and not  at  the grid  corner.   This amounts  to
     scaling the k-components by a phase factor:
   */
-  bgy3d_vec_fft_trans (BHD->dc, N, uc_fft);
+  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, uc_fft);
 }
 
 
@@ -233,34 +208,12 @@ void bgy3d_pair_potential (const State *BHD,
   const real sigma = 0.5 * (a.sigma + b.sigma);
   const real q2 = a.charge * b.charge;
 
-  real interval[2];
-  interval[0] = BHD->PD->interval[0];
-  interval[1] = BHD->PD->interval[1];
-
-  real h[3];
-  FOR_DIM
-    h[dim] = BHD->PD->h[dim];
-
-  real ***v_short_;
-  DMDAVecGetArray (BHD->da, v_short, &v_short_);
-
-  int n[3], x[3], i[3];
-  DMDAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
-        {
-          real r[3];
-          FOR_DIM
-            r[dim] = i[dim] * h[dim] + interval[0];
-
-          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
-
-          v_short_[i[2]][i[1]][i[0]] = lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
-        }
-  DMDAVecRestoreArray (BHD->da, v_short, &v_short_);
+  /* Tabulate spherically symmetric function around grid center: */
+  real pure f (real r)
+  {
+    return lennard_jones_coulomb_short (r, sigma, epsilon, G, q2);
+  }
+  vec_rmap (BHD, f, v_short);
 
   /* Long-range part of the potential is best represented by FFT: */
   coulomb_long_fft (BHD, G, v_long_fft);
@@ -286,15 +239,7 @@ void bgy3d_force (State *BHD,
   const real epsilon = damp_LJ * sqrt (a.epsilon * b.epsilon);
   const real q2 = damp * (a.charge * b.charge);
 
-  const ProblemData *PD = BHD->PD;
-  const DA da = BHD->da;
-
-  real h[3];
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  const real off = PD->interval[0];
-  const real beta = PD->beta;
+  const real beta = BHD->PD->beta;
 
   /*
     Compute long-range  Coulomb potential and  corresponding forces by
@@ -324,23 +269,50 @@ void bgy3d_force (State *BHD,
 
   /*
     Sort-range  potential/force is  specific  for each  pair, on  the
-    other hand:
-  */
-  PetscScalar ***u_ini_;
-  if (u_ini)
-    DMDAVecGetArray (da, u_ini, &u_ini_);
+    other hand.
 
-  PetscScalar ***c2_;
+    Lennard-Jones and Coulomb short  potential. Note that the strength
+    of LJ and Coulomb contributions  has been scaled by the respective
+    factors:
+  */
+  if (u_ini)
+    {
+      real pure f (real r)
+      {
+        return lennard_jones_coulomb_short (r, sigma, epsilon, G, q2);
+      }
+      vec_rmap (BHD, f, u_ini);
+    }
+
+  /*
+    Deterministic  correction.  Original version  did not  respect the
+    damp factors for this.
+  */
   if (c2)
-    DMDAVecGetArray (da, c2, &c2_);
+    {
+      real pure f (real r)
+      {
+        /* FIXME: argument order? */
+        return exp (-beta * lennard_jones_repulsive (r, epsilon, sigma));
+      }
+      vec_rmap (BHD, f, c2);
+    }
+
+
+  /* Now tabulate the short-range forces: */
+  real h[3];
+  FOR_DIM
+    h[dim] = BHD->PD->h[dim];
+
+  const real off = BHD->PD->interval[0];
 
   PetscScalar ***(f_short_[3]);
   FOR_DIM
-    DMDAVecGetArray (da, f_short[dim], &f_short_[dim]);
+    DMDAVecGetArray (BHD->da, f_short[dim], &f_short_[dim]);
 
   /* Get local portion of the grid */
   int x[3], n[3], i[3];
-  DMDAGetCorners (da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
   for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
@@ -354,33 +326,12 @@ void bgy3d_force (State *BHD,
 
             const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
-            /*
-              Lennard-Jones and Coulomb short potential. Note that the
-              strength of LJ and Coulomb contributions has been scaled
-              by the respective factors:
-            */
-            if (u_ini)
-              u_ini_[i[2]][i[1]][i[0]] =
-                lennard_jones_coulomb_short (r_s, sigma, epsilon, G, q2);
-
             /* Lennard-Jones and Coulomb short forces: */
             FOR_DIM
               f_short_[dim][i[2]][i[1]][i[0]] =
                 lennard_jones_coulomb_short_grad (r_s, r[dim], sigma, epsilon, G, q2);
-
-            /*
-              Deterministic  correction.   Original  version  did  not
-              respect the damp factors for this.
-            */
-            if (c2)
-              c2_[i[2]][i[1]][i[0]] =
-                exp (-beta * lennard_jones_repulsive (r_s, epsilon, sigma));
           }
 
-  if (u_ini)
-    DMDAVecRestoreArray (da, u_ini, &u_ini_);
-  if (c2)
-    DMDAVecRestoreArray (da, c2, &c2_);
   FOR_DIM
-    DMDAVecRestoreArray (da, f_short[dim], &f_short_[dim]);
+    DMDAVecRestoreArray (BHD->da, f_short[dim], &f_short_[dim]);
 }
