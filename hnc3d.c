@@ -589,9 +589,7 @@ static real chempot (const State *HD, int m,
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
     {
-      /* VecAXPBYPCZ(z, alpha, beta, gamma, x, y)
-       * z = alpha * x + beta *y + gamms * z */
-      VecAXPBYPCZ (v_h[i][j], 1.0, 1.0, 0.0, c[i][j], t[i][j]);
+      VecWAXPY (v_h[i][j], 1.0, c[i][j], t[i][j]);
 
       /* Get real representation of long-range coulomb potential */
       MatMultTranspose (HD->fft_mat, v_long_fft[i][j],
