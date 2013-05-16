@@ -274,3 +274,38 @@ Electronic energies:
 
 * -42.289934379628 (post-scf)
 * -42.289922799953 (scf)
+
+
+Using analytical Coulomb potential and the real-space representation of FFT Coulomb potential to calculate the long-range correction of excess chemical potential
+=================================================================================================================================================================
+
+The excess chemical potential is calculated by the volume integral, cf.:
+
+$\beta\mu$ = 4$\pi\rho\int [\frac{1}{2}h^2(r) - c(r) - \frac{1}{2}h(r)c(r)] r^2dr$
+
+to get the long-range component of c(r) term, we need the long-range
+tail of coulomb potential, which could be obtained from two sources:
+analytical expression and real-space represention of FFT.
+
+Here we list the results of two solvents: simple charged LJ solvent
+and modified TIP3P water. It could be obserbed that the difference
+between the results of anaylical and FFT coulomb potential is tiny.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ ("LJC" (("LJ" (0.0 0.0 0.0) 1.0 1.0 -0.1)
+	 ("LJ" (0.0 0.0 0.5) 0.5 1.0 +0.1)))
+
+ ("water"
+   (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
+    ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
+    ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Excess chemical potential (kcal):
+
+solvent            analytical            FFT
+-------            ----------            ----------
+LJC                16.292235             16.292285
+water              -6.320048             -6.309774
+---------------------------------------------------
+
