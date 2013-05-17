@@ -615,6 +615,63 @@ static real chempot2 (const State *HD, int m,
 }
 
 /*
+  Returns the β-scaled "density" of the chemical potential
+  Here we pass c(r) and h(r) for solvent-solute pair
+*/
+static void chempot_density1 (int m,
+                              Vec c[m], Vec h[m], /* in */
+                              Vec mu)             /* out */
+{
+  /* incremental for all solvent sites */
+  local Vec dmu = vec_duplicate (mu);
+  /* work vector, used in the place of long-range correction */
+  local Vec work = vec_duplicate (mu);
+  /* no long-range correction */
+  VecSet (work, 0.0);
+
+  for (int i = 0; i < m; i++)
+  {
+    compute_mu (c[i], h[i], work, dmu);
+
+    VecAXPY (mu, 1.0, dmu);
+  }
+
+  vec_destroy (&dmu);
+  vec_destroy (&work);
+}
+
+/* interface to get chemical potential of solute-solvent pair from
+ * Vector t and h, return the value of chemical potential*/
+static real chempot1 (const State *HD, int m,
+                      Vec t[m], Vec h[m])
+{
+  const ProblemData *PD = HD->PD;
+  const real beta = PD->beta;
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+
+  /* vector for chemical potential density */
+  local Vec mu_dens = vec_create (HD->da);
+  /* we need direct correlation c in chempot_density */
+  local Vec c[m];
+  vec_create1 (HD->da, m, c);
+
+  /* c = h - t */
+  for (int i = 0; i < m; i++)
+    VecWAXPY (c[i], -1.0, t[i], h[i]);
+
+  /* get β-scaled chemical potential density */
+  chempot_density1 (m, c, h, mu_dens);
+
+  /* Volume integral scaled by a factor: */
+  const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
+
+  vec_destroy (&mu_dens);
+  vec_destroy1 (m, c);
+
+  return mu;
+}
+
+/*
   Solving for indirect correlation t = h - c and thus, also for direct
   correlation c  and other quantities  of HNC equation.   The indirect
   correlation  t appears  as  a  primary variable  x  here. All  other
@@ -1289,6 +1346,13 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
     for (int i = 0; i < m; i++)
       compute_h (PD->beta, v[i], x[i], y[i]);
+
+    /* excess chemical potential */
+    {
+    /* x == t, y == h */
+    const real mu = chempot1 (HD, m, x, y);
+    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+    }
 
     vec_aliases_destroy1 (X, m, x);
   }
