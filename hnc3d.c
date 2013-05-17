@@ -540,17 +540,18 @@ static void compute_mu (Vec c_s, Vec h, Vec c_l, Vec mu)
 
   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
 
-  Here we pass c(r) and γ(r) = h(r) - c(r)
+  Here we pass c(r) and h(r) and long-range part of c(r) for
+  solvent-solvent pair
 
   Volume integral in cartesian grid is actually:
 
   Vol(D) = ∫∫∫dxdydz
             D
 */
-static void chempot_density (int m,
-                            Vec c_s[m][m], Vec h[m][m], /* in */
-                            Vec c_l[m][m],  /* in, long range */
-                            Vec mu)         /* out */
+static void chempot_density2 (int m,
+                              Vec c_s[m][m], Vec h[m][m], /* in */
+                              Vec c_l[m][m],  /* in, long range */
+                              Vec mu)         /* out */
 {
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
@@ -567,11 +568,11 @@ static void chempot_density (int m,
   vec_destroy (&dmu);
 }
 
-/* interface to get chemical potential from Vector c, t, and
- * v_long_fft, return the value of chemical potential  */
-static real chempot (const State *HD, int m,
-                     Vec c[m][m], Vec t[m][m],
-                     Vec v_long_fft[m][m])
+/* interface to get chemical potential of solvent-solvent pair from
+ * Vector c, t, and v_long_fft, return the value of chemical potential*/
+static real chempot2 (const State *HD, int m,
+                      Vec c[m][m], Vec t[m][m],
+                      Vec v_long_fft[m][m])
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -601,10 +602,10 @@ static real chempot (const State *HD, int m,
     }
 
   /* get β-scaled chemical potential density */
-  chempot_density (m, c, v_h, v_long_real, mu_dens);
+  chempot_density2 (m, c, v_h, v_long_real, mu_dens);
 
   /* Volume integral scaled by a factor: */
-  const real mu = PD->rho * vec_sum (mu_dens) * h3 / PD->beta;
+  const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
 
   vec_destroy (&mu_dens);
   vec_destroy2 (m, v_long_real);
@@ -752,7 +753,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* Chemical potential */
   {
-    const real mu = chempot (HD, m, c, t, v_long_fft);
+    const real mu = chempot2 (HD, m, c, t, v_long_fft);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
   }
 
