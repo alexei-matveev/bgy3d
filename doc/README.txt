@@ -276,19 +276,37 @@ Electronic energies:
 * -42.289922799953 (scf)
 
 
-Using analytical Coulomb potential and the real-space representation of FFT Coulomb potential to calculate the long-range correction of excess chemical potential
-=================================================================================================================================================================
+1d- and 3d-RISM with HNC closure
+================================
 
-The excess chemical potential is calculated by the volume integral, cf.:
+Analytical vs. FFT expression for real space long-range Coulomb
+---------------------------------------------------------------
 
-$\beta\mu$ = 4$\pi\rho\int [\frac{1}{2}h^2(r) - c(r) - \frac{1}{2}h(r)c(r)] r^2dr$
+Using analytical  expression for the real space  representation of the
+long-range  Coulomb  potential and  the  FFT  transform  of the  (also
+analytical)  Fourier space  representation of  the  long-range Coulomb
+potential  will  not   necessarily  produce  identical  results.   The
+real-space representation of the  long-range Coulomb potential is used
+to calculate  the long-range part  of the direct  correlation function
+and thus contributes to the  excess chemical potential.  In 1d-RISM we
+compute the  finite grid real space representation  from an analytical
+expression. In 3d-RISM we use the FFT transform instead.
 
-to get the long-range component of c(r) term, we need the long-range
-tail of coulomb potential, which could be obtained from two sources:
-analytical expression and real-space represention of FFT.
+The excess  chemical potential is  calculated by the  volume integral,
 
-Here we list the results of two solvents: simple charged LJ solvent
-and modified TIP3P water. It could be obserbed that the difference
+$$
+\beta\mu =
+         \rho\int \left[\frac{1}{2}h^2(\vec{r})
+          - c(\vec{r})
+          - \frac{1}{2}h(\vec{r})c(\vec{r})\right] d^3r,
+$$
+
+to  get the  long-range component  of $c(\vec{r})$  term, we  need the
+long-range tail of Coulomb potential, which could be obtained from two
+sources: analytical expression and real-space represention of FFT.
+
+Here we  list the results of  two solvents: simple  charged LJ solvent
+and modified  TIP3P water.  It could be  obserbed that  the difference
 between the results of anaylical and FFT coulomb potential is tiny.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -303,9 +321,9 @@ between the results of anaylical and FFT coulomb potential is tiny.
 
 Excess chemical potential (kcal):
 
-solvent            analytical            FFT
+Solvent            Analytical            FFT
 -------            ----------            ----------
 LJC                16.292235             16.292285
-water              -6.320048             -6.309774
+Water              -6.320048             -6.309774
 ---------------------------------------------------
 
