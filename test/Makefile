@@ -59,7 +59,7 @@ hnc-diffs = \
 # By default "make"  all the diffs. Unomment the  second entry to also
 # run HNC3D tests:
 #
-all: bgy-tests # hnc-tests
+all: bgy-tests hnc-tests
 bgy-tests: $(bgy-diffs)
 hnc-tests: $(hnc-diffs)
 
