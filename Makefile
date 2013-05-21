@@ -75,6 +75,7 @@ srcdir = .
 
 # Compiler and compiler options
 CC       = gcc
+FC       = gfortran
 CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS) $(if $(shared), -fPIC)
 FFLAGS   = -std=f2008 -Wall $(if $(shared), -fPIC)
 LDFLAGS  =
