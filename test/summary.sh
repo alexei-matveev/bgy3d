@@ -27,5 +27,8 @@ grep "with long-range electrostatic" $file | tail -1
 # Energy from PG
 grep -A1 "Total energy of solute with solvent" $file | tail -2
 
+# Excess chemical potential in RISM/HNC3D calculations:
+grep "mu =" $file
+
 # This is to satisfy GNU Make:
 exit 0
