@@ -327,3 +327,35 @@ LJC                16.292235             16.292285
 Water              -6.320048             -6.309774
 ---------------------------------------------------
 
+
+Excess chemical potential of 1D-RISM v.s. 3D-RISM model
+-------------------------------------------------------
+
+This section contains the excess chemical potential results obtained
+from our implementation of 1D- and 3D-RISM model. Besides "LJC" and
+modified TIP3P water solvent used in last section, we also compare the
+values of several simple solvents:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+("LJ" (("LJ" (0.0 0.0 0.0) 1.0 1.0 0.0)))
+
+("LJ2" (("LJ" (0.0 0.0 0.0) 1.0 1.0 0.0)
+        ("LJ" (0.0 0.0 0.5) 0.5 1.0 0.0)))
+
+("OW" (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From the tables below, we could see that numbers solved from 3D-RISM
+model are close to their counterparts in 1D-RISM model.
+
+Excess chemical potential (kcal):
+
+Solvent            3D-RISM               1D-RISM
+-------            ----------            ----------
+LJ                 15.580806             15.854951
+LJ2                16.476489             16.542005
+LJC                16.292285             16.385851
+OW                  6.910124              6.940968
+Water              -6.309774             -6.303708
+---------------------------------------------------
+
