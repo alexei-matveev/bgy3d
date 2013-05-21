@@ -135,7 +135,7 @@
 #include <math.h>               /* expm1() */
 
 
-static const bool eq7 = false;  /* Eq. (7) vs. Eq. (8) */
+static const bool eq7 = true;   /* Eq. (7) vs. Eq. (8) */
 
 /*
   There  are several  closure  relations, all  must  satisfy the  same
