@@ -1598,7 +1598,7 @@ contains
 
   function chempot (rho, h, cs, cl) result (mu)
     !
-    ! Computes the  chemical potential, βμ(r) by  integration over the
+    ! Computes  the chemical  potential, βμ,  by integration  over the
     ! volume:
     !
     !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
