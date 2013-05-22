@@ -743,7 +743,7 @@ contains
     block
        integer :: p, i, j
        real  (rk) :: cl(nrad, m, m)
-       real  (rk) :: mu_dens(nrad), mu
+       real  (rk) :: mu
 
        ! Real-space rep of the long-range correlation:
        forall (p = 1:nrad, i = 1:m, j = 1:m)
@@ -751,21 +751,18 @@ contains
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
-       ! Chemical potential to be integrated:
-       mu_dens = chempot_density (rho, c + t, c, cl)
-       mu = integrate (mu_dens) * dr**3 / beta
+       ! Chemical potential:
+       mu = chempot (rho, c + t, c, cl) * (dr**3 / beta)
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
-       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs, then mu"
+       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs"
        do p = 1, nrad
           write (*, *) r(p), &
                &     ((v(p, i, j), i=1,j), j=1,m), &
                &     ((t(p, i, j), i=1,j), j=1,m), &
                &     ((c(p, i, j), i=1,j), j=1,m), &
-               &     ((g(p, i, j), i=1,j), j=1,m), &
-               &       4 * pi * r(p)**2 * mu_dens(p)
-
+               &     ((g(p, i, j), i=1,j), j=1,m)
        enddo
     end block
 
@@ -889,7 +886,7 @@ contains
     block
        integer :: p, i, j
        real  (rk) :: cl(nrad, n, m)
-       real  (rk) :: mu_dens(nrad), mu
+       real  (rk) :: mu
 
        ! Real-space rep of the long-range correlation:
        forall (p = 1:nrad, i = 1:n, j = 1:m)
@@ -897,21 +894,18 @@ contains
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
-       ! Chemical potential to be integrated:
-       mu_dens = chempot_density (rho, c + t, c, cl)
-       mu = integrate (mu_dens) * dr**3 / beta
+       ! Chemical potential:
+       mu = chempot (rho, c + t, c, cl) * (dr**3 / beta)
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
-       print *, "# r, and v, t, c, g, each for m * n pairs, then mu"
+       print *, "# r, and v, t, c, g, each for m * n pairs"
        do p = 1, nrad
           write (*, *) r(p), &
                &     ((v(p, i, j), i=1,n), j=1,m), &
                &     ((t(p, i, j), i=1,n), j=1,m), &
                &     ((c(p, i, j), i=1,n), j=1,m), &
-               &     ((g(p, i, j), i=1,n), j=1,m), &
-               &       4 * pi * r(p)**2 * mu_dens(p)
-
+               &     ((g(p, i, j), i=1,n), j=1,m)
        enddo
     end block
 
@@ -1601,4 +1595,32 @@ contains
        mu(p) = muH + muS + muL
     enddo
   end function chempot_density
+
+  function chempot (rho, h, cs, cl) result (mu)
+    !
+    ! Computes the  chemical potential, βμ(r) by  integration over the
+    ! volume:
+    !
+    !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+    !
+    ! Here dr == 1, scale the result by dr³ if that is not the case.
+    !
+    use fft, only: integrate
+    implicit none
+    real (rk), intent (in) :: rho(:)      ! (m)
+    real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
+    real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
+    real (rk) :: mu
+    ! *** end of interface ***
+
+    real (rk) :: density (size (h, 1))
+
+    ! Chemical potential density to be integrated:
+    density = chempot_density (rho, h, cs, cl)
+
+    ! Multiply that by dr³ and divide by β to get the real number:
+    mu = integrate (density)
+  end function chempot
+
 end module rism
