@@ -23,8 +23,27 @@ module fft
   real (rk), parameter, public :: FT_FW = 1           ! == a
   real (rk), parameter, public :: FT_BW = (2 * pi)**3 ! == b
 
-  public :: fourier_many        ! x(1:n, *) -> y(1:n, *)
-
+  !
+  ! Functions operated upon by fourier(), integrate() and their fellow
+  ! siblings depend on radius "r" only and are represented by an array
+  ! such as f(1:n) where
+  !
+  !   f  = f(dr * [2 * i - 1] / 2),  1 <= i <= n
+  !    i
+  !
+  ! and  dr  =  1  for  the  purposes  of  the  current  module.   The
+  ! corresponding  Fourier transforms are  represented by  a similarly
+  ! spaced k-grid,
+  !
+  !   g  = f(dk * [2 * k - 1] / 2),  1 <= k <= n
+  !    k
+  !
+  ! albeit with dk related to dr by the following expression:
+  !
+  !   dr * dk = 2π / 2n
+  !
+  public :: fourier_many        ! f(1:n, *) -> g(1:n, *)
+  public :: integrate           ! f(1:n) -> scalar
   !
   ! *** END OF INTERFACE ***
   !
@@ -119,6 +138,29 @@ contains
   end function fourier
 
 
+  function integrate (f) result (g)
+    !
+    ! Approximates 4π  ∫f(r)r²dr.  Should  be "related" to  the k  = 0
+    ! component of the  FT. This is also the  only reason the function
+    ! is put into this module.
+    !
+    implicit none
+    real (rk), intent (in) :: f(:)
+    real (rk) :: g
+    ! *** end of interface ***
+
+    integer :: i, n
+
+    n = size (f)
+
+    g = 0
+    do i = n, 1, -1
+       g = g + f(i) * (2 * i - 1)**2 / 4
+    enddo
+    g = 4 * pi * g
+  end function integrate
+
+
   subroutine dst_many (f)
     use iso_c_binding, only: c_int
     implicit none
@@ -207,25 +249,25 @@ contains
     ! Backward transform:
     h = fourier (g) * (dk**3 / FT_BW)
 
-    print *, "# norm (f )^2 =", sum ((r * f)**2) * 4 * pi * dr
-    print *, "# norm (g )^2 =", sum ((k * g)**2) * 4 * pi * dk
-    print *, "# norm (f')^2 =", sum ((r * h)**2) * 4 * pi * dr
+    print *, "# norm (f )^2 =", integrate (f**2) * dr**3
+    print *, "# norm (g )^2 =", integrate (g**2) * dk**3
+    print *, "# norm (f')^2 =", integrate (h**2) * dr**3
 
     print *, "# |f - f'| =", maxval (abs (f - h))
 
-    print *, "# int (f') =", sum (r**2 * h) * 4 * pi * dr
-    print *, "# int (f ) =", sum (r**2 * f) * 4 * pi * dr
+    print *, "# int (f') =", integrate (h) * dr**3
+    print *, "# int (f ) =", integrate (f) * dr**3
 
     ! This should correspond  to the convolution (f *  f) which should
     ! be again a gaussian, twice as "fat":
     h = g * g
     h = fourier (h) * (dk**3 / FT_BW)
 
-    print *, "# int (h ) =", sum (r**2 * h) * 4 * pi * dr
+    print *, "# int (h ) =", integrate (h) * dr**3
 
     ! Compare width as <r^2>:
-    print *, "# sigma (f) =", sum (r**4 * f) * 4 * pi * dr
-    print *, "# sigma (h) =", sum (r**4 * h) * 4 * pi * dr
+    print *, "# sigma (f) =", integrate (r**2 * f) * dr**3
+    print *, "# sigma (h) =", integrate (r**2 * h) * dr**3
 
     ! print *, "# n=", n
     ! print *, "# r, f, k, g, h = (f*f)"
@@ -622,7 +664,7 @@ contains
 
 
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, chi)
-    use fft, only: fourier_many, FT_FW, FT_BW
+    use fft, only: fourier_many, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site
     implicit none
@@ -711,7 +753,7 @@ contains
 
        ! Chemical potential to be integrated:
        mu_dens = chempot_density (rho, c + t, c, cl)
-       mu = 4 * pi * sum (r**2 * mu_dens) * dr / beta
+       mu = integrate (mu_dens) * dr**3 / beta
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
@@ -784,6 +826,7 @@ contains
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute)
     use snes, only: snes_default
     use foreign, only: site
+    use fft, only: integrate
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -856,7 +899,7 @@ contains
 
        ! Chemical potential to be integrated:
        mu_dens = chempot_density (rho, c + t, c, cl)
-       mu = 4 * pi * sum (r**2 * mu_dens) * dr / beta
+       mu = integrate (mu_dens) * dr**3 / beta
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
