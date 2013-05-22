@@ -1169,6 +1169,8 @@ contains
        c = closure_kh (beta, v, t)
     case (PY)
        c = closure_py (beta, v, t)
+    case default
+       c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
   end function closure
 
