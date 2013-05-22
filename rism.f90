@@ -427,7 +427,12 @@ module foreign
      real (c_double) :: charge              ! charge
   end type site
 
-  ! Keep this in sync with bgy3d.h:
+  ! Keep these in sync with bgy3d.h:
+  enum, bind (c)
+     enumerator :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
+  end enum
+  public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
+
   type, public, bind (c) :: problem_data
      real (c_double) :: interval(2) ! min and max of the domain: 3d-box
      real (c_double) :: h(3)        ! mesh width
@@ -442,6 +447,7 @@ module foreign
      integer (c_int) :: max_iter ! Maximal number of iterations.
      real (c_double) :: norm_tol ! Convergence threshold.
      real (c_double) :: zpad     ! FIXME: ???
+     integer (c_int) :: closure  ! enum for HNC, KH, or PY
   end type problem_data
 
   !
@@ -525,6 +531,7 @@ contains
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
+    print *, "# closure=", pd % closure
     print *, "# rho=", pd % rho
     print *, "# beta=", pd % beta
     print *, "# L=", rmax

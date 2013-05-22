@@ -194,6 +194,9 @@ extern int verbosity;
 */
 typedef double real;
 
+/* There are a few closures available for HNC-like methods: */
+typedef enum {CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY} ClosureEnum;
+
 typedef struct ProblemData
 {
   real interval[2];             /* min and max of the domain: 3d-box*/
@@ -209,6 +212,7 @@ typedef struct ProblemData
   int max_iter;                 /* Maximal number of iterations. */
   real norm_tol;                /* Convergence threshold. */
   real zpad;                    /* FIXME: ??? */
+  ClosureEnum closure;          /* HNC, KH, or PY */
 } ProblemData;
 
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*

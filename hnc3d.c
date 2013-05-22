@@ -201,22 +201,22 @@ static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
 }
 
 
-static void compute_c (real beta, Vec v, Vec t, Vec c)
+static void compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 {
-  char closure[20] = "HNC";
-  bgy3d_getopt_string ("--closure", closure, sizeof closure);
-
-  if (strcmp (closure, "HNC") == 0)
-    compute_c_HNC (beta, v, t, c);
-  else if (strcmp (closure, "KH") == 0)
-    compute_c_KH (beta, v, t, c);
-  else if (strcmp (closure, "PY") == 0)
-    compute_c_PY (beta, v, t, c);
-  else
+  switch (closure)
     {
-      PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
-      exit (1);
+    case CLOSURE_HNC:
+      compute_c_HNC (beta, v, t, c);
+      break;
+    case CLOSURE_KH:
+      compute_c_KH (beta, v, t, c);
+      break;
+    case CLOSURE_PY:
+      compute_c_PY (beta, v, t, c);
+      break;
     }
+  /* No  default,  let the  compiler  warn if  we  do  not handle  all
+     cases. */
 }
 
 
@@ -249,9 +249,9 @@ static void compute_c (real beta, Vec v, Vec t, Vec c)
   solvent to produce the same result as the pure solvent if we use the
   "native" closure here:
 */
-static void compute_h (real beta, Vec v, Vec t, Vec h)
+static void compute_h (ClosureEnum closure, real beta, Vec v, Vec t, Vec h)
 {
-  compute_c (beta, v, t, h);
+  compute_c (closure, beta, v, t, h);
   VecAXPY (h, 1.0, t);
 }
 
@@ -460,7 +460,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        compute_c (beta, v_short[i][j], t[i][j], c[i][j]);
+        compute_c (PD->closure, beta, v_short[i][j], t[i][j], c[i][j]);
 
         MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
 
@@ -1059,7 +1059,7 @@ static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
   */
   for (int i = 0; i < m; i++)
     {
-      compute_h (beta, ctx->v[i], t[i], h[i]);
+      compute_h (PD->closure, beta, ctx->v[i], t[i], h[i]);
 
       /* fft(h).   Here h is  the 3d  unknown hole  density h1  of the
          solvent sites. */
@@ -1123,7 +1123,7 @@ static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
   */
   for (int i = 0; i < m; i++)
     {
-      compute_c (beta, ctx->v[i], t[i], c[i]);
+      compute_c (PD->closure, beta, ctx->v[i], t[i], c[i]);
 
       /* fft(c).  Here  c is the  3d unknown direct  uv-correlation of
          the solvent sites and the solute species as the whole: */
@@ -1345,7 +1345,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
     vec_aliases_create1 (X, m, x); /* aliases to subsections */
 
     for (int i = 0; i < m; i++)
-      compute_h (PD->beta, v[i], x[i], y[i]);
+      compute_h (PD->closure, PD->beta, v[i], x[i], y[i]);
 
     /* excess chemical potential */
     {
