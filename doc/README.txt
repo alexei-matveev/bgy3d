@@ -321,18 +321,18 @@ between the results of anaylical and FFT coulomb potential is tiny.
 
 Excess chemical potential (kcal):
 
-Solvent            Analytical            FFT
--------            ----------            ----------
+Solvent            Analytical                  FFT
+-------           -----------           ----------
 LJC                16.292235             16.292285
 Water              -6.320048             -6.309774
 ---------------------------------------------------
 
 
-Excess chemical potential of 1D-RISM v.s. 3D-RISM model
--------------------------------------------------------
+Excess chemical potential of 1D- and 3D-RISM for pure solvents
+--------------------------------------------------------------
 
-This section contains the excess chemical potential results obtained
-from our implementation of 1D- and 3D-RISM model. Besides "LJC" and
+This section  contains the excess chemical  potential results obtained
+from our  implementation of 1D-  and 3D-RISM model. Besides  "LJC" and
 modified TIP3P water solvent used in last section, we also compare the
 values of several simple solvents:
 
@@ -345,13 +345,13 @@ values of several simple solvents:
 ("OW" (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-From the tables below, we could see that numbers solved from 3D-RISM
+From the tables  below, we could see that  numbers solved from 3D-RISM
 model are close to their counterparts in 1D-RISM model.
 
 Excess chemical potential (kcal):
 
-Solvent            3D-RISM               1D-RISM
--------            ----------            ----------
+Solvent              3D-RISM               1D-RISM
+-------           ----------            ----------
 LJ                 15.580806             15.854951
 LJ2                16.476489             16.542005
 LJC                16.292285             16.385851
@@ -359,3 +359,61 @@ OW                  6.910124              6.940968
 Water              -6.309774             -6.303708
 ---------------------------------------------------
 
+
+Excess chemical potential in 1D- and 3D-RISM for solute/solvent systems
+-----------------------------------------------------------------------
+
+Excess chemical potential  $\mu$ (in kcal/mol) solute/solvent mixtures
+at infinite  dilutions computed by  1d- and 3d-RISM.   Excess chemical
+potential for pure  solvens computed with the same  settings is quoted
+for  reference. Most  of  the calculations  involving charged  solvent
+sites in realisitc water model diverge when employing HNC closure with
+the default Newton solver (indicated by "-").
+
+Species               in       1D-HNC         3D-HNC
+-------            ----- ------------   ------------
+Pure solvent:
+Ow                           6.922977       6.930328
+Nw                           6.981084       6.973021
+Water                       -6.262289      -6.281097
+Solute/Solvent:
+Ow                  Ow       6.922977       6.930328
+                    Nw       6.550974       6.542975
+                    Water    5.980016       5.943212
+Nw                  Ow       7.087025       6.604694
+                    Nw       6.981084       6.234882
+                    Water    6.627866       5.657242
+Water               Ow       7.087025       6.604694
+                    Nw       6.981084       6.234882
+                    Water   -6.262280              -
+Hydrogen chloride   Ow       8.057284       7.801370
+                    Nw       7.588731       7.001046
+                    Water    6.009940              -
+Methanol            Ow      13.621287      11.399124
+                    Nw      14.078878      10.526617
+                    Water    1.432886              -
+Butanoic acid       Ow      33.758116      27.205191
+                    Nw      36.250502      24.535412
+                    Water   25.450272              -
+Carbon disulfide    Ow      15.511894      14.193590
+                    Nw      14.597500      12.476879
+                    Water   10.910771              -
+Hexane              Ow      42.384342      32.110759
+                    Nw      46.609190      29.196929
+                    Water   44.770328              -
+----------------------------------------------------
+
+Here "Ow"  is a  single-site LJ water  model derived from  SPC/E water
+model  by removing  the hydrogens  and  setting the  oxygen charge  to
+zero. "Nw" is a three-site water model derived from the modified TIP3P
+water  model by  setting all  site charges  to zero.   "Water"  is the
+modified  TIP3P  water model.   See  `guile/solutes.scm` for  details.
+FIXME: As it stands "Ow" does not directly derive from "Nw".
+
+The numbers in this section were  obtained with 1d-RISM (N = 1024) and
+3d-RISM (N = 128) and the rest of the settings like this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--N $N --L 10.0 --beta 1.6889
+--max-iter 1000 --rho 0.033427745 --norm-tol 1e-12
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
