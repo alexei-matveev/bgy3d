@@ -207,6 +207,18 @@ void bgy3d_problem_data_print (const ProblemData *PD)
   PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);
   PetscPrintf (PETSC_COMM_WORLD, "max-iter = %d\n", PD->max_iter);
   PetscPrintf (PETSC_COMM_WORLD, "zpad = %g\n", PD->zpad);
+  switch (PD->closure)
+    {
+    case CLOSURE_HNC:
+      PetscPrintf (PETSC_COMM_WORLD, "closure = HNC\n");
+      break;
+    case CLOSURE_KH:
+      PetscPrintf (PETSC_COMM_WORLD, "closure = KH\n");
+      break;
+    case CLOSURE_PY:
+      PetscPrintf (PETSC_COMM_WORLD, "closure = PY\n");
+      break;
+    }
 }
 
 real** Load_Molecule(int *N)
