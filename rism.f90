@@ -1196,8 +1196,10 @@ contains
   end function closure_hnc
 
 
+  !
   ! For x <= 0 the same as exp(x) - 1, but does not grow exponentially
   ! for positive x:
+  !
   elemental function lexpm1 (x) result (y)
     use foreign, only: expm1
     implicit none
@@ -1212,7 +1214,10 @@ contains
     endif
   end function lexpm1
 
+
+  !
   ! 2) Kovalenko-Hirata (KH) closure.
+  !
   elemental function closure_kh (beta, v, t) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t
