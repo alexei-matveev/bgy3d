@@ -416,6 +416,7 @@ module foreign
   implicit none
   private
 
+  public :: expm1
   public :: bgy3d_problem_data
 
   ! Keep this in sync with bgy3d-solutes.h:
@@ -459,6 +460,14 @@ module foreign
        implicit none
        type (problem_data) :: pd
      end function bgy3d_problem_data
+
+     ! From libm:
+     pure function expm1 (x) result (y) bind (c)
+       import c_double
+       implicit none
+       real (c_double), intent (in), value :: x
+       real (c_double) :: y
+     end function expm1
   end interface
 end module foreign
 
@@ -531,11 +540,11 @@ contains
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
-    print *, "# closure=", pd % closure
-    print *, "# rho=", pd % rho
-    print *, "# beta=", pd % beta
-    print *, "# L=", rmax
-    print *, "# n=", nrad
+    print *, "# closure =", pd % closure
+    print *, "# rho =", pd % rho
+    print *, "# beta =", pd % beta
+    print *, "# L =", rmax
+    print *, "# n =", nrad
     print *, "# Solvent:"
     do i = 1, m
        print *, "#", i, &
@@ -550,7 +559,7 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism_vv (nrad, rmax, pd % beta, rho, solvent)
+    call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent)
   end subroutine rism_solvent
 
 
@@ -572,10 +581,11 @@ contains
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
-    print *, "# rho=", pd % rho
-    print *, "# beta=", pd % beta
-    print *, "# L=", rmax
-    print *, "# n=", nrad
+    print *, "# closure =", pd % closure
+    print *, "# rho =", pd % rho
+    print *, "# beta =", pd % beta
+    print *, "# L =", rmax
+    print *, "# n =", nrad
 
     print *, "# Solvent:"
     do i = 1, m
@@ -604,18 +614,19 @@ contains
        ! Solvent susceptibility χ = ω + ρh:
        real (rk) :: chi(nrad, m, m)
 
-       call rism_vv (nrad, rmax, pd % beta, rho, solvent, chi)
+       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi)
 
-       call rism_uv (nrad, rmax, pd % beta, rho, solvent, chi, solute)
+       call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi, solute)
     end block
   end subroutine rism_solute
 
 
-  subroutine rism_vv (nrad, rmax, beta, rho, sites, chi)
+  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, chi)
     use fft, only: fourier_many, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site
     implicit none
+    integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
     real (rk), intent (in) :: rmax         ! cell size
     real (rk), intent (in) :: beta         ! inverse temp
@@ -664,7 +675,7 @@ contains
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
-    c = closure_hnc (beta, v, t)
+    c = closure (method, beta, v, t)
     g = 1 + c + t
 
     !
@@ -728,7 +739,7 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure_hnc (beta, v, t)
+      c = closure (method, beta, v, t)
 
       ! Forward FT via DST:
       c = fourier_many (c) * (dr**3 / FT_FW)
@@ -770,10 +781,11 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (nrad, rmax, beta, rho, solvent, chi, solute)
+  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute)
     use snes, only: snes_default
     use foreign, only: site
     implicit none
+    integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
     real (rk), intent (in) :: rmax         ! cell size
     real (rk), intent (in) :: beta         ! inverse temp
@@ -827,7 +839,7 @@ contains
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
-    c = closure_hnc (beta, v, t)
+    c = closure (method, beta, v, t)
     g = 1 + c + t
 
     ! Done with it, print results:
@@ -873,7 +885,7 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure_hnc (beta, v, t)
+      c = closure (method, beta, v, t)
 
       ! Forward FT via DST:
       c = fourier_many (c) * (dr**3 / FT_FW)
@@ -1099,6 +1111,24 @@ contains
   end function coulomb_short
 
 
+  elemental function closure (method, beta, v, t) result (c)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: beta, v, t
+    real (rk) :: c
+    ! *** end of interface ***
+
+    select case (method)
+    case (HNC)
+       c = closure_hnc (beta, v, t)
+    case (KH)
+       c = closure_kh (beta, v, t)
+    case (PY)
+       c = closure_py (beta, v, t)
+    end select
+  end function closure
+
   !
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
   ! correlation function c  in real space.  See OZ  equation below for
@@ -1110,15 +1140,57 @@ contains
   !   c := exp (-βv + γ) - 1 - γ
   !
   elemental function closure_hnc (beta, v, t) result (c)
+    use foreign, only: expm1
     implicit none
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
     ! *** end of interface ***
 
-    ! exp (-beta * v + t) - 1.0 - t:
-    c = exp (-beta * v + t) - 1 - t
+    ! c = exp (-beta * v + t) - 1 - t
+    c = expm1 (-beta * v + t) - t
   end function closure_hnc
 
+
+  ! For x <= 0 the same as exp(x) - 1, but does not grow exponentially
+  ! for positive x:
+  elemental function lexpm1 (x) result (y)
+    use foreign, only: expm1
+    implicit none
+    real (rk), intent (in) :: x
+    real (rk) :: y
+    ! *** end of interface ***
+
+    if (x <= 0.0) then
+       y = expm1 (x)
+    else
+       y = x
+    endif
+  end function lexpm1
+
+  ! 2) Kovalenko-Hirata (KH) closure.
+  elemental function closure_kh (beta, v, t) result (c)
+    implicit none
+    real (rk), intent (in) :: beta, v, t
+    real (rk) :: c
+    ! *** end of interface ***
+
+    ! Note that lexpm1() /= expm1():
+    c = lexpm1 (-beta * v + t) - t
+  end function closure_kh
+
+
+  ! 3)  Percus-Yevick  (PY)   closure  relation  between  direct-  and
+  ! indirect correlation c and γ:
+  !
+  !   c := exp (-βv) [1 + γ] - 1 - γ
+  elemental function closure_py (beta, v, t) result (c)
+    implicit none
+    real (rk), intent (in) :: beta, v, t
+    real (rk) :: c
+    ! *** end of interface ***
+
+    c = exp (-beta * v) * (1 + t) - 1 - t
+  end function closure_py
 
   !
   ! Use the k-representation of Ornstein-Zernike (OZ) equation
