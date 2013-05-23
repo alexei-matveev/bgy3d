@@ -678,8 +678,6 @@ contains
     optional :: chi
     ! *** end of interface ***
 
-    real (rk), parameter :: half = 0.5
-
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
          v, vk, t, c, g, wk
@@ -696,8 +694,8 @@ contains
     dr = rmax / nrad
     dk = pi / rmax
     forall (i = 1:nrad)
-       r(i) = (i - half) * dr
-       k(i) = (i - half) * dk
+       r(i) = (2 * i - 1) * dr / 2
+       k(i) = (2 * i - 1) * dk / 2
     end forall
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
@@ -835,8 +833,6 @@ contains
     type (site), intent (in) :: solute(:)  ! (n)
     ! *** end of interface ***
 
-    real (rk), parameter :: half = 0.5
-
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
          v, vk, t, c, g
@@ -858,8 +854,8 @@ contains
     dr = rmax / nrad
     dk = pi / rmax
     forall (i = 1:nrad)
-       r(i) = (i - half) * dr
-       k(i) = (i - half) * dk
+       r(i) = (2 * i - 1) * dr / 2
+       k(i) = (2 * i - 1) * dk / 2
     end forall
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
