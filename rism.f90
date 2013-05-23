@@ -752,7 +752,7 @@ contains
        end forall
 
        ! Chemical potential:
-       mu = chempot (rho, c + t, c, cl) * (dr**3 / beta)
+       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
@@ -895,7 +895,7 @@ contains
        end forall
 
        ! Chemical potential:
-       mu = chempot (rho, c + t, c, cl) * (dr**3 / beta)
+       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
 
        print *, "# rho=", rho, "beta=", beta, "n=", nrad
        print *, "# mu=", mu, "(kcal)"
@@ -1517,7 +1517,7 @@ contains
     enddo
   end function pad
 
-  function chempot_density (rho, h, cs, cl) result (mu)
+  function chempot_density (method, rho, h, cs, cl) result (mu)
     !
     ! Returns the β-scaled "density" of the chemical potential, βμ(r).
     ! To  get the  excess  chemical potential  integrate  it over  the
@@ -1568,7 +1568,9 @@ contains
     !     J.  Phys.   Chem.  B,   2005,  109  (36),   pp  17290–17295,
     !     http://dx.doi.org/10.1021/jp053259i
     !
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho(:)      ! (m)
     real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
     real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
@@ -1577,7 +1579,19 @@ contains
     ! *** end of interface ***
 
     integer :: p, i, j
-    real (rk) :: muH, muS, muL
+    real (rk) :: muH, muS, muL, thresh
+
+    select case (method)
+    case (KH)
+       ! The h² term contributes only in the depletion regions (KH):
+       thresh = 0.0
+    case (HNC)
+       ! The h² term contributes unconditionally (HNC):
+       thresh = - huge (thresh)
+    case default
+       ! There is no h² term otherwise (GF):
+       thresh = huge (thresh)
+    end select
 
     do p = 1, size (h, 1)       ! nrad
        muH = 0.0
@@ -1585,7 +1599,15 @@ contains
        muL = 0.0
        do j = 1, size (h, 3)    ! m
           do i = 1, size (h, 2) ! n
-             muH = muH + rho(j) * h(p, i, j)**2 / 2
+             ! The h² term contributes conditionally. Eventually, only
+             ! depletion regions  (h < 0)  contribute (KH).  Threshold
+             ! is  supposed to  be  0.0 for  KH functional  (depletion
+             ! regions contribute),  anywhere between 1 and  +∞ for GF
+             ! functional  (no such  term) and  -∞ for  HNC functional
+             ! (contributes unconditionally):
+             if (-h(p, i, j) > thresh) then
+                muH = muH + rho(j) * h(p, i, j)**2 / 2
+             endif
 
              muS = muS + rho(j) * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
              muL = muL + rho(j) * (             - h(p, i, j) * cl(p, i, j) / 2)
@@ -1596,7 +1618,7 @@ contains
     enddo
   end function chempot_density
 
-  function chempot (rho, h, cs, cl) result (mu)
+  function chempot (method, rho, h, cs, cl) result (mu)
     !
     ! Computes  the chemical  potential, βμ,  by integration  over the
     ! volume:
@@ -1607,6 +1629,7 @@ contains
     !
     use fft, only: integrate
     implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho(:)      ! (m)
     real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
     real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
@@ -1617,7 +1640,7 @@ contains
     real (rk) :: density (size (h, 1))
 
     ! Chemical potential density to be integrated:
-    density = chempot_density (rho, h, cs, cl)
+    density = chempot_density (method, rho, h, cs, cl)
 
     ! Multiply that by dr³ and divide by β to get the real number:
     mu = integrate (density)
