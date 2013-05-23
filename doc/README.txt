@@ -370,38 +370,38 @@ for  reference. Most  of  the calculations  involving charged  solvent
 sites in realisitc water model diverge when employing HNC closure with
 the default Newton solver (indicated by "-").
 
-Species               in    1D-HNC    3D-HNC     1D-KH   GF/1D-KH
--------            -----  --------  --------  --------  ---------
+Species               in    1D-HNC  GF/1D-HNC    3D-HNC     1D-KH   GF/1D-KH
+-------            -----  -------- ----------  --------  --------  ---------
 Pure solvent:
-Ow                           6.923     6.930
-Nw                           6.981     6.973
-Water                       -6.262    -6.281    -5.767     -9.562
+Ow                           6.923                6.930
+Nw                           6.981                6.973
+Water                       -6.262   -12.097     -6.281    -5.767     -9.562
 Solute/Solvent:
-Ow                  Ow       6.923     6.930
-                    Nw       6.551     6.543
-                    Water    5.980     5.943     6.495      4.571
-Nw                  Ow       7.087     6.605
-                    Nw       6.981     6.235
-                    Water    6.628     5.657     7.131      3.670
-Water               Ow       7.087     6.605
-                    Nw       6.981     6.235
-                    Water   -6.262         -    -5.767     -9.562
-Hydrogen chloride   Ow       8.057     7.801
-                    Nw       7.589     7.001
-                    Water    6.010         -     6.779      2.874
-Methanol            Ow      13.621    11.399
-                    Nw      14.079    10.527
-                    Water    1.433         -     2.351     -6.942
-Butanoic acid       Ow      33.758    27.205
-                    Nw      36.251    24.535
-                    Water   25.450         -    27.818     -1.944
-Carbon disulfide    Ow      15.512    14.194
-                    Nw      14.598    12.477
-                    Water   10.911         -    12.365      4.854
-Hexane              Ow      42.384    32.111
-                    Nw      46.609    29.197
-                    Water   44.770         -    47.536      7.115
------------------------------------------------------------------
+Ow                  Ow       6.923                6.930
+                    Nw       6.551                6.543
+                    Water    5.980     3.106      5.943     6.495      4.571
+Nw                  Ow       7.087                6.605
+                    Nw       6.981                6.235
+                    Water    6.628     1.889      5.657     7.131      3.670
+Water               Ow       7.087                6.605
+                    Nw       6.981                6.235
+                    Water   -6.262   -12.097          -    -5.767     -9.562
+Hydrogen chloride   Ow       8.057                7.801
+                    Nw       7.589                7.001
+                    Water    6.010     0.692          -     6.779      2.874
+Methanol            Ow      13.621               11.399
+                    Nw      14.079               10.527
+                    Water    1.433    -9.721          -     2.351     -6.942
+Butanoic acid       Ow      33.758               27.205
+                    Nw      36.251               24.535
+                    Water   25.450    -6.318          -    27.818     -1.944
+Carbon disulfide    Ow      15.512               14.194
+                    Nw      14.598               12.477
+                    Water   10.911     1.938          -    12.365      4.854
+Hexane              Ow      42.384               32.111
+                    Nw      46.609               29.197
+                    Water   44.770     2.118          -    47.536      7.115
+----------------------------------------------------------------------------
 
 Here "Ow"  is a  single-site LJ water  model derived from  SPC/E water
 model  by removing  the hydrogens  and  setting the  oxygen charge  to
