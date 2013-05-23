@@ -601,7 +601,12 @@ contains
     ! density/temperature:
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
-    call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent)
+    block
+       ! Solvent susceptibility χ = ω + ρh (computed but discarded):
+       real (rk) :: chi(nrad, m, m)
+
+       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi)
+    end block
   end subroutine rism_solvent
 
 
@@ -675,12 +680,11 @@ contains
     real (rk), intent (in) :: rho(:)       ! (m)
     type (site), intent (in) :: sites(:)   ! (m)
     real (rk), intent(out) :: chi(:, :, :) ! (nrad, m, m)
-    optional :: chi
     ! *** end of interface ***
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
-         v, vk, t, c, g, wk
+         v, vk, t, c, wk
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -716,26 +720,23 @@ contains
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
     c = closure (method, beta, v, t)
-    g = 1 + c + t
 
     !
     ! When requested  by the caller return the  susceptibility χ(k) in
     ! Fourier rep:
     !
-    if (present (chi)) then
-       block
-          real (rk) :: h(nrad, m, m)
-          integer :: i, j
+    block
+       real (rk) :: h(nrad, m, m)
+       integer :: i, j
 
-          h = fourier_many (c + t) * (dr**3 / FT_FW)
+       h = fourier_many (c + t) * (dr**3 / FT_FW)
 
-          do i = 1, m
-             do j = 1, m
-                chi(:, i, j) = wk(:, i, j) + rho(i) * h(:, i, j)
-             enddo
+       do i = 1, m
+          do j = 1, m
+             chi(:, i, j) = wk(:, i, j) + rho(i) * h(:, i, j)
           enddo
-       end block
-    endif
+       enddo
+    end block
 
     ! Done with it, print results. Here solute == solvent:
     call post_process (method, beta, rho, sites, sites, dr, v, t)
