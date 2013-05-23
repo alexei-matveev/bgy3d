@@ -912,7 +912,7 @@ contains
     !
     ! Prints some results.
     !
-    use foreign, only: site
+    use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -935,8 +935,8 @@ contains
        real (rk) :: r(nrad)
        real (rk) :: c(nrad, n, m)
        real (rk) :: cl(nrad, n, m)
+       real (rk) :: h(nrad, n, m)
        real (rk) :: g(nrad, n, m)
-       real (rk) :: mu
 
        ! Dont like to pass redundant info, recompute r(:) from dr:
        forall (i = 1:nrad)
@@ -945,7 +945,8 @@ contains
 
        ! For the same reason recomute c and g:
        c = closure (method, beta, v, t)
-       g = 1 + c + t
+       h = c + t
+       g = 1 + h
 
        ! Real-space rep of the long-range correlation:
        forall (p = 1:nrad, i = 1:n, j = 1:m)
@@ -953,11 +954,28 @@ contains
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
-       ! Chemical potential:
-       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
-
        print *, "# rho =", rho, "beta =", beta, "n =", nrad
-       print *, "# mu =", mu, "(kcal)"
+
+       ! Chemical potentials:
+       block
+          ! FIXME: as implemented, for method == PY the default energy
+          ! functional is GF:
+          integer :: methods(3) = [HNC, KH, PY]
+          character(len=3) :: names(size (methods)) = ["HNC", "KH ", "GF "]
+          real (rk) :: mu(size (methods))
+          integer :: i
+
+          do i = 1, size (methods)
+             mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
+          enddo
+
+          print *, "# Chemical potentials, default is marked with *:"
+          do i = 1, size (methods)
+             print *, "# mu =", mu(i), "kcal (", names(i), ")", merge ("*", " ", method == methods(i))
+          enddo
+       end block
+
+       ! This prints a lot of data on tty!
        print *, "# r, and v, t, c, g, each for",  n, "x", m, "pairs"
        do p = 1, nrad
           write (*, *) r(p), &
