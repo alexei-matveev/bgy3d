@@ -737,32 +737,8 @@ contains
        end block
     endif
 
-    ! Done with it, print results:
-    block
-       integer :: p, i, j
-       real  (rk) :: cl(nrad, m, m)
-       real  (rk) :: mu
-
-       ! Real-space rep of the long-range correlation:
-       forall (p = 1:nrad, i = 1:m, j = 1:m)
-          cl(p, i, j) = -beta * sites(i) % charge * sites(j) % charge &
-               * EPSILON0INV * coulomb_long (r(p), ALPHA)
-       end forall
-
-       ! Chemical potential:
-       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
-
-       print *, "# rho=", rho, "beta=", beta, "n=", nrad
-       print *, "# mu=", mu, "(kcal)"
-       print *, "# r, and v, t, c, g, each for m * (m + 1) / 2 pairs"
-       do p = 1, nrad
-          write (*, *) r(p), &
-               &     ((v(p, i, j), i=1,j), j=1,m), &
-               &     ((t(p, i, j), i=1,j), j=1,m), &
-               &     ((c(p, i, j), i=1,j), j=1,m), &
-               &     ((g(p, i, j), i=1,j), j=1,m)
-       enddo
-    end block
+    ! Done with it, print results. Here solute == solvent:
+    call post_process (method, beta, rho, sites, sites, dr, v, t)
 
   contains
 
@@ -835,7 +811,7 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v, vk, t, c, g
+         v, vk, t, c
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: &
@@ -873,37 +849,8 @@ contains
     ! Lenny does not support that:
     call snes_default (iterate_t, t)
 
-    ! Do not assume c has a meaningfull value, it was overwritten with
-    ! c(k):
-    c = closure (method, beta, v, t)
-    g = 1 + c + t
-
     ! Done with it, print results:
-    block
-       integer :: p, i, j
-       real  (rk) :: cl(nrad, n, m)
-       real  (rk) :: mu
-
-       ! Real-space rep of the long-range correlation:
-       forall (p = 1:nrad, i = 1:n, j = 1:m)
-          cl(p, i, j) = -beta * solute(i) % charge * solvent(j) % charge &
-               * EPSILON0INV * coulomb_long (r(p), ALPHA)
-       end forall
-
-       ! Chemical potential:
-       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
-
-       print *, "# rho=", rho, "beta=", beta, "n=", nrad
-       print *, "# mu=", mu, "(kcal)"
-       print *, "# r, and v, t, c, g, each for m * n pairs"
-       do p = 1, nrad
-          write (*, *) r(p), &
-               &     ((v(p, i, j), i=1,n), j=1,m), &
-               &     ((t(p, i, j), i=1,n), j=1,m), &
-               &     ((c(p, i, j), i=1,n), j=1,m), &
-               &     ((g(p, i, j), i=1,n), j=1,m)
-       enddo
-    end block
+    call post_process (method, beta, rho, solvent, solute, dr, v, t)
 
   contains
 
@@ -958,6 +905,68 @@ contains
       dt = dt - t
     end function iterate_t
   end subroutine rism_uv
+
+
+  subroutine post_process (method, beta, rho, solvent, solute, dr, v, t)
+    !
+    ! Prints some results.
+    !
+    use foreign, only: site
+    implicit none
+    integer, intent (in) :: method         ! HNC, KH or PY
+    real (rk), intent (in) :: beta         ! inverse temperature
+    real (rk), intent (in) :: rho(:)       ! (m)
+    type (site), intent (in) :: solvent(:) ! (m)
+    type (site), intent (in) :: solute(:)  ! (n)
+    real (rk), intent (in) :: dr           ! grid step
+    real (rk), intent (in) :: v(:, :, :)   ! (nrad, n, m)
+    real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
+    ! *** end of interface ***
+
+    integer :: nrad, n, m
+
+    nrad = size (t, 1)
+    n = size (t, 2)
+    m = size (t, 3)
+
+    block
+       integer :: p, i, j
+       real (rk) :: r(nrad)
+       real (rk) :: c(nrad, n, m)
+       real (rk) :: cl(nrad, n, m)
+       real (rk) :: g(nrad, n, m)
+       real (rk) :: mu
+
+       ! Dont like to pass redundant info, recompute r(:) from dr:
+       forall (i = 1:nrad)
+          r(i) = (2 * i - 1) * dr / 2
+       end forall
+
+       ! For the same reason recomute c and g:
+       c = closure (method, beta, v, t)
+       g = 1 + c + t
+
+       ! Real-space rep of the long-range correlation:
+       forall (p = 1:nrad, i = 1:n, j = 1:m)
+          cl(p, i, j) = -beta * solute(i) % charge * solvent(j) % charge &
+               * EPSILON0INV * coulomb_long (r(p), ALPHA)
+       end forall
+
+       ! Chemical potential:
+       mu = chempot (method, rho, c + t, c, cl) * (dr**3 / beta)
+
+       print *, "# rho =", rho, "beta =", beta, "n =", nrad
+       print *, "# mu =", mu, "(kcal)"
+       print *, "# r, and v, t, c, g, each for",  n, "x", m, "pairs"
+       do p = 1, nrad
+          write (*, *) r(p), &
+               &     ((v(p, i, j), i=1,n), j=1,m), &
+               &     ((t(p, i, j), i=1,n), j=1,m), &
+               &     ((c(p, i, j), i=1,n), j=1,m), &
+               &     ((g(p, i, j), i=1,n), j=1,m)
+       enddo
+    end block
+  end subroutine post_process
 
 
   function omega_fourier (sites, k) result (wk)
