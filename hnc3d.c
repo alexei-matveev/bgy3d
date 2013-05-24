@@ -560,12 +560,15 @@ static void compute_mu (Vec h, Vec cs, Vec cl, Vec mu)
 
     Vol(D) = ∫∫∫dxdydz
               D
+
+  The shape of arrays passed here may be arbitrary, though in practice
+  it is either m x m or 1 x m:
 */
-static void chempot_density2 (int m,
-                              Vec h[m][m],   /* in */
-                              Vec cs[m][m],  /* in */
-                              Vec cl[m][m],  /* in, long range */
-                              Vec mu)        /* out */
+static void chempot_density (int n, int m,
+                             Vec h[n][m],  /* in */
+                             Vec cs[n][m], /* in */
+                             Vec cl[n][m], /* in, long range */
+                             Vec mu)       /* out */
 {
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
@@ -573,7 +576,7 @@ static void chempot_density2 (int m,
   /* Clear accumulator: */
   VecSet (mu, 0.0);
 
-  for (int i = 0; i < m; i++)
+  for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++)
       {
         compute_mu (h[i][j], cs[i][j], cl[i][j], dmu);
@@ -589,8 +592,8 @@ static void chempot_density2 (int m,
   Interface to get chemical potential of solvent-solvent pair from Vec
   h, c, and cl, return the value of chemical potential.
 */
-static real chempot2 (const State *HD, int m,
-                      Vec h[m][m], Vec c[m][m], Vec cl[m][m]) /* in */
+static real chempot (const State *HD, int n, int m,
+                     Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -600,58 +603,7 @@ static real chempot2 (const State *HD, int m,
   local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
-  chempot_density2 (m, h, c, cl, mu_dens);
-
-  /* Volume integral scaled by a factor: */
-  const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
-
-  vec_destroy (&mu_dens);
-
-  return mu;
-}
-
-
-/*
-  Returns the  β-scaled "density" of the chemical  potential.  Here we
-  pass h(r) and c(r) for solvent-solute pair.
-*/
-static void chempot_density1 (int m,
-                              Vec h[m], Vec c[m], Vec cl[m], /* in */
-                              Vec mu)                        /* out */
-{
-  /* Incremental for all solvent sites */
-  local Vec dmu = vec_duplicate (mu);
-
-  /* Clear accumulator: */
-  VecSet (mu, 0.0);
-
-  for (int i = 0; i < m; i++)
-    {
-      compute_mu (h[i], c[i], cl[i], dmu);
-
-      VecAXPY (mu, 1.0, dmu);
-    }
-
-  vec_destroy (&dmu);
-}
-
-
-/*
-  Interface to get chemical  potential of solute-solvent pair from Vec
-  h and c, return the value of chemical potential.
-*/
-static real chempot1 (const State *HD, int m,
-                      Vec h[m], Vec c[m], Vec cl[m])
-{
-  const ProblemData *PD = HD->PD;
-  const real beta = PD->beta;
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  /* Vector for chemical potential density */
-  local Vec mu_dens = vec_create (HD->da);
-
-  /* Get β-scaled chemical potential density */
-  chempot_density1 (m, h, c, cl, mu_dens);
+  chempot_density (n, m, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
@@ -812,7 +764,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
           VecScale (cl[i][j], -beta/L/L/L);
         }
 
-    const real mu = chempot2 (HD, m, h, c, cl);
+    /* The function chempot() operates  on rectangular arrays, we pass
+       an m x m square ones: */
+    const real mu = chempot (HD, m, m, h, c, cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
 
     vec_destroy2 (m, cl);
@@ -1266,7 +1220,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
     Vec y already has any meaningful value.
   */
 
-  /* We need direct correlation c in chempot_density() */
+  /* We need direct correlation c to compute chemical potential: */
   local Vec c[m];
   vec_create1 (HD->da, m, c);
 
@@ -1299,7 +1253,12 @@ void hnc3d_solute_solve (const ProblemData *PD,
     for (int i = 0; i < m; i++)
       VecSet (cl[i], 0.0);
 
-    const real mu = chempot1 (HD, m, h, c, cl);
+    /*
+      In  3d  models  the  solute  is  effectively  a  single  (albeit
+      non-spherical) site. Treat the arrays  h[m], c[m] and cl[m] as 1
+      x m arrays here:
+    */
+    const real mu = chempot (HD, 1, m, (void*) h, (void*) c, (void*) cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
 
     vec_destroy1 (m, cl);
