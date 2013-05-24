@@ -85,7 +85,9 @@
     χ   = 1 + ρ  h                                                 (10)
      uv        v  vv
 
-  which is equivalent to Eq. (7).
+  which is  equivalent to Eq. (7). Note  that χ, as it  stands, is not
+  symmetric, unless ρ is the same for all sites. FIXME: the code makes
+  use of this assumption!
 
   The discussion  above deals  with a special  case of a  more general
   molecular RISM equation
@@ -108,7 +110,8 @@
      uv    uv    uv    uv   vv
 
   does  not simplify  to  Eq. (7)  directly  though still  has a  very
-  similar structure.
+  similar structure. Again,  only if ρ is a scalar  one can assume the
+  solvent susceptibility χ is symmetric in site indices.
 
   [1] Numerical solution of the hypernetted chain equation for a
       solute of arbitrary geometry in three dimensions, Dmitrii Beglov
@@ -903,7 +906,9 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   solute    impurity    to    give    another   "vector"    of    site
   distributions. FIXME: the names of the local variables correspond to
   Eq. (8)  for historical reasons ---  the variant of  Beglov and Roux
-  was there first.
+  was  there first.   Also note  that the  order of  multiplication χc
+  assumes that χ is symmetric which is only the case if number density
+  of all solvent sites is the same.
 
   Here ρ  is a scalar overall  factor equal to solvent  density in one
   case or just 1 in the other case (only if the convolution theorem is
@@ -1087,9 +1092,9 @@ static void solvent_kernel (State *HD, int m, Vec chi_fft[m][m])
 
 
 /*
-  Solving  HNC3d  equations.  Direct  correlation  c  of pure  solvent
-  appears  as a  fixed  input  here. A  primary  variable is  indirect
-  correlation t related to h by one of the closure relations.
+  Solving  HNC3d equations.   Solvent  susceptibility χ  -  1 of  pure
+  solvent  appears  as a  fixed  input  here.  A primary  variable  is
+  indirect correlation t related to h by one of the closure relations.
 
   Historically  another   branch  of   the  code  treated   the  total
   correlation  h as  a primary  variable.  At  least for  water  in OW
@@ -1111,12 +1116,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
-  /*
-    This  will be  a functional  y(x) of  primary variable  x,  y(x) =
-    c(t). Earlier versions supported direct correlation c as a primary
-    variable  so  that  in that  case  one  had  y(x)  == t(c)  as  an
-    alternative.
-  */
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
@@ -1158,7 +1157,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   }
 
   /*
-    For primary variable x there are  two ways to access the data: via
+    For primary variable t there are  two ways to access the data: via
     the long Vec  T and m shorter Vec t[m]  aliased to the subsections
     of the longer one.
   */
@@ -1216,8 +1215,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /*
     Now that the solution T has  converged, use it to compute the rest
-    of the  quantities. (Re)evaluate y  := h(t) without  assuming that
-    Vec y already has any meaningful value.
+    of the  quantities. (Re)evaluate h(t) without assuming  that Vec h
+    already has any meaningful value.
   */
 
   /* We need direct correlation c to compute chemical potential: */
@@ -1285,8 +1284,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
 /*
   Solving for  h of HNC equation  with a default  non-linear solver as
-  specified  by  the  --snes-solver  option.  The  direct  correlation
-  function "c" is fixed and appears as an input here:
+  specified by the --snes-solver option.  The solvent susceptibility χ
+  - 1 is fixed and appears as an input here:
 */
 Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
 {
