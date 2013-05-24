@@ -135,8 +135,6 @@
 #include <math.h>               /* expm1() */
 
 
-static const bool eq7 = true;   /* Eq. (7) vs. Eq. (8) */
-
 /*
   There  are several  closure  relations, all  must  satisfy the  same
   interface. Vec c is intent(out) the rest is input.
@@ -974,20 +972,22 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
 /*
   In k-space compute either
 
-    t   = ρ c   *  h
-     vu      vv     vu
-
-  or
-
     t   = (χ   - 1) * c
      vu     vv         vu
 
-  Compare to Eqs.   (8) and (7) in the  header comments, respectively.
+  or
+
+    t   = ρ c   *  h
+     vu      vv     vu
+
+  Compare to Eqs.   (7) and (8) in the  header comments, respectively.
   Given that the solute index  "u" is redundant, both expressions have
   the structure of the matrix-vector product of a (fixed) solvent pair
   quantitiy  and a  (variable) "vector"  of site  distributions around
-  solute impurity to give another "vector" of site distributions. That
-  is why the code re-use.
+  solute    impurity    to    give    another   "vector"    of    site
+  distributions. FIXME: the names of the local variables correspond to
+  Eq. (8)  for historical reasons ---  the variant of  Beglov and Roux
+  was there first.
 
   Here ρ  is a scalar overall  factor equal to solvent  density in one
   case or just 1 in the other case (only if the convolution theorem is
@@ -1065,73 +1065,7 @@ typedef struct Ctx1
 } Ctx1;
 
 
-static void iterate_t1_eq8 (Ctx1 *ctx, Vec T, Vec dT)
-{
-  /* alias of the right shape: */
-  const int m = ctx->m;
-  Vec (*c_fft)[m] = (void*) ctx->c_fft;
-  Vec *h = (void*) ctx->y;      /* [m], here y = h(t) */
-
-  const ProblemData *PD = ctx->HD->PD;
-  const real rho = PD->rho;
-  const real beta = PD->beta;
-  const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
-
-  /* Establish aliases to the subsections of the long Vec T and dT: */
-  local Vec t[m], dt[m];
-  vec_aliases_create1 (T, m, t);
-  vec_aliases_create1 (dT, m, dt);
-
-  /*
-    The new candidate for the total correlation
-
-      h ~ exp (-βv + t) - 1
-
-    See comments to compute_h() for the meaning of "~".
-  */
-  for (int i = 0; i < m; i++)
-    {
-      compute_h (PD->closure, beta, ctx->v[i], t[i], h[i]);
-
-      /* fft(h).   Here h is  the 3d  unknown hole  density h1  of the
-         solvent sites. */
-      MatMult (ctx->HD->fft_mat, h[i], ctx->h_fft[i]);
-    }
-
-  /*
-    fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
-    correlation  c2  of  the  pure solvent.   The  "convolution  star"
-    corresponds to  a matrix multiplication  in the k-space:  for each
-    solvent site sum over solvent sites.
-
-    Let the overall  scale include a factor for  forward & inverse FFT
-    right away  --- check how  we (i) conveniently forgot  to multiply
-    h_fft[] with grid weight h³  after forward FFT and (ii) the result
-    of inverse FFT is also not divided by L³ as everywhere else:
-  */
-  compute_t1 (m, rho / N3, c_fft, ctx->h_fft, ctx->t_fft);
-
-  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
-  for (int i = 0; i < m; i++)
-    MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
-
-  /*
-    This  destroys the  aliases,  but  does not  free  the memory,  of
-    course. The actuall data is owned by Vec T and Vec dT. From now on
-    one may access T and dT directly again.
-  */
-  vec_aliases_destroy1 (T, m, t);
-  vec_aliases_destroy1 (dT, m, dt);
-
-  /*
-    dt := t    - t
-           out    in
-  */
-  VecAXPY (dT, -1.0, T);
-}
-
-
-static void iterate_t1_eq7 (Ctx1 *ctx, Vec T, Vec dT)
+static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
@@ -1231,12 +1165,8 @@ static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
       vec_destroy2 (m, c);
     }
   else
-    {
-      if (eq7)
-        bgy3d_vec_read2 ("x%d%d-fft.bin", m, c_fft); /* ready for use as is */
-      else
-        bgy3d_vec_read2 ("c%d%d-fft.bin", m, c_fft); /* ready for use as is */
-    }
+    bgy3d_vec_read2 ("x%d%d-fft.bin", m, c_fft); /* ready for use as is */
+
 
 }
 
@@ -1361,10 +1291,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .t_fft = (void*) t_fft,
       };
 
-    if (eq7)
-      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq7, X);
-    else
-      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1_eq8, X);
+    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, X);
   }
 
   /*
