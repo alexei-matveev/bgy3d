@@ -616,30 +616,23 @@ static real chempot2 (const State *HD, int m,
   pass h(r) and c(r) for solvent-solute pair.
 */
 static void chempot_density1 (int m,
-                              Vec h[m], Vec c[m], /* in */
-                              Vec mu)             /* out */
+                              Vec h[m], Vec c[m], Vec cl[m], /* in */
+                              Vec mu)                        /* out */
 {
   /* Incremental for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
-
-  /* Work vector for the zero long-range correlation: */
-  local Vec cl = vec_duplicate (mu);
-
-  /* No long-range correction: */
-  VecSet (cl, 0.0);
 
   /* Clear accumulator: */
   VecSet (mu, 0.0);
 
   for (int i = 0; i < m; i++)
     {
-      compute_mu (h[i], c[i], cl, dmu);
+      compute_mu (h[i], c[i], cl[i], dmu);
 
       VecAXPY (mu, 1.0, dmu);
     }
 
   vec_destroy (&dmu);
-  vec_destroy (&cl);
 }
 
 
@@ -648,7 +641,7 @@ static void chempot_density1 (int m,
   h and c, return the value of chemical potential.
 */
 static real chempot1 (const State *HD, int m,
-                      Vec h[m], Vec c[m])
+                      Vec h[m], Vec c[m], Vec cl[m])
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -658,7 +651,7 @@ static real chempot1 (const State *HD, int m,
   local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
-  chempot_density1 (m, h, c, mu_dens);
+  chempot_density1 (m, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
@@ -1295,8 +1288,21 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* Excess chemical potential: */
   {
-    const real mu = chempot1 (HD, m, h, c);
+    /*
+      So  far  the  solute/solvent  code does  not  handle  long-range
+      potential of the solute (assuming  it is neutral).  The code for
+      the chemical potential expects that. Supply zeroes:
+    */
+    local Vec cl[m];
+    vec_create1 (HD->da, m, cl);
+
+    for (int i = 0; i < m; i++)
+      VecSet (cl[i], 0.0);
+
+    const real mu = chempot1 (HD, m, h, c, cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+
+    vec_destroy1 (m, cl);
   }
   /* No more used: */
   vec_destroy1 (m, c);
