@@ -584,11 +584,10 @@ static void chempot_density2 (int m,
 
 /*
   Interface to get chemical potential of solvent-solvent pair from Vec
-  c, t, and v_long_fft, return the value of chemical potential.
+  h, c, and v_long_fft, return the value of chemical potential.
 */
 static real chempot2 (const State *HD, int m,
-                      Vec c[m][m], Vec t[m][m],
-                      Vec v_long_fft[m][m]) /* in */
+                      Vec h[m][m], Vec c[m][m], Vec v_long_fft[m][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -598,18 +597,12 @@ static real chempot2 (const State *HD, int m,
   /* vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
 
-  local Vec h[m][m];            /* vector for h */
-  vec_create2 (HD->da, m, h);
-
   local Vec cl[m][m];           /* vector for long-range correlation */
   vec_create2 (HD->da, m, cl);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
-        /* h = c + t */
-        VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
-
         /* Get real representation of long-range Coulomb potential */
         MatMultTranspose (HD->fft_mat, v_long_fft[i][j], cl[i][j]);
 
@@ -631,7 +624,6 @@ static real chempot2 (const State *HD, int m,
 
   vec_destroy (&mu_dens);
   vec_destroy2 (m, cl);
-  vec_destroy2 (m, h);
 
   return mu;
 }
@@ -800,29 +792,32 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     the final t. If not, recompute it with compute_c() again.
   */
 
-  /* Now  that T  has  converged  we will  post-process  it using  the
-     aliases t[][]: */
-  local Vec t[m][m];
-  vec_aliases_create2 (T, m, t); /* aliases to subsections */
-
   Vec h[m][m];                  /* FIXME: not deallocated! */
   vec_create2 (HD->da, m, h);
 
-  /* h = c + t: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
+  /* Compute h[][]: */
+  {
+    /* Now  that T  has  converged  we will  post-process  it using  the
+       aliases t[][]: */
+    local Vec t[m][m];
+    vec_aliases_create2 (T, m, t); /* aliases to subsections */
+
+    /* h = c + t: */
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
+
+    vec_aliases_destroy2 (T, m, t);
+  }
+  vec_pack_destroy2 (&T);
 
   /* Chemical potential */
   {
-    const real mu = chempot2 (HD, m, c, t, v_long_fft);
+    const real mu = chempot2 (HD, m, h, c, v_long_fft);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
   }
 
   /* No more used: */
-  vec_aliases_destroy2 (T, m, t);
-  vec_pack_destroy2 (&T);
-
   vec_destroy2 (m, c);
   vec_destroy2 (m, v_short);
   vec_destroy2 (m, v_long_fft);
