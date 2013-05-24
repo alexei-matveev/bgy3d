@@ -517,62 +517,80 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   VecAXPY (dT, -1.0, T);
 }
 
+
 /*
- * h(r) = c(r) + γ(r)
- * μ := ½h²(r) - c(r) - ½h(r)c(r)
- */
-static void compute_mu (Vec c_s, Vec h, Vec c_l, Vec mu)
+         2
+    μ = h / 2 - c  - h * (c + c ) / 2
+                 S         S   L
+
+  This is  a subexpression in  the summation over all  site-site pairs
+  where it is assumed that the long-range contribution in
+
+    - Σ   c
+       uv  uv
+
+  cancels out. This is the case when
+
+    c      = -βQ q v
+     L,uv       u v L
+
+  and either  solute charges Q or  the solvent charges q  sum to zero.
+  Naturally, with  an exact  arithmetics one does  not need  to handle
+  short- and long-range correlations separately in this case.
+*/
+static void compute_mu (Vec h, Vec cs, Vec cl, Vec mu)
 {
-  real pure f (real c_s, real h, real c_l)
+  real pure f (real h, real cs, real cl)
   {
-    /* h = c + γ */
-    return 0.5 * SQR(h)         /* h2 term */
-          - c_s - 0.5 * h * c_s /* short range part of hc */
-          - 0.5 * h * c_l;      /* long range part of hc */
+    return h * h / 2 - cs - h * (cs + cl) / 2;
   }
-  vec_map3 (mu, f, c_s, h, c_l);
+  vec_map3 (mu, f, h, cs, cl);
 }
 
+
 /*
-  Returns the β-scaled "density" of the chemical potential, βμ(r).
-  To  get the  excess  chemical potential  integrate  it over  the
-  volume and divide by β, cf.:
+  Returns the  β-scaled density of the chemical  potential, βμ(r).  To
+  get the excess  chemical potential integrate it over  the volume and
+  divide by β, cf.:
 
-  βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+    βμ = ρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] d³r
 
-  Here we pass c(r) and h(r) and long-range part of c(r) for
-  solvent-solvent pair
+  Here  we  pass  h(r)  and  c(r)  and long-range  part  of  c(r)  for
+  solvent-solvent pair.
 
   Volume integral in cartesian grid is actually:
 
-  Vol(D) = ∫∫∫dxdydz
-            D
+    Vol(D) = ∫∫∫dxdydz
+              D
 */
 static void chempot_density2 (int m,
-                              Vec c_s[m][m], Vec h[m][m], /* in */
-                              Vec c_l[m][m],  /* in, long range */
-                              Vec mu)         /* out */
+                              Vec h[m][m],   /* in */
+                              Vec cs[m][m],  /* in */
+                              Vec cl[m][m],  /* in, long range */
+                              Vec mu)        /* out */
 {
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < m; j++)
-    {
+      {
+        compute_mu (h[i][j], cs[i][j], cl[i][j], dmu);
 
-      compute_mu (c_s[i][j], h[i][j], c_l[i][j], dmu);
-
-      VecAXPY (mu, 1.0, dmu);
-    }
+        VecAXPY (mu, 1.0, dmu);
+      }
 
   vec_destroy (&dmu);
 }
 
-/* interface to get chemical potential of solvent-solvent pair from
- * Vector c, t, and v_long_fft, return the value of chemical potential*/
+
+/*
+  Interface to get chemical potential of solvent-solvent pair from Vec
+  c, t, and v_long_fft, return the value of chemical potential.
+*/
 static real chempot2 (const State *HD, int m,
                       Vec c[m][m], Vec t[m][m],
-                      Vec v_long_fft[m][m])
+                      Vec v_long_fft[m][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -581,67 +599,79 @@ static real chempot2 (const State *HD, int m,
 
   /* vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
-  local Vec v_h[m][m];         /* vector for h */
-  local Vec v_long_real[m][m]; /* vector for long-range correction */
-  vec_create2 (HD->da, m, v_long_real);
-  vec_create2 (HD->da, m, v_h);
 
-  /* h = c + t */
+  local Vec h[m][m];            /* vector for h */
+  vec_create2 (HD->da, m, h);
+
+  local Vec cl[m][m];           /* vector for long-range correlation */
+  vec_create2 (HD->da, m, cl);
+
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-    {
-      VecWAXPY (v_h[i][j], 1.0, c[i][j], t[i][j]);
+      {
+        /* h = c + t */
+        VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
 
-      /* Get real representation of long-range coulomb potential */
-      MatMultTranspose (HD->fft_mat, v_long_fft[i][j],
-                        v_long_real[i][j]);
+        /* Get real representation of long-range Coulomb potential */
+        MatMultTranspose (HD->fft_mat, v_long_fft[i][j], cl[i][j]);
 
-      /* scale v_long_real to get long-range correction of c
-       * c_l := -beta * v_long_real */
-      VecScale (v_long_real[i][j], -beta/L/L/L);
-    }
+        /*
+          Scale  Vec cl  to  get long-range  correlation (division  by
+          volume is part of the inverse FFT):
 
-  /* get β-scaled chemical potential density */
-  chempot_density2 (m, c, v_h, v_long_real, mu_dens);
+            c  = -βv
+             L      L
+        */
+        VecScale (cl[i][j], -beta/L/L/L);
+      }
+
+  /* Get β-scaled chemical potential density */
+  chempot_density2 (m, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
 
   vec_destroy (&mu_dens);
-  vec_destroy2 (m, v_long_real);
-  vec_destroy2 (m, v_h);
+  vec_destroy2 (m, cl);
+  vec_destroy2 (m, h);
 
   return mu;
 }
 
+
 /*
-  Returns the β-scaled "density" of the chemical potential
-  Here we pass c(r) and h(r) for solvent-solute pair
+  Returns the  β-scaled "density" of the chemical  potential.  Here we
+  pass h(r) and c(r) for solvent-solute pair.
 */
 static void chempot_density1 (int m,
-                              Vec c[m], Vec h[m], /* in */
+                              Vec h[m], Vec c[m], /* in */
                               Vec mu)             /* out */
 {
-  /* incremental for all solvent sites */
+  /* Incremental for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
-  /* work vector, used in the place of long-range correction */
-  local Vec work = vec_duplicate (mu);
-  /* no long-range correction */
-  VecSet (work, 0.0);
+
+  /* Work vector for the zero long-range correlation: */
+  local Vec cl = vec_duplicate (mu);
+
+  /* No long-range correction: */
+  VecSet (cl, 0.0);
 
   for (int i = 0; i < m; i++)
-  {
-    compute_mu (c[i], h[i], work, dmu);
+    {
+      compute_mu (h[i], c[i], cl, dmu);
 
-    VecAXPY (mu, 1.0, dmu);
-  }
+      VecAXPY (mu, 1.0, dmu);
+    }
 
   vec_destroy (&dmu);
-  vec_destroy (&work);
+  vec_destroy (&cl);
 }
 
-/* interface to get chemical potential of solute-solvent pair from
- * Vector t and h, return the value of chemical potential*/
+
+/*
+  Interface to get chemical  potential of solute-solvent pair from Vec
+  t and h, return the value of chemical potential.
+*/
 static real chempot1 (const State *HD, int m,
                       Vec t[m], Vec h[m])
 {
@@ -649,9 +679,10 @@ static real chempot1 (const State *HD, int m,
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  /* vector for chemical potential density */
+  /* Vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
-  /* we need direct correlation c in chempot_density */
+
+  /* We need direct correlation c in chempot_density() */
   local Vec c[m];
   vec_create1 (HD->da, m, c);
 
@@ -659,8 +690,8 @@ static real chempot1 (const State *HD, int m,
   for (int i = 0; i < m; i++)
     VecWAXPY (c[i], -1.0, t[i], h[i]);
 
-  /* get β-scaled chemical potential density */
-  chempot_density1 (m, c, h, mu_dens);
+  /* Get β-scaled chemical potential density */
+  chempot_density1 (m, h, c, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
@@ -670,6 +701,7 @@ static real chempot1 (const State *HD, int m,
 
   return mu;
 }
+
 
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
