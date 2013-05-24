@@ -1190,12 +1190,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
   Vec h[m];                     /* FIXME: not deallocated */
   vec_create1 (HD->da, m, h);
 
-  local Vec h_fft[m];
-  vec_create1 (HD->dc, m, h_fft); /* complex */
-
-  local Vec t_fft[m];
-  vec_create1 (HD->dc, m, t_fft); /* complex */
-
   local Vec v[m];
   vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
@@ -1249,26 +1243,38 @@ void hnc3d_solute_solve (const ProblemData *PD,
      initial guess for h: */
   VecSet (T, 0.0);
 
-  /*
-    Find  T such  that dt  as returned  by iterate_t1  (HD, T,  dT) is
-    zero. Cast is  there to silence the mismatch in  the type of first
-    pointer argument: Ctx1* vs. void*:
-  */
   {
-    /* Work area for iterate_t1(): */
-    Ctx1 ctx =
-      {
-        .HD = HD,
-        .m = m,
-        .v = (void*) v,
-        .y = (void*) h,         /* h(t), not t(h) */
-        .c_fft = (void*) c_fft, /* pair quantitity */
-        .h_fft = (void*) h_fft,
-        .t_fft = (void*) t_fft,
-      };
+    local Vec h_fft[m];
+    vec_create1 (HD->dc, m, h_fft); /* complex */
 
-    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, T);
+    local Vec t_fft[m];
+    vec_create1 (HD->dc, m, t_fft); /* complex */
+
+    /*
+      Find T  such that dt  as returned by  iterate_t1 (HD, T,  dT) is
+      zero. Cast is there to silence the mismatch in the type of first
+      pointer argument: Ctx1* vs. void*:
+    */
+    {
+      /* Work area for iterate_t1(): */
+      Ctx1 ctx =
+        {
+          .HD = HD,
+          .m = m,
+          .v = (void*) v,
+          .y = (void*) h,         /* h(t), not t(h) */
+          .c_fft = (void*) c_fft, /* pair quantitity */
+          .h_fft = (void*) h_fft,
+          .t_fft = (void*) t_fft,
+        };
+
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, T);
+    }
+    vec_destroy1 (m, h_fft);
+    vec_destroy1 (m, t_fft);
   }
+  /* This should have been the only pair quantity: */
+  vec_destroy2 (m, c_fft);
 
   /*
     Now that the solution T has  converged, use it to compute the rest
@@ -1291,6 +1297,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
     vec_aliases_destroy1 (T, m, t);
   }
   vec_pack_destroy1 (&T);       /* not vec_destroy()! */
+  vec_destroy1 (m, v);
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
@@ -1298,12 +1305,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&h) */
-  vec_destroy1 (m, h_fft);
-  vec_destroy1 (m, t_fft);
-  vec_destroy1 (m, v);
-
-  /* This should be the only pair quantity: */
-  vec_destroy2 (m, c_fft);
 
   bgy3d_state_destroy (HD);
 
