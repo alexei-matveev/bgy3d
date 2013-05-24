@@ -1112,38 +1112,37 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
-/* Reads  c_fft[][]  as previousely  written  by  solvent solver.  See
-   hnc3d_solvent_solve() above. */
-static void solvent_kernel (State *HD, int m, Vec c_fft[m][m])
+/* Reads  χ -  1 into  chi_fft[][] as  previousely written  by solvent
+   solver.  See hnc3d_solvent_solve() above. */
+static void solvent_kernel (State *HD, int m, Vec chi_fft[m][m])
 {
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
     {
       /*
-        Load  radial  direct   correlation  from  text  file.   FIXME:
-        representing long-range on  a real-space grid is intrinsically
-        broken!
+        Load  radial   data  from  text   file.   FIXME:  representing
+        long-range on a real-space grid is intrinsically broken!
       */
       const real dV = HD->PD->h[0] * HD->PD->h[1] * HD->PD->h[2];
 
-      local Vec c[m][m];
-      vec_create2 (HD->da, m, c);
+      local Vec chi[m][m];
+      vec_create2 (HD->da, m, chi);
 
-      bgy3d_vec_read_radial2 (HD->da, HD->PD, "c%d%d.txt", m, c);
+      bgy3d_vec_read_radial2 (HD->da, HD->PD, "x%d%d.txt", m, chi);
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
           {
-            MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
-            VecScale (c_fft[i][j], dV);
+            MatMult (HD->fft_mat, chi[i][j], chi_fft[i][j]);
+            VecScale (chi_fft[i][j], dV);
 
             /* Translate the distribution to  the grid corner. This is
                what one expects in convolution integrals. */
-            bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
+            bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
           }
-      vec_destroy2 (m, c);
+      vec_destroy2 (m, chi);
     }
   else
-    bgy3d_vec_read2 ("x%d%d-fft.bin", m, c_fft); /* ready for use as is */
+    bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
 
 
 }
