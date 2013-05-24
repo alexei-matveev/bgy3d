@@ -724,18 +724,28 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   /*
+    For primary variable t there  will be two exclusive ways to access
+    the data:  via the  long Vec  T or  m * (m  + 1)  / 2  shorter Vec
+    t[m][m] aliased to the subsections of the longer one.
+  */
+  local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
+
+  /* Zero as intial guess for t  is not the same as zero initial guess
+     for c: */
+  VecSet (T, 0.0);
+
+  /*
     Most of these  Vecs will be a functional of  primary variable t or
     constant.  Earlier  versions supported  direct correlation c  as a
     primary variable.
   */
-  Vec c[m][m];                  /* FIXME: not deallocated */
+  local Vec c[m][m];
   vec_create2 (HD->da, m, c);
 
-  local Vec t_fft[m][m];
-  vec_create2 (HD->dc, m, t_fft); /* complex */
-
-  local Vec c_fft[m][m];
-  vec_create2 (HD->dc, m, c_fft); /* complex */
+  /* Prepare intra-molecular correlations. The origin is at the corner
+     as suitable for convolutions. Diagonal will be NULL: */
+  local Vec w_fft[m][m];
+  bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
 
   /* Solvent-solvent interaction  is a  sum of two  terms, short-range
      and long-range: */
@@ -751,48 +761,38 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       bgy3d_pair_potential (HD, solvent[i], solvent[j],
                             v_short[i][j], v_long_fft[i][j]);
 
-  /* Prepare intra-molecular correlations. The origin is at the corner
-     as suitable for convolutions. Diagonal will be NULL: */
-  local Vec w_fft[m][m];
-  bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
-
-  /*
-    For primary variable t there  will be two exclusive ways to access
-    the data:  via the  long Vec  T or  m * (m  + 1)  / 2  shorter Vec
-    t[m][m] aliased to the subsections of the longer one.
-  */
-  local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
-
-  /* Zero as intial guess for t  is not the same as zero initial guess
-     for c: */
-  VecSet (T, 0.0);
-
-  /*
-    Find a T  such that dT as returned by iterate_t2  (&ctx, T, dT) is
-    zero.  Cast is there to silence  the mismatch in the type of first
-    pointer argument: struct Ctx2* vs. void*:
-  */
   {
-    Ctx2 ctx =
-      {
-        .HD = HD,
-        .m = m,
-        .v_short = (void*) v_short,       /* in */
-        .v_long_fft = (void*) v_long_fft, /* in */
-        .y = (void*) c,                   /* work, c(t)*/
-        .t_fft = (void*) t_fft,           /* work, fft(t) */
-        .c_fft = (void*) c_fft,           /* work, fft(c(t)) */
-        .w_fft = (void*) w_fft,           /* in */
-      };
+    local Vec t_fft[m][m];
+    vec_create2 (HD->dc, m, t_fft); /* complex */
 
-    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, T);
+    local Vec c_fft[m][m];
+    vec_create2 (HD->dc, m, c_fft); /* complex */
+
+    /*
+      Find a T such that dT as returned by iterate_t2 (&ctx, T, dT) is
+      zero.   Cast is there  to silence  the mismatch  in the  type of
+      first pointer argument: struct Ctx2* vs. void*:
+    */
+    {
+      Ctx2 ctx =
+        {
+          .HD = HD,
+          .m = m,
+          .v_short = (void*) v_short,       /* in */
+          .v_long_fft = (void*) v_long_fft, /* in */
+          .y = (void*) c,                   /* work, c(t)*/
+          .t_fft = (void*) t_fft,           /* work, fft(t) */
+          .c_fft = (void*) c_fft,           /* work, fft(c(t)) */
+          .w_fft = (void*) w_fft,           /* in */
+        };
+
+      bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t2, T);
+    }
+
+    /* Free local stuff */
+    vec_destroy2 (m, t_fft);
+    vec_destroy2 (m, c_fft);
   }
-
-  /* Now  that T  has  converged  we will  post-process  it using  the
-     aliases t[][]: */
-  local Vec t[m][m];
-  vec_aliases_create2 (T, m, t); /* aliases to subsections */
-
   /*
     The approach with the primary variable  x == t won over time.  The
     direct correlation c(t) is  a dependent quantity! FIXME: we assume
@@ -800,21 +800,32 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     the final t. If not, recompute it with compute_c() again.
   */
 
+  /* Now  that T  has  converged  we will  post-process  it using  the
+     aliases t[][]: */
+  local Vec t[m][m];
+  vec_aliases_create2 (T, m, t); /* aliases to subsections */
+
+  Vec h[m][m];                  /* FIXME: not deallocated! */
+  vec_create2 (HD->da, m, h);
+
+  /* h = c + t: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
+
   /* Chemical potential */
   {
     const real mu = chempot2 (HD, m, c, t, v_long_fft);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
   }
 
+  /* No more used: */
+  vec_aliases_destroy2 (T, m, t);
+  vec_pack_destroy2 (&T);
 
-  /* h = c + t, store in Vec c: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecAXPY (c[i][j], 1.0, t[i][j]); /* FIXME: misnomer! */
-
-  /*
-   * From this point on Vec c[][] holds h[][]!
-   */
+  vec_destroy2 (m, c);
+  vec_destroy2 (m, v_short);
+  vec_destroy2 (m, v_long_fft);
 
   /*
     Compute  the  solvent susceptibility,  χ  =  ω  + ρh,  in  Fourier
@@ -823,14 +834,12 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     is what is actually saved to disk.
   */
   {
-    /*
-      FIXME:  temp aliases  as better  names.  Real  space rep  in Vec
-      v_short[][],  Fourier  rep in  Vec  v_long_fft[][]. Contents  of
-      v_short[][] and v_long_fft[][] will be overwritten!
-    */
-    Vec (*h)[m] = c;            /* read-only */
-    Vec (*chi)[m] = v_short;
-    Vec (*chi_fft)[m] = v_long_fft;
+    local Vec chi[m][m];
+    vec_create2 (HD->da, m, chi);
+
+    local Vec chi_fft[m][m];
+    vec_create2 (HD->dc, m, chi_fft);
+
     const real dV = PD->h[0] * PD->h[1] * PD->h[2];
 
     for (int i = 0; i < m; i++)
@@ -867,34 +876,29 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     /* The Fourier  rep is what is actually  read in solvent_kernel(),
        see below: */
     bgy3d_vec_save2 ("x%d%d-fft.bin", m, chi_fft);
+
+    vec_destroy2 (m, chi);
+    vec_destroy2 (m, chi_fft);
   }
 
-  /* g = 1 + h, store in Vec c for output: */
+  /* no more used: */
   for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      VecShift (c[i][j], 1.0);  /* FIXME: misnomer! */
+    for (int j = 0; j < i; j++)   /* sic! */
+      vec_destroy (&w_fft[i][j]); /* Diagonal is NULL! */
 
-  /* free stuff */
-  /* Delegated to the caller: vec_destroy (&t); */
-  vec_destroy2 (m, t_fft);
-  vec_destroy2 (m, c_fft);
-  vec_destroy2 (m, v_short);
-  vec_destroy2 (m, v_long_fft);
-
-  /* Diagonal is NULL: */
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < i; j++) /* sic! */
-      vec_destroy (&w_fft[i][j]);
-
-  vec_aliases_destroy2 (T, m, t);
-  vec_pack_destroy2 (&T);
+  /* Delegated to the caller: vec_destroy (&h); */
 
   bgy3d_state_destroy (HD);
+
+  /* g = 1 + h, store in Vec h for output: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecShift (h[i][j], 1.0);  /* FIXME: misnomer! */
 
   /* Dont forget to vec_destroy2() it! */
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      g[i][j] = g[j][i] = c[i][j]; /* FIXME: misnomer! */
+      g[i][j] = g[j][i] = h[i][j]; /* FIXME: misnomer! */
 
   bgy3d_vec_save2 ("g%d%d.bin", m, g);
 }
