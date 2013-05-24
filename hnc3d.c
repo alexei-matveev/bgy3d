@@ -539,11 +539,19 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   Naturally, with  an exact  arithmetics one does  not need  to handle
   short- and long-range correlations separately in this case.
 */
-static void compute_mu (Vec h, Vec cs, Vec cl, Vec mu)
+static void compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
 {
+  /*
+    The h² term  contributes conditionally. Eventually, only depletion
+    regions (h < 0) contribute  (KH).  Threshold is supposed to be 0.0
+    for KH functional (depletion regions contribute), anywhere between
+    1  and  +∞  for GF  functional  (no  such  term)  and -∞  for  HNC
+    functional (contributes unconditionally):
+  */
   real pure f (real h, real cs, real cl)
   {
-    return h * h / 2 - cs - h * (cs + cl) / 2;
+    const real h2 = (-h > thresh ? h * h : 0.0);
+    return h2 / 2 - cs - h * (cs + cl) / 2;
   }
   vec_map3 (mu, f, h, cs, cl);
 }
@@ -567,7 +575,7 @@ static void compute_mu (Vec h, Vec cs, Vec cl, Vec mu)
   The shape of arrays passed here may be arbitrary, though in practice
   it is either m x m or 1 x m:
 */
-static void chempot_density (int n, int m,
+static void chempot_density (real thresh, int n, int m,
                              Vec h[n][m],  /* in */
                              Vec cs[n][m], /* in */
                              Vec cl[n][m], /* in, long range */
@@ -582,7 +590,7 @@ static void chempot_density (int n, int m,
   for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++)
       {
-        compute_mu (h[i][j], cs[i][j], cl[i][j], dmu);
+        compute_mu (thresh, h[i][j], cs[i][j], cl[i][j], dmu);
 
         VecAXPY (mu, 1.0, dmu);
       }
@@ -593,20 +601,42 @@ static void chempot_density (int n, int m,
 
 /*
   Interface to get chemical potential of solvent-solvent pair from Vec
-  h, c, and cl, return the value of chemical potential.
+  h,  c, and cl,  return the  value of  chemical potential.
+
+  The   argument   "closure"   choses   between   HNC,   KH   and   GF
+  functionals. The State  struct also holds a setting  for the closure
+  --- that one is  ignored to allow computing any  kind of functional.
 */
-static real chempot (const State *HD, int n, int m,
+static real chempot (const State *HD, ClosureEnum closure, int n, int m,
                      Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
+  real thresh;
+  switch (closure)              /* not PD->closure! */
+    {
+    case CLOSURE_KH:
+      /* The  h²  term  contributes  only  in  the  depletion  regions
+         (KH): */
+      thresh = 0.0;
+      break;
+    case CLOSURE_HNC:
+      /* The h² term contributes unconditionally (HNC): */
+      thresh = - DBL_MAX;
+      break;
+    default:
+      /* There is no h² term otherwise (GF): */
+      thresh = DBL_MAX;
+      break;
+    }
+
   /* Vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
-  chempot_density (n, m, h, c, cl, mu_dens);
+  chempot_density (thresh, n, m, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
@@ -769,7 +799,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
     /* The function chempot() operates  on rectangular arrays, we pass
        an m x m square ones: */
-    const real mu = chempot (HD, m, m, h, c, cl);
+    const real mu = chempot (HD, HD->PD->closure, m, m, h, c, cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
 
     vec_destroy2 (m, cl);
@@ -1257,7 +1287,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
       non-spherical) site. Treat the arrays  h[m], c[m] and cl[m] as 1
       x m arrays here:
     */
-    const real mu = chempot (HD, 1, m, (void*) h, (void*) c, (void*) cl);
+    const real mu = chempot (HD, HD->PD->closure,
+                             1, m, (void*) h, (void*) c, (void*) cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
 
     vec_destroy1 (m, cl);
