@@ -587,34 +587,14 @@ static void chempot_density2 (int m,
 
 /*
   Interface to get chemical potential of solvent-solvent pair from Vec
-  h, c, and v_long_fft, return the value of chemical potential.
+  h, c, and cl, return the value of chemical potential.
 */
 static real chempot2 (const State *HD, int m,
-                      Vec h[m][m], Vec c[m][m], Vec v_long_fft[m][m]) /* in */
+                      Vec h[m][m], Vec c[m][m], Vec cl[m][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-
-  local Vec cl[m][m];           /* vector for long-range correlation */
-  vec_create2 (HD->da, m, cl);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        /* Get real representation of long-range Coulomb potential */
-        MatMultTranspose (HD->fft_mat, v_long_fft[i][j], cl[i][j]);
-
-        /*
-          Scale  Vec cl  to  get long-range  correlation (division  by
-          volume is part of the inverse FFT):
-
-            c  = -βv
-             L      L
-        */
-        VecScale (cl[i][j], -beta/L/L/L);
-      }
 
   /* Vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
@@ -626,7 +606,6 @@ static real chempot2 (const State *HD, int m,
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
 
   vec_destroy (&mu_dens);
-  vec_destroy2 (m, cl);
 
   return mu;
 }
@@ -819,8 +798,40 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* Chemical potential */
   {
-    const real mu = chempot2 (HD, m, h, c, v_long_fft);
+    const real beta = HD->PD->beta;
+    const real L = HD->PD->interval[1] - HD->PD->interval[0];
+
+    /*
+      FIXME: this is the only  place where one needs real-space rep of
+      the  long-range  Coulomb.   So   far  it  is  computed  by  FFT.
+      Alternative is to tablulate it  on the real-space grid using the
+      analytic expression. Surprisingly, for a couple of tests we made
+      (LJC,TIP3P)  the difference between  the two  approaches appears
+      small.
+    */
+    local Vec cl[m][m];        /* real-space long-range correlation */
+    vec_create2 (HD->da, m, cl);
+
+    for (int i = 0; i < m; i++)
+      for (int j = 0; j <= i; j++)
+        {
+          /* Get real representation of long-range Coulomb potential */
+          MatMultTranspose (HD->fft_mat, v_long_fft[i][j], cl[i][j]);
+
+          /*
+            Scale  Vec cl  to  get long-range  correlation (division  by
+            volume is part of the inverse FFT):
+
+              c  = -βv
+               L      L
+          */
+          VecScale (cl[i][j], -beta/L/L/L);
+        }
+
+    const real mu = chempot2 (HD, m, h, c, cl);
     PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+
+    vec_destroy2 (m, cl);
   }
 
   /* No more used: */
