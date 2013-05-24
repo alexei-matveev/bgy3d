@@ -1185,12 +1185,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
   /*
-    This will be a functional y(x) of primary variable, either y(x) ==
-    t(h)  or  vice  versa, y(x)  =  h(t).  Depending  on the  type  of
-    iteration.
+    This will be a functional h(t) of primary variable:
   */
-  Vec y[m];                     /* FIXME: not deallocated */
-  vec_create1 (HD->da, m, y);
+  Vec h[m];                     /* FIXME: not deallocated */
+  vec_create1 (HD->da, m, h);
 
   local Vec h_fft[m];
   vec_create1 (HD->dc, m, h_fft); /* complex */
@@ -1263,7 +1261,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .HD = HD,
         .m = m,
         .v = (void*) v,
-        .y = (void*) y,         /* h(t), not t(h) */
+        .y = (void*) h,         /* h(t), not t(h) */
         .c_fft = (void*) c_fft, /* pair quantitity */
         .h_fft = (void*) h_fft,
         .t_fft = (void*) t_fft,
@@ -1282,12 +1280,11 @@ void hnc3d_solute_solve (const ProblemData *PD,
     vec_aliases_create1 (T, m, t); /* aliases to subsections */
 
     for (int i = 0; i < m; i++)
-      compute_h (PD->closure, PD->beta, v[i], t[i], y[i]);
+      compute_h (PD->closure, PD->beta, v[i], t[i], h[i]);
 
     /* excess chemical potential */
     {
-      /* x == t, y == h */
-      const real mu = chempot1 (HD, m, t, y);
+      const real mu = chempot1 (HD, m, t, h);
       PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
     }
 
@@ -1297,7 +1294,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
-    VecShift (y[i], 1.0);
+    VecShift (h[i], 1.0);       /* FIXME: misnomer! */
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&h) */
@@ -1312,7 +1309,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* Caller is supposed to destroy it! */
   for (int i = 0; i < m; i++)
-    g[i] = y[i];
+    g[i] = h[i];                /* FIXME: misnomer! */
 
   bgy3d_vec_save1 ("g%d.bin", m, g);
 }
