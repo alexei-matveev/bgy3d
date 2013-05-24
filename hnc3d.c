@@ -1193,18 +1193,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
   local Vec v[m];
   vec_create1 (HD->da, m, v); /* solute-solvent interaction */
 
-  /* This should be the only pair quantity: */
-  local Vec c_fft[m][m];
-  vec_create2 (HD->dc, m, c_fft);        /* complex */
-
-  /*
-    Get  the solvent-solvent direct  correlation function.   FIXME: we
-    get the solvent  description as an argument, but  read the file to
-    get  the  rest.   There  is  no  guarantee  the  two  sources  are
-    consistent.
-  */
-  solvent_kernel (HD, m, c_fft);
-
   /*
     Get  solute-solvent interaction.  Fill  v[i] with  the short-range
     potential acting on solvent site "i". FIXME: asymptotic Coulomb is
@@ -1250,6 +1238,18 @@ void hnc3d_solute_solve (const ProblemData *PD,
     local Vec t_fft[m];
     vec_create1 (HD->dc, m, t_fft); /* complex */
 
+    /* This should be the only pair quantity, χ - 1: */
+    local Vec chi_fft[m][m];
+    vec_create2 (HD->dc, m, chi_fft);        /* complex */
+
+    /*
+      Get the solvent-solvent  susceptibility (offset by one).  FIXME:
+      we get the solvent description as an argument, but read the file
+      to  get the rest.   There is  no guarantee  the two  sources are
+      consistent.
+    */
+    solvent_kernel (HD, m, chi_fft);
+
     /*
       Find T  such that dt  as returned by  iterate_t1 (HD, T,  dT) is
       zero. Cast is there to silence the mismatch in the type of first
@@ -1262,8 +1262,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
           .HD = HD,
           .m = m,
           .v = (void*) v,
-          .y = (void*) h,         /* h(t), not t(h) */
-          .c_fft = (void*) c_fft, /* pair quantitity */
+          .y = (void*) h,           /* h(t), not t(h) */
+          .c_fft = (void*) chi_fft, /* pair quantitity */
           .h_fft = (void*) h_fft,
           .t_fft = (void*) t_fft,
         };
@@ -1272,9 +1272,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
     }
     vec_destroy1 (m, h_fft);
     vec_destroy1 (m, t_fft);
+
+    /* This should have been the only pair quantity: */
+    vec_destroy2 (m, chi_fft);
   }
-  /* This should have been the only pair quantity: */
-  vec_destroy2 (m, c_fft);
 
   /*
     Now that the solution T has  converged, use it to compute the rest
