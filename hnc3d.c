@@ -727,7 +727,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   bgy3d_omega_fft_create (HD, m, solvent, w_fft); /* creates them */
 
   /*
-    For primary variable  t there will be two  excusive ways to access
+    For primary variable t there  will be two exclusive ways to access
     the data:  via the  long Vec  T or  m * (m  + 1)  / 2  shorter Vec
     t[m][m] aliased to the subsections of the longer one.
   */
@@ -891,7 +891,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   /* Diagonal is NULL: */
   for (int i = 0; i < m; i++)
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < i; j++) /* sic! */
       vec_destroy (&w_fft[i][j]);
 
   vec_aliases_destroy2 (T, m, t);
