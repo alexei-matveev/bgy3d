@@ -1242,17 +1242,17 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /*
     For primary variable x there are  two ways to access the data: via
-    the long Vec  X and m shorter Vec x[m]  aliased to the subsections
+    the long Vec  T and m shorter Vec t[m]  aliased to the subsections
     of the longer one.
   */
-  local Vec X = vec_pack_create1 (HD->da, m); /* long Vec */
+  local Vec T = vec_pack_create1 (HD->da, m); /* long Vec */
 
-  /* Zero as intial guess for x == t is (almost?) the same as exp(-βv)
-     - 1 initial guess for x == h: */
-  VecSet (X, 0.0);
+  /* Zero as intial guess for t  is (almost?) the same as exp(-βv) - 1
+     initial guess for h: */
+  VecSet (T, 0.0);
 
   /*
-    Find a  t such that  dt as returned  by iterate_t1 (HD, t,  dt) is
+    Find  T such  that dt  as returned  by iterate_t1  (HD, T,  dT) is
     zero. Cast is  there to silence the mismatch in  the type of first
     pointer argument: Ctx1* vs. void*:
   */
@@ -1269,30 +1269,31 @@ void hnc3d_solute_solve (const ProblemData *PD,
         .t_fft = (void*) t_fft,
       };
 
-    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, X);
+    bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, T);
   }
 
   /*
-    Now that the  solution X = T has converged, use  it to compute the
-    rest of  the quantities. (Re)evaluate  y := h(t)  without assuming
-    that Vec y already has any meaningful value.
+    Now that the solution T has  converged, use it to compute the rest
+    of the  quantities. (Re)evaluate y  := h(t) without  assuming that
+    Vec y already has any meaningful value.
   */
   {
-    local Vec x[m];
-    vec_aliases_create1 (X, m, x); /* aliases to subsections */
+    local Vec t[m];
+    vec_aliases_create1 (T, m, t); /* aliases to subsections */
 
     for (int i = 0; i < m; i++)
-      compute_h (PD->closure, PD->beta, v[i], x[i], y[i]);
+      compute_h (PD->closure, PD->beta, v[i], t[i], y[i]);
 
     /* excess chemical potential */
     {
-    /* x == t, y == h */
-    const real mu = chempot1 (HD, m, x, y);
-    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+      /* x == t, y == h */
+      const real mu = chempot1 (HD, m, t, y);
+      PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
     }
 
-    vec_aliases_destroy1 (X, m, x);
+    vec_aliases_destroy1 (T, m, t);
   }
+  vec_pack_destroy1 (&T);       /* not vec_destroy()! */
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
@@ -1303,8 +1304,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
   vec_destroy1 (m, h_fft);
   vec_destroy1 (m, t_fft);
   vec_destroy1 (m, v);
-
-  vec_pack_destroy1 (&X);       /* not vec_destroy()! */
 
   /* This should be the only pair quantity: */
   vec_destroy2 (m, c_fft);
