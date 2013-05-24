@@ -645,22 +645,14 @@ static void chempot_density1 (int m,
 
 /*
   Interface to get chemical  potential of solute-solvent pair from Vec
-  t and h, return the value of chemical potential.
+  h and c, return the value of chemical potential.
 */
 static real chempot1 (const State *HD, int m,
-                      Vec t[m], Vec h[m])
+                      Vec h[m], Vec c[m])
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  /* We need direct correlation c in chempot_density() */
-  local Vec c[m];
-  vec_create1 (HD->da, m, c);
-
-  /* c = h - t */
-  for (int i = 0; i < m; i++)
-    VecWAXPY (c[i], -1.0, t[i], h[i]);
 
   /* Vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
@@ -672,7 +664,6 @@ static real chempot1 (const State *HD, int m,
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
 
   vec_destroy (&mu_dens);
-  vec_destroy1 (m, c);
 
   return mu;
 }
@@ -1281,6 +1272,11 @@ void hnc3d_solute_solve (const ProblemData *PD,
     of the  quantities. (Re)evaluate y  := h(t) without  assuming that
     Vec y already has any meaningful value.
   */
+
+  /* We need direct correlation c in chempot_density() */
+  local Vec c[m];
+  vec_create1 (HD->da, m, c);
+
   {
     local Vec t[m];
     vec_aliases_create1 (T, m, t); /* aliases to subsections */
@@ -1288,16 +1284,22 @@ void hnc3d_solute_solve (const ProblemData *PD,
     for (int i = 0; i < m; i++)
       compute_h (PD->closure, PD->beta, v[i], t[i], h[i]);
 
-    /* excess chemical potential */
-    {
-      const real mu = chempot1 (HD, m, t, h);
-      PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
-    }
+    /* c = h - t */
+    for (int i = 0; i < m; i++)
+      VecWAXPY (c[i], -1.0, t[i], h[i]);
 
     vec_aliases_destroy1 (T, m, t);
   }
   vec_pack_destroy1 (&T);       /* not vec_destroy()! */
   vec_destroy1 (m, v);
+
+  /* Excess chemical potential: */
+  {
+    const real mu = chempot1 (HD, m, h, c);
+    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+  }
+  /* No more used: */
+  vec_destroy1 (m, c);
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
