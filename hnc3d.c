@@ -570,6 +570,9 @@ static void chempot_density2 (int m,
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
 
+  /* Clear accumulator: */
+  VecSet (mu, 0.0);
+
   for (int i = 0; i < m; i++)
     for (int j = 0; j < m; j++)
       {
@@ -594,9 +597,6 @@ static real chempot2 (const State *HD, int m,
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
   const real L = PD->interval[1] - PD->interval[0];
 
-  /* vector for chemical potential density */
-  local Vec mu_dens = vec_create (HD->da);
-
   local Vec cl[m][m];           /* vector for long-range correlation */
   vec_create2 (HD->da, m, cl);
 
@@ -615,6 +615,9 @@ static real chempot2 (const State *HD, int m,
         */
         VecScale (cl[i][j], -beta/L/L/L);
       }
+
+  /* Vector for chemical potential density */
+  local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
   chempot_density2 (m, h, c, cl, mu_dens);
@@ -646,6 +649,9 @@ static void chempot_density1 (int m,
   /* No long-range correction: */
   VecSet (cl, 0.0);
 
+  /* Clear accumulator: */
+  VecSet (mu, 0.0);
+
   for (int i = 0; i < m; i++)
     {
       compute_mu (h[i], c[i], cl, dmu);
@@ -669,9 +675,6 @@ static real chempot1 (const State *HD, int m,
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
-  /* Vector for chemical potential density */
-  local Vec mu_dens = vec_create (HD->da);
-
   /* We need direct correlation c in chempot_density() */
   local Vec c[m];
   vec_create1 (HD->da, m, c);
@@ -679,6 +682,9 @@ static real chempot1 (const State *HD, int m,
   /* c = h - t */
   for (int i = 0; i < m; i++)
     VecWAXPY (c[i], -1.0, t[i], h[i]);
+
+  /* Vector for chemical potential density */
+  local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
   chempot_density1 (m, h, c, mu_dens);
