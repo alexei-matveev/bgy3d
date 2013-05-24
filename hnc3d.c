@@ -798,45 +798,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     direct correlation c(t) is  a dependent quantity! FIXME: we assume
     that the  value of c on  exit from the SNES  solver corresponds to
     the final t. If not, recompute it with compute_c() again.
-
-    This saves c??-fft.bin (including  the long-range part) to disk to
-    be used in solute/solvent calculations:
   */
-  {
-    const real dV = PD->h[0] * PD->h[1] * PD->h[2];
-
-    /*
-      The real-space rep of the short-range direct correlation is only
-      usefull for debug and visualization:
-
-      bgy3d_vec_save2 ("c%d%d.bin", m, c);
-    */
-
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j <= i; j++)
-        {
-          MatMult (HD->fft_mat, c[i][j], c_fft[i][j]);
-          VecScale (c_fft[i][j], dV);
-
-          /*
-            The real-space representation encodes only the short-range
-            part  of the  direct  corrlation. The  (fixed) long  range
-            contribution is added here:
-
-              C := C  - βV
-                    S     L
-          */
-          VecAXPY (c_fft[i][j], -PD->beta, v_long_fft[i][j]);
-
-          /* Translate the  distribution to the grid  corner.  This is
-             what one expects in convolution integrals: */
-          bgy3d_vec_fft_trans (HD->dc, HD->PD->N, c_fft[i][j]);
-        }
-
-    /* The Fourier  rep is what is actually  read in solvent_kernel(),
-       see below: */
-    bgy3d_vec_save2 ("c%d%d-fft.bin", m, c_fft);
-  }
 
   /* Chemical potential */
   {
