@@ -659,14 +659,16 @@ print_chempot (const State *HD, int n, int m,
   const char *names[3] = {"HNC", "KH", "GF"};
   real mu[3];
 
+  /* Silent computing: */
+  for (int i = 0; i < 3; i++)
+    mu[i] = chempot (HD, methods[i], n, m, h, c, cl);
+
+  /* Printing only: */
   PetscPrintf (PETSC_COMM_WORLD,
                " # Chemical potentials, default is marked with *:\n");
   for (int i = 0; i < 3; i++)
-    {
-      mu[i] = chempot (HD, methods[i], n, m, h, c, cl);
-      PetscPrintf (PETSC_COMM_WORLD, " # mu = %f kcal (%s)%s\n", mu[i], names[i],
-                   ((methods[i] == HD->PD->closure)? "*" : ""));
-    }
+    PetscPrintf (PETSC_COMM_WORLD, " # mu = %f kcal (%s)%s\n", mu[i], names[i],
+                 ((methods[i] == HD->PD->closure)? "*" : ""));
 }
 
 
