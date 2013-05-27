@@ -1,15 +1,21 @@
 Moments from g0.bin
-<1> =  7456.64951072
+<1> =  7456.64950989
 <x> =  63.7652513265
 <y> =  63.7652513265
 <z> =  63.7652513265
-<xy> =  -0.523969405315
-<yz> =  -0.523969405344
-<zx> =  -0.52396940534
-<z^2 - 1/3 * r^2> =  7.35592350818
-<x^2 - y^2> =  -1.8681508818e-07
-<r^2> =  33.1016552635
+<xy> =  -0.523969405384
+<yz> =  -0.523969405386
+<zx> =  -0.523969405374
+<z^2 - 1/3 * r^2> =  7.3559234461
+<x^2 - y^2> =  -1.73691122215e-07
+<r^2> =  33.1016549148
 integrated charge = 0.000000 (should be close to zero)
+q_v = 0.000000 (charge of solvent medium)
+|<x|ρ_n>| = | 0.000000,  0.000000,  0.000000| = 0.000000 (dipole moment of solute cores)
+|<x|ρ_v>| = | 0.000000,  0.000000,  0.000000| = 0.000000 (dipole moment of solvent medium)
+<U_v|ρ_N> = 0.000000 (solvent electrostatic field with solute point nuclei)
+<U_v|ρ_u> = 0.000000 (solvent electrostatic field with diffuse charge density of solute)
+<ρ_v|U_u> = 0.000000 (solvent charge density with long-range electrostatic field of solute)
  # mu = 6.930328 kcal (HNC)*
  # mu = 5.661754 kcal (KH)
  # mu = 4.609951 kcal (GF)
