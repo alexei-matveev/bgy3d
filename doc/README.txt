@@ -370,45 +370,45 @@ for  reference. Most  of  the calculations  involving charged  solvent
 sites in realisitc water model diverge when employing HNC closure with
 the default Newton solver (indicated by "-").
 
-Species               in    1D-HNC  GF/1D-HNC    3D-HNC     1D-KH   GF/1D-KH
--------            -----  -------- ----------  --------  --------  ---------
-Pure solvent:
-Ow                           6.923                6.930
-Nw                           6.981                6.973
-Water                       -6.262   -12.097     -6.281    -5.767     -9.562
-Solute/Solvent:
-Ow                  Ow       6.923                6.930
-                    Nw       6.551                6.543
-                    Water    5.980     3.106      5.943     6.495      4.571
-Nw                  Ow       7.087                6.605
-                    Nw       6.981                6.235
-                    Water    6.628     1.889      5.657     7.131      3.670
-Water               Ow       7.087                6.605
-                    Nw       6.981                6.235
-                    Water   -6.262   -12.097          -    -5.767     -9.562
-Hydrogen chloride   Ow       8.057                7.801
-                    Nw       7.589                7.001
-                    Water    6.010     0.692          -     6.779      2.874
-Methanol            Ow      13.621               11.399
-                    Nw      14.079               10.527
-                    Water    1.433    -9.721          -     2.351     -6.942
-Butanoic acid       Ow      33.758               27.205
-                    Nw      36.251               24.535
-                    Water   25.450    -6.318          -    27.818     -1.944
-Carbon disulfide    Ow      15.512               14.194
-                    Nw      14.598               12.477
-                    Water   10.911     1.938          -    12.365      4.854
-Hexane              Ow      42.384               32.111
-                    Nw      46.609               29.197
-                    Water   44.770     2.118          -    47.536      7.115
-----------------------------------------------------------------------------
+Species                      HNC1d       (GF)     HNC3d      KH1d       (GF)       KH3d       (GF)
+-------            -----  -------- ----------  --------  --------  ---------  ---------  ---------
+Solvent
+O~w~                         6.923                6.930                           7.498      6.484
+X~2~Y                        6.981                6.973
+H~2~O                       -6.262   -12.097     -6.281    -5.767     -9.562
+Solute              in
+O~w~                O~w~     6.923                6.930                           7.498      6.484
+                    X~2~Y    6.551                6.543
+                    H~2~O    5.980     3.106      5.943     6.495      4.571
+X~2~Y               O~w~     7.087                6.605                           7.167      6.159
+                    X~2~Y    6.981                6.235
+                    H~2~O    6.628     1.889      5.657     7.131      3.670
+H~2~O               O~w~     7.087                6.605                           7.167      6.159
+                    X~2~Y    6.981                6.235
+                    H~2~O   -6.262   -12.097          -    -5.767     -9.562
+HCl                 O~w~     8.057                7.801                           8.756      7.364
+                    X~2~Y    7.589                7.001
+                    H~2~O    6.010     0.692          -     6.779      2.874
+CH~3~OH             O~w~    13.621               11.399                          12.742     11.010
+                    X~2~Y   14.079               10.527
+                    H~2~O    1.433    -9.721          -     2.351     -6.942
+C~3~H~7~COOH        O~w~    33.758               27.205                          31.239     27.548
+                    X~2~Y   36.251               24.535
+                    H~2~O   25.450    -6.318          -    27.818     -1.944
+CS~2~               O~w~    15.512               14.194                          16.115     13.852
+                    X~2~Y   14.598               12.477
+                    H~2~O   10.911     1.938          -    12.365      4.854
+C~6~H~14~           O~w~    42.384               32.111                          36.854     32.673
+                    X~2~Y   46.609               29.197
+                    H~2~O   44.770     2.118          -    47.536      7.115
+---------------------------------------------------------------------------------------------------
 
 Here "Ow"  is a  single-site LJ water  model derived from  SPC/E water
 model  by removing  the hydrogens  and  setting the  oxygen charge  to
-zero. "Nw" is a three-site water model derived from the modified TIP3P
-water  model by  setting all  site charges  to zero.   "Water"  is the
+zero. "X~2~Y"  is a three-site  water model derived from  the modified
+TIP3P water model by setting all site charges to zero.  "Water" is the
 modified  TIP3P  water model.   See  `guile/solutes.scm` for  details.
-FIXME: As it stands "Ow" does not directly derive from "Nw".
+FIXME: As it stands "Ow" does not directly derive from "X~2~Y".
 
 The numbers in this section were  obtained with 1d-RISM (N = 1024) and
 3d-RISM (N = 128) and the rest of the settings like this:
