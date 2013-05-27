@@ -222,9 +222,7 @@ ProblemData bgy3d_problem_data (void);
 real** Load_Molecule (int *N);
 void Molecule_free (real **x_M, int N);
 
-/*******************************************/
-/* Water  */
-/*******************************************/
+
 typedef struct State
 {
   /*
@@ -264,9 +262,8 @@ typedef struct State
 
 #ifdef WITH_EXTRA_SOLVERS
   /*
-    BGY3dM 3-site  stuff.  These  are vector field  quantities indexed
-    Uby  two site  indices. FIXME:  get rid  of them,  see  the 2-site
-    version.
+    BGY3dM 3-site stuff.  These are vector field quantities indexed by
+    two site indices. FIXME: get rid of them, see the 2-site version.
 
     In much of the  code one refers to the two sites  by literal H and
     O, though the actual sites may  be different.  Let us stick to the
