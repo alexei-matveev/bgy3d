@@ -125,13 +125,20 @@ static const Solute LJ =
   {"LJ", 1,
    {{"LJ", {0.0, 0.0, 0.0}, 1.0, 1.0, 0.0}}};
 
+/* Fake single-site  LJ water model
+ * FIXME: inconvenient to add more solutes*/
+static const Solute OW =
+  {"OW", 1,
+   {{"OW", {0.0, 0.0, 0.0}, 3.16, 0.1549, 0.0}}};
+
 static const Solute *solutes[] = {&HydrogenChloride, /* 0 */
                                   &CarbonDisulfide,  /* 1 */
                                   &Water,            /* 2 */
                                   &Methanol,         /* 3 */
                                   &ButanoicAcid,     /* 4 */
                                   &Hexane,           /* 5 */
-                                  &LJ};              /* 6 */
+                                  &LJ,               /* 6 */
+                                  &OW};              /* 7 */
 
 /* Get solute  sites by solute name.  Functions that do  the real work
    operate on array of sites: */
