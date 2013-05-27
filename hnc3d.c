@@ -647,6 +647,29 @@ static real chempot (const State *HD, ClosureEnum closure, int n, int m,
 }
 
 
+/* Prints chemical  potentials on  tty. The default  is marked  with a
+   star. */
+static void
+print_chempot (const State *HD, int n, int m,
+               Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
+{
+  /* FIXME:  as  implemented, for  method  ==  PY  the default  energy
+     functional is GF: */
+  const ClosureEnum methods[3] = {CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY};
+  const char *names[3] = {"HNC", "KH", "GF"};
+  real mu[3];
+
+  PetscPrintf (PETSC_COMM_WORLD,
+               " # Chemical potentials, default is marked with *:\n");
+  for (int i = 0; i < 3; i++)
+    {
+      mu[i] = chempot (HD, methods[i], n, m, h, c, cl);
+      PetscPrintf (PETSC_COMM_WORLD, " # mu = %f kcal (%s)%s\n", mu[i], names[i],
+                   ((methods[i] == HD->PD->closure)? "*" : ""));
+    }
+}
+
+
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
   correlation c  and other quantities  of HNC equation.   The indirect
@@ -799,8 +822,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
     /* The function chempot() operates  on rectangular arrays, we pass
        an m x m square ones: */
-    const real mu = chempot (HD, HD->PD->closure, m, m, h, c, cl);
-    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+    print_chempot (HD, m, m, h, c, cl);
 
     vec_destroy2 (m, cl);
   }
@@ -1287,9 +1309,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
       non-spherical) site. Treat the arrays  h[m], c[m] and cl[m] as 1
       x m arrays here:
     */
-    const real mu = chempot (HD, HD->PD->closure,
-                             1, m, (void*) h, (void*) c, (void*) cl);
-    PetscPrintf (PETSC_COMM_WORLD, " mu = %f\n", mu);
+    print_chempot (HD, 1, m, (void*) h, (void*) c, (void*) cl);
 
     vec_destroy1 (m, cl);
   }
