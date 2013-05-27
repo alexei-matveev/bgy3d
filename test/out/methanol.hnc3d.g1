@@ -10,4 +10,6 @@ Moments from g0.bin
 <x^2 - y^2> =  1.05709625399
 <r^2> =  34.3494706904
 integrated charge = -0.000000 (should be close to zero)
- mu = 11.399124
+ # mu = 11.399124 kcal (HNC)*
+ # mu = 8.803609 kcal (KH)
+ # mu = 6.990610 kcal (GF)
