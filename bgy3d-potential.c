@@ -72,7 +72,7 @@ static void divmod (const int n, const int N, int *j, int *i)
   while  iterating over it.   It may  though vec_destroy()  the vector
   right after calling this function as we will increment the refcount.
 */
-Context* bgy3d_pot_create (const State *BHD, Vec v)
+static Context* bgy3d_pot_create (const State *BHD, Vec v)
 {
   /* memory for context pointer */
   Context *s = malloc (sizeof *s);
