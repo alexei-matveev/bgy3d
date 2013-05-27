@@ -135,6 +135,7 @@
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "hnc3d.h"
+#include "bgy3d-potential.h"    /* info() */
 #include <math.h>               /* expm1() */
 
 
@@ -1188,27 +1189,23 @@ void hnc3d_solute_solve (const ProblemData *PD,
     potential acting on solvent site "i". FIXME: asymptotic Coulomb is
     assumed to be short-range and is added to to total potential:
   */
-  {
-    /* Asymptotic Coulomb field of the (often neutral) solute: */
-    local Vec uc = vec_create (HD->da);
-    local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
 
-    bgy3d_solute_field (HD, m, solvent, n, solute,
-                        v, uc,  /* out */
-                        uc_rho, /* smeared core density, discarded */
-                        NULL);  /* no electronic density */
+  /* Asymptotic Coulomb field of the (often neutral) solute: */
+  local Vec uc = vec_create (HD->da);
+  local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
 
-    /*
-      If   the  solute  is   neutral,  asymptotic   electrostatics  is
-      short-range  (if  you  dare   to  call  dipole  field  that,  of
-      course). Add it to the rest:
-    */
-    for (int i = 0; i < m; i++)
-      VecAXPY (v[i], solvent[i].charge, uc);
+  bgy3d_solute_field (HD, m, solvent, n, solute,
+                      v, uc,  /* out */
+                      uc_rho, /* smeared core density, discarded */
+                      NULL);  /* no electronic density */
 
-    vec_destroy (&uc);
-    vec_destroy (&uc_rho);
-  }
+  /*
+    If   the  solute  is   neutral,  asymptotic   electrostatics  is
+    short-range  (if  you  dare   to  call  dipole  field  that,  of
+    course). Add it to the rest:
+  */
+  for (int i = 0; i < m; i++)
+    VecAXPY (v[i], solvent[i].charge, uc);
 
   /*
     For primary variable t there are  two ways to access the data: via
@@ -1321,6 +1318,15 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
     VecShift (h[i], 1.0);       /* FIXME: misnomer! */
+
+  /* information printing */
+  Context *ret = info (HD, m, solvent, n, solute, h, uc, uc_rho);
+  /* FIXME: Context is not used anywhere yet, simple destroy it */
+  bgy3d_pot_destroy (ret);
+
+  /* keep uc and uc_rho until being used in info() */
+  vec_destroy (&uc);
+  vec_destroy (&uc_rho);
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&h) */
