@@ -370,7 +370,7 @@ for  reference. Most  of  the calculations  involving charged  solvent
 sites in realisitc water model diverge when employing HNC closure with
 the default Newton solver (indicated by "-").
 
-Species               HNC1d      (GF)    HNC3d     (GF)     KH1d      (GF)      KH3d      (GF)
+Species                HNC1      (GF)     HNC3     (GF)      KH1      (GF)       KH3      (GF)
 -------      -----  ------- ---------  -------  -------  -------  --------  --------  --------
 Solvent
 O~w~                  6.923    4.550     6.930    4.610    7.511     6.489     7.498     6.484
@@ -403,12 +403,12 @@ C~6~H~14~     O~w~   42.384   23.272    32.111   19.496   45.177    27.220    36
               H~2~O  44.770    2.118         -        -   47.536     7.115    29.083    20.433
 -----------------------------------------------------------------------------------------------
 
-Here "Ow"  is a  single-site LJ water  model derived from  SPC/E water
+Here O~w~  is a  single-site LJ water  model derived from  SPC/E water
 model  by removing  the hydrogens  and  setting the  oxygen charge  to
-zero. "X~2~Y"  is a three-site  water model derived from  the modified
-TIP3P water model by setting all site charges to zero.  "Water" is the
+zero.  X~2~Y is  a three-site  water model  derived from  the modified
+TIP3P water model  by setting all site charges to  zero.  H~2~O is the
 modified  TIP3P  water model.   See  `guile/solutes.scm` for  details.
-FIXME: As it stands "Ow" does not directly derive from "X~2~Y".
+FIXME: As it stands O~w~ does not directly derive from X~2~Y.
 
 The numbers in this section were  obtained with 1d-RISM (N = 1024) and
 3d-RISM (N = 128) and the rest of the settings like this:
