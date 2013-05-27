@@ -16,9 +16,9 @@ module fft
 
   !
   ! These should  obey: ab  = (2π)³, a²b  = (2π)³. The  first equality
-  ! guarantees  that that the  forward- and  backward FT  are mutually
-  ! inverse,  whereas the  second equation  will make  the convolution
-  ! theorem factor-less as in FT(f * g) = FT(f) FT(g):
+  ! guarantees that the forward- and backward FT are mutually inverse,
+  ! whereas  the second  equation  will make  the convolution  theorem
+  ! factor-less as in FT(f * g) = FT(f) FT(g):
   !
   real (rk), parameter, public :: FT_FW = 1           ! == a
   real (rk), parameter, public :: FT_BW = (2 * pi)**3 ! == b
@@ -32,10 +32,10 @@ module fft
   !    i
   !
   ! and  dr  =  1  for  the  purposes  of  the  current  module.   The
-  ! corresponding  Fourier transforms are  represented by  a similarly
-  ! spaced k-grid,
+  ! corresponding Fourier  transform, g =  FT(f), is represented  on a
+  ! similarly spaced k-grid,
   !
-  !   g  = f(dk * [2 * k - 1] / 2),  1 <= k <= n
+  !   g  = g(dk * [2 * k - 1] / 2),  1 <= k <= n
   !    k
   !
   ! albeit with dk related to dr by the following expression:
