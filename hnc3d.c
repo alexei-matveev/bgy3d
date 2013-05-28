@@ -223,42 +223,6 @@ static void compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 }
 
 
-/*
-  Compute
-
-    h = c'(t) + t
-
-  In particular  for t =  0 returns  h = exp(-βv)  - 1 (except  for KH
-  closure).   Used  to  compute   the  new  candidate  for  the  total
-  correlation with the original expression being
-
-    h = exp (-βv + t) - 1
-
-  where
-
-    t = ρ (c *  h)
-
-  is computed  using the current input  h in HNC3d  model.  To compute
-  that we re-use the closure  relation, which, in case of HNC closure,
-  outputs
-
-    exp (-βv + t) - 1.0 - t
-
-  (I am somewhat reluctant to call  the expression above "c" as in the
-  closure definition  to avoid the necessity  to differentiate between
-  pair and singleton c = c2  and c' = c1).  It is questionable whether
-  we should  always use HNC closure  here or respect the  input of the
-  user  (--closure switch).  There  is  only a  chance  for solute  ==
-  solvent to produce the same result as the pure solvent if we use the
-  "native" closure here:
-*/
-static void compute_h (ClosureEnum closure, real beta, Vec v, Vec t, Vec h)
-{
-  compute_c (closure, beta, v, t, h);
-  VecAXPY (h, 1.0, t);
-}
-
-
 static int delta (int i, int j)
 {
   return (i == j) ? 1 : 0;
@@ -1274,11 +1238,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /*
     Now that the solution T has  converged, use it to compute the rest
-    of the  quantities. (Re)evaluate h(t) without assuming  that Vec h
-    already has any meaningful value.
+    of the  quantities.  (Re)evaluate  c(t) and h(t)  without assuming
+    that e.g. Vec h already  has any meaningful value.  We need direct
+    correlation c to compute chemical potential:
   */
-
-  /* We need direct correlation c to compute chemical potential: */
   local Vec c[m];
   vec_create1 (HD->da, m, c);
 
@@ -1286,12 +1249,13 @@ void hnc3d_solute_solve (const ProblemData *PD,
     local Vec t[m];
     vec_aliases_create1 (T, m, t); /* aliases to subsections */
 
+    /* Closure relation, c = c(t): */
     for (int i = 0; i < m; i++)
-      compute_h (PD->closure, PD->beta, v[i], t[i], h[i]);
+      compute_c (PD->closure, PD->beta, v[i], t[i], c[i]);
 
-    /* c = h - t */
+    /* h = c + t */
     for (int i = 0; i < m; i++)
-      VecWAXPY (c[i], -1.0, t[i], h[i]);
+      VecWAXPY (h[i], 1.0, c[i], t[i]);
 
     vec_aliases_destroy1 (T, m, t);
   }
