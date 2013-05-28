@@ -575,6 +575,9 @@ module rism
 contains
 
   subroutine rism_solvent (pd, m, solvent) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
     use iso_c_binding, only: c_int
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
@@ -583,35 +586,14 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
-    integer :: nrad
-    real (rk) :: rmax
-    real (rk) :: rho(m)
-
-    rho = pd % rho              ! all site densities are the same
-    rmax = 0.5 * (pd % interval(2) - pd % interval(1))
-    nrad = maxval (pd % n)
-
-    call bgy3d_problem_data_print (pd)
-    print *, "# L =", rmax, "(for 1d)"
-    print *, "# N =", nrad, "(for 1d)"
-
-    print *, "# Solvent:"
-    call show_sites (solvent, rho)
-
-    ! This is applicable to LJ only, and should take reduced
-    ! density/temperature:
-    ! call print_info (rho = pd % rho, beta = pd % beta)
-
-    block
-       ! Solvent susceptibility χ = ω + ρh (computed but discarded):
-       real (rk) :: chi(nrad, m, m)
-
-       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi)
-    end block
+    call main (pd, solvent)
   end subroutine rism_solvent
 
 
   subroutine rism_solute (pd, n, solute, m, solvent) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
     use iso_c_binding, only: c_int
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
@@ -621,23 +603,39 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
+    call main (pd, solvent, solute)
+  end subroutine rism_solute
+
+
+  subroutine main (pd, solvent, solute)
+    !
+    ! This one does not need to be interoperable.
+    !
+    use foreign, only: problem_data, site, bgy3d_problem_data_print
+    implicit none
+    type (problem_data), intent (in) :: pd
+    type (site), intent (in) :: solvent(:)
+    type (site), optional, intent (in) :: solute(:)
+    ! *** end of interface ***
+
     integer :: nrad
     real (rk) :: rmax
-    real (rk) :: rho(m)
+    real (rk) :: rho(size (solvent))
 
     rho = pd % rho              ! all site densities are the same
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
-    call bgy3d_problem_data_print (pd)
     print *, "# L =", rmax, "(for 1d)"
     print *, "# N =", nrad, "(for 1d)"
 
-    print *, "# Solvent:"
-    call show_sites (solvent, rho)
+    call bgy3d_problem_data_print (pd)
 
-    print *, "# Solute:"
-    call show_sites (solute)
+    call show_sites ("Solvent", solvent, rho)
+
+    if (present (solute)) then
+       call show_sites ("Solute", solute)
+    endif
 
     ! This is applicable to LJ only, and should take reduced
     ! density/temperature:
@@ -645,13 +643,15 @@ contains
 
     block
        ! Solvent susceptibility χ = ω + ρh:
-       real (rk) :: chi(nrad, m, m)
+       real (rk) :: chi(nrad, size (solvent), size (solvent))
 
        call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi)
 
-       call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi, solute)
+       if (present (solute)) then
+          call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi, solute)
+       endif
     end block
-  end subroutine rism_solute
+  end subroutine main
 
 
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, chi)
@@ -1657,15 +1657,18 @@ contains
   end function chempot
 
 
-  subroutine show_sites (sites, rho)
+  subroutine show_sites (name, sites, rho)
     use foreign, only: site
     implicit none
+    character (len=*), intent (in) :: name
     type (site), intent (in) :: sites(:)
     real (rk), optional, intent (in) :: rho(:)
     ! *** end of interface ***
 
     integer :: i
     real (rk) :: this_rho
+
+    print *, "# ", name
 
     do i = 1, size (sites)
 
