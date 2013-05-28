@@ -460,6 +460,7 @@ module foreign
 
   public :: expm1
   public :: bgy3d_problem_data
+  public :: bgy3d_problem_data_print
 
   ! Keep this in sync with bgy3d-solutes.h:
   type, public, bind (c) :: site
@@ -497,11 +498,19 @@ module foreign
   ! These are concrete functions, implemented in C:
   !
   interface
+     ! ProblemData bgy3d_problem_data (void)
      function bgy3d_problem_data () result (pd) bind (c)
        import problem_data
        implicit none
        type (problem_data) :: pd
      end function bgy3d_problem_data
+
+     ! void bgy3d_problem_data_print (const ProblemData *PD)
+     subroutine bgy3d_problem_data_print (pd) bind (c)
+       import problem_data
+       implicit none
+       type (problem_data), intent (in) :: pd
+     end subroutine bgy3d_problem_data_print
 
      ! From libm:
      pure function expm1 (x) result (y) bind (c)
@@ -567,7 +576,7 @@ contains
 
   subroutine rism_solvent (pd, m, solvent) bind (c)
     use iso_c_binding, only: c_int
-    use foreign, only: problem_data, site
+    use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: m
@@ -582,11 +591,10 @@ contains
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
-    print *, "# closure =", pd % closure
-    print *, "# rho =", pd % rho
-    print *, "# beta =", pd % beta
-    print *, "# L =", rmax
-    print *, "# n =", nrad
+    call bgy3d_problem_data_print (pd)
+    print *, "# L =", rmax, "(for 1d)"
+    print *, "# N =", nrad, "(for 1d)"
+
     print *, "# Solvent:"
     do i = 1, m
        print *, "#", i, &
@@ -612,7 +620,7 @@ contains
 
   subroutine rism_solute (pd, n, solute, m, solvent) bind (c)
     use iso_c_binding, only: c_int
-    use foreign, only: problem_data, site
+    use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: n, m
@@ -628,11 +636,9 @@ contains
     rmax = 0.5 * (pd % interval(2) - pd % interval(1))
     nrad = maxval (pd % n)
 
-    print *, "# closure =", pd % closure
-    print *, "# rho =", pd % rho
-    print *, "# beta =", pd % beta
-    print *, "# L =", rmax
-    print *, "# n =", nrad
+    call bgy3d_problem_data_print (pd)
+    print *, "# L =", rmax, "(for 1d)"
+    print *, "# N =", nrad, "(for 1d)"
 
     print *, "# Solvent:"
     do i = 1, m
