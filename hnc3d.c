@@ -945,6 +945,8 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   Vec g[m][m];
   hnc3d_solvent_solve (PD, m, solvent, g);
 
+  vec_destroy2 (m, g);
+
   return PETSC_NULL;
 }
 
@@ -1395,5 +1397,6 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   Vec g[m];
   hnc3d_solute_solve (PD, m, solvent, n, solute, g);
 
+  vec_destroy1 (m, g);
   return PETSC_NULL;
 }
