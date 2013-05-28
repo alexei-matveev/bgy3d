@@ -583,7 +583,7 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
-    integer :: i, nrad
+    integer :: nrad
     real (rk) :: rmax
     real (rk) :: rho(m)
 
@@ -596,14 +596,7 @@ contains
     print *, "# N =", nrad, "(for 1d)"
 
     print *, "# Solvent:"
-    do i = 1, m
-       print *, "#", i, &
-            &        pad (solvent(i) % name), &
-            &        solvent(i) % sigma, &
-            &        solvent(i) % epsilon, &
-            &        solvent(i) % charge, &
-            &        rho(i)
-    enddo
+    call show_sites (solvent, rho)
 
     ! This is applicable to LJ only, and should take reduced
     ! density/temperature:
@@ -628,7 +621,7 @@ contains
     type (site), intent (in) :: solvent(m)
     ! *** end of interface ***
 
-    integer :: i, nrad
+    integer :: nrad
     real (rk) :: rmax
     real (rk) :: rho(m)
 
@@ -641,23 +634,10 @@ contains
     print *, "# N =", nrad, "(for 1d)"
 
     print *, "# Solvent:"
-    do i = 1, m
-       print *, "#", i, &
-            &        pad (solvent(i) % name), &
-            &        solvent(i) % sigma, &
-            &        solvent(i) % epsilon, &
-            &        solvent(i) % charge, &
-            &        rho(i)
-    enddo
+    call show_sites (solvent, rho)
 
     print *, "# Solute:"
-    do i = 1, n
-       print *, "#", i, &
-            &        pad (solute(i) % name), &
-            &        solute(i) % sigma, &
-            &        solute(i) % epsilon, &
-            &        solute(i) % charge
-    enddo
+    call show_sites (solute)
 
     ! This is applicable to LJ only, and should take reduced
     ! density/temperature:
@@ -1675,5 +1655,33 @@ contains
     ! Multiply that by dr³ and divide by β to get the real number:
     mu = integrate (density)
   end function chempot
+
+
+  subroutine show_sites (sites, rho)
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: sites(:)
+    real (rk), optional, intent (in) :: rho(:)
+    ! *** end of interface ***
+
+    integer :: i
+    real (rk) :: this_rho
+
+    do i = 1, size (sites)
+
+       if (present (rho)) then
+          this_rho = rho(i)
+       else
+          this_rho = 0.0
+       endif
+
+       print *, "#", i, &
+            &        pad (sites(i) % name), &
+            &        sites(i) % sigma, &
+            &        sites(i) % epsilon, &
+            &        sites(i) % charge, &
+            &        this_rho
+    enddo
+  end subroutine show_sites
 
 end module rism
