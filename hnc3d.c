@@ -136,6 +136,7 @@
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "hnc3d.h"
 #include "bgy3d-potential.h"    /* info() */
+#include "bgy3d-solvents.h"      /* bgy3d_sites_show() */
 #include <math.h>               /* expm1() */
 
 
@@ -935,14 +936,16 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
      the solute tables: */
   bgy3d_solute_get (name, &m, &solvent);
 
+  /* Show solvent parameters: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
 
   Vec g[m][m];
   hnc3d_solvent_solve (PD, m, solvent, g);
 
-  assert (m == 1);
-  return g[0][0];               /* vec_destroy (&) it! */
+  return PETSC_NULL;
 }
 
 
@@ -1371,6 +1374,9 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
      the solute tables: */
   bgy3d_solute_get (name, &m, &solvent);
 
+  /* Show solvent parameters: */
+  bgy3d_sites_show ("Solvent", m, solvent);
+
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
 
@@ -1380,12 +1386,14 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   /* Get the solute from the tables: */
   bgy3d_solute_get (name, &n, &solute);
 
+  /* Show solute parameters: */
+  bgy3d_sites_show ("Solute", n, solute);
+
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
   Vec g[m];
   hnc3d_solute_solve (PD, m, solvent, n, solute, g);
 
-  assert (m == 1);
-  return g[0];
+  return PETSC_NULL;
 }
