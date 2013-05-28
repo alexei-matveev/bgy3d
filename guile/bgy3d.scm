@@ -5,9 +5,9 @@
 (define-module (guile bgy3d)
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-11)           ; let-values
-  #:use-module (ice-9 match)
-  #:use-module (ice-9 pretty-print)
-  #:use-module (ice-9 getopt-long)
+  #:use-module (ice-9 match)            ; match-lambda
+  #:use-module (ice-9 pretty-print)     ; pretty-print
+  #:use-module (ice-9 getopt-long)      ; getopt-long, option-ref
   #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
   #:re-export                           ; from (guile bgy3d internal)
   (state-make
@@ -90,13 +90,6 @@
 ;;; complains about "possibly undefined  symbols" at compile time. The
 ;;; boilerplate is left here for reference:
 ;;;
-;;; OUTDATED: This name has to be defined on guile start up, see the C
-;;; sources of bgy3d_guile_init() in bgy3d-guile.c:
-;;;
-;; (define guile-bgy3d-module-init
-;;   (@@ (guile-user) guile-bgy3d-module-init))
-;;
-;; (guile-bgy3d-module-init)
 
 ;;;
 ;;; This  may become  define-syntax some  time, so  do not  assume the
@@ -128,11 +121,12 @@
       (lambda . 0.02)))))               ; not the scheme lambda
 
 (define *default-molecule* "hydrogen chloride")
+
 ;;;
 ;;; Only uses the length of g1 list to generate file names:
 ;;;
 (define (g1-file-names g1)
-  (map (lambda (i) (format #f "g~A.bin" i)) ; no new line?
+  (map (lambda (i) (format #f "g~A.bin" i))
        (iota (length g1))))
 
 ;;;
@@ -598,8 +592,14 @@ computes the sum of all vector elements."
      ((option-ref opts 'rism #f)
       (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
         (if (option-ref opts 'solute #f)
+            ;;
+            ;; Solute with solvent:
+            ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
               (rism-solute solute solvent '()))
+            ;;
+            ;; Pure solvent:
+            ;;
             (rism-solvent solvent '()))))  ; use Petsc env
      ;;
      ;; Fall through to the new variant:
