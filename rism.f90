@@ -478,11 +478,12 @@ module foreign
   public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
 
   type, public, bind (c) :: problem_data
-     real (c_double) :: interval(2) ! min and max of the domain: 3d-box
-     real (c_double) :: h(3)        ! mesh width
-     real (c_double) :: beta        ! inverse temperature, 1/kT
-     real (c_double) :: rho         ! solvent density
-     integer (c_int) :: N(3), N3    ! global Grid size
+     real (c_double) :: interval(2) ! FIXME: rm that!
+     real (c_double) :: L(3)     ! box size
+     real (c_double) :: h(3)     ! mesh width
+     real (c_double) :: beta     ! inverse temperature, 1/kT
+     real (c_double) :: rho      ! solvent density
+     integer (c_int) :: N(3), N3 ! global Grid size
 
      ! Other staff  that was retrieved by the  solvers themselves from
      ! the (Petsc) environment:

@@ -19,29 +19,26 @@ int verbosity = 0;
 ProblemData bgy3d_problem_data (void)
 {
     ProblemData PD;
-    int N = 0;
 
     /* defaults: for older solvers: */
     /* real maxL = 5.0; */
     /* real beta = 0.6061; */
 
     /* default for recent solvers: */
+    int N = 32;
     real maxL = 12.0;
     real beta = 1.6889;
-
-    real rho = 0.3, h = 0.5;
+    real rho = 0.3;
 
     /* Grid points in 1 dimension */
     bgy3d_getopt_int ("--N", &N);
+    assert (N > 0);
 
     /* inverse temperature */
     bgy3d_getopt_real ("--beta", &beta);
 
     /* Density */
     bgy3d_getopt_real ("--rho", &rho);
-
-    /* mesh width */
-    bgy3d_getopt_real ("--mesh", &h);
 
     /* (half of the) box size: */
     bgy3d_getopt_real ("--L", &maxL);
@@ -51,26 +48,24 @@ ProblemData bgy3d_problem_data (void)
     /*=================================*/
 
     /* It appears the intervals for x, y, and z are the same: */
+    FOR_DIM
+      PD.L[dim] = 2 * maxL;
+
+    /* FIXME: tm that: */
     PD.interval[0] = -maxL;
     PD.interval[1] = +maxL;
 
-    if (N == 0) {
-        assert (h > 0.0);
-        N = (int) ceil((PD.interval[1] - PD.interval[0]) / h);
-    }
-    else {
-        assert (N > 0);
-        h = (PD.interval[1] - PD.interval[0]) / N;
-    }
-    /* At  this  point  N  and   h  have  consistent  values  for  the
-       interval. */
+    FOR_DIM
+      PD.N[dim] = N;
+
+    FOR_DIM
+      PD.h[dim] = PD.L[dim] / PD.N[dim];
+
+    /* At this point N, h and L have consistent values. */
 
     /* FIXME:  N^2 +  N^2 +  N^2 should  not overflow,  this condition
        ensures that 3N^2 < 2^31: */
     assert (N < 26755);
-
-    FOR_DIM
-        PD.N[dim] = N;
 
     /* FIXME: N^3 should not overflow, this condition ensures that N^3
        < 2^31: */
@@ -78,9 +73,6 @@ ProblemData bgy3d_problem_data (void)
         assert (N < 1291);
 
     PD.N3 = PD.N[0] * PD.N[1] * PD.N[2];
-
-    FOR_DIM
-        PD.h[dim] = h;
 
     PD.beta = beta;
     PD.rho  = rho;
@@ -195,13 +187,13 @@ void bgy3d_state_destroy (State *BHD)
 /* Code used to be verbose: */
 void bgy3d_problem_data_print (const ProblemData *PD)
 {
-  const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
 
-  PetscPrintf (PETSC_COMM_WORLD, "Ω = [%g %g]^3\n", PD->interval[0], PD->interval[1]);
+  PetscPrintf (PETSC_COMM_WORLD, "Ω = %g x %g x %g A³\n", PD->L[0], PD->L[1], PD->L[2]);
   PetscPrintf (PETSC_COMM_WORLD, "N = %d x %d x %d\n", PD->N[0], PD->N[1], PD->N[2]);
-  PetscPrintf (PETSC_COMM_WORLD, "h = %g x %g x %g\n", PD->h[0], PD->h[1], PD->h[2]);
+  PetscPrintf (PETSC_COMM_WORLD, "h = %g x %g x %g A³\n", PD->h[0], PD->h[1], PD->h[2]);
   PetscPrintf (PETSC_COMM_WORLD, "β = %g (%5.1f K)\n", PD->beta, 1.0 / PD->beta / KBOLTZMANN);
-  PetscPrintf (PETSC_COMM_WORLD, "ρ = %g (%g per cell)\n", PD->rho, PD->rho * L * L * L);
+  PetscPrintf (PETSC_COMM_WORLD, "ρ = %g (%g per cell)\n", PD->rho, PD->rho * L3);
   PetscPrintf (PETSC_COMM_WORLD, "a = %g (Seitz radius)\n", pow ((4 * M_PI / 3) * PD->rho, -1.0 / 3.0));
   PetscPrintf (PETSC_COMM_WORLD, "λ = %g (mixing ratio)\n", PD->lambda);
   PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);

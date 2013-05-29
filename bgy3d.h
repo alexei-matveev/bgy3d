@@ -200,6 +200,7 @@ typedef enum {CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY} ClosureEnum;
 typedef struct ProblemData
 {
   real interval[2];             /* min and max of the domain: 3d-box*/
+  real L[3];                    /* box size */
   real h[3];                    /* mesh width */
   real beta;                    /* inverse temperature, 1/kT */
   real rho;                     /* solvent density */

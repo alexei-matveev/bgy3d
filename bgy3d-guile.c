@@ -126,6 +126,10 @@ static ProblemData problem_data (SCM alist)
   real length;
   if (alist_getopt_real (alist, "L", &length))
     {
+      for (int i = 0; i < 3; i++)
+        PD.L[i] = 2 * length;
+
+      /* FIXME: rm that: */
       PD.interval[0] = -length;
       PD.interval[1] = +length;
     }
@@ -133,21 +137,16 @@ static ProblemData problem_data (SCM alist)
   /* Integer options: */
   int n;
   if (alist_getopt_int (alist, "N", &n))
-    {
-      PD.N[0] = n;
-      PD.N[1] = n;
-      PD.N[2] = n;
-    }
+    for (int i = 0; i < 3; i++)
+      PD.N[i] = n;
 
   alist_getopt_int (alist, "max-iter", &PD.max_iter);
 
   /* Preserve invariants or get rid of redundancies: */
   PD.N3 = PD.N[0] * PD.N[1] * PD.N[2];
 
-  length = PD.interval[1] - PD.interval[0];
-  PD.h[0] = length / PD.N[0];
-  PD.h[1] = length / PD.N[1];
-  PD.h[2] = length / PD.N[2];
+  for (int i = 0; i < 3; i++)
+    PD.h[i] = PD.L[i] / PD.N[i];
 
   return PD;
 }
