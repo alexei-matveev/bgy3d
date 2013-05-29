@@ -207,15 +207,18 @@ static void kernel (const DA dc,
                     Vec coul,   /* complex, intent(in) */
                     Vec dfg)    /* complex, intent(out) */
 {
-  int x[3], n[3], i[3], N[3];
+  int x[3], n[3], i[3];
 
-  FOR_DIM
-    N[dim] = PD->N[dim];
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-  const real L3 = L * L * L;
-  const real fac = L / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+  const real L3 = L[0] * L[1] * L[2];
+  const real fac = L[0] / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
   const real scale = fac / L3;
 
   /* Get local portion of the grid */
