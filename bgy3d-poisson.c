@@ -99,14 +99,17 @@
 */
 void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
-  const real *interval = BHD->PD->interval; /* [2] */
-  const int *N = BHD->PD->N;    /* N[3] */
+  const int *N = BHD->PD->N;    /* [3] */
+  const real *L = BHD->PD->L;   /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
 
   /* Otherwise needs some work: */
   assert (N[0] == N[1]);
   assert (N[0] == N[2]);
 
-  const real L = interval[1] - interval[0];
   const int NNN = N[0] * N[1] * N[2];
 
   /* Scratch complex vector: */
@@ -175,7 +178,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
                 /* For  i, j,  and k  less than  or equal  to  N/2 and
                    uniform box of size  L this expression evaluates to
                    (π/L)² (i² + j² + k²) */
-                const real k2 = SQR (M_PI / L) *
+                const real k2 = SQR (M_PI / L[0]) *
                   (SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]));
 
                 const real fac = scale / k2;
