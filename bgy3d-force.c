@@ -22,11 +22,8 @@
 /* Tabulate v = f(r) with origin at the grid center:  */
 static void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
 {
-  const real off = BHD->PD->interval[0];
-
-  real h[3];
-  FOR_DIM
-    h[dim] = BHD->PD->h[dim];
+  const real *L = BHD->PD->L;   /* [3] */
+  const real *h = BHD->PD->h;   /* [3] */
 
   real ***v_;
   DMDAVecGetArray (BHD->da, v, &v_);
@@ -41,7 +38,7 @@ static void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
         {
           real r[3];
           FOR_DIM
-            r[dim] = i[dim] * h[dim] + off;
+            r[dim] = i[dim] * h[dim] - L[dim] / 2;
 
           const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
@@ -55,8 +52,12 @@ static void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
 static void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
 {
   const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real L = PD->interval[1] - PD->interval[0];
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -85,7 +86,7 @@ static void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
             potential  is also  a complex  number with  zero imaginary
             part.
           */
-          v_fft_[i[2]][i[1]][i[0]] = f ((2 * M_PI / L) * sqrt (k2));
+          v_fft_[i[2]][i[1]][i[0]] = f ((2 * M_PI / L[0]) * sqrt (k2));
         }
   DMDAVecRestoreArray (BHD->dc, v_fft, &v_fft_);
 }
@@ -120,9 +121,14 @@ static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
 {
   const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
-  const real L = PD->interval[1] - PD->interval[0];
-  const real fac = 2.0 * M_PI / L;
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
+
+  const real fac = 2.0 * M_PI / L[0];
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -179,17 +185,17 @@ static void ComputeFFTfromCoulomb (State *BHD,
   grad_fft (BHD, uc_fft, fc_fft);
 
   const ProblemData *PD = BHD->PD;
-  const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
 
   /* FFT^-1 potential ... */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
-  VecScale (uc, 1./L/L/L);
+  VecScale (uc, 1./L3);
 
   /* FFT^-1 of the corresponding force: */
   FOR_DIM
     {
       MatMultTranspose (BHD->fft_mat, fc_fft[dim], fc[dim]);
-      VecScale (fc[dim], 1./L/L/L);
+      VecScale (fc[dim], 1./L3);
     }
 }
 
@@ -300,11 +306,8 @@ void bgy3d_force (State *BHD,
 
 
   /* Now tabulate the short-range forces: */
-  real h[3];
-  FOR_DIM
-    h[dim] = BHD->PD->h[dim];
-
-  const real off = BHD->PD->interval[0];
+  const real *h = BHD->PD->h;   /* [3] */
+  const real *L = BHD->PD->L;   /* [3] */
 
   PetscScalar ***(f_short_[3]);
   FOR_DIM
@@ -322,7 +325,7 @@ void bgy3d_force (State *BHD,
             /* set force vectors */
             real r[3];
             FOR_DIM
-              r[dim] = i[dim] * h[dim] + off;
+              r[dim] = i[dim] * h[dim] - L[dim] / 2;
 
             const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
 
