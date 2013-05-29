@@ -195,16 +195,13 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
 {
   FILE *fp;
   real *xg, *g;
-  real r[3], r_s, h[3], interval[2];
+  real r[3], r_s;
   int index=0;
   int x[3], n[3], i[3], k;
   PetscScalar ***g2_vec;
 
-  FOR_DIM
-    h[dim] = PD->h[dim];
-
-  interval[0] = PD->interval[0];
-  interval[1] = PD->interval[1];
+  const real *h = PD->h;        /* [3] */
+  const real *L = PD->L;        /* [3] */
 
   /* read file */
   fp = fopen(filename, "r");
@@ -241,7 +238,8 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
       for(i[0]=x[0]; i[0]<x[0]+n[0]; i[0]++)
         {
           FOR_DIM
-            r[dim] = i[dim]*h[dim]+interval[0];
+            r[dim] = i[dim] * h[dim] - L[dim] / 2;
+
           r_s = sqrt( SQR(r[0])+SQR(r[1])+SQR(r[2]) );
 
           /* find x in array */
