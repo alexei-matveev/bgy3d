@@ -184,19 +184,11 @@ static void field (DA da, const ProblemData *PD,
                    Vec v)
 {
   PetscScalar ***vec;
-  real h[3];
+  const real *h = PD->h;        /* [3] */
+  const real *L = PD->L;        /* [3] */
+
   int i0, j0, k0;
   int ni, nj, nk;
-
-  /*
-   * FIXME: do we  really assume that intervals for x-,  y- and z- are
-   * the same? This basically means the  corner of the unit cell is at
-   * (offset, offset, offset):
-   */
-  real offset = PD->interval[0];
-
-  FOR_DIM
-    h[dim] = PD->h[dim];
 
   /* Get local portion of the grid */
   DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
@@ -206,15 +198,15 @@ static void field (DA da, const ProblemData *PD,
   /* loop over local portion of grid */
   for (int k = k0; k < k0 + nk; k++)
     {
-      A.x[2] = k * h[2] + offset;
+      A.x[2] = k * h[2] - L[2] / 2;
 
       for (int j = j0; j < j0 + nj; j++)
         {
-          A.x[1] = j * h[1] + offset;
+          A.x[1] = j * h[1] - L[1] / 2;
 
           for (int i = i0; i < i0 + ni; i++)
             {
-              A.x[0] = i * h[0] + offset;
+              A.x[0] = i * h[0] - L[0] / 2;
 
               /*
                * Compute the field  f at (x, y, z) <->  (i, j, k) e.g.
@@ -256,13 +248,10 @@ static void grid_map (DA da, const ProblemData *PD,
       for (int j = j0; j < j0 + nj; j++)
         for (int i = i0; i < i0 + ni; i++)
           {
-            /* Coordinates  (x, y,  z) <->  (i, j,  k).  FIXME:  do we
-               really assume that intervals for  x-, y- and z- are the
-               same? This basically means  the corner of the unit cell
-               is at (offset, offset, offset): */
-            x[ijk][0] = i * PD->h[0] + PD->interval[0];
-            x[ijk][1] = j * PD->h[1] + PD->interval[0];
-            x[ijk][2] = k * PD->h[2] + PD->interval[0];
+            /* Coordinates (x, y, z) <-> (i, j, k): */
+            x[ijk][0] = i * PD->h[0] - PD->L[0] / 2;
+            x[ijk][1] = j * PD->h[1] - PD->L[1] / 2;
+            x[ijk][2] = k * PD->h[2] - PD->L[2] / 2;
             ijk++;
           }
     assert (ijk == m);
