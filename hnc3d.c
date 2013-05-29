@@ -416,7 +416,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   const ProblemData *PD = HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
-  const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
@@ -470,7 +470,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
         MatMultTranspose (HD->fft_mat, t_fft[i][j], dt[i][j]);
 
-        VecScale (dt[i][j], 1.0/L/L/L);
+        VecScale (dt[i][j], 1.0/L3);
       }
 
   /*
@@ -760,7 +760,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   /* Chemical potential */
   {
     const real beta = HD->PD->beta;
-    const real L = HD->PD->interval[1] - HD->PD->interval[0];
+    const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
 
     /*
       FIXME: this is the only  place where one needs real-space rep of
@@ -786,7 +786,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
               c  = -βv
                L      L
           */
-          VecScale (cl[i][j], -beta/L/L/L);
+          VecScale (cl[i][j], -beta/L3);
         }
 
     /* The function chempot() operates  on rectangular arrays, we pass
