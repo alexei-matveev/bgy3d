@@ -49,7 +49,7 @@ struct Context {
   PetscScalar ***v_;    /* v_[k][j][i] points to the real data */
   int ijk;              /* linarized index for local (k, j, i) */
   real h[3];            /* mesh sizes */
-  real interval[2];     /* ? */
+  real L[3];            /* box size */
   int i0, j0, k0;       /* corner of local grid */
   int ni, nj, nk;       /* local grid shape */
 };
@@ -109,8 +109,8 @@ static Context* bgy3d_pot_create (const State *BHD, Vec v)
     s->h[dim] = BHD->PD->h[dim];
 
   /* copy interval */
-  s->interval[0] = BHD->PD->interval[0];
-  s->interval[1] = BHD->PD->interval[1];
+  FOR_DIM
+    s->L[dim] = BHD->PD->L[dim];
 
   /* Initalize counter: */
   s->ijk = 0;
@@ -127,14 +127,12 @@ void bgy3d_pot_interp (Context *s, int n, /* const */ real x[n][3], real v[n])
       MatMult (s->fft_mat, s->v, s->v_fft);
     }
 
-  const real off = s->interval[0];
-
   /* Translate site coordinates into real grid coordinates where
      integer values correspond to the grid nodes: */
   real y[n][3];
   for (int i = 0; i < n; i++)
     FOR_DIM
-      y[i][dim] = (x[i][dim] - off) / s->h[dim];
+      y[i][dim] = (x[i][dim] + s->L[dim] / 2) / s->h[dim];
 
   /* Trigonometric interpolation: */
   bgy3d_fft_interp (s->fft_mat, s->v_fft, n, y, v);
@@ -170,10 +168,10 @@ bool bgy3d_pot_get_value (Context *s, int n, real x[n][3], real v[n], int *np)
       j += s->j0;
       k += s->k0;
 
-      x[p][0] = i * s->h[0] + s->interval[0]; /* x */
-      x[p][1] = j * s->h[1] + s->interval[0]; /* y */
-      x[p][2] = k * s->h[2] + s->interval[0]; /* z */
-      v[p] = s->v_[k][j][i] * dV;             /* value * weight */
+      x[p][0] = i * s->h[0] - s->L[0] / 2; /* x */
+      x[p][1] = j * s->h[1] - s->L[1] / 2; /* y */
+      x[p][2] = k * s->h[2] - s->L[2] / 2; /* z */
+      v[p] = s->v_[k][j][i] * dV;          /* value * weight */
 
       /* update counters */
       s->ijk++;
@@ -458,8 +456,7 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       bgy3d_comm_allreduce (1, &m0);
       bgy3d_comm_allreduce (3, m1);
 
-      const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
-      const real V = L * L * L;
+      const real V = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
       PetscPrintf (PETSC_COMM_WORLD, "Moments divided by cell volume V = %lf: \n", V);
       PetscPrintf (PETSC_COMM_WORLD, "<1 * v> = %lf\n", m0 / V);
       PetscPrintf (PETSC_COMM_WORLD, "<x * v> = %lf\n", m1[0] / V);
