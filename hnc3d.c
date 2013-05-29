@@ -1220,11 +1220,11 @@ void hnc3d_solute_solve (const ProblemData *PD,
         {
           .HD = HD,
           .m = m,
-          .v = (void*) v,
-          .y = (void*) h,           /* h(t), not t(h) */
+          .v = v,
+          .y = h,                   /* h(t), not t(h) */
           .c_fft = (void*) chi_fft, /* pair quantitity */
-          .h_fft = (void*) h_fft,
-          .t_fft = (void*) t_fft,
+          .h_fft = h_fft,
+          .t_fft = t_fft,
         };
 
       bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, T);
