@@ -43,9 +43,14 @@ static bool inside_boundary (const Boundary *b, int i, int j, int k)
    inside_boundary(): */
 static Boundary make_boundary (const ProblemData *PD)
 {
-  const int *N = PD->N;         /* N[3] */
-  const real *h = PD->h;        /* h[3] */
-  const real L = PD->interval[1] - PD->interval[0];
+  const int *N = PD->N;         /* [3] */
+  const real *h = PD->h;        /* [3] */
+  const real *L = PD->L;        /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
+
   const real zpad = PD->zpad;
 
   /*
@@ -63,7 +68,7 @@ static Boundary make_boundary (const ProblemData *PD)
     tests fail though with deviations  in the third or fourth digit of
     the moments.
   */
-  const int border = 1 + (int) ceil ((L - 2.0 * zpad) / h[0] / 2.0);
+  const int border = 1 + (int) ceil ((L[0] - 2.0 * zpad) / h[0] / 2.0);
 
   /* Holds for all regression tests! */
   assert (border == 1);
