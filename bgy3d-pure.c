@@ -84,10 +84,15 @@ static void kapply (const State *BHD,
                     Vec dg_fft)              /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-  const real fac = L / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
+
+  const real fac = L[0] / (2. * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
 
   complex ***g_fft_, ***dg_fft_, ***coul_fft_, ***fg2_fft_[3];
   DMDAVecGetArray (BHD->dc, g_fft, &g_fft_);
@@ -159,7 +164,7 @@ static void Compute_dg_inter (State *BHD,
                               Vec dua) /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
-  const real L = PD->interval[1] - PD->interval[0];
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
 
   local Vec fg2_fft[3];
   FOR_DIM
@@ -208,7 +213,7 @@ static void Compute_dg_inter (State *BHD,
   /* Transform the result of the convolution to real space du_a: */
   MatMultTranspose (BHD->fft_mat, dua_fft, dua);
 
-  VecScale (dua, rhob * PD->beta/L/L/L);
+  VecScale (dua, rhob * PD->beta/L3);
 }
 
 
@@ -245,8 +250,12 @@ static double pure sinc (double x)
 static
 void omega_intra (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 {
-  const int *N = PD->N;         /* N[3] */
-  const real L = PD->interval[1] - PD->interval[0];
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -268,7 +277,7 @@ void omega_intra (const ProblemData *PD, const DA dc, real r, Vec w_fft)
 
           /* FIXME: integer sum of squares will overflow for N >> 20000! */
           const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
-          const real kr = (2.0 * M_PI * r / L) * sqrt (k2);
+          const real kr = (2.0 * M_PI * r / L[0]) * sqrt (k2);
 
           /* Compute ω(k): */
           w_fft_[i[2]][i[1]][i[0]] = sinc (kr);
@@ -361,7 +370,7 @@ static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
 static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
                              Vec nab)
 {
-  const real L = BHD->PD->interval[1] - BHD->PD->interval[0];
+  const real L3 = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
 
   local Vec nab_fft = vec_pop (BHD->dc);
 
@@ -374,7 +383,7 @@ static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
 
   vec_push (BHD->dc, &nab_fft);
 
-  VecScale (nab, 1./L/L/L);
+  VecScale (nab, 1./L3);
 
   /* FIXME:  make  n(x) >  0,  because it  will  appear  later in  the
      denominator. Note that the same redundant precautions are made at
@@ -431,11 +440,16 @@ static void Compute_dg_intra (State *BHD,
                               Vec dg, Vec dg_help)
 {
   const ProblemData *PD = BHD->PD;
-  const int *N = PD->N;         /* N[3] */
+  const int *N = PD->N;         /* [3] */
+  const real *L = PD->L;        /* [3] */
+  const real L3 = L[0] * L[1] * L[2];
+
+  /* FIXME: rectangular box? */
+  assert (L[0] == L[1]);
+  assert (L[0] == L[2]);
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L = PD->interval[1] - PD->interval[0];
-  const real scale = L / (2. * M_PI); /* siehe oben ... */
+  const real scale = L[0] / (2. * M_PI); /* siehe oben ... */
 
   local Vec fg2_fft[3];
   FOR_DIM
@@ -491,7 +505,7 @@ static void Compute_dg_intra (State *BHD,
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
-        VecScale (work, 1./L/L/L);
+        VecScale (work, 1./L3);
 
         /* A   safer   version   of   VecPointwiseDivide   (BHD->v[dim],
            BHD->v[dim], nab);
@@ -561,7 +575,7 @@ static void Compute_dg_intra (State *BHD,
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg_help);
 
-  VecScale (dg_help, PD->beta/L/L/L);
+  VecScale (dg_help, PD->beta/L3);
 
   /* Back transformation  of coulomb part,  divide by nab  and forward
      transfromation */
@@ -570,7 +584,7 @@ static void Compute_dg_intra (State *BHD,
     FOR_DIM
       {
         MatMultTranspose (BHD->fft_mat, fg2_fft[dim], work);
-        VecScale (work, 1./L/L/L);
+        VecScale (work, 1./L3);
 
         /* A safer version of VecPointwiseDivide (work, work, nab);
 
@@ -621,7 +635,7 @@ static void Compute_dg_intra (State *BHD,
 
   MatMultTranspose (BHD->fft_mat, dg_fft, dg);
 
-  VecScale (dg, PD->beta/L/L/L);
+  VecScale (dg, PD->beta/L3);
 
   VecAXPY (dg, 1.0, dg_help);
 }
