@@ -531,7 +531,8 @@ static void compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
     βμ = ρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] d³r
 
   Here  we  pass  h(r)  and  c(r)  and long-range  part  of  c(r)  for
-  solvent-solvent pair.
+  solute-solvent pair.  The solute  might be the  same as  solvent, of
+  course.
 
   Volume integral in cartesian grid is actually:
 
@@ -641,7 +642,7 @@ print_chempot (const State *HD, int n, int m,
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
   correlation c  and other quantities  of HNC equation.   The indirect
-  correlation  t appears  as  a  primary variable  x  here. All  other
+  correlation  t  appears  as  a  primary  variable  here.  All  other
   unknowns, including the direction  correlation c, are functionals of
   that.
 
