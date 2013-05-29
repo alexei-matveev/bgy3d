@@ -125,14 +125,8 @@ static ProblemData problem_data (SCM alist)
 
   real length;
   if (alist_getopt_real (alist, "L", &length))
-    {
-      for (int i = 0; i < 3; i++)
-        PD.L[i] = 2 * length;
-
-      /* FIXME: rm that: */
-      PD.interval[0] = -length;
-      PD.interval[1] = +length;
-    }
+    for (int i = 0; i < 3; i++)
+      PD.L[i] = 2 * length;
 
   /* Integer options: */
   int n;

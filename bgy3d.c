@@ -51,10 +51,6 @@ ProblemData bgy3d_problem_data (void)
     FOR_DIM
       PD.L[dim] = 2 * maxL;
 
-    /* FIXME: tm that: */
-    PD.interval[0] = -maxL;
-    PD.interval[1] = +maxL;
-
     FOR_DIM
       PD.N[dim] = N;
 

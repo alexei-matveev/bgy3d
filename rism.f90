@@ -478,7 +478,6 @@ module foreign
   public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
 
   type, public, bind (c) :: problem_data
-     real (c_double) :: interval(2) ! FIXME: rm that!
      real (c_double) :: L(3)     ! box size
      real (c_double) :: h(3)     ! mesh width
      real (c_double) :: beta     ! inverse temperature, 1/kT
@@ -624,7 +623,7 @@ contains
     real (rk) :: rho(size (solvent))
 
     rho = pd % rho              ! all site densities are the same
-    rmax = 0.5 * (pd % interval(2) - pd % interval(1))
+    rmax = maxval (pd % L) / 2
     nrad = maxval (pd % n)
 
     print *, "# L =", rmax, "(for 1d)"
