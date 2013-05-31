@@ -134,10 +134,10 @@
 #include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
-#include "hnc3d.h"
 #include "bgy3d-potential.h"    /* info() */
 #include "bgy3d-solvents.h"      /* bgy3d_sites_show() */
 #include <math.h>               /* expm1() */
+#include "hnc3d.h"
 
 
 /*
