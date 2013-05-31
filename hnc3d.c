@@ -1139,7 +1139,9 @@ static void solvent_kernel (State *HD, int m, Vec chi_fft[m][m])
 void hnc3d_solute_solve (const ProblemData *PD,
                          const int m, const Site solvent[m],
                          const int n, const Site solute[n],
-                         Vec g[m])
+                         void (*density)(int k, const real x[k][3], real rho[k]),
+                         Vec g[m],
+                         Context **medium)
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -1170,7 +1172,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_solute_field (HD, m, solvent, n, solute,
                       v, uc,  /* out */
                       uc_rho, /* smeared core density, discarded */
-                      NULL);  /* no electronic density */
+                      density);  /* void (*density)(...) */
 
   /*
     If   the  solute  is   neutral,  asymptotic   electrostatics  is
@@ -1292,10 +1294,13 @@ void hnc3d_solute_solve (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     VecShift (h[i], 1.0);       /* FIXME: misnomer! */
 
-  /* information printing */
+  /* return the Context **ret to caller for integration over electron
+   * potential of solvent */
   Context *ret = info (HD, m, solvent, n, solute, h, uc, uc_rho);
-  /* FIXME: Context is not used anywhere yet, simple destroy it */
-  bgy3d_pot_destroy (ret);
+  if (medium)
+    *medium = ret;
+  else
+    bgy3d_pot_destroy (ret);
 
   /* keep uc and uc_rho until being used in info() */
   vec_destroy (&uc);
@@ -1360,7 +1365,10 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
 
   Vec g[m];
-  hnc3d_solute_solve (PD, m, solvent, n, solute, g);
+  hnc3d_solute_solve (PD, m, solvent, n, solute,
+                      NULL,  /* no electron density */
+                      g,
+                      NULL); /* no medium returned */
 
   vec_destroy1 (m, g);
   return PETSC_NULL;
