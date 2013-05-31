@@ -872,12 +872,27 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
 
+  /* This declares and  sets a function pointer. If  the settings dont
+     specify it, it should remain NULL: */
+  void (*qm_density) (int n, const real x[n][3], real rho[n]) = NULL;
+
+  /*
+    Cast is to silence the warning  here.  Note that we pass a pointer
+    to  a  funptr,  void  (**)(),  as  the  function  is  supposed  to
+    (eventually) set that funptr to something meaningful:
+  */
+  alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
+
   /*
     This  takes part  of  the  input from  the  disk, returns  solvent
     distribution in Vec g[] (dont forget to destroy them).:
   */
   Vec g[m];
-  hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, g);
+  Context *medium_;
+
+  hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                      g,
+                      &medium_);
 
   free (solute_name);
   free (solute_sites);
@@ -886,10 +901,10 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
 
   /* Build a list starting from the tail: */
   SCM gs = from_vec1 (m, g);
-  SCM v = from_pointer (NULL);
+  SCM medium = from_pointer (medium_);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
-  return scm_values (scm_list_2 (gs, v));
+  return scm_values (scm_list_2 (gs, medium));
 }
 
 
