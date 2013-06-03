@@ -472,7 +472,7 @@ computes the sum of all vector elements."
       (verbose          (single-char #\v)
                         (value #f)) ; verbosity
       (no-cage          (value #f)) ; turns off metallic cage boundary
-      (no-hacks          (value #f))    ; turns off ugly hacks
+      (no-hacks         (value #f)) ; turns off ugly hacks
       (unquote-splicing numeric)))))
 
 
