@@ -151,7 +151,7 @@ static inline void da_shape (const DA da, int N[static 3])
   DMDAGetInfo (da, &dim, &N[0], &N[1], &N[2],
              NULL, NULL, NULL, NULL, NULL,
              NULL,
-#if PETSC_VERSION >= 30200
+#if PETSC_VERSION >= VERSION(3, 2)
              NULL, NULL,
 #endif
              NULL);
@@ -166,7 +166,7 @@ static inline int da_dof (const DA da)
   DMDAGetInfo (da, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
              &n, NULL,
              NULL,
-#if PETSC_VERSION >= 30200
+#if PETSC_VERSION >= VERSION(3, 2)
              NULL, NULL,
 #endif
              NULL);
@@ -638,7 +638,7 @@ static inline DA da_create (int dof,
   */
   DA da;
   DMDACreate3d (PETSC_COMM_WORLD,
-#if PETSC_VERSION >= 30200
+#if PETSC_VERSION >= VERSION(3, 2)
               BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
 #else
               BOUNDARY_TYPE,

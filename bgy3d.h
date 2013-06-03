@@ -15,9 +15,10 @@
 #include <float.h>              /* DBL_MAX */
 
 #include "petsc.h"
-#define PETSC_VERSION (PETSC_VERSION_MAJOR * 10000 + PETSC_VERSION_MINOR * 100)
+#define VERSION(major, minor) ((major) * 10000 + (minor) * 100)
+#define PETSC_VERSION VERSION(PETSC_VERSION_MAJOR, PETSC_VERSION_MINOR)
 
-#if PETSC_VERSION >= 30200
+#if PETSC_VERSION >= VERSION(3, 2)
 #  include "petscdmda.h"        /* Vec, Mat, DA, ... */
 #else
 #  include "petscda.h"          /* Vec, Mat, DA, ... */
@@ -26,7 +27,7 @@
 #include "petscdmmg.h"          /* KSP, ... */
 
 /* FIXME: PETSC 3.2 */
-#if PETSC_VERSION >= 30200
+#if PETSC_VERSION >= VERSION(3, 2)
 typedef DM DA;
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
 #  define STENCIL_TYPE          DMDA_STENCIL_STAR
@@ -59,7 +60,7 @@ typedef DM DA;
   that expands  to a call to DMGet/RestoreGlobalVector()  with DA cast
   to DM:
 */
-#  if PETSC_VERSION < 30100
+#  if PETSC_VERSION < VERSION(3, 1)
 #    define DMGetGlobalVector     DAGetGlobalVector
 #    define DMRestoreGlobalVector DARestoreGlobalVector
 #  else
@@ -159,10 +160,10 @@ typedef DM DA;
 
 /* GCC extensions: */
 #ifdef __GNUC__
-#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
+#define GCC_VERSION VERSION(__GNUC__, __GNUC_MINOR__)
 #endif
 
-#if GCC_VERSION > 30000
+#if GCC_VERSION > VERSION(3, 0)
 #define likely(x)    __builtin_expect (!!(x), 1)
 #define unlikely(x)  __builtin_expect (!!(x), 0)
 #define pure         __attribute__ ((const))
@@ -174,7 +175,7 @@ typedef DM DA;
 #define deprecated              /* deprecated */
 #endif
 
-#if GCC_VERSION > 40300
+#if GCC_VERSION > VERSION(4, 3)
 static inline void assert_is_null (void *x)
 {
   void **y = (void**) x;
