@@ -198,13 +198,23 @@ typedef double real;
 /* There are a few closures available for HNC-like methods: */
 typedef enum {CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY} ClosureEnum;
 
+
+/* Keep  this  in  sync   with  the  foreign  type  (problem_data)  in
+   rism.f90: */
 typedef struct ProblemData
 {
+  /*
+    These three are redundant and should fulfil the relation
+
+      L[i] = N[i] * h[i]
+
+    modulo floating point arithmetics, as usual.
+  */
+  int N[3];                     /* global grid size */
   real L[3];                    /* box size */
   real h[3];                    /* mesh width */
   real beta;                    /* inverse temperature, 1/kT */
   real rho;                     /* solvent density */
-  int N[3], N3;                 /* global Grid size */
 
   /* Other staff that was retrieved by the solvers themselves from the
      (Petsc) environment: */

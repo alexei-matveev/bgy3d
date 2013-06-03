@@ -478,11 +478,18 @@ module foreign
   public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
 
   type, public, bind (c) :: problem_data
-     real (c_double) :: L(3)     ! box size
-     real (c_double) :: h(3)     ! mesh width
-     real (c_double) :: beta     ! inverse temperature, 1/kT
-     real (c_double) :: rho      ! solvent density
-     integer (c_int) :: N(3), N3 ! global Grid size
+     !
+     ! These three are redundant and should fulfil the relation
+     !
+     !   L(i) = N(i) * h(i)
+     !
+     ! modulo floating point arithmetics, as usual.
+     !
+     integer (c_int) :: N(3)    ! global grid size
+     real (c_double) :: L(3)    ! box size
+     real (c_double) :: h(3)    ! mesh width
+     real (c_double) :: beta    ! inverse temperature, 1/kT
+     real (c_double) :: rho     ! solvent density
 
      ! Other staff  that was retrieved by the  solvers themselves from
      ! the (Petsc) environment:

@@ -68,8 +68,6 @@ ProblemData bgy3d_problem_data (void)
     if (!bgy3d_getopt_test ("--rism"))
         assert (N < 1291);
 
-    PD.N3 = PD.N[0] * PD.N[1] * PD.N[2];
-
     PD.beta = beta;
     PD.rho  = rho;
 
