@@ -409,8 +409,10 @@ static SCM guile_vec_fft (SCM state, SCM x)
   SCM y = guile_vec_make_complex (state);
   Vec y_ = to_vec (y);
 
+  const int N3 = BHD->PD->N[0] * BHD->PD->N[1] * BHD->PD->N[2];
+
   MatMult (BHD->fft_mat, to_vec (x), y_);
-  VecScale (y_, 1.0 / sqrt (BHD->PD->N3));
+  VecScale (y_, 1.0 / sqrt (N3));
 
   return y;
 }
@@ -420,10 +422,12 @@ static SCM guile_vec_ifft (SCM state, SCM y)
 {
   State *BHD = to_state (state);
   SCM x = guile_vec_make (state);
-
   Vec x_ = to_vec (x);
+
+  const int N3 = BHD->PD->N[0] * BHD->PD->N[1] * BHD->PD->N[2];
+
   MatMultTranspose (BHD->fft_mat, to_vec (y), x_);
-  VecScale (x_, 1.0 / sqrt (BHD->PD->N3));
+  VecScale (x_, 1.0 / sqrt (N3));
 
   return x;
 }
@@ -433,6 +437,7 @@ static SCM guile_vec_fft_interp (SCM state, SCM Y, SCM x)
 {
   State *BHD = to_state (state);
   Vec Y_ = to_vec (Y);
+  const int N3 = BHD->PD->N[0] * BHD->PD->N[1] * BHD->PD->N[2];
 
   double x_[1][3], y[1];
   for (int i = 0; i < 3; i ++)
@@ -444,7 +449,7 @@ static SCM guile_vec_fft_interp (SCM state, SCM Y, SCM x)
   bgy3d_fft_interp (BHD->fft_mat, Y_, 1, x_, y);
 
   /* FIXME: FFT in BGY3d code is unnormalized: */
-  return scm_from_double (y[0] * sqrt (BHD->PD->N3));
+  return scm_from_double (y[0] * sqrt (N3));
 }
 
 
