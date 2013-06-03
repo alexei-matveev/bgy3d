@@ -461,6 +461,9 @@ module foreign
   public :: expm1
   public :: bgy3d_problem_data
   public :: bgy3d_problem_data_print
+  public :: verbosity           ! extern int
+
+  integer (c_int), bind (c) :: verbosity ! see bgy3d.c
 
   ! Keep this in sync with bgy3d-solutes.h:
   type, public, bind (c) :: site
@@ -618,7 +621,7 @@ contains
     !
     ! This one does not need to be interoperable.
     !
-    use foreign, only: problem_data, site, bgy3d_problem_data_print
+    use foreign, only: problem_data, site, bgy3d_problem_data_print, verbosity
     implicit none
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
@@ -633,15 +636,17 @@ contains
     rmax = maxval (pd % L) / 2
     nrad = maxval (pd % n)
 
-    print *, "# L =", rmax, "(for 1d)"
-    print *, "# N =", nrad, "(for 1d)"
+    if (verbosity > 0) then
+       print *, "# L =", rmax, "(for 1d)"
+       print *, "# N =", nrad, "(for 1d)"
 
-    call bgy3d_problem_data_print (pd)
+       call bgy3d_problem_data_print (pd)
 
-    call show_sites ("Solvent", solvent, rho)
+       call show_sites ("Solvent", solvent, rho)
 
-    if (present (solute)) then
-       call show_sites ("Solute", solute)
+       if (present (solute)) then
+          call show_sites ("Solute", solute)
+       endif
     endif
 
     ! This is applicable to LJ only, and should take reduced
@@ -905,7 +910,8 @@ contains
     !
     ! Prints some results.
     !
-    use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: site, verbosity, &
+         HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -969,14 +975,16 @@ contains
        end block
 
        ! This prints a lot of data on tty!
-       print *, "# r, and v, t, c, g, each for",  n, "x", m, "pairs"
-       do p = 1, nrad
-          write (*, *) r(p), &
-               &     ((v(p, i, j), i=1,n), j=1,m), &
-               &     ((t(p, i, j), i=1,n), j=1,m), &
-               &     ((c(p, i, j), i=1,n), j=1,m), &
-               &     ((g(p, i, j), i=1,n), j=1,m)
-       enddo
+       if (verbosity > 1) then
+          print *, "# r, and v, t, c, g, each for",  n, "x", m, "pairs"
+          do p = 1, nrad
+             write (*, *) r(p), &
+                  &     ((v(p, i, j), i=1,n), j=1,m), &
+                  &     ((t(p, i, j), i=1,n), j=1,m), &
+                  &     ((c(p, i, j), i=1,n), j=1,m), &
+                  &     ((g(p, i, j), i=1,n), j=1,m)
+          enddo
+       endif
     end block
   end subroutine post_process
 
