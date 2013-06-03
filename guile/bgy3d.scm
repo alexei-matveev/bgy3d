@@ -190,8 +190,8 @@
 (define (site-z site) (third (site-position site)))
 
 (define (print-xyz solute)
-  (let ((name	(molecule-name solute))
-        (sites	(molecule-sites solute)))
+  (let ((name   (molecule-name solute))
+        (sites  (molecule-sites solute)))
     (format #t "~a\n" (length sites))
     (format #t "# ~a\n" name)
     (for-each (lambda (site)
@@ -331,15 +331,15 @@ computes the sum of all vector elements."
   ;;
   ;; Grid data:
   ;;
-  (let loop ((vecs	vecs)
-             (vec-id	0))
+  (let loop ((vecs      vecs)
+             (vec-id    0))
     (if (not (null? vecs))
-        (let* ((vec	(first vecs))
-               (len	(vec-length vec))
-               (n	(cubic-root len))
-               (L	(or (assq-ref settings 'L) 10.0))
-               (L	(angstrom->bohr L))   ; punch file is in AU
-               (S	(* L (/ (- n 2) n)))) ; off-by-one on a 2L interval
+        (let* ((vec     (first vecs))
+               (len     (vec-length vec))
+               (n       (cubic-root len))
+               (L       (or (assq-ref settings 'L) 10.0))
+               (L       (angstrom->bohr L))   ; punch file is in AU
+               (S       (* L (/ (- n 2) n)))) ; off-by-one on a 2L interval
           (header '((block . data) (records . 0)))
           (header '((block . grid_title) (records . 1)))
           (format #t "Solvent site hole density ~a\n" vec-id)
@@ -387,8 +387,8 @@ computes the sum of all vector elements."
 ;;; These hooks, bgy3d-solvent and bgy3d-solute, are called from PG:
 ;;;
 (define (bgy3d-solvent)
-  (let ((settings	*default-settings*)
-        (solvent	(find-molecule *default-molecule*)))
+  (let ((settings       *default-settings*)
+        (solvent        (find-molecule *default-molecule*)))
     ;;
     ;; At the moment the function bgy3d-run-solvent echos settings as
     ;; is, the output is written to disk instead. FIXME: a hack to
@@ -406,9 +406,9 @@ computes the sum of all vector elements."
 
 (define (bgy3d-solute name sites funptr restart)
   "To be called from QM code."
-  (let ((settings	*default-settings*)
-        (solvent	(find-molecule *default-molecule*))
-        (solute		(make-molecule name
+  (let ((settings       *default-settings*)
+        (solvent        (find-molecule *default-molecule*))
+        (solute         (make-molecule name
                                        (update-sites name
                                                      sites))))
     ;;
@@ -478,7 +478,7 @@ computes the sum of all vector elements."
 
 (define option-spec-new
   (quasiquote
-   ((save-binary	(value #f))
+   ((save-binary        (value #f))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
@@ -539,9 +539,9 @@ computes the sum of all vector elements."
         (getopt-long argv option-spec-all))
        ((method run-solvent run-solute) ; three method-dependent values:
         (cond
-         ((option-ref opts 'hnc #f)	(values 'hnc hnc3d-run-solvent hnc3d-run-solute))
-         ((option-ref opts 'bgy #f)	(values 'bgy bgy3d-run-solvent bgy3d-run-solute))
-         ((option-ref opts 'rism #f)	(values 'rism rism-solvent rism-solute)))))
+         ((option-ref opts 'hnc #f)     (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
+         ((option-ref opts 'bgy #f)     (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
+         ((option-ref opts 'rism #f)    (values 'rism rism-solvent rism-solute)))))
     (case method
      ;;
      ;; 3d HNC/BGY.  The functions {hnc3d,bgy3d}-run-{solute,solvent}
@@ -606,13 +606,13 @@ computes the sum of all vector elements."
 ;;; "solvent":
 ;;;
 (define (new-main argv)
-  (let ((cmd		(car argv))     ; should be non-empty
-        (options	(getopt-long argv option-spec-new)))
-    (let ((args		(option-ref options '() '())) ; positional arguments (solute names)
-          (solvent	(find-molecule (option-ref options 'solvent *default-molecule*)))
-          (solute	(find-molecule (option-ref options 'solute *default-molecule*)))
-          (save-binary	(option-ref options 'save-binary #f))
-          (settings	(update-settings *default-settings* options))) ; defaults updated from command line
+  (let ((cmd            (car argv))     ; should be non-empty
+        (options        (getopt-long argv option-spec-new)))
+    (let ((args         (option-ref options '() '())) ; positional arguments (solute names)
+          (solvent      (find-molecule (option-ref options 'solvent *default-molecule*)))
+          (solute       (find-molecule (option-ref options 'solute *default-molecule*)))
+          (save-binary  (option-ref options 'save-binary #f))
+          (settings     (update-settings *default-settings* options))) ; defaults updated from command line
       (match cmd
         ("solvent"
          ;;
