@@ -534,24 +534,32 @@ computes the sum of all vector elements."
 ;;; functionality is in flux.
 ;;;
 (define (old-main argv)
-  (let ((opts (getopt-long argv option-spec-all)))
-    ;; (pretty-print opts)
-    (cond
+  (let*-values
+      (((opts)                          ; opts as a single value:
+        (getopt-long argv option-spec-all))
+       ((method run-solvent run-solute) ; three method-dependent values:
+        (cond
+         ((option-ref opts 'hnc #f)	(values 'hnc hnc3d-run-solvent hnc3d-run-solute))
+         ((option-ref opts 'bgy #f)	(values 'bgy bgy3d-run-solvent bgy3d-run-solute))
+         ((option-ref opts 'rism #f)	(values 'rism rism-solvent rism-solute)))))
+    (case method
      ;;
-     ;; HNC:
+     ;; 3d HNC/BGY.  The functions {hnc3d,bgy3d}-run-{solute,solvent}
+     ;; share the interface. The code that calls them is the same:
      ;;
-     ((option-ref opts 'hnc #f)
-      (let ((solvent (find-molecule (option-ref opts 'solvent "LJ"))))
+     ((hnc bgy)
+      (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
         (maybe-print (list 'solvent: solvent))
         (if (option-ref opts 'solute #f)
             ;;
-            ;; Solute with solvent:
+            ;; Solute with solvent.  Note that at variance with the
+            ;; legacy code the function find-molecule uses on-disk
+            ;; database in ./solutes.scm and not the compiled in set
+            ;; from bgy3d-solutes.c and bgy3d-solvents.h:
             ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
               (maybe-print (list 'solute: solute))
-              (let-values (((g1 potential) (hnc3d-run-solute solute
-                                                             solvent
-                                                             '())))
+              (let-values (((g1 potential) (run-solute solute solvent '())))
                 ;;
                 ;; Evaluate and print potential at positions of solute
                 ;; sites and the corresponding total energy:
@@ -569,58 +577,22 @@ computes the sum of all vector elements."
             ;;
             ;; Pure solvent:
             ;;
-            (hnc3d-run-solvent solvent '()))))
-     ;;
-     ;; BGY:
-     ;;
-     ((option-ref opts 'bgy #f)
-      (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
-        (maybe-print (list 'solvent: solvent))
-        (if (option-ref opts 'solute #f)
-            ;;
-            ;; Solute with solvent.  Note that at variance with the
-            ;; legacy code the function find-molecule uses on-disk
-            ;; database in ./solutes.scm and not the compiled in set
-            ;; from bgy3d-solutes.c and bgy3d-solvents.h:
-            ;;
-            (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
-              (maybe-print (list 'solute: solute))
-              (let-values (((g1 potential) (bgy3d-run-solute solute
-                                                             solvent
-                                                             '()))) ; Use Petsc env
-                ;;
-                ;; Evaluate and print potential at positions of solute
-                ;; sites and the corresponding total energy:
-                ;;
-                (maybe-print-potentials solute potentials)
-                ;;
-                ;; Write g?.bin files:
-                ;;
-                (map vec-save (g1-file-names g1) g1)
-                ;;
-                ;; Then destroy the objects returned:
-                ;;
-                (bgy3d-pot-destroy potential)
-                (map vec-destroy g1)))
-            ;;
-            ;; Pure solvent:
-            ;;
-            (bgy3d-run-solvent solvent '()))))
+            (run-solvent solvent '()))))
      ;;
      ;; 1d-RISM, very experimental:
      ;;
-     ((option-ref opts 'rism #f)
+     ((rism)
       (let ((solvent (find-molecule (option-ref opts 'solvent *default-molecule*))))
         (if (option-ref opts 'solute #f)
             ;;
             ;; Solute with solvent:
             ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
-              (rism-solute solute solvent '()))
+              (run-solute solute solvent '()))
             ;;
             ;; Pure solvent:
             ;;
-            (rism-solvent solvent '()))))  ; use Petsc env
+            (run-solvent solvent '()))))  ; use Petsc env
      ;;
      ;; Fall through to the new variant:
      ;;
