@@ -14,6 +14,7 @@ BGY-FLAGS = \
 	--max-iter 1000 \
 	--L 10.0 \
 	--lambda 0.02 \
+	--solvent "hydrogen chloride" \
 	--snes-solver jager \
 
 solvent = water
