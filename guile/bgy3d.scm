@@ -510,6 +510,24 @@ computes the sum of all vector elements."
                        value)))))))
     (map update-pair settings)))
 
+
+;;;
+;;; For testing, primarily, evaluate  potential at positions of solute
+;;; sites and the corresponding total energy:
+;;;
+(define (maybe-print-potentials solute potential)
+  (let* ((sites (molecule-sites solute))
+         (positions (map site-position sites))
+         (potentials (potential-map potential positions))
+         (charges (map site-charge sites))
+         (energy (apply + (map * charges potentials))))
+    ;;
+    ;; Only print on master:
+    ;;
+    (maybe-print (cons 'core-potentials potentials))
+    (maybe-print (cons 'core-energy energy))))
+
+
 ;;;
 ;;; FIXME: at  the moment this  function only emulates the  minimum of
 ;;; the   functionality   of   the   original  executable.   The   new
@@ -531,10 +549,22 @@ computes the sum of all vector elements."
             ;;
             (let ((solute (find-molecule (option-ref opts 'solute *default-molecule*))))
               (maybe-print (list 'solute: solute))
-              (let-values (((g1 ve) (hnc3d-run-solute solute
-                                                      solvent
-                                                      '())))
+              (let-values (((g1 potential) (hnc3d-run-solute solute
+                                                             solvent
+                                                             '())))
+                ;;
+                ;; Evaluate and print potential at positions of solute
+                ;; sites and the corresponding total energy:
+                ;;
+                (maybe-print-potentials solute potential)
+                ;;
+                ;; Write g?.bin files:
+                ;;
                 (map vec-save (g1-file-names g1) g1)
+                ;;
+                ;; Then destroy the objects returned:
+                ;;
+                (bgy3d-pot-destroy potential)
                 (map vec-destroy g1)))
             ;;
             ;; Pure solvent:
@@ -559,20 +589,10 @@ computes the sum of all vector elements."
                                                              solvent
                                                              '()))) ; Use Petsc env
                 ;;
-                ;; For testing, primarily, evaluate potential at
-                ;; positions of solute sites and the corresponding
-                ;; total energy:
+                ;; Evaluate and print potential at positions of solute
+                ;; sites and the corresponding total energy:
                 ;;
-                (let* ((sites		(molecule-sites solute))
-                       (positions	(map site-position sites))
-                       (potentials	(potential-map potential positions))
-                       (charges		(map site-charge sites))
-                       (energy		(apply + (map * charges potentials))))
-                  ;;
-                  ;; Only print on master:
-                  ;;
-                  (maybe-print (cons 'core-potentials potentials))
-                  (maybe-print (cons 'core-energy energy)))
+                (maybe-print-potentials solute potentials)
                 ;;
                 ;; Write g?.bin files:
                 ;;
