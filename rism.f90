@@ -1056,7 +1056,7 @@ contains
 
           print *, "# Chemical potentials, default is marked with *:"
           do i = 1, size (methods)
-             print *, "# mu =", mu(i), "kcal (", names(i), ")", merge ("*", " ", method == methods(i))
+             print *, "# MU =", mu(i), "kcal (", names(i), ")", merge ("*", " ", method == methods(i))
           enddo
        end block
 
