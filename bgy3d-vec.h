@@ -3,6 +3,12 @@
 /* FIXME: any better way? */
 #include <complex.h>
 
+void vec_rtab (const State *HD, int n, const real rtab[n], real dr,
+               Vec v);          /* out */
+
+void vec_ktab (const State *HD, int n, const real ktab[n], real dk,
+               Vec v_fft);      /* out */
+
 real bgy3d_vec_mix (Vec dg, Vec dg_new, real a, Vec work);
 
 void bgy3d_vec_save (const char file[], const Vec vec);

@@ -3,6 +3,61 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"
 
+#define assert_range(i, n) assert (likely (0 <= (i)) && likely ((i) < (n)));
+
+/*
+  Interpolate f(x) given the tabular values. The values in the x-table
+  are
+
+    xtab[i] = f(x ), for x = (i + 1/2) dx
+                 i        i
+*/
+static
+real interp (real x, int n, const real xtab[n], real dx)
+{
+  const real ix = x / dx - 0.5; /* i(x), real! */
+
+  /* FIXME: interpolation to nearest node is poor: */
+  const int i = ix + 0.5;           /* rounding! */
+
+  /* FIXME: Table should be complete enough: */
+  assert_range (i, n);
+
+  /* Here [ip, im] = [i + 1, i - 1] in most cases: */
+  const int ip = (i < n - 2) ? i + 1 : i;
+  const int im = (i > 0 + 1) ? i - 1 : i;
+  assert_range (ip, n);         /* paranoya! */
+  assert_range (im, n);         /* paranoya! */
+  assert (ip - im > 0);         /* FIXME: fails for n < 2! */
+
+  /* Estimate for the derivative df/di: */
+  const real fi = (xtab[ip] - xtab[im]) / (ip - im);
+
+  return xtab[i] + fi * (ix - i);
+}
+
+
+void vec_rtab (const State *HD, int n, const real rtab[n], real dr,
+                      Vec v) /* out */
+{
+  pure real f (real r)
+  {
+    return interp (r, n, rtab, dr);
+  }
+  vec_rmap (HD, f, v);
+}
+
+
+void vec_ktab (const State *HD, int n, const real ktab[n], real dk,
+                      Vec v_fft) /* out */
+{
+  pure complex f (real k)
+  {
+    return interp (k, n, ktab, dk);
+  }
+  vec_kmap (HD, f, v_fft);
+}
+
 
 /*
   Does the mixing:
