@@ -584,7 +584,14 @@ module rism
 
 contains
 
-  subroutine rism_solvent (pd, m, solvent, chi_fft_ptr) bind (c)
+  subroutine rism_solvent (pd, m, solvent, t_buf, x_buf) bind (c)
+    !
+    ! When either t_buf or x_buf is not NULL it should be a pointer to
+    ! a buffer  with sufficient space  to store nrad  * m *  m doubles
+    ! where nrad = maxval (pd % n). If this is the case for t_buf then
+    ! the real space represented  of indirect correlation t is written
+    ! there.  If x_buf is not  NULL then the Fourier representation of
+    ! the solvent susceptibility (not offset by one) is written there.
     !
     ! Needs to be consistent with ./rism.h
     !
@@ -594,19 +601,21 @@ contains
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
-    type (c_ptr), intent (in), value :: chi_fft_ptr ! (nrad * m * m) or NULL
+    type (c_ptr), intent (in), value :: t_buf ! double[m][m][nrad] or NULL
+    type (c_ptr), intent (in), value :: x_buf ! double[m][m][nrad] or NULL
     ! *** end of interface ***
 
     integer :: nrad
-    real (rk), pointer :: chi_fft(:, :, :)
+    real (rk), pointer :: t(:, :, :), x(:, :, :)
 
     nrad = maxval (pd % n)
 
-    call c_f_pointer (chi_fft_ptr, chi_fft, shape = [nrad, m, m])
+    call c_f_pointer (t_buf, t, shape = [nrad, m, m])
+    call c_f_pointer (x_buf, x, shape = [nrad, m, m])
 
     ! Fill supplied  storage with solvent susceptibility.  If NULL, it
     ! is interpreted as not present() in main() and thus ignored:
-    call main (pd, solvent, chi_fft=chi_fft)
+    call main (pd, solvent, t=t, x=x)
   end subroutine rism_solvent
 
 
@@ -627,7 +636,7 @@ contains
   end subroutine rism_solute
 
 
-  subroutine main (pd, solvent, solute, chi_fft)
+  subroutine main (pd, solvent, solute, t, x)
     !
     ! This one does not need to be interoperable.
     !
@@ -636,7 +645,8 @@ contains
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
-    real (rk), optional, intent (out) :: chi_fft(:, :, :) ! (nrad, m, m)
+    real (rk), optional, intent (out) :: t(:, :, :) ! (nrad, m, m)
+    real (rk), optional, intent (out) :: x(:, :, :) ! (nrad, m, m)
     ! *** end of interface ***
 
     integer :: nrad
@@ -665,35 +675,44 @@ contains
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
     block
-       ! Solvent susceptibility χ = ω + ρh:
-       real (rk) :: chi(nrad, size (solvent), size (solvent))
+       ! Indirect correlation γ aka t = h - c:
+       real (rk) :: gam(nrad, size (solvent), size (solvent))
 
-       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi)
+       ! Solvent susceptibility χ = ω + ρh:
+       real (rk) :: chi_fft(nrad, size (solvent), size (solvent))
+
+       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, gam, chi_fft)
+
 
        if (present (solute)) then
-          call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi, solute)
+          call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi_fft, solute)
        endif
 
        ! Output, if requested:
-       if (present (chi_fft)) then
-          chi_fft = chi
+       if (present (t)) then
+          t = gam
+       endif
+
+       if (present (x)) then
+          x = chi_fft
        endif
     end block
   end subroutine main
 
 
-  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, chi)
+  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi)
     use fft, only: fourier_many, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site
     implicit none
-    integer, intent (in) :: method         ! HNC, KH, or PY
-    integer, intent (in) :: nrad           ! grid size
-    real (rk), intent (in) :: rmax         ! cell size
-    real (rk), intent (in) :: beta         ! inverse temp
-    real (rk), intent (in) :: rho(:)       ! (m)
-    type (site), intent (in) :: sites(:)   ! (m)
-    real (rk), intent(out) :: chi(:, :, :) ! (nrad, m, m)
+    integer, intent (in) :: method          ! HNC, KH, or PY
+    integer, intent (in) :: nrad            ! grid size
+    real (rk), intent (in) :: rmax          ! cell size
+    real (rk), intent (in) :: beta          ! inverse temp
+    real (rk), intent (in) :: rho(:)        ! (m)
+    type (site), intent (in) :: sites(:)    ! (m)
+    real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m)
+    real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m)
     ! *** end of interface ***
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
@@ -736,9 +755,11 @@ contains
     c = closure (method, beta, v, t)
 
     !
-    ! When requested  by the caller return the  susceptibility χ(k) in
-    ! Fourier rep:
+    ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
+    ! solvent susceptibility χ(k) in Fourier rep:
     !
+    gam = t
+
     block
        real (rk) :: h(nrad, m, m)
        integer :: i, j

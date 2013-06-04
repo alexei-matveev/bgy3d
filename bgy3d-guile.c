@@ -938,9 +938,12 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
 
-  /* NULL indicates an optional  output argument: we dont need solvent
-     susceptibility here (yet): */
-  rism_solvent (&PD, m, solvent_sites, NULL);
+  /*
+    NULL indicates  an optional output argument: we  dont need neither
+    solvent  indirect  correlation  nor  solvent  susceptibility  here
+    (yet):
+  */
+  rism_solvent (&PD, m, solvent_sites, NULL, NULL);
 
   free (solvent_name);
   free (solvent_sites);

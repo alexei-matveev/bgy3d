@@ -3,7 +3,8 @@
 /* Implemented in Fortran. See rism.f90 */
 void rism_solvent (const ProblemData *PD,
                    int m, const Site solvent[m],
-                   real chi_fft[m][m][*]); /* [m][m][nrad], out */
+                   real t[m][m][*],  /* [m][m][nrad], out */
+                   real x[m][m][*]); /* [m][m][nrad], out */
 
 void rism_solute (const ProblemData *PD,
                   int n, const Site solute[n],
