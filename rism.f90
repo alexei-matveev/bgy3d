@@ -241,7 +241,7 @@ contains
     f = exp (-r**2 / 2)
 
     ! Unit "charge", a "fat" delta function:
-    f = f / (sum (r**2 * f) * 4 * pi * dr)
+    f = f / (integrate (f) * dr**3)
 
     ! Forward transform:
     g = fourier (f) * (dr**3 / FT_FW)
