@@ -584,6 +584,55 @@ module rism
 
 contains
 
+  function rism_nrad (pd) result (nrad) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int
+    use foreign, only: problem_data
+    implicit none
+    type (problem_data), intent (in) :: pd ! no VALUE
+    integer (c_int) :: nrad
+    ! *** end of interface ***
+
+    nrad = maxval (pd % n)
+  end function rism_nrad
+
+
+  function rism_rmax (pd) result (rmax) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_double
+    use foreign, only: problem_data
+    implicit none
+    type (problem_data), intent (in) :: pd ! no VALUE
+    real (c_double) :: rmax
+    ! *** end of interface ***
+
+    rmax = maxval (pd % L) / 2
+  end function rism_rmax
+
+
+  function rism_upscale (pd) result (xpd) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
+    use foreign, only: problem_data
+    implicit none
+    type (problem_data), intent (in) :: pd ! no VALUE
+    type (problem_data) :: xpd
+    ! *** end of interface ***
+
+    xpd = pd
+
+    ! FIXME: get rid of redundancies:
+    xpd % n = xpd % n * 16
+    xpd % L = xpd % L * 4
+    xpd % h = xpd % L / xpd % n
+  end function rism_upscale
+
+
   subroutine rism_solvent (pd, m, solvent, t_buf, x_buf) bind (c)
     !
     ! When either t_buf or x_buf is not NULL it should be a pointer to
@@ -598,7 +647,7 @@ contains
     use iso_c_binding, only: c_int, c_ptr, c_f_pointer
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE!
+    type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
     type (c_ptr), intent (in), value :: t_buf ! double[m][m][nrad] or NULL
@@ -608,7 +657,7 @@ contains
     integer :: nrad
     real (rk), pointer :: t(:, :, :), x(:, :, :)
 
-    nrad = maxval (pd % n)
+    nrad = rism_nrad (pd)
 
     call c_f_pointer (t_buf, t, shape = [nrad, m, m])
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
@@ -626,7 +675,7 @@ contains
     use iso_c_binding, only: c_int
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE!
+    type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: n, m
     type (site), intent (in) :: solute(n)
     type (site), intent (in) :: solvent(m)
@@ -654,8 +703,8 @@ contains
     real (rk) :: rho(size (solvent))
 
     rho = pd % rho              ! all site densities are the same
-    rmax = maxval (pd % L) / 2
-    nrad = maxval (pd % n)
+    rmax = rism_rmax (pd)
+    nrad = rism_nrad (pd)
 
     if (verbosity > 0) then
        print *, "# L =", rmax, "(for 1d)"
