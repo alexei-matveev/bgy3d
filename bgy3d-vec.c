@@ -17,7 +17,7 @@ real interp (real x, int n, const real xtab[n], real dx)
 {
   const real ix = x / dx - 0.5; /* i(x), real! */
 
-  /* FIXME: interpolation to nearest node is poor: */
+  /* Nearest table entry: */
   const int i = ix + 0.5;           /* rounding! */
 
   /* FIXME: Table should be complete enough: */
@@ -33,6 +33,8 @@ real interp (real x, int n, const real xtab[n], real dx)
   /* Estimate for the derivative df/di: */
   const real fi = (xtab[ip] - xtab[im]) / (ip - im);
 
+  /* Note that  (ix - i) is  the *real* offset from  the nearest table
+     entry: */
   return xtab[i] + fi * (ix - i);
 }
 
