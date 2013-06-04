@@ -584,19 +584,29 @@ module rism
 
 contains
 
-  subroutine rism_solvent (pd, m, solvent) bind (c)
+  subroutine rism_solvent (pd, m, solvent, chi_fft_ptr) bind (c)
     !
     ! Needs to be consistent with ./rism.h
     !
-    use iso_c_binding, only: c_int
+    use iso_c_binding, only: c_int, c_ptr, c_f_pointer
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE!
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
+    type (c_ptr), intent (in), value :: chi_fft_ptr ! (nrad * m * m) or NULL
     ! *** end of interface ***
 
-    call main (pd, solvent)
+    integer :: nrad
+    real (rk), pointer :: chi_fft(:, :, :)
+
+    nrad = maxval (pd % n)
+
+    call c_f_pointer (chi_fft_ptr, chi_fft, shape = [nrad, m, m])
+
+    ! Fill supplied  storage with solvent susceptibility.  If NULL, it
+    ! is interpreted as not present() in main() and thus ignored:
+    call main (pd, solvent, chi_fft=chi_fft)
   end subroutine rism_solvent
 
 
@@ -617,7 +627,7 @@ contains
   end subroutine rism_solute
 
 
-  subroutine main (pd, solvent, solute)
+  subroutine main (pd, solvent, solute, chi_fft)
     !
     ! This one does not need to be interoperable.
     !
@@ -626,6 +636,7 @@ contains
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
+    real (rk), optional, intent (out) :: chi_fft(:, :, :) ! (nrad, m, m)
     ! *** end of interface ***
 
     integer :: nrad
@@ -661,6 +672,11 @@ contains
 
        if (present (solute)) then
           call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi, solute)
+       endif
+
+       ! Output, if requested:
+       if (present (chi_fft)) then
+          chi_fft = chi
        endif
     end block
   end subroutine main
