@@ -33,7 +33,8 @@
    hnc3d-run-solvent
    hnc3d-run-solute
    bgy3d-run-solvent
-   bgy3d-run-solute)
+   bgy3d-run-solute
+   bgy3d-restart-destroy)
   #:export
   (find-molecule
    new-main
