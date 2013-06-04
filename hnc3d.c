@@ -134,6 +134,7 @@
 #include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
+#include "rism.h"               /* rism_solvent() */
 #include "bgy3d-potential.h"    /* info() */
 #include "bgy3d-solvents.h"      /* bgy3d_sites_show() */
 #include <math.h>               /* expm1() */
@@ -668,9 +669,40 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   */
   local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
 
+#ifndef WITH_FORTRAN
   /* Zero as intial guess for t  is not the same as zero initial guess
      for c: */
   VecSet (T, 0.0);
+#else
+  {
+    /*
+      Problem data for use in 1d-RISM code. If you do not upscale, the
+      rmax = max (PD->L) / 2 will be too low for interpolation:
+    */
+    ProblemData pd = rism_upscale (PD);
+
+    const int nrad = rism_nrad (&pd);
+    const real rmax = rism_rmax (&pd);
+
+    real t_rad[m][m][nrad];
+
+    /* 1d-RISM calculation.  Dont need susceptibility, need t(r): */
+    rism_solvent (&pd, m, solvent, t_rad, NULL);
+
+    {
+      local Vec t[m][m];
+      vec_aliases_create2 (T, m, t); /* aliases to subsections */
+
+      const real dr = rmax / nrad;
+
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          vec_rtab (HD, nrad, t_rad[i][j], dr, t[i][j]);
+
+      vec_aliases_destroy2 (T, m, t);
+    }
+  }
+#endif
 
   /*
     Most of these  Vecs will be a functional of  primary variable t or
@@ -1085,7 +1117,9 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 
 /* Reads  χ -  1 into  chi_fft[][] as  previousely written  by solvent
    solver.  See hnc3d_solvent_solve() above. */
-static void solvent_kernel (State *HD, int m, Vec chi_fft[m][m])
+static void solvent_kernel (State *HD,
+                            int m, const Site solvent[m], /* in */
+                            Vec chi_fft[m][m])            /* out */
 {
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
     {
@@ -1115,7 +1149,39 @@ static void solvent_kernel (State *HD, int m, Vec chi_fft[m][m])
   else
     bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
 
+#ifdef WITH_FORTRAN
+  if (false)
+    {
+      /*
+        Problem data for  use in 1d-RISM code. If  you do not upscale,
+        the rmax =  max (PD->L) / 2 will be  too low for interpolation
+        on the r-grid. Though here only the k-grid is of interest.
+      */
+      ProblemData pd = rism_upscale (HD->PD);
 
+      const int nrad = rism_nrad (&pd);
+      const real rmax = rism_rmax (&pd);
+
+      real x_fft[m][m][nrad];
+
+      /* 1d-RISM  calculation. Dont  need  indirect correlation,  need
+         χ(k): */
+      rism_solvent (&pd, m, solvent, NULL, x_fft);
+
+      /* The solute/solvent code expects χ - 1: */
+      for (int i = 0; i < m; i++)
+        for (int k = 0; k < nrad; k++)
+          x_fft[i][i][k] -= 1;
+
+      /* dr * dk = π / nrad where dr = rmax / nrad */
+      const real dk = M_PI / rmax;
+
+      /* FIXME: assuming symmetric χ - 1 with aliasing: */
+      for (int i = 0; i < m; i++)
+        for (int j = 0; j <= i; j++)
+          vec_ktab (HD, nrad, x_fft[i][j], dk, chi_fft[i][j]);
+    }
+#endif
 }
 
 
@@ -1210,7 +1276,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
       to  get the rest.   There is  no guarantee  the two  sources are
       consistent.
     */
-    solvent_kernel (HD, m, chi_fft);
+    solvent_kernel (HD, m, solvent, chi_fft);
 
     /*
       Find T  such that dt  as returned by  iterate_t1 (HD, T,  dT) is
