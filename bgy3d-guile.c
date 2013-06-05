@@ -363,10 +363,7 @@ static SCM guile_vec_load (SCM path)
 
 static SCM guile_vec_length (SCM vec)
 {
-  int len;
-  VecGetSize (to_vec (vec), &len);
-
-  return scm_from_int (len);
+  return scm_from_int (vec_size (to_vec (vec)));
 }
 
 /* An inefficient way of getting just one value, vec[ix], even if that
