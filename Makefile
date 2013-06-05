@@ -38,16 +38,6 @@ WITH_GUILE = 0
 WITH_FORTRAN = 0
 
 #
-# Compile rarely used solvers.   These solvers have not beed converted
-# to direct  use of  FFTW MPI API  and rely  on the wrappers  by Steve
-# Plimpton,  see  ./fft  directory.    The  fft_3d.h  header  needs  a
-# -DFFT_FFTW  in  CFLAGS,  otherwise   it  cannot  be  included.  Keep
-# WITH_EXTRA_SOLVERS = 1  by default to minimize bit  rotting of those
-# solvers:
-#
-WITH_EXTRA_SOLVERS = 0
-
-#
 # Compile  a   shared  library  libbgy3d.so  and  link   that  to  the
 # executable.   May require  setting LD_LIBRARY_PATH  in order  to run
 # that. The following flag is used in expressions like $(if $(shared),
@@ -57,10 +47,6 @@ WITH_EXTRA_SOLVERS = 0
 # shared = 1
 
 USERFLAGS = -DFFT_FFTW
-ifeq ($(WITH_EXTRA_SOLVERS),1)
-USERFLAGS += -DWITH_EXTRA_SOLVERS
-endif
-
 USERFLAGS += -DCENTRALDIFF
 #USERFLAGS += -DMATPRECOND
 USERFLAGS += -DL_BOUNDARY
@@ -123,28 +109,6 @@ endif
 ifeq ($(WITH_FORTRAN),1)
 	f-objs += rism.o
 	USERFLAGS += -DWITH_FORTRAN
-endif
-
-bgy3d-extra-objs = \
-	bgy3d-simple.o \
-	hnc3d-newton.o \
-	bgy3d-molecule.o \
-	bgy3ddiv.o \
-	bgy3d-fourier.o \
-	bgy3d-test.o \
-	bgy3d-newton-pure.o \
-	bgy3d-newton-impure.o \
-	bgy3d-multigrid.o \
-
-fft3d-objs = \
-	fft/fft_3d.o \
-	fft/fft_3d_f.o \
-	fft/pack_3d.o \
-	fft/remap_3d.o \
-	fft/factor.o
-
-ifeq ($(WITH_EXTRA_SOLVERS),1)
-c-objs += $(bgy3d-extra-objs) $(fft3d-objs)
 endif
 
 OBJECTS = bgy3d-main.o
