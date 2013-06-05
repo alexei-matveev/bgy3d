@@ -1109,10 +1109,7 @@ void bgy3d_guile_init (int argc, char **argv)
 
   /* We assume that  data- and function pointers are  of the same size
      when assigning a void* to void (*)() in alist_getopt_funptr(): */
-  {
-    void (*fn)(void);           /* only for an assert */
-    assert (sizeof (fn) == sizeof (void*));
-  }
+  assert (sizeof (void (*)()) == sizeof (void*));
 
   /* MPI may  choose to rewrite the  command line, do  it early. Petsc
      does not rewrite argv.  Guile will not understand Petsc flags. */
