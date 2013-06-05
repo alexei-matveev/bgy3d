@@ -92,7 +92,9 @@ LIBS = $(fftw3-libs) -lm $(PETSC_LIB)
 # Make rules
 #--------------------------------------------------------------------------------
 
-libbgy3d.a = \
+libbgy3d.a = $(c-objs) $(f-objs)
+
+c-objs = \
 	hnc3d.o \
 	hnc3d-sles.o \
 	rism-dst.o \
@@ -112,14 +114,14 @@ libbgy3d.a = \
 	bgy3d-potential.o
 
 ifeq ($(WITH_GUILE),1)
-	libbgy3d.a += bgy3d-guile.o
+	c-objs += bgy3d-guile.o
 	LIBS += $(shell guile-config link)
 	INCDIRS += $(shell guile-config compile)
 	USERFLAGS += -DWITH_GUILE
 endif
 
 ifeq ($(WITH_FORTRAN),1)
-	libbgy3d.a += rism.o
+	f-objs += rism.o
 	USERFLAGS += -DWITH_FORTRAN
 endif
 
@@ -142,7 +144,7 @@ fft3d-objs = \
 	fft/factor.o
 
 ifeq ($(WITH_EXTRA_SOLVERS),1)
-libbgy3d.a += $(bgy3d-extra-objs) $(fft3d-objs)
+c-objs += $(bgy3d-extra-objs) $(fft3d-objs)
 endif
 
 OBJECTS = bgy3d-main.o
@@ -202,10 +204,10 @@ include $(libbgy3d.a:.o=.d)
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
 	[ -s $@ ] || rm -f $@
 
-TAGS: $(OBJECTS:.o=.c) $(libbgy3d.a:.o=.c)
+TAGS: $(OBJECTS:.o=.c) $(c-objs:.o=.c) $(f-objs:.o=.f90)
 	etags $(^)
 
-tags: $(OBJECTS:.o=.c) $(libbgy3d.a:.o=.c)
+tags: $(OBJECTS:.o=.c) $(c-objs:.o=.c) $(f-objs:.o=.f90)
 	ctags $(^)
 
 #---End of Makefile---
