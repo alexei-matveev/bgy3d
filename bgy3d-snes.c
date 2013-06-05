@@ -265,16 +265,16 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       const int nth = 10;
       /*
         "a  = a1"  is taken  in  iteration 0,  10, 20,  etc.  "a1"  is
-        modified during the loop.
+        modified during the loop (moves).
 
         "a = a0" is taken in iterations 1-9, 11-19, etc.  "a0" remains
-        unchanged during the loop.
+        unchanged during the loop (annealing).
 
         Note that in the first iteration a1 == a0.
       */
 
-      /* Every nth  iteration, raise the mixing  coefficients just one
-         time: */
+      /* Every  nth  iteration make  a  "move"  ---  raise the  mixing
+         coefficients just one time: */
       const real a = (iter % nth == 0) ? a1 : a0;
 
       /* Simple mixing: x = a * x + (1 - a) * x_old */
@@ -287,22 +287,37 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
       /* That was the only place comparing to norm_old: */
       norm_old = norm;
 
+      /* Measure time since the last change of "a1": */
       mycount++;
 
-      if (iter % nth != 1 && up) /* not in the nth + 1 iteration */
-        upwards = 1;
-      else if (iter > 2 * nth && iter % nth == 1 && upwards == 0 && up)
+      /* 1) Watching "annealing": */
+      if (iter % nth != 1)      /* not in the nth + 1 iteration ... */
         {
-          /* In the  nth + 1 iteration,  if the norm  went up decrease
-             the mixing: */
-          a1 = MAX (a1 / 2.0, a0);
-          mycount = 0;
+          if (up)               /* if the norm went up ... */
+            upwards = 1;        /* we are not even near convergence. */
+          else
+            upwards = 0;        /* otherwise we might be! */
         }
-      else
-        upwards = 0;
 
-      /* Scale the coefficient  "a1" up by a factor,  but make sure it
-         is not above 1.0. Reset mycount. */
+      /* 2) Watching "moves": */
+      if (iter % nth == 1)      /* in the  nth + 1 iteration ... */
+        if (up)                 /* if the norm went up ... */
+          if (upwards == 0)     /* but otherwise it did not ... */
+            if (iter > 2 * nth) /* and we did not just start ... */
+              {
+                /*
+                  The "move"  was too dangerous.   Decrease the mixing
+                  for the "moves", but not below that of "annealing":
+                */
+                a1 = MAX (a1 / 2.0, a0);
+                mycount = 0;
+              }
+
+      /*
+        3) Make more  couragous "moves"  as  time  passes.   Scale the
+           coefficient "a1"  up by a factor,  but make sure  it is not
+           above 1.0. Reset mycount.
+      */
       if (mycount > 2 * nth)
         {
           a1 = MIN (a1 * 2.0, 1.0);
