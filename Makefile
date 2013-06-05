@@ -132,11 +132,11 @@ test-all:
 	$(MAKE) -C ./test
 
 clean:
-	rm -f *.a *.so *.o fft/*.o *.bin *.info
+	rm -f *.a *.so *.o *.bin *.info
 	rm -f bgy3d
 
 distclean:
-	rm -f *.o *.so *.d  fft/*.o fft/*.d
+	rm -f *.o *.so *.d
 	rm -f bgy3d
 .PHONY: distclean
 
