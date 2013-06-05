@@ -102,10 +102,6 @@
 #include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
 #include "bgy3d-impure.h"
 
-#ifndef L_BOUNDARY_MG
-#include "bgy3d-multigrid.h"    /* InitializeDMMGSolver */
-#endif
-
 #include <stdbool.h>            /* bool */
 #include <complex.h>            /* after fftw.h */
 
@@ -688,11 +684,6 @@ static void solute_solve (State *BHD,
     VecSet (x_lapl[i], 0.0);
 #endif
 
-#ifdef L_BOUNDARY_MG
-  /* Create KSP environment */
-  InitializeDMMGSolver(BHD);
-#endif
-
   /*
     These complex  vectors will  hold FFT of  the current  g. Allocate
     enough to  hold a  local portion  of the grid  and free  after the
@@ -1248,11 +1239,6 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   vec_create1 (BHD->da, 2, x_lapl);
   for (int i = 0; i < 2; i++)
     VecSet (x_lapl[i], 0.0);
-#endif
-
-#ifdef L_BOUNDARY_MG
-  /* Create KSP environment */
-  InitializeDMMGSolver(&BHD);
 #endif
 
   g[0] = vec_create (BHD.da);
