@@ -488,11 +488,10 @@ void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* [3] */
-  const real *L = PD->L;        /* [3] */
 
-  /* FIXME: rectangular box? */
-  assert (L[0] == L[1]);
-  assert (L[0] == L[2]);
+  real dk[3];                   /* k-mesh spacing */
+  FOR_DIM
+    dk[dim] = 2 * M_PI / PD->L[dim];
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -506,14 +505,13 @@ void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          int ic[3];
+          real k[3];
 
           /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            ic[dim] = KFREQ (i[dim], N[dim]);
+            k[dim] = KFREQ (i[dim], N[dim]) * dk[dim];
 
-          /* FIXME: integer sum of squares will overflow for N >> 20000! */
-          const int k2 = SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]);
+          const real k2 = SQR (k[2]) + SQR (k[1]) + SQR (k[0]);
 
           /*
             FIXME:  we  take a  square  root  here,  but in  the  most
@@ -521,7 +519,7 @@ void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
             potential  is also  a complex  number with  zero imaginary
             part.
           */
-          v_fft_[i[2]][i[1]][i[0]] = f ((2 * M_PI / L[0]) * sqrt (k2));
+          v_fft_[i[2]][i[1]][i[0]] = f (sqrt (k2));
         }
   DMDAVecRestoreArray (BHD->dc, v_fft, &v_fft_);
 }
