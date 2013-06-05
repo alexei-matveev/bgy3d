@@ -49,13 +49,10 @@ static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* [3] */
-  const real *L = PD->L;        /* [3] */
 
-  /* FIXME: rectangular box? */
-  assert (L[0] == L[1]);
-  assert (L[0] == L[2]);
-
-  const real fac = 2.0 * M_PI / L[0];
+  real dk[3];                   /* k-mesh spacing */
+  FOR_DIM
+    dk[dim] = 2 * M_PI / PD->L[dim];
 
   /* Get local portion of the k-grid */
   int x[3], n[3], i[3];
@@ -71,16 +68,16 @@ static void grad_fft (const State *BHD, Vec uc_fft, Vec fc_fft[3])
     for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
       for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
         {
-          int ic[3];
+          real k[3];
 
           /* Take negative frequencies for i > N/2: */
           FOR_DIM
-            ic[dim] = KFREQ (i[dim], N[dim]);
+            k[dim] = KFREQ (i[dim], N[dim]) * dk[dim];
 
           /* Force  is purely imaginary  if Vec  uc_fft happens  to be
              real: */
           FOR_DIM
-            fc_fft_[dim][i[2]][i[1]][i[0]] = ic[dim] * ((fac * I) * uc_fft_[i[2]][i[1]][i[0]]);
+            fc_fft_[dim][i[2]][i[1]][i[0]] = k[dim] * (I * uc_fft_[i[2]][i[1]][i[0]]);
         }
   DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   FOR_DIM
