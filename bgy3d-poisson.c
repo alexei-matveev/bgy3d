@@ -100,15 +100,10 @@
 void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
 {
   const int *N = BHD->PD->N;    /* [3] */
-  const real *L = BHD->PD->L;   /* [3] */
 
-  /* FIXME: rectangular box? */
-  assert (L[0] == L[1]);
-  assert (L[0] == L[2]);
-
-  /* Otherwise needs some work: */
-  assert (N[0] == N[1]);
-  assert (N[0] == N[2]);
+  real dk[3];                   /* k-mesh spacing */
+  FOR_DIM
+    dk[dim] = 2 * M_PI / BHD->PD->L[dim];
 
   const int NNN = N[0] * N[1] * N[2];
 
@@ -146,7 +141,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   */
 
   /* With q = -4π/ε₀ you would get the potential: */
-  const real scale = - q / NNN / 4;
+  const real scale = - q / NNN;
 
   /* Loop over local portion of the k-grid */
   {
@@ -160,33 +155,28 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
         for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
           {
-            /* FIXME: what if we  change the complex vectors to remove
-               the redundnacy? */
-            int ic[3];
+            real k[3];
 
             /* Take negative frequencies for i > N/2: */
             FOR_DIM
-              ic[dim] = KFREQ (i[dim], N[dim]);
+              k[dim] = KFREQ (i[dim], N[dim]) * dk[dim];
 
-            if (ic[0] == 0 && ic[1] == 0 && ic[2] == 0)
-              {
-                /* The gamma point, k = 0, we cannot divide by 0: */
-                work_[i[2]][i[1]][i[0]] = 0.0; /* complex */
-              }
+            /*
+              For i,  j, and k less  than or equal to  N/2 and uniform
+              box of size L this expression evaluates to (2π/L)² (i² +
+              j² + k²)
+            */
+            const real k2 = SQR (k[2]) + SQR (k[1]) + SQR (k[0]);
+
+            real fac;
+            if (likely (k2 != 0.0))
+              fac = scale / k2;
             else
-              {
-                /* For  i, j,  and k  less than  or equal  to  N/2 and
-                   uniform box of size  L this expression evaluates to
-                   (π/L)² (i² + j² + k²) */
-                const real k2 = SQR (M_PI / L[0]) *
-                  (SQR (ic[2]) + SQR (ic[1]) + SQR (ic[0]));
+              fac = 0.0;        /* gamma-point */
 
-                const real fac = scale / k2;
-
-                /* Here we compute in place: uc(kx, ky, kz) := scale *
-                   rho(kx, ky, kz) / k^2 */
-                work_[i[2]][i[1]][i[0]] *= fac; /* complex */
-              }
+            /* Here  we compute  in  place: uc(kx,  ky,  kz) :=  scale
+               * rho(kx, ky, kz) / k² */
+            work_[i[2]][i[1]][i[0]] *= fac; /* complex */
           }
     DMDAVecRestoreArray (BHD->dc, work, &work_);
   }
