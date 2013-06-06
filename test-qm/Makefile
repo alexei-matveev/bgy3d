@@ -68,7 +68,7 @@ make-summary = $(SHELL) ../test/summary.sh
 %.g1: %.scm
 	$(EXE) $(*).scm | tee $(*).out
 	$(moments) g0.bin g1.bin > $(@)
-	$(SHELL) summary.sh $(*).out >> $(@)
+	$(make-summary) $(*).out >> $(@)
 	rm -f *.info
 
 clean:
