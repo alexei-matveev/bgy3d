@@ -27,100 +27,100 @@ int verbosity = 0;
 */
 ProblemData bgy3d_problem_data (void)
 {
-    ProblemData PD;
+  ProblemData PD;
 
-    /* Grid points in 1 dimension */
-    int N = 32;
-    bgy3d_getopt_int ("--N", &N);
-    assert (N > 0);
+  /* Grid points in 1 dimension */
+  int N = 32;
+  bgy3d_getopt_int ("--N", &N);
+  assert (N > 0);
 
-    /* (half of the) box size: */
-    real maxL = 12.0;
-    bgy3d_getopt_real ("--L", &maxL);
+  /* (half of the) box size: */
+  real maxL = 12.0;
+  bgy3d_getopt_real ("--L", &maxL);
 
-    /* It appears the intervals for x, y, and z are the same: */
-    FOR_DIM
-      PD.L[dim] = 2 * maxL;
+  /* It appears the intervals for x, y, and z are the same: */
+  FOR_DIM
+    PD.L[dim] = 2 * maxL;
 
-    FOR_DIM
-      PD.N[dim] = N;
+  FOR_DIM
+    PD.N[dim] = N;
 
-    FOR_DIM
-      PD.h[dim] = PD.L[dim] / PD.N[dim];
+  FOR_DIM
+    PD.h[dim] = PD.L[dim] / PD.N[dim];
 
-    /*
-      At this  point N, h and  L have consistent values.  FIXME: N^2 +
-      N^2 + N^2 should not  overflow, this condition ensures that 3N^2
-      < 2^31:
-    */
-    assert (N < 26755);
+  /*
+    At this point N, h and L have consistent values.  FIXME: N^2 + N^2
+    +  N^2 should  not overflow,  this condition  ensures that  3N^2 <
+    2^31:
+  */
+  assert (N < 26755);
 
-    /* FIXME: N^3 should not overflow, this condition ensures that N^3
-       < 2^31: */
-    if (!bgy3d_getopt_test ("--rism"))
-        assert (N < 1291);
+  /* FIXME: N^3 should not overflow, this condition ensures that N^3 <
+     2^31: */
+  if (!bgy3d_getopt_test ("--rism"))
+    assert (N < 1291);
 
-    /* Inverse temperature: */
-    PD.beta = 1.6889;
-    bgy3d_getopt_real ("--beta", &PD.beta);
+  /* Inverse temperature: */
+  PD.beta = 1.6889;
+  bgy3d_getopt_real ("--beta", &PD.beta);
 
-    /* Density: */
-    PD.rho = 0.3;
-    bgy3d_getopt_real ("--rho", &PD.rho);
+  /* Density: */
+  PD.rho = 0.3;
+  bgy3d_getopt_real ("--rho", &PD.rho);
 
-    /* Mixing parameter: */
-    PD.lambda = 0.1;
-    bgy3d_getopt_real ("--lambda", &PD.lambda);
+  /* Mixing parameter: */
+  PD.lambda = 0.1;
+  bgy3d_getopt_real ("--lambda", &PD.lambda);
 
-    assert (PD.lambda >= 0.0);
-    assert (PD.lambda <= 1.0);
+  assert (PD.lambda >= 0.0);
+  assert (PD.lambda <= 1.0);
 
-    /*
-      Get initial  interaction scaling  factor from command  line. The
-      code  used   to  automate  "blending-in"   some  interaction  by
-      iterating  scaling factor  from  some low  initial  value to  1.
-      Default was  0.0 originally, but that makes  necessary to always
-      specify --damp-start when 1.0 you do not want blending.  I think
-      1.0 is a more reasonable default:
-    */
-    PD.damp = 1.0;
-    bgy3d_getopt_real ("--damp-start", &PD.damp);
+  /*
+    Get initial interaction scaling factor from command line. The code
+    used  to  automate  "blending-in"  some interaction  by  iterating
+    scaling factor from some low  initial value to 1.  Default was 0.0
+    originally,   but   that  makes   necessary   to  always   specify
+    --damp-start when 1.0 you do not  want blending.  I think 1.0 is a
+    more reasonable default:
+  */
+  PD.damp = 1.0;
+  bgy3d_getopt_real ("--damp-start", &PD.damp);
 
-    /* Number of total iterations: */
-    PD.max_iter = 100;
-    bgy3d_getopt_int ("--max-iter", &PD.max_iter);
+  /* Number of total iterations: */
+  PD.max_iter = 100;
+  bgy3d_getopt_int ("--max-iter", &PD.max_iter);
 
-    /* Norm tolerance for convergence test: */
-    PD.norm_tol = 1.0e-2;
-    bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
+  /* Norm tolerance for convergence test: */
+  PD.norm_tol = 1.0e-2;
+  bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
-    /*
-      Zeropad.  FIXME:  The  code   appears  to  break  when  zpad  >
-      L. Regression tests have them  equal, so make it the default to
-      have one command line flag fewer:
-    */
-    PD.zpad = maxL;
-    bgy3d_getopt_real ("--zpad", &PD.zpad);
+  /*
+    Zeropad.   FIXME:   The  code  appears   to  break  when   zpad  >
+    L. Regression  tests have  them equal, so  make it the  default to
+    have one command line flag fewer:
+  */
+  PD.zpad = maxL;
+  bgy3d_getopt_real ("--zpad", &PD.zpad);
 
 
-    /* Closure is  only used in  HNC-like methods. Supply  default for
-       the case the command line does not provide it: */
-    char closure[] = "HNC";
-    bgy3d_getopt_string ("--closure", closure, sizeof closure);
+  /* Closure is only used in  HNC-like methods. Supply default for the
+     case the command line does not provide it: */
+  char closure[] = "HNC";
+  bgy3d_getopt_string ("--closure", closure, sizeof closure);
 
-    if (strcmp (closure, "HNC") == 0)
-      PD.closure = CLOSURE_HNC;
-    else if (strcmp (closure, "KH") == 0)
-      PD.closure = CLOSURE_KH;
-    else if (strcmp (closure, "PY") == 0)
-      PD.closure = CLOSURE_PY;
-    else
-      {
-        PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
-        exit (1);
-      }
+  if (strcmp (closure, "HNC") == 0)
+    PD.closure = CLOSURE_HNC;
+  else if (strcmp (closure, "KH") == 0)
+    PD.closure = CLOSURE_KH;
+  else if (strcmp (closure, "PY") == 0)
+    PD.closure = CLOSURE_PY;
+  else
+    {
+      PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
+      exit (1);
+    }
 
-    return PD;
+  return PD;
 }
 
 
