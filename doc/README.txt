@@ -352,12 +352,17 @@ Excess chemical potential (kcal):
 
 Solvent              3D-RISM               1D-RISM
 -------           ----------            ----------
-LJ                 15.580806             15.854951
-LJ2                16.476489             16.542005
-LJC                16.292285             16.385851
-OW                  6.910124              6.940968
-Water              -6.309774             -6.303708
+LJ                 15.725374             15.808186
+LJ2                16.593576             16.579971
+LJC                16.473840             16.435115
+OW                  6.930328              6.922977
+Water              -6.281097             -6.262288
 ---------------------------------------------------
+
+Except setting "--rho 0.75" and "--beta 0.25" for "LJ", "LJ2" and "LJC"
+solvents, all the other calculation parameters for the comparison above
+could be found in the next section in which excess chemical potentials
+for solute/solvent systems are calcualted.
 
 
 Excess chemical potential in 1D- and 3D-RISM for solute/solvent systems
