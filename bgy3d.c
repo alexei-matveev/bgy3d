@@ -14,38 +14,29 @@
    main() is taken from elsewhere: */
 int verbosity = 0;
 
-/* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
-   interface: */
+
+/*
+  Get  problem data  (e.g.   from command  line) using  bgy3d_getopt_*
+  interface.
+
+  FIXME:  some parameters are  still handled  by the  solvers themself
+  each having potentially its own set of the defaults.
+
+  Do not forget to set the  defaults, the command line may not contain
+  a setting for every ProblemData field!
+*/
 ProblemData bgy3d_problem_data (void)
 {
     ProblemData PD;
 
-    /* defaults: for older solvers: */
-    /* real maxL = 5.0; */
-    /* real beta = 0.6061; */
-
-    /* default for recent solvers: */
-    int N = 32;
-    real maxL = 12.0;
-    real beta = 1.6889;
-    real rho = 0.3;
-
     /* Grid points in 1 dimension */
+    int N = 32;
     bgy3d_getopt_int ("--N", &N);
     assert (N > 0);
 
-    /* inverse temperature */
-    bgy3d_getopt_real ("--beta", &beta);
-
-    /* Density */
-    bgy3d_getopt_real ("--rho", &rho);
-
     /* (half of the) box size: */
+    real maxL = 12.0;
     bgy3d_getopt_real ("--L", &maxL);
-
-    /*=================================*/
-    /* set Problem Data */
-    /*=================================*/
 
     /* It appears the intervals for x, y, and z are the same: */
     FOR_DIM
@@ -57,10 +48,11 @@ ProblemData bgy3d_problem_data (void)
     FOR_DIM
       PD.h[dim] = PD.L[dim] / PD.N[dim];
 
-    /* At this point N, h and L have consistent values. */
-
-    /* FIXME:  N^2 +  N^2 +  N^2 should  not overflow,  this condition
-       ensures that 3N^2 < 2^31: */
+    /*
+      At this  point N, h and  L have consistent values.  FIXME: N^2 +
+      N^2 + N^2 should not  overflow, this condition ensures that 3N^2
+      < 2^31:
+    */
     assert (N < 26755);
 
     /* FIXME: N^3 should not overflow, this condition ensures that N^3
@@ -68,14 +60,13 @@ ProblemData bgy3d_problem_data (void)
     if (!bgy3d_getopt_test ("--rism"))
         assert (N < 1291);
 
-    PD.beta = beta;
-    PD.rho  = rho;
+    /* Inverse temperature: */
+    PD.beta = 1.6889;
+    bgy3d_getopt_real ("--beta", &PD.beta);
 
-    /*
-     * Other  parameters  were traditionally  handled  by the  solvers
-     * themself each  having potentially its own set  of the defaults.
-     * Read commonly used flags from command line:
-     */
+    /* Density: */
+    PD.rho = 0.3;
+    bgy3d_getopt_real ("--rho", &PD.rho);
 
     /* Mixing parameter: */
     PD.lambda = 0.1;
@@ -95,11 +86,11 @@ ProblemData bgy3d_problem_data (void)
     PD.damp = 1.0;
     bgy3d_getopt_real ("--damp-start", &PD.damp);
 
-    /* Number of total iterations */
+    /* Number of total iterations: */
     PD.max_iter = 100;
     bgy3d_getopt_int ("--max-iter", &PD.max_iter);
 
-    /* Norm_tol for convergence test */
+    /* Norm tolerance for convergence test: */
     PD.norm_tol = 1.0e-2;
     bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
