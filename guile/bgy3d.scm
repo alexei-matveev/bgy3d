@@ -676,6 +676,6 @@ computes the sum of all vector elements."
                        (vec-destroy v)))
                    args))))))
 
+
 (define (bgy3d-test)
-  (let ((solvent (find-molecule "OW")))
-    (hnc3d-run-solvent solvent *default-settings*)))
+  (pretty-print "does nothing"))
