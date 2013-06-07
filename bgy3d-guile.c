@@ -727,11 +727,15 @@ guile_bgy3d_solvent (SCM solvent, SCM settings)
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
 
+  local Vec g[m][m];
+
   /* This writes to the disk: */
-  bgy3d_solve_solvent (&PD, m, solvent_sites);
+  bgy3d_solve_solvent (&PD, m, solvent_sites, g);
 
   free (solvent_name);
   free (solvent_sites);
+
+  vec_destroy2 (m, g);
 
   return settings;
 }
@@ -755,7 +759,7 @@ guile_hnc3d_solvent (SCM solvent, SCM settings)
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
 
-  Vec g[m][m];
+  local Vec g[m][m];
 
   /* This writes to the disk: */
   hnc3d_solvent_solve (&PD, m, solvent_sites, g);

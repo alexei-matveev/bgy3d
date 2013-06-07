@@ -776,13 +776,19 @@ Vec BGY3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   /* Get the number of solvent sites and their parameters: */
   bgy3d_solvent_get (&m, &solvent);
 
-  bgy3d_solve_solvent (PD, m, solvent);
+  local Vec g[m][m];
+
+  bgy3d_solve_solvent (PD, m, solvent, g);
+
+  vec_destroy2 (m, g);
 
   return PETSC_NULL;
 
 }
 
-void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
+void
+bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
+                     Vec g[m][m]) /* out, allocated here */
 {
   State *BHD = bgy3d_state_make (PD);
 
@@ -869,9 +875,9 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  local Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
-  local Vec g_fft[m][m];                /* complex, ij = ji */
-  vec_create2 (BHD->da, m, g);
+  local Vec du[m][m], t[m][m];  /* real, ij = ji */
+  local Vec g_fft[m][m];        /* complex, ij = ji */
+  vec_create2 (BHD->da, m, g);  /* output, FIXME: not deallocated! */
   vec_create2 (BHD->dc, m, g_fft); /* complex */
   vec_create2 (BHD->da, m, du);
   vec_create2 (BHD->da, m, t);
@@ -1188,8 +1194,9 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
 
     } /* for (dump = ... ) */
 
-  /* deallocation of work vectors */
-  vec_destroy2 (m, g);
+  /* Delegated to the caller: vec_destroy2 (m, g); */
+
+  /* Deallocation of work vectors */
   vec_destroy2 (m, g_fft);
   vec_destroy2 (m, t);
   vec_destroy2 (m, du);
