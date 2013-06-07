@@ -767,8 +767,8 @@ static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
 }
 
 
-static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings,
-                               SCM restart) /* optional */
+static SCM
+guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -813,37 +813,20 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings,
   Context *medium_;
 
   /*
-    If the argument "restart" is  not present, the caller is not going
-    to  resume a  calculaiton  with with  a,  say, slightly  different
-    solute  parameters.  When  the argument  is present  but  NULL the
-    restart will be (eventually) used, but no restart information from
-    the previous run  is available yet.  In this  case the solver puts
-    such info into this  position on exit, thus, effectively returning
-    one more value.
+    If the  argument SCM  restart is SCM  NULL no  restart information
+    from the previous run is available yet.  This is a pointer to some
+    structure holding restart  info (ok, so far it is  just a long Vec
+    in disguise). This is NULL in the first call of a series:
   */
-  SCM next_restart;
-  if (SCM_UNBNDP (restart))
-    {
-      bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                          g,          /* out */
-                          &medium_,   /* out, if not NULL */
-                          NULL);      /* not restartable */
-      next_restart = restart;         /* unspecified */
-    }
-  else
-    {
-      /*
-        This is a pointer to  some structure holding restart info (ok,
-        so far it is just a long Vec in disguise). This is NULL in the
-        first call of a series:
-      */
-      Restart *restart_ = to_pointer (restart);
-      bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                          g,          /* out */
-                          &medium_,   /* out */
-                          &restart_); /* inout */
-      next_restart = from_pointer (restart_);
-    }
+  Restart *restart_ = to_pointer (restart); /* maybe NULL */
+
+  bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                      g,          /* out */
+                      &medium_,   /* out */
+                      &restart_); /* inout */
+
+  /* Not NULL if solver supports restarting: */
+  restart = from_pointer (restart_);
 
   free (solute_name);
   free (solute_sites);
@@ -855,14 +838,9 @@ static SCM guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings,
   SCM medium = from_pointer (medium_);
 
   /*
-    Return  multiple  values. Caller,  dont  forget  to destroy  them!
-    FIXME: this is a terrible function --- the number of return values
-    depends on the input!
+    Return multiple values. Caller, dont forget to destroy them!
   */
-  if (SCM_UNBNDP (next_restart))
-    return scm_values (scm_list_2 (gs, medium));
-  else
-    return scm_values (scm_list_3 (gs, medium, next_restart));
+  return scm_values (scm_list_3 (gs, medium, restart));
 }
 
 
@@ -873,7 +851,8 @@ static SCM guile_restart_destroy (SCM restart)
 }
 
 
-static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
+static SCM
+guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -928,7 +907,7 @@ static SCM guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings)
   SCM medium = from_pointer (medium_);
 
   /* Return multiple values. Caller, dont forget to destroy them! */
-  return scm_values (scm_list_2 (gs, medium));
+  return scm_values (scm_list_3 (gs, medium, restart));
 }
 
 
@@ -1098,9 +1077,9 @@ static void module_init (void* unused)
     a macro that does both.
   */
   EXPORT ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
-  EXPORT ("hnc3d-run-solute", 3, 0, 0, guile_hnc3d_solute);
+  EXPORT ("hnc3d-run-solute", 4, 0, 0, guile_hnc3d_solute);
   EXPORT ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
-  EXPORT ("bgy3d-run-solute", 3, 1, 0, guile_bgy3d_solute);
+  EXPORT ("bgy3d-run-solute", 4, 0, 0, guile_bgy3d_solute);
   EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);

@@ -84,14 +84,19 @@
 ;;;   state-make
 ;;;   state-destroy
 ;;;
-;;; and  possibly more,  depending on  the compilation  options. The
+;;; and  possibly  more, depending  on  the  compilation options.  The
 ;;; definitions are  put into (guile bgy3d  internal) module, imported
 ;;; here  and  re-exported  selectively  (see use-modules  form).   An
 ;;; earlier  version actively  invoked the  procedure to  define those
 ;;; symbols. However, this caused annoying warnings with Guile 2 which
-;;; complains about "possibly undefined  symbols" at compile time. The
-;;; boilerplate is left here for reference:
+;;; complains about "possibly undefined symbols" at compile time.
 ;;;
+
+;;;
+;;; So far C-pointers  are represented by integers in  Scheme. In case
+;;; this is ever going to change use this as the null pointer literal:
+;;;
+(define NULL 0)
 
 ;;;
 ;;; This  may become  define-syntax some  time, so  do not  assume the
@@ -564,9 +569,11 @@ computes the sum of all vector elements."
         ((hnc bgy)
          (if solute                     ; either #f or real solute
              ;;
-             ;; Solute with solvent:
+             ;; Solute with solvent. Supply NULL as the restart
+             ;; parameter --- we cannot offer anything here:
              ;;
-             (let-values (((g1 potential) (run-solute solute solvent '())))
+             (let-values (((g1 potential restart)
+                           (run-solute solute solvent '() NULL)))
                ;;
                ;; Evaluate and print potential at positions of solute
                ;; sites and the corresponding total energy:
@@ -579,6 +586,7 @@ computes the sum of all vector elements."
                ;;
                ;; Then destroy the objects returned:
                ;;
+               (bgy3d-restart-destroy restart) ; ignores NULL
                (bgy3d-pot-destroy potential)
                (map vec-destroy g1))
              ;;
@@ -633,10 +641,8 @@ computes the sum of all vector elements."
          ;;
          (let ((solutes (map find-molecule args)))
            (map (lambda (solute)
-                  (let-values (((g1 ve) (bgy3d-run-solute solute
-                                                          solvent
-                                                          settings)))
-                    (bgy3d-pot-destroy ve) ; not yet used
+                  (let-values (((g1 ve restart)
+                                (bgy3d-run-solute solute solvent settings NULL)))
                     ;;
                     ;; Save distributions if requested from command
                     ;; line. FIXME: the file names do not relate to
@@ -648,6 +654,8 @@ computes the sum of all vector elements."
                     ;;
                     ;; Dont forget to destroy them:
                     ;;
+                    (bgy3d-pot-destroy ve) ; not yet used
+                    (bgy3d-restart-destroy restart)
                     (map vec-destroy g1)))
                 solutes)))
         ("punch"
