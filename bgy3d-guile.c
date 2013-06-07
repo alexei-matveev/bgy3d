@@ -709,11 +709,12 @@ static void guile_init_vec_type (void)
 }
 
 
-static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
+static SCM
+guile_bgy3d_solvent (SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
-  const ProblemData PD = problem_data (alist);
+  const ProblemData PD = problem_data (settings);
 
   int m;                        /* number of solvent sites */
   Site *solvent_sites;          /* solvent_sites[m] */
@@ -732,11 +733,12 @@ static SCM guile_bgy3d_solvent (SCM solvent, SCM alist)
   free (solvent_name);
   free (solvent_sites);
 
-  return alist;
+  return settings;
 }
 
 
-static SCM guile_hnc3d_solvent (SCM solvent, SCM settings)
+static SCM
+guile_hnc3d_solvent (SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
