@@ -456,26 +456,29 @@ computes the sum of all vector elements."
 ;;; integer numbers:
 ;;;
 (define option-spec-base
-  (let ((numeric (map (lambda (op)
-                        (quasiquote
-                         ((unquote op) (value #t) (predicate (unquote string->number)))))
-                      (map car *default-settings*)))) ; all of them are numbers
-    (quasiquote
-     ((solvent          (value #t)
-                        (predicate ,find-molecule)) ; a string
-      (solute           (value #t)
-                        (predicate ,find-molecule)) ; a string
-      (from-radial-g2   (value #f))
-      (save-guess       (value #f))
-      (load-guess       (value #f))
-      (snes-solver      (value #t)
+  (quasiquote
+   ((N                  (value #t)      (predicate ,string->number))
+    (rho                (value #t)      (predicate ,string->number))
+    (beta               (value #t)      (predicate ,string->number))
+    (norm-tol           (value #t)      (predicate ,string->number))
+    (max-iter           (value #t)      (predicate ,string->number))
+    (L                  (value #t)      (predicate ,string->number))
+    (zpad               (value #t)      (predicate ,string->number)) ; MUST DIE!
+    (damp-start         (value #t)      (predicate ,string->number))
+    (lambda             (value #t)      (predicate ,string->number))
+    (solvent            (value #t)      (predicate ,find-molecule)) ; a string
+    (solute             (value #t)      (predicate ,find-molecule)) ; a string
+    (from-radial-g2     (value #f))
+    (save-guess         (value #f))
+    (load-guess         (value #f))
+    (snes-solver        (value #t)
                         (predicate ,(lambda (x)
-                                      (member x '("jager" "newton" "picard" "trial")))))
-      (verbose          (single-char #\v)
+                                    (member x '("jager" "newton" "picard" "trial")))))
+    (verbose            (single-char #\v)
                         (value #f)) ; verbosity
-      (no-cage          (value #f)) ; turns off metallic cage boundary
-      (no-hacks         (value #f)) ; turns off ugly hacks
-      (unquote-splicing numeric)))))
+    (no-cage            (value #f)) ; turns off metallic cage boundary
+    (no-hacks           (value #f)))))  ; turns off ugly hacks
+
 
 
 (define option-spec-new
