@@ -800,7 +800,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
                "Solving BGY3d-M %d-site equation with Fourier ansatz...\n", m);
 
   /* allocation for local work vectors */
-  Vec f[m][m][3], f_l[m][m][3]; /* full and long range pair force */
+  local Vec f[m][m][3], f_l[m][m][3]; /* full and long range pair force */
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
@@ -815,8 +815,8 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
    by inverse  temperature beta) is  initially put into  the following
    array:
   */
-  Vec u0[m][m];
-  Vec c2[m][m];                 /* exp(- beta * LJ_repulsive(i, j) */
+  local Vec u0[m][m];
+  local Vec c2[m][m];           /* exp(- beta * LJ_repulsive(i, j) */
 
   vec_create2 (BHD->da, m, u0);
   vec_create2 (BHD->da, m, c2);
@@ -827,13 +827,13 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
     store just one?  Here u2_fft are the Fourier transform of u2.  The
     same redundancy. Those are complex Vecs.
   */
-  Vec u2[m][m], u2_fft[m][m];
+  local Vec u2[m][m], u2_fft[m][m];
 
   vec_create2 (BHD->da, m, u2);
   vec_create2 (BHD->dc, m, u2_fft); /* complex */
 
   /* Allocate more memory for fft */
-  Vec gfg2_fft = vec_create (BHD->dc); /* complex */
+  local Vec gfg2_fft = vec_create (BHD->dc); /* complex */
 
   /* end of allocation */
 
@@ -869,16 +869,16 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
   /* norm_tol for convergence test */
   const real norm_tol = PD->norm_tol;
 
-  Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
-  Vec g_fft[m][m];                /* complex, ij = ji */
+  local Vec g[m][m], du[m][m], t[m][m]; /* real, ij = ji */
+  local Vec g_fft[m][m];                /* complex, ij = ji */
   vec_create2 (BHD->da, m, g);
   vec_create2 (BHD->dc, m, g_fft); /* complex */
   vec_create2 (BHD->da, m, du);
   vec_create2 (BHD->da, m, t);
 
-  Vec du_new = vec_create (BHD->da);
-  Vec du_new2 = vec_create (BHD->da);
-  Vec work = vec_create (BHD->da);
+  local Vec du_new = vec_create (BHD->da);
+  local Vec du_new2 = vec_create (BHD->da);
+  local Vec work = vec_create (BHD->da);
 
 #ifdef L_BOUNDARY
   /*
@@ -886,7 +886,7 @@ void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m])
     problem across iterations. See call to KSPSetInitialGuessNonzero()
     in bgy3d-poisson.c:
   */
-  Vec x_lapl[m][m];             /* real */
+  local Vec x_lapl[m][m];       /* real */
   vec_create2 (BHD->da, m, x_lapl);
 
   for (int i = 0; i < m; i++)
