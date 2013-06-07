@@ -109,6 +109,7 @@ static bool alist_getopt_funptr (SCM alist, /* intent(in) */
 }
 
 
+/* Will longjmp() on error! */
 static ProblemData problem_data (SCM alist)
 {
   /* This sets defaults, eventually modified from the command line: */
@@ -139,6 +140,29 @@ static ProblemData problem_data (SCM alist)
   /* Preserve invariants or get rid of redundancies: */
   for (int i = 0; i < 3; i++)
     PD.h[i] = PD.L[i] / PD.N[i];
+
+  /*
+    Closure is a  symbol, in capital letters.  Only  do something if
+    closure is  specified in the association  list, otherwise assume
+    bgy3d_problem_data() has set it properly:
+  */
+  SCM closure;
+  if (alist_getopt_scm (alist, "closure", &closure))
+    {
+      const SCM hnc = scm_from_locale_symbol ("HNC");
+      const SCM kh = scm_from_locale_symbol ("KH");
+      const SCM py = scm_from_locale_symbol ("PY");
+
+      if (scm_is_true (scm_equal_p (closure, hnc)))
+        PD.closure = CLOSURE_HNC;
+      else if (scm_is_true (scm_equal_p (closure, kh)))
+        PD.closure = CLOSURE_KH;
+      else if (scm_is_true (scm_equal_p (closure, py)))
+        PD.closure = CLOSURE_PY;
+      else
+        scm_misc_error          /* longjmp! */
+          (__func__, "no such closure ~A", scm_list_1 (closure));
+    }
 
   return PD;
 }
@@ -263,7 +287,7 @@ static SCM guile_state_make (SCM alist)
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   ProblemData *PD = malloc (sizeof *PD); /* free() in guile_state_free() */
-  *PD = problem_data (alist);
+  *PD = problem_data (alist);            /* FIXME: leak on longjmp! */
 
   return from_state (bgy3d_state_make (PD));
 }
