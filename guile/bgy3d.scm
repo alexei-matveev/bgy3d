@@ -390,12 +390,19 @@ computes the sum of all vector elements."
           (loop (cdr vecs)
                 (+ 1 vec-id))))))
 
+
+(define *experimental* #f)
+
 ;;;
 ;;; These hooks, bgy3d-solvent and bgy3d-solute, are called from PG:
 ;;;
 (define (bgy3d-solvent)
-  (let ((settings       *default-settings*)
-        (solvent        (find-molecule *default-molecule*)))
+  (let ((settings *default-settings*)
+        (run-solvent (if *experimental*
+                         hnc3d-run-solvent
+                         bgy3d-run-solvent))
+        (solvent (find-molecule *default-molecule*))
+        (solvent-info-file "g00.bin"))
     ;;
     ;; At the moment the function bgy3d-run-solvent echos settings as
     ;; is, the output is written to disk instead. FIXME: a hack to
@@ -406,14 +413,17 @@ computes the sum of all vector elements."
     ;;
     (let ((always-run-solvent #t))
       (if (or always-run-solvent
-              (not (file-exists? "g00.bin")))
-          (bgy3d-run-solvent solvent settings) ; writes g??.bin
+              (not (file-exists? solvent-info-file)))
+          (run-solvent solvent settings) ; writes solvent info to disk
           settings))))
 
 
 (define (bgy3d-solute name sites funptr restart)
   "To be called from QM code."
   (let ((settings       *default-settings*)
+        (run-solute (if *experimental*
+                        hnc3d-run-solute
+                        bgy3d-run-solute))
         (solvent        (find-molecule *default-molecule*))
         (solute         (make-molecule name
                                        (update-sites name
@@ -430,15 +440,16 @@ computes the sum of all vector elements."
     (maybe-print (list 'solute: solute))
     (maybe-print (list 'settings: settings))
     ;;
-    ;; The  function bgy3d-run-solute allocates and returns  a list of
-    ;; Petsc Vecs and a potential (returned as multiple values). It is
-    ;; the callers responsibility to destroy all of them. As of now it
-    ;; expects files g??.bin to exist and reads them:
+    ;; The function  bound to run-solute allocates and  returns a list
+    ;; of  Petsc Vecs, a  descriptor for electrostatic  potential, and
+    ;; some  restart info  to be passed  back on the  next invokations
+    ;; (returned as multiple values). It is the callers responsibility
+    ;; to destroy  all of them ---  do not assume any of  them will be
+    ;; garbage-collected. As of now it expects the solvent description
+    ;; such as g??.bin or x??-fft.bin to exist as files:
     ;;
-    (let-values (((g1 potential restart) (bgy3d-run-solute solute
-                                                           solvent
-                                                           settings
-                                                           restart)))
+    (let-values (((g1 potential restart)
+                  (run-solute solute solvent settings restart)))
       ;;
       ;; Save g1-files to disk:
       ;;
