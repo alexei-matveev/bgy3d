@@ -136,7 +136,8 @@
 #include "hnc3d-sles.h"         /* hnc3d_sles_zgesv() */
 #include "rism.h"               /* rism_solvent() */
 #include "bgy3d-potential.h"    /* info() */
-#include "bgy3d-solvents.h"      /* bgy3d_sites_show() */
+#include "bgy3d-impure.h"       /* Restart */
+#include "bgy3d-solvents.h"     /* bgy3d_sites_show() */
 #include <math.h>               /* expm1() */
 #include "hnc3d.h"
 
@@ -1207,7 +1208,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          const int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
                          Vec g[m],
-                         Context **medium)
+                         Context **medium,  /* out */
+                         Restart **restart) /* inout, so far unchanged  */
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -1236,9 +1238,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
   local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
 
   bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v, uc,  /* out */
-                      uc_rho, /* smeared core density, discarded */
-                      density);  /* void (*density)(...) */
+                      v, uc,    /* out */
+                      uc_rho,   /* out, smeared cores */
+                      density); /* in, electron density callback */
 
   /*
     If   the  solute  is   neutral,  asymptotic   electrostatics  is
@@ -1432,9 +1434,10 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
 
   Vec g[m];
   hnc3d_solute_solve (PD, m, solvent, n, solute,
-                      NULL,  /* no electron density */
+                      NULL,     /* dont have electron density */
                       g,
-                      NULL); /* no medium returned */
+                      NULL,     /* dont need medium info */
+                      NULL);    /* dont need restart info */
 
   vec_destroy1 (m, g);
   return PETSC_NULL;

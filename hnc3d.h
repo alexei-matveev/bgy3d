@@ -9,7 +9,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          const int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
                          Vec g[m],
-                         Context **medium);
+                         Context **medium,   /* out */
+                         Restart **restart); /* inout */
 
 Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini);
 Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini);

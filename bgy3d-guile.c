@@ -899,9 +899,21 @@ guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
   Vec g[m];
   Context *medium_;
 
+  /*
+    If the  argument SCM  restart is SCM  NULL no  restart information
+    from the previous run is available yet.  This is a pointer to some
+    structure holding restart  info (ok, so far it is  just a long Vec
+    in disguise). This is NULL in the first call of a series:
+  */
+  Restart *restart_ = to_pointer (restart); /* maybe NULL */
+
   hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
                       g,
-                      &medium_);
+                      &medium_,
+                      &restart_);
+
+  /* Not NULL if solver supports restarting: */
+  restart = from_pointer (restart_);
 
   free (solute_name);
   free (solute_sites);
