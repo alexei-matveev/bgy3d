@@ -11,6 +11,8 @@
 
     xtab[i] = f(x ), for x = (i + 1/2) dx
                  i        i
+
+  FIXME: precompute derivatives once things start becoming costly.
 */
 static
 real interp (real x, int n, const real xtab[n], real dx)
