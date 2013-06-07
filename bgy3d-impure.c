@@ -593,36 +593,29 @@ static void iterate_u (Ctx *s, Vec U, Vec dU)
 }
 
 
+/*
+ * FIXME: when  passing in a  NULL pointer, this destroy  function can
+ * still be executed without error.
+ *
+ * From time to time we have to pass an artificial value of 'restart',
+ * e.g.  hnc3d_solute_solve() neither  receives 'restart'  pointer nor
+ * returns it,  but when  calling from PG,  an argument  for 'restart'
+ * from  the scheme interface  'bgy3d_solute_hook' is  still expected.
+ * In this case, we could (only)  set restart as '0' and since it will
+ * not be refreshed during  calling hnc3d_solute_solve(), we will have
+ * a   NULL  pointer  when   this  destroy   function  is   called  by
+ * bgy3d_finalize() in PG.
+ *
+ * Due to the type cast  in bgy3d-guile.c, 'restart' could only be set
+ * as integer and nothing else.
+ */
 void bgy3d_restart_destroy (Restart *restart)
 {
   /* Restart info  is just a (long)  Vec that happens to  fit into (or
-     *rather is*) a pointer: */
-
-  /*
-   * FIXME: when passing in a NULL pointer, this destroy function can
-   * still be executed without error. Branch here is for insurance
-   *
-   * From time to time we have to pass an artificial value of 'restart',
-   * e.g. hnc3d_solute_solve() neither receives 'restart' pointer nor
-   * returns it, but when calling from PG, an argument for 'restart'
-   * from the scheme interface 'bgy3d_solute_hook' is still expected.
-   * In this case, we could (only) set restart as '0' and since it will
-   * not be refreshed during calling hnc3d_solute_solve(), we will
-   * have a NULL pointer when this destroy function is called by
-   * bgy3d_finalize() in PG.
-   *
-   * Due to the type cast in bgy3d_guile.c, 'restart' could only be
-   * set as integer and nothing else
-   */
-  if (restart != NULL)
-  {
-    local Vec U = (Vec) restart;
+     *rather is*) a valid pointer or NULL: */
+  local Vec U = (Vec) restart;
+  if (U)
     vec_pack_destroy1 (&U);
-  }
-  else
-  {
-    /* do nothing */
-  }
 }
 
 
