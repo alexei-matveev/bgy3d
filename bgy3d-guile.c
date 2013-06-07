@@ -709,8 +709,14 @@ static void guile_init_vec_type (void)
 }
 
 
+/* E.g. hnc3d_solvent_solve() or bgy3d_solvent_solve(): */
+typedef
+void (*SV) (const ProblemData *PD, int m, const Site solvent[m], Vec g[m][m]);
+
+/* Decode SCM input,  encode output to SCM. The  first argument is the
+   actual solver that operates with C-types. */
 static SCM
-guile_bgy3d_solvent (SCM solvent, SCM settings)
+run_solvent (SV solve_solvent, SCM solvent, SCM settings)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -730,7 +736,7 @@ guile_bgy3d_solvent (SCM solvent, SCM settings)
   local Vec g[m][m];
 
   /* This writes to the disk: */
-  bgy3d_solve_solvent (&PD, m, solvent_sites, g);
+  solve_solvent (&PD, m, solvent_sites, g);
 
   free (solvent_name);
   free (solvent_sites);
@@ -738,43 +744,39 @@ guile_bgy3d_solvent (SCM solvent, SCM settings)
   vec_destroy2 (m, g);
 
   return settings;
+}
+
+
+static SCM
+guile_bgy3d_solvent (SCM solvent, SCM settings)
+{
+  return run_solvent (bgy3d_solve_solvent, solvent, settings);
 }
 
 
 static SCM
 guile_hnc3d_solvent (SCM solvent, SCM settings)
 {
-  /* This sets defaults, eventually modified from the command line and
-     updated by the entries from the association list: */
-  const ProblemData PD = problem_data (settings);
-
-  int m;                        /* number of solvent sites */
-  Site *solvent_sites;          /* solvent_sites[m] */
-  char *solvent_name;
-
-  /* Get  the  number  of   sites  and  their  parameters.   Allocates
-     sol*_sites, sol*_name: */
-  to_sites (solvent, &m, &solvent_sites, &solvent_name);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
-
-  local Vec g[m][m];
-
-  /* This writes to the disk: */
-  hnc3d_solvent_solve (&PD, m, solvent_sites, g);
-
-  free (solvent_name);
-  free (solvent_sites);
-
-  vec_destroy2 (m, g);
-
-  return settings;
+  return run_solvent (hnc3d_solvent_solve, solvent, settings);
 }
 
 
+/* E.g. hnc3d_solute_solve() or bgy3d_solute_solve(): */
+typedef
+void (*SU) (const ProblemData *PD,
+            const int m, const Site solvent[m],
+            const int n, const Site solute[n],
+            void (*density)(int k, const real x[k][3], real rho[k]),
+            Vec g[m],
+            Context **medium,   /* out */
+            Restart **restart); /* inout */
+
+
+
+/* Decode SCM input,  encode output to SCM. The  first argument is the
+   actual solver that operates with C-types. */
 static SCM
-guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
+run_solute (SU solute_solve, SCM solute, SCM solvent, SCM settings, SCM restart)
 {
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -809,11 +811,11 @@ guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
   alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
 
   /*
-    A call  to bgy3d_solute_solve() takes  part of the input  from the
-    disk and returns  solvent distribution in Vec g[]  (dont forget to
-    destroy them).  If no additional charge distribution is associated
-    with the solute  pass NULL as the function  pointer. Similarly, if
-    you do not want an iterator over the solvent potential pass NULL:
+    A call to solute_solve() takes part of the input from the disk and
+    returns solvent  distribution in Vec  g[] (dont forget  to destroy
+    them).  If  no additional  charge distribution is  associated with
+    the solute pass NULL as the function pointer. Similarly, if you do
+    not want an iterator over the solvent potential pass NULL:
   */
   Vec g[m];
   Context *medium_;
@@ -826,10 +828,10 @@ guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
   */
   Restart *restart_ = to_pointer (restart); /* maybe NULL */
 
-  bgy3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                      g,          /* out */
-                      &medium_,   /* out */
-                      &restart_); /* inout */
+  solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                g,              /* out */
+                &medium_,       /* out */
+                &restart_);     /* inout */
 
   /* Not NULL if solver supports restarting: */
   restart = from_pointer (restart_);
@@ -850,82 +852,24 @@ guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
 }
 
 
-static SCM guile_restart_destroy (SCM restart)
+static SCM
+guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
 {
-  bgy3d_restart_destroy (to_pointer (restart));
-  return from_pointer (NULL);
+  return run_solute (bgy3d_solute_solve, solute, solvent, settings, restart);
 }
 
 
 static SCM
 guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
 {
-  /* This sets defaults, eventually modified from the command line and
-     updated by the entries from the association list: */
-  const ProblemData PD = problem_data (settings);
+  return run_solute (hnc3d_solute_solve, solute, solvent, settings, restart);
+}
 
-  int m;                        /* number of solvent sites */
-  Site *solvent_sites;          /* solvent_sites[m] */
-  char *solvent_name;
 
-  int n;                        /* number of solute sites */
-  Site *solute_sites;           /* solute_sites[n] */
-  char *solute_name;
-
-  /* Get  the  number  of   sites  and  their  parameters.   Allocates
-     sol*_sites, sol*_name: */
-  to_sites (solvent, &m, &solvent_sites, &solvent_name);
-  to_sites (solute, &n, &solute_sites, &solute_name);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
-
-  /* This declares and  sets a function pointer. If  the settings dont
-     specify it, it should remain NULL: */
-  void (*qm_density) (int n, const real x[n][3], real rho[n]) = NULL;
-
-  /*
-    Cast is to silence the warning  here.  Note that we pass a pointer
-    to  a  funptr,  void  (**)(),  as  the  function  is  supposed  to
-    (eventually) set that funptr to something meaningful:
-  */
-  alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
-
-  /*
-    This  takes part  of  the  input from  the  disk, returns  solvent
-    distribution in Vec g[] (dont forget to destroy them).:
-  */
-  Vec g[m];
-  Context *medium_;
-
-  /*
-    If the  argument SCM  restart is SCM  NULL no  restart information
-    from the previous run is available yet.  This is a pointer to some
-    structure holding restart  info (ok, so far it is  just a long Vec
-    in disguise). This is NULL in the first call of a series:
-  */
-  Restart *restart_ = to_pointer (restart); /* maybe NULL */
-
-  hnc3d_solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                      g,
-                      &medium_,
-                      &restart_);
-
-  /* Not NULL if solver supports restarting: */
-  restart = from_pointer (restart_);
-
-  free (solute_name);
-  free (solute_sites);
-  free (solvent_name);
-  free (solvent_sites);
-
-  /* Build a list starting from the tail: */
-  SCM gs = from_vec1 (m, g);
-  SCM medium = from_pointer (medium_);
-
-  /* Return multiple values. Caller, dont forget to destroy them! */
-  return scm_values (scm_list_3 (gs, medium, restart));
+static SCM guile_restart_destroy (SCM restart)
+{
+  bgy3d_restart_destroy (to_pointer (restart));
+  return from_pointer (NULL);
 }
 
 
