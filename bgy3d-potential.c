@@ -74,7 +74,7 @@ static void divmod (const int n, const int N, int *j, int *i)
 */
 static Context* bgy3d_pot_create (const State *BHD, Vec v)
 {
-  /* memory for context pointer */
+  /* Memory for context pointer: */
   Context *s = malloc (sizeof *s);
 
   /* Increment refcounts  and save a  ref in the  Context. DADestroy()
@@ -87,9 +87,8 @@ static Context* bgy3d_pot_create (const State *BHD, Vec v)
   s->fft_mat = mat_ref (BHD->fft_mat);
 
   /*
-    Do not copy the input vector, save a reference instead, but also
-    Uincrement the refcount. We will have to vec_destroy() it
-    too:
+    Do not copy  the input vector, save a  reference instead, but also
+    increment the refcount. We will have to vec_destroy() it too:
   */
   s->v = vec_ref (v);
 
@@ -104,11 +103,11 @@ static Context* bgy3d_pot_create (const State *BHD, Vec v)
   /* Get local portion of the grid */
   DMDAGetCorners (s->da, &s->i0, &s->j0, &s->k0, &s->ni, &s->nj, &s->nk);
 
-  /* copy N3 and h3 from PD */
+  /* Copy grid mesh sizes h[3] from PD */
   FOR_DIM
     s->h[dim] = BHD->PD->h[dim];
 
-  /* copy interval */
+  /* Copy box dimensions: */
   FOR_DIM
     s->L[dim] = BHD->PD->L[dim];
 
