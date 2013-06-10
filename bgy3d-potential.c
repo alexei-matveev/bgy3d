@@ -320,14 +320,18 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 
 
 /*
-  Prints  and returns  some info  interesting to  the caller.   At the
-  moment  it  returns  the  iterator  over  the  medium  electrostatic
-  potential. See bgy3d-potentialc:
+  Prints  properties and  returns the  info about  the  solvent medium
+  interesting to  the caller.  At  the moment it returns  the iterator
+  over the medium electrostatic potential.
+
+  The direct correlation  h = g -  1 is used here only  to compute the
+  charge  density of  the medium.  As a  matter of  fact,  for neutral
+  solvent one could supply g instead.
 */
 Context* info (const State *BHD,
                int m, const Site solvent[m],
                int n, const Site solute[n],
-               Vec g[m],           /* in */
+               Vec h[m],           /* in */
                Vec uc, Vec uc_rho) /* in */
 {
   /* Solvent electrostatic potential field: */
@@ -336,8 +340,12 @@ Context* info (const State *BHD,
   /* Keep solvent charge density for integration: */
   local Vec ve_rho = vec_create (BHD->da);
 
-  /* This fills Vec ve with solvent electrostatic potential: */
-  bgy3d_solvent_field (BHD, m, solvent, g, ve, ve_rho);
+  /*
+    This fills Vec ve with solvent electrostatic potential. This is so
+    far the only place where h  is used.  For neutral solvents one may
+    supply g instead of h here:
+  */
+  bgy3d_solvent_field (BHD, m, solvent, h, ve, ve_rho);
 
   /* Return the iterator over the solvent field: */
   Context *v = bgy3d_pot_create (BHD, ve);

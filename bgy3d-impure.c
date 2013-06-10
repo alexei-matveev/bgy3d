@@ -866,7 +866,9 @@ static void solute_solve (State *BHD,
   /*
     Compute, and eventually  (when Context** v is not  NULL) return to
     the  caller  the  iterator  over electrostatic  potential  of  the
-    solvent:
+    solvent. As  the distribution functions  are only used  to compute
+    the  charge density  one can  supply either  g or  h =  g -  1 for
+    neutral solvents.
   */
   Context *ret = info (BHD, m, solvent, n, solute, g, uc, uc_rho);
   if (medium)
