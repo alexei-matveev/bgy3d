@@ -335,37 +335,12 @@ medium_charge (const ProblemData *PD, int m, const Site solvent[m],
 }
 
 
-/*
-  Prints  properties and  returns the  info about  the  solvent medium
-  interesting to  the caller.  At  the moment it returns  the iterator
-  over the medium electrostatic potential.
-
-  The direct correlation  h = g -  1 is used here only  to compute the
-  charge  density of  the medium.  As a  matter of  fact,  for neutral
-  solvent one could supply g instead.
-*/
-Context* info (const State *BHD,
-               int m, const Site solvent[m],
-               int n, const Site solute[n],
-               Vec h[m],           /* in */
-               Vec uc, Vec uc_rho) /* in */
+static void print_info (const State *BHD,
+                        int n, const Site solute[n],
+                        Vec uc, Vec uc_rho, /* in */
+                        Vec ve, Vec ve_rho, /* in */
+                        Context *v)         /* in */
 {
-  /* Solvent electrostatic potential field: */
-  local Vec ve = vec_create (BHD->da);
-
-  /* Keep solvent charge density for integration: */
-  local Vec ve_rho = vec_create (BHD->da);
-
-  /*
-    This fills Vec ve with solvent electrostatic potential. This is so
-    far the only place where h  is used.  For neutral solvents one may
-    supply g instead of h here:
-  */
-  bgy3d_solvent_field (BHD, m, solvent, h, ve, ve_rho);
-
-  /* Return the iterator over the solvent field: */
-  Context *v = bgy3d_pot_create (BHD, ve);
-
   /* Also compute dipole moment: */
   real d[3], d_norm;
   dipole (n, solute, d, &d_norm);
@@ -442,6 +417,48 @@ Context* info (const State *BHD,
                val3);
   PetscPrintf (PETSC_COMM_WORLD,
                "     diff = % lf\n", val3 - val2);
+}
+
+
+/*
+  Prints  properties and  returns the  info about  the  solvent medium
+  interesting to  the caller.  At  the moment it returns  the iterator
+  over the medium electrostatic potential.
+
+  The direct correlation  h = g -  1 is used here only  to compute the
+  charge  density of  the medium.  As a  matter of  fact,  for neutral
+  solvent one could supply g instead.
+*/
+Context* info (const State *BHD,
+               int m, const Site solvent[m],
+               int n, const Site solute[n],
+               Vec h[m],           /* in */
+               Vec uc, Vec uc_rho) /* in */
+{
+  /* Solvent electrostatic potential field: */
+  local Vec ve = vec_create (BHD->da);
+
+  /* Keep solvent charge density for integration: */
+  local Vec ve_rho = vec_create (BHD->da);
+
+  /*
+    This fills Vec ve with solvent electrostatic potential. This is so
+    far the only place where h  is used.  For neutral solvents one may
+    supply g instead of h here:
+  */
+  bgy3d_solvent_field (BHD, m, solvent, h, ve, ve_rho);
+
+  /* Return the iterator over the solvent field. Context holds another
+     ref to Vec ve: */
+  Context *v = bgy3d_pot_create (BHD, ve);
+
+  /*
+    Print some observables for the  solute embedded into the medium on
+    tty.    Some  of   the   observables  are   used  for   regression
+    tests. Otherwise it is completely optional:
+  */
+  if (true)
+    print_info (BHD, n, solute, uc, uc_rho, ve, ve_rho, v);
 
   vec_destroy (&ve);            /* yes, we do! */
   vec_destroy (&ve_rho);
