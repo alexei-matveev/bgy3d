@@ -1259,7 +1259,22 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* Zero as intial guess for t  is (almost?) the same as exp(-βv) - 1
      initial guess for h: */
-  VecSet (T, 0.0);
+  if (restart && *restart)
+    {
+      /*
+        If the argument  is present and valid, this is  the data to be
+        used for resuming iterations.  So  far this data is just a ref
+        to a long Vec that happens to fit into a pointer:
+      */
+      Vec T_old = (Vec) (*restart);
+
+      /* Initialize long Vec  T by copying restart data  from the last
+         run: */
+      VecCopy (T_old, T);
+      bgy3d_restart_destroy (*restart);
+    }
+  else
+    VecSet (T, 0.0);
 
   {
     local Vec h_fft[m];
@@ -1330,8 +1345,28 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
     vec_aliases_destroy1 (T, m, t);
   }
-  vec_pack_destroy1 (&T);       /* not vec_destroy()! */
   vec_destroy1 (m, v);
+
+
+  /* Do not destroy  the long Vec T, return it as  restart info if the
+     caller requested that: */
+  if (restart)
+    {
+      /*
+        This is probably QM code  calling, eventually this will not be
+        the last  call during  SCF.  Pass  the long Vec  T to  help us
+        restart iterations  in the next  SCF round.  At this  point we
+        give up ownersip of the long  Vec T to the caller.  The caller
+        will  eventually have  to dispose  of it  by means  of calling
+        bgy3d_restart_destroy(),  unless  it is  passed  back to  this
+        function.
+      */
+      *restart = (void*) T;
+      T = NULL;                 /* because declared local */
+    }
+  else
+    vec_pack_destroy1 (&T);     /* not vec_destroy()! */
+
 
   /* Excess chemical potential: */
   {
@@ -1362,8 +1397,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     VecShift (h[i], 1.0);       /* FIXME: misnomer! */
 
-  /* return the Context **ret to caller for integration over electron
-   * potential of solvent */
+  /* Return  the   Context  **ret  to  caller   for  integration  over
+     electrostatic potential of solvent */
   Context *ret = info (HD, m, solvent, n, solute, h, uc, uc_rho);
   if (medium)
     *medium = ret;
