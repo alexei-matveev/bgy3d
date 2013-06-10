@@ -319,6 +319,22 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
+/* For neutral solvents either g or h = g - 1 can be passed: */
+static real
+medium_charge (const ProblemData *PD, int m, const Site solvent[m],
+               const Vec g[m])
+{
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+
+  real total = 0.0;
+  for (int i = 0; i < m; i++)
+    total += solvent[i].charge * vec_sum (g[i]);
+
+  /* FIXME: different rhos[]? */
+  return total * h3 * PD->rho;
+}
+
+
 /*
   Prints  properties and  returns the  info about  the  solvent medium
   interesting to  the caller.  At  the moment it returns  the iterator

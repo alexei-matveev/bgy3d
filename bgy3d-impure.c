@@ -397,19 +397,6 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
   vec_destroy1 (3, fl_g2_fft);
 }
 
-static real ComputeCharge (const ProblemData *PD,
-                           int m, const Site solvent[m],
-                           const Vec g[m])
-{
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  real total = 0.0;
-  for (int i = 0; i < m; i++)
-    total += solvent[i].charge * vec_sum (g[i]);
-
-  /* FIXME: different rhos[]? */
-  return total * h3 * PD->rho;
-}
 
 /* g := exp (-u) */
 static void mexp (Vec g, Vec u)
