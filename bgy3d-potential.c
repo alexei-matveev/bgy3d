@@ -46,12 +46,12 @@ struct Context {
   DA da, dc;                 /* real and complex array descriptors */
   Mat fft_mat;               /* FFT matrix for interpolation */
   Vec v, v_fft;              /* refs to real and complex vectors */
-  PetscScalar ***v_;    /* v_[k][j][i] points to the real data */
-  int ijk;              /* linarized index for local (k, j, i) */
-  real h[3];            /* mesh sizes */
-  real L[3];            /* box size */
-  int i0, j0, k0;       /* corner of local grid */
-  int ni, nj, nk;       /* local grid shape */
+  PetscScalar ***v_;         /* v_[k][j][i] points to the real data */
+  int ijk;                   /* linarized index for local (k, j, i) */
+  real h[3];                 /* mesh sizes */
+  real L[3];                 /* box size */
+  int i0, j0, k0;            /* corner of local grid */
+  int ni, nj, nk;            /* local grid shape */
 };
 
 /* n = N * j + i, return i and j */
