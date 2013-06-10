@@ -843,6 +843,9 @@ static void solute_solve (State *BHD,
         }
     } /* for (damp = ... ) */
 
+
+  /* Do not destroy  the long Vec U, return it as  restart info if the
+     caller requested that: */
   if (restart)
     {
       /*
@@ -854,8 +857,11 @@ static void solute_solve (State *BHD,
         passed back to this function.
       */
       *restart = (void*) U;
-      U = NULL;
+      U = NULL;                 /* because declared local */
     }
+  else
+    vec_pack_destroy1 (&U);     /* not vec_destroy()! */
+
 
   /*
     Compute, and eventually  (when Context** v is not  NULL) return to
@@ -869,9 +875,6 @@ static void solute_solve (State *BHD,
     bgy3d_pot_destroy (ret);
 
   /* Clean up and exit ... */
-  if (U)
-    vec_pack_destroy1 (&U); /* not vec_destroy()! */
-
   vec_destroy1 (m, u0);
   vec_destroy1 (m, g_fft);
   vec_destroy1 (m, x_lapl);
