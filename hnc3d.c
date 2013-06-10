@@ -1268,7 +1268,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
         used for resuming iterations.  So  far this data is just a ref
         to a long Vec that happens to fit into a pointer:
       */
-      Vec T_old = (Vec) (*restart);
+      Vec T_old = (Vec) *restart;
 
       /* Initialize long Vec  T by copying restart data  from the last
          run: */

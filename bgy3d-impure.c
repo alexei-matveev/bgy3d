@@ -762,7 +762,7 @@ static void solute_solve (State *BHD,
             be used for resuming iterations.  So far this data is just
             a ref to a long Vec that happens to fit into a pointer:
           */
-          Vec U_old = (Vec) (*restart);
+          Vec U_old = (Vec) *restart;
 
           /* Initialize long  Vec U by  copying restart data  from the
              last run: */
