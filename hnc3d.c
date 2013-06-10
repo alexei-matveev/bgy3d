@@ -1150,7 +1150,9 @@ static void solvent_kernel (State *HD,
   else
     bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
 
-#ifdef WITH_FORTRAN
+#ifndef WITH_FORTRAN
+  (void) solvent;               /* not used */
+#else
   if (false)
     {
       /*
