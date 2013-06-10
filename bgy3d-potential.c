@@ -319,22 +319,6 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
-/* For neutral solvents either g or h = g - 1 can be passed: */
-static real
-medium_charge (const ProblemData *PD, int m, const Site solvent[m],
-               const Vec g[m])
-{
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-
-  real total = 0.0;
-  for (int i = 0; i < m; i++)
-    total += solvent[i].charge * vec_sum (g[i]);
-
-  /* FIXME: different rhos[]? */
-  return total * h3 * PD->rho;
-}
-
-
 static void print_info (const State *BHD,
                         int n, const Site solute[n],
                         Vec uc, Vec uc_rho, /* in */
@@ -465,6 +449,7 @@ Context* info (const State *BHD,
 
   return v;
 }
+
 
 /* Example usage: */
 void bgy3d_pot_test (const State *BHD, Vec vec)
