@@ -320,9 +320,9 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 
 static void print_info (const State *BHD,
                         int n, const Site solute[n],
-                        Vec uc, Vec uc_rho, /* in */
-                        Vec ve, Vec ve_rho, /* in */
-                        Context *v)         /* in */
+                        Vec coul_u, Vec rho_u, /* in */
+                        Vec coul_v, Vec rho_v, /* in */
+                        Context *v)            /* in */
 {
   /* Also compute dipole moment: */
   real d[3], d_norm;
@@ -334,7 +334,7 @@ static void print_info (const State *BHD,
 
   {
     real q, x, y, z;
-    moments (BHD, ve_rho, &q, &x, &y, &z);
+    moments (BHD, rho_v, &q, &x, &y, &z);
 
     const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
 
@@ -355,8 +355,8 @@ static void print_info (const State *BHD,
     3. Solvent charge density with long-range solute electrostatic
     field.
 
-    Vec uc and uc_rho  are returned by bgy3d_solute_field().  Vec ve
-    and ve_rho are obtained from bgy3d_solvent_field().
+    Vec coul_u  and rho_u  are returned by  bgy3d_solute_field().  Vec
+    coul_v and rho_v are obtained from bgy3d_solvent_field().
   */
 
   /* 1. */
@@ -386,8 +386,8 @@ static void print_info (const State *BHD,
   {
     /* Dot-product is an integral over space (up to a factor): */
     const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
-    val2 = h3 * vec_dot (ve, uc_rho);
-    val3 = h3 * vec_dot (uc, ve_rho);
+    val2 = h3 * vec_dot (coul_v, rho_u);
+    val3 = h3 * vec_dot (coul_u, rho_v);
   }
 
   PetscPrintf (PETSC_COMM_WORLD,
@@ -415,25 +415,25 @@ static void print_info (const State *BHD,
 Context* info (const State *BHD,
                int m, const Site solvent[m],
                int n, const Site solute[n],
-               Vec h[m],           /* in */
-               Vec uc, Vec uc_rho) /* in */
+               Vec h[m],              /* in */
+               Vec coul_u, Vec rho_u) /* in */
 {
   /* Solvent electrostatic potential field: */
-  local Vec ve = vec_create (BHD->da);
+  local Vec coul_v = vec_create (BHD->da);
 
   /* Keep solvent charge density for integration: */
-  local Vec ve_rho = vec_create (BHD->da);
+  local Vec rho_v = vec_create (BHD->da);
 
   /*
-    This fills Vec ve with solvent electrostatic potential. This is so
-    far the only place where h  is used.  For neutral solvents one may
-    supply g instead of h here:
+    This fills  Vec coul_v with solvent  electrostatic potential. This
+    is so  far the only place  where h is used.   For neutral solvents
+    one may supply g instead of h here:
   */
-  bgy3d_solvent_field (BHD, m, solvent, h, ve, ve_rho);
+  bgy3d_solvent_field (BHD, m, solvent, h, coul_v, rho_v);
 
   /* Return the iterator over the solvent field. Context holds another
-     ref to Vec ve: */
-  Context *v = bgy3d_pot_create (BHD, ve);
+     ref to Vec coul_v: */
+  Context *v = bgy3d_pot_create (BHD, coul_v);
 
   /*
     Print some observables for the  solute embedded into the medium on
@@ -441,10 +441,10 @@ Context* info (const State *BHD,
     tests. Otherwise it is completely optional:
   */
   if (true)
-    print_info (BHD, n, solute, uc, uc_rho, ve, ve_rho, v);
+    print_info (BHD, n, solute, coul_u, rho_u, coul_v, rho_v, v);
 
-  vec_destroy (&ve);            /* yes, we do! */
-  vec_destroy (&ve_rho);
+  vec_destroy (&coul_v);        /* yes, we do! */
+  vec_destroy (&rho_v);
 
   return v;
 }
