@@ -457,3 +457,38 @@ KH closure:
 192     -5.784    -5.821    -5.839    -5.849
 224     -5.785    -5.821    -5.837    -5.847
 --------------------------------------------
+
+Solvent electrostatic field with and without boundary condition
+---------------------------------------------------------------
+
+When solving Poisson equation to get the electrostatic potential from
+solvent charge density, we supply an option "--no-cage" to control
+whether not or zeroing the potential values at the boundary of
+simulation box. Potential corrected by boundary condition is in effect a
+superposition of the solvent electrostatic field and a surface charge on
+that metallic cage.
+
+Here we listed the results of the integration of solvent electrostatic
+field with solute point nuclei $<U_v|\rho_N>$ and with diffuse charge
+density of solute $<U_v|\rho_u>$, which are the only two output entries
+that changed when running with and without boundary condition.
+
+Calculation parameters used are the same with those in section "Excess
+chemical potential in 1D- and 3D-RISM for solute/solvent systems".
+
+
+Solute        cage    $<U_v|\rho_N>$    $<U_v|\rho_u>$
+------        ----    --------------    --------------
+H~2~O           no        -22.830917        -22.152216
+               yes        -22.816307        -22.137614
+HCl             no         -1.894681         -1.892238
+               yes         -1.891148         -1.888711
+CH~3~OH         no        -21.772003        -21.176797
+               yes        -21.756322        -21.161100
+C~3~H~7~COOH    no        -15.937807        -15.547307
+               yes        -15.896105        -15.505732
+CS~2~           no         -2.153173         -2.120207
+               yes         -2.149663         -2.116716
+C~6~H~14~       no         -0.240059         -0.272374
+               yes         -0.239890         -0.272191
+------------------------------------------------------
