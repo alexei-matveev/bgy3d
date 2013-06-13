@@ -35,6 +35,7 @@
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-vec.h"          /* vec_ref(), ... */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
+#include "bgy3d-getopt.h"        /* bgy3d_getopt_test() */
 #include "bgy3d-potential.h"
 #include "bgy3d-poisson.h"      /* bgy3d_poisson() */
 
@@ -282,7 +283,10 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    corrected potential  is, in effect, a superposition  of the solvent
    electrostatic field and a surface charge on that metallic cage:
   */
+  if (!bgy3d_getopt_test ("--no-cage"))
   {
+    /* applying boundary condition when "--no-cage" option is not
+     * supplied */
     local Vec x = vec_create (BHD->da);
 
     /*
