@@ -422,3 +422,38 @@ The numbers in this section were  obtained with 1d-RISM (N = 1024) and
 --N $N --L 10.0 --beta 1.6889
 --max-iter 1000 --rho 0.033427745 --norm-tol 1e-12
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Influence of grid number and length on 3D-RISM results of water solvent
+-----------------------------------------------------------------------
+
+Here we listed the value changes of excess chemical potential of water
+solvent  from  3D-RISM  results  with  different  grid  numbers(N) and
+lengths(L). The default "--snes-solver newton " was switched to
+"--snes-solver trial" for HNC closure to guarantee convergence. Note
+that grid resolutions are identical for diagonal pairs ( h = 2 * L / N =
+0.15625 ).
+
+Due to the limit of computation resources, the maximum grid number we
+used in this test is 224 for each dimension. Calculations using more 192
+grid numbers had already begun to consume swap on single node (neh13 and
+neh19).
+
+HNC closure:
+
+ N      L=10.0    L=12.5    L=15.0    L=17.5
+----    ------    ------    ------    ------
+128     -6.281    -6.309    -6.334    -6.328
+160     -6.279    -6.317    -6.330    -6.327
+192     -6.280    -6.316    -6.332    -6.344
+224     -6.280    -6.316    -6.331    -6.340
+--------------------------------------------
+
+KH closure:
+
+ N      L=10.0    L=12.5    L=15.0    L=17.5
+----    ------    ------    ------    ------
+128     -5.787    -5.808    -5.835    -5.828
+160     -5.783    -5.823    -5.836    -5.828
+192     -5.784    -5.821    -5.839    -5.849
+224     -5.785    -5.821    -5.837    -5.847
+--------------------------------------------
