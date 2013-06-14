@@ -109,23 +109,24 @@
         (force-output))))
 
 ;;;
-;;; Settings  are  handled  as  an  association list,  these  are  the
-;;; settings used in regression tests. To get butanoic acid and hexane
-;;; (two larges ones) convere when  treated by QM one needs about 1500
-;;; iterations (well, we should make the solver better).
+;;; Settings are handled as an  association list. The human input as a
+;;; sequence of 2-lists.  This is  the input almost as it would appear
+;;; in the  file.  To get butanoic  acid and hexane  (two larges ones)
+;;; convere when treated by QM  one needs about 1500 iterations (well,
+;;; we should make the solver better).
 ;;;
-(define *default-settings*
+(define *defaults*
   (let ((half-size 10.0))
     (quasiquote
-     ((N . 64)                          ; grid dimension
-      (rho . 0.018)                     ; solvent density
-      (beta . 1.1989)                   ; inverse temperature
-      (norm-tol . 1.0e-7)               ; convergence threshold
-      (max-iter . 1500)                 ; max number of iterations
-      (L . (unquote half-size))         ; [-L, L] gives the box size
-      (zpad . (unquote half-size))      ; affects boundary condition
-      (damp-start . 1.0)                ; scaling factor?
-      (lambda . 0.02)))))               ; not the scheme lambda
+     ((N 64)                          ; grid dimension
+      (rho 0.018)                     ; solvent density
+      (beta 1.1989)                   ; inverse temperature
+      (norm-tol 1.0e-7)               ; convergence threshold
+      (max-iter 1500)                 ; max number of iterations
+      (L (unquote half-size))         ; [-L, L] gives the box size
+      (zpad (unquote half-size))      ; affects boundary condition
+      (damp-start 1.0)                ; scaling factor?
+      (lambda 0.02)))))               ; not the scheme lambda
 
 (define *default-molecule* "hydrogen chloride")
 
@@ -394,19 +395,18 @@ computes the sum of all vector elements."
 (define *experimental* #f)
 
 ;;;
-;;; This merges two association  lists with entries in settings having
-;;; precedence. FIXME: is there a built in for that?
+;;; This compacts  association list  with entries coming  later having
+;;; precedence. FIXME: thus any prior acons may be ignored.
 ;;;
-(define (update-default-settings defaults settings)
-  (let ((alist (append defaults settings))) ; in this sequence
-    (let loop ((merged '())
-               (alist alist))
-      (if (null? alist)
-          merged
-          (let ((head (car alist))
-                (tail (cdr alist)))
-            (loop (assoc-set! merged (car head) (cdr head))
-                  tail))))))
+(define (overwrite alist)
+  (let loop ((merged '())
+             (alist alist))
+    (if (null? alist)
+        merged
+        (let ((head (car alist))
+              (tail (cdr alist)))
+          (loop (assoc-set! merged (car head) (cdr head))
+                tail)))))
 
 
 ;;;
@@ -425,16 +425,15 @@ computes the sum of all vector elements."
 ;;; association list of (key . value) pairs:
 ;;;
 (define (input->settings input)
-  (let ((settings (map (lambda (x) (cons (first x) (second x)))
-                       input)))
-    (update-default-settings *default-settings* settings)))
+  (overwrite (map (lambda (x) (cons (first x) (second x)))
+                  input)))
 
 ;;;
 ;;; These hooks,  solvent/solvent and solute/solvent,  are called from
 ;;; the "runqm" script used for QM solutes:
 ;;;
 (define (solvent/solvent input)
-  (let ((settings (input->settings input)) ; *default-settings* if empty
+  (let ((settings (input->settings (append *defaults* input)))
         (run-solvent (if *experimental*
                          hnc3d-run-solvent
                          bgy3d-run-solvent))
@@ -461,7 +460,7 @@ computes the sum of all vector elements."
 ;;; something meaningful as the QM code knows little about that.
 ;;;
 (define (solute/solvent input sites funptr restart)
-  (let* ((settings      (input->settings input)) ;  *default-settings* if null?
+  (let* ((settings      (input->settings (append *defaults* input)))
          (solvent       (find-molecule *default-molecule*))
          (solute-name   (assoc-ref settings 'solute)) ; FIXME: string or #f
          (solute        (make-molecule solute-name
