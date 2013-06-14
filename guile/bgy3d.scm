@@ -44,8 +44,8 @@
    *default-settings*
    bgy3d-api-version
    bgy3d-test
-   bgy3d-solvent
-   bgy3d-solute))
+   solvent/solvent
+   solute/solvent))
 
 ;;;
 ;;; Functionality is  in the  flux. QM  code may want  to check  if it
@@ -394,10 +394,47 @@ computes the sum of all vector elements."
 (define *experimental* #f)
 
 ;;;
-;;; These hooks, bgy3d-solvent and bgy3d-solute, are called from PG:
+;;; This merges two association  lists with entries in settings having
+;;; precedence. FIXME: is there a built in for that?
 ;;;
-(define (bgy3d-solvent)
-  (let ((settings *default-settings*)
+(define (update-default-settings defaults settings)
+  (let ((alist (append defaults settings))) ; in this sequence
+    (let loop ((merged '())
+               (alist alist))
+      (if (null? alist)
+          merged
+          (let ((head (car alist))
+                (tail (cdr alist)))
+            (loop (assoc-set! merged (car head) (cdr head))
+                  tail))))))
+
+
+;;;
+;;;
+;;; The  input comes  from reading  (in  the Scheme  sense) the  human
+;;; editable file.  To keep it  simple for a  human we do  not require
+;;; him/her  to properly  specify pairs  by Scheme  syntax as  in (key
+;;; . value).   Instead the a key/value  shall be a 2-list  as in (key
+;;; value), e.g.:
+;;;
+;;;   ((solute "butanoic acid")
+;;;    (closure KH)
+;;;    ...)
+;;;
+;;; This function is supposed to  process the input an return a proper
+;;; association list of (key . value) pairs:
+;;;
+(define (input->settings input)
+  (let ((settings (map (lambda (x) (cons (first x) (second x)))
+                       input)))
+    (update-default-settings *default-settings* settings)))
+
+;;;
+;;; These hooks,  solvent/solvent and solute/solvent,  are called from
+;;; the "runqm" script used for QM solutes:
+;;;
+(define (solvent/solvent input)
+  (let ((settings (input->settings input)) ; *default-settings* if empty
         (run-solvent (if *experimental*
                          hnc3d-run-solvent
                          bgy3d-run-solvent))
@@ -417,17 +454,23 @@ computes the sum of all vector elements."
           (run-solvent solvent settings) ; writes solvent info to disk
           settings))))
 
-
-(define (bgy3d-solute name sites funptr restart)
-  "To be called from QM code."
-  (let ((settings       *default-settings*)
-        (run-solute (if *experimental*
-                        hnc3d-run-solute
-                        bgy3d-run-solute))
-        (solvent        (find-molecule *default-molecule*))
-        (solute         (make-molecule name
-                                       (update-sites name
-                                                     sites))))
+;;;
+;;; Input  comes   from  the  text  file   (see  ../test-qm/*.scm  and
+;;; ../test-qm/runqm) but  sites, funptr and restart come  from the QM
+;;; code.  The force  field parameters of sites are  to be replaced by
+;;; something meaningful as the QM code knows little about that.
+;;;
+(define (solute/solvent input sites funptr restart)
+  (let* ((settings      (input->settings input)) ;  *default-settings* if null?
+         (solvent       (find-molecule *default-molecule*))
+         (solute-name   (assoc-ref settings 'solute)) ; FIXME: string or #f
+         (solute        (make-molecule solute-name
+                                       (update-sites solute-name
+                                                     sites)))
+         (run-solute    (if *experimental*
+                            hnc3d-run-solute
+                            bgy3d-run-solute)))
+    ;; (set! settings (acons 'closure 'KH settings))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
@@ -436,9 +479,9 @@ computes the sum of all vector elements."
                           funptr        ; value
                           settings))    ; alist
     ;; Print on master only:
-    (maybe-print (list 'restart: restart))
-    (maybe-print (list 'solute: solute))
-    (maybe-print (list 'settings: settings))
+    (maybe-print (list 'RESTART: restart))
+    (maybe-print (list 'SOLUTE: solute))
+    (maybe-print (list 'SETTINGS: settings))
     ;;
     ;; The function  bound to run-solute allocates and  returns a list
     ;; of  Petsc Vecs, a  descriptor for electrostatic  potential, and

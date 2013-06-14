@@ -34,15 +34,23 @@
              ;;
              ((guile bgy3d)
               #:select (bgy3d-api-version
-                        bgy3d-solvent
-                        bgy3d-solute
+                        solvent/solvent
+                        solute/solvent
                         bgy3d-restart-destroy)))
 
 ;;;
-;;; ParaGauss looks  up names in  the top-level environment.   See the
-;;; imports from  (guile bgy3d) module.  Also  we bind this  hook to a
+;;; ParaGauss looks up these names in the top-level environment:
+;;;
+;;;   bgy3d-api-version
+;;;   bgy3d-solvent             (v1)
+;;;   bgy3d-solute-hook         (v1)
+;;;   bgy3d-restart-destroy     (v1)
+;;;
+;;; Some of  these names are  imported from (guile bgy3d)  module (see
+;;; above).  Others are defined here --- e.g. we will bind a hook to a
 ;;; closure over input parameters later:
 ;;;
+(define bgy3d-solvent (if #f #f))       ; unspecified yet
 (define bgy3d-solute-hook (if #f #f))   ; unspecified yet
 
 ;;;
@@ -66,17 +74,38 @@
        (opts (with-input-from-file path
                (lambda ()
                  (read)                 ; skip PG input
-                 (read))))              ; return BGY3d input
-       (table (second (assoc 'solute opts))))
-  (pretty-print opts)
-  (pretty-print table)
+                 (read)))))             ; return BGY3d input
+  (pretty-print (list 'ARGV: argv))
+  (pretty-print (list 'OPTS: opts))
   ;;
   ;; PG calls bgy3d-solute-hook with solute sites (having fake force
-  ;; field parameters) and a pointer to a function returning the
-  ;; density. In this case we call bgy3d-run with a name of the table
-  ;; read from the input prepended to the list of arguments:
+  ;; field parameters), a pointer to a function returning the density
+  ;; and a pointer token for the opaque restart info object to
+  ;; facilitate SCF iterations:
+  ;;
+  ;;   (bgy3d-solute-hook solute-sites
+  ;;                      electron-density-funptr
+  ;;                      restart-info-ptr)
+  ;;
+  ;; QM code cannot and should not be required to provide more info.
+  ;; In this case we call solute/solvent with a the (medium model
+  ;; related) input read from the file prepended to the list of
+  ;; arguments:
   ;;
   (set! bgy3d-solute-hook
         (lambda args
-          (apply bgy3d-solute table args))) ; returns potential
+          (apply solute/solvent opts args))) ; -> (potential . restart)
+  ;;
+  ;; This hook  is called from PG without  arguments. However, we pass
+  ;; model-related  input "opts" from the  file at "path"  to the code
+  ;; doing the actual work:
+  ;;
+  (set! bgy3d-solvent
+        (lambda args (solvent/solvent opts)))
+  ;;
+  ;; Call  PG with arguments as  supplied in the  command line. FIXME:
+  ;; Here is the conflict.  Who should interprete the command line? QM
+  ;; or solvent  code?  As of now the command line  is reserved for QM
+  ;; code:
+  ;;
   (qm-main argv))
