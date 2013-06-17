@@ -57,4 +57,9 @@
 ;;; take the  site-specific force field  parameters. The names  of the
 ;;; sites are those specified in PG input above:
 ;;;
-((solute "butanoic acid"))
+((solute "butanoic acid")
+ (solvent "hydrogen chloride")
+ (L 10.0)                               ; box size, A
+ (N 64)                                 ; grid dimension
+ (rho 0.018)                            ; solvent number density, A^-3
+ (beta 1.1989))                         ; inverse temperature, kcal^-1
