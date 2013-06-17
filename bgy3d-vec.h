@@ -31,7 +31,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD,
 void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
                              const char *format, int m, /* const */ Vec g2[m][m]);
 
-void bgy3d_vec_moments1 (const DA da, Vec v, real *x, real *y, real *z);
+void bgy3d_vec_moments1 (const DA da, Vec v, real d[static 3]);
 void bgy3d_vec_moments2 (const DA da, Vec v,
                          real *xy, real *yz, real *zx,
                          real *z2, real *x2y2, real *r2);

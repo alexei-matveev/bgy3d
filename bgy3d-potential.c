@@ -235,7 +235,7 @@ moments (const State *BHD, Vec v, real *q, real d[static 3])
   *q = h3 * vec_sum (v);
 
   /* 1st moments: */
-  bgy3d_vec_moments1 (BHD->da, v, &d[0], &d[1], &d[2]);
+  bgy3d_vec_moments1 (BHD->da, v, d);
 
   d[0] *= h3 * h[0];
   d[1] *= h3 * h[1];
