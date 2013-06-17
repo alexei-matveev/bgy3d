@@ -109,6 +109,11 @@
         (force-output))))
 
 ;;;
+;;; FIXME: must die, use *defaults* instead:
+;;;
+(define *default-molecule* "hydrogen chloride")
+
+;;;
 ;;; Settings are handled as an  association list. The human input as a
 ;;; sequence of 2-lists.  This is  the input almost as it would appear
 ;;; in the  file.  To get butanoic  acid and hexane  (two larges ones)
@@ -118,17 +123,16 @@
 (define *defaults*
   (let ((half-size 10.0))
     (quasiquote
-     ((N 64)                          ; grid dimension
-      (rho 0.018)                     ; solvent density
-      (beta 1.1989)                   ; inverse temperature
-      (norm-tol 1.0e-7)               ; convergence threshold
-      (max-iter 1500)                 ; max number of iterations
-      (L (unquote half-size))         ; [-L, L] gives the box size
-      (zpad (unquote half-size))      ; affects boundary condition
-      (damp-start 1.0)                ; scaling factor?
-      (lambda 0.02)))))               ; not the scheme lambda
-
-(define *default-molecule* "hydrogen chloride")
+     ((solvent ,*default-molecule*)     ; solvent name
+      (N 64)                            ; grid dimension
+      (rho 0.018)                       ; solvent density
+      (beta 1.1989)                     ; inverse temperature
+      (norm-tol 1.0e-7)                 ; convergence threshold
+      (max-iter 1500)                   ; max number of iterations
+      (L (unquote half-size))           ; [-L, L] gives the box size
+      (zpad (unquote half-size))        ; affects boundary condition
+      (damp-start 1.0)                  ; scaling factor?
+      (lambda 0.02)))))                 ; not the scheme lambda
 
 ;;;
 ;;; Only uses the length of g1 list to generate file names:
@@ -433,12 +437,13 @@ computes the sum of all vector elements."
 ;;; the "runqm" script used for QM solutes:
 ;;;
 (define (solvent/solvent input)
-  (let ((settings (input->settings (append *defaults* input)))
-        (run-solvent (if *experimental*
-                         hnc3d-run-solvent
-                         bgy3d-run-solvent))
-        (solvent (find-molecule *default-molecule*))
-        (solvent-info-file "g00.bin"))
+  (let* ((settings (input->settings (append *defaults* input)))
+         (solvent-name (assoc-ref settings 'solvent)) ; string or #f
+         (solvent (find-molecule solvent-name)) ; will fail for #f
+         (run-solvent (if *experimental*
+                          hnc3d-run-solvent
+                          bgy3d-run-solvent))
+         (solvent-info-file "g00.bin"))
     ;;
     ;; At the moment the function bgy3d-run-solvent echos settings as
     ;; is, the output is written to disk instead. FIXME: a hack to
@@ -447,6 +452,7 @@ computes the sum of all vector elements."
     ;; the file "g00.bin" does not exist. It may still correspond to a
     ;; different solvent or settings.
     ;;
+    (maybe-print (list 'SETTINGS: settings))
     (let ((always-run-solvent #t))
       (if (or always-run-solvent
               (not (file-exists? solvent-info-file)))
@@ -461,8 +467,9 @@ computes the sum of all vector elements."
 ;;;
 (define (solute/solvent input sites funptr restart)
   (let* ((settings      (input->settings (append *defaults* input)))
-         (solvent       (find-molecule *default-molecule*))
-         (solute-name   (assoc-ref settings 'solute)) ; FIXME: string or #f
+         (solvent-name  (assoc-ref settings 'solvent)) ; string or #f
+         (solute-name   (assoc-ref settings 'solute))  ; string or #f
+         (solvent       (find-molecule solvent-name))
          (solute        (make-molecule solute-name
                                        (update-sites solute-name
                                                      sites)))
@@ -478,9 +485,10 @@ computes the sum of all vector elements."
                           funptr        ; value
                           settings))    ; alist
     ;; Print on master only:
-    (maybe-print (list 'RESTART: restart))
-    (maybe-print (list 'SOLUTE: solute))
     (maybe-print (list 'SETTINGS: settings))
+    (maybe-print (list 'SOLVENT: solvent))
+    (maybe-print (list 'SOLUTE: solute))
+    (maybe-print (list 'RESTART: restart))
     ;;
     ;; The function  bound to run-solute allocates and  returns a list
     ;; of  Petsc Vecs, a  descriptor for electrostatic  potential, and
