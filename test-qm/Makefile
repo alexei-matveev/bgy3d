@@ -6,7 +6,7 @@ SHELL = /bin/sh
 # the stock  PG script  will not interprete  the BGY3d section  in the
 # *.scm input files (yet):
 #
-EXE ?= ./runqm
+EXE ?= mpirun ./runqm
 
 solutes = \
 	hydrogen_chloride \
