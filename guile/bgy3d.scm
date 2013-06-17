@@ -41,7 +41,6 @@
    old-main
    vec-print
    vec-norm
-   *default-settings*
    bgy3d-api-version
    bgy3d-test
    solvent/solvent
@@ -109,30 +108,61 @@
         (force-output))))
 
 ;;;
-;;; FIXME: must die, use *defaults* instead:
-;;;
-(define *default-molecule* "hydrogen chloride")
-
-;;;
 ;;; Settings are handled as an  association list. The human input as a
-;;; sequence of 2-lists.  This is  the input almost as it would appear
-;;; in the  file.  To get butanoic  acid and hexane  (two larges ones)
-;;; convere when treated by QM  one needs about 1500 iterations (well,
-;;; we should make the solver better).
+;;; sequence of 2-lists.  This is the  input as it would appear in the
+;;; file.  To get butanoic acid and hexane (two largest ones) converge
+;;; when  treated by  QM one  needs  about 1500  iterations (well,  we
+;;; should make the solver better).
 ;;;
 (define *defaults*
-  (let ((half-size 10.0))
-    (quasiquote
-     ((solvent ,*default-molecule*)     ; solvent name
-      (N 64)                            ; grid dimension
-      (rho 0.018)                       ; solvent density
-      (beta 1.1989)                     ; inverse temperature
-      (norm-tol 1.0e-7)                 ; convergence threshold
-      (max-iter 1500)                   ; max number of iterations
-      (L (unquote half-size))           ; [-L, L] gives the box size
-      (zpad (unquote half-size))        ; affects boundary condition
-      (damp-start 1.0)                  ; scaling factor?
-      (lambda 0.02)))))                 ; not the scheme lambda
+  '((solvent "hydrogen chloride")       ; solvent name
+    (N 64)                              ; grid dimension
+    (rho 0.018)                         ; solvent density
+    (beta 1.1989)                       ; inverse temperature
+    (norm-tol 1.0e-7)                   ; convergence threshold
+    (max-iter 1500)                     ; max number of iterations
+    (L 10.0)                            ; [-L, L] gives the box size
+    (damp-start 1.0)                    ; scaling factor?
+    (lambda 0.02)))                     ; not the scheme lambda
+
+
+;;;
+;;; This compacts  association list  with entries coming  later having
+;;; precedence. FIXME: thus any prior acons may be ignored.
+;;;
+(define (overwrite alist)
+  (let loop ((merged '())
+             (alist alist))
+    (if (null? alist)
+        merged
+        (let ((head (car alist))
+              (tail (cdr alist)))
+          (loop (assoc-set! merged (car head) (cdr head))
+                tail)))))
+
+
+;;;
+;;; The  input comes  from reading  (in  the Scheme  sense) the  human
+;;; editable file.   To keep it simple  for a human we  do not require
+;;; him/her  to properly  specify pairs  by Scheme  syntax as  in (key
+;;; .  value).  Instead  a  key/value shall  be  a 2-list  as in  (key
+;;; value), e.g.:
+;;;
+;;;   ((solute "butanoic acid")
+;;;    (closure KH))
+;;;
+;;; This function is supposed to process the input and return a proper
+;;; association list of (key . value) pairs:
+;;;
+(define (input->settings input)
+  (overwrite (map (lambda (x) (cons (first x) (second x)))
+                  input)))
+
+
+;;;
+;;; FIXME: must die, use *defaults* directly:
+;;;
+(define *default-molecule* (assoc-ref (input->settings *defaults*) 'solvent))
 
 ;;;
 ;;; Only uses the length of g1 list to generate file names:
@@ -397,40 +427,6 @@ computes the sum of all vector elements."
 
 
 ;;;
-;;; This compacts  association list  with entries coming  later having
-;;; precedence. FIXME: thus any prior acons may be ignored.
-;;;
-(define (overwrite alist)
-  (let loop ((merged '())
-             (alist alist))
-    (if (null? alist)
-        merged
-        (let ((head (car alist))
-              (tail (cdr alist)))
-          (loop (assoc-set! merged (car head) (cdr head))
-                tail)))))
-
-
-;;;
-;;;
-;;; The  input comes  from reading  (in  the Scheme  sense) the  human
-;;; editable file.  To keep it  simple for a  human we do  not require
-;;; him/her  to properly  specify pairs  by Scheme  syntax as  in (key
-;;; . value).   Instead the a key/value  shall be a 2-list  as in (key
-;;; value), e.g.:
-;;;
-;;;   ((solute "butanoic acid")
-;;;    (closure KH)
-;;;    ...)
-;;;
-;;; This function is supposed to  process the input an return a proper
-;;; association list of (key . value) pairs:
-;;;
-(define (input->settings input)
-  (overwrite (map (lambda (x) (cons (first x) (second x)))
-                  input)))
-
-;;;
 ;;; These hooks,  solvent/solvent and solute/solvent,  are called from
 ;;; the "runqm" script used for QM solutes:
 ;;;
@@ -528,7 +524,6 @@ computes the sum of all vector elements."
     (norm-tol           (value #t)      (predicate ,string->number))
     (max-iter           (value #t)      (predicate ,string->number))
     (L                  (value #t)      (predicate ,string->number))
-    (zpad               (value #t)      (predicate ,string->number)) ; MUST DIE!
     (damp-start         (value #t)      (predicate ,string->number))
     (lambda             (value #t)      (predicate ,string->number))
     (solvent            (value #t)      (predicate ,find-molecule)) ; a string
