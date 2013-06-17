@@ -357,8 +357,13 @@ void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
 }
 
 
+/*
+  FIXME: vec_integrate() operates on  scalar functions only. Thus need
+  three   integrations   for  a   dipole   and   6  integrations   for
+  quadrupole:
+*/
 void
-bgy3d_vec_moments1 (const DA da, Vec v, real d[static 3])
+bgy3d_vec_moments1 (const DA da, Vec v, real d[3])
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
@@ -385,62 +390,72 @@ bgy3d_vec_moments1 (const DA da, Vec v, real d[static 3])
   d[2] = vec_integrate (da, mz, v);
 }
 
+
 /*
- * Second moments
- */
-void bgy3d_vec_moments2 (const DA da, Vec v,
-                         real *xy, real *yz, real *zx,
-                         real *z2, real *x2y2, real *r2)
+  Second moments:
+
+    q   = <x  x >
+     ij     i  j
+*/
+void
+bgy3d_vec_moments2 (const DA da, Vec v, real q[3][3])
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
   da_shape (da, N);
 
-  /* < x * y > */
-  real mxy (real v, int i, int j, int k)
+  /* <xy> */
+  real m01 (real v, int i, int j, int k)
   {
     (void) k;
     return v * (i - 0.5 * N[0]) * (j - 0.5 * N[1]);
   }
-  /* < y * z > */
-  real myz (real v, int i, int j, int k)
+
+  /* <yz> */
+  real m12 (real v, int i, int j, int k)
   {
     (void) i;
     return v * (j - 0.5 * N[1]) * (k - 0.5 * N[2]);
   }
-  /* < z * x > */
-  real mzx (real v, int i, int j, int k)
+
+  /* <zx> */
+  real m20 (real v, int i, int j, int k)
   {
     (void) j;
     return v * (k - 0.5 * N[2]) * (i - 0.5 * N[0]);
   }
-  /* < z^2 - 1 / 3 * r^2 > */
-  real mz2 (real v, int i, int j, int k)
+
+  /* <xx> */
+  real m00 (real v, int i, int j, int k)
   {
-    return v * (2 * SQR (k - 0.5 * N[2]) -
-                SQR (i - 0.5 * N[0]) -
-                SQR (j - 0.5 * N[1])) / 3.0;
-  }
-  /* < x^2 - y^2 > */
-  real mx2y2 (real v, int i, int j, int k)
-  {
+    (void) j;
     (void) k;
-    return v * (SQR (i - 0.5 * N[0]) - SQR (j - 0.5 * N[1]));
-  }
-  /* < x^2 + y^2 + z^2 > */
-  real mr2 (real v, int i, int j, int k)
-  {
-    return v * (SQR (i - 0.5 * N[0]) +
-                SQR (j - 0.5 * N[1]) +
-                SQR (k - 0.5 * N[2]));
+    return v * SQR (i - 0.5 * N[0]);
   }
 
-  *xy   = vec_integrate (da, mxy, v);
-  *yz   = vec_integrate (da, myz, v);
-  *zx   = vec_integrate (da, mzx, v);
-  *z2   = vec_integrate (da, mz2, v);
-  *x2y2 = vec_integrate (da, mx2y2, v);
-  *r2   = vec_integrate (da, mr2, v);
+  /* <yy> */
+  real m11 (real v, int i, int j, int k)
+  {
+    (void) i;
+    (void) k;
+    return v * SQR (j - 0.5 * N[1]);
+  }
+
+  /* <zz> */
+  real m22 (real v, int i, int j, int k)
+  {
+    (void) i;
+    (void) j;
+    return v * SQR (k - 0.5 * N[2]);
+  }
+
+  q[0][1] = q[1][0] = vec_integrate (da, m01, v);
+  q[1][2] = q[2][1] = vec_integrate (da, m12, v);
+  q[0][2] = q[2][0] = vec_integrate (da, m20, v);
+
+  q[0][0] = vec_integrate (da, m00, v);
+  q[1][1] = vec_integrate (da, m11, v);
+  q[2][2] = vec_integrate (da, m22, v);
 }
 
 
