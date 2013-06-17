@@ -224,8 +224,9 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
   *d_norm = sqrt (SQR (d[0]) + SQR (d[1]) + SQR (d[2]));
 }
 
-static void moments (const State *BHD, Vec v,
-                     real *q, real *x, real *y, real *z)
+
+static void
+moments (const State *BHD, Vec v, real *q, real d[static 3])
 {
   const real *h = BHD->PD->h;   /* h[3] */
   const real h3 = h[0] * h[1] * h[2];
@@ -234,11 +235,11 @@ static void moments (const State *BHD, Vec v,
   *q = h3 * vec_sum (v);
 
   /* 1st moments: */
-  bgy3d_vec_moments1 (BHD->da, v, x, y, z);
+  bgy3d_vec_moments1 (BHD->da, v, &d[0], &d[1], &d[2]);
 
-  *x *= h3 * h[0];
-  *y *= h3 * h[1];
-  *z *= h3 * h[2];
+  d[0] *= h3 * h[0];
+  d[1] *= h3 * h[1];
+  d[2] *= h3 * h[2];
 }
 
 /*
@@ -322,6 +323,13 @@ static void print_table (int n, const Site sites[n], const real vs[n])
 }
 
 
+static real
+len3 (const real v[static 3])
+{
+  return sqrt (SQR (v[0]) + SQR (v[1]) + SQR (v[2]));
+}
+
+
 static void print_info (const State *BHD,
                         int n, const Site solute[n],
                         Vec coul_u, Vec rho_u, /* in */
@@ -340,27 +348,23 @@ static void print_info (const State *BHD,
 
   /* Dipole moments and charge of the solute: */
   {
-    real q, x, y, z;
-    moments (BHD, rho_u, &q, &x, &y, &z);
-
-    const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
+    real q, d[3];
+    moments (BHD, rho_u, &q, d);
 
     PetscPrintf (PETSC_COMM_WORLD,
                  "|<x|ρ_u>| = |% f, % f, % f| = %f (dipole moment of solute charge density)\n",
-                 x, y, z, d);
+                 d[0], d[1], d[2], len3 (d));
     PetscPrintf (PETSC_COMM_WORLD, "q_u = %f (charge of solute charge density)\n", q);
   }
 
   /* Dipole moments and charge of the solvent medium: */
   {
-    real q, x, y, z;
-    moments (BHD, rho_v, &q, &x, &y, &z);
-
-    const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
+    real q, d[3];
+    moments (BHD, rho_v, &q, d);
 
     PetscPrintf (PETSC_COMM_WORLD,
                  "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
-                 x, y, z, d);
+                 d[0], d[1], d[2], len3 (d));
     PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
   }
 
