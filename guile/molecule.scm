@@ -4,7 +4,6 @@
 ;;;
 (define-module (guile molecule)
   #:use-module (srfi srfi-1)            ; list manipulation
-  #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
   #:export
   (make-molecule
    molecule-name
