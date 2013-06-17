@@ -22,7 +22,9 @@ Moments from g1.bin
 <r^2> =  107.364770351
 integrated charge = -0.010583 (should be close to zero)
 q_v = -0.087341 (charge of solvent medium)
+q_u = -0.010583 (charge of solute charge density)
 |<x|ρ_n>| = | 9.371000,  0.475000,  0.001000| = 9.383031 (dipole moment of solute cores)
+|<x|ρ_u>| = |-0.097651,  0.116960,  0.000610| = 0.152367 (dipole moment of solute charge density)
 |<x|ρ_v>| = | 0.104261, -0.112720, -0.001424| = 0.153552 (dipole moment of solvent medium)
 <U_v|ρ_N> = 81.392287 (solvent electrostatic field with solute point nuclei)
 <U_v|ρ_u> = -0.372157 (solvent electrostatic field with diffuse charge density of solute)
