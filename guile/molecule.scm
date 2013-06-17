@@ -9,6 +9,7 @@
   (make-molecule
    molecule-name
    molecule-sites
+   find-molecule
    molecule-print/xyz
    make-site
    site-name
@@ -19,6 +20,38 @@
    site-x
    site-y
    site-z))
+
+;;;
+;;; Find a solute/solvent in a database or die:
+;;;
+(define (find-molecule name)
+  (let ((solutes (slurp (find-file "guile/solutes.scm"))))
+    (or (assoc name solutes)
+        (error "Not in the list:" name (map first solutes)))))
+
+;;;
+;;; Find  a file in  the search  patch, or  die.  Note  that find-file
+;;; assumes  the %load-path contains  the repo  directory in  order to
+;;; find "guile/solutes.scm".
+;;;
+(define (find-file file)
+  (or (search-path %load-path file)
+      (error "Not found:" file)))
+
+;;;
+;;; Slurps the whole file into a list:
+;;;
+(define (slurp file)
+  (with-input-from-file file
+    (lambda ()
+      (let loop ((acc (list)))
+        (let ((sexp (read)))
+          (if (eof-object? sexp)
+              (reverse acc)
+              (loop (cons sexp acc))))))))
+
+;; (write (slurp "guile/solutes.scm"))
+;; (newline)
 
 
 ;;;
@@ -61,3 +94,6 @@
                         (site-y site)
                         (site-z site)))
               sites)))
+
+;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
+;; (exit 0)

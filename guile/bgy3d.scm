@@ -37,8 +37,7 @@
    bgy3d-run-solute
    bgy3d-restart-destroy)
   #:export
-  (find-molecule
-   new-main
+  (new-main
    old-main
    vec-print
    vec-norm
@@ -173,38 +172,6 @@
        (iota (length g1))))
 
 ;;;
-;;; Find a solute/solvent in a database or die:
-;;;
-(define (find-molecule name)
-  (let ((solutes (slurp (find-file "guile/solutes.scm"))))
-    (or (assoc name solutes)
-        (error "Not in the list:" name (map first solutes)))))
-
-;;;
-;;; Find  a file in  the search  patch, or  die.  Note  that find-file
-;;; assumes  the %load-path contains  the repo  directory in  order to
-;;; find "guile/solutes.scm".
-;;;
-(define (find-file file)
-  (or (search-path %load-path file)
-      (error "Not found:" file)))
-
-;;;
-;;; Slurps the whole file into a list:
-;;;
-(define (slurp file)
-  (with-input-from-file file
-    (lambda ()
-      (let loop ((acc (list)))
-        (let ((sexp (read)))
-          (if (eof-object? sexp)
-              (reverse acc)
-              (loop (cons sexp acc))))))))
-
-;; (write (slurp "guile/solutes.scm"))
-;; (newline)
-
-;;;
 ;;; Solute parameters are  currently represented by a name  and a list
 ;;; of sites. See (guile molecule) for accessors/constructors:
 ;;;
@@ -213,9 +180,6 @@
 ;;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
 ;;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 ;;;
-
-;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
-;; (exit 0)
 
 ;;;
 ;;; Update site force field parameters by replacing them with the data
