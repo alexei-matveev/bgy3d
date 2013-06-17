@@ -328,14 +328,30 @@ static void print_info (const State *BHD,
                         Vec coul_v, Vec rho_v, /* in */
                         Context *v)            /* in */
 {
-  /* Also compute dipole moment: */
-  real d[3], d_norm;
-  dipole (n, solute, d, &d_norm);
+  /* Dipole moment of solute cores/nuclei: */
+  {
+    real d[3], d_norm;
+    dipole (n, solute, d, &d_norm);
 
-  PetscPrintf (PETSC_COMM_WORLD,
-               "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
-               d[0], d[1], d[2], d_norm);
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
+                 d[0], d[1], d[2], d_norm);
+  }
 
+  /* Dipole moments and charge of the solute: */
+  {
+    real q, x, y, z;
+    moments (BHD, rho_u, &q, &x, &y, &z);
+
+    const real d = sqrt (SQR (x) + SQR (y) + SQR (z));
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "|<x|ρ_u>| = |% f, % f, % f| = %f (dipole moment of solute charge density)\n",
+                 x, y, z, d);
+    PetscPrintf (PETSC_COMM_WORLD, "q_u = %f (charge of solute charge density)\n", q);
+  }
+
+  /* Dipole moments and charge of the solvent medium: */
   {
     real q, x, y, z;
     moments (BHD, rho_v, &q, &x, &y, &z);
@@ -347,6 +363,7 @@ static void print_info (const State *BHD,
                  x, y, z, d);
     PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
   }
+
   /*
     Integration of:
 
@@ -419,8 +436,8 @@ static void print_info (const State *BHD,
 Context* info (const State *BHD,
                int m, const Site solvent[m],
                int n, const Site solute[n],
-               Vec h[m],              /* in */
-               Vec coul_u, Vec rho_u) /* in */
+               Vec h[m],              /* in, h or g */
+               Vec coul_u, Vec rho_u) /* in, solute e-field, density */
 {
   /* Solvent electrostatic potential field: */
   local Vec coul_v = vec_create (BHD->da);
