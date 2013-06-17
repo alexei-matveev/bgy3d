@@ -678,7 +678,7 @@ computes the sum of all vector elements."
           (solvent      (find-molecule (option-ref options 'solvent *default-molecule*)))
           (solute       (find-molecule (option-ref options 'solute *default-molecule*)))
           (save-binary  (option-ref options 'save-binary #f))
-          (settings     (update-settings *default-settings* options))) ; defaults updated from command line
+          (settings     (update-settings (input->settings *defaults*) options))) ; defaults updated from command line
       (match cmd
         ("solvent"
          ;;
