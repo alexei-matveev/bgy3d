@@ -435,24 +435,22 @@ computes the sum of all vector elements."
          (solvent-name  (assoc-ref settings 'solvent)) ; string or #f
          (solvent       (find-molecule solvent-name))  ; fails for #f
          (closure       (assoc-ref settings 'closure)) ; symbol or #f
-         (run-solvent (if closure
-                          hnc3d-run-solvent
-                          bgy3d-run-solvent))
-         (solvent-info-file "g00.bin"))
+         (run-solvent   (if closure
+                            hnc3d-run-solvent
+                            bgy3d-run-solvent))
+         (solvent-info-file "g00.bin")
+         (always-run-solvent #t))
     ;;
-    ;; At the moment the function bgy3d-run-solvent echos settings as
-    ;; is, the output is written to disk instead. FIXME: a hack to
+    ;; At the moment the function bound to run-solvent echoes settings
+    ;; as is, the output is written to disk instead. FIXME: a hack to
     ;; save some time re-running pure solvent calculations.  Set
     ;; always-run-solvent to #f. Then the calulation will only run if
-    ;; the file "g00.bin" does not exist. It may still correspond to a
-    ;; different solvent or settings.
+    ;; the file solvent-info-file does not exist. It may still
+    ;; correspond to a different solvent or settings.
     ;;
-    (maybe-print (list 'SETTINGS: settings))
-    (let ((always-run-solvent #t))
-      (if (or always-run-solvent
-              (not (file-exists? solvent-info-file)))
-          (run-solvent solvent settings) ; writes solvent info to disk
-          settings))))
+    (if (or always-run-solvent
+            (not (file-exists? solvent-info-file)))
+        (run-solvent solvent settings)))) ; writes solvent info to disk
 
 ;;;
 ;;; Input  comes   from  the  text  file   (see  ../test-qm/*.scm  and
@@ -581,11 +579,11 @@ computes the sum of all vector elements."
 ;;; sites and the corresponding total energy:
 ;;;
 (define (maybe-print-potentials solute potential)
-  (let* ((sites (molecule-sites solute))
-         (positions (map site-position sites))
-         (potentials (potential-map potential positions))
-         (charges (map site-charge sites))
-         (energy (apply + (map * charges potentials))))
+  (let* ((sites         (molecule-sites solute))
+         (positions     (map site-position sites))
+         (potentials    (potential-map potential positions))
+         (charges       (map site-charge sites))
+         (energy        (apply + (map * charges potentials))))
     ;;
     ;; Only print on master:
     ;;
