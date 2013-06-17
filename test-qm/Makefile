@@ -8,20 +8,16 @@ SHELL = /bin/sh
 #
 EXE ?= mpirun ./runqm
 
-solutes = \
-	hydrogen_chloride \
-	carbon_disulfide \
-	water \
-	methanol \
-	butanoic_acid \
-	hexane
+#
+# Keep the test directory clean from stray *.scm files:
+#
+inputs = $(wildcard *.scm)
 
 #
 # These  are  phony  targets,  they   are  not  created  as  files  to
 # re-evaluate the diffs every time Make is executed:
 #
-diffs = \
-	$(patsubst %,%.g1.diff,$(solutes))
+diffs = $(patsubst %.scm,%.g1.diff,$(inputs))
 
 #
 # By default "make" all the diffs:
