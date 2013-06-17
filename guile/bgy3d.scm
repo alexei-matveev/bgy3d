@@ -396,8 +396,6 @@ computes the sum of all vector elements."
                 (+ 1 vec-id))))))
 
 
-(define *experimental* #f)
-
 ;;;
 ;;; This compacts  association list  with entries coming  later having
 ;;; precedence. FIXME: thus any prior acons may be ignored.
@@ -437,10 +435,11 @@ computes the sum of all vector elements."
 ;;; the "runqm" script used for QM solutes:
 ;;;
 (define (solvent/solvent input)
-  (let* ((settings (input->settings (append *defaults* input)))
-         (solvent-name (assoc-ref settings 'solvent)) ; string or #f
-         (solvent (find-molecule solvent-name)) ; will fail for #f
-         (run-solvent (if *experimental*
+  (let* ((settings      (input->settings (append *defaults* input)))
+         (solvent-name  (assoc-ref settings 'solvent)) ; string or #f
+         (solvent       (find-molecule solvent-name))  ; fails for #f
+         (closure       (assoc-ref settings 'closure)) ; symbol or #f
+         (run-solvent (if closure
                           hnc3d-run-solvent
                           bgy3d-run-solvent))
          (solvent-info-file "g00.bin"))
@@ -473,10 +472,10 @@ computes the sum of all vector elements."
          (solute        (make-molecule solute-name
                                        (update-sites solute-name
                                                      sites)))
-         (run-solute    (if *experimental*
+         (closure       (assoc-ref settings 'closure)) ; symbol or #f
+         (run-solute    (if closure
                             hnc3d-run-solute
                             bgy3d-run-solute)))
-    ;; (set! settings (acons 'closure 'KH settings))
     ;;
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
