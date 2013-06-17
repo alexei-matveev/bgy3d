@@ -7,9 +7,11 @@ file=$1
 grep "integrated charge" $file | tail -1
 
 grep "charge of solvent medium" $file | tail -1
+grep "charge of solute charge density" $file | tail -1
 
-# Get dipole
+# Get dipoles
 grep "dipole moment of solute cores" $file | tail -1
+grep "dipole moment of solute charge density" $file | tail -1
 
 grep "dipole moment of solvent medium" $file | tail -1
 
