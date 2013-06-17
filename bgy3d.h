@@ -222,7 +222,6 @@ typedef struct ProblemData
   real damp;                    /* Scaling factor. */
   int max_iter;                 /* Maximal number of iterations. */
   real norm_tol;                /* Convergence threshold. */
-  real zpad;                    /* FIXME: ??? */
   ClosureEnum closure;          /* HNC, KH, or PY */
 } ProblemData;
 

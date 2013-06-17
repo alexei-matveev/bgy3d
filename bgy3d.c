@@ -94,15 +94,6 @@ ProblemData bgy3d_problem_data (void)
   PD.norm_tol = 1.0e-2;
   bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
-  /*
-    Zeropad.   FIXME:   The  code  appears   to  break  when   zpad  >
-    L. Regression  tests have  them equal, so  make it the  default to
-    have one command line flag fewer:
-  */
-  PD.zpad = maxL;
-  bgy3d_getopt_real ("--zpad", &PD.zpad);
-
-
   /* Closure is only used in  HNC-like methods. Supply default for the
      case the command line does not provide it: */
   char closure[] = "HNC";
@@ -183,7 +174,7 @@ void bgy3d_problem_data_print (const ProblemData *PD)
   PetscPrintf (PETSC_COMM_WORLD, "λ = %g (mixing ratio)\n", PD->lambda);
   PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);
   PetscPrintf (PETSC_COMM_WORLD, "max-iter = %d\n", PD->max_iter);
-  PetscPrintf (PETSC_COMM_WORLD, "zpad = %g\n", PD->zpad);
+
   switch (PD->closure)
     {
     case CLOSURE_HNC:

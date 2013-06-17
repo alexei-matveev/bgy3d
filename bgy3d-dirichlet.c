@@ -51,7 +51,12 @@ static Boundary make_boundary (const ProblemData *PD)
   assert (L[0] == L[1]);
   assert (L[0] == L[2]);
 
-  const real zpad = PD->zpad;
+  /*
+    Zeropad.   FIXME:   The  code  appears   to  break  when   zpad  >
+    L/2. Regression tests  have them equal, so make  it the default to
+    have one command line flag fewer:
+  */
+  const real zpad = L[0] / 2;
 
   /*
     FIXME:  With  this definition  and  the  default  zpad =  L/2  the
@@ -68,7 +73,7 @@ static Boundary make_boundary (const ProblemData *PD)
     tests fail though with deviations  in the third or fourth digit of
     the moments.
   */
-  const int border = 1 + (int) ceil ((L[0] - 2.0 * zpad) / h[0] / 2.0);
+  const int border = 1 + (int) ceil ((L[0] - 2 * zpad) / h[0] / 2);
 
   /* Holds for all regression tests! */
   assert (border == 1);

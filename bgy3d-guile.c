@@ -122,7 +122,6 @@ static ProblemData problem_data (SCM alist)
   alist_getopt_real (alist, "norm-tol", &PD.norm_tol);
   alist_getopt_real (alist, "lambda", &PD.lambda);
   alist_getopt_real (alist, "damp-start", &PD.damp);
-  alist_getopt_real (alist, "zpad", &PD.zpad);
 
   real length;
   if (alist_getopt_real (alist, "L", &length))

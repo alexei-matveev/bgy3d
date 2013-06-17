@@ -500,7 +500,6 @@ module foreign
      real (c_double) :: damp     ! Scaling factor.
      integer (c_int) :: max_iter ! Maximal number of iterations.
      real (c_double) :: norm_tol ! Convergence threshold.
-     real (c_double) :: zpad     ! FIXME: ???
      integer (c_int) :: closure  ! enum for HNC, KH, or PY
   end type problem_data
 
