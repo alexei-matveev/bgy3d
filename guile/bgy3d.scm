@@ -3,6 +3,7 @@
 ;;; namespace  we put bgy3d-*  functions into  this module.
 ;;;
 (define-module (guile bgy3d)
+  #:use-module (guile molecule)         ; site representation
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (srfi srfi-11)           ; let-values
@@ -205,46 +206,15 @@
 
 ;;;
 ;;; Solute parameters are  currently represented by a name  and a list
-;;; of sites:
+;;; of sites. See (guile molecule) for accessors/constructors:
 ;;;
 ;;; ("water"
 ;;;  (("O" (-0.2929 0.0 0.0) 3.1506 0.1521 -0.834)
 ;;;   ("OH" (0.2929 0.757 0.0) 0.4 0.046 0.417)
 ;;;   ("OH" (0.2929 -0.757 0.0) 0.4 0.046 0.417)))
 ;;;
-(define (make-molecule name sites)
-  (list name sites))
 
-(define (molecule-name solute) (first solute))
-(define (molecule-sites solute) (second solute))
-
-(define (make-site name position sigma epsilon charge)
-  (list name position sigma epsilon charge))
-
-(define (site-name site) (first site))
-(define (site-position site) (second site))
-(define (site-sigma site) (third site))
-(define (site-epsilon site) (fourth site))
-(define (site-charge site) (fifth site))
-
-(define (site-x site) (first (site-position site)))
-(define (site-y site) (second (site-position site)))
-(define (site-z site) (third (site-position site)))
-
-(define (print-xyz solute)
-  (let ((name   (molecule-name solute))
-        (sites  (molecule-sites solute)))
-    (format #t "~a\n" (length sites))
-    (format #t "# ~a\n" name)
-    (for-each (lambda (site)
-                (format #t "~a ~a ~a ~a\n"
-                        (site-name site)
-                        (site-x site)
-                        (site-y site)
-                        (site-z site)))
-              sites)))
-
-;; (for-each print-xyz (slurp (find-file "guile/solutes.scm")))
+;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
 ;;;
