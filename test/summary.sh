@@ -9,9 +9,9 @@ grep "integrated charge" $file | tail -1
 grep "charge of solvent medium" $file | tail -1
 
 # Get dipole
-grep "dipole moment of solute" $file | tail -1
+grep "dipole moment of solute cores" $file | tail -1
 
-grep "dipole moment of solvent" $file | tail -1
+grep "dipole moment of solvent medium" $file | tail -1
 
 # Get energy.  Interaction between point nuclei with solvent potential
 grep "with solute point nuclei" $file | tail -1
