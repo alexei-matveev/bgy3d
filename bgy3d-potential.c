@@ -225,23 +225,6 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
 }
 
 
-static void
-moments (const State *BHD, Vec v, real *q, real d[static 3])
-{
-  const real *h = BHD->PD->h;   /* h[3] */
-  const real h3 = h[0] * h[1] * h[2];
-
-  /* 0th moment: */
-  *q = h3 * vec_sum (v);
-
-  /* 1st moments: */
-  bgy3d_vec_moments1 (BHD->da, v, d);
-
-  d[0] *= h3 * h[0];
-  d[1] *= h3 * h[1];
-  d[2] *= h3 * h[2];
-}
-
 /*
   Function to  generate solvent field that  is supposed to  act on the
   solute  electrons. At  the moment  only the  electrostatic  field is
@@ -346,26 +329,44 @@ static void print_info (const State *BHD,
                  d[0], d[1], d[2], d_norm);
   }
 
-  /* Dipole moments and charge of the solute: */
+  /* Dipole/quadrupole moments and charge of the solute: */
   {
-    real q, d[3];
-    moments (BHD, rho_u, &q, d);
+    real q, d[3], Q[3][3];
+    bgy3d_moments (BHD, rho_u, &q, d, Q);
 
     PetscPrintf (PETSC_COMM_WORLD,
                  "|<x|ρ_u>| = |% f, % f, % f| = %f (dipole moment of solute charge density)\n",
                  d[0], d[1], d[2], len3 (d));
-    PetscPrintf (PETSC_COMM_WORLD, "q_u = %f (charge of solute charge density)\n", q);
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "q_u = %f (charge of solute charge density)\n",
+                 q);
+
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j <= i; j++)
+        PetscPrintf (PETSC_COMM_WORLD,
+                     "Q_u[%d][%d] = % f (second moments of solute charge density)\n",
+                     i, j, Q[i][j]);
   }
 
-  /* Dipole moments and charge of the solvent medium: */
+  /* Dipole/quadrupole moments and charge of the solvent medium: */
   {
-    real q, d[3];
-    moments (BHD, rho_v, &q, d);
+    real q, d[3], Q[3][3];
+    bgy3d_moments (BHD, rho_v, &q, d, Q);
 
     PetscPrintf (PETSC_COMM_WORLD,
                  "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
                  d[0], d[1], d[2], len3 (d));
-    PetscPrintf (PETSC_COMM_WORLD, "q_v = %f (charge of solvent medium)\n", q);
+
+    PetscPrintf (PETSC_COMM_WORLD,
+                 "q_v = %f (charge of solvent medium)\n",
+                 q);
+
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j <= i; j++)
+        PetscPrintf (PETSC_COMM_WORLD,
+                     "Q_v[%d][%d] = % f (second moments of solvent charge density)\n",
+                     i, j, Q[i][j]);
   }
 
   /*

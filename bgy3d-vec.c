@@ -362,8 +362,8 @@ void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
   three   integrations   for  a   dipole   and   6  integrations   for
   quadrupole:
 */
-void
-bgy3d_vec_moments1 (const DA da, Vec v, real d[3])
+static void
+vec_moments1 (const DA da, Vec v, real d[3])
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
@@ -397,8 +397,8 @@ bgy3d_vec_moments1 (const DA da, Vec v, real d[3])
     q   = <x  x >
      ij     i  j
 */
-void
-bgy3d_vec_moments2 (const DA da, Vec v, real q[3][3])
+static void
+vec_moments2 (const DA da, Vec v, real q[3][3])
 {
   /* Historically the grid origin is at 0.5 N[]: */
   int N[3];
@@ -456,6 +456,31 @@ bgy3d_vec_moments2 (const DA da, Vec v, real q[3][3])
   q[0][0] = vec_integrate (da, m00, v);
   q[1][1] = vec_integrate (da, m11, v);
   q[2][2] = vec_integrate (da, m22, v);
+}
+
+
+void
+bgy3d_moments (const State *BHD, Vec v, real *q, real d[3], real Q[3][3])
+{
+  const real *h = BHD->PD->h;   /* h[3] */
+  const real h3 = h[0] * h[1] * h[2];
+
+  /* 0th moment: */
+  *q = h3 * vec_sum (v);
+
+  /* 1st moments: */
+  vec_moments1 (BHD->da, v, d);
+
+  d[0] *= h3 * h[0];
+  d[1] *= h3 * h[1];
+  d[2] *= h3 * h[2];
+
+  /* 2nd moments: */
+  vec_moments2 (BHD->da, v, Q);
+
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      Q[i][j] *= h3 * h[i] * h[j];
 }
 
 
