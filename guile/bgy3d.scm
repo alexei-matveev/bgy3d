@@ -299,6 +299,13 @@ computes the sum of all vector elements."
    (if #f #f)                           ; seed is #<unspecified>
    vec))
 
+;;;
+;;; Returns an "iterator" --- here  a function that takes a callback f
+;;; and invokes that callback for each vector element:
+;;;
+(define (make-vec-iter vec)
+  (lambda (f) (vec-for-each f vec)))
+
 ;;
 ;; FIXME: Guile has problems with denormal numbers, replace small ones
 ;; by zeros. Otherwise Guile will show #.# when printing it:
@@ -335,11 +342,15 @@ computes the sum of all vector elements."
     (if (< n (* x x x))
         (- x 1)
         (loop (+ 1 x)))))
+
 ;;;
 ;;; This writes a GAMESS-UK punch file to the current output port. See
-;;; interfaces/filepunch.py in CCP1 GUI repo:
+;;; interfaces/filepunch.py   in  CCP1   GUI  repo.    To  disentangle
+;;; dependencies the  function takes  a list of  vector lengths  and a
+;;; list  of so-called  iterators. Each  iterator is  a  function that
+;;; accepts a (print) callback to be invoked for each vector element.
 ;;;
-(define (write-punch-file solute vecs settings)
+(define (write-punch-file solute lens vecs settings)
   (define (header alist)
     (for-each (lambda (pair)
                 (format #t "~a=~a " (car pair) (cdr pair)))
@@ -373,11 +384,12 @@ computes the sum of all vector elements."
   ;;
   ;; Grid data:
   ;;
-  (let loop ((vecs      vecs)
-             (vec-id    0))
+  (let loop ((lens lens)
+             (vecs vecs)
+             (vec-id 0))
     (if (not (null? vecs))
         (let* ((vec     (first vecs))
-               (len     (vec-length vec))
+               (len     (first lens))
                (n       (cubic-root len))
                (L       (or (assq-ref settings 'L) 10.0))
                (L       (angstrom->bohr L))   ; punch file is in AU
@@ -419,10 +431,13 @@ computes the sum of all vector elements."
           (header `((block . grid_data)
                     (records . (unquote len))
                     (elements . 1)))
-          (vec-for-each
-           (lambda (x) (format #t "~a\n" (- x 1.0)))
-           vec)
-          (loop (cdr vecs)
+          ;;
+          ;; Invoke an iterator with a callback that prints each
+          ;; value:
+          ;;
+          (vec (lambda (x) (format #t "~a\n" (- x 1.0))))
+          (loop (cdr lens)
+                (cdr vecs)
                 (+ 1 vec-id))))))
 
 
@@ -716,7 +731,10 @@ computes the sum of all vector elements."
          ;; Use g1 vectors to produce a *.pun file for visualization:
          ;;
          (let ((g1 (map vec-load args)))
-            (write-punch-file solute g1 settings)
+            (write-punch-file solute
+                              (map vec-length g1)
+                              (map make-vec-iter g1)
+                              settings)
             (map vec-destroy g1)))
         ;;
         ("dump"
