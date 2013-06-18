@@ -111,18 +111,20 @@
 ;;;
 ;;; Settings are handled as an  association list. The human input as a
 ;;; sequence of 2-lists.  This is the  input as it would appear in the
-;;; file.  To get butanoic acid and hexane (two largest ones) converge
-;;; when  treated by  QM one  needs  about 1500  iterations (well,  we
-;;; should make the solver better).
+;;; file.  These defaults are targeting water at normal conditions.
+;;;
+;;; OUTDATED?  To get  butanoic  acid and  hexane  (two largest  ones)
+;;; converge when treated by QM one needs about 1500 iterations (well,
+;;; we should make the solver better).
 ;;;
 (define *defaults*
-  '((solvent "hydrogen chloride")       ; solvent name
+  '((solvent "water")                   ; solvent name
+    (L 10.0)                            ; [-L, L] gives the box size
     (N 64)                              ; grid dimension
-    (rho 0.018)                         ; solvent density
-    (beta 1.1989)                       ; inverse temperature
+    (rho 0.033427745)                   ; solvent density
+    (beta 1.6889)                       ; inverse temperature
     (norm-tol 1.0e-7)                   ; convergence threshold
     (max-iter 1500)                     ; max number of iterations
-    (L 10.0)                            ; [-L, L] gives the box size
     (damp-start 1.0)                    ; scaling factor?
     (lambda 0.02)))                     ; not the scheme lambda
 
