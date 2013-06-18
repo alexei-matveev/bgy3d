@@ -433,8 +433,16 @@ Rows  labeled with  ^a)^ correspond  to  the water  solvent around  an
 unpolarized  (gas-phase)  QM  solute.   These calculations  have  been
 performed with N=96 and correspond to what we called post-SCF above.
 
-Influence of grid number and length on 3D-RISM results of water solvent
------------------------------------------------------------------------
+Influence of grid resolution and box size on RISM results for water
+-------------------------------------------------------------------
+
+This is not  really a 3D model, rather 1D-RISM  with 3D machinery. All
+distribution functions  here are spherically  symmetric as far  as the
+cubic domain shape allows that.  Also all the local singularities that
+are  often  present  in  3D  models are  less  pronounced  here  since
+effectively the  method operates with  distribution functions averaged
+over angular  coordinates.  Compare to the  third row of  the table in
+the previous section.
 
 Here we listed the value changes of excess chemical potential of water
 solvent  from  3D-RISM  results  with  different  grid  numbers(N) and
