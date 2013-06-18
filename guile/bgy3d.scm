@@ -276,7 +276,9 @@ computes the sum of all vector elements."
          (run-solvent   (if closure
                             hnc3d-run-solvent
                             bgy3d-run-solvent))
-         (solvent-info-file "g00.bin")
+         (solvent-info-file (if closure
+                                "x00-fft.bin"
+                                "g00.bin"))
          (always-run-solvent #t))
     ;;
     ;; At the moment the function bound to run-solvent echoes settings
