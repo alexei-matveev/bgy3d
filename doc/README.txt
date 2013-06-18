@@ -445,16 +445,16 @@ over angular  coordinates.  Compare to the  third row of  the table in
 the previous section.
 
 Here we listed the value changes of excess chemical potential of water
-solvent  from  3D-RISM  results  with  different  grid  numbers(N) and
-lengths(L). The default "--snes-solver newton " was switched to
-"--snes-solver trial" for HNC closure to guarantee convergence. Note
-that grid resolutions are identical for diagonal pairs ( h = 2 * L / N =
-0.15625 ).
+solvent  from  3D-RISM  results  with different  grid  numbers(N)  and
+lengths(L).   The  default "--snes-solver  newton  "  was switched  to
+"--snes-solver trial"  for HNC closure to  guarantee convergence. Note
+that grid resolutions are identical for diagonal  pairs (h = 2 * L / N
+= 0.15625).
 
-Due to the limit of computation resources, the maximum grid number we
-used in this test is 224 for each dimension. Calculations using more 192
-grid numbers had already begun to consume swap on single node (neh13 and
-neh19).
+Due to the limit of  computation resources, the maximum grid number we
+used in this  test is 224 for each  dimension. Calculations using more
+192  grid numbers had  already begun  to consume  swap on  single node
+(neh13 and neh19).
 
 HNC closure:
 
@@ -479,17 +479,18 @@ KH closure:
 Solvent electrostatic field with and without boundary condition
 ---------------------------------------------------------------
 
-When solving Poisson equation to get the electrostatic potential from
-solvent charge density, we supply an option "--no-cage" to control
-whether not or zeroing the potential values at the boundary of
-simulation box. Potential corrected by boundary condition is in effect a
-superposition of the solvent electrostatic field and a surface charge on
-that metallic cage.
+When solving Poisson equation  to get the electrostatic potential from
+solvent  charge density, we  supply an  option "--no-cage"  to control
+whether  not  or zeroing  the  potential  values  at the  boundary  of
+simulation box. Potential corrected by boundary condition is in effect
+a  superposition of  the  solvent electrostatic  field  and a  surface
+charge on that metallic cage.
 
 Here we listed the results of the integration of solvent electrostatic
-field with solute point nuclei $<U_v|\rho_N>$ and with diffuse charge
-density of solute $<U_v|\rho_u>$, which are the only two output entries
-that changed when running with and without boundary condition.
+field with  solute point nuclei $\langle U_v|\rho_N  \rangle$ and with
+diffuse charge  density of solute $\langle  U_v|\rho_u \rangle$, which
+are the  only two  output entries that  changed when running  with and
+without boundary condition.
 
 Calculation parameters used are the same with those in section "Excess
 chemical potential in 1D- and 3D-RISM for solute/solvent systems".
