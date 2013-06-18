@@ -92,7 +92,7 @@
   ("S2" (+1.57 0.0 0.0) 3.52 0.36341 0.0)))
 
 ;;
-;; Parametrisierung TIP3P :
+;; Parametrisierung TIP3P:
 ;; sigma_H = 0.400   epsilon_H = 0.046  q_H = 0.417
 ;; sigma_O = 3.1506  epsilon_O = 0.1521 q_O =-0.834
 ;; r_OH = 0.9572
@@ -100,43 +100,54 @@
 ;; theta_HOH = 104.52
 ;; mass H2O = 18.0154 u
 ;; density = 1 kg/l = 0.6022142 u/A^3 => 0.033427745 / A^3
-;; temperature : T= 298.15 K (25 C) => 0.5921, => beta =1.6889
+;; temperature: T = 298.15 K (25 C) => 0.5921, => beta = 1.6889
 ;;
-;; Here are two sources for the non-zero  sigma  and epsilon  parameter
+;; Here are two  sources for the non-zero sigma  and epsilon parameter
 ;; for hydrogen:
 ;;
-;; I. The one introduced by Pettitt and Rossky [1] to "avoid
-;; catastrophic overlap of the corresponding  site charges in the
-;; calculations".  But it be noted that in [1], these  non-zero
+;; I.  The  one  introduced  by  Pettitt  and  Rossky  [1]  to  "avoid
+;; catastrophic  overlap  of the  corresponding  site  charges in  the
+;; calculations".   But  it  be  noted  that in  [1],  these  non-zero
 ;; parameter only contribute to the C_12 term of O-H pair and "present
-;; in a 6-12 potential with a depth of 0.2 kcal/mol and effective
-;; diameters of 2.8 Å for oxygen and 0.4 Å for hydrogen", but in this
+;; in  a 6-12 potential  with a  depth of  0.2 kcal/mol  and effective
+;; diameters of 2.8 Å for oxygen  and 0.4 Å for hydrogen", but in this
 ;; model ε(H) is quite different from what we used here:
 ;;
 ;; In [1], C_12(OH) = 225.180 kcal Å^12 / mol, and LJ potential is
+;;
 ;;   u = C_12/r^12 + C_6/r^6
+;;
 ;; considering the other form of LJ potential
+;;
 ;;   u = 4ε[(σ/r)^12 - (σ/r)^6]
+;;
 ;; since C_6 is zero:
+;;
 ;;   C_12(OH) = 4ε(OH)σ(OH)^12
+;;
 ;; with
+;;
 ;;   σ(OH) = (2.8 + 0.4) / 2 = 1.6
+;;
 ;; so
+;;
 ;;   ε(OH) = C_12(OH) / σ(OH)^12 / 4 = 225.180 / 281.47497671065616 / 4
 ;;         = 0.2 kcal / mol
+;;
 ;; now we have
+;;
 ;;   ε(H) = ε(OH)^2 / ε(O) = 0.04 / 0.1521 = 0.2630
 ;;
-;; II. By checking some papers using this modified TIP3P, found the
-;; paper introducing the protein parameters used in CHARMM22 [2],
-;; which is hopefully the original source of modified TIP3P. From the
-;; discussion in CHARMM official forum [3], some people metioned that
-;; this modified TIP3P, naming CHARMM TIP3P, is only for practical
-;; purposes (to avoid electrostatic catastrophe). Further details of
-;; the refinement of CHARMM TIP3P could be found in the Ph.D. thesis
-;; of Reiner [4] (check the path of local copy on wiki page). In my
-;; opinion we should cite this or the CHARMM paper instead of [1] for
-;; future usage. (in the PhD thesis, ε(H) = 0.04598 kcal / mol and
+;; II. By  checking some papers  using this modified TIP3P,  found the
+;; paper  introducing the  protein  parameters used  in CHARMM22  [2],
+;; which is hopefully the original  source of modified TIP3P. From the
+;; discussion in CHARMM official  forum [3], some people metioned that
+;; this  modified TIP3P, naming  CHARMM TIP3P,  is only  for practical
+;; purposes (to  avoid electrostatic catastrophe).  Further details of
+;; the refinement of  CHARMM TIP3P could be found  in the Ph.D. thesis
+;; of Reiner  [4] (check the path of  local copy on wiki  page). In my
+;; opinion we should cite this or  the CHARMM paper instead of [1] for
+;; future usage.  (in the PhD  thesis, ε(H) =  0.04598 kcal /  mol and
 ;; σ(H) = 0.4490 Å)
 ;;
 ;; Reference:
@@ -146,14 +157,15 @@
 ;;     Rossky, The Journal of Chemical Physics, 1982, 77 (3),
 ;;     1451-1457, http://dx.doi.org/10.1063/1.443972
 ;;
-;; [2] All-Atom Empirical Potential for Molecular Modeling and Dynamics
-;;     Studies of Proteins, A. D. MacKerell, D. Bashford, Bellott, R. L.
-;;     Dunbrack, J. D. Evanseck, M. J. Field, S. Fischer, J. Gao, H. Guo
-;;     , S. Ha, D. Joseph-McCarthy, L. Kuchnir, K. Kuczera, F. T. K. Lau
-;;     , C. Mattos, S. Michnick, T. Ngo, D. T. Nguyen, B. Prodhom, W. E.
-;;     Reiher, B. Roux, M. Schlenkrich, J. C. Smith, R. Stote, J. Straub
-;;     , M. Watanabe, J. Wiórkiewicz-Kuczera, D. Yin and M. Karplus, The
-;;     Journal of Physical Chemistry B 1998, 102 (18), 3586-3616.
+;; [2] All-Atom Empirical Potential for Molecular Modeling and
+;;     Dynamics Studies of Proteins, A. D. MacKerell, D. Bashford,
+;;     Bellott, R. L.  Dunbrack, J. D. Evanseck, M. J. Field,
+;;     S. Fischer, J. Gao, H. Guo , S. Ha, D. Joseph-McCarthy,
+;;     L. Kuchnir, K. Kuczera, F. T. K. Lau , C. Mattos, S. Michnick,
+;;     T. Ngo, D. T. Nguyen, B. Prodhom, W. E.  Reiher, B. Roux,
+;;     M. Schlenkrich, J. C. Smith, R. Stote, J. Straub , M. Watanabe,
+;;     J. Wiórkiewicz-Kuczera, D. Yin and M. Karplus, The Journal of
+;;     Physical Chemistry B 1998, 102 (18), 3586-3616.
 ;;     http://dx.doi.org/10.1021/jp973084f
 ;;
 ;; [3] http://goo.gl/ldmC8
