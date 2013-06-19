@@ -237,7 +237,8 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
 static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
                                  int m, const Site solvent[m],
                                  Vec g[m],        /* intent(in) */
-                                 Vec ve, Vec rho) /* intent(out) */
+                                 Vec ve, Vec rho, /* intent(out) */
+                                 const PetscBool cage)
 {
   /* FIXME: this  code assumes  the same density  rho for  all solvent
      particles. */
@@ -267,10 +268,9 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    corrected potential  is, in effect, a superposition  of the solvent
    electrostatic field and a surface charge on that metallic cage:
   */
-  if (!bgy3d_getopt_test ("--no-cage"))
+  if (cage)
   {
-    /* applying boundary condition when "--no-cage" option is not
-     * supplied */
+    /* applying boundary condition when cage==true */
     local Vec x = vec_create (BHD->da);
 
     /*
@@ -442,7 +442,8 @@ Context* info (const State *BHD,
                int m, const Site solvent[m],
                int n, const Site solute[n],
                Vec h[m],              /* in, h or g */
-               Vec coul_u, Vec rho_u) /* in, solute e-field, density */
+               Vec coul_u, Vec rho_u, /* in, solute e-field, density */
+               const PetscBool cage)  /* true for boundary condition */
 {
   /* Solvent electrostatic potential field: */
   local Vec coul_v = vec_create (BHD->da);
@@ -455,7 +456,7 @@ Context* info (const State *BHD,
     is so  far the only place  where h is used.   For neutral solvents
     one may supply g instead of h here:
   */
-  bgy3d_solvent_field (BHD, m, solvent, h, coul_v, rho_v);
+  bgy3d_solvent_field (BHD, m, solvent, h, coul_v, rho_v, cage);
 
   /* Return the iterator over the solvent field. Context holds another
      ref to Vec coul_v: */

@@ -11,5 +11,6 @@ Context* info (const State *BHD,
                int m, const Site solvent[m],
                int n, const Site solute[n],
                Vec h[m],            /* in */
-               Vec uc, Vec uc_rho); /* in */
+               Vec uc, Vec uc_rho,  /* in */
+	       const PetscBool cage);
 

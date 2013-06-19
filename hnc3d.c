@@ -1213,6 +1213,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          Context **medium,  /* out */
                          Restart **restart) /* inout, so far unchanged  */
 {
+  /* default not applying boundary condition in hnc code */
+  PetscBool cage = false;
+
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
@@ -1401,7 +1404,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   /* Return  the   Context  **ret  to  caller   for  integration  over
      electrostatic potential of solvent */
-  Context *ret = info (HD, m, solvent, n, solute, h, uc, uc_rho);
+  Context *ret = info (HD, m, solvent, n, solute, h, uc, uc_rho, cage);
   if (medium)
     *medium = ret;
   else

@@ -856,8 +856,11 @@ static void solute_solve (State *BHD,
     solvent. As  the distribution functions  are only used  to compute
     the  charge density  one can  supply either  g or  h =  g -  1 for
     neutral solvents.
+
+    FIXME: the last argument means using boundary condition for solvent
+    field
   */
-  Context *ret = info (BHD, m, solvent, n, solute, g, uc, uc_rho);
+  Context *ret = info (BHD, m, solvent, n, solute, g, uc, uc_rho, true);
   if (medium)
     *medium = ret;
   else
