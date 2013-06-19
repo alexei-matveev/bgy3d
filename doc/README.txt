@@ -546,26 +546,32 @@ H~2~O        mm        -3.860    -5.835                      0.489         0.455
              qm/gp     -5.632    -7.667  -17.154353092917    0.522         0.488
              qm/aq    -11.576   -13.695  -17.149256062555    0.644         0.604
              qm/aq/nc -11.582   -13.701  -17.149246364375    0.644         0.604
+                                          (3.198)
 HCl          mm         6.006     3.382                      0.251         0.225
              qm/gp      4.554     1.931  -15.536046511749    0.358         0.323
              qm/aq      3.966     1.353  -15.535551571194    0.414         0.377
              qm/aq/nc   3.964     1.351  -15.535548519827    0.414         0.377
+                                          (0.311)
 CH~3~OH      mm         0.997    -2.515                      0.502         0.517
              qm/gp      1.808    -1.734  -23.983214454853    0.454         0.470
              qm/aq     -4.245    -7.883  -23.977789344961    0.615         0.624
              qm/aq/nc  -4.253    -7.891  -23.977775709821    0.615         0.624
+                                          (3.404)
 C~3~H~7~COOH mm        17.466     9.823                      0.617         0.732
              qm/gp     16.244     8.508  -59.326272328142    0.581         0.641
              qm/aq     ??.??      ??.??  -59.32??????????    ?.??          ?.??
              qm/aq/nc  ??.??      ??.??  -59.32??????????    ?.??          ?.??
+                                          (?.???)
 CS~2~        mm        11.499     6.988                      0.000         0.035
              qm/gp     12.366     7.765  -25.969418157956    0.000         0.033
              qm/aq     12.347     7.748  -25.969402573454    0.000         0.033
              qm/aq/nc  12.347     7.748  -25.969402441004    0.000         0.033
+                                          (0.010)
 C~6~H~14~    mm        29.083    20.433                      0.001         0.082
              qm/gp     29.367    20.562  -42.289934379624    0.008         0.077
              qm/aq     29.321    20.518  -42.289896194950    0.009         0.076
              qm/aq/nc  29.320    20.518  -42.289895181470    0.009         0.076
+                                          (0.024)
 ---------------------------------------------------------------------------------
 
 a) The dipoles of the QM solutes have been taken from the medium model
@@ -585,3 +591,12 @@ applied to solvent field, all the  values are very close to those with
 boundary condition  (qm/aq).  The  boundary condition does  not affect
 qm/gp calculations as the action of  the solvent field on QM solute is
 ignored.
+
+e) Numbers in parens in the  E~el~ column is the difference of the two
+electronic energies  (qm/aq and qm/gp)  in kcal. This is  the electron
+reorganization energy due to electric field of the solvent.  The SPC/E
+paper quotes  an estimate  for water models:  "With a value  [...]  of
+0.001445  nm^3^ for  the polarizability  $\alpha/4\pi  \epsilon_0$, or
+1.608  $\times$ 10^-40^ F  m for  $\alpha$,the average  induced dipole
+moment  in  the SPC  model  corresponds  to  3.74 kJ/mol  polarization
+energy." FIXME: Hm, this is not even close to 3 kcals that we get.
