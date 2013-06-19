@@ -580,6 +580,8 @@ water is 3.09 D.
 c)  Butanoic acid  in aqueous  medium  did not  converge. Notably  the
 dipoles "oscillated" irregularly between ~0.5 and ~1.5 eA.
 
-d)  For (qm, gp) calculations without boundary condition (no-cage)
-applied to solvent field, all the values are identical to those with
-boundary condition.
+d)  For  qm/aq/nc calculations  without  boundary condition  (no-cage)
+applied to solvent field, all the  values are very close to those with
+boundary condition  (qm/aq).  The  boundary condition does  not affect
+qm/gp calculations as the action of  the solvent field on QM solute is
+ignored.
