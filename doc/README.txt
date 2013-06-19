@@ -375,6 +375,8 @@ for  reference. Most  of  the calculations  involving charged  solvent
 sites in realisitc water model diverge when employing HNC closure with
 the default Newton solver (indicated by "-").
 
+Table 1. <!-- tab:1d3d -->
+
 Species                HNC1      (GF)     HNC3     (GF)      KH1      (GF)       KH3      (GF)
 -------      -----  ------- ---------  -------  -------  -------  --------  --------  --------
 Solvent
@@ -515,6 +517,16 @@ C~6~H~14~       no         -0.240059         -0.272374
 
 MM and QM solutes in water
 --------------------------
+
+<!-- Table 1 refers to tab:1d3d -->
+
+The chemical potentials for MM-rows  copied from Table 1 were obtained
+with N=128.   FIXME: However  the data  on QM solutes  and all  of the
+dipole moments,  including those for  MM-row, were obtained  with N=96
+but otherwise the same parameters.  Thus the numbers in MM-row are not
+mutually consistent --- the  quality of chemical potential is "better"
+than that of the dipole moments.
+
 
 Species                   KH3      (GF)         E~el~, au    D~u~, eA   D~v~, eA
 -------      -------- -------   -------  ----------------   ---------  ---------
