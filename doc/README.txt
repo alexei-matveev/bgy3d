@@ -540,11 +540,8 @@ mutually consistent --- the  quality of chemical potential is "better"
 than that of the dipole moments.
 
 
-Species      Model        KH3      (GF)         E~el~, au    D~u~, eA   D~v~, eA
+Solute       Model        KH3      (GF)         E~el~, au    D~u~, eA   D~v~, eA
 -------      -------- -------   -------  ----------------   ---------  ---------
-Solvent
-H~2~O        mm        -5.787    -9.587                      0.489
-Solute
 H~2~O        mm        -3.860    -5.835                      0.489         0.455
              qm/gp     -5.632    -7.667  -17.154353092917    0.522         0.488
              qm/aq    -11.576   -13.695  -17.149256062555    0.644         0.604
