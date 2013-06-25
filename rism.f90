@@ -716,6 +716,8 @@ contains
        if (present (solute)) then
           call show_sites ("Solute", solute)
        endif
+
+       print *, "# ε(RISM) =", epsilon_rism (pd % beta, pd % rho, solvent)
     endif
 
     ! This is applicable to LJ only, and should take reduced
@@ -1786,5 +1788,42 @@ contains
             &        this_rho
     enddo
   end subroutine show_sites
+
+
+  function epsilon_rism (beta, rho, sites) result (e)
+    use foreign, only: site
+    implicit none
+    real (rk), intent (in) :: beta, rho
+    type (site), intent (in) :: sites(:)
+    real (rk) :: e
+    ! *** end of interface ***
+
+    real (rk) :: y
+
+    !
+    ! Here ρμ² has  the dimension of electrostatic energy  which is by
+    ! convention    converted   to    kcal    by   multiplying    with
+    ! EPSILON0INV.  The inverse  temperature is  supposed to  have the
+    ! dimension of 1/kcal here:
+    !
+    y = 4 * pi * beta * EPSILON0INV * rho * norm2 (dipole (sites))**2 / 9
+
+    e = 1 + 3 * y
+  end function epsilon_rism
+
+
+  function dipole (sites) result (m)
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: sites(:)
+    real (rk) :: m(3)
+    ! *** end of interface ***
+
+    integer :: i
+
+    do i = 1, 3
+       m(i) = sum (sites % charge * sites % x(i))
+    enddo
+  end function dipole
 
 end module rism
