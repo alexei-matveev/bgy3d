@@ -530,6 +530,45 @@ C~6~H~14~       no         -0.240059         -0.272374
 MM and QM solutes in water
 --------------------------
 
+### Water in PCM-water
+
+This section discusses COSMO/PCM reference results for water using the
+same minimal  CRENBL ECP for  reference purposes. For this  reason the
+geometry of the water solute is kept fixed to that of the TIP3P model.
+The difference of the two energies,  PCM and gas phase, amounts to the
+total  solvation energy  estimate of  -9.58 kcal.   The  solute dipole
+moments are also shown:
+
+
+Method             E~tot~, au    D~u~, eA
+----------  -----------------  ----------
+qm/gp        -17.154353092917   0.5239553
+qm/pcm       -17.169614518847   0.6021832
+
+
+The next table shows the terms  in the PCM solvation energy as printed
+by  a  recent version  of  PG.  The  convention  is  that the  Coulomb
+interaction  energy includes the  (Born) factor  1/2.  Note  that this
+decomposition  is  missing  a  term  that we  dubbed  "the  electronic
+reorganization", a  positive term, here of  10.86 - 9.58  = 1.28 kcal,
+which can only be deduced by comparison with the gas phase results.
+
+
+Term            E, kcal
+-------------  --------
+Electrostatic    -11.97
+Cavitation         5.05
+Dispersion        -4.88
+Repulsion          0.94
+$\Sigma$         -10.86
+
+The  dipole  of  a  gas  phase  molecule  computed  usong  CRENBL  ECP
+corresponds to 2.52  D which is significantly more  than 1.85 D quoted
+by some  sources [wikipedia].  The dipole  increases to 2.89  D due to
+PCM polarization.
+
+### MM and QM solutes in KH-water
+
 <!-- Table 1 refers to tab:1d3d -->
 
 The chemical potentials for MM-rows  copied from Table 1 were obtained
@@ -540,11 +579,11 @@ mutually consistent --- the  quality of chemical potential is "better"
 than that of the dipole moments.
 
 
-Solute       Model        KH3      (GF)         E~el~, au    D~u~, eA   D~v~, eA
--------      -------- -------   -------  ----------------   ---------  ---------
-H~2~O        mm        -3.860    -5.835                      0.489         0.455
-             qm/gp     -5.632    -7.667  -17.154353092917    0.522         0.488
-             qm/aq    -11.576   -13.695  -17.149256062555    0.644         0.604
+Solute       Model        KH3      (GF)         E~el~, au    D~u~, eA   D~v~, eA    E~c~    E~c~
+-------      -------- -------   -------  ----------------   ---------  ---------  ------  ------
+H~2~O        mm        -3.860    -5.835                      0.489         0.455   -11.1
+             qm/gp     -5.632    -7.667  -17.154353092917    0.522         0.488   -15.1   -13.0
+             qm/aq    -11.576   -13.695  -17.149256062555    0.644         0.604   -22.3   -19.4
              qm/aq/nc -11.582   -13.701  -17.149246364375    0.644         0.604
                                           (3.198)
 HCl          mm         6.006     3.382                      0.251         0.225
@@ -600,3 +639,9 @@ paper quotes  an estimate  for water models:  "With a value  [...]  of
 1.608  $\times$ 10^-40^ F  m for  $\alpha$,the average  induced dipole
 moment  in  the SPC  model  corresponds  to  3.74 kJ/mol  polarization
 energy." FIXME: Hm, this is not even close to 3 kcals that we get.
+
+f) The two E~c~ values, both in kcals, correspond to the electrostatic
+energy  and include  the factor  1/2. One  is obtained  by integrating
+"solvent   electrostatic  field   with  diffuse   charge   density  of
+solute". The  other is computed by QM  code by forming a  trace of the
+density matrix with the matrix representatio of the potential.
