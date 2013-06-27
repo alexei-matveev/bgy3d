@@ -687,6 +687,9 @@ static void solute_solve (State *BHD,
   /* Electron density for integration: */
   local Vec uc_rho = vec_create (BHD->da);
 
+  /* FFT of Coulomb long */
+  local Vec uc_fft = vec_create (BHD->dc);
+
   /*
     Later u0  = beta *  (VM_LJ + VM_coulomb_short), which  is -log(g0)
     actually.  See: (5.106)  and (5.108) in Jager's thesis.  It is not
@@ -710,8 +713,11 @@ static void solute_solve (State *BHD,
         those passed explicitly are modified:
       */
       bgy3d_solute_field (BHD, m, solvent, n, solute,
-                          u0, uc, uc_rho, /* out */
+                          u0, uc_fft, uc_rho, /* out */
                           density);       /* void (*density)(...) */
+
+      /* get the real-space represenation of FFT coulomb_long */
+      MatMultTranspose (BHD->fft_mat, uc_fft, uc);
 
       /* Scale solute-solvent interactions: */
       PetscPrintf (PETSC_COMM_WORLD,
@@ -875,6 +881,7 @@ static void solute_solve (State *BHD,
   vec_destroy (&work);
   vec_destroy (&uc);
   vec_destroy (&uc_rho);
+  vec_destroy (&uc_fft);
 }
 
 
@@ -1245,6 +1252,9 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   uc = vec_create (BHD.da); /* common for all sites */
 
+  /* FFT of Coulomb long */
+  local Vec uc_fft = vec_create (BHD->dc);
+
   dg_histO = vec_create (BHD.da);
   dg_histH = vec_create (BHD.da);
   VecSet(dg_histH, 0.0);
@@ -1303,9 +1313,12 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
         /* This does the real work: */
         bgy3d_solute_field (&BHD,
                             2, solvent,
-                            g0, uc, /* intent(out) */
+                            g0, uc_fft, /* intent(out) */
                             n, sites,
                             NULL); /* void (*density)(...) */
+
+        /* get the real-space represenation of FFT coulomb_long */
+        MatMultTranspose (BHD->fft_mat, uc_fft, uc);
       }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
@@ -1491,6 +1504,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
   vec_destroy (&tO);
 
   vec_destroy (&uc);
+  vec_destroy (&uc_fft);
 
   vec_destroy (&dg_newH);
   vec_destroy (&dg_newO);
