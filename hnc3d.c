@@ -1242,10 +1242,18 @@ void hnc3d_solute_solve (const ProblemData *PD,
   local Vec uc = vec_create (HD->da);
   local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
 
+  /* FFT long-range coulomb potential */
+  local Vec uc_fft = vec_create (HD->dc);
+
   bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v, uc,    /* out */
+                      v, uc_fft,    /* out */
                       uc_rho,   /* out, smeared cores */
                       density); /* in, electron density callback */
+  /*
+   * Now get the real-space represenation of long-range part of
+   * coulomb potential
+   */
+  MatMultTranspose (HD->fft_mat, uc_fft, uc);
 
   /*
     If   the  solute  is   neutral,  asymptotic   electrostatics  is
@@ -1413,6 +1421,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* keep uc and uc_rho until being used in info() */
   vec_destroy (&uc);
   vec_destroy (&uc_rho);
+  vec_destroy (&uc_fft);
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&h) */
