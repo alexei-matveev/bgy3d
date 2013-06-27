@@ -256,8 +256,21 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
     Solve Poisson equation for rho.  Note that the output potential is
     in kcals  (see the  definiton of EPSILON0INV)  as all  energies in
     this code are:
+
+    FIXME: Poisson solver only pass the FFT coulomb potential out, here
+    we use ve_fft as work vector and perform IFFT
   */
-  bgy3d_poisson (BHD, ve, rho, -4 * M_PI * EPSILON0INV);
+  {
+    local Vec ve_fft = vec_create (BHD->dc);
+
+    /* poisson sovler returns FFT coulomb long */
+    bgy3d_poisson (BHD, ve_fft, rho, -4 * M_PI * EPSILON0INV);
+
+    /* Transpose to get the real-space representation */
+    MatMultTranspose (BHD->fft_mat, ve_fft, ve);
+
+    vec_destroy (&ve_fft);
+  }
 
   /*
    Solving Poisson  equation by  FFT results in  a potential  with the
