@@ -80,10 +80,11 @@
    survive with more thatn 3-4 digits: */
 #ifndef POISSON_AS_INVERSE_LAPLACE
 /*
-  Solve  Poisson  Equation  in  Fourier space  and  get  elestrostatic
-  potential by inverse FFT.
+  Solve  Poisson  Equation  in  Fourier space  and pass the FFT
+  electrostatic potential to its caller, one could get the real-space
+  representation by simply call inverse FFT operation once
 
-  Vec uc is intent(out).
+  Vec uc_fft is intent(out).
   Vec rho is intent(in).
   real q is the overall factor.
 
@@ -97,7 +98,7 @@
   Except of  temporary allocation of a  complex Vec does  not have any
   side effect.
 */
-void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
+void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 {
   const int *N = BHD->PD->N;    /* [3] */
 
@@ -138,6 +139,10 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     normalization IFFT(FFT(f)) = n³ * f we have:
 
         u(i, j, k) = 1 / n³  * IFFT(u(kx, ky, kz))
+
+    Since we already applied the scaling factor 1 / n³ in Poisson
+    solver, one need only call IFFT to get the real-space
+    representation in caller
   */
 
   /* With q = -4π/ε₀ you would get the potential: */
@@ -181,8 +186,11 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     DMDAVecRestoreArray (BHD->dc, work, &work_);
   }
 
-  /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
-  MatMultTranspose (BHD->fft_mat, work, uc);
+  /*
+   * Leave IFFT to the caller when necessary, here we only pass out
+   * FFT coulomb potential
+   */
+  VecCopy (work, uc_fft);
 
   vec_destroy (&work);
 }
@@ -197,7 +205,7 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
   To get the potential in kcal/mol as used in the rest of the code you
   need to supply q = -4π/ε₀ that is -4 * M_PI * EPSILON0INV.
 */
-void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
+void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 {
   const real *h = BHD->PD->h;   /* h[3] */
   const int *N = BHD->PD->N;    /* N[3] */
@@ -250,8 +258,11 @@ void bgy3d_poisson (const State *BHD, Vec uc, Vec rho, real q)
     DMDAVecRestoreArray (BHD->dc, work, &work_);
   }
 
-  /* u(x, y, z) := IFFT(u(kx, ky, kz)) */
-  MatMultTranspose (BHD->fft_mat, work, uc);
+  /*
+   * Leave IFFT to the caller when necessary, here we only pass out
+   * FFT coulomb potential
+   */
+  VecCopy (work, uc_fft);
 
   vec_destroy (&work);
 }
