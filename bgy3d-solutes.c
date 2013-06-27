@@ -474,11 +474,11 @@ static void read_charge_density (DA da, const ProblemData *PD,
     us = v   + v
           LJ    CS
 
-  and  uc  with  long   range  (or  rather  asymptotic)  electrostatic
-  potential
+  and uc_fft with k-space representation of long range (or rather
+  asymptotic) electrostatic potential
 
-    uc = v
-          CL
+    v  = IFFT(uc_fft)
+     CL
 
   not scaled by the charges of the solvent sites.
 
@@ -495,7 +495,8 @@ void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* in */
                          int n, const Site solute[n],  /* in */
                          Vec us[m],                    /* out */
-                         Vec uc, Vec uc_rho,           /* out, optional */
+                         Vec uc_fft,           /* out, complex */
+                         Vec uc_rho,           /* out, optional */
                          void (*density)(int k, const real x[k][3], real rho[k]))
 {
   const real G = G_COULOMB_INVERSE_RANGE;
@@ -547,7 +548,7 @@ void bgy3d_solute_field (const State *BHD,
     }
 
   /* Early return if no Coulomb is requested: */
-  if (uc == NULL && uc_rho == NULL)
+  if (uc_fft == NULL && uc_rho == NULL)
     return;
 
   /*
@@ -619,6 +620,8 @@ void bgy3d_solute_field (const State *BHD,
     electrostatics.   Therefore  the  Vec  uc_rho  is,  formally,  not
     representing the  whole of the  solute charge density,  rather its
     "diffuse" or "smeared" part.
+
+    Note that we only get FFT coulomb potential from Poisson solver
    */
-  bgy3d_poisson (BHD, uc, uc_rho, -4 * M_PI * EPSILON0INV);
+  bgy3d_poisson (BHD, uc_fft, uc_rho, -4 * M_PI * EPSILON0INV);
 }

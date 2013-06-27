@@ -17,6 +17,7 @@ void bgy3d_solute_field (const State *BHD,
                          int m, const Site solvent[m], /* in */
                          int n, const Site solute[n],  /* in */
                          Vec us[m],                    /* out */
-                         Vec uc, Vec uc_rho,           /* out, optional */
+                         Vec uc_fft,           /* out, complex */
+                         Vec uc_rho,           /* out, optional */
                          void (*density)(int k, const real x[k][3], real rho[k]));
 
