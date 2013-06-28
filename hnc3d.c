@@ -1219,6 +1219,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
@@ -1254,6 +1256,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
    * coulomb potential
    */
   MatMultTranspose (HD->fft_mat, uc_fft, uc);
+
+  /* apply inverse volume factor after backforward FFT */
+  VecScale (uc, 1.0 / L3);
 
   /*
     If   the  solute  is   neutral,  asymptotic   electrostatics  is
