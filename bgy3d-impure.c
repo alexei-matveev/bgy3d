@@ -642,6 +642,8 @@ static void solute_solve (State *BHD,
   for (int i = 0; i < m; i++)
     rhos[i] = PD->rho;          /* 2 * PD->rho; */
 
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+
   /*
    * Extract BGY3d specific things from supplied input:
    */
@@ -718,6 +720,9 @@ static void solute_solve (State *BHD,
 
       /* get the real-space represenation of FFT coulomb_long */
       MatMultTranspose (BHD->fft_mat, uc_fft, uc);
+
+      /* apply inverse volume factor after backforward FFT */
+      VecScale (uc, 1.0 / L3);
 
       /* Scale solute-solvent interactions: */
       PetscPrintf (PETSC_COMM_WORLD,
@@ -1193,6 +1198,8 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   State BHD = initialize_state (PD);
 
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+
   /* Site specific  density.  Computed as a solvent  density rho times
      number of sites of that type in a solvent: */
   real rhos[m];
@@ -1319,6 +1326,11 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
         /* get the real-space represenation of FFT coulomb_long */
         MatMultTranspose (BHD->fft_mat, uc_fft, uc);
+
+        /* apply inverse volume factor after backforward FFT */
+        VecScale (uc, 1.0 / L3);
+
+
       }
 
       PetscPrintf(PETSC_COMM_WORLD,"New lambda= %f\n", a0);
