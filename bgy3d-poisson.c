@@ -101,12 +101,13 @@
 void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 {
   const int *N = BHD->PD->N;    /* [3] */
+  const real *h = BHD->PD->h;
 
   real dk[3];                   /* k-mesh spacing */
   FOR_DIM
     dk[dim] = 2 * M_PI / BHD->PD->L[dim];
 
-  const int NNN = N[0] * N[1] * N[2];
+  const real h3 = h[0] * h[1] * h[2];
 
   /* Scratch complex vector: */
   Vec work = vec_create (BHD->dc);
@@ -139,14 +140,11 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
     normalization IFFT(FFT(f)) = n³ * f we have:
 
         u(i, j, k) = 1 / n³  * IFFT(u(kx, ky, kz))
-
-    Since we already applied the scaling factor 1 / n³ in Poisson
-    solver, one need only call IFFT to get the real-space
-    representation in caller
   */
 
   /* With q = -4π/ε₀ you would get the potential: */
-  const real scale = - q / NNN;
+  /* scale by h3 in forward FFT */
+  const real scale = - q * h3;
 
   /* Loop over local portion of the k-grid */
   {
@@ -210,7 +208,7 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
   const real *h = BHD->PD->h;   /* h[3] */
   const int *N = BHD->PD->N;    /* N[3] */
 
-  const int NNN = N[0] * N[1] * N[2];
+  const real h3 = h[0] * h[1] * h[3];
 
   /* Scratch complex vector: */
   Vec work = vec_create (BHD->dc);
@@ -220,7 +218,8 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
   MatMult (BHD->fft_mat, rho, work);
 
   /* With q = -4π/ε₀ you would get the potential: */
-  const real scale = - q / NNN / 4;
+  /* scale by h3 in forward FFT */
+  const real scale = - q * h3 / 4;
 
   /* Loop over local portion of the k-grid */
   {
