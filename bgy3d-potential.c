@@ -262,12 +262,16 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   */
   {
     local Vec ve_fft = vec_create (BHD->dc);
+    const real L3 = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
 
     /* poisson sovler returns FFT coulomb long */
     bgy3d_poisson (BHD, ve_fft, rho, -4 * M_PI * EPSILON0INV);
 
     /* Transpose to get the real-space representation */
     MatMultTranspose (BHD->fft_mat, ve_fft, ve);
+
+    /* apply inverse volume factor after backforward FFT */
+    VecScale (ve, 1.0 / L3);
 
     vec_destroy (&ve_fft);
   }
