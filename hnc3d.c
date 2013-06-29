@@ -1040,7 +1040,8 @@ typedef struct Ctx1
 {
   State *HD;
   int m;
-  Vec *v;                       /* [m], real, fixed */
+  Vec *v_short;                 /* [m], real, fixed */
+  Vec *v_long_fft;              /* [m], complex */
   Vec *y;                       /* [m], real, y = h(t), not t(h) */
   Vec *h_fft, *t_fft;           /* [m], complex */
   Vec *c_fft;                   /* [m][m], complex, fixed */
@@ -1058,7 +1059,8 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   const ProblemData *PD = ctx->HD->PD;
   // const real rho = PD->rho;
   const real beta = PD->beta;
-  const real N3 = PD->N[0] * PD->N[1] * PD->N[2];
+  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real L3 = PD->L[0] * PD->L[1] * PD->L[0];
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m], dt[m];
@@ -1071,11 +1073,24 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   */
   for (int i = 0; i < m; i++)
     {
-      compute_c (PD->closure, beta, ctx->v[i], t[i], c[i]);
+      compute_c (PD->closure, beta, ctx->v_short[i], t[i], c[i]);
 
       /* fft(c).  Here  c is the  3d unknown direct  uv-correlation of
          the solvent sites and the solute species as the whole: */
       MatMult (ctx->HD->fft_mat, c[i], c_fft[i]);
+
+      /* scaling by h^3 in forward FFT */
+      VecScale (c_fft[i], h3);
+
+      /*
+        The real-space  representation encodes only  the short-range
+        part  of  the  direct  corrlation. The  (fixed)  long  range
+        contribution is added here:
+
+          C := C  - βV
+                S     L
+      */
+      VecAXPY (c_fft[i], -beta, ctx->v_long_fft[i]);
     }
 
   /*
@@ -1089,16 +1104,35 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     each solvent site sum over  solvent sites.  Note that the input in
     chi_fft[][] corresponds to χ - 1.
 
-    Let the overall  scale include a factor for  forward & inverse FFT
-    right away  --- check how  we (i) conveniently forgot  to multiply
-    c_fft[] with grid weight h³  after forward FFT and (ii) the result
-    of inverse FFT is also not divided by L³ as everywhere else:
+    Now we apply the scaling of h^3 in forward FFT and divide the
+    result by L^3 in backward FFT, replace 1.0 / N3 as 1.0 ( 1.0 / N3
+    = h^3 / L^3 )
+
+    FIXME: is the scaling of 'rho' missing here ?
   */
-  compute_t1 (m, 1.0 / N3, chi_fft, c_fft, ctx->t_fft);
+  compute_t1 (m, 1.0, chi_fft, c_fft, ctx->t_fft);
 
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
+  {
+    /*
+      Since we plugged in the Fourier transform of the full direct
+      correlation  including  the  long  range part  into  the  OZ
+      equation what  we get out  is the full  indirect correlation
+      including the  long-range part.   The menmonic is  C +  T is
+      short range.  Take it out:
+
+        T := T - βV
+         S         L
+    */
+    VecAXPY (ctx->t_fft[i], -beta, ctx->v_long_fft[i]);
+
     MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
+
+    /* scaling by inverse volume factor in backward FFT */
+    VecScale (dt[i], 1.0 / L3);
+  }
+
 
   /*
     This  destroys the  aliases,  but  does not  free  the memory,  of
@@ -1231,42 +1265,46 @@ void hnc3d_solute_solve (const ProblemData *PD,
   Vec h[m];                     /* FIXME: not deallocated */
   vec_create1 (HD->da, m, h);
 
-  local Vec v[m];
-  vec_create1 (HD->da, m, v); /* solute-solvent interaction */
+  local Vec v_short[m];
+  vec_create1 (HD->da, m, v_short); /* short-range solute-solvent
+                                       interaction */
+
+  local Vec v_long_fft[m];
+  vec_create1 (HD->dc, m, v_long_fft); /* FFT long-range coulomb
+                                          potential */
 
   /*
-    Get  solute-solvent interaction.  Fill  v[i] with  the short-range
-    potential acting on solvent site "i". FIXME: asymptotic Coulomb is
-    assumed to be short-range and is added to to total potential:
+    Get  solute-solvent interaction.  Fill  v_short[i] with  the
+    short-range potential acting on solvent site "i".
   */
 
   /* Asymptotic Coulomb field of the (often neutral) solute: */
   local Vec uc = vec_create (HD->da);
   local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
 
-  /* FFT long-range coulomb potential */
+  /* FFT long-range coulomb field */
   local Vec uc_fft = vec_create (HD->dc);
 
   bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v, uc_fft,    /* out */
+                      v_short, uc_fft,    /* out */
                       uc_rho,   /* out, smeared cores */
                       density); /* in, electron density callback */
   /*
    * Now get the real-space represenation of long-range part of
-   * coulomb potential
+   * coulomb field, which would be supplied to chemical potential
+   * calculation later
    */
   MatMultTranspose (HD->fft_mat, uc_fft, uc);
 
   /* apply inverse volume factor after backforward FFT */
   VecScale (uc, 1.0 / L3);
 
-  /*
-    If   the  solute  is   neutral,  asymptotic   electrostatics  is
-    short-range  (if  you  dare   to  call  dipole  field  that,  of
-    course). Add it to the rest:
-  */
+  /* Scale the FFT coulomb field by solvent charge to get potential */
   for (int i = 0; i < m; i++)
-    VecAXPY (v[i], solvent[i].charge, uc);
+  {
+    VecCopy (uc_fft, v_long_fft[i]);
+    VecScale (v_long_fft[i], solvent[i].charge);
+  }
 
   /*
     For primary variable t there are  two ways to access the data: via
@@ -1324,7 +1362,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
         {
           .HD = HD,
           .m = m,
-          .v = v,
+          .v_short = v_short,
+          .v_long_fft = v_long_fft,
           .y = h,                   /* h(t), not t(h) */
           .c_fft = (void*) chi_fft, /* pair quantitity */
           .h_fft = h_fft,
@@ -1355,7 +1394,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
     /* Closure relation, c = c(t): */
     for (int i = 0; i < m; i++)
-      compute_c (PD->closure, PD->beta, v[i], t[i], c[i]);
+      compute_c (PD->closure, PD->beta, v_short[i], t[i], c[i]);
 
     /* h = c + t */
     for (int i = 0; i < m; i++)
@@ -1363,7 +1402,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
     vec_aliases_destroy1 (T, m, t);
   }
-  vec_destroy1 (m, v);
+  vec_destroy1 (m, v_short);
+  vec_destroy1 (m, v_long_fft);
 
 
   /* Do not destroy  the long Vec T, return it as  restart info if the
@@ -1389,15 +1429,17 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* Excess chemical potential: */
   {
     /*
-      So  far  the  solute/solvent  code does  not  handle  long-range
-      potential of the solute (assuming  it is neutral).  The code for
-      the chemical potential expects that. Supply zeroes:
-    */
+       Now we could supply the long-range part for chemical potential
+       calculation, scaling by beta * solvent.charge
+     */
     local Vec cl[m];
     vec_create1 (HD->da, m, cl);
 
     for (int i = 0; i < m; i++)
+    {
       VecSet (cl[i], 0.0);
+      VecAXPY (cl[i], -PD->beta * solvent[i].charge, uc);
+    }
 
     /*
       In  3d  models  the  solute  is  effectively  a  single  (albeit
