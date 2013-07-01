@@ -42,18 +42,9 @@
    old-main
    vec-print
    vec-norm
-   bgy3d-api-version
    bgy3d-test
    solvent/solvent
    solute/solvent))
-
-;;;
-;;; Functionality is  in the  flux. QM  code may want  to check  if it
-;;; assumes   the   correct  API.    Change   this  when   introducing
-;;; incompatible  changes. The variable  is a  3-list of  (major minor
-;;; extra) integer numbers.
-;;;
-(define bgy3d-api-version '(1 0 0))
 
 ;;;
 ;;; The list of the procedures defined in bgy3d-guile.c includes
