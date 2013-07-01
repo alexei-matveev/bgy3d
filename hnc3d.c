@@ -1040,8 +1040,9 @@ typedef struct Ctx1
 {
   State *HD;
   int m;
+  real *charge;                 /* [m], fixed */
   Vec *v_short;                 /* [m], real, fixed */
-  Vec *v_long_fft;              /* [m], complex */
+  Vec v_long_fft;               /* complex, fixed */
   Vec *y;                       /* [m], real, y = h(t), not t(h) */
   Vec *h_fft, *t_fft;           /* [m], complex */
   Vec *c_fft;                   /* [m][m], complex, fixed */
@@ -1089,8 +1090,11 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 
           C := C  - βV
                 S     L
+
+        The long-range asymptotics is  of electrostatic origin so that
+        site-specific potentials are proportional to the site charges:
       */
-      VecAXPY (c_fft[i], -beta, ctx->v_long_fft[i]);
+      VecAXPY (c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
     }
 
   /*
@@ -1125,7 +1129,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
         T := T - βV
          S         L
     */
-    VecAXPY (ctx->t_fft[i], -beta, ctx->v_long_fft[i]);
+    VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
 
     MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
@@ -1269,42 +1273,35 @@ void hnc3d_solute_solve (const ProblemData *PD,
   vec_create1 (HD->da, m, v_short); /* short-range solute-solvent
                                        interaction */
 
-  local Vec v_long_fft[m];
-  vec_create1 (HD->dc, m, v_long_fft); /* FFT long-range coulomb
-                                          potential */
-
   /*
-    Get  solute-solvent interaction.  Fill  v_short[i] with  the
-    short-range potential acting on solvent site "i".
+    Get   solute-solvent  interaction.    Fill  v_short[i]   with  the
+    short-range potential  acting on solvent site  "i". The long-range
+    part, Vec uc_fft,  is represented on the k-grid  and is assumed to
+    differ only by factors proportional to the solvent site charges.
+
+    Note that  asymptotic Coulomb field of the  *neutral* solute would
+    be formally of  the short-range.  In practice it  appears that the
+    observables do not  change if we treat it as  either the short- or
+    the long range.
+
+    Fourier transform of long-range Coulomb field goes here:
   */
-
-  /* Asymptotic Coulomb field of the (often neutral) solute: */
-  local Vec uc = vec_create (HD->da);
-  local Vec uc_rho = vec_create (HD->da); /* FIXME: discarded */
-
-  /* FFT long-range coulomb field */
   local Vec uc_fft = vec_create (HD->dc);
+  local Vec uc_rho = vec_create (HD->da); /* used for observables */
 
   bgy3d_solute_field (HD, m, solvent, n, solute,
                       v_short, uc_fft,    /* out */
                       uc_rho,   /* out, smeared cores */
                       density); /* in, electron density callback */
+
   /*
-   * Now get the real-space represenation of long-range part of
-   * coulomb field, which would be supplied to chemical potential
-   * calculation later
-   */
-  MatMultTranspose (HD->fft_mat, uc_fft, uc);
-
-  /* apply inverse volume factor after backforward FFT */
-  VecScale (uc, 1.0 / L3);
-
-  /* Scale the FFT coulomb field by solvent charge to get potential */
+    Scaling  factors  for  the  site-specific long  range  potentials.
+    Instead of  storing multiple proportional fields we  will pass the
+    factors separately:
+  */
+  real charge[m];
   for (int i = 0; i < m; i++)
-  {
-    VecCopy (uc_fft, v_long_fft[i]);
-    VecScale (v_long_fft[i], solvent[i].charge);
-  }
+    charge[i] = solvent[i].charge;
 
   /*
     For primary variable t there are  two ways to access the data: via
@@ -1362,9 +1359,10 @@ void hnc3d_solute_solve (const ProblemData *PD,
         {
           .HD = HD,
           .m = m,
-          .v_short = v_short,
-          .v_long_fft = v_long_fft,
-          .y = h,                   /* h(t), not t(h) */
+          .charge = charge,     /* [m], in */
+          .v_short = v_short,   /* [m], real, in */
+          .v_long_fft = uc_fft, /* complex, in */
+          .y = h,               /* h(t), not t(h) */
           .c_fft = (void*) chi_fft, /* pair quantitity */
           .h_fft = h_fft,
           .t_fft = t_fft,
@@ -1403,7 +1401,6 @@ void hnc3d_solute_solve (const ProblemData *PD,
     vec_aliases_destroy1 (T, m, t);
   }
   vec_destroy1 (m, v_short);
-  vec_destroy1 (m, v_long_fft);
 
 
   /* Do not destroy  the long Vec T, return it as  restart info if the
@@ -1426,20 +1423,43 @@ void hnc3d_solute_solve (const ProblemData *PD,
     vec_pack_destroy1 (&T);     /* not vec_destroy()! */
 
 
+  /*
+    Now get the real-space represenation of long-range part of Coulomb
+    field, which  would be supplied to  chemical potential calculation
+    later.  The  real-space representation is not (and  should not be)
+    used during iterations.
+   */
+  local Vec uc = vec_create (HD->da);
+  MatMultTranspose (HD->fft_mat, uc_fft, uc);
+
+  /* apply inverse volume factor after backforward FFT */
+  VecScale (uc, 1.0 / L3);
+
+  /* Should not be needed: */
+  vec_destroy (&uc_fft);
+
+
   /* Excess chemical potential: */
   {
     /*
-       Now we could supply the long-range part for chemical potential
-       calculation, scaling by beta * solvent.charge
+       FIXME: At the moment we can only supply the long-range part for
+       chemical potential calculation obtained  by FFT over the finite
+       size unit cell.  This is possibly inaccurate for the long-range
+       potential of charged systems.
+
+       FIXME:  Though  the chemical  potential  code  does assume  the
+       asymptotics of  the direct  correlations to be  proportional to
+       the solvent charges (see how we handle the term linear in C) we
+       still supply m redundant vectors:
      */
     local Vec cl[m];
     vec_create1 (HD->da, m, cl);
 
     for (int i = 0; i < m; i++)
-    {
-      VecSet (cl[i], 0.0);
-      VecAXPY (cl[i], -PD->beta * solvent[i].charge, uc);
-    }
+      {
+        VecSet (cl[i], 0.0);
+        VecAXPY (cl[i], -PD->beta * charge[i], uc);
+      }
 
     /*
       In  3d  models  the  solute  is  effectively  a  single  (albeit
@@ -1465,10 +1485,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
   else
     bgy3d_pot_destroy (ret);
 
-  /* keep uc and uc_rho until being used in info() */
+  /* Keep uc and uc_rho until being used in info() */
   vec_destroy (&uc);
   vec_destroy (&uc_rho);
-  vec_destroy (&uc_fft);
 
   /* free stuff */
   /* Delegated to the caller: vec_destroy (&h) */
