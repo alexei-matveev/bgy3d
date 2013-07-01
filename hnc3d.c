@@ -1043,9 +1043,9 @@ typedef struct Ctx1
   real *charge;                 /* [m], fixed */
   Vec *v_short;                 /* [m], real, fixed */
   Vec v_long_fft;               /* complex, fixed */
-  Vec *y;                       /* [m], real, y = h(t), not t(h) */
-  Vec *h_fft, *t_fft;           /* [m], complex */
-  Vec *c_fft;                   /* [m][m], complex, fixed */
+  Vec *c;                       /* [m], real, work */
+  Vec *c_fft, *t_fft;           /* [m], complex, work */
+  Vec *chi_fft;                 /* [m][m], complex, fixed */
 } Ctx1;
 
 
@@ -1053,9 +1053,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
-  Vec (*chi_fft)[m] = (void*) ctx->c_fft; /* [m][m], complex, in */
-  Vec *c = (void*) ctx->y;                /* [m], real, work */
-  Vec *c_fft = (void*) ctx->h_fft;        /* [m], complex, work */
+  Vec (*chi_fft)[m] = (void*) ctx->chi_fft; /* [m][m], complex, in */
 
   const ProblemData *PD = ctx->HD->PD;
   // const real rho = PD->rho;
@@ -1074,14 +1072,14 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   */
   for (int i = 0; i < m; i++)
     {
-      compute_c (PD->closure, beta, ctx->v_short[i], t[i], c[i]);
+      compute_c (PD->closure, beta, ctx->v_short[i], t[i], ctx->c[i]);
 
       /* fft(c).  Here  c is the  3d unknown direct  uv-correlation of
          the solvent sites and the solute species as the whole: */
-      MatMult (ctx->HD->fft_mat, c[i], c_fft[i]);
+      MatMult (ctx->HD->fft_mat, ctx->c[i], ctx->c_fft[i]);
 
       /* scaling by h^3 in forward FFT */
-      VecScale (c_fft[i], h3);
+      VecScale (ctx->c_fft[i], h3);
 
       /*
         The real-space  representation encodes only  the short-range
@@ -1094,7 +1092,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
         The long-range asymptotics is  of electrostatic origin so that
         site-specific potentials are proportional to the site charges:
       */
-      VecAXPY (c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
+      VecAXPY (ctx->c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
     }
 
   /*
@@ -1112,7 +1110,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     result by L^3 in backward FFT, replace  1.0 / N3 as 1.0 ( 1.0 / N3
     = h^3 / L^3 )
   */
-  compute_t1 (m, 1.0, chi_fft, c_fft, ctx->t_fft);
+  compute_t1 (m, 1.0, chi_fft, ctx->c_fft, ctx->t_fft);
 
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
@@ -1328,8 +1326,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
     VecSet (T, 0.0);
 
   {
-    local Vec h_fft[m];
-    vec_create1 (HD->dc, m, h_fft); /* complex */
+    local Vec c_fft[m];
+    vec_create1 (HD->dc, m, c_fft); /* complex */
 
     local Vec t_fft[m];
     vec_create1 (HD->dc, m, t_fft); /* complex */
@@ -1357,18 +1355,18 @@ void hnc3d_solute_solve (const ProblemData *PD,
         {
           .HD = HD,
           .m = m,
-          .charge = charge,     /* [m], in */
-          .v_short = v_short,   /* [m], real, in */
-          .v_long_fft = uc_fft, /* complex, in */
-          .y = h,               /* h(t), not t(h) */
-          .c_fft = (void*) chi_fft, /* pair quantitity */
-          .h_fft = h_fft,
-          .t_fft = t_fft,
+          .charge = charge,           /* [m], in */
+          .v_short = v_short,         /* [m], real, in */
+          .v_long_fft = uc_fft,       /* complex, in */
+          .c = h,                     /* [m], work for c(t) */
+          .chi_fft = (void*) chi_fft, /* [m][m], pair quantitity, in */
+          .c_fft = c_fft,             /* [m], work for c(t) */
+          .t_fft = t_fft,             /* [m], work for t(c(t))) */
         };
 
       bgy3d_snes_default (PD, &ctx, (VectorFunc) iterate_t1, T);
     }
-    vec_destroy1 (m, h_fft);
+    vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
 
     /* This should have been the only pair quantity: */
