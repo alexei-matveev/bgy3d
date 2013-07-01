@@ -1116,24 +1116,24 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
-  {
-    /*
-      Since we  plugged in  the Fourier transform  of the  full direct
-      correlation including  the long range part into  the OZ equation
-      what we get  out is the full indirect  correlation including the
-      long-range part.  The menmonic is C + T is short range.  Take it
-      out:
+    {
+      /*
+        Since we plugged  in the Fourier transform of  the full direct
+        correlation including the long range part into the OZ equation
+        what we get out is the full indirect correlation including the
+        long-range part.  The menmonic is  C + T is short range.  Take
+        it out:
 
-        T := T - βV
-         S         L
-    */
-    VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
+          T := T - βV
+           S         L
+      */
+      VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
 
-    MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
+      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
-    /* scaling by inverse volume factor in backward FFT */
-    VecScale (dt[i], 1.0 / L3);
-  }
+      /* Scaling by inverse volume factor in backward FFT */
+      VecScale (dt[i], 1.0 / L3);
+    }
 
 
   /*
