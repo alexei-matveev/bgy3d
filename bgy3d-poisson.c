@@ -109,12 +109,9 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 
   const real h3 = h[0] * h[1] * h[2];
 
-  /* Scratch complex vector: */
-  Vec work = vec_create (BHD->dc);
-
   /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
-     complex work: */
-  MatMult (BHD->fft_mat, rho, work);
+     complex uc_fft: */
+  MatMult (BHD->fft_mat, rho, uc_fft);
 
   /*
     Solving Poisson Equation (note the  absence of -4π factor) with FFT
@@ -152,7 +149,7 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
     DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
     complex ***work_;
-    DMDAVecGetArray (BHD->dc, work, &work_);
+    DMDAVecGetArray (BHD->dc, uc_fft, &work_);
 
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -181,16 +178,13 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
                * rho(kx, ky, kz) / k² */
             work_[i[2]][i[1]][i[0]] *= fac; /* complex */
           }
-    DMDAVecRestoreArray (BHD->dc, work, &work_);
+    DMDAVecRestoreArray (BHD->dc, uc_fft, &work_);
   }
 
   /*
    * Leave IFFT to the caller when necessary, here we only pass out
    * FFT coulomb potential
    */
-  VecCopy (work, uc_fft);
-
-  vec_destroy (&work);
 }
 #else
 /*
@@ -210,12 +204,9 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 
   const real h3 = h[0] * h[1] * h[3];
 
-  /* Scratch complex vector: */
-  Vec work = vec_create (BHD->dc);
-
   /* Get FFT of  rho: rho(i, j, k) -> fft_rho(kx,  ky, kz) placed into
-     complex work: */
-  MatMult (BHD->fft_mat, rho, work);
+     complex uc_fft: */
+  MatMult (BHD->fft_mat, rho, uc_fft);
 
   /* With q = -4π/ε₀ you would get the potential: */
   /* scale by h3 in forward FFT */
@@ -227,7 +218,7 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
     DMDAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
     complex ***work_;
-    DMDAVecGetArray (BHD->dc, work, &work_);
+    DMDAVecGetArray (BHD->dc, uc_fft, &work_);
 
     for (int k = k0; k < k0 + nk; k++)
       for (int j = j0; j < j0 + nj; j++)
@@ -254,15 +245,12 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
                rho(kx, ky, kz) / k^2 */
             work_[k][j][i] *= fac; /* complex */
           }
-    DMDAVecRestoreArray (BHD->dc, work, &work_);
+    DMDAVecRestoreArray (BHD->dc, uc_fft, &work_);
   }
 
   /*
    * Leave IFFT to the caller when necessary, here we only pass out
    * FFT coulomb potential
    */
-  VecCopy (work, uc_fft);
-
-  vec_destroy (&work);
 }
 #endif
