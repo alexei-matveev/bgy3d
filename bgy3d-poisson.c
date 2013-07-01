@@ -148,8 +148,8 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
     int x[3], n[3], i[3];
     DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
-    complex ***work_;
-    DMDAVecGetArray (BHD->dc, uc_fft, &work_);
+    complex ***uc_fft_;
+    DMDAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
 
     for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
       for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
@@ -176,9 +176,9 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 
             /* Here  we compute  in  place: uc(kx,  ky,  kz) :=  scale
                * rho(kx, ky, kz) / k² */
-            work_[i[2]][i[1]][i[0]] *= fac; /* complex */
+            uc_fft_[i[2]][i[1]][i[0]] *= fac; /* complex */
           }
-    DMDAVecRestoreArray (BHD->dc, uc_fft, &work_);
+    DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   }
 
   /*
@@ -217,8 +217,8 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
     int i0, j0, k0, ni, nj, nk;
     DMDAGetCorners (BHD->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
-    complex ***work_;
-    DMDAVecGetArray (BHD->dc, uc_fft, &work_);
+    complex ***uc_fft_;
+    DMDAVecGetArray (BHD->dc, uc_fft, &uc_fft_);
 
     for (int k = k0; k < k0 + nk; k++)
       for (int j = j0; j < j0 + nj; j++)
@@ -243,9 +243,9 @@ void bgy3d_poisson (const State *BHD, Vec uc_fft, Vec rho, real q)
 
             /* Here we compute in place: u(kx, ky, kz) := scale *
                rho(kx, ky, kz) / k^2 */
-            work_[k][j][i] *= fac; /* complex */
+            uc_fft_[k][j][i] *= fac; /* complex */
           }
-    DMDAVecRestoreArray (BHD->dc, uc_fft, &work_);
+    DMDAVecRestoreArray (BHD->dc, uc_fft, &uc_fft_);
   }
 
   /*
