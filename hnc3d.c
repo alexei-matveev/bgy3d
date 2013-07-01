@@ -1108,11 +1108,9 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     each solvent site sum over  solvent sites.  Note that the input in
     chi_fft[][] corresponds to χ - 1.
 
-    Now we apply the scaling of h^3 in forward FFT and divide the
-    result by L^3 in backward FFT, replace 1.0 / N3 as 1.0 ( 1.0 / N3
+    Now we  apply the  scaling of  h^3 in forward  FFT and  divide the
+    result by L^3 in backward FFT, replace  1.0 / N3 as 1.0 ( 1.0 / N3
     = h^3 / L^3 )
-
-    FIXME: is the scaling of 'rho' missing here ?
   */
   compute_t1 (m, 1.0, chi_fft, c_fft, ctx->t_fft);
 
