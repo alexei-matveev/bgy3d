@@ -1118,11 +1118,11 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   for (int i = 0; i < m; i++)
   {
     /*
-      Since we plugged in the Fourier transform of the full direct
-      correlation  including  the  long  range part  into  the  OZ
-      equation what  we get out  is the full  indirect correlation
-      including the  long-range part.   The menmonic is  C +  T is
-      short range.  Take it out:
+      Since we  plugged in  the Fourier transform  of the  full direct
+      correlation including  the long range part into  the OZ equation
+      what we get  out is the full indirect  correlation including the
+      long-range part.  The menmonic is C + T is short range.  Take it
+      out:
 
         T := T - βV
          S         L
