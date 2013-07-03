@@ -645,3 +645,66 @@ energy  and include  the factor  1/2. One  is obtained  by integrating
 "solvent   electrostatic  field   with  diffuse   charge   density  of
 solute". The  other is computed by QM  code by forming a  trace of the
 density matrix with the matrix representatio of the potential.
+
+
+Reference values for execess chemical potential
+-----------------------------------------------
+
+For comparison, we collected values for excess chemical potential
+reported in others' work in which results for solutes that we used for
+regression tests are available. There's no guarantee that our numbers
+must be the same with other sources because force field and geometry for
+solutes in our code are different with theirs, but good agreement might
+indicate that we are not doing things totally wrong.
+
+In source [1], "UC" is short for "universal correction" and in source
+[2] and [3], "SDC" is for "structural descriptors correction".  They are
+actually different names for the same method which they developed to
+"improve the accuracy of hydration free energies".
+
+
+
+source [1]:
+
+Solute/FF Solvent/FF Method     KH3  KH3/UC    GF3  GF3/UC $\Delta G_{exp}$
+--------- ---------- ------- ------ ------- ------ ------- ----------------
+CH~3~OH/  water/     3D-RISM  1.041  -5.971 -2.399  -6.086  -5.100
+OPLS-AA   MSPC-E     -KH
+---------------------------------------------------------------------------
+
+
+source [2]:
+
+Solute/FF Solvent/FF Method     GF1    GF3   SDC1   SDC3 $\Delta G_{exp}$
+--------- ---------- ------- ------ ------ ------ ------ ----------------
+CH~3~OH/   water/    1D/3D-   -6.34  12.24  -7.49  -5.16  -5.11
+Amber      Amber     RISM-KH
+C~6~H14/   water/    1D/3D-    2.85  20.41   2.49   2.55   2.50
+Amber      Amber     RISM-KH
+-------------------------------------------------------------------------
+
+source [3]:
+
+Solute/FF Solvent/FF Method    PW1   GF1  SDC/PW  SDC/GF $\Delta G_{exp}$
+--------- ---------- ------- ----- ----- ------- ------- ----------------
+CH~3~OH/  water/     1D-RISM -0.07 -5.46   -5.76   -6.02  -5.11
+OPLS-AA   MSPC-E     -KH
+C~6~H14/  water/     1D-RISM 13.33  5.23    2.89    3.03   2.50
+OPLS-AA   MSPC-E     -KH
+-------------------------------------------------------------------------
+
+[1] "3DRISM Multigrid Algorithm for Fast Solvation Free Energy
+    Calculations", Volodymyr P. Sergiievskyi, and Maxim V. Fedorov,
+    J. Chem. Theory Comput., 2012, 8 (6), pp 2062-2070,
+    http://dx.doi.org/10.1021/ct200815v
+
+[2] "Hydration Thermodynamics Using the Reference Interaction Site
+    Model: Speed or Accuracy?",  A. I. Frolov, E. L. Ratkova,
+    D. S. Palmer and M. V. Fedorov, J. Phys. Chem. B, 2011, 115 (19),
+    pp 6011-6022, http://dx.doi.org/10.1021/jp111271c
+
+[3] "An Accurate Prediction of Hydration Free Energies by Combination of
+    Molecular Integral Equations Theory with Structural Descriptors",
+    E. L. Ratkova, G. N. Chuev, V. P. Sergiievskyi and M. V. Fedorov,
+    J. Phys. Chem. B, 2010, 114 (37), pp 12068-12079,
+    http://dx.doi.org/10.1021/jp103955r
