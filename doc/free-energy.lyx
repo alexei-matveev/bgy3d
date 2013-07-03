@@ -1,5 +1,5 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass article
@@ -16,18 +16,26 @@
 \end_preamble
 \options twoside
 \use_default_options false
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding latin1
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 12
 \spacing single
 \use_hyperref false
@@ -35,9 +43,18 @@
 \use_geometry true
 \use_amsmath 1
 \use_esint 0
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 1in
 \topmargin 1.5in
 \rightmargin 1in
@@ -45,15 +62,16 @@
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
-\defskip medskip
+\paragraph_indentation default
 \quotes_language english
 \papercolumns 1
 \papersides 2
 \paperpagestyle fancy
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -68,27 +86,38 @@ AM
 \end_layout
 
 \begin_layout Date
-27.06.2011
+July 2013
 \end_layout
 
 \begin_layout Abstract
-A steady increase in available computational power allows us to use more
- and more sofisticated ab-initio techniques in studies of electronic and
- microscopic structures.
- Yet no explosion in computational power justifies brute force use of the
- very same techniques at macroscopic scale.
- For a specific problem of studying solution we propose a multiscale approach
- to treat the solute by quantum- and the solvent by statistical mechanics.
- The atomistic statistical model delivers insights into the microscopic
- structure of the solvent on the one side and relates that to the macroscopic
- parameters of the solvent such as temperature and pressure on the other
- side, thus bridging micro- and macroscopic scales.
- For both, electronic structure and statisctical model, we propose to build
- upon existing packages relying on the established techniques: density funcitona
-l theory and Born--Green--Yvon hierarchy of equations for distribution functions.
- The interface between quantum and statistical models will address electrostatic
- electron-solvent interaction directly with the net rest parametrized by
- a suitable force field.
+As a widespread phenomenon of fundamental importance in chemistry and technology
+, solvation currently is one of the grand challenges in computational chemistry.
+ Steady increase in available computational power allows using increasingly
+ sophisticated ab initio techniques when studying electronic and atomisitic
+ structures of matter.
+ Yet not even an explosion in computational power will ever admit a brute
+ force atomistic approach at the macroscopic scale.
+ For the specific problem of studying solvation we propose a multi-scale
+ approach to treat the solute by quantum- and the solvent by statistical
+ mechanics.
+ The atomistic statistical model delivers insight into the microscopic structure
+ of the solvent on the one hand, and relates that to the macroscopic parameters
+ of the solvent, such as temperature and pressure, on the other hand – thus
+ bridging micro- and macroscopic scales.
+ For the statistical model of the solvent, we propose to develop algorithms
+ and generic software that permit solving the Born-Green-Yvon hierarchy
+ of equations for a molecular solvent, admitting a realistic quantification
+ of the corresponding distribution functions.
+ While any high-level electronic structure method may be applied as electronic
+ structure model, density functional theory is the method of choice for
+ complex solutes.
+ The interface between these two model partitions will address long-range
+ electrostatic electron-solvent interactions while short-range interactions
+ will be parameterized by a suitable force field.
+ The method is to be implemented as generic module, parallelized for high
+ performance applications, like the determination of Gibbs free energy hyper
+ surfaces of complex chemical systems.
+ 
 \end_layout
 
 \begin_layout Abstract
@@ -1445,8 +1474,10 @@ key "ten-no93,book:hirata03,kovalenko99,kovalenko00a,kovalenko00b"
 \begin_layout Standard
 Canonical distribution of the compound system is given by the distribution
  function
-\begin_inset Formula \begin{equation}
-\rho(X,Y)=\mathrm{e}^{\beta(A-V(X,Y))}\label{eq:def-partition-function}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\rho(X,Y)=\mathrm{e}^{\beta(A-V(X,Y))}\label{eq:def-partition-function}
+\end{equation}
 
 \end_inset
 
@@ -1467,14 +1498,18 @@ key "book:landauV5"
 \end_inset
 
 :
-\begin_inset Formula \begin{equation}
-A=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dXdY\end{equation}
+\begin_inset Formula 
+\begin{equation}
+A=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dXdY
+\end{equation}
 
 \end_inset
 
 The (reduced) distribution of the solute coordinates
-\begin_inset Formula \begin{equation}
-\rho(X)=\int\rho(X,Y)dY\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\rho(X)=\int\rho(X,Y)dY
+\end{equation}
 
 \end_inset
 
@@ -1487,15 +1522,19 @@ may be used to introduce the free energy
 \end_inset
 
  
-\begin_inset Formula \begin{equation}
-\rho(X)=\mathrm{e}^{\beta(A-A(X))}\label{eq:def-conformation-free-energy}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\rho(X)=\mathrm{e}^{\beta(A-A(X))}\label{eq:def-conformation-free-energy}
+\end{equation}
 
 \end_inset
 
 more explicitly given by given by a partial statistical sum over solvent
  coordinates: 
-\begin_inset Formula \begin{equation}
-A(X)=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dY\label{eq:conformation-free-energy}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+A(X)=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dY\label{eq:conformation-free-energy}
+\end{equation}
 
 \end_inset
 
@@ -1623,8 +1662,10 @@ key "book:hansen76"
 \end_inset
 
 : 
-\begin_inset Formula \[
-\frac{dA(X)}{dX}=\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}:=\int\frac{\partial V}{\partial X}\rho_{X}(Y)dY\]
+\begin_inset Formula 
+\[
+\frac{dA(X)}{dX}=\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}:=\int\frac{\partial V}{\partial X}\rho_{X}(Y)dY
+\]
 
 \end_inset
 
@@ -1632,8 +1673,10 @@ where we introduced conditional distribution function
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \[
-\rho_{X}(Y):=\frac{\rho(X,Y)}{\rho(X)}=\mathrm{e}^{\beta[A(X)-V(X,Y)]}\]
+\begin_inset Formula 
+\[
+\rho_{X}(Y):=\frac{\rho(X,Y)}{\rho(X)}=\mathrm{e}^{\beta[A(X)-V(X,Y)]}
+\]
 
 \end_inset
 
@@ -1716,8 +1759,10 @@ The Jacobian contribution vanishes identically, as the assumed partition
 \end_inset
 
  
-\begin_inset Formula \begin{equation}
-A(X_{1})-A(X_{0})=\int_{X_{0}}^{X_{1}}\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}dX.\label{eq:pmf-path-integral}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+A(X_{1})-A(X_{0})=\int_{X_{0}}^{X_{1}}\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}dX.\label{eq:pmf-path-integral}
+\end{equation}
 
 \end_inset
 
@@ -1990,14 +2035,18 @@ polarization vector
 \begin_layout Standard
 Let us examine the special case of a pairwise solute-solvent interaction
  
-\begin_inset Formula \[
-U_{1}(X,Y)=\sum_{i}u_{X}(y_{i})\]
+\begin_inset Formula 
+\[
+U_{1}(X,Y)=\sum_{i}u_{X}(y_{i})
+\]
 
 \end_inset
 
 defining the interface between two subsystems in the potential function
-\begin_inset Formula \[
-V_{\lambda}(X,Y)=E(X)+\lambda U_{1}(X,Y)+U_{2}(Y).\]
+\begin_inset Formula 
+\[
+V_{\lambda}(X,Y)=E(X)+\lambda U_{1}(X,Y)+U_{2}(Y).
+\]
 
 \end_inset
 
@@ -2023,8 +2072,10 @@ Here we augmented the list of system parameters
 \end_inset
 
  is a sum of solute and solvent energies
-\begin_inset Formula \[
-A_{0}(X)=E(X)-\beta^{-1}\ln\int\mathrm{e}^{-\beta U_{2}(Y)}dY\]
+\begin_inset Formula 
+\[
+A_{0}(X)=E(X)-\beta^{-1}\ln\int\mathrm{e}^{-\beta U_{2}(Y)}dY
+\]
 
 \end_inset
 
@@ -2045,8 +2096,10 @@ with partition function of the pure solvent independent of solute parameters
 
  suggests the expression for the conformation free energy difference with
  respect to the non-interacting solute and solvent,
-\begin_inset Formula \[
-A_{1}(X)-A_{0}(X)=\int_{0}^{1}d\lambda\int u_{X}(y)\rho_{\lambda X}(y)dy,\]
+\begin_inset Formula 
+\[
+A_{1}(X)-A_{0}(X)=\int_{0}^{1}d\lambda\int u_{X}(y)\rho_{\lambda X}(y)dy,
+\]
 
 \end_inset
 
@@ -2114,8 +2167,10 @@ For thermodynamic processes where the dependence of the density distribution
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \[
-\rho_{\lambda X}(y)=(1-\lambda)\rho_{0X}(y)+\lambda\rho_{1X}(y)\]
+\begin_inset Formula 
+\[
+\rho_{\lambda X}(y)=(1-\lambda)\rho_{0X}(y)+\lambda\rho_{1X}(y)
+\]
 
 \end_inset
 
@@ -2125,8 +2180,10 @@ with accessible first- (or higher) order response terms the integration
 \end_inset
 
  can be performed analytically: 
-\begin_inset Formula \[
-\Delta A(X)=\int u_{X}(y)\rho_{0.5X}(y)dy,\quad\rho_{0.5X}(y)=\frac{1}{2}[\rho_{0X}(y)+\rho_{1X}(y)]\]
+\begin_inset Formula 
+\[
+\Delta A(X)=\int u_{X}(y)\rho_{0.5X}(y)dy,\quad\rho_{0.5X}(y)=\frac{1}{2}[\rho_{0X}(y)+\rho_{1X}(y)]
+\]
 
 \end_inset
 
@@ -2179,8 +2236,10 @@ polarization
 
  to first order (thus assuming linear response) one obtains for the free
  energy differences an approximate expression
-\begin_inset Formula \[
-\Delta A(X)=\frac{1}{2}\int u_{1}(y)\rho_{1X}(y)dy=\frac{1}{2}\int u_{1}(y)[\rho_{1X}(y)-\rho_{0X}(y)]dy.\]
+\begin_inset Formula 
+\[
+\Delta A(X)=\frac{1}{2}\int u_{1}(y)\rho_{1X}(y)dy=\frac{1}{2}\int u_{1}(y)[\rho_{1X}(y)-\rho_{0X}(y)]dy.
+\]
 
 \end_inset
 
@@ -2238,8 +2297,10 @@ key "book:landauV5"
 \end_inset
 
 , 
-\begin_inset Formula \[
-\Delta A(X)\approx-\frac{\beta}{2}\int u_{1}^{2}(y)\rho_{0X}(y)dy=-\frac{\beta}{2}\left\langle u_{1}^{2}\right\rangle _{X},\]
+\begin_inset Formula 
+\[
+\Delta A(X)\approx-\frac{\beta}{2}\int u_{1}^{2}(y)\rho_{0X}(y)dy=-\frac{\beta}{2}\left\langle u_{1}^{2}\right\rangle _{X},
+\]
 
 \end_inset
 
@@ -2269,8 +2330,10 @@ key "onsager36"
 \end_inset
 
 , 
-\begin_inset Formula \[
-\Delta A=-\frac{\epsilon-1}{\epsilon}\frac{Q^{2}}{2R}\]
+\begin_inset Formula 
+\[
+\Delta A=-\frac{\epsilon-1}{\epsilon}\frac{Q^{2}}{2R}
+\]
 
 \end_inset
 
@@ -2421,8 +2484,10 @@ key "marconi99"
 
 \begin_layout Standard
 A common partition of the functional
-\begin_inset Formula \[
-\mathcal{F}[\rho]=\mathcal{F}_{\text{id}}[\rho]+\Delta\mathcal{F}_{\text{rep}}[\rho]+\Delta\mathcal{F}_{\text{attr}}[\rho]\]
+\begin_inset Formula 
+\[
+\mathcal{F}[\rho]=\mathcal{F}_{\text{id}}[\rho]+\Delta\mathcal{F}_{\text{rep}}[\rho]+\Delta\mathcal{F}_{\text{attr}}[\rho]
+\]
 
 \end_inset
 
@@ -2458,8 +2523,10 @@ ideal
 \end_inset
 
  liquid without internal degrees of freedom is proportional to the entropy
-\begin_inset Formula \[
-\Delta\mathcal{F}_{\text{id}}[\rho]=\beta^{-1}\int\rho(y)\ln\rho(y)dy,\]
+\begin_inset Formula 
+\[
+\Delta\mathcal{F}_{\text{id}}[\rho]=\beta^{-1}\int\rho(y)\ln\rho(y)dy,
+\]
 
 \end_inset
 
@@ -2470,8 +2537,10 @@ which is a local functional.
 \end_inset
 
 :
-\begin_inset Formula \[
-\Delta\mathcal{F}_{\text{rep}}[\rho]=\beta^{-1}\int\rho(y)f_{\text{rep}}(\eta(y))dy,\quad\eta(y)=\int w(y,y^{\prime})\rho(y^{\prime})dy^{\prime}\]
+\begin_inset Formula 
+\[
+\Delta\mathcal{F}_{\text{rep}}[\rho]=\beta^{-1}\int\rho(y)f_{\text{rep}}(\eta(y))dy,\quad\eta(y)=\int w(y,y^{\prime})\rho(y^{\prime})dy^{\prime}
+\]
 
 \end_inset
 
@@ -2530,8 +2599,10 @@ key "carnahan70"
  is non-local.
  A rough estimate of the free energy functional responsible for the attractive
  interaction is given by an integral
-\begin_inset Formula \[
-\Delta\mathcal{F}_{\text{attr}}[\rho]=\frac{1}{2}\iint\rho(y)u_{2}(y,y^{\prime})\rho(y^{\prime})dydy^{\prime}\]
+\begin_inset Formula 
+\[
+\Delta\mathcal{F}_{\text{attr}}[\rho]=\frac{1}{2}\iint\rho(y)u_{2}(y,y^{\prime})\rho(y^{\prime})dydy^{\prime}
+\]
 
 \end_inset
 
@@ -2570,8 +2641,10 @@ In the presence of external (solute) field
 \end_inset
 
  consists of two terms,
-\begin_inset Formula \[
-\Omega[\rho(y)]=\mathcal{F}[\rho(y)]+\int\rho(y)[u(y)-\mu]dy,\]
+\begin_inset Formula 
+\[
+\Omega[\rho(y)]=\mathcal{F}[\rho(y)]+\int\rho(y)[u(y)-\mu]dy,
+\]
 
 \end_inset
 
@@ -2587,8 +2660,10 @@ where the intrinsic free energy functional
 .
  The corresponding Lagrange equation for the density minimizing the free
  energy functional 
-\begin_inset Formula \[
-\frac{\delta\mathcal{F}[\rho]}{\delta\rho(y)}+u(y)=\mu\]
+\begin_inset Formula 
+\[
+\frac{\delta\mathcal{F}[\rho]}{\delta\rho(y)}+u(y)=\mu
+\]
 
 \end_inset
 
@@ -2706,8 +2781,10 @@ fast
 \end_inset
 
  
-\begin_inset Formula \[
-E=E[n,R,Y]\]
+\begin_inset Formula 
+\[
+E=E[n,R,Y]
+\]
 
 \end_inset
 
@@ -2963,8 +3040,10 @@ The simplest approach for constructing such a model is to reduce the potential
 \end_inset
 
 :
-\begin_inset Formula \[
-V(R,Y)=E_{0}(R)+U(R,Y)\]
+\begin_inset Formula 
+\[
+V(R,Y)=E_{0}(R)+U(R,Y)
+\]
 
 \end_inset
 
@@ -2997,8 +3076,10 @@ More useful approach will account for interaction of electronic degrees
 .
  A successful approach accounting for this kind of interaction will need
  to allow efficient evaluations of energy functional
-\begin_inset Formula \[
-V(X,Y)\equiv V[n,R,Y]\]
+\begin_inset Formula 
+\[
+V(X,Y)\equiv V[n,R,Y]
+\]
 
 \end_inset
 
@@ -3040,8 +3121,10 @@ key "ten-no93"
 
 .
  The total energy of the system is then defined as a functional
-\begin_inset Formula \[
-V[n,R,Y]=E[n,R]+U(Q[n],R,Y)\]
+\begin_inset Formula 
+\[
+V[n,R,Y]=E[n,R]+U(Q[n],R,Y)
+\]
 
 \end_inset
 
@@ -3076,14 +3159,18 @@ with
 \end_inset
 
 , the potential contribution 
-\begin_inset Formula \[
-u(\vec{r})=\frac{\delta U}{\delta n(\vec{r})}=\frac{\partial U}{\partial Q}\frac{\delta Q}{\delta n(\vec{r})}\]
+\begin_inset Formula 
+\[
+u(\vec{r})=\frac{\delta U}{\delta n(\vec{r})}=\frac{\partial U}{\partial Q}\frac{\delta Q}{\delta n(\vec{r})}
+\]
 
 \end_inset
 
 Similarly the free energy (mean field) functional
-\begin_inset Formula \[
-A[n,R]=-\beta^{-1}\ln\int\mathrm{e}^{\beta(A-V[n,R,Y])}dY\]
+\begin_inset Formula 
+\[
+A[n,R]=-\beta^{-1}\ln\int\mathrm{e}^{\beta(A-V[n,R,Y])}dY
+\]
 
 \end_inset
 
@@ -3439,8 +3526,10 @@ Apart from the constant QM energy
 \end_inset
 
  which is a sum of pair interaction of two types,
-\begin_inset Formula \[
-U(Y)=\sum_{i}u_{1}(y_{i})+\frac{1}{2}\sum_{i\ne j}u_{2}(y_{i},y_{j}),\]
+\begin_inset Formula 
+\[
+U(Y)=\sum_{i}u_{1}(y_{i})+\frac{1}{2}\sum_{i\ne j}u_{2}(y_{i},y_{j}),
+\]
 
 \end_inset
 
@@ -3736,8 +3825,10 @@ key "book:hansen76"
 .
  The first equation of the BGY hierarchy relates the gradient of the solvent
  density to the mean field force acting on a solvent particle
-\begin_inset Formula \begin{equation}
-\frac{\partial}{\partial y}\ln g(y)=\beta\left[f_{1}(y)+\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy\right]\label{eq:ybg-first-order}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\frac{\partial}{\partial y}\ln g(y)=\beta\left[f_{1}(y)+\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy\right]\label{eq:ybg-first-order}
+\end{equation}
 
 \end_inset
 
@@ -3750,8 +3841,10 @@ where the forces
 \end_inset
 
  are the external (solute) field and solvent-solvent interaction, respectively:
-\begin_inset Formula \[
-f_{1}(y)=-\frac{\partial u_{1}}{\partial y},\quad f_{2}(y,y^{\prime})=-\frac{\partial u_{2}(y,y^{\prime})}{\partial y};\]
+\begin_inset Formula 
+\[
+f_{1}(y)=-\frac{\partial u_{1}}{\partial y},\quad f_{2}(y,y^{\prime})=-\frac{\partial u_{2}(y,y^{\prime})}{\partial y};
+\]
 
 \end_inset
 
@@ -3805,14 +3898,18 @@ reference "eq:ybg-first-order"
 \end_inset
 
 , 
-\begin_inset Formula \begin{equation}
--\frac{\partial w}{\partial y}=\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy,\label{eq:ybg-pmf-gradient}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+-\frac{\partial w}{\partial y}=\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy,\label{eq:ybg-pmf-gradient}
+\end{equation}
 
 \end_inset
 
 related to the distribution function by the following definition : 
-\begin_inset Formula \[
-g(y):=g_{0}(y)\mathrm{e}^{-\beta w(y)}:=\mathrm{e}^{-\beta[u_{1}(y)+w(y)]}.\]
+\begin_inset Formula 
+\[
+g(y):=g_{0}(y)\mathrm{e}^{-\beta w(y)}:=\mathrm{e}^{-\beta[u_{1}(y)+w(y)]}.
+\]
 
 \end_inset
 
@@ -3864,8 +3961,10 @@ key "jager07diss,griebel08"
 \end_inset
 
 :
-\begin_inset Formula \[
--\left(\frac{\partial}{\partial y}\right)^{2}w=\rho\frac{\partial}{\partial y}\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy^{\prime}.\]
+\begin_inset Formula 
+\[
+-\left(\frac{\partial}{\partial y}\right)^{2}w=\rho\frac{\partial}{\partial y}\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy^{\prime}.
+\]
 
 \end_inset
 
@@ -3982,8 +4081,10 @@ weighted force
  define the (approximate) model of a simple liquid completely and the BGY
  equation may be cast into the non-linear integro-differential equation:
  
-\begin_inset Formula \begin{equation}
-\Delta w=-\rho\nabla\left[\vec{f}\ast g\right],\quad g=g_{0}\mathrm{e}^{-\beta w},\label{eq:bgy3d}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\Delta w=-\rho\nabla\left[\vec{f}\ast g\right],\quad g=g_{0}\mathrm{e}^{-\beta w},\label{eq:bgy3d}
+\end{equation}
 
 \end_inset
 
@@ -4034,8 +4135,10 @@ weighted force field
 \end_inset
 
 :
-\begin_inset Formula \[
-k^{2}w=\mathrm{i}\rho\vec{k}\cdot\vec{f}g.\]
+\begin_inset Formula 
+\[
+k^{2}w=\mathrm{i}\rho\vec{k}\cdot\vec{f}g.
+\]
 
 \end_inset
 
@@ -4347,8 +4450,10 @@ difference
 \end_inset
 
 
-\begin_inset Formula \[
-\Delta y=y_{2}-y_{1}:=(r_{12},q_{12}),\quad r_{12}:=r_{2}-r_{1},\quad q_{12}:=q_{2}q_{1}^{-1}\]
+\begin_inset Formula 
+\[
+\Delta y=y_{2}-y_{1}:=(r_{12},q_{12}),\quad r_{12}:=r_{2}-r_{1},\quad q_{12}:=q_{2}q_{1}^{-1}
+\]
 
 \end_inset
 
