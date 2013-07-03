@@ -1,0 +1,4367 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+%\usepackage{times}
+\usepackage[scaled]{helvet}
+\renewcommand\familydefault{\sfdefault} % Only if the base font of the document is to be sans serif
+\usepackage{sfmath}
+%\usepackage{mathptmx}
+%\usepackage{amsfonts}
+%\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+\usepackage[square]{natbib}
+\renewcommand{\cite}[1]{\citep{#1}}
+\end_preamble
+\options twoside
+\use_default_options false
+\language english
+\inputencoding latin1
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1in
+\topmargin 1.5in
+\rightmargin 1in
+\bottommargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+A hybrid approach to atomistic simulation of solvation effect: interfacing
+ quantum chemistry and statistical mechanics 
+\end_layout
+
+\begin_layout Author
+AM
+\end_layout
+
+\begin_layout Date
+27.06.2011
+\end_layout
+
+\begin_layout Abstract
+A steady increase in available computational power allows us to use more
+ and more sofisticated ab-initio techniques in studies of electronic and
+ microscopic structures.
+ Yet no explosion in computational power justifies brute force use of the
+ very same techniques at macroscopic scale.
+ For a specific problem of studying solution we propose a multiscale approach
+ to treat the solute by quantum- and the solvent by statistical mechanics.
+ The atomistic statistical model delivers insights into the microscopic
+ structure of the solvent on the one side and relates that to the macroscopic
+ parameters of the solvent such as temperature and pressure on the other
+ side, thus bridging micro- and macroscopic scales.
+ For both, electronic structure and statisctical model, we propose to build
+ upon existing packages relying on the established techniques: density funcitona
+l theory and Born--Green--Yvon hierarchy of equations for distribution functions.
+ The interface between quantum and statistical models will address electrostatic
+ electron-solvent interaction directly with the net rest parametrized by
+ a suitable force field.
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quote
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quote
+\begin_inset Newpage clearpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The environment of an aqueous solution can completely change the products,
+ mechanism and rate of a given chemical reaction.
+ Therefore, its computational modeling is of central importance for understandin
+g many chemical reactions of organic and inorganic species as well as for
+ industrial applications 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hirata03"
+
+\end_inset
+
+.
+ Timely examples are on-water catalysis, electrocatalysis, “green chemistry”
+ (e.g., aqueous phase reforming of biomass-derived feedstock for non-fossile
+ fuels), important photocatalytic processes (hydrogen production from water,
+ CO2 conversion), and fuel cells.
+ Several of these processes are crucial for capturing and using energy form
+ renewable sources.
+ 
+\end_layout
+
+\begin_layout Standard
+To support current experimental efforts in various areas of catalysis and
+ materials science in aqueous media, computational studies are needed to
+ examine/predict species and processes at the atomic level.
+ The goal of this project is to develop and apply a novel accurate, yet
+ efficient computational model for describing solvent effects, including
+ the atomistic structure of the solvent.
+ This theoretically as well as computationally very challenging problem
+ can be tackled only with an interdisciplinary approach: expertise from
+ quantum chemistry, computational materials science, and computer science
+ is bundled in this collaborative project of TU München (Scientific Computing,
+ Catalysis Research Center) and Northwestern University (Chemistry Department),
+ Evanston, USA, to provide know-how in high performance computing and theoretica
+l chemistry as prerequisites for an accurate and efficient novel software
+ tool.
+ 
+\end_layout
+
+\begin_layout Standard
+A hybrid approach will be implemented that combines a quantum-mechanical
+ (QM) description of the solute with a direct statistical microscopic descriptio
+n of a molecular solvent.
+ The model will be generally applicable, but is first elaborated within
+ the existing parallel density functional program ParaGauss for electronic
+ structure calculations.
+ The structure of the solvent will be quantified by a promising method based
+ on the Born--Green--Yvon (BGY) hierarchy of integral equations for solvent
+ (pair) distribution densities at finite temperature on a three-dimensional
+ (3d) grid.
+ Invoking a suitable parameterization, both the classical electrostatic
+ effects of a polarizable solvent and the non-classical effects of interacting
+ electronic shells will be reproduced.
+ The structure of both subsystems, the QM region of the solute and the near-fiel
+d distribution of the solvent, will be determined in a mutually consistent
+ fashion.
+ From such self-consistent treatment, structural properties of the solute,
+ essential for modeling reactions in solution in the ground and excited
+ states, can be determined.
+ Excited state properties are required when charge transfer reactions at
+ electrodes or effects of solvation on spectroscopic properties are to be
+ examined.
+ The demands of the project regarding high-performance computing will be
+ tackled by efficient numerical and scalable parallel algorithms.
+ The new microscopic model of solvation effects will supersede state-of-the-art
+ continuum solvation models and, at the same time, will prove far more cost
+ effective than comparable models that rely on molecular dynamics (MD) simulatio
+ns with QM forces for averaging over solvent configurations.
+ The solvation simulation technique to be realized in this project will
+ have a considerable impact on many current topics in materials science
+ and chemistry research.
+ Based on the expertise of the project partners, the enhanced capabilities
+ of the proposed novel computational strategy will be showcased for catalytic
+ processes at metal nanoparticles in solution, including photocatalytic
+ production of hydrogen from water and electrochemistry, as well as on actinide
+ complexation chemistry in solutions of finite ionic strength.
+\end_layout
+
+\begin_layout Section
+Background
+\end_layout
+
+\begin_layout Standard
+Water is ubiquitous in nature as well as in technical and industrial environment
+s.
+ Due to its specific physico-chemical properties (as a solvent of polar
+ molecules that in solution readily form hydrogen bonds), it plays a crucial
+ role as solvent as well as reactant in a huge variety of processes – in
+ the environment, in biological systems and in many industrial procedures
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:bennaim74,kamerlin11"
+
+\end_inset
+
+.
+ In addition, the solvation chemistry of water is a key aspect of environmental
+ chemistry, especially with respect to protecting sweet water resources,
+ and in remediation and deposition of toxic chemical and radioactive wastes.
+ With its goal to explore chemical and physical systems and processes at
+ the atomic scale, computational materials science is confronted with two
+ important aspects of interaction related to water as solvent.
+ Its high dielectric constant, ~80, results in strong screening of long-range
+ electrostatic fields.
+ On the other hand, due to their strongly polar nature, water molecules
+ are oriented when interacting with polarized molecules or solid surfaces,
+ act as electron donating or accepting ligands, and easily form oriented
+ hydrogen bonds.
+ A successfull water model will pick the essential properties of the water
+ in a minimal fashion: ab-initio or supermolecule approach is difficult
+ to justify where a soft sphere dipolar water-like particles may be sufficient
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "warshel79,liu96,papazyan97"
+
+\end_inset
+
+.
+ Current computational strategies either couple a QM treatment of the solute
+ with a continuum representation of the bulk solvent or rely on a fully
+ atomistic approach in combination with a molecular dynamics or Monte Carlo
+ approach for generating suitable configuration averages.
+ The latter methods are computationally quite demanding at the accurate
+ QM level required when modeling chemical reactions.
+\end_layout
+
+\begin_layout Standard
+This project suggests combining existing computational ingredients using
+ a novel method that will overcome several shortcomings of existing procedures.
+ First, the new strategy represents the atomistic structure of the solvent
+ in an averaged way, thus notably improving on an essential deficiency of
+ continuum models.
+ Secondly, a costly dynamical treatment of the bulk solvent will be avoided;
+ rather, an accurate, yet efficient method is invoked which will permit
+ far more realistic models than current dynamic QM methods.
+ 
+\end_layout
+
+\begin_layout Subsection
+Continuum solvation models
+\end_layout
+
+\begin_layout Standard
+Currently, the most widely used solvation models combine a QM description
+ of the electronic structure of a solute molecule with a polarizable continuum
+ model (PCM) of the solvent as a dielectric medium 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tomasi94,tomasi05"
+
+\end_inset
+
+; the solute cavity is shaped via a prescription that relies on the van
+ der Waals atomic radii.
+ The nuclei and the electrons of the solute region are taken to interact
+ electrostatically with the charges induced in the surrounding (polarizable)
+ dielectric continuum.
+ These charges are represented by a charge density on the surface of the
+ cavity 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chipman02"
+
+\end_inset
+
+; generalizations for treating screening effects of ionic solutions have
+ been proposed 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "mennuci97"
+
+\end_inset
+
+.
+ The reduction of the reaction potential to the potential of a charge on
+ the cavity surface greatly simplifies the electrostatic problem as there
+ are efficient techniques for solving the associated (surface) integral
+ equations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chipman02"
+
+\end_inset
+
+.
+ Phenomenological corrections account for the cavitation energy and dispersion
+ interaction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tomasi94,tomasi05"
+
+\end_inset
+
+.
+ Continuum models reproduce the classical electrostatic interaction of the
+ solute with the induced volume charge in a semi-quantitative fashion.
+ A particularly intuitive variant of such models, the conductor-like screening
+ model (COSMO), 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "klamt93"
+
+\end_inset
+
+ was implemented for energies and forces by Rösch's group 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "fuchs02"
+
+\end_inset
+
+ in their code ParaGauss 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "belling98b,ParaGaussV3.1"
+
+\end_inset
+
+.
+ However, continuum models provide no insight into the microscopic structure
+ of the solvent.
+ As mean-field theories they attempt to reproduce the average effect of
+ the solute-solvent interactions on the electronic structure of the solute
+ by an averaged reaction field of the solvent environment, without offering
+ an estimate of the effects of (correlated) thermal fluctuations of the
+ microscopic structure on thermodynamic properties of the system.
+ Another negative aspect is the empirical choice of the solute cavity size
+ and shape.
+\end_layout
+
+\begin_layout Subsection
+Explicit solvation models
+\end_layout
+
+\begin_layout Standard
+The weakly attractive part of the solvent-solvent interaction significantly
+ contributes to the thermodynamic free energy while the repulsive part determine
+s the microscopic structure of the liquid 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hansen76"
+
+\end_inset
+
+.
+ In an associated liquid like water the relatively strong hydrogen bonds
+ play a major role for the microscopic structure, even at room temperature.
+ Such pronounced solvent-solvent (and similar solute-solvent) interactions
+ render the applicability of a continuum solvation model questionable 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hirata03"
+
+\end_inset
+
+.
+ In contrast, an approach that combines QM calculations with force-field
+ based (molecular mechanics, MM) dynamical simulations (molecular dynamics,
+ Monte--Carlo), provides detailed insight into the microscopic structure
+ of the solvated system 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gao96,li03,tomasi05"
+
+\end_inset
+
+.
+ Here statistical averaging entails significant additional cost, dominated
+ by QM calculations.
+ Yet, the results of such statistical sampling are only as good as the effective
+ force field used to parameterize the solvent-solvent and solute-solvent
+ interactions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gordon01"
+
+\end_inset
+
+.
+ Important issues regarding the polarizability of solvent molecules have
+ to be solved to compete with continuum models in reproducing electrostatic
+ interactions.
+ The slow convergence of long-range electrostatic interactions with system
+ size may still require a polarizable continuum representation of the bulk
+ outside of the explicit QM/MM region 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "li03"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Reference interaction site model (RISM)
+\end_layout
+
+\begin_layout Standard
+Naturally, continuum solvation approaches cannot properly account for the
+ structure of the solvent caused by the shape of the solvent molecules and
+ their packing, or by hydrogen bonding.
+ Explicit discrete models do not directly tackle the important question
+ of statistical sampling.
+ In contrast, statistical mechanical theories based on distribution functions
+ and integral equations achieve a compromise and provide a rigorous framework
+ for addressing both issues of solvation models.
+ The reference interaction site model (RISM) characterizes a class of integral
+ equation theories 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chandler72"
+
+\end_inset
+
+ where the Ornstein--Zernike equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "yoshida00"
+
+\end_inset
+
+ for simple liquids is generalized to mixtures with strong intramolecular
+ correlations, due to chemical bonds.
+ RISM accounts for a very important aspect of interacting molecules, namely
+ their shape, in terms of pairwise site-site interactions between atomic
+ centers.
+ In its recent form this theory handles electrostatic aspects, although
+ to reproduce the dielectric constant of a liquid a phenomenological correction
+ of the integral equations may be required 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "perkyns92,book:hirata03"
+
+\end_inset
+
+.
+ The theory has been extended from radial correlations only to 3d spatial
+ distributions of atomic centers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kovalenko99"
+
+\end_inset
+
+.
+ In this 3d form it is suitable for integration with QM models of an arbitrary
+ solute, as first demonstrated for Hartree-Fock (HF) calculations and a
+ simplified multipole expansion (MPE) of the coupling between the electronic
+ Hamiltonian and the solvent distribution 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ten-no93"
+
+\end_inset
+
+.
+ The MPE technique reduces the electrostatic solute-solvent interaction
+ to that of a few multipole moments, in the simplest case atomic charges,
+ derived from the electronic density of the QM system, a technique proven
+ successful in combination with continuum models 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tomasi05"
+
+\end_inset
+
+.
+ A more elaborate coupling of the electronic Hamiltonian and the solvent
+ environment may include repulsive exchange and charge transfer interactions
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "yoshida00"
+
+\end_inset
+
+.
+ The formation of a cavity is an essential byproduct of the RISM method,
+ but the burden is shifted from an empirical procedure as in continuum models
+ to the (empirical) parameterization of the site-site interactions, mainly
+ of the repulsive part of the corresponding force field.
+ 
+\end_layout
+
+\begin_layout Subsection
+Born--Green--Yvon integro-differential equations
+\end_layout
+
+\begin_layout Standard
+Recently a new approach for approximating solvent densities around a solute
+ of arbitrary shape was proposed 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss,griebel08"
+
+\end_inset
+
+.
+ This BGY3dM model invokes the 3d Born--Green--Yvon (BGY) equation for the
+ distribution function of a molecular (M) solvent exposed to a field of
+ an arbitrary solute, Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:bgy"
+
+\end_inset
+
+.
+ The corresponding BGY equation for the solvent-solvent pair distribution
+ function employs the Kirkwood approximation as closure relation for three-body
+ distribution functions.
+ The molecules of the solvent are modeled as rigid bodies.
+ Short-range interactions parameterized by pairwise force field parameters
+ as well as the long-range Coulomb interaction are taken into account.
+ Periodic boundary conditions are enforced for the short-range distribution
+ functions.
+ Long-range interactions of system replicas in neighboring unit cells may
+ optionally be restricted in the case of infinite dilution.
+ The resulting integro-differential equations are iteratively solved by
+ extensive use of fast Fourier transformations (FFT).
+ The overall performance of the method was shown to be promising, yet entailed
+ high computational demands for realistic and accurate applications.
+ The model was applied to simulate the structure of non-polar (CS
+\begin_inset Formula $_{2}$
+\end_inset
+
+) and polar (HCl) solvents with hexane, methanol, and butyric acid as solute
+ molecules in addition to simulations with the reference solvent as solute
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss,griebel08"
+
+\end_inset
+
+.
+ In fact, the BGY3dM simulation of a pure solvent is a prerequisite for
+ other solute-solvent simulations; the solvent-solvent site-site distribution
+ function serve as input to subsequent solute-solvent simulations of an
+ arbitrary solute.
+ In the BGY3dM approach a solute is treated as source of an external potential
+ to which the solvent molecules are exposed.
+ Both solvent-solvent and solute-solvent interactions are described by site-site
+ pair potentials.
+ 
+\end_layout
+
+\begin_layout Section
+Project strategy and goals
+\end_layout
+
+\begin_layout Standard
+The BGY3dM model developed in Prof.
+ Griebel's group 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss,griebel08"
+
+\end_inset
+
+ will for the first time be applied together with a QM solute where the
+ solute-solvent interaction involves electronic degrees of freedom.
+ This coupling of an accurate QM treatment of the solute with the BGY3dM
+ model is the subject of the current project.
+ Several problems have to be tackled before molecular solvation energies
+ and other effects on molecular properties can be determined in QM calculations
+ in combination with the BGY3dM method.
+ 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Components of the hybrid framework.
+ Interfacing an available BGY solver with 3D periodic boundary conditions
+ for molecular solvent distribution and an existing DFT program package
+ for electronic structure calculations by means of a QM/Solvent interface
+ provides access to the microscopic structure of the solute environment,
+ the mean-field effects on the electronic structure, and solute free energy.
+ Liquid state DFT (LS-DFT) is an alternative approach to the microscopic
+ solvent structure directly addressing solvent free energy, 
+\begin_inset Formula $\Delta G$
+\end_inset
+
+, traditionally addressed by thermodynamic integration (TI).
+ Establishing a procedure for solute-solvent force field generation is essential
+ for treating an arbitrary solute.
+ 
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename components2.png
+	lyxscale 20
+	width 10cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The central task is the construction of an interface between the solvent
+ environment, treated by the BGY3dM package (available for this project)
+ and a QM subsystem, treated by a generic QM package, e.g., the DFT program
+ ParaGauss developed by Rösch's group 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "belling98b,ParaGaussV3.1"
+
+\end_inset
+
+.
+ There are several possibilities, of increasing accuracy and expected computatio
+nal effort, for implementing the long-range electrostatic interaction of
+ the electrons of the QM sub-system with the charges of the solvent, represented
+ by site distribution densities:
+\end_layout
+
+\begin_layout Itemize
+the multipole expansion (MPE) of the Coulomb potential of the QM subsystem,
+ 
+\end_layout
+
+\begin_layout Itemize
+the fitting function representation of the electronic density 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "dunlap-mintmire90,dunlap-roesch90"
+
+\end_inset
+
+ as employed in many DFT codes including the program ParaGauss,
+\end_layout
+
+\begin_layout Itemize
+the electronic density directly derived from the Kohn--Sham wave function.
+\end_layout
+
+\begin_layout Standard
+Each of the three choices implies a specific contribution to the one-electron
+ Hamiltonian of the QM subsystem and to the solute-induced field to which
+ the solvent molecules are exposed to.
+ At least the first two of these strategies of increasing accuracy and computati
+onal demand will be implemented and evaluated regarding their performance
+ and accuracy implications for a mutually consistent reaction field approach.
+ For practical applications an efficient and scaling parallelization of
+ these approaches will be crucial.
+ A related issue is the derivation of the site-site force-field parameterization
+ for the remaining part of the solute-solvent interactions (including the
+ strongly repulsive interaction responsible for cavity formation) from those
+ available in the literature 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gordon01"
+
+\end_inset
+
+ and adopted in ParaGauss.
+ The effective fragment potential method, where part of the exchange interaction
+ in parameterized form is integrated into the electron-solvent interaction,
+ is left as option 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gordon01"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+An envisioned work flow for building and exploring the model of a combined
+ QM/Solvent model can be separated in the following steps 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Solute induced field 
+\begin_inset Formula $u_{X}(y)$
+\end_inset
+
+ for a chosen solute conformation 
+\begin_inset Formula $X$
+\end_inset
+
+ and solvent-solvent interaction 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+ are used in statistical model to provide solvent distribution 
+\begin_inset Formula $\rho_{X}(y)$
+\end_inset
+
+.
+ Electronic density 
+\begin_inset Formula $n$
+\end_inset
+
+ and DFT energy 
+\begin_inset Formula $E[n]$
+\end_inset
+
+ of a solute are obtained in a self-consistent solvent mean field.
+ Combining results offers a way to exploring free-energy surface 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ as a function of solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ to search for the stationary points, such as minima and transition states,
+ and reaction paths connecting the minima.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:qm-mm-scf"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+center
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename flow4.png
+	lyxscale 20
+	width 15cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Building a solvent model:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Generating a solvent-solvent force field, 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+, using an ensemble of reference QM calculations.
+ This step is omitted when a suitable MM/MD force field does exist for this
+ particular solvent.
+\end_layout
+
+\begin_layout Enumerate
+Adapting available solvent-solvent force field, 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+, to a site-site interaction form, 
+\begin_inset Formula $u_{ij}(x)$
+\end_inset
+
+, suitable for RISM equations.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "enu:vv-force-field"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Performing a simulation of a pure uniform solvent with a 
+\begin_inset Quotes eld
+\end_inset
+
+solvent as a solute
+\begin_inset Quotes erd
+\end_inset
+
+ setup, 
+\begin_inset Formula $u_{X}\equiv u_{2}$
+\end_inset
+
+, to generate site-site distribution functions, 
+\begin_inset Formula $g_{ij}(x)$
+\end_inset
+
+.
+ These site-site distribution functions, 
+\begin_inset Formula $g_{ij}(x)$
+\end_inset
+
+, together with the site-site interaction potentials, 
+\begin_inset Formula $u_{ij}(x)$
+\end_inset
+
+, will be used to approximate the mean field in BGY equation for arbitrary
+ solutes in combined QM/Solvent models.
+ This step does not involve QM calculations and self-consistency cycle for
+ 
+\begin_inset Quotes eld
+\end_inset
+
+solute
+\begin_inset Quotes erd
+\end_inset
+
+ field, 
+\begin_inset Formula $u_{X}$
+\end_inset
+
+, as in step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:uv-scf"
+
+\end_inset
+
+ below, as the solvent molecule lacks electronic and other internal degrees
+ of freedom, cp.
+\begin_inset space ~
+\end_inset
+
+Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:qm-mm-scf"
+
+\end_inset
+
+.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "enu:vv-distribution"
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Building a solute model and a solute-solvent interface:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Setting up a QM (DFT) model for electronic structure calculations.
+ One might distinguish between the QM setups for sampling ab-initio potential
+ energy surface for the purpose of solute-solvent force field generation
+ and QM setup to be interfaced to the implicit solvent model.
+\end_layout
+
+\begin_layout Enumerate
+Generating a solute-solvent force field, 
+\begin_inset Formula $u_{X}(y)$
+\end_inset
+
+, using an ensemble of reference calculations of a solute with a solvent
+ molecule.
+ By accompanying calculations of electrostatic interaction of electronic
+ density of a solute and a charge skeleton of solvent molecule model one
+ separates the the short range interaction to be fitted by pairwise solute-solve
+nt site-site interactions suitable for BGY solver.
+ Separation of electrostatic electron-solvent and short range site-site
+ interaction is what distinguishes this task from that for the solvent-solvent
+ interactions that lack electronic degrees of freedom.
+ Another substantial requirement for the solute-solvent field, 
+\begin_inset Formula $u_{X}(y)$
+\end_inset
+
+, being applicable for some non-trivial range of the geometric parameters
+ 
+\begin_inset Formula $X$
+\end_inset
+
+ of the solute to be useful in exploring free energy surface as a function
+ of solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Rigid solvent molecules do not impose these requirement for solvent-solvent
+ force field generation in step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:vv-force-field"
+
+\end_inset
+
+.
+ Note that adaption of the solute-solvent interaction to a site-site interaction
+ form is a only a technical requirement of the current version of the BGY
+ solver 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss"
+
+\end_inset
+
+; it will be released in course of the project for greater flexibility.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Performing a self-consistent calculation of a solute embedded into implicit
+ solvent model involving two phases: 
+\begin_inset CommandInset label
+LatexCommand label
+name "enu:uv-scf"
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+QM calculation in the mean field of the solvent distribution that determines
+ the electronic structure and (electron) charge distribution of the solute.
+ The solvent mean field the electrons of the QM subsystem are exposed to
+ is mediated by the solute-solvent interface, more specifically, the interaction
+ between intermediate (electron) density representation and solvent charge
+ distribution, Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:interface"
+
+\end_inset
+
+.
+ The short range site-site interaction contributes to the Kohn--Sham hamiltonian
+ only indirectly by affecting the solvent distribution.
+\end_layout
+
+\begin_layout Enumerate
+Updating the solvent distribution in the electrostatic field of the solute
+ charge density.
+ The Coulomb field of the updated intermediate (electron) density representation
+ together with the short range site-site interactions will induce solvent
+ redistribution.
+ The pair-distribution function of a pure solvent obtained in the preparatory
+ step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:vv-distribution"
+
+\end_inset
+
+ and the solvent-solvent force field prepared in step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:vv-force-field"
+
+\end_inset
+
+ are parts of the (fixed) implicit liquid model input.
+\end_layout
+
+\begin_layout Standard
+The self-consistency cycle with these two phases solves the non-linear equation
+ involving the electronic density and solvent distribution as unknowns and
+ will require specialized acceleration techniques.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Exploring free energy surface as a function of solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+For self-consistent solute electronic structure and solvent distribution
+ obtained in step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:uv-scf"
+
+\end_inset
+
+ compute the derivatives of the free energy, 
+\begin_inset Formula $\partial A/\partial X$
+\end_inset
+
+, as PMF forces 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:pmf-path-integral"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Using the PMF forces update geometry of the solute 
+\begin_inset Formula $X$
+\end_inset
+
+ in a procedure seeking a minimum, transition state or intermediate reaction
+ path points.
+\end_layout
+
+\begin_layout Standard
+Return to an repeat the step 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:uv-scf"
+
+\end_inset
+
+ with solute field adapted to reflect new geometry.
+ Stop when reaching required accuracy for a stationary- or reaction path
+ point.
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Research Plan
+\end_layout
+
+\begin_layout Standard
+The goal of this project is to adapt and interface two independently developed
+ methods and the corresponding software packages (one specialized on DFT
+ electronic structure methods another for statistical simulations of the
+ structure of liquids) aiming at a combined QM description of the solute,
+ an accurate microscopic statistical description of a molecular solvent,
+ and scalable parallel implementation.
+ To reach this goal we will first explore the most efficient way to define
+ the interaction functional of the two subsystems.
+ The BGY3dM package requires a representation of an 
+\begin_inset Quotes eld
+\end_inset
+
+external field
+\begin_inset Quotes erd
+\end_inset
+
+ induced by the solute, specifically the Coulomb field of the QM electronic
+ density, on an equally spaced Cartesian 3d grid.
+ For a very high spatial resolution this may become a performance bottleneck
+ of the overall task, which has to overcome by an efficient parallelization.
+ Conversely, the charge distribution of the solvent represented again on
+ a 3d-grid will have to be translated into a contribution to the electronic
+ Hamiltonian.
+ Implemented in a straightforward way this requires an integration over
+ the grid for each matrix element of the (square) Hamiltonian matrix of
+ the QM calculation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Interfacing the QM and the statistical environment models
+\end_layout
+
+\begin_layout Subsubsection*
+Electrostatic interaction functional
+\end_layout
+
+\begin_layout Standard
+We will implement and evaluate electrostatic interaction functionals for
+ the charge density of the QM region and that of the solvent, Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:interface"
+
+\end_inset
+
+.
+ Three variants of this functional will be explored in order of increasing
+ accuracy, with two of them involving an intermediate representation of
+ the Coulomb field (charge density) of the QM region: 
+\end_layout
+
+\begin_layout Itemize
+a multipole expansion of the QM potential, starting with atomic charges
+ derived from a population analysis or a fit of the potential, atom-centered
+ point dipoles and higher multipoles, 
+\end_layout
+
+\begin_layout Itemize
+the electron density expansion available in an auxiliary “fitting” basis
+ set, 
+\end_layout
+
+\begin_layout Itemize
+the direct use of the electron charge density derived from the Kohn--Sham
+ orbitals.
+\end_layout
+
+\begin_layout Standard
+Both sides of the interface will be designed in a sufficiently modular way
+ to allow for an easy exchange with typical quantum chemistry programs.
+ This implies implementing
+\end_layout
+
+\begin_layout Itemize
+a module for the statistical package that (on a Cartesian 3d grid) determines
+ the electrostatic contribution to the “external field”, to which solvent
+ molecules are exposed to, using an appropriate representation of the potential
+ of the QM region.
+ 
+\end_layout
+
+\begin_layout Itemize
+a QM module that for a given fixed representation of the charge distribution
+ of the solvent returns on a 3d grid a contribution to the Kohn--Sham Hamiltonia
+n which is consistent with the chosen interaction functional.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Force-field based energy expression of the “mechanical” part of the solute-solve
+nt interaction
+\end_layout
+
+\begin_layout Standard
+The short-range solute-solvent interaction energy (besides the electrostatic
+ interaction) will be based on site-site pair potentials.
+ The latter will be derived from potentials applied in preceding BGY3dM
+ simulations by removing the terms responsible for electrostatic interactions,
+ i.e.
+ those between point charges in the chosen force field (FF) model.
+ The repulsive part of the potential responsible for shape and size of the
+ solute cavity will also be treated by this FF contribution and thus is
+ crucial for the overall performance.
+ The overall quality of the method will be verified for consistency by compariso
+n with the original statistical model as well as with hybrid QM models on
+ examples of non-polar (CCl
+\begin_inset Formula $_{4}$
+\end_inset
+
+) and polar (HCl) molecular solvents.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Algorithmic and performance aspects of the implementation
+\end_layout
+
+\begin_layout Standard
+To achieve an efficient method, the processing of data on the extended 3d
+ grid of the solvent model has to be optimized with respect to serial performanc
+e, and subsequently to be parallelized in a scalable fashion.
+ This task is decisive for arriving at a method of practical applicability.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Extension to aqueous solutions
+\end_layout
+
+\begin_layout Standard
+The model will be extended to water as a solvent by proposing, implementing,
+ and evaluating a site-site pair-potential FF parameterization of water-water
+ interactions.
+ The consistency of statistical and hybrid models will be tested by comparing
+ FF and QM representations of water molecules as solute.
+ Special attention will be given to the convergence behavior of the BGY3dM
+ solver for the case of water, as previous exploratory calculations showed
+ this to be an issue.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Test calculations and benchmark applications
+\end_layout
+
+\begin_layout Subsubsection*
+Comparison of solvation models
+\end_layout
+
+\begin_layout Standard
+To evaluate the new solvation model, test calculations on simple and well
+ known systems will be carried out, using results of the COSMO PCM method
+ when comparing electronic structure, geometric structure, thermodynamic
+ properties, vibrational and electronic excitations.
+ Test cases will include solvated ions, small organic molecules, and metal
+ complexes, mainly of actinides.
+ Simple and complex solvents like water will be considered.
+ Performance tests with respect to scalability and parallel efficiency will
+ be carried out on solvated transition metal cluster ions and bifunctional
+ organic molecules of increasing size.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Force-field parameters for transition metals and uranyl-water interactions
+\end_layout
+
+\begin_layout Standard
+To carry out test calculations and applications on uranyl complexes in solution,
+ a site-site pair potential FF parameterization of uranyl-water interactions
+ will be generated.
+ Existing methodology will be applied on results of first-principles calculation
+s.vi The consistency of statistical and hybrid models will be tested by comparing
+ FF and QM representations of uranyl as a solute.
+ For many commonly treated elements FF parameterizations are available.vii
+ For some transition metals involved in catalytic reactions (Pd with dimethylfor
+mamide), new FF representations of the interaction with the solvent will
+ have to be developed.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Catalytic reactions
+\end_layout
+
+\begin_layout Standard
+As benchmark, the new solvation model will be applied to the aqueous phase
+ reforming of biomass (modeled as alcohols) to alkanes (fuels), photoinduced
+ water splitting on small transition metal clusters as models of photochemical
+ hydrogen production, and to leaching of Pd species from Pd nanoparticles
+ in dimethylformamide.
+ Leached mononuclear Pd species have been suggested to act as homogeneous
+ catalysts in solution.
+ 
+\end_layout
+
+\begin_layout Section*
+Conclusions
+\end_layout
+
+\begin_layout Itemize
+Statistical description of solvent intermediate between continuum and MD/MC
+ ensemble
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+avoids statistical noise of finite ensembles
+\end_layout
+
+\begin_layout Itemize
+affords smooth differentiable energy landscape and free energy derivatives
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Interfacing QM and statistical model by use of intermediate density representati
+on
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+offers more efficient approach to electrostatic interaction across the region
+ border
+\end_layout
+
+\begin_layout Itemize
+abstracts away details of QM implementation
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A robust procedure for generating force field parametrizations
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+provides a flexible alternative to RISM approach for orientation dependent
+ force fields
+\end_layout
+
+\begin_layout Itemize
+is required to establish solute field in the solvent accessible volume as
+ a function of solute conformation
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Exploring free energy landscape for stationary points and paths by a hybrid
+ approach is a cost-effective alternative to explicit solvent MD or MC simulatio
+ns.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "bibliq,bibam"
+options "bibtotoc,apalike"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Free energy surface
+\end_layout
+
+\begin_layout Quote
+Free energy surface of a microscopic subsystem as a substitute for potential
+ energy surface of the macroscopic system.
+\end_layout
+
+\begin_layout Standard
+The solute-solvent system is fully characterized by by potential energy
+ surface (PES) 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+ as a function of solute- and solvent coordinates, 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+, and quadratic kinetic energy form of corresponding momenta.
+ Hybrid environment models treat the two kinds of degrees of freedom on
+ a different level of accuracy.
+ A common model is to treat the solute by a quantum mechanical (QM) method
+ such as density functional theory (DFT) and the solvent by continuous medium
+ [polarizable continuum model (PCM) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tomasi94,orozco00,tomasi05"
+
+\end_inset
+
+, Debye-Hueckel (DH) equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "debye23"
+
+\end_inset
+
+, Poisson-Boltzmann (PB) equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "grochowski08"
+
+\end_inset
+
+], or by a force field based methods such as molecular mechanics (MM), molecular
+ dynamics (MD) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:griebel07"
+
+\end_inset
+
+, Monte-Carlo (MC) or an intermediate approach such as an integral equation
+ formalism of the reactive interaction site model (RISM) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ten-no93,book:hirata03,kovalenko99,kovalenko00a,kovalenko00b"
+
+\end_inset
+
+.
+ The interaction across the interface of the two subsystem, encoded in potential
+ function 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+ is an intrinsic part of the model definition.
+\end_layout
+
+\begin_layout Standard
+Canonical distribution of the compound system is given by the distribution
+ function
+\begin_inset Formula \begin{equation}
+\rho(X,Y)=\mathrm{e}^{\beta(A-V(X,Y))}\label{eq:def-partition-function}\end{equation}
+
+\end_inset
+
+with the free energy 
+\begin_inset Formula $A$
+\end_inset
+
+ of the system defined from normalization condition for distribution density
+ 
+\begin_inset Formula $\rho$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:landauV5"
+
+\end_inset
+
+:
+\begin_inset Formula \begin{equation}
+A=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dXdY\end{equation}
+
+\end_inset
+
+The (reduced) distribution of the solute coordinates
+\begin_inset Formula \begin{equation}
+\rho(X)=\int\rho(X,Y)dY\end{equation}
+
+\end_inset
+
+may be used to introduce the free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ of a solute conformation 
+\begin_inset Formula $X$
+\end_inset
+
+ 
+\begin_inset Formula \begin{equation}
+\rho(X)=\mathrm{e}^{\beta(A-A(X))}\label{eq:def-conformation-free-energy}\end{equation}
+
+\end_inset
+
+more explicitly given by given by a partial statistical sum over solvent
+ coordinates: 
+\begin_inset Formula \begin{equation}
+A(X)=-\beta^{-1}\ln\int\mathrm{e}^{-\beta V(X,Y)}dY\label{eq:conformation-free-energy}\end{equation}
+
+\end_inset
+
+The analogy between Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:def-partition-function"
+
+\end_inset
+
+) defining the canonical distribution function and Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:def-conformation-free-energy"
+
+\end_inset
+
+) defining the conformation free energy is, of course, intentional.
+ By means of the former equation the potential function 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+ defines all statistical properties of the whole system: e.g.
+ ensemble averages or the 
+\begin_inset Quotes eld
+\end_inset
+
+most probable
+\begin_inset Quotes erd
+\end_inset
+
+ state corresponding to the minimum of the potential.
+ Similarly the direct relation of the conformation free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ to the (reduced) solute distribution function may be used to justify exploratio
+n of a 
+\emph on
+free energy surface
+\emph default
+ of a (solute) subsystem as a substitute for PES in methods seeking stationary
+ points or a minimal energy path connecting two minima.
+ Statistical description may be further extended onto the domain of (solute)
+ parameters 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ For 
+\begin_inset Formula $X$
+\end_inset
+
+ being the nuclear coordinates of the solute atoms a practical approach
+ is to use a quadratic approximation for the conformation free energy, 
+\begin_inset Formula $A(X)$
+\end_inset
+
+, at its minimum to estimate vibrational contributions to the total free
+ energy 
+\begin_inset Formula $A$
+\end_inset
+
+; this approach replaces an explicit sampling over the full domain of parameters
+ 
+\begin_inset Formula $X$
+\end_inset
+
+ by analytic integral expressions.
+\end_layout
+
+\begin_layout Section
+Free energy differences as work integrals
+\end_layout
+
+\begin_layout Quote
+Without closed equation of state for the free energy its differences may
+ be computed as work integrals along paths.
+ 
+\end_layout
+
+\begin_layout Standard
+Expression for conformation free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ via the logarithm of the partition function, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:conformation-free-energy"
+
+\end_inset
+
+), is rarely useful as is.
+ Instead, the expression for the derivative of the free energy with respect
+ to parameters of some (reversible) process (slowly) changing the system
+ parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ serves as a starting points for estimates of the free energy (differences).
+ In such a process the free energy derivative is an average of the potential
+ derivative over constrained ensemble 
+\begin_inset Formula $X=\text{const}$
+\end_inset
+
+.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hansen76"
+
+\end_inset
+
+: 
+\begin_inset Formula \[
+\frac{dA(X)}{dX}=\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}:=\int\frac{\partial V}{\partial X}\rho_{X}(Y)dY\]
+
+\end_inset
+
+where we introduced conditional distribution function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\rho_{X}(Y):=\frac{\rho(X,Y)}{\rho(X)}=\mathrm{e}^{\beta[A(X)-V(X,Y)]}\]
+
+\end_inset
+
+representing normalized solvent distribution for specific parameters 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ For exploration of the free-energy surface 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ this implies that the energy derivatives 
+\begin_inset Formula $dA(X)/dX$
+\end_inset
+
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+readily
+\begin_inset Quotes erd
+\end_inset
+
+ available as ensemble averages, whereas the values are not.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+For example, by a quasi-Newton optimization technique these average forces
+ may be used to locate a stationary point 
+\begin_inset Formula $X^{\ast}$
+\end_inset
+
+ on the free energy surface, but an independent integration might be required
+ to accurately compute the value of 
+\begin_inset Formula $A(X^{\ast})$
+\end_inset
+
+ relative to some reference conformation 
+\begin_inset Formula $X_{0}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ A fast and numerically stable procedure to compute the averages 
+\begin_inset Formula $\left\langle \cdot\right\rangle _{X}$
+\end_inset
+
+ over solvent degrees of freedom or the constrained solvent density distribution
+ 
+\begin_inset Formula $\rho_{X}(Y)$
+\end_inset
+
+, in combination with path integration between two conformations, 
+\begin_inset Formula $X_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $X_{1}$
+\end_inset
+
+, offers a convenient way to compute free energy differences
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The Jacobian contribution vanishes identically, as the assumed partition
+ of the coordinates implies a unit Jacobian for the phase space volume element:
+ 
+\begin_inset Formula $d\Gamma=1dXdY$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Formula \begin{equation}
+A(X_{1})-A(X_{0})=\int_{X_{0}}^{X_{1}}\left\langle \frac{\partial V}{\partial X}\right\rangle _{X}dX.\label{eq:pmf-path-integral}\end{equation}
+
+\end_inset
+
+Adopting this work integral of the average force as definition of the free
+ energy differences is known as a thermodynamic integration.
+\end_layout
+
+\begin_layout Section
+Statistical integrals
+\end_layout
+
+\begin_layout Quote
+Free energy surface relying on finite ensemble averages suffers from statistical
+ noise.
+\end_layout
+
+\begin_layout Standard
+In practice the integration over solvent coordinates 
+\begin_inset Formula $Y$
+\end_inset
+
+ is often not performed explicitly.
+ One rather estimates the integrals using ensemble averages with associated
+ approximation 
+\begin_inset Formula $\bar{\rho}(X,Y)$
+\end_inset
+
+ for distribution function 
+\series bold
+
+\begin_inset Formula $\rho(X,Y)$
+\end_inset
+
+
+\series default
+.
+ Note, that in a constrained MD or MC simulation with 
+\begin_inset Formula $X=\text{const}$
+\end_inset
+
+ the ensemble generated from the (time) series provides neither an estimate
+ of the reduced partition function 
+\begin_inset Formula $\rho(X)$
+\end_inset
+
+, nor that for the related conformation free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+.
+ Being the 
+\emph on
+relative
+\emph default
+ frequency 
+\begin_inset Formula $\rho(X)$
+\end_inset
+
+ cannot be computed without knowing the frequencies of all conformations
+ including those with other values of solute parameters, 
+\begin_inset Formula $X^{\prime}\ne X$
+\end_inset
+
+.
+ All that a single constrained calculation can provide is an estimate for
+ the ratio 
+\begin_inset Formula $\rho(X,Y)/\rho(X)=\rho_{X}(Y)$
+\end_inset
+
+, that is the (conditional) solvent distribution function for this specific
+ conformation 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ On the other hand, being able to compute this solvent distribution for
+ arbitrary solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ is sufficient to recover the (reduced) solute partition function 
+\begin_inset Formula $\rho(X)$
+\end_inset
+
+ or, equivalently, the conformation free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Unconstrained simulations address the complete partition function 
+\begin_inset Formula $\rho(X,Y)$
+\end_inset
+
+ and sometimes employ the bias (umbrella) potentials, 
+\begin_inset Formula $V^{\prime}(X,Y)=V_{\text{u}}(X)+V(X,Y)$
+\end_inset
+
+, to force more detailed sampling of high energy domains; ideal bias would
+ turn the corresponding conformation free energy 
+\begin_inset Formula $A^{\prime}(X)=V_{\text{u}}(X)+A(X)$
+\end_inset
+
+ into a constant (zero) identically.
+ 
+\end_layout
+
+\begin_layout Standard
+Methods based on thermodynamic integration (TI), estimate the derivatives
+ 
+\begin_inset Formula $dA/dX$
+\end_inset
+
+ of conformation free energy 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ and the corresponding free energy differences 
+\begin_inset Formula $\Delta A$
+\end_inset
+
+ as a potential of a mean force (PMF) by averaging solute forces 
+\begin_inset Formula $\partial V/\partial X$
+\end_inset
+
+, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:pmf-path-integral"
+
+\end_inset
+
+), again using approximate distribution functions derived from finite ensembles.
+ Approximate free energy functionals 
+\begin_inset Formula $\bar{A}(X)$
+\end_inset
+
+ and corresponding derivatives 
+\begin_inset Formula $d\bar{A}/dX$
+\end_inset
+
+ obtained in such an averaging procedure may suffer from intrinsic statistical
+ noise that make exploration of free energy surfaces by algorithms designed
+ for analytic PES more difficult.
+\end_layout
+
+\begin_layout Standard
+The success of the continuum models for solvent description, such as a polarizab
+le continuum model (PCM), is in part due to direct addressing the solvent
+ (charge) distribution function, 
+\begin_inset Formula $\rho_{X}(Y)$
+\end_inset
+
+, avoiding the sampling step that involves a finite ensemble.
+ The solvent distribution in the expression for the free energy of a PCM
+ model
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Solvent distribution in PCM is reduced to the description of the cavity
+ shape and that of a volume charge distribution.
+\end_layout
+
+\end_inset
+
+ affords a deterministic, smooth, and thus differentiable, free energy surface
+ suitable for conventional optimization techniques.
+\end_layout
+
+\begin_layout Section
+Alchemical processes and pairwise solute-solvent interaction
+\end_layout
+
+\begin_layout Quote
+Solute-solvent pair distribution defines the work integral for models with
+ pairwise solute-solvent interaction potential.
+ 
+\end_layout
+
+\begin_layout Standard
+A special case of, so called, alchemical processes, like gradual adding
+ a term to the interaction potential, 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+, may be used to approximately estimate (or, rather, define) particular
+ contributions to the free energy.
+ E.g.
+\begin_inset space ~
+\end_inset
+
+for a small (external or solute-induced) field contribution, 
+\begin_inset Formula $U_{1}(Y)=\sum_{i}u(y_{i})$
+\end_inset
+
+, acting on solvent molecules a linearized expression, 
+\begin_inset Formula $\delta A(X)=\int u(y)\rho_{X}(y)dy$
+\end_inset
+
+, involving only the single particle solvent distribution function 
+\begin_inset Formula $\rho_{X}(y)$
+\end_inset
+
+ might be useful.
+ Arbitrary order distribution functions may be shown to be the functional
+ derivatives of the free energy with respect to one- or many-body potential
+ terms; for the single particle distribution that relation is 
+\begin_inset Formula $\rho_{X}(y)=\delta A(X)/\delta u(y)$
+\end_inset
+
+.
+ For some terms the first order contribution to the free energy will vanish.
+ We dub such terms 
+\begin_inset Quotes eld
+\end_inset
+
+polarization terms
+\begin_inset Quotes erd
+\end_inset
+
+ if there is no net polarization of the unperturbed distribution 
+\begin_inset Formula $\rho_{X}(y)$
+\end_inset
+
+ for some degrees of freedom among the solvent parameters 
+\begin_inset Formula $y$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Here we assume that parameters of a solvent molecule, 
+\begin_inset Formula $y$
+\end_inset
+
+, include some 
+\begin_inset Quotes eld
+\end_inset
+
+polarization vector
+\begin_inset Quotes erd
+\end_inset
+
+.
+ No net polarization in distribution 
+\begin_inset Formula $\rho_{X}(y)$
+\end_inset
+
+ amounts to its factual independence of these polarization parameters.
+ 
+\end_layout
+
+\end_inset
+
+ In this case a higher order thermodynamic perturbation will define the
+ leading free energy term, see below.
+ 
+\end_layout
+
+\begin_layout Standard
+Let us examine the special case of a pairwise solute-solvent interaction
+ 
+\begin_inset Formula \[
+U_{1}(X,Y)=\sum_{i}u_{X}(y_{i})\]
+
+\end_inset
+
+defining the interface between two subsystems in the potential function
+\begin_inset Formula \[
+V_{\lambda}(X,Y)=E(X)+\lambda U_{1}(X,Y)+U_{2}(Y).\]
+
+\end_inset
+
+Here we augmented the list of system parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ by the magnitude 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ of the pairwise solute-solvent interaction 
+\begin_inset Formula $U_{1}$
+\end_inset
+
+.
+ Free energy 
+\begin_inset Formula $A_{\lambda}(X)$
+\end_inset
+
+ for zero coupling parameter 
+\begin_inset Formula $\lambda=0$
+\end_inset
+
+ is a sum of solute and solvent energies
+\begin_inset Formula \[
+A_{0}(X)=E(X)-\beta^{-1}\ln\int\mathrm{e}^{-\beta U_{2}(Y)}dY\]
+
+\end_inset
+
+with partition function of the pure solvent independent of solute parameters
+ 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Thermodynamic integration for an alchemical process of varying interaction
+ strength from 
+\begin_inset Formula $\lambda=0$
+\end_inset
+
+ to 
+\begin_inset Formula $\lambda=1$
+\end_inset
+
+ suggests the expression for the conformation free energy difference with
+ respect to the non-interacting solute and solvent,
+\begin_inset Formula \[
+A_{1}(X)-A_{0}(X)=\int_{0}^{1}d\lambda\int u_{X}(y)\rho_{\lambda X}(y)dy,\]
+
+\end_inset
+
+which involves only the first order solvent (conditional) distribution function
+ 
+\begin_inset Formula $\rho_{\lambda X}(y)$
+\end_inset
+
+.
+ A formal consequence of this relation is that being able to determine the
+ first-order distribution function, 
+\begin_inset Formula $\rho_{\lambda X}(y)$
+\end_inset
+
+, of a solvent exposed to an arbitrary (or arbitrarily strong) field, 
+\begin_inset Formula $u_{X}(y)$
+\end_inset
+
+, is formally sufficient for determining solvation free energy of any solute
+ conformation 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ This statement also holds for the free energy differences of two conformations,
+ 
+\begin_inset Formula $A(X_{1})-A(X_{0})$
+\end_inset
+
+, that can be implemented either as an alchemical process of 
+\begin_inset Quotes eld
+\end_inset
+
+blending in- and out
+\begin_inset Quotes erd
+\end_inset
+
+ the two conformations or, when possible as a path integral, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:pmf-path-integral"
+
+\end_inset
+
+).
+ Both are the consequences of the pairwise solute-solvent interaction model.
+\end_layout
+
+\begin_layout Standard
+For thermodynamic processes where the dependence of the density distribution
+ 
+\begin_inset Formula $\rho_{\lambda X}(y)$
+\end_inset
+
+ on the progress parameter 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is known to be e.g.
+ a low order polynomial, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\rho_{\lambda X}(y)=(1-\lambda)\rho_{0X}(y)+\lambda\rho_{1X}(y)\]
+
+\end_inset
+
+with accessible first- (or higher) order response terms the integration
+ over progress parameter 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ can be performed analytically: 
+\begin_inset Formula \[
+\Delta A(X)=\int u_{X}(y)\rho_{0.5X}(y)dy,\quad\rho_{0.5X}(y)=\frac{1}{2}[\rho_{0X}(y)+\rho_{1X}(y)]\]
+
+\end_inset
+
+For linear response the work integral is thus a functional of unperturbed
+ density distribution 
+\begin_inset Formula $\rho_{0X}(y)$
+\end_inset
+
+ and interacting density distribution 
+\begin_inset Formula $\rho_{1X}(y)$
+\end_inset
+
+ only, or, equivalently, it is a functional of a single density distribution
+ halfway along the process path.
+ Of course, some thermodynamic processes like, cavity formation, that may
+ be considered as an alchemical process of 
+\begin_inset Quotes eld
+\end_inset
+
+turning on
+\begin_inset Quotes erd
+\end_inset
+
+ the repulsive branch of solute-solvent interaction potential, may not be
+ suitable for linear response description.
+ The well established PCM models, for example, address the cavity formation
+ work by phenomenological terms based on a simplified cavity shape description.
+ In general, a higher order specialized numerical quadrature may be required
+ for such processes; the choice of integration path, including the reference
+ (initial) state may also play an important role.
+ 
+\end_layout
+
+\begin_layout Standard
+Applying the above alchemical process to a perturbation by a 
+\begin_inset Quotes eld
+\end_inset
+
+polarization
+\begin_inset Quotes erd
+\end_inset
+
+ term 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ and expanding the density distribution 
+\begin_inset Formula $\rho_{\lambda X}(y)$
+\end_inset
+
+ to first order (thus assuming linear response) one obtains for the free
+ energy differences an approximate expression
+\begin_inset Formula \[
+\Delta A(X)=\frac{1}{2}\int u_{1}(y)\rho_{1X}(y)dy=\frac{1}{2}\int u_{1}(y)[\rho_{1X}(y)-\rho_{0X}(y)]dy.\]
+
+\end_inset
+
+which can be viewed as a functional of interacting density distribution
+ 
+\begin_inset Formula $\rho_{1X}(y)$
+\end_inset
+
+ only.
+ Here we used our definition of the 
+\begin_inset Quotes eld
+\end_inset
+
+polarization
+\begin_inset Quotes erd
+\end_inset
+
+ contribution implying the vanishing first-order term, 
+\begin_inset Formula $\int u_{1}(y)\rho_{0X}(y)dy=0$
+\end_inset
+
+.
+ The two relevant differences between confusingly similarly looking first-
+ and second-order terms is the factor 
+\begin_inset Formula $1/2$
+\end_inset
+
+ in the latter and the use of unperturbed distribution 
+\begin_inset Formula $\rho_{0X}(y)$
+\end_inset
+
+ vs.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+polarized
+\begin_inset Quotes erd
+\end_inset
+
+ distribution 
+\begin_inset Formula $\rho_{1X}(y)$
+\end_inset
+
+.
+ By using a more explicit expression for density response, 
+\begin_inset Formula $\rho_{1X}(y)-\rho_{0X}(y)$
+\end_inset
+
+, one arrives at another form of the second order term 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:landauV5"
+
+\end_inset
+
+, 
+\begin_inset Formula \[
+\Delta A(X)\approx-\frac{\beta}{2}\int u_{1}^{2}(y)\rho_{0X}(y)dy=-\frac{\beta}{2}\left\langle u_{1}^{2}\right\rangle _{X},\]
+
+\end_inset
+
+that makes the negative sign of the leading polarization contribution obvious.
+ The sign and the factor 
+\begin_inset Formula $1/2$
+\end_inset
+
+ in the second order term have the same origin as the those in the Born
+ model for a free energy of a charge 
+\begin_inset Formula $Q$
+\end_inset
+
+ in a spherical cavity of radius 
+\begin_inset Formula $R$
+\end_inset
+
+ in dielectric medium with permittivity 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "onsager36"
+
+\end_inset
+
+, 
+\begin_inset Formula \[
+\Delta A=-\frac{\epsilon-1}{\epsilon}\frac{Q^{2}}{2R}\]
+
+\end_inset
+
+that is only a half of the electrostatic interaction energy of the charge
+ with the negative induced surface charge density.
+ Naturally this is also how many PCM models treat the medium polarization
+ contribution to the free energy, thus assuming the linear response of the
+ medium to electric field 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tomasi94,tomasi05"
+
+\end_inset
+
+.
+ Again the linear response assumption may hold to a different extent for
+ orientational component of polarizability of a polar solvent and its electronic
+ polarizability.
+\end_layout
+
+\begin_layout Standard
+In summary, with a pairwise solute-solvent interaction model, the single
+ particle distribution function of the solvent in an arbitrary external-
+ or solute-induced field may serve as a basis to built free energy functional
+ of a solute.
+ Thermodynamic perturbation theory offers a viable approach to construct
+ free energy functionals for solute-solvent and solvent-solvent interactions
+ that are too cumbersome too apply self-consistently including treatment
+ of the attractive hydrogen bonds that are responsible for the structure
+ of the liquid water 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "zhou09"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Liquid free-energy density functionals
+\end_layout
+
+\begin_layout Quote
+Free energy density functional theory for liquids offers approximate functionals
+ to be used in a minimization procedure.
+\end_layout
+
+\begin_layout Standard
+A distinctive approach to the free energy of a liquid is a density functional
+ approach where the intrinsic free energy is a functional, 
+\begin_inset Formula $\mathcal{F}[\rho(y)]$
+\end_inset
+
+, of the first-order distribution function 
+\begin_inset Formula $\rho(y)$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lebowitz63,ebner76,saam77"
+
+\end_inset
+
+ including non-uniform polyatomic liquids 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chandler86"
+
+\end_inset
+
+.
+ The DFT for electron 
+\begin_inset Quotes eld
+\end_inset
+
+gas
+\begin_inset Quotes erd
+\end_inset
+
+ in external fields at finite temperatures and DFT for liquids share the
+ same philosophy 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "mermin65"
+
+\end_inset
+
+.
+ As with the electronic density function theory the actual problem is to
+ design a suitable model for the functional 
+\begin_inset Formula $\mathcal{F}$
+\end_inset
+
+.
+ The singularity in the repulsive branch of solvent-solvent interactions
+ makes the hard sphere liquid and the corresponding functionals 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rosenfeld97,rosenfeld98"
+
+\end_inset
+
+ serve as a natural starting point to develop free energy functional for
+ soft interactions by thermodynamic perturbation theory 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "zhou09"
+
+\end_inset
+
+.
+ A series of approaches to the functionals exists in the literature starting
+ with LDA, functionals based on a smoothed density 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tarazona85"
+
+\end_inset
+
+ or generalized measures of density distributions
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rosenfeld97"
+
+\end_inset
+
+, gradient approximations, and functionals depending on correlation functions
+ of the uniform liquid as an input 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ebner76,ebner77"
+
+\end_inset
+
+.
+ The density functional approach may be extended to dynamic phenomena 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "marconi99"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+A common partition of the functional
+\begin_inset Formula \[
+\mathcal{F}[\rho]=\mathcal{F}_{\text{id}}[\rho]+\Delta\mathcal{F}_{\text{rep}}[\rho]+\Delta\mathcal{F}_{\text{attr}}[\rho]\]
+
+\end_inset
+
+with the 
+\begin_inset Quotes eld
+\end_inset
+
+ideal
+\begin_inset Quotes erd
+\end_inset
+
+ liquid contribution 
+\begin_inset Formula $\mathcal{F}_{\text{id}}$
+\end_inset
+
+ which is a free energy of the reference non-interacting liquid in an effective
+ field, the repulsive contribution 
+\begin_inset Formula $\Delta\mathcal{F}_{\text{rep}}$
+\end_inset
+
+ often approximated or rather defined by the hard sphere model and soft
+ attraction contribution 
+\begin_inset Formula $\Delta\mathcal{F}_{\text{attr}}$
+\end_inset
+
+ approximating the rest of the functional.
+ The free energy of the 
+\begin_inset Quotes eld
+\end_inset
+
+ideal
+\begin_inset Quotes erd
+\end_inset
+
+ liquid without internal degrees of freedom is proportional to the entropy
+\begin_inset Formula \[
+\Delta\mathcal{F}_{\text{id}}[\rho]=\beta^{-1}\int\rho(y)\ln\rho(y)dy,\]
+
+\end_inset
+
+which is a local functional.
+ The repulsive hard sphere contribution may be defined using (one or more)
+ measures of the density distribution 
+\begin_inset Formula $\eta$
+\end_inset
+
+:
+\begin_inset Formula \[
+\Delta\mathcal{F}_{\text{rep}}[\rho]=\beta^{-1}\int\rho(y)f_{\text{rep}}(\eta(y))dy,\quad\eta(y)=\int w(y,y^{\prime})\rho(y^{\prime})dy^{\prime}\]
+
+\end_inset
+
+with 
+\begin_inset Formula $\eta$
+\end_inset
+
+ being e.g.
+ a packing fraction of the hard spheres averaged over molecular volume 
+\begin_inset Formula $\sigma^{3}$
+\end_inset
+
+.
+ The weight function 
+\begin_inset Formula $w(y,y^{\prime})$
+\end_inset
+
+ is often chosen to be significantly different from zero in the region 
+\begin_inset Formula $y^{\prime}\approx y$
+\end_inset
+
+ on the scale of molecular size 
+\begin_inset Formula $\sigma$
+\end_inset
+
+, such as a spherical Heaviside step function.
+ The function 
+\begin_inset Formula $f_{\text{rep}}(\eta)$
+\end_inset
+
+ may be approximated by a rational function for the case of the measure
+ 
+\begin_inset Formula $\eta$
+\end_inset
+
+ being the packing fraction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "carnahan70"
+
+\end_inset
+
+.
+ Due to non-local (but usually short-range) dependence of the measure 
+\begin_inset Formula $\eta=\eta[\rho]$
+\end_inset
+
+ on distribution 
+\begin_inset Formula $\rho$
+\end_inset
+
+ the free energy functional 
+\begin_inset Formula $\mathcal{F}_{\text{rep}}$
+\end_inset
+
+ is non-local.
+ A rough estimate of the free energy functional responsible for the attractive
+ interaction is given by an integral
+\begin_inset Formula \[
+\Delta\mathcal{F}_{\text{attr}}[\rho]=\frac{1}{2}\iint\rho(y)u_{2}(y,y^{\prime})\rho(y^{\prime})dydy^{\prime}\]
+
+\end_inset
+
+with interaction potential 
+\begin_inset Formula $u_{2}(y,y^{\prime})$
+\end_inset
+
+ simplified to a short range square well potential characterized by its
+ depth and width chosen to simulate hydrogen bonding 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "paramonov05"
+
+\end_inset
+
+.
+ This form of attractive contribution is non-local as well.
+ For the bulk liquid the relation between the uniform density 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and the free energy (density) establishes an equation of state.
+\end_layout
+
+\begin_layout Standard
+In the presence of external (solute) field 
+\begin_inset Formula $u(y)$
+\end_inset
+
+ the functional 
+\begin_inset Formula $\Omega[\rho(y)]$
+\end_inset
+
+ to be minimized at constant temperature and chemical potential 
+\begin_inset Formula $\mu$
+\end_inset
+
+ consists of two terms,
+\begin_inset Formula \[
+\Omega[\rho(y)]=\mathcal{F}[\rho(y)]+\int\rho(y)[u(y)-\mu]dy,\]
+
+\end_inset
+
+where the intrinsic free energy functional 
+\begin_inset Formula $\mathcal{F}[\rho]$
+\end_inset
+
+, e.g.
+ defined as above, is independent of external field 
+\begin_inset Formula $u(y)$
+\end_inset
+
+.
+ The corresponding Lagrange equation for the density minimizing the free
+ energy functional 
+\begin_inset Formula \[
+\frac{\delta\mathcal{F}[\rho]}{\delta\rho(y)}+u(y)=\mu\]
+
+\end_inset
+
+is a nonlinear integral equation and is usually solved iteratively 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "tarazona85,paramonov05"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+A non-local functional for water-like fluid with hard core and a square
+ well attractive potential simulating hydrogen bonds 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "paramonov05"
+
+\end_inset
+
+ is capable of reproducing essential features of non-uniform density distributio
+n in proximity of nano-scale asperity 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:bennaim74,jang04"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Some of the density functionals rely on the properties of the uniform liquid
+ as an input.
+ These properties will need to be derived independently, e.g.
+ by solving the Percus--Yevick equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "percus58"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Electronic degrees of freedom (slippery ground)
+\end_layout
+
+\begin_layout Quote
+Free energy on ground state PES vs.
+\begin_inset space ~
+\end_inset
+
+minimum of the free-energy density functional (or 
+\begin_inset Quotes eld
+\end_inset
+
+ground state
+\begin_inset Quotes erd
+\end_inset
+
+ in the 
+\begin_inset Quotes eld
+\end_inset
+
+mean field
+\begin_inset Quotes erd
+\end_inset
+
+ is nonsense).
+\end_layout
+
+\begin_layout Standard
+The two types of solute degrees of freedom, the electronic state 
+\begin_inset Formula $n$
+\end_inset
+
+ and nuclear coordinates 
+\begin_inset Formula $R$
+\end_inset
+
+ require quite a different treatment justified by Born-Oppenheimer (BO)
+ approximation.
+ BO approximation assumes that electronic spectrum may be obtained for each
+ configuration of the nuclei, this includes both solute- and solvent coordinates
+, 
+\begin_inset Formula $R$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+:
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+We do not assume the solvent description includes 
+\begin_inset Quotes eld
+\end_inset
+
+fast
+\begin_inset Quotes erd
+\end_inset
+
+ electronic degrees of freedom.
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Formula \[
+E=E[n,R,Y]\]
+
+\end_inset
+
+It is a common approximation to exclude excited electronic states from statistic
+al sums as electronic excitation energies are often far above the temperature
+ range one is interested in.
+ The ground state energy 
+\begin_inset Formula $E_{0}(R,Y)$
+\end_inset
+
+ is then what is usually used as a PES 
+\begin_inset Formula $V(R,Y)$
+\end_inset
+
+, a function of nuclear- and solvent coordinates only, for exploration.
+ In this approach solute parameters reduce to nuclear coordinates 
+\begin_inset Formula $X=R$
+\end_inset
+
+.
+ Unless the electronic wave function is unaffected by solute rearrangements
+ within use of ground state energy 
+\begin_inset Formula $V(R,Y)=E_{0}(R,Y)$
+\end_inset
+
+ as a PES implies an expensive wave function computation for each PES evaluation.
+ The sampling approach would imply doing a wavefunciton calculation for
+ each ensemble sample.
+\end_layout
+
+\begin_layout Standard
+On the other hand, when introducing the conformation free energy of the
+ solute we formally performed ensemble averaging over solvent degrees of
+ freedom keeping (all of) the solute degrees of freedom (including electronic
+ ones) fixed, Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:conformation-free-energy"
+
+\end_inset
+
+.
+ This averaging (integration) over solvent coordinates 
+\begin_inset Formula $Y$
+\end_inset
+
+ for specific values of solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ introduced above in definition of the free solute energy should be thus
+ interpreted as an energy of a fixed electronic state 
+\begin_inset Formula $n$
+\end_inset
+
+ in a mean field of the solvent since the solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ by definition include the electronic degrees of freedom: 
+\begin_inset Formula $X=(n,R)$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The state 
+\begin_inset Formula $n$
+\end_inset
+
+ need not to be the ground state of any particular arrangement 
+\begin_inset Formula $(R,Y)$
+\end_inset
+
+.
+ Also think of Markus theory.
+\end_layout
+
+\end_inset
+
+ This recipe establishes an energy as a functional of density.
+ However the minima of this functional should not be interpreted as ground
+ states --- they do not even correspond to any specific arrangement of the
+ solvent.
+ The reasoning is the same as for the minimum on the free-energy surface
+ that should be interpreted as the 
+\emph on
+expectation value
+\emph default
+ of free-energy parameters or loosely speaking the 
+\begin_inset Quotes eld
+\end_inset
+
+most probable
+\begin_inset Quotes erd
+\end_inset
+
+ conformation as opposed to 
+\begin_inset Quotes eld
+\end_inset
+
+lowest energy
+\begin_inset Quotes erd
+\end_inset
+
+ conformation.
+ In this context it is probably worth noting that an expectation value,
+ in general, does not correspond to any state of the ensemble which is common
+ for discrete ensembles.
+ By analogy, the only reasonable objective for a 
+\begin_inset Quotes eld
+\end_inset
+
+free-energy density functional
+\begin_inset Quotes erd
+\end_inset
+
+ can only be the 
+\emph on
+expectation
+\emph default
+ for the electronic state (density), not the ground state.
+ This point of view parallels ensemble density functional theory that targets
+ the energy functional as a functional of 
+\begin_inset Quotes eld
+\end_inset
+
+average
+\begin_inset Quotes erd
+\end_inset
+
+ density (density matrix) and formally requires adapted QM energy functionals,
+ though the functionals designed for ground state are often used in practice.
+ 
+\end_layout
+
+\begin_layout Standard
+This second point of view is assumed below when discussing thermodynamic
+ averaging of solute-solvent electrostatic interactions with a fixed solute
+ charge distribution.
+ We do not (yet) discuss availability of specialized 
+\begin_inset Quotes eld
+\end_inset
+
+free energy density functionals
+\begin_inset Quotes erd
+\end_inset
+
+ thus also making a (questionable) assumption that the conventional ground
+ state DFT functionals may be reused.
+ Again the typical energy separations between the ground and excited electronic
+ states that at low temperatures usually imply that the 
+\emph on
+expectation
+\emph default
+ is close to the 
+\emph on
+ground
+\emph default
+ state may serve as an intuitive justification of the ground state DFT abuse.
+ Note that this very assumption is made in many continuum solvent models
+ targeting the 
+\begin_inset Quotes eld
+\end_inset
+
+ground electronic state
+\begin_inset Quotes erd
+\end_inset
+
+ in the mean field of the solvent.
+\end_layout
+
+\begin_layout Section
+Interfacing solute and solvent 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:interface"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quote
+Simplified intermediate density representation in definition of solute-solvent
+ interaction may make the latter faster to evaluate.
+\end_layout
+
+\begin_layout Standard
+Irrespective of the approach used to address the conditional solvent distributio
+n function 
+\begin_inset Formula $\rho(X,Y)$
+\end_inset
+
+ for some specific conformation of the solute 
+\begin_inset Formula $X$
+\end_inset
+
+ one has to propose a suitable model of the interaction of the solute and
+ solvent molecules summarized in the function 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+.
+ A successful interaction model will allow an efficient computation of the
+ potential 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+ for many solvent configurations 
+\begin_inset Formula $Y$
+\end_inset
+
+ with solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+ being fixed.
+ Note that in a hybrid QM/solvent model evaluation of the potential 
+\begin_inset Formula $V(X,Y)$
+\end_inset
+
+ for several values of solute coordinates 
+\begin_inset Formula $X$
+\end_inset
+
+ necessarily will require an expensive QM calculation.
+ 
+\end_layout
+
+\begin_layout Standard
+The simplest approach for constructing such a model is to reduce the potential
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ to a sum of QM ground state energy 
+\begin_inset Formula $E_{0}$
+\end_inset
+
+ as a function of solute geometry 
+\begin_inset Formula $R$
+\end_inset
+
+ and a force-field potential 
+\begin_inset Formula $U$
+\end_inset
+
+:
+\begin_inset Formula \[
+V(R,Y)=E_{0}(R)+U(R,Y)\]
+
+\end_inset
+
+This amounts to an (admittedly strong) assumption that electronic wave function
+ is independent of solvent arrangement.
+ In particular this form does not cover electrostatic Coulomb interaction
+ of electron- and solvent charge distribution densities.
+ A simple form of force-field potential 
+\begin_inset Formula $U(R,Y)$
+\end_inset
+
+ will allow efficient sampling/integration over solvent coordinates 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+More useful approach will account for interaction of electronic degrees
+ of freedom 
+\begin_inset Formula $n$
+\end_inset
+
+, which, in DFT spirit, will be interpreted as electronic density from now
+ on and solvent degrees of freedom 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ A successful approach accounting for this kind of interaction will need
+ to allow efficient evaluations of energy functional
+\begin_inset Formula \[
+V(X,Y)\equiv V[n,R,Y]\]
+
+\end_inset
+
+with a fixed solute state, parametrized by electronic density 
+\begin_inset Formula $n$
+\end_inset
+
+ and geometry 
+\begin_inset Formula $R$
+\end_inset
+
+, for sufficiently many solvent configurations 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+To achieve this goal the original RISM formulation proposed to reduce the
+ representation of the electronic density 
+\begin_inset Formula $n$
+\end_inset
+
+ to a set of point charges 
+\begin_inset Formula $Q$
+\end_inset
+
+ centered at positions of solute atoms 
+\begin_inset Formula $R$
+\end_inset
+
+ by a procedure similar to the one used for population analysis 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ten-no93"
+
+\end_inset
+
+.
+ The total energy of the system is then defined as a functional
+\begin_inset Formula \[
+V[n,R,Y]=E[n,R]+U(Q[n],R,Y)\]
+
+\end_inset
+
+with 
+\begin_inset Formula $E[n,R]$
+\end_inset
+
+ being the reference (e.g.
+ Kohn--Sham) energy functional of the solute and the interaction 
+\begin_inset Formula $U(Q,R,Y)$
+\end_inset
+
+ has a form of a force-field that includes the Coulomb interaction of solute
+ and solvent charges.
+ For any particular solvent configuration 
+\begin_inset Formula $Y$
+\end_inset
+
+ the solvent-induced contribution will affect the minimization procedure
+ of the total energy functional, 
+\begin_inset Formula $V[n,R,Y]$
+\end_inset
+
+, with respect to electronic degrees of freedom 
+\begin_inset Formula $n$
+\end_inset
+
+ (for example in DFT framework) --- the effective (Kohn--Sham) Hamiltonian
+ contains, in addition to the traditional terms originating from the reference
+ functional 
+\begin_inset Formula $E[n,R]$
+\end_inset
+
+, the potential contribution 
+\begin_inset Formula \[
+u(\vec{r})=\frac{\delta U}{\delta n(\vec{r})}=\frac{\partial U}{\partial Q}\frac{\delta Q}{\delta n(\vec{r})}\]
+
+\end_inset
+
+Similarly the free energy (mean field) functional
+\begin_inset Formula \[
+A[n,R]=-\beta^{-1}\ln\int\mathrm{e}^{\beta(A-V[n,R,Y])}dY\]
+
+\end_inset
+
+ or a finite ensemble approximation to that acquires solvent induced terms
+ depending on the electron density 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The approximation the original RISM paper 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ten-no93"
+
+\end_inset
+
+ made for simplifying the solute-solvent interaction may be relaxed without
+ sacrificing the idea behind it.
+ Established procedures such as multipole (MP) expansion or density fitting
+ are successfully used to reduce complexity of representing the electron
+ density of a QM subsystem keeping the ability to (approximately) reproduce
+ an essential effect of the electron charge distribution --- its electrostatic
+ field in a solvent accessible volume.
+ In both cases the electron density is represented by a set of parameters
+ 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+, either the multipole expansion coefficients or density expansion coefficients
+ derived by a deterministic procedure from the electronic density 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ There is no good reason why the functional 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+ should not be a linear functional so that 
+\begin_inset Formula $Q[n+\delta n]=Q[n]+Q[\delta n]$
+\end_inset
+
+ always holds.
+ It is indeed the case for multipole expansions and (unconstrained) density
+ fitting techniques.
+ The linearity condition simplifies computing the response of the density
+ parameters 
+\begin_inset Formula $\delta Q/\delta n(\vec{r})$
+\end_inset
+
+ making this quantity independent of 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ For grid-based techniques that rely on Fourier transformations the intermediate
+ representation of the solute charge density, that is a superposition of
+ electron and nuclear charge densities, may take responsibility for eliminating
+ singularities in Coulomb potential.
+ These singularities are localized around solute nuclei in solvent inaccessible
+ volume and may be expected to contribute little to the solvent distribution.
+ This intermediate density representation may serve as an abstraction between
+ a generic QM code and a solvent model: every electronic structure solver
+ that is supposed to inter-operate with the solvent model will need to implement
+ procedures to compute 
+\begin_inset Quotes eld
+\end_inset
+
+density expansion coefficients
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+ and their variational derivatives 
+\begin_inset Formula $\delta Q/\delta n$
+\end_inset
+
+ with respect to density.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In practice one would choose elements of the density matrix as primary variables.
+\end_layout
+
+\end_inset
+
+ The force field part of the solute-solvent interaction potential is an
+ additive contribution to energy and molecular forces that does not directly
+ affect electronic structure.
+\end_layout
+
+\begin_layout Section
+Solvent degrees of freedom 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:solvent-degrees"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quote
+Solvent molecules are rigid objects.
+\end_layout
+
+\begin_layout Standard
+Unless stated otherwise the solvent molecules will be assumed to be the
+ rigid objects with no internal degrees of freedom.
+ Thus each solvent molecule is contributing six degrees of freedom 
+\begin_inset Formula $y$
+\end_inset
+
+ to the solvent state vector 
+\begin_inset Formula $Y$
+\end_inset
+
+, each six parametrizing the location and orientation of a solid object.
+ Naturally the relative position and relative orientation of two such solid
+ objects is also specified by six parameters.
+\end_layout
+
+\begin_layout Standard
+The fixed internal structure of the solvent molecules will be reflected
+ in the form of solvent-solvent and solute-solvent interaction potential.
+ A pair interaction potential is in this case a function of the six parameters
+ defining relative position and orientation of the interacting parts.
+ This choice 
+\emph on
+allows
+\emph default
+ but does not 
+\emph on
+require
+\emph default
+ parametrization of the solvent-solvent and solute-solvent interactions
+ as e.g.
+ a sum of pairwise site-site interaction terms with each site corresponding
+ to an atom in a molecule or a geometric center of a charge distribution.
+ The ambiguous task of constructing such a parametrization, for instance,
+ from an ab-initio data set, may soon prove too tedious and not practical
+ for many solute-solvent and solvent-solvent combinations.
+ On the other hand an arbitrary complete sampling of an ab-initio potential
+ energy surface of a isolated solute-solvent or solvent-solvent pair can
+ be efficiently achieved on massively parallel architectures.
+ Again the solid object model for pair interaction potential does not preclude
+ the use of available site-site parametrizations of the pair interactions.
+\end_layout
+
+\begin_layout Standard
+A generalization to a mixture implies adding a discrete variable 
+\begin_inset Formula $i$
+\end_inset
+
+ to the list of solute parameters, 
+\begin_inset Formula $y=(x,i)$
+\end_inset
+
+, that indicates the type of a solvent molecule or an ion.
+ The distribution function for a specific type of the solvent 
+\begin_inset Formula $i$
+\end_inset
+
+, 
+\begin_inset Formula $\rho_{i}(x):=\rho(y)$
+\end_inset
+
+, carries statistical description for location and, for molecular species,
+ also orientation of the species 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Specifying an external field, 
+\begin_inset Formula $u(y)$
+\end_inset
+
+, for a mixture implies a set of the external potentials, 
+\begin_inset Formula $u_{i}(x):=u(y)$
+\end_inset
+
+, for all the species in the mixture.
+ Similarly specifying a pair potential 
+\begin_inset Formula $u_{2}(y_{1},y_{2})$
+\end_inset
+
+ implies a table of pair potentials for any pair 
+\begin_inset Formula $(i,j)$
+\end_inset
+
+ of the species, 
+\begin_inset Formula $u_{ij}(x_{1},x_{2}):=u_{2}(y_{1},y_{2})$
+\end_inset
+
+.
+ Vice-versa, a presence of an additional discrete internal degree of freedom
+ in solvent parameters 
+\begin_inset Formula $y$
+\end_inset
+
+ is up to interpretation equivalent to a mixture.
+\end_layout
+
+\begin_layout Standard
+Indeed, the RISM approach treats molecular liquids as a mixture of atomic
+ liquids each atom, or rather 
+\begin_inset Quotes eld
+\end_inset
+
+interacting site
+\begin_inset Quotes erd
+\end_inset
+
+, characterized by its type 
+\begin_inset Formula $i$
+\end_inset
+
+ and position vector 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ Of course, such a model of molecular liquid requires separate treatment
+ of intra- and inter-molecular site-site interactions and correlations.
+ The rigidity of the solvent molecules mandates special treatment of the
+ intra-molecular correlations.
+ 
+\emph on
+FIXME: Conceptually, any ...
+\end_layout
+
+\begin_layout Standard
+A further generalization is adding a continuous degree of freedom to the
+ solvent species.
+ In practice a continuous degree of freedom will either be reduced to a
+ finite set of states by choosing a (quadrature) grid or a basis set expansion
+ thus again approximating the liquid as a mixture.
+ Of course interpretation of the mixture components and their interactions
+ with external field and each other will depend on particular representation.
+ An important example of such continuous degree of freedom is an (induced)
+ polarization where the first order density distribution is often reduced
+ to three components of (medium) polarization field.
+\end_layout
+
+\begin_layout Section
+Pair interactions
+\end_layout
+
+\begin_layout Quote
+Interaction potential is a sum of pairwise solvent-solute and solvent-solvent
+ terms.
+\end_layout
+
+\begin_layout Standard
+For simplicity we restrict ourselves to pair solvent-solvent interactions,
+ thus again indirectly assuming rigidity of solvent molecules.
+ A presence of internal degrees of freedom, e.g.
+ a polarizable electronic density, would make the interaction of the molecules
+ strictly speaking non-additive.
+ A formal many-body expansion of these interactions, if attempted, would
+ also yield the higher order terms.
+ Note that in the scope of statistical model for the free energy, 
+\begin_inset Formula $A[n,R]$
+\end_inset
+
+, the QM degrees of freedom, the density 
+\begin_inset Formula $n$
+\end_inset
+
+ and nuclear positions 
+\begin_inset Formula $R$
+\end_inset
+
+, are frozen.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This assumption needs to be relaxed for exploration of the free-energy surface.
+\end_layout
+
+\end_inset
+
+ In this sense the QM solute is also a 
+\begin_inset Quotes eld
+\end_inset
+
+rigid
+\begin_inset Quotes erd
+\end_inset
+
+ object for which we chose the interaction with the solvent molecules to
+ be a sum of pair contributions.
+ The six geometric degrees of freedom 
+\begin_inset Formula $x$
+\end_inset
+
+ of the such a rigid solute define positions of its nuclei, 
+\begin_inset Formula $R=R(x)$
+\end_inset
+
+.
+ Together with the intermediate density representation 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+ these six geometric parameters 
+\begin_inset Formula $x$
+\end_inset
+
+ completely define the solute within the scope of our statistical model.
+ Assuming the translational and rotational invariance of the PES with respect
+ to these geometric parameters 
+\begin_inset Formula $x$
+\end_inset
+
+ we may omit them from the picture, by choosing a reference orientation
+ of the solute.
+ For brevity, we will omit below the solute parameters 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+ in its reference orientation from the discussion of the dependence of the
+ interaction functional on solvent degrees of freedom --- the effect of
+ the (frozen) solute on the solvent molecules amounts to a fixed external
+ field.
+ 
+\end_layout
+
+\begin_layout Standard
+Apart from the constant QM energy 
+\begin_inset Formula $E[n,R]$
+\end_inset
+
+ characterizing the frozen solute the potential energy surface 
+\begin_inset Formula $V(Y)$
+\end_inset
+
+ is determined by the interaction term 
+\begin_inset Formula $U$
+\end_inset
+
+ which is a sum of pair interaction of two types,
+\begin_inset Formula \[
+U(Y)=\sum_{i}u_{1}(y_{i})+\frac{1}{2}\sum_{i\ne j}u_{2}(y_{i},y_{j}),\]
+
+\end_inset
+
+accounting for solute-solvent and solvent-solvent interactions, respectively.
+ The first term 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ is the effective field of the (frozen) solute acting on the solvent molecule
+ at position and orientation characterized by solvent parameters 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ In fact, the term 
+\begin_inset Formula $u_{1}$
+\end_inset
+
+ is the pair interaction potential of a solute and solvent molecules where
+ the dependence on solute positional and orientational parameters 
+\begin_inset Formula $x$
+\end_inset
+
+, or rather density 
+\begin_inset Formula $n$
+\end_inset
+
+ and geometry 
+\begin_inset Formula $R$
+\end_inset
+
+, is implied.
+ The second term, 
+\begin_inset Formula $u_{2}(y_{1},y_{2})$
+\end_inset
+
+, is a pair potential depending on 
+\emph on
+relative
+\emph default
+ position and orientation of two solute molecules parametrized by 
+\begin_inset Formula $y_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $y_{2}$
+\end_inset
+
+, respectively.
+ Dependence of the relative parameters implies that the pair potential is
+ in fact a pure function 
+\begin_inset Formula $u_{2}(\Delta y)$
+\end_inset
+
+ of relative coordinates 
+\begin_inset Formula $\Delta y=y_{2}-y_{1}$
+\end_inset
+
+ parametrizing displacement vector and relative orientation.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The operation computing the relative parameters 
+\begin_inset Formula $\Delta y$
+\end_inset
+
+ from a pair 
+\begin_inset Formula $y_{1}$
+\end_inset
+
+and 
+\begin_inset Formula $y_{2}$
+\end_inset
+
+, here denoted by a minus sign, will depend on particular choice of parametrizat
+ion.
+ For position vectors and quaternionic orientation parameters it will involve
+ vector rotation, vector addition, and quaternion multiplication.
+\end_layout
+
+\end_inset
+
+ By the same logic as for the solute-solvent pairs the solvent-solvent interacti
+on 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+ could by viewed as field of a solvent molecule in a reference position/orientat
+ion 
+\begin_inset Formula $y_{0}$
+\end_inset
+
+ such that 
+\begin_inset Formula $y-y_{0}=y$
+\end_inset
+
+ for all 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ Note that the solute density 
+\begin_inset Formula $n$
+\end_inset
+
+ (or rather its intermediate representation 
+\begin_inset Formula $Q[n]$
+\end_inset
+
+) and geometry 
+\begin_inset Formula $R$
+\end_inset
+
+ (in reference orientation and origin) are implicitly present in the definition
+ of solute-solvent interaction 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ but not in the solvent-solvent interaction 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+.
+ The important distinction between the two is that the assumption of the
+ rigidity of solvent molecules is rarely relaxed whereas for the exploration
+ of the free energy surface 
+\begin_inset Formula $A(X)$
+\end_inset
+
+ on an non-trivial domain of parameters 
+\begin_inset Formula $X$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Such as an integration path between two conformations 
+\begin_inset Formula $X_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $X_{1}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ one needs to reproduce the implied dependence of solute field 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ on the solute parameters 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Whenever this distinction is important we use the symbol 
+\begin_inset Formula $u_{X}(y)$
+\end_inset
+
+ to indicate the dependence of the solute field on solute conformation 
+\begin_inset Formula $X$
+\end_inset
+
+ that includes position of all solute nuclei 
+\begin_inset Formula $R$
+\end_inset
+
+ and in general is not limited to a single (mass center) location and orientatio
+n.
+ For the sub-problem of finding the solvent distribution the origin of the
+ external field 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ is formally irrelevant except that it should be technically feasible to
+ compute this field for a high number of solvent parameters 
+\begin_inset Formula $y$
+\end_inset
+
+ (or rather integrals involving this potential function).
+ 
+\end_layout
+
+\begin_layout Standard
+With assumption of pairwise interactions, translational- and rotational
+ invariance the statistical part of the model is fully defined by two potentials
+, 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ and 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+, the former playing a role of an external (or rather solute-induced) field
+ in the solvent accessible volume and the latter defining the pairwise interacti
+on of solvent molecules.
+ 
+\end_layout
+
+\begin_layout Section
+Reduced one- and two-particle densities
+\end_layout
+
+\begin_layout Standard
+TBD.
+ With only pair potentials contributing to the interactions of the system
+ ...
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+\begin_inset Quotes eld
+\end_inset
+
+The orientational structure of dense, hard diatomic fluids has been studied
+ by calculating up to sixteen terms in the expansion of the total pair correlati
+on function 
+\begin_inset Formula $g(r_{12},\omega_{1},\omega_{2})$
+\end_inset
+
+, in spherical harmonics ...
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "streett76I"
+
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Two spherical harmonic expansions of the angular pair correlation function,
+ one with orientations referred to an intermolecular reference frame, the
+ other with orientations referred to a space-fixed frame...
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "haile80"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Born--Green--Yvon equation for distribution function 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:bgy"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quote
+Describes the essence of an available implementation of the BGY approach
+ for three-dimensional case to build upon.
+\end_layout
+
+\begin_layout Standard
+The assumption of pair interactions allows one to establish a series of
+ equations relating the order 
+\begin_inset Formula $n$
+\end_inset
+
+ distribution function to the order 
+\begin_inset Formula $n+1$
+\end_inset
+
+ distribution function 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hansen76"
+
+\end_inset
+
+.
+ The first equation of the BGY hierarchy relates the gradient of the solvent
+ density to the mean field force acting on a solvent particle
+\begin_inset Formula \begin{equation}
+\frac{\partial}{\partial y}\ln g(y)=\beta\left[f_{1}(y)+\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy\right]\label{eq:ybg-first-order}\end{equation}
+
+\end_inset
+
+where the forces 
+\begin_inset Formula $f_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $f_{2}$
+\end_inset
+
+ are the external (solute) field and solvent-solvent interaction, respectively:
+\begin_inset Formula \[
+f_{1}(y)=-\frac{\partial u_{1}}{\partial y},\quad f_{2}(y,y^{\prime})=-\frac{\partial u_{2}(y,y^{\prime})}{\partial y};\]
+
+\end_inset
+
+and 
+\begin_inset Formula $\rho$
+\end_inset
+
+ is a fixed parameter staying for the average solvent density.
+ The BGY hierarchy of equations formalizes the stationarity condition for
+ reduced distribution functions of ensembles following the classical trajectorie
+s in the phase space 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:hansen76"
+
+\end_inset
+
+ and can be generalized for discrete components of the solvent parameters
+ 
+\begin_inset Formula $y$
+\end_inset
+
+ that correspond to a mixture, Appendix
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:solvent-degrees"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The equation, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ybg-first-order"
+
+\end_inset
+
+), is more conveniently solved for the PMF term, 
+\begin_inset Formula $w(y)$
+\end_inset
+
+, 
+\begin_inset Formula \begin{equation}
+-\frac{\partial w}{\partial y}=\rho\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy,\label{eq:ybg-pmf-gradient}\end{equation}
+
+\end_inset
+
+related to the distribution function by the following definition : 
+\begin_inset Formula \[
+g(y):=g_{0}(y)\mathrm{e}^{-\beta w(y)}:=\mathrm{e}^{-\beta[u_{1}(y)+w(y)]}.\]
+
+\end_inset
+
+This choice of parametrization makes the PMF contribution vanishing, 
+\begin_inset Formula $w(y)\approx0$
+\end_inset
+
+, in the low density, 
+\begin_inset Formula $\rho\approx0$
+\end_inset
+
+, or ideal gas, 
+\begin_inset Formula $u_{2}\approx0$
+\end_inset
+
+, limits.
+ In these limiting cases the density approaches the Boltzmann distribution
+ 
+\begin_inset Formula $g(y)\approx g_{0}(y)$
+\end_inset
+
+.
+ For mono-atomic liquids and within the RISM approach to molecular liquids
+ where continuous solvent parameters 
+\begin_inset Formula $y$
+\end_inset
+
+ correspond to a vector of three components the system of equations, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ybg-pmf-gradient"
+
+\end_inset
+
+), for a gradient of a scalar function 
+\begin_inset Formula $w(y)$
+\end_inset
+
+ may be replaced by a single equation relating Laplacian of the PMF term
+ and divergence of the mean force field of the solvent 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss,griebel08"
+
+\end_inset
+
+:
+\begin_inset Formula \[
+-\left(\frac{\partial}{\partial y}\right)^{2}w=\rho\frac{\partial}{\partial y}\int f_{2}(y,y^{\prime})g^{(2)}(y,y^{\prime})g(y^{\prime})dy^{\prime}.\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Whereas the solvent-solvent interaction potential 
+\begin_inset Formula $u_{2}(y,y^{\prime})$
+\end_inset
+
+ and hence the corresponding force 
+\begin_inset Formula $f_{2}(y,y^{\prime})$
+\end_inset
+
+ depend on the relative coordinates 
+\begin_inset Formula $y-y^{\prime}$
+\end_inset
+
+ of a pair, the pair distribution function 
+\begin_inset Formula $g^{(2)}(y,y^{\prime})$
+\end_inset
+
+ also depends on the absolute positions, 
+\begin_inset Formula $y$
+\end_inset
+
+ and 
+\begin_inset Formula $y^{\prime}$
+\end_inset
+
+, in the phase space of the solvent molecule due to the presence of external
+ (solute) field, 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+.
+ In fact the pair distribution function 
+\begin_inset Formula $g^{(2)}$
+\end_inset
+
+ is given by the next equation in the BGY hierarchy that involves the third
+ order distribution function 
+\begin_inset Formula $g^{(3)}$
+\end_inset
+
+.
+ The often used approach is to approximate the pair distribution function
+\begin_inset Formula $g^{(2)}(y,y^{\prime})$
+\end_inset
+
+ by that of a uniform liquid with 
+\begin_inset Formula $u_{1}=0$
+\end_inset
+
+.
+ In this case it is a function of relative coordinates only: 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\begin_inset Formula $g^{(2)}=g^{(2)}(y-y^{\prime})$
+\end_inset
+
+.
+ Moreover, the site-site distribution functions within RISM approach depend
+ only on the absolute value of the distance vector.
+\end_layout
+
+\begin_layout Standard
+The pair distribution function of the uniform liquid could be either assumed
+ known from independent sources or taken from the self-consistent solution
+ of the BGY equation for the analogous equation with the solute substituted
+ by a solvent molecule.
+ Note that the pair distribution function, 
+\begin_inset Formula $g^{(2)}$
+\end_inset
+
+, and the pair force, 
+\begin_inset Formula $f_{2}$
+\end_inset
+
+, both (approximated by) a function of relative coordinates 
+\begin_inset Formula $y-y^{\prime}$
+\end_inset
+
+ and both parts of the model definition appear in the integral equation
+ together in a product 
+\begin_inset Formula $\vec{f}:=f_{2}g^{(2)}$
+\end_inset
+
+.
+ This antisymmetric 
+\begin_inset Quotes eld
+\end_inset
+
+weighted force
+\begin_inset Quotes erd
+\end_inset
+
+ vector field, 
+\begin_inset Formula $\vec{f}$
+\end_inset
+
+, together with external (solute) potential 
+\begin_inset Formula $u_{1}$
+\end_inset
+
+ define the (approximate) model of a simple liquid completely and the BGY
+ equation may be cast into the non-linear integro-differential equation:
+ 
+\begin_inset Formula \begin{equation}
+\Delta w=-\rho\nabla\left[\vec{f}\ast g\right],\quad g=g_{0}\mathrm{e}^{-\beta w},\label{eq:bgy3d}\end{equation}
+
+\end_inset
+
+with convolution integral defined by 
+\begin_inset Formula $\left[a\ast b\right](x):=\int a(x-x^{\prime})b(x^{\prime})dx^{\prime}$
+\end_inset
+
+.
+ The convolution integral, divergence of a vector field and solving the
+ Laplace equation are most efficiently performed in the momentum representation
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "sears03,jager07diss"
+
+\end_inset
+
+.
+ In the momentum space the first part of the equation, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bgy3d"
+
+\end_inset
+
+), is an algebraic equation between the Fourier components of PMF term 
+\begin_inset Formula $w$
+\end_inset
+
+ and distribution function 
+\begin_inset Formula $g$
+\end_inset
+
+ mediated by the (Fourier components of) 
+\begin_inset Quotes eld
+\end_inset
+
+weighted force field
+\begin_inset Quotes eld
+\end_inset
+
+ 
+\begin_inset Formula $\vec{f}$
+\end_inset
+
+:
+\begin_inset Formula \[
+k^{2}w=\mathrm{i}\rho\vec{k}\cdot\vec{f}g.\]
+
+\end_inset
+
+In an iterative solution of this equation, the non-linear real space relation
+ between the PMF term, 
+\begin_inset Formula $w$
+\end_inset
+
+, and the distribution function, 
+\begin_inset Formula $g$
+\end_inset
+
+, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:bgy3d"
+
+\end_inset
+
+), implies repeated Fourier transformations of the PMF unknown, 
+\begin_inset Formula $w$
+\end_inset
+
+, into the real space and an inverse transformation of the corresponding
+ distribution function, 
+\begin_inset Formula $g$
+\end_inset
+
+, into momentum space at each iteration 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+An available implementation of the method for molecular liquids and pair
+ interactions parametrized by simple force fields is available to build
+ future extensions upon 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "jager07diss,griebel08"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Choosing grid for position- and orientation parameters
+\end_layout
+
+\begin_layout Standard
+Functions of six degrees of freedom, 
+\begin_inset Formula $y=(r,q)$
+\end_inset
+
+, corresponding to a position vector, 
+\begin_inset Formula $r$
+\end_inset
+
+, and orientation parameters, 
+\begin_inset Formula $q$
+\end_inset
+
+, appear at a few occasions in the discussion above.
+ All of the following are such functions:
+\end_layout
+
+\begin_layout Itemize
+solute-solvent pair interaction potential 
+\begin_inset Formula $u_{1}(y)$
+\end_inset
+
+ where parameters 
+\begin_inset Formula $y$
+\end_inset
+
+ define the position and orientation of a solvent molecule with respect
+ to the solute in some reference orientation and location,
+\end_layout
+
+\begin_layout Itemize
+solute-solvent pair distribution function 
+\begin_inset Formula $\rho_{1}(y)$
+\end_inset
+
+ which corresponds to solvent distribution around solute in its reference
+ orientation and location,
+\end_layout
+
+\begin_layout Itemize
+solvent-solvent pair interaction potential 
+\begin_inset Formula $u_{2}(y)$
+\end_inset
+
+ where parameters 
+\begin_inset Formula $y$
+\end_inset
+
+ define the position and orientation of one solvent molecule with respect
+ to another solvent molecule in some reference orientation and location,
+\end_layout
+
+\begin_layout Itemize
+solvent-solvent pair distribution function 
+\begin_inset Formula $\rho_{2}(y)$
+\end_inset
+
+ of a pure solvent.
+\end_layout
+
+\begin_layout Standard
+A discrete representation of any of these function 
+\begin_inset Formula $f(y)$
+\end_inset
+
+ amounts to specifying the grid as a set of points 
+\begin_inset Formula $y_{k}=(r_{k},q_{k})$
+\end_inset
+
+ and a set of corresponding values 
+\begin_inset Formula $f(y_{k})$
+\end_inset
+
+.
+ A particular choice is to specify the grids independently for the positions
+ 
+\begin_inset Formula $r$
+\end_inset
+
+ and orientations 
+\begin_inset Formula $q$
+\end_inset
+
+.
+ A uniform cartesian grid for vector 
+\begin_inset Formula $r$
+\end_inset
+
+ in the simulation cell 
+\begin_inset Formula $L^{3}$
+\end_inset
+
+ is an obvious choice which has both advantages and drawbacks.
+ A short range distribution function, 
+\begin_inset Formula $\rho_{1}$
+\end_inset
+
+ or 
+\begin_inset Formula $\rho_{2}$
+\end_inset
+
+, may quickly approach a constant at distances 
+\begin_inset Formula $|r|\gg a$
+\end_inset
+
+ longer that the range parameter 
+\begin_inset Formula $a$
+\end_inset
+
+, thus making the values in the remaining 
+\begin_inset Formula $L^{3}-a^{3}$
+\end_inset
+
+ volume redundant.
+ On the other hand, an equally spaced cartesian grid allows use of fast
+ Fourier transformation techniques for solving integral equations for which
+ there are efficient implementations available.
+ For the equally spaced grid one takes for granted that for any two grid
+ points 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ the difference 
+\begin_inset Formula $r_{2}-r_{1}$
+\end_inset
+
+ is also a grid point.
+ 
+\end_layout
+
+\begin_layout Standard
+In the following discussion we assume that parameters, 
+\begin_inset Formula $q$
+\end_inset
+
+, specifying orientation are the unit quaternions.
+ The unit quaternions are often used to parametrize 
+\begin_inset Formula $SO(3)$
+\end_inset
+
+ rotations because of the existing homomorphism between unit quaternion
+ group under multiplication and 
+\begin_inset Formula $SO(3)$
+\end_inset
+
+.
+ This 2-to-1 correspondence (quaternions that differ by a sign map to the
+ same rotation) has a nice property of being a smooth parametrization of
+ 
+\begin_inset Formula $SO(3)$
+\end_inset
+
+.
+ The parameter space for unit quaternions is a three-dimensional surface
+ of a sphere, 
+\begin_inset Formula $S^{3}$
+\end_inset
+
+, embedded into the four-dimensional Euclidean space 
+\begin_inset Formula $R^{4}$
+\end_inset
+
+ with any two opposite poles of the sphere being equivalent.
+ Several choices for the (integration) grid on such a manifold exist [Stroud
+ 1960].
+ The equivalence of the opposite poles may be enforced either by considering
+ only the functions even in quaternionic parameters, 
+\begin_inset Formula $f(r,q)=f(r,-q)$
+\end_inset
+
+, or by grid pruning eliminating redundant points.
+ For the specialized problem at hand another aspect of the quaternion grid
+ may be worth considering.
+ Note that for the two species with orientations 
+\begin_inset Formula $q_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{2}$
+\end_inset
+
+ their relative orientation will be given by quaternion product 
+\begin_inset Formula $q=q_{1}^{-1}q_{2}$
+\end_inset
+
+.
+ It may be advantageous if this product is also a grid point if both 
+\begin_inset Formula $q_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $q_{2}$
+\end_inset
+
+ are themselves grid points (property taken for granted for relative 
+\emph on
+positions
+\emph default
+ on uniform cartesian grids).
+ Such grids are well defined as they correspond to the exhaustively studied
+ point groups as subgroups of 
+\begin_inset Formula $SO(3)$
+\end_inset
+
+.
+ We will also consider properties of such 
+\begin_inset Quotes eld
+\end_inset
+
+symmetry adapted
+\begin_inset Quotes erd
+\end_inset
+
+ integration grids for solute and solvent molecules exhibiting non-trivial
+ symmetry.
+ The fact that several orientations of a symmetric molecule are equivalent
+ allows one to reduce the domain of the quaternion orientation parameters
+ on the three-dimensional sphere 
+\begin_inset Formula $S^{3}$
+\end_inset
+
+ to the smaller fundamental domain.
+ This fundamental domain of orientation parameters is the counterpart of
+ the unit cell in direct- or Brilloin zone in reciprocal space corresponding
+ to translational symmetry.
+ 
+\end_layout
+
+\begin_layout Standard
+FIXME: With this particular choice of the orientation parameters the relative
+ position and orientation of the two objects (e.g.
+ solvent molecules) specified by 
+\begin_inset Formula $y_{1}=(r_{1},q_{1})$
+\end_inset
+
+ and 
+\begin_inset Formula $y_{2}=(r_{2},q_{2})$
+\end_inset
+
+ is given by the 
+\begin_inset Quotes eld
+\end_inset
+
+difference
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Formula \[
+\Delta y=y_{2}-y_{1}:=(r_{12},q_{12}),\quad r_{12}:=r_{2}-r_{1},\quad q_{12}:=q_{2}q_{1}^{-1}\]
+
+\end_inset
+
+defined by a relative position 
+\begin_inset Formula $r_{12}$
+\end_inset
+
+ and relative orientation 
+\begin_inset Formula $q_{12}$
+\end_inset
+
+ computed as a ratio of two quaternionic parameters.
+\end_layout
+
+\end_body
+\end_document
