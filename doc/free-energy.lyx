@@ -662,7 +662,7 @@ center
 
 
 \begin_inset Graphics
-	filename components2.png
+	filename free-energy.dir/components.png
 	lyxscale 20
 	width 10cm
 
@@ -821,7 +821,7 @@ center
 
 
 \begin_inset Graphics
-	filename flow4.png
+	filename free-energy.dir/flow.png
 	lyxscale 20
 	width 15cm
 
