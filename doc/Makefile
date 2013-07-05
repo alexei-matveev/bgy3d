@@ -12,8 +12,8 @@ all: \
 # There are a few figures in this document:
 #
 free-energy.pdf: \
-	free-energy.dir/components.png \
-	free-energy.dir/flow.png
+	free-energy.dir/components.pdf \
+	free-energy.dir/flow.pdf
 
 #
 # PDF4 format is produced by XeTeX
@@ -21,5 +21,5 @@ free-energy.pdf: \
 %.pdf: %.lyx
 	lyx --export pdf4 $(<)
 
-%.png: %.svg
-	inkscape $(<) --export-dpi=300 --export-png=$(@)
+%.pdf: %.svg
+	inkscape $(<) --export-dpi=300 --export-pdf=$(@)
