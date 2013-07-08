@@ -235,11 +235,15 @@ static void grid_map (DA da, const ProblemData *PD,
   /* MEMORY: huge arrays here: */
   int m = ni * nj * nk;
 
-  /* use dynamically memory allocation here */
+  /*
+    Use  dynamically  memory  allocation  here, otherwise  stack  will
+    overflow.  FIXME:  do the work  in chunks if  memory/efficiency is
+    low (see bgy3d-potential.c for example). This allocation is as big
+    as four real Vecs:
+  */
   real (*x)[3], *fx;
-  fx = malloc(m * sizeof(real));
-  /* contiguous memory allocation */
-  x = malloc(m * 3 * sizeof(real));
+  fx = malloc (m * sizeof (real));
+  x = malloc (m * 3 * sizeof (real)); /* contiguous memory */
 
   /* Get coordinates of the local grid portion: */
   {
@@ -263,23 +267,23 @@ static void grid_map (DA da, const ProblemData *PD,
 
   /* Copy contents of fx[] to the output vector: */
   {
-    PetscScalar ***vec;
-    DMDAVecGetArray (da, v, &vec);
+    PetscScalar ***v_;
+    DMDAVecGetArray (da, v, &v_);
     int ijk = 0;
     for (int k = k0; k < k0 + nk; k++)
       for (int j = j0; j < j0 + nj; j++)
         for (int i = i0; i < i0 + ni; i++)
           {
-            vec[k][j][i] = fx[ijk];
+            v_[k][j][i] = fx[ijk];
             ijk++;
           }
     assert (ijk == m);
-    DMDAVecRestoreArray (da, v, &vec);
+    DMDAVecRestoreArray (da, v, &v_);
   }
 
-  /* remember to free! */
-  free(fx);
-  free(x);
+  /* Remember to free! */
+  free (fx);
+  free (x);
 }
 
 
@@ -572,15 +576,25 @@ void bgy3d_solute_field (const State *BHD,
     read_charge_density (BHD->da, BHD->PD, filename, 1.0, uc_rho);
   else
     {
-      /* This function computes the density  of the solute as a sum of
-         gaussian functions and  distributed (electron) charge density
-         at an  array of points.  FIXME: nested  closure function, GCC
-         extension: */
+      /*
+        This  function  computes  the  density  of  the  solute  as  a
+        superposition  of gaussian  cores  and distributed  (electron)
+        charge density at an array of  points. In the MM case there is
+        no electron  density, and the  core charges correspond  to the
+        effective (small) charges of  atoms in the solute molecule. In
+        the QM case, however,  the core charges (partially) compensate
+        the electron density and may  become large (e.g.  +6 or +4 for
+        oxygen atom depending on the ECP used).
+
+        FIXME: nested closure function, GCC extension:
+      */
       void f (int m, const real x[m][3], real rho[m])
       {
-        /* Bind solute description  from the enclosing scope.  Compute
-           the  (positive)   charge  density  of  (gaussian-broadened)
-           cores: */
+        /*
+          Bind solute  description from the  enclosing scope.  Compute
+          the   (positive)  charge  density   of  (gaussian-broadened)
+          cores:
+        */
         gf_density (m, x, rho, n, solute, G);
 
         /* If not NULL, add charge density of electrons: */
@@ -598,8 +612,11 @@ void bgy3d_solute_field (const State *BHD,
           }
       }
 
-      /* Use f()  to compute total core  & electron at  every point of
-         the local grid portion and put that into Vec uc: */
+      /*
+        Use f()  to compute  total core &  electron charge  density at
+        every point  of the local grid  portion and put  that into Vec
+        uc_rho:
+      */
       grid_map (BHD->da, BHD->PD, f, uc_rho);
     }
 
