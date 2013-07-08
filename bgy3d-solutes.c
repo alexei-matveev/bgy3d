@@ -21,6 +21,7 @@
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* G_COULOMB_INVERSE_RANGE */
 #include "bgy3d-force.h"        /* lennard_jones_coulomb_short() */
+#include "bgy3d-vec.h"          /* bgy3d_vec_read() */
 
 /* FIXME: bgy3d-solvents.h pollutes the namespace: */
 #undef sH
@@ -570,10 +571,13 @@ void bgy3d_solute_field (const State *BHD,
 
   char filename[260];           /* electron density file */
 
-  /* The first  branch was  rarely tested. Maybe  use bgy3d_vec_read()
-     instead and prepare the density by some utility? */
+  /*
+    The first branch was  rarely tested.  We use bgy3d_vec_read() here
+    so the file  needs to be in the PETSC binary  Vec format. See also
+    read_charge_density().
+  */
   if (bgy3d_getopt_string("--load-charge", filename, sizeof (filename)))
-    read_charge_density (BHD->da, BHD->PD, filename, 1.0, uc_rho);
+    bgy3d_vec_read (filename, uc_rho);
   else
     {
       /*
