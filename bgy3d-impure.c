@@ -212,7 +212,7 @@ static void kernel (const DA dc,
   assert (L[0] == L[2]);
 
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L3 = L[0] * L[1] * L[2];
+  const real L3 = volume (PD);
   const real fac = L[0] / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
   const real scale = fac / L3;
 
@@ -641,7 +641,7 @@ static void solute_solve (State *BHD,
   for (int i = 0; i < m; i++)
     rhos[i] = PD->rho;          /* 2 * PD->rho; */
 
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -1197,7 +1197,7 @@ Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini)
 
   State BHD = initialize_state (PD);
 
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   /* Site specific  density.  Computed as a solvent  density rho times
      number of sites of that type in a solvent: */
