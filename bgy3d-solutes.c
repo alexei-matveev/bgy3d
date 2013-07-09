@@ -198,8 +198,8 @@ static void field (const State *BHD,
   vec_rmap3 (BHD, f3, v);
 }
 
-/* Callback here  is that of  gf_density() closure over all  but three
-   leading arguments: */
+
+/* Callback here is a function passed from QM code: */
 static void grid_map (DA da, const ProblemData *PD,
                       void (*f)(int m, const real x[m][3], real fx[m]),
                       Vec v)
@@ -305,44 +305,41 @@ static real ljc (const Site *A, int n, const Site S[n])
 
 /*
   Gaussian functions  (gf) represent each solute  site charge, compute
-  the total charge density at every point x[]. Compare to the function
-  rho() above that does the same for one point at a time.
+  the total charge density at every point x[i].
 
   Each gaussian is evaluated as:
 
     ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
-
-  This is  another type  of (elemental) callbacks  that take  array of
-  coordinates and return an array of respective values.
 */
-static void gf_density (int m, const real x[m][3], /* coordinates */
-                        real rho[m],            /* output densities */
-                        int n, const Site S[n], /* solute description */
-                        real G)                 /* inverse coulomb range */
+static
+void cores (const State *BHD,
+            int n, const real q[n], /* const */ real r[n][3], real G,
+            Vec rho_fft)
 {
-  /* G is predefind in bgy3d-solvents.h FIXME: make the gaussian width
-     a property of the (solute) site  in the same way as the charge of
-     the site. */
-  real prefac = pow(G / sqrt(M_PI), 3.0);
+  /*
+    FIXME: make the gaussian width  a property of the (solute) site in
+    the same way as the charge of the site.
+  */
+  const real prefac = pow (G / sqrt (M_PI), 3.0);
 
-  for (int i = 0; i < m; i++)
-    {
-      /* Sum Gaussian contributions from all solute sites: */
-      real ro = 0.0;
-      for (int j = 0; j < n; j++)
-        {
+  real f3 (const real x[3])
+  {
+    /* Sum Gaussian contributions from all (solute) sites: */
+    real sum = 0.0;
+    for (int i = 0; i < n; i++)
+      {
+        /* Square of the distance from a grid point to this site: */
+        real r2 = SQR (x[0] - r[i][0]) +
+                  SQR (x[1] - r[i][1]) +
+                  SQR (x[2] - r[i][2]);
 
-          /* Square of the distance from a grid point to this site: */
-          real r2 = SQR (x[i][0] - S[j].x[0]) +
-                    SQR (x[i][1] - S[j].x[1]) +
-                    SQR (x[i][2] - S[j].x[2]);
-
-          /* Gaussian distribution,  note that G  is not a  width, but
-             rather an inverse of it: */
-          ro += prefac * S[j].charge * exp(- G * G * r2);
-        }
-      rho[i] = ro;
-    }
+        /* Gaussian  distribution, note  that G  is not  a  width, but
+           rather an inverse of it: */
+        sum += q[i] * exp(- G * G * r2);
+      }
+    return prefac * sum;
+  }
+  vec_rmap3 (BHD, f3, rho_fft);
 }
 
 
@@ -433,72 +430,70 @@ void bgy3d_solute_field (const State *BHD,
     return;
 
   /*
-   * Compute the charge density  of the solute.  The callback function
-   * gf_density() sums  (net or nuclear) charge  distribution for each
-   * solute site. The overall factor for the Coulomb potential derived
-   * from this density is 1.0 (idependent of the solvent charge).
-   *
-   * Vec uc  will first hold the  solute charge density  and later its
-   * Coulomb field.
-   *
-   * 1.  Put  the  solute  charge  density  (positive  core,  negative
-   * electrons) into Vec uc:
-   */
+    1.   Put  the  solute  charge density  (positive  cores,  negative
+    electrons) into Vec uc_rho.
 
-  char filename[260];           /* electron density file */
+    The density of the solute as a superposition of gaussian cores and
+    distributed (electron) charge density. In  the MM case there is no
+    electron density, and the core charges correspond to the effective
+    (small) charges of atoms in  the solute molecule.  In the QM case,
+    however,  the  core charges  (partially)  compensate the  electron
+    density  and may  become large  (e.g.  +6  or +4  for  oxygen atom
+    depending on the ECP used).
 
-  /*
-    The first branch was  rarely tested.  We use bgy3d_vec_read() here
-    so the file  needs to be in the PETSC binary  Vec format. See also
-    read_charge_density().
+    The  overall factor for  the Coulomb  potential derived  from this
+    density will be 1.0, that is idependent of the solvent charge.
   */
-  if (bgy3d_getopt_string("--load-charge", filename, sizeof (filename)))
-    bgy3d_vec_read (filename, uc_rho);
-  else
-    {
-      /*
-        This  function  computes  the  density  of  the  solute  as  a
-        superposition  of gaussian  cores  and distributed  (electron)
-        charge density at an array of  points. In the MM case there is
-        no electron  density, and the  core charges correspond  to the
-        effective (small) charges of  atoms in the solute molecule. In
-        the QM case, however,  the core charges (partially) compensate
-        the electron density and may  become large (e.g.  +6 or +4 for
-        oxygen atom depending on the ECP used).
 
-        FIXME: nested closure function, GCC extension:
-      */
-      void f (int m, const real x[m][3], real rho[m])
+  /* a) Core density: */
+  {
+    real q[n];              /* solute charges */
+    real x[n][3];           /* solute coordinates */
+
+    /* Copy them from struct Site: */
+    for (int i = 0; i < n; i++)
       {
-        /*
-          Bind solute  description from the  enclosing scope.  Compute
-          the   (positive)  charge  density   of  (gaussian-broadened)
-          cores:
-        */
-        gf_density (m, x, rho, n, solute, G);
-
-        /* If not NULL, add charge density of electrons: */
-        if (density)
-          {
-            /* Electron density goes here: */
-            real rho1[m];       /* MEMORY: huge array here! */
-
-            /* This   computes   the   (unsigned)   electron   density
-               distributed in space by QM rules: */
-            density (m, x, rho1);
-
-            for (int i = 0; i < m; i++)
-              rho[i] -= rho1[i]; /* electrons are negative */
-          }
+        q[i] = solute[i].charge;
+        FOR_DIM
+          x[i][dim] = solute[i].x[dim];
       }
 
+    /* Compute the charge density of gaussian broadened cores: */
+    cores (BHD, n, q, x, G, uc_rho);
+  }
+
+  /* b) Electron density.  Only if not NULL, add the charge density of
+     electrons: */
+  if (density)
+    {
+      local Vec rho_elec = vec_duplicate (uc_rho);
+
       /*
-        Use f()  to compute  total core &  electron charge  density at
+        Use  density() to  compute  total electron  charge density  at
         every point  of the local grid  portion and put  that into Vec
-        uc_rho:
+        rho_elec:
       */
-      grid_map (BHD->da, BHD->PD, f, uc_rho);
+      grid_map (BHD->da, BHD->PD, density, rho_elec);
+
+      /* Electrons are negative: */
+      VecAXPY (uc_rho, -1.0, rho_elec);
+
+      vec_destroy (&rho_elec);
     }
+
+  /*
+    This branch  was rarely tested.   Replace the computed  density by
+    the one from file. We  use bgy3d_vec_read() here so the file needs
+    to   be   in   the    PETSC   binary   Vec   format.    See   also
+    bgy3d_vec_read_gpaw().
+  */
+  {
+    char filename[260];           /* electron density file */
+
+    if (bgy3d_getopt_string ("--load-charge", filename, sizeof (filename)))
+      bgy3d_vec_read (filename, uc_rho);
+  }
+
 
   if (1)                        /* debug prints only */
     {
