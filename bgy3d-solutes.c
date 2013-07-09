@@ -179,46 +179,23 @@ void bgy3d_solute_get (const char *name, int *n, const Site **sites)
 
   Vector "v" is the intent(out) argument.
  */
-static void field (DA da, const ProblemData *PD,
+static void field (const State *BHD,
                    Site A, int n, const Site S[n],
                    real (*f)(const Site *A, int n, const Site S[n]),
                    Vec v)
 {
-  PetscScalar ***vec;
-  const real *h = PD->h;        /* [3] */
-  const real *L = PD->L;        /* [3] */
+  /*
+    Compute the field  f at (x, y,  z) <-> (i, j, k)  e.g.  by summing
+    (LJ) contributions from all solute sites at that grid point:
+  */
+  real f3 (const real r[3])
+  {
+    FOR_DIM
+      A.x[dim] = r[dim];        /* Modifying the input! */
+    return f (&A, n, S);
+  }
 
-  int i0, j0, k0;
-  int ni, nj, nk;
-
-  /* Get local portion of the grid */
-  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  DMDAVecGetArray (da, v, &vec);
-
-  /* loop over local portion of grid */
-  for (int k = k0; k < k0 + nk; k++)
-    {
-      A.x[2] = k * h[2] - L[2] / 2;
-
-      for (int j = j0; j < j0 + nj; j++)
-        {
-          A.x[1] = j * h[1] - L[1] / 2;
-
-          for (int i = i0; i < i0 + ni; i++)
-            {
-              A.x[0] = i * h[0] - L[0] / 2;
-
-              /*
-               * Compute the field  f at (x, y, z) <->  (i, j, k) e.g.
-               * by summing  (LJ) contributions from  all solute sites
-               * at that grid point:
-               */
-              vec[k][j][i] = f (&A, n, S);
-            }
-        }
-    }
-  DMDAVecRestoreArray (da, v, &vec);
+  vec_rmap3 (BHD, f3, v);
 }
 
 /* Callback here  is that of  gf_density() closure over all  but three
@@ -448,7 +425,7 @@ void bgy3d_solute_field (const State *BHD,
       Site scaled = solvent[i];          /* dont modify the input */
       scaled.charge *= scale_coul_short; /* modify a copy */
 
-      field (BHD->da, BHD->PD, scaled, n, solute, ljc, us[i]);
+      field (BHD, scaled, n, solute, ljc, us[i]);
     }
 
   /* Early return if no Coulomb is requested: */
