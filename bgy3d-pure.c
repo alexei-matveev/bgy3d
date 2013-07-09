@@ -164,7 +164,7 @@ static void Compute_dg_inter (State *BHD,
                               Vec dua) /* intent(out) */
 {
   const ProblemData *PD = BHD->PD;
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   local Vec fg2_fft[3];
   FOR_DIM
@@ -370,7 +370,7 @@ static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
 static void nssa_norm_intra (State *BHD, Vec gac_fft, Vec wbc_fft,
                              Vec nab)
 {
-  const real L3 = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
+  const real L3 = volume (BHD->PD);
 
   local Vec nab_fft = vec_pop (BHD->dc);
 
@@ -442,7 +442,7 @@ static void Compute_dg_intra (State *BHD,
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* [3] */
   const real *L = PD->L;        /* [3] */
-  const real L3 = L[0] * L[1] * L[2];
+  const real L3 = volume (PD);
 
   /* FIXME: rectangular box? */
   assert (L[0] == L[1]);
