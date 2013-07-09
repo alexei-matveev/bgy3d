@@ -418,7 +418,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   const ProblemData *PD = HD->PD;
   const real rho = PD->rho;
   const real beta = PD->beta;
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
@@ -793,7 +793,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   /* Chemical potential */
   {
     const real beta = HD->PD->beta;
-    const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+    const real L3 = volume (PD);
 
     /*
       FIXME: this is the only  place where one needs real-space rep of
@@ -1059,7 +1059,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   // const real rho = PD->rho;
   const real beta = PD->beta;
   const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[0];
+  const real L3 = volume (PD);
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m], dt[m];
@@ -1253,7 +1253,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
 
