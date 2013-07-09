@@ -262,7 +262,7 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
   */
   {
     local Vec ve_fft = vec_create (BHD->dc);
-    const real L3 = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
+    const real L3 = volume (BHD->PD);
 
     /* poisson sovler returns FFT coulomb long */
     bgy3d_poisson (BHD, ve_fft, rho, -4 * M_PI * EPSILON0INV);
@@ -525,7 +525,7 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       bgy3d_comm_allreduce (1, &m0);
       bgy3d_comm_allreduce (3, m1);
 
-      const real V = BHD->PD->L[0] * BHD->PD->L[1] * BHD->PD->L[2];
+      const real V = volume (BHD->PD);
       PetscPrintf (PETSC_COMM_WORLD, "Moments divided by cell volume V = %lf: \n", V);
       PetscPrintf (PETSC_COMM_WORLD, "<1 * v> = %lf\n", m0 / V);
       PetscPrintf (PETSC_COMM_WORLD, "<x * v> = %lf\n", m1[0] / V);
