@@ -225,6 +225,15 @@ typedef struct ProblemData
   ClosureEnum closure;          /* HNC, KH, or PY */
 } ProblemData;
 
+
+/* Accessors for often used derived properties: */
+static inline real
+volume (const ProblemData *PD)
+{
+  return PD->L[0] * PD->L[1] * PD->L[2];
+}
+
+
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
    interface: */
 ProblemData bgy3d_problem_data (void);
