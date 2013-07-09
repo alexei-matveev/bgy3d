@@ -303,18 +303,19 @@ static real ljc (const Site *A, int n, const Site S[n])
   return field;
 }
 
+
 /*
-  Gaussian functions  (gf) represent each solute  site charge, compute
-  the total charge density at every point x[i].
+  Gaussian functions  represent each  solute site charge,  compute the
+  total charge density at every point x[i].
 
   Each gaussian is evaluated as:
 
     ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
 */
-static
-void cores (const State *BHD,
-            int n, const real q[n], /* const */ real r[n][3], real G,
-            Vec rho_fft)
+static void
+cores (const State *BHD,
+       int n, const real q[n], /* const */ real r[n][3], real G,
+       Vec rho)                /* out, real, center */
 {
   /*
     FIXME: make the gaussian width  a property of the (solute) site in
@@ -339,7 +340,7 @@ void cores (const State *BHD,
       }
     return prefac * sum;
   }
-  vec_rmap3 (BHD, f3, rho_fft);
+  vec_rmap3 (BHD, f3, rho);
 }
 
 
