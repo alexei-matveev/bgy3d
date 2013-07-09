@@ -163,7 +163,7 @@ void bgy3d_state_destroy (State *BHD)
 /* Code used to be verbose: */
 void bgy3d_problem_data_print (const ProblemData *PD)
 {
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   PetscPrintf (PETSC_COMM_WORLD, "Ω = %g x %g x %g A³\n", PD->L[0], PD->L[1], PD->L[2]);
   PetscPrintf (PETSC_COMM_WORLD, "N = %d x %d x %d\n", PD->N[0], PD->N[1], PD->N[2]);
