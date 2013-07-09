@@ -109,7 +109,7 @@ static void ComputeFFTfromCoulomb (State *BHD,
   grad_fft (BHD, uc_fft, fc_fft);
 
   const ProblemData *PD = BHD->PD;
-  const real L3 = PD->L[0] * PD->L[1] * PD->L[2];
+  const real L3 = volume (PD);
 
   /* FFT^-1 potential ... */
   MatMultTranspose (BHD->fft_mat, uc_fft, uc);
