@@ -462,13 +462,13 @@ void vec_rmap3 (const State *BHD, real (*f)(const real r[3]), Vec v)
   real ***v_;
   DMDAVecGetArray (BHD->da, v, &v_);
 
-  int n[3], x[3], i[3];
-  DMDAGetCorners (BHD->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  int n[3], a[3], i[3];
+  DMDAGetCorners (BHD->da, &a[0], &a[1], &a[2], &n[0], &n[1], &n[2]);
 
   /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+  for (i[2] = a[2]; i[2] < a[2] + n[2]; i[2]++)
+    for (i[1] = a[1]; i[1] < a[1] + n[1]; i[1]++)
+      for (i[0] = a[0]; i[0] < a[0] + n[0]; i[0]++)
         {
           real r[3];
           FOR_DIM
@@ -496,16 +496,16 @@ void vec_kmap3 (const State *BHD, complex (*f)(const real k[3]), Vec v_fft)
     dk[dim] = 2 * M_PI / PD->L[dim];
 
   /* Get local portion of the k-grid */
-  int x[3], n[3], i[3];
-  DMDAGetCorners (BHD->dc, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  int a[3], n[3], i[3];
+  DMDAGetCorners (BHD->dc, &a[0], &a[1], &a[2], &n[0], &n[1], &n[2]);
 
   complex ***v_fft_;
   DMDAVecGetArray (BHD->dc, v_fft, &v_fft_);
 
    /* loop over local portion of grid */
-  for (i[2] = x[2]; i[2] < x[2] + n[2]; i[2]++)
-    for (i[1] = x[1]; i[1] < x[1] + n[1]; i[1]++)
-      for (i[0] = x[0]; i[0] < x[0] + n[0]; i[0]++)
+  for (i[2] = a[2]; i[2] < a[2] + n[2]; i[2]++)
+    for (i[1] = a[1]; i[1] < a[1] + n[1]; i[1]++)
+      for (i[0] = a[0]; i[0] < a[0] + n[0]; i[0]++)
         {
           real k[3];
 
