@@ -540,10 +540,10 @@ total  solvation energy  estimate of  -9.58 kcal.   The  solute dipole
 moments are also shown:
 
 
-Method             E~tot~, au    D~u~, eA
-----------  -----------------  ----------
+Method             E~tot~, au    D~u~, eA     D~v~, eA
+----------  -----------------  ----------  -----------
 qm/gp        -17.154353092917   0.5239553
-qm/pcm       -17.169614518847   0.6021832
+qm/pcm       -17.169614518847   0.6021832    0.5426852
 
 
 The next table shows the terms  in the PCM solvation energy as printed
@@ -565,7 +565,8 @@ $\Sigma$         -10.86
 The  dipole  of  a  gas  phase  molecule  computed  usong  CRENBL  ECP
 corresponds to 2.52  D which is significantly more  than 1.85 D quoted
 by some  sources [wikipedia].  The dipole  increases to 2.89  D due to
-PCM polarization.
+PCM  polarization. However  it is  mostly compensated  by  the induced
+medium dipole of 2.61 D of opposite direction.
 
 ### MM and QM solutes in KH-water
 
