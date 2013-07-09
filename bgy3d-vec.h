@@ -449,9 +449,12 @@ static inline void vec_fft_map3 (Vec w, /* out */
 }
 
 
-/* Tabulate v = f(r) with origin at the grid center:  */
+/*
+  Tabulate v = f(r) with origin at the grid center. Here r[3] are the
+  coordinates of the grid point (small r are in the grid center).
+*/
 static inline
-void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
+void vec_rmap3 (const State *BHD, real (*f)(const real r[3]), Vec v)
 {
   const real *L = BHD->PD->L;   /* [3] */
   const real *h = BHD->PD->h;   /* [3] */
@@ -471,17 +474,19 @@ void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
           FOR_DIM
             r[dim] = i[dim] * h[dim] - L[dim] / 2;
 
-          const real r_s = sqrt (SQR (r[0]) + SQR (r[1]) + SQR (r[2]));
-
-          v_[i[2]][i[1]][i[0]] = f (r_s);
+          v_[i[2]][i[1]][i[0]] = f (r);
         }
   DMDAVecRestoreArray (BHD->da, v, &v_);
 }
 
 
-/* Tabulate v_fft = f(k) with origin at the grid corner: */
+/*
+  Tabulate v_fft = f(k) with origin  at the grid corner. Here k[3] are
+  the  coordinates  of the  k-grid  point (small  k  are  in the  grid
+  corner).
+*/
 static inline
-void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
+void vec_kmap3 (const State *BHD, complex (*f)(const real k[3]), Vec v_fft)
 {
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* [3] */
@@ -508,17 +513,41 @@ void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
           FOR_DIM
             k[dim] = KFREQ (i[dim], N[dim]) * dk[dim];
 
-          const real k2 = SQR (k[2]) + SQR (k[1]) + SQR (k[0]);
-
-          /*
-            FIXME:  we  take a  square  root  here,  but in  the  most
-            interesting case  the Coulomb depends on  k^2 anyway. This
-            potential  is also  a complex  number with  zero imaginary
-            part.
-          */
-          v_fft_[i[2]][i[1]][i[0]] = f (sqrt (k2));
+          v_fft_[i[2]][i[1]][i[0]] = f (k);
         }
   DMDAVecRestoreArray (BHD->dc, v_fft, &v_fft_);
+}
+
+
+/* Tabulate v = f(r) with origin at the grid center:  */
+static inline
+void vec_rmap (const State *BHD, real (*f)(real r), Vec v)
+{
+  real f3 (const real x[3])
+  {
+    const real r2 = SQR (x[0]) + SQR (x[1]) + SQR (x[2]);
+    return f (sqrt (r2));
+  }
+  vec_rmap3 (BHD, f3, v);
+}
+
+
+/*
+  Tabulate v_fft = f(k) with origin at the grid corner.
+
+  FIXME: we take a square root  here, but in the most interesting case
+  the Coulomb depends on k^2  anyway. This potential is also a complex
+  number with zero imaginary part.
+*/
+static inline
+void vec_kmap (const State *BHD, complex (*f)(real k), Vec v_fft)
+{
+  complex f3 (const real k[3])
+  {
+    const real k2 = SQR (k[0]) + SQR (k[1]) + SQR (k[2]);
+    return f (sqrt (k2));
+  }
+  vec_kmap3 (BHD, f3, v_fft);
 }
 
 
