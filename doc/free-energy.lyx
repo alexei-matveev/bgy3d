@@ -3548,7 +3548,7 @@ fixed
 \emph on
 shape
 \emph default
- distribution with a center as its only parameter.
+ with a magnitude and a center as its only parameters.
 \end_layout
 
 \end_inset
