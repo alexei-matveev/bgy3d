@@ -3563,6 +3563,45 @@ shape
  
 \end_layout
 
+\begin_layout Standard
+\begin_inset Marginal
+status collapsed
+
+\begin_layout Plain Layout
+new:
+\end_layout
+
+\end_inset
+
+Probably a more accessible approach, at the moment, is to base the definition
+ of the effective solute site charges on a Mulliken population analysis
+ for which an analytic expression via the density- and overlap matrix elements
+ exists.
+ Such an approach would require 
+\end_layout
+
+\begin_layout Itemize
+evaluating and passing the Mulliken charges to the solvent model code during
+ SCF as opposed to post-SCF evaluation (1 week).
+\end_layout
+
+\begin_layout Itemize
+deriving and implementing the corresponding hamiltonian matrix elements
+ to be combined with 
+\begin_inset Quotes eld
+\end_inset
+
+site electrostatic potentials
+\begin_inset Quotes erd
+\end_inset
+
+ and added to the KS matrix (2 weeks)
+\end_layout
+
+\begin_layout Itemize
+adapting and verifying regression tests for QM/water calculations (1 week)
+\end_layout
+
 \begin_layout Subsection
 Pairwise electron-solvent interaction
 \end_layout
@@ -3821,7 +3860,171 @@ Here we introduced the solvent charge density
 \end_layout
 
 \begin_layout Standard
-A minimal change 
+\begin_inset Marginal
+status collapsed
+
+\begin_layout Plain Layout
+new:
+\end_layout
+
+\end_inset
+
+ An important aspect of choosing the parametrization 
+\begin_inset Formula $f_{\alpha}(r)$
+\end_inset
+
+ for the interaction between electrons and solvent sites is the consistency
+ with the force-field parameters of the solute-solvent site-site pair interactio
+ns.
+ Indeed, the often quoted origin of the repulsive branch in the LJ potential
+ is the, so called, Pauli repulsion of the electron shells.
+ One would want to avoid double counting when introducing the repulsive
+ interaction also to the electron-solvent interactions.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The Coulomb interaction of electrons with solvent sites itself is a double
+ counting unless one replaces the effective net charges of the solute sites
+ from a force-field parametrization by (usually) much higher nuclear or
+ core charges.
+\end_layout
+
+\end_inset
+
+ Ideally, the force field parameters for site-site interactions available
+ in the literature should remain applicable, any alternative is open-ended.
+ 
+\end_layout
+
+\begin_layout Standard
+A minimal effort approach to avoid near-singularities in the KS potential
+ due to localized peaks in the solvent distribution functions would be to
+ remove the Coulomb singularity at 
+\begin_inset Formula $r\to0$
+\end_inset
+
+ in 
+\begin_inset Formula $f_{\alpha}(r)$
+\end_inset
+
+.
+ For example, an electron-solvent interaction described by 
+\begin_inset Formula $f_{\alpha}(r)=-z_{\alpha}\text{erf}(\eta r)/r$
+\end_inset
+
+ is free of such a singularity.
+ When compared to the Coulomb law, 
+\begin_inset Formula $-z_{\alpha}/r$
+\end_inset
+
+, the regularized form of the interaction effectively introduces a repulsive
+ short range interaction, 
+\begin_inset Formula $z_{\alpha}\text{erfc}(\eta r)/r$
+\end_inset
+
+, between positively charged solvent sites with 
+\begin_inset Formula $z_{\alpha}>0$
+\end_inset
+
+ and electrons and an 
+\emph on
+attractive
+\emph default
+ short range interaction for negatively charged sites with 
+\begin_inset Formula $z_{\alpha}<0$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A (limited) experience shows that a positively charged and 
+\begin_inset Quotes eld
+\end_inset
+
+small
+\begin_inset Quotes erd
+\end_inset
+
+ water hydrogen tends to approach the solute more easily and, occasionally,
+ forms high localized distribution peaks in the attractive regions.
+\end_layout
+
+\end_inset
+
+ Effectively, this change introduces a finite size and a fixed shape to
+ either electrons or/and solvent sites, depending on the interpretation,
+ into the pair interaction model.
+\end_layout
+
+\begin_layout Standard
+Such a minimal-effort approach would require 
+\end_layout
+
+\begin_layout Itemize
+adapting the code that evaluates the (site-independent) electrostatic potential
+ of the electrons (along the lines of a Poisson solver) acting on solvent
+ sites to effectively introduce a 
+\begin_inset Quotes eld
+\end_inset
+
+gaussian blur
+\begin_inset Quotes erd
+\end_inset
+
+ on the grid representation of the electron density (2 days);
+\end_layout
+
+\begin_layout Itemize
+adapting the code that evaluates the electron (KS) potential of solvent
+ charge distribution to effectively introduce a 
+\begin_inset Quotes eld
+\end_inset
+
+gaussian blur
+\begin_inset Quotes erd
+\end_inset
+
+ (2 days);
+\end_layout
+
+\begin_layout Itemize
+searching for a suitable width parameter 
+\begin_inset Formula $\eta$
+\end_inset
+
+ that still allows re-use of the literature force-field parameters and eliminate
+s (if really present)
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+There is no clear evidence yet that such an artifact really exists.
+\end_layout
+
+\end_inset
+
+ artifacts of near-singularities in the KS potential (2 weeks);
+\end_layout
+
+\begin_layout Itemize
+adapting and verifying regression tests for QM/water calculations (1 week)
+\end_layout
+
+\begin_layout Itemize
+careful watching for other artifacts that might have been introduced together
+ with, say, short-range attraction between negative solvent sites and electrons
+ and occasional comparisons against the Coulomb 
+\begin_inset Quotes eld
+\end_inset
+
+reference
+\begin_inset Quotes erd
+\end_inset
+
+ (the whole extent of the project).
 \end_layout
 
 \begin_layout Section
