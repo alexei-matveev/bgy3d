@@ -363,7 +363,9 @@
   ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
   ("O" (1.76 0.0 0.0) 3.00 1.08 -0.25)))
 
-;; FF for TIP3P uranyl is the same with SPC one according to [1]
+;; Non-bond FF parameters for TIP3P uranyl is the same with SPC one according
+;; to [1], the difference is that they used flexible model for SPC/Fw and
+;; treated TIP3P water as a rigid molecule.
 ("uranyl, TIP3P"
  (("U" (0.0 0.0 0.0) 3.25 0.27 2.5)
   ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
