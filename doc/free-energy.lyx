@@ -3564,15 +3564,6 @@ shape
 \end_layout
 
 \begin_layout Standard
-\begin_inset Marginal
-status collapsed
-
-\begin_layout Plain Layout
-new:
-\end_layout
-
-\end_inset
-
 Probably a more accessible approach, at the moment, is to base the definition
  of the effective solute site charges on a Mulliken population analysis
  for which an analytic expression via the density- and overlap matrix elements
@@ -3860,16 +3851,7 @@ Here we introduced the solvent charge density
 \end_layout
 
 \begin_layout Standard
-\begin_inset Marginal
-status collapsed
-
-\begin_layout Plain Layout
-new:
-\end_layout
-
-\end_inset
-
- An important aspect of choosing the parametrization 
+An important aspect of choosing the parametrization 
 \begin_inset Formula $f_{\alpha}(r)$
 \end_inset
 
