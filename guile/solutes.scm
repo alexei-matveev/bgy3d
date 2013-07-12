@@ -299,6 +299,16 @@
   ("CH3" (-0.41937205696157085365 +1.29155267463595300518 0.0) 3.75 0.194616 0.0)
   ("CH3" (-0.41937205696157085365 -1.29155267463595300518 0.0) 3.75 0.194616 0.0)))
 
+;;
+;; By comparing atom by atom, we found that FFs for atom sites in methanol,
+;; butanoic acid and hexane which are recorded in the original code are the
+;; same with those in OPLS All-Atom (OPLS-AA) force field [1]
+;;
+;; [1] "Development and Testing of the OPLS All-Atom Force Field on
+;;     Conformational Energetics and Properties of Organic Liquids", W.
+;;     L. Jorgensen, D. S. Maxwell and J. Tirado-Rives, Journal of the
+;;     American Chemical Society, 1996, 118 (45), 11225-11236
+;;     http://dx.doi.org/10.1021/ja9621760
 ("methanol"
  (("C" (-0.748 -0.015 0.024) 3.5 0.066 0.145)
   ("HC1" (-1.293 -0.202 -0.901) 2.5 0.03 0.04)
