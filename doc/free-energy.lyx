@@ -1947,7 +1947,14 @@ Solvent distribution in PCM is reduced to the description of the cavity
 \end_layout
 
 \begin_layout Section
-Alchemical processes and pairwise solute-solvent interaction
+Alchemical processes and pairwise solute-solvent interaction 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:alchemical-processes"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Quote
@@ -5438,6 +5445,183 @@ reference "eq:water-solvation-energy"
 \end_inset
 
 
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Three-dimensional statistical solvent models for water
+\end_layout
+
+\begin_layout Quote
+(Work plan)
+\end_layout
+
+\begin_layout Subsection
+Charged solutes in 3D-RISM
+\end_layout
+
+\begin_layout Itemize
+Investigate the long range (
+\begin_inset Formula $r\to\infty$
+\end_inset
+
+ or rather 
+\begin_inset Formula $k\to0$
+\end_inset
+
+) behavior of the solvent susceptibility, 
+\begin_inset Formula $\tilde{\chi}_{\alpha\gamma}(k)=\tilde{\omega}_{\alpha\gamma}(k)+\rho\tilde{h}_{\alpha\gamma}(k)$
+\end_inset
+
+.
+ The solvent susceptibility 
+\begin_inset Formula $\tilde{\chi}_{\alpha\gamma}(k)$
+\end_inset
+
+ appears in a convolution with the long-range direct correlation 
+\begin_inset Formula $\tilde{c}_{\alpha\gamma}(k)$
+\end_inset
+
+ that features a 
+\begin_inset Formula $k^{-2}$
+\end_inset
+
+ Coulomb singularity for charged solutes in water.
+ An expected behavior is due to formal asymptotics of the intra-molecular
+ pair correlation 
+\begin_inset Formula $\tilde{\omega}_{\alpha\gamma}(k)=\text{sinc}(k\ell_{\alpha\gamma})\approx1-(k\ell_{\alpha\gamma})^{2}/6$
+\end_inset
+
+ and a an intuitive (or formal?) 
+\begin_inset Quotes eld
+\end_inset
+
+hole volume rule
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Formula $\rho\tilde{h}_{\alpha\gamma}(0)=-1$
+\end_inset
+
+ or more intuitive 
+\begin_inset Formula $4\pi\rho\int h_{\alpha\gamma}(r)r^{2}dr=-1$
+\end_inset
+
+.
+ The observed 
+\begin_inset Quotes eld
+\end_inset
+
+hole volumes
+\begin_inset Quotes erd
+\end_inset
+
+ are lower than expected by a few percent so that cancellation of 
+\begin_inset Formula $o(1)$
+\end_inset
+
+ terms is incomplete.
+\end_layout
+
+\begin_layout Itemize
+Adapt 1D-RISM for charged solutes to achieve accuracy comparable to that
+ of neutral solutes.
+\end_layout
+
+\begin_layout Itemize
+In 3D-RISM iterations implement use of radial form of the solvent susceptibility
+ from 1D-RISM.
+ Enforcing physical constraints on 1D machinery appears to be more accessible
+ than to achieve that for pure solvent calculation in 3D.
+ 
+\end_layout
+
+\begin_layout Itemize
+Establish a convolution procedure for solvent susceptibility and solute-solvent
+ direct correlation, 
+\begin_inset Formula $\chi\ast c$
+\end_inset
+
+, that avoids 0/0 uncertainty at 
+\begin_inset Formula $k=0$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Verify 3D implementation by comparison with 1D results and literature data.
+\end_layout
+
+\begin_layout Subsection
+Free energy functional for isolated QM solutes
+\end_layout
+
+\begin_layout Itemize
+An (approximate) approach to account for thermodynamic integration along
+ the path of 
+\begin_inset Quotes eld
+\end_inset
+
+blending in
+\begin_inset Quotes erd
+\end_inset
+
+ the electron-solvent interaction.
+ Currently two terminal points can be computed: solvent in a field of a
+ frozen density and solvent in a field of a fully relaxed (re-organized)
+ density.
+ The values of the excess chemical potential as computed by KH, HNC or GF
+ functionals at these two points differ significantly.
+ The approximation may be as simple as a 
+\begin_inset Quotes eld
+\end_inset
+
+factor 1/2
+\begin_inset Quotes erd
+\end_inset
+
+ at the right place, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:alchemical-processes"
+
+\end_inset
+
+, but needs a formal justification/rationalization.
+\end_layout
+
+\begin_layout Itemize
+A procedure to partition the electrostatic field of a QM solute 
+\begin_inset Formula $v_{\text{u}}(\vec{r})$
+\end_inset
+
+ acting on solvent sites into a (singular) short range contribution 
+\begin_inset Formula $v_{\text{us}}(\vec{r})$
+\end_inset
+
+ represented on a regular 3D grid and a (smooth) long-range 
+\begin_inset Formula $\tilde{v}_{\text{ul}}(\vec{k})$
+\end_inset
+
+ represented on the regular reciprocal grid.
+ Such a partition is not unique, naturally.
+ A most accessible way appears to be a derivation of the long-range asymptotics
+ from the (constant) force-field parameters of the solute.
+ This appears less ambiguous than trying to derive asymptotic behavior of
+ electrostatic potential from the electron density.
+\end_layout
+
+\begin_layout Itemize
+Charged solutes by 3D-RISM, implementation and verification.
 \end_layout
 
 \end_body
