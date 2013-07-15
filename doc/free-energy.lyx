@@ -5222,6 +5222,190 @@ defined by a relative position
 \end_layout
 
 \begin_layout Section
+Isothermal compressibility and the 
+\begin_inset Quotes eld
+\end_inset
+
+hole integral
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For simple liquids the isothermal compressibility 
+\begin_inset Formula 
+\[
+\kappa_{T}=-\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_{T}=\beta\langle(\Delta V)^{2}\rangle/V
+\]
+
+\end_inset
+
+is given by the integral 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:rice65"
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+1+4\pi\rho\int h(r)r^{2}dr=\rho\kappa_{T}/\beta.\label{eq:hole-integral}
+\end{equation}
+
+\end_inset
+
+The second term on the left hand side can be interpreted as a (negative
+ of) number of particles displaced from the neighborhood of every selected
+ solvent particle.
+ For incompressible liquid, 
+\begin_inset Formula $\kappa_{T}=0$
+\end_inset
+
+, the identity
+\begin_inset Formula 
+\begin{equation}
+4\pi\rho\int h(r)r^{2}dr=-1
+\end{equation}
+
+\end_inset
+
+holds exactly.
+ For models of 
+\begin_inset Quotes eld
+\end_inset
+
+almost incompressible
+\begin_inset Quotes erd
+\end_inset
+
+ water, the latter equation will only hold approximately.
+ More accurately, it holds when 
+\begin_inset Formula $\rho\kappa_{T}/\beta\ll1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Isothermal compressibility, as introduced above, is intrinsically related
+ to the structure factor 
+\begin_inset Formula $S(k)$
+\end_inset
+
+, a Fourier transform of the total correlation function, which for simple
+ liquids in radial coordinates fulfills the following expression:
+\begin_inset Formula 
+\begin{equation}
+S(k)-1=4\pi\rho\int[g(r)-1]\text{sinc}(kr)r^{2}dr.
+\end{equation}
+
+\end_inset
+
+The limiting value of 
+\begin_inset Formula $S(k)$
+\end_inset
+
+ for 
+\begin_inset Formula $k\to0$
+\end_inset
+
+ is exactly the 
+\begin_inset Quotes eld
+\end_inset
+
+hole integral
+\begin_inset Quotes erd
+\end_inset
+
+, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:hole-integral"
+
+\end_inset
+
+), and thus again related to the isothermal compressibility by
+\begin_inset Formula 
+\begin{equation}
+S(0)=\rho\kappa_{T}/\beta.
+\end{equation}
+
+\end_inset
+
+The literature quotes the value of 0.4599 GPa
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ for the water isothermal compressibility at normal conditions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "url:water"
+
+\end_inset
+
+.
+ This corresponds
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Using 1 kcal/mol/A
+\begin_inset Formula $^{3}$
+\end_inset
+
+ 
+\begin_inset Formula $\approx$
+\end_inset
+
+ 6.952 GPa (ITC kcal), 
+\begin_inset Formula $\rho\approx$
+\end_inset
+
+ 0.03347 A
+\begin_inset Formula $^{-3}$
+\end_inset
+
+, 
+\begin_inset Formula $\beta\approx$
+\end_inset
+
+ 1.6889 (kcal/mol)
+\begin_inset Formula $^{-1}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ to 
+\begin_inset Formula $\rho\kappa_{T}/\beta=$
+\end_inset
+
+0.06336.
+ Thus, for water the 
+\begin_inset Quotes eld
+\end_inset
+
+hole integral
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Formula $-4\pi\rho\int h(r)r^{2}dr$
+\end_inset
+
+, is only by ~6% less than 1.
+\end_layout
+
+\begin_layout Section
 Solvation energy and chemical potential of water phases
 \end_layout
 
