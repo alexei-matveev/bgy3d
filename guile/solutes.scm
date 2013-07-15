@@ -302,7 +302,11 @@
 ;;
 ;; By comparing atom by atom, we found that FFs for atom sites in methanol,
 ;; butanoic acid and hexane which are recorded in the original code are the
-;; same with those in OPLS All-Atom (OPLS-AA) force field [1]
+;; same with those in OPLS All-Atom (OPLS-AA) force field, see the supporting
+;; information of [1]. We added place description of the matching entry in the
+;; tables of supporting information of [1] for each type of atom in solutes,
+;; hope that one can easily build new solutes (alcohols, carboxylic acids and
+;; alkanes) by re-using these entries
 ;;
 ;; [1] "Development and Testing of the OPLS All-Atom Force Field on
 ;;     Conformational Energetics and Properties of Organic Liquids", W.
@@ -310,23 +314,32 @@
 ;;     American Chemical Society, 1996, 118 (45), 11225-11236
 ;;     http://dx.doi.org/10.1021/ja9621760
 ("methanol"
- (("C" (-0.748 -0.015 0.024) 3.5 0.066 0.145)
-  ("HC1" (-1.293 -0.202 -0.901) 2.5 0.03 0.04)
+ (("C" (-0.748 -0.015 0.024) 3.5 0.066 0.145)  ;; 18th entry of table 1
+  ("HC1" (-1.293 -0.202 -0.901) 2.5 0.03 0.04) ;; 17th entry of table 1
   ("HC2" (-1.263 0.754 0.6) 2.5 0.03 0.04)
   ("HC3" (-0.699 -0.934 0.609) 2.5 0.03 0.04)
-  ("O" (0.558 0.42 -0.278) 3.12 0.17 -0.683)
-  ("OH" (0.716 1.404 0.137) 0.4 0.04 0.418)))
+  ("O" (0.558 0.42 -0.278) 3.12 0.17 -0.683)   ;; 15th entry of table 1
+  ("OH" (0.716 1.404 0.137) 0.4 0.04 0.418)))  ;; 16th entry of table 1
+;;                                             FIXME: note that LJ parameters
+;;                                             for "H" are actually "0.0" in
+;;                                             the table, here small values are
+;;                                             assigned possibly for numerical
+;;                                             reason, similar to what has been
+;;                                             done for "H" in "modified TIP3P"
 
 ;; H1 sigma and epsilon adopted:
 ("butanoic acid"
- (("C1" (1.422 -0.017 0.0) 3.75 0.105 0.52)
-  ("O1" (1.422 1.353 0.0) 2.96 0.21 -0.44)
-  ("O2" (2.643 -0.722 0.0) 3.0 0.17 -0.53)
-  ("C2" (0.1 -0.78 0.0) 3.5 0.066 -0.12)
+ (("C1" (1.422 -0.017 0.0) 3.75 0.105 0.52) ;; 19th entry of table 5
+  ("O1" (1.422 1.353 0.0) 2.96 0.21 -0.44)  ;; 20th entry of table 5
+  ("O2" (2.643 -0.722 0.0) 3.0 0.17 -0.53)  ;; 21th entry of table 5
+  ("C2" (0.1 -0.78 0.0) 3.5 0.066 -0.12)    ;; 3rd entry of table 1
   ("C3" (-1.06 0.212 0.0) 3.5 0.066 -0.12)
-  ("C4" (-2.381 -0.551 0.0) 3.5 0.066 -0.18)
-  ("OH" (3.21 -0.461 0.882) 3.4 0.046 0.45)
-  ("H2" (0.043 -1.407 0.89) 2.5 0.03 0.06)
+  ("C4" (-2.381 -0.551 0.0) 3.5 0.066 -0.18);; 2nd entry of table 1
+  ("OH" (3.21 -0.461 0.882) 3.4 0.046 0.45) ;; FIXME: expected to match
+;;                                          the last entry of table 5 but
+;;                                          shouldn't they be "0.4 0.046" even
+;;                                          for numerical reason?
+  ("H2" (0.043 -1.407 0.89) 2.5 0.03 0.06)  ;; 6th entry of table 1
   ("H3" (0.043 -1.407 -0.89) 2.5 0.03 0.06)
   ("H4" (-1.002 0.838 -0.89) 2.5 0.03 0.06)
   ("H5" (-1.002 0.838 0.89) 2.5 0.03 0.06)
@@ -335,13 +348,13 @@
   ("H8" (-3.21 0.157 0.0) 2.5 0.03 0.06)))
 
 ("hexane"
- (("C" (1.709 -2.812 0.0) 3.5 0.066 -0.18)
-  ("C" (1.684 -1.278 0.0) 3.5 0.066 -0.12)
+ (("C" (1.709 -2.812 0.0) 3.5 0.066 -0.18) ;; 2nd entry of table 1
+  ("C" (1.684 -1.278 0.0) 3.5 0.066 -0.12) ;; 3rd entry of table 1
   ("C" (0.245 -0.753 0.0) 3.5 0.066 -0.12)
   ("C" (0.241 0.779 0.0) 3.5 0.066 -0.12)
   ("C" (-1.198 1.304 0.0) 3.5 0.066 -0.12)
   ("C" (-1.206 2.834 0.0) 3.5 0.066 -0.18)
-  ("H" (2.236 -3.164 0.887) 2.5 0.03 0.06)
+  ("H" (2.236 -3.164 0.887) 2.5 0.03 0.06) ;; 6th entry of table 1
   ("H" (2.232 -3.164 -0.89) 2.5 0.03 0.06)
   ("H" (0.691 -3.204 0.003) 2.5 0.03 0.06)
   ("H" (2.202 -0.914 -0.888) 2.5 0.03 0.06)
