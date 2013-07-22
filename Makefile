@@ -107,7 +107,7 @@ ifeq ($(WITH_GUILE),1)
 endif
 
 ifeq ($(WITH_FORTRAN),1)
-	f-objs += rism.o
+	f-objs += rism.o lebed/lebed.o lebed/Lebedev-Laikov.o
 	USERFLAGS += -DWITH_FORTRAN
 endif
 
@@ -152,12 +152,19 @@ include $(libbgy3d.a:.o=.d)
 %.d: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -M -MF $(*).d -MP $(<)
 
+#
+# FIXME:  this effectively  ignores the  dependencies  between fortran
+# sources:
+#
+%.d: %.f90
+	touch $(@)
+
+%.d: %.F
+	touch $(@)
+
 # The next two rules are fairly portable across compilers.
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -o $(*).o -c $(<)
-
-%.d: %.f90
-	touch $(@)
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -o $(*).o -c $(<)
