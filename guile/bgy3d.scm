@@ -26,6 +26,7 @@
    vec-fft-interp
    vec-map1
    vec-map2
+   genpts
    f64dst
    f64+
    f64*
