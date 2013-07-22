@@ -6,10 +6,31 @@ module lebed
   public :: genpts
 
   integer, parameter, public :: order(32) =  &
-       [6, 14, 26, 38, 50, 74, 86, 110, 146, 170, &
-       194 , 230, 266, 302, 350, 434, 590, 770, 974, 1202, &
-       1454 , 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, &
-       5294 , 5810]
+       [   6,   14,   26,   38,   50,   74,   86,  110,  146,  170, &
+         194,  230,  266,  302,  350,  434,  590,  770,  974, 1202, &
+        1454, 1730, 2030, 2354, 2702, 3074, 3470, 3890, 4334, 4802, &
+        5294, 5810]
+
+  abstract interface
+      subroutine ldxxxx (x, y, z, w, n)
+       double precision x(*)
+       double precision y(*)
+       double precision z(*)
+       double precision w(*)
+       integer :: n
+     end subroutine ldxxxx
+  end interface
+
+  ! See Lebedev-Laikov.F  for the implementation,  these are interface
+  ! declarations only:
+  procedure (ldxxxx) :: &
+       LD0006, LD0014, LD0026, LD0038, LD0050, &
+       LD0074, LD0086, LD0110, LD0146, LD0170, &
+       LD0194, LD0230, LD0266, LD0302, LD0350, &
+       LD0434, LD0590, LD0770, LD0974, LD1202, &
+       LD1454, LD1730, LD2030, LD2354, LD2702, &
+       LD3074, LD3470, LD3890, LD4334, LD4802, &
+       LD5294, LD5810
 
 contains
 
@@ -22,7 +43,7 @@ contains
 
     integer :: i
 
-    ! The larges n <= m for which a Lebedev quadrature does exist:
+    ! The largest n <= m for which a Lebedev quadrature does exist:
     n = -1
     do i = 1, size (order)
        if (order(i) <= m) then
