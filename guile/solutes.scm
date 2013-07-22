@@ -8,6 +8,26 @@
 ;;;
 ("LJ" (("LJ" (0.0 0.0 0.0) 1.0 1.0 0.0)))
 
+
+;;;
+;;;
+;;; Table I. Structural data and force field parameters [1].
+;;;
+;;; Atom        x (A)   y (A)   z (A)   ε (kJ/mol)   σ (A)    q (e)
+;;; ----------------------------------------------------------------
+;;; K+                                  0.3640       3.14265   1
+;;; Cl-                                 0.0422       4.04468  -1
+;;; O(water)    0.000   0.000   0.000   0.6359       3.15080  -0.834
+;;; H(water) +/-0.757   0.000   0.586   0.1921       0.40000   0.417
+;;;
+;;; [1] Treatment of charged solutes in three-dimensional integral
+;;;     equation theory Thomas Kloss and Stefan M. Kast
+;;;     J. Chem. Phys. 128, 134505 (2008)
+;;;     http://dx.doi.org/10.1063/1.2841967
+;;;
+("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kJ 0.3640) 1.0)))
+("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kJ 0.0422) -1.0)))
+
 ;;
 ;; Application of an extended RISM equation to dipolar and quadrupolar
 ;; fluids, Fumio  Hirata, B. Montgomery Pettitt, and  Peter J. Rossky,
