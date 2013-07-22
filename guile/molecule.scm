@@ -39,6 +39,10 @@
   (if (not (pair? ast))
       ast
       (match ast
+        (('A num)
+         num)                           ; for completeness, default
+        (('kcal num)
+         num)                           ; for completeness, default
         (('kJ num)
          (kj->kcal num))                ; (kJ 0.3640) -> 0.08694
         (ast
