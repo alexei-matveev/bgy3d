@@ -13,6 +13,7 @@
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "rism-dst.h"           /* rism_dst() */
 #include "rism.h"               /* rism_solvent() */
+#include "lebed/lebed.h"        /* genpts() */
 #include "bgy3d-guile.h"
 
 
@@ -166,13 +167,39 @@ static ProblemData problem_data (SCM alist)
   return PD;
 }
 
-static void to_array (SCM x, int n, double y[n])
+
+static void
+to_array (SCM x, int n, double y[n])
 {
   for (int i = 0; i < n; i++)
     {
       y[i] = scm_to_double (scm_car (x));
       x = scm_cdr (x);
     }
+}
+
+
+static SCM
+from_array (int n, double x[n])
+{
+  SCM y = SCM_EOL;
+
+  while (n-- > 0)
+    y = scm_cons (scm_from_double (x[n]), y);
+
+  return y;
+}
+
+
+static SCM
+from_array2 (int m, int n, double x[m][n])
+{
+  SCM y = SCM_EOL;
+
+  while (m-- > 0)
+    y = scm_cons (from_array (n, x[m]), y);
+
+  return y;
 }
 
 /* A Site is represented by an sexp like:
@@ -471,6 +498,20 @@ static SCM guile_vec_fft_interp (SCM state, SCM Y, SCM x)
 }
 
 
+static SCM guile_genpts (SCM M)
+{
+  const int m = scm_to_int (M);
+  double x[m][3], w[m];
+
+  const int n = genpts (m, x, w);
+
+  assert (n <= m);
+
+  /* n == m */
+  return scm_values (scm_list_2 (from_array2 (n, 3, x), from_array (n, w)));
+}
+
+
 static SCM guile_vec_set_random (SCM x)
 {
   VecSetRandom (to_vec (x), NULL);
@@ -701,6 +742,7 @@ static void guile_init_vec_type (void)
   EXPORT ("vec-map1", 2, 0, 0, guile_vec_map1);
   EXPORT ("vec-map2", 3, 0, 0, guile_vec_map2);
 
+  EXPORT ("genpts", 1, 0, 0, guile_genpts);
   EXPORT ("f64dst", 1, 0, 0, guile_f64_dst);
   EXPORT ("f64+", 2, 0, 0, guile_f64_add);
   EXPORT ("f64*", 2, 0, 0, guile_f64_mul);
