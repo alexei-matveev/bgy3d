@@ -4,6 +4,8 @@
 ;;;
 (define-module (guile molecule)
   #:use-module (srfi srfi-1)            ; list manipulation
+  #:use-module (srfi srfi-2)            ; and-let*
+  #:use-module (ice-9 match)            ; match-lambda
   #:export
   (make-molecule
    molecule-name
@@ -21,12 +23,40 @@
    site-z))
 
 ;;;
+;;; ITC Calorie here. See also bgy3d.h:
+;;;
+(define (kj->kcal num)
+  (/ num 4.1868))
+(define (kcal->kj num)
+  (* num 4.1868))
+
+;;;
+;;; Database  contains  entries in  non-native  units  such as  kJ/mol
+;;; represented by an s-expression  like (kJ 0.3640).  Convert them to
+;;; working units kcal & angstrom:
+;;;
+(define (eval-units ast)
+  (if (not (pair? ast))
+      ast
+      (match ast
+        (('kJ num)
+         (kj->kcal num))                ; (kJ 0.3640) -> 0.08694
+        (ast
+         (map eval-units ast)))))
+
+;;;
 ;;; Find a solute/solvent in a database or die:
 ;;;
 (define (find-molecule name)
-  (let ((solutes (slurp (find-file "guile/solutes.scm"))))
-    (or (assoc name solutes)
-        (error "Not in the list:" name (map first solutes)))))
+  (or
+   (and-let* ((solutes (slurp (find-file "guile/solutes.scm")))
+              (molecule (or (assoc name solutes)
+                            (error "Not in the list:"
+                                   name
+                                   (map first solutes)))))
+     (eval-units molecule))))
+
+
 
 ;;;
 ;;; Find  a file in  the search  patch, or  die.  Note  that find-file
