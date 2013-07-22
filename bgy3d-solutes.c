@@ -345,6 +345,85 @@ cores (const State *BHD,
 
 
 /*
+  Tabulate ρ(k) for ρ(r) being  a superposition of δ-like functions at
+  r[i]  with weights q[i].  Centered at  the corner.  Normalization is
+  such that
+
+    ρ(k=0) = Σ q[i]
+              i
+
+  FIXME: if this ever  becomes performance critical consider using the
+  properties of the exponential and maybe constant grid spacing.
+
+     a + b    a    b
+    e      = e  * e
+*/
+static void
+deltas_fft (const State *BHD,
+            int m, const real q[m], /* const */ real r[m][3],
+            Vec rho_fft)            /* out, complex, corner */
+{
+  complex f3 (const real k[3])
+  {
+    complex sum = 0.0;
+    for (int p = 0; p < m; p++)
+      sum += q[p] * cexp (-I * (k[0] * r[p][0] + k[1] * r[p][1] + k[2] * r[p][2]));
+    return sum;
+  }
+  vec_kmap3 (BHD, f3, rho_fft);
+}
+
+
+/*
+  Return ρ(k) for ρ(r) being  a superposition of gaussian at r[i] with
+  weights q[i].  Centered at the corner.  Normalization is such that
+
+    ρ(k=0) = Σ q[i]
+              i
+
+  Each gaussian is evaluated as:
+
+    ρ(k) = q * exp[-k² / 4G²]
+
+  The phase factor accounts for the translation.
+*/
+static void
+cores_fft (const State *BHD,
+           int n, const real q[n], /* const */ real r[n][3], real G,
+           Vec rho_fft)            /* out, complex, corner */
+{
+  /* Compute the k-representation of the position density: */
+  deltas_fft (BHD, n, q, r, rho_fft);
+
+  /* K-representation of the (gaussian) core shape f(r) goes here: */
+  local Vec f_fft = vec_duplicate (rho_fft);
+
+  /*
+    This is  the k-representation of  a gaussian unit charge  of width
+    1/G:
+                    2    2
+      f(k) = exp (-k / 4G )
+
+    We will apply it as a convolution kernel to the point-density.
+   */
+  complex f (real k)
+  {
+    return exp (- SQR (k) / (4 * SQR (G)));
+  }
+  vec_kmap (BHD, f, f_fft);
+
+  /* Pointwise multiplication of complex numbers: */
+  complex pure mul (complex x, complex y)
+  {
+    return x * y;
+  }
+  vec_fft_map2 (rho_fft, mul, f_fft, rho_fft); /* aliasing! */
+
+  vec_destroy (&f_fft);
+}
+
+
+/*
   Create initial solute field.
 
   See Eqs.  (5.106)  and (5.08) in the thesis.   Fill us[0] and us[1],
