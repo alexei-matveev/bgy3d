@@ -43,7 +43,7 @@ rism_rdf (State *dom, Vec g,
          where integer values correspond to the grid nodes: */
       for (int i = 0; i < mm; i++)
         FOR_DIM
-          y[i][dim] = (r[j] * x[i][dim] - a[dim] + PD->L[dim] / 2) / PD->h[dim];
+          y[i][dim] = (a[dim] + r[j] * x[i][dim] + PD->L[dim] / 2) / PD->h[dim];
 
       /* FIXME: very expensive trigonometric interpolation: */
       bgy3d_fft_interp (dom->fft_mat, g_fft, mm, y, gr);
