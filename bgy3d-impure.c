@@ -211,7 +211,7 @@ static void kernel (const DA dc,
   assert (L[0] == L[1]);
   assert (L[0] == L[2]);
 
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
   const real L3 = volume (PD);
   const real fac = L[0] / (2.0 * M_PI); /* BHD->f ist nur grad U, nicht F=-grad U  */
   const real scale = fac / L3;
@@ -934,7 +934,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      VecScale (omega_fft[i][j], PD->h[0] * PD->h[1] * PD->h[2]); /* historically */
+      VecScale (omega_fft[i][j], volume_element (PD)); /* historically */
 
   /*
     These  are the solvent  kernels, e.g.   HH, HO,  OH, OO  stored as

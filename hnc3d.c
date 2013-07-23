@@ -419,7 +419,7 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   const real rho = PD->rho;
   const real beta = PD->beta;
   const real L3 = volume (PD);
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
   local Vec t[m][m], dt[m][m];
@@ -581,7 +581,7 @@ static real chempot (const State *HD, ClosureEnum closure, int n, int m,
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
 
   real thresh;
   switch (closure)              /* not PD->closure! */
@@ -847,7 +847,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
     local Vec chi_fft[m][m];
     vec_create2 (HD->dc, m, chi_fft);
 
-    const real dV = PD->h[0] * PD->h[1] * PD->h[2];
+    const real dV = volume_element (PD);
 
     for (int i = 0; i < m; i++)
       for (int j = 0; j <= i; j++)
@@ -1058,7 +1058,7 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   const ProblemData *PD = ctx->HD->PD;
   // const real rho = PD->rho;
   const real beta = PD->beta;
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
   const real L3 = volume (PD);
 
   /* Establish aliases to the subsections of the long Vec T and dT: */
@@ -1162,7 +1162,7 @@ static void solvent_kernel (State *HD,
         Load  radial   data  from  text   file.   FIXME:  representing
         long-range on a real-space grid is intrinsically broken!
       */
-      const real dV = HD->PD->h[0] * HD->PD->h[1] * HD->PD->h[2];
+      const real dV = volume_element (HD->PD);
 
       local Vec chi[m][m];
       vec_create2 (HD->da, m, chi);

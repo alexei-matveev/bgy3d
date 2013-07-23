@@ -428,7 +428,7 @@ static void print_info (const State *BHD,
   real val2, val3;
   {
     /* Dot-product is an integral over space (up to a factor): */
-    const real h3 = BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2];
+    const real h3 = volume_element (BHD->PD);
     val2 = h3 * vec_dot (coul_v, rho_u);
     val3 = h3 * vec_dot (coul_u, rho_v);
   }

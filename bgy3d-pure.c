@@ -86,7 +86,7 @@ static void kapply (const State *BHD,
   const ProblemData *PD = BHD->PD;
   const int *N = PD->N;         /* [3] */
   const real *L = PD->L;        /* [3] */
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
 
   /* FIXME: rectangular box? */
   assert (L[0] == L[1]);
@@ -448,7 +448,7 @@ static void Compute_dg_intra (State *BHD,
   assert (L[0] == L[1]);
   assert (L[0] == L[2]);
 
-  const real h3 = PD->h[0] * PD->h[1] * PD->h[2];
+  const real h3 = volume_element (PD);
   const real scale = L[0] / (2. * M_PI); /* siehe oben ... */
 
   local Vec fg2_fft[3];
@@ -857,7 +857,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
     rhos[i] = PD->rho;
 
   /* Here dN is rho * dV, with dV being the weight of a grid point: */
-  const real dN = PD->rho * PD->h[0] * PD->h[1] * PD->h[2];
+  const real dN = PD->rho * volume_element (PD);
   {
     const int N3 =  PD->N[0] * PD->N[1] * PD->N[2];
     PetscPrintf (PETSC_COMM_WORLD, "Number of solvent molecules is %f\n", N3 * dN);
@@ -905,7 +905,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
 
   for (int i = 0; i < m; i++)
     for (int j = 0; j < i; j++)
-      VecScale (omega[i][j], PD->h[0] * PD->h[1] * PD->h[2]); /* historically */
+      VecScale (omega[i][j], volume_element (PD)); /* historically */
 
   VecSet(du_new,0.0);
 
@@ -1341,8 +1341,8 @@ Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini)
   omega_intra (BHD->PD, BHD->dc, r_HO, omega[0][1]);
   omega_intra (BHD->PD, BHD->dc, r_HH, omega[0][0]);
 
-  VecScale (omega[0][1], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
-  VecScale (omega[0][0], BHD->PD->h[0] * BHD->PD->h[1] * BHD->PD->h[2]); /* historically */
+  VecScale (omega[0][1], volume_element (BHD->PD)); /* historically */
+  VecScale (omega[0][0], volume_element (BHD->PD)); /* historically */
 
   /* Set initial guess, either here or by reading from file: */
   if (bgy3d_getopt_test ("--load-guess"))
