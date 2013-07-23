@@ -320,7 +320,8 @@ void bgy3d_comm_allreduce (int n, real x[n]);
 
 
 /* Sum of an integer array: */
-static inline int isum (int n, const int x[n])
+static inline int
+isum (int n, const int x[n])
 {
   int s = 0;
 
@@ -329,6 +330,20 @@ static inline int isum (int n, const int x[n])
 
   return s;
 }
+
+
+/* Sum of an real array: */
+static inline real
+sum (int n, const real x[n])
+{
+  real s = 0.0;
+
+  for (int i = 0; i < n; i++)
+    s += x[i];
+
+  return s;
+}
+
 
 
 /* Returns most  negative number for  zero sized arrays.   Will return
