@@ -12,6 +12,7 @@
 #include "bgy3d-fft.h"          /* bgy3d_fft_test() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
 #include "rism-dst.h"           /* rism_dst() */
+#include "rism-rdf.h"           /* rism_rdf() */
 #include "rism.h"               /* rism_solvent() */
 #include "lebed/lebed.h"        /* genpts() */
 #include "bgy3d-guile.h"
@@ -498,7 +499,35 @@ static SCM guile_vec_fft_interp (SCM state, SCM Y, SCM x)
 }
 
 
-static SCM guile_genpts (SCM M)
+/* (rism-rdf domain center radial-mesh angular-order) */
+static SCM
+guile_rism_rdf (SCM state, SCM g, SCM center, SCM radial_mesh, SCM angular_order)
+{
+  /* RDF center: */
+  double a[3];
+  to_array (center, 3, a);
+
+  /* Number of radial pioints: */
+  const int n = scm_to_int (scm_length (radial_mesh));
+
+  /* Radial points: */
+  double r[n];
+  to_array (radial_mesh, n, r);
+
+  const int m = scm_to_int (angular_order);
+
+  /* Output array: */
+  double rdf[n];
+
+  /* Does the real work: */
+  rism_rdf (to_state (state), to_vec (g), a, n, r, m, rdf);
+
+  return from_array (n, rdf);
+}
+
+
+static SCM
+guile_genpts (SCM M)
 {
   const int m = scm_to_int (M);
   double x[m][3], w[m];
@@ -742,6 +771,7 @@ static void guile_init_vec_type (void)
   EXPORT ("vec-map1", 2, 0, 0, guile_vec_map1);
   EXPORT ("vec-map2", 3, 0, 0, guile_vec_map2);
 
+  EXPORT ("rism-rdf", 5, 0, 0, guile_rism_rdf);
   EXPORT ("genpts", 1, 0, 0, guile_genpts);
   EXPORT ("f64dst", 1, 0, 0, guile_f64_dst);
   EXPORT ("f64+", 2, 0, 0, guile_f64_add);
