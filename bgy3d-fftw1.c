@@ -51,7 +51,7 @@ static void unpack_real (FFT *fft, Vec g, fftw_complex *restrict doubl)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
@@ -76,7 +76,7 @@ static void pack_real (FFT *fft, Vec g, const fftw_complex *restrict doubl)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (fft->da, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) doubl;
@@ -101,7 +101,7 @@ static void pack_cmplx (FFT *fft, Vec g, /* const */ fftw_complex *cmplx)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
@@ -126,7 +126,7 @@ static void unpack_cmplx (FFT *fft, Vec g, fftw_complex *cmplx)
 {
   /* Get local portion of the grid */
   int i0, j0, k0, ni, nj, nk;
-  DAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
+  DMDAGetCorners (fft->dc, &i0, &j0, &k0, &ni, &nj, &nk);
 
   /* The view of local FFT complex storage as a 3d array: */
   complex (*const view)[nk][nj][ni] = (complex (*)[nk][nj][ni]) cmplx;
@@ -229,7 +229,7 @@ static PetscErrorCode mat_destroy_fft (Mat A)
   of  the call sequence  suggesting that  the array  NI x  NJ x  NK is
   stored in the column major order with the stride-1 dimension NI:
 
-    DAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
+    DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
     DAVecGetArray (da, vec, &layout);
 
     int ijk = 0;
@@ -343,7 +343,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 
   /* Get local dimensions: */
   int x[3], n[3];
-  DAGetCorners (fft->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (fft->da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
 
   if (debug)
     {
@@ -427,7 +427,7 @@ void bgy3d_fft_interp (const Mat A,
 
   /* loop over local portion of grid */
   int c[3], n[3];             /* corner and the size of the section */
-  DAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
+  DMDAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
 
   complex ***Y_;
   DAVecGetArray (fft->dc, Y, &Y_);
