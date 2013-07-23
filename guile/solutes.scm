@@ -20,6 +20,12 @@
 ;;; O(water)    0.000   0.000   0.000   0.6359       3.15080  -0.834
 ;;; H(water) +/-0.757   0.000   0.586   0.1921       0.40000   0.417
 ;;;
+;;; Force  field  parameters  for  water is  a  TIP3P  parametrization
+;;; according to  Ref.  [1]  with 0.4 A  hydrogens (see  "water" entry
+;;; below).  In Ref. [1]  the authors used the "logarithmically spaced
+;;; grid ranging from 0.0059 to 164.02 A", T = 298.15 K, ρ = 0.0333295
+;;; A^-3 and the dielectric constant 78.4 for DRISM equations.
+;;;
 ;;; [1] Treatment of charged solutes in three-dimensional integral
 ;;;     equation theory Thomas Kloss and Stefan M. Kast
 ;;;     J. Chem. Phys. 128, 134505 (2008)
@@ -27,6 +33,15 @@
 ;;;
 ("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kJ 0.3640) 1.0)))
 ("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kJ 0.0422) -1.0)))
+
+;;;
+;;; Almost the same as "water":
+;;;
+("water, Kloss & Kast"
+ (("OW" (0.000 0.000 0.000) (A 3.15080) (kJ 0.6359) -0.834)
+  ("HW" (+0.757 0.000 0.586) (A 0.40000) (kJ 0.1921) 0.417)
+  ("HW" (-0.757 0.000 0.586) (A 0.40000) (kJ 0.1921) 0.417)))
+
 
 ;;
 ;; Application of an extended RISM equation to dipolar and quadrupolar
