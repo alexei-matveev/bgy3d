@@ -24,7 +24,14 @@ rism_rdf (State *dom, Vec g,
   /* Coordinates  and weights of  spherical quadrature.  Only mm  <= m
      points are valid: */
   real x[m][3], w[m];
+
+  /* FIXME: install a recent Fortran and get rid of this ugliness: */
+#ifdef WITH_FORTRAN
   const int mm = genpts (m, x, w);
+#else
+  const int mm = 0;
+  assert (false);
+#endif
 
   /* (Real) grid coordinates and interpolated values: */
   real y[mm][3], gr[mm];

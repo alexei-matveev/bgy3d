@@ -532,7 +532,13 @@ guile_genpts (SCM M)
   const int m = scm_to_int (M);
   double x[m][3], w[m];
 
+  /* FIXME: install a recent Fortran and get rid of this ugliness: */
+#ifdef WITH_FORTRAN
   const int n = genpts (m, x, w);
+#else
+  const int n = 0;
+  assert (false);
+#endif
 
   assert (n <= m);
 
