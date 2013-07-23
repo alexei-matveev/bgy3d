@@ -585,7 +585,7 @@ computes the sum of all vector elements."
         ;;
         ("rdf"
          ;;
-         ;; Print Gnuplot read RDF table. Eg. by executing this:
+         ;; Print Gnuplot-ready RDF table. E.g. by executing this:
          ;;
          ;; mpirun guile/runbgy.scm rdf --N 96 --L 10 0 0 0 test/*.bin
          ;;
@@ -605,7 +605,9 @@ computes the sum of all vector elements."
                            args)))
            (state-destroy domain)
            (if (zero? (bgy3d-rank))
-               (apply print-columns mesh rdfs))))
+               (begin
+                 (format #t "# center = ~A\n" center)
+                 (apply print-columns mesh rdfs)))))
         ;;
         ("dump"
          ;;
