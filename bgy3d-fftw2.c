@@ -507,6 +507,45 @@ void bgy3d_fft_interp (const Mat A,
   int c[3], n[3];             /* corner and the size of the section */
   DMDAGetCorners (fft->dc, &c[0], &c[1], &c[2], &n[0], &n[1], &n[2]);
 
+  /*
+    Precompute tables for sin/cos or, rather, cexp(). Each worker owns
+    a subset of k-space. In general n[0] /= n[1] /= n[2].
+
+    FIXME:  watch the  stack usage,  typical size  of each  array  N x
+    110. Malloc() when necessary:
+  */
+  complex wavex[n[0]][np];
+  complex wavey[n[1]][np];
+  complex wavez[n[2]][np];
+
+  /* Think wave?[i][p], 0 <= i < n[?] */
+  typedef complex (*Array2)[np];
+
+  /* For looping over x, y and z: */
+  const Array2 waves[3] = {wavex, wavey, wavez};
+
+  FOR_DIM
+    for (int i = 0; i < n[dim]; i++)
+      {
+        /* Unsigned k */
+        const int k = i + c[dim];
+
+        /* Signed K. Take negative frequencies where k > N/2: */
+        const int K = KFREQ (k, N[dim]);
+
+        /*
+          Coordinates  x[p][]  are  fractional,  represented  by  real
+          numbers.   FIXME: maybe  a  better way  to tabulate  complex
+          exponenial on uniform k-grid:
+        */
+        for (int p = 0; p < np; p++)
+          if ((N[dim] - 2 * k) % N[dim] != 0) /* k != N - k mod N */
+            waves[dim][i][p] = cexp ((2 * M_PI / N[dim]) * K * x[p][dim] * I);
+          else
+            waves[dim][i][p] = cos ((2 * M_PI / N[dim]) * K * x[p][dim]);
+      }
+
+
   complex ***Y_;
   DMDAVecGetArray (fft->dc, Y, &Y_);
 
@@ -525,14 +564,10 @@ void bgy3d_fft_interp (const Mat A,
 
           for (int p = 0; p < np; p++)
             {
-              /* Coordinates  x[p][]  are  fractional, represented  by
-                 real numbers: */
-              complex wkx = 1.0;
-              FOR_DIM
-                if ((N[dim] - 2 * K[dim]) % N[dim] != 0) /* k != N - k mod N */
-                  wkx *= cexp (2 * M_PI * K[dim] * x[p][dim] / N[dim] * I);
-                else
-                  wkx *= cos (2 * M_PI * K[dim] * x[p][dim] / N[dim]);
+              complex wkx = \
+                waves[0][k[0] - c[0]][p] *
+                waves[1][k[1] - c[1]][p] *
+                waves[2][k[2] - c[2]][p];
 
               /* Avoid double counting: */
               if ((N[0] - 2 * K[0]) % N[0] == 0) /* k == N - k mod N */
@@ -544,7 +579,7 @@ void bgy3d_fft_interp (const Mat A,
                 is  real  by  construction  maybe use  that  to  avoid
                 complex arithmetics?
               */
-              y[p] += yk * wkx + conj (yk * wkx);
+              y[p] += 2 * creal (yk * wkx); // yk * wkx + conj (yk * wkx)
             }
         }
   DMDAVecRestoreArray (fft->dc, Y, &Y_);
