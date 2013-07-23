@@ -514,18 +514,18 @@ computes the sum of all vector elements."
 (define (mesh/log min max n)
   (map exp (mesh/lin (log min) (log max) n)))
 
+
 ;;;
-;;; FIXME: make it work for any number of columns:
+;;; Should work for any number of columns:
 ;;;
-(define (print-columns x y)
-  (for-each
-   (lambda (x y)
-     (display x)
-     (display " ")
-     (display y)
-     (newline))
-   x
-   y))
+(define (print-columns . columns)
+  (apply for-each
+         (lambda row
+           (display (string-join (map number->string row) " "))
+           (newline))
+         columns))
+
+
 ;;;
 ;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
 ;;; "solutes" interprete each argument as the name of the solute. Note
@@ -584,6 +584,11 @@ computes the sum of all vector elements."
             (map vec-destroy g1)))
         ;;
         ("rdf"
+         ;;
+         ;; Print Gnuplot read RDF table. Eg. by executing this:
+         ;;
+         ;; mpirun guile/runbgy.scm rdf --N 96 --L 10 0 0 0 test/*.bin
+         ;;
          (let* ((center (map string->number (take args 3)))
                 (args (drop args 3))
                 (angular-order 110)     ; FIXME: literals here ...
@@ -591,16 +596,16 @@ computes the sum of all vector elements."
                 (rmax (assoc-ref settings 'L)) ; a choice ...
                 (npts (assoc-ref settings 'N)) ; another choice ...
                 (mesh (mesh/log rmin rmax npts))
-                (domain (state-make settings)))
-           (for-each
-            (lambda (path)
-              (let* ((g (vec-load path))
-                     (rdf (rism-rdf domain g center mesh angular-order)))
-                (if (zero? (bgy3d-rank))
-                    (print-columns mesh rdf))
-                (vec-destroy g)))
-            args)
-           (state-destroy domain)))
+                (domain (state-make settings))
+                (rdfs (map (lambda (path)
+                             (let* ((g (vec-load path))
+                                    (rdf (rism-rdf domain g center mesh angular-order)))
+                               (vec-destroy g)
+                               rdf))
+                           args)))
+           (state-destroy domain)
+           (if (zero? (bgy3d-rank))
+               (apply print-columns mesh rdfs))))
         ;;
         ("dump"
          ;;
