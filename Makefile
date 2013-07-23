@@ -84,6 +84,7 @@ c-objs = \
 	hnc3d.o \
 	hnc3d-sles.o \
 	rism-dst.o \
+	rism-rdf.o \
 	bgy3d.o \
 	bgy3d-force.o \
 	bgy3d-pure.o \
