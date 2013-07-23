@@ -272,8 +272,8 @@ static PetscErrorCode mat_destroy_fft (Mat A)
     dangling pointers we should have incremented the reference counter
     on these two objects in bgy3d_fft_mat_create().
   */
-  DADestroy (fft->da);
-  DADestroy (fft->dc);
+  DMDestroy (&fft->da);
+  DMDestroy (&fft->dc);
 
   rfftwnd_mpi_destroy_plan (fft->fw);
   rfftwnd_mpi_destroy_plan (fft->bw);
