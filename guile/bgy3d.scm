@@ -497,6 +497,35 @@ computes the sum of all vector elements."
         (else
          (new-main argv))))))
 
+
+;;;
+;;; Linear mesh.  Note that the last point  is max - dr  < max. FIXME:
+;;; division by zero for n = 0.
+;;;
+(define (mesh/lin min max n)
+  (let ((dr (/ (- max min) n)))
+    (map (lambda (i) (+ min (* dr i)))
+         (iota n))))
+
+;;;
+;;; Logarithmic mesh.  Similar gotchas  as with mesh/lin. Moreover one
+;;; needs min > 0:
+;;;
+(define (mesh/log min max n)
+  (map exp (mesh/lin (log min) (log max) n)))
+
+;;;
+;;; FIXME: make it work for any number of columns:
+;;;
+(define (print-columns x y)
+  (for-each
+   (lambda (x y)
+     (display x)
+     (display " ")
+     (display y)
+     (newline))
+   x
+   y))
 ;;;
 ;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
 ;;; "solutes" interprete each argument as the name of the solute. Note
@@ -554,15 +583,35 @@ computes the sum of all vector elements."
                               settings)
             (map vec-destroy g1)))
         ;;
+        ("rdf"
+         (let* ((center (map string->number (take args 3)))
+                (args (drop args 3))
+                (angular-order 110)     ; FIXME: literals here ...
+                (rmin 0.75)             ; cannot be zero for log-mesh
+                (rmax (assoc-ref settings 'L)) ; a choice ...
+                (npts (assoc-ref settings 'N)) ; another choice ...
+                (mesh (mesh/log rmin rmax npts))
+                (domain (state-make settings)))
+           (for-each
+            (lambda (path)
+              (let* ((g (vec-load path))
+                     (rdf (rism-rdf domain g center mesh angular-order)))
+                (if (zero? (bgy3d-rank))
+                    (print-columns mesh rdf))
+                (vec-destroy g)))
+            args)
+           (state-destroy domain)))
+        ;;
         ("dump"
          ;;
          ;; Dump each Vec from a *.bin file to tty:
          ;;
-         (for-each (lambda (path)
-                     (let ((v (vec-load path)))
-                       (vec-print v)
-                       (vec-destroy v)))
-                   args))))))
+         (for-each
+          (lambda (path)
+            (let ((v (vec-load path)))
+              (vec-print v)
+              (vec-destroy v)))
+          args))))))
 
 
 (define (bgy3d-test)
