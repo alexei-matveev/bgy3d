@@ -234,6 +234,13 @@ volume (const ProblemData *PD)
 }
 
 
+static inline real
+volume_element (const ProblemData *PD)
+{
+  return PD->h[0] * PD->h[1] * PD->h[2];
+}
+
+
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
    interface: */
 ProblemData bgy3d_problem_data (void);
