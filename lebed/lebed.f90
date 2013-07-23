@@ -12,12 +12,12 @@ module lebed
         5294, 5810]
 
   abstract interface
-      subroutine ldxxxx (x, y, z, w, n)
-       double precision x(*)
-       double precision y(*)
-       double precision z(*)
-       double precision w(*)
-       integer :: n
+     subroutine ldxxxx (x, y, z, w, n)
+       double precision, intent (out) :: x(*)
+       double precision, intent (out) :: y(*)
+       double precision, intent (out) :: z(*)
+       double precision, intent (out) :: w(*)
+       integer, intent (out) :: n
      end subroutine ldxxxx
   end interface
 
@@ -37,7 +37,7 @@ contains
   function genpts (m, pts, wts) result (n) bind (c)
     implicit none
     integer (ik), intent (in), value :: m
-    real (rk), intent (out) :: pts (3, m), wts (m)
+    real (rk), intent (out) :: pts(3, m), wts(m)
     integer (ik) :: n
     ! *** end of interface ***
 
@@ -55,20 +55,23 @@ contains
 
     ! FIXME: copy-out here:
     if (n > 0 ) then
-       call ld (pts (1, :n), pts (2, :n), pts (3, :n), wts(:n), n)
+       call ld (n, pts(1, :n), pts(2, :n), pts(3, :n), wts(:n))
     else
        pts = huge (pts)
        wts = huge (wts)
     endif
   end function genpts
 
-  subroutine ld (x, y, z, w, n)
+  subroutine ld (m, x, y, z, w)
     implicit none
-    integer, intent (in) :: n
-    real (rk), intent (out) :: x(n), y(n), z(n), w(n)
+    integer, intent (in) :: m
+    real (rk), intent (out) :: x(m), y(m), z(m), w(m)
     ! *** end of interface ***
 
-    select case (n)
+    integer :: n
+
+    n = -1
+    select case (m)
     case (0006)
        call LD0006 (x, y, z, w, n)
     case (0014)
@@ -134,5 +137,9 @@ contains
     case (5810)
        call LD5810 (x, y, z, w, n)
     end select
+
+    if (n /= m) then
+       error stop "no such order!"
+    endif
   end subroutine ld
 end module lebed
