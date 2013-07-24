@@ -1063,13 +1063,13 @@ contains
 
        ! This prints a lot of data on tty!
        if (verbosity > 1) then
-          print *, "# r, and v, t, c, g, each for",  n, "x", m, "pairs"
+          print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
           do p = 1, nrad
              write (*, *) r(p), &
+                  &     ((g(p, i, j), i=1,n), j=1,m), &
                   &     ((v(p, i, j), i=1,n), j=1,m), &
                   &     ((t(p, i, j), i=1,n), j=1,m), &
-                  &     ((c(p, i, j), i=1,n), j=1,m), &
-                  &     ((g(p, i, j), i=1,n), j=1,m)
+                  &     ((c(p, i, j), i=1,n), j=1,m)
           enddo
        endif
     end block
