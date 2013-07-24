@@ -1170,6 +1170,10 @@ void bgy3d_guile_init (int argc, char **argv)
   */
   verbosity = bgy3d_getopt_test ("-v"); /* extern */
 
+  /* Numeric value, if supplied, will overwrite the on/off "-v"
+     flag: */
+  bgy3d_getopt_int ("--verbosity", &verbosity);
+
   /*
    Note that  the names that would  be defined here were  put into the
    private name space of (guile-user) module. For example if you do
