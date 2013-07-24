@@ -348,7 +348,8 @@ computes the sum of all vector elements."
 ;;;
 (define option-spec-base
   (quasiquote
-   ((N                  (value #t)      (predicate ,string->number))
+   ((verbosity          (value #t)      (predicate ,string->number)) ; dont use -v
+    (N                  (value #t)      (predicate ,string->number))
     (rho                (value #t)      (predicate ,string->number))
     (beta               (value #t)      (predicate ,string->number))
     (norm-tol           (value #t)      (predicate ,string->number))
@@ -365,7 +366,7 @@ computes the sum of all vector elements."
                         (predicate ,(lambda (x)
                                     (member x '("jager" "newton" "picard" "trial")))))
     (verbose            (single-char #\v)
-                        (value #f)) ; verbosity
+                        (value #f)) ; use --verbosity num instead
     (no-cage            (value #f)) ; turns off metallic cage boundary
     (no-hacks           (value #f)))))  ; turns off ugly hacks
 
