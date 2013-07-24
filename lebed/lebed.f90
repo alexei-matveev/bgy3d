@@ -35,6 +35,13 @@ module lebed
 contains
 
   function genpts (m, pts, wts) result (n) bind (c)
+    !
+    ! Fills  pts(1:3,  :n)  and  wts(:n) with  quadrature  points  and
+    ! corresponding weights on a unit sphere. Chooses the largest n, 0
+    ! <= n  <= m, such  that a Lebedev  quadrature of that  order does
+    ! exist. Note  that n /= m,  in general.  In particular  n will be
+    ! zero if m < 6.  You have been warned.
+    !
     implicit none
     integer (ik), intent (in), value :: m
     real (rk), intent (out) :: pts(3, m), wts(m)
@@ -43,8 +50,9 @@ contains
 
     integer :: i
 
-    ! The largest n <= m for which a Lebedev quadrature does exist:
-    n = -1
+    ! Find  the largest n  <= m  for which  a Lebedev  quadrature does
+    ! exist:
+    n = 0
     do i = 1, size (order)
        if (order(i) <= m) then
           n = order(i)
@@ -53,13 +61,14 @@ contains
        endif
     end do
 
-    ! FIXME: copy-out here:
-    if (n > 0 ) then
+    ! FIXME: copy in/out here:
+    if (n > 0) then
        call ld (n, pts(1, :n), pts(2, :n), pts(3, :n), wts(:n))
-    else
-       pts = huge (pts)
-       wts = huge (wts)
     endif
+
+    ! Make sure it does not go unnoticed, if anyone uses these:
+    pts(:, n+1:) = huge (0.0d0)
+    wts(n+1:) = huge (0.0d0)
   end function genpts
 
   subroutine ld (m, x, y, z, w)
