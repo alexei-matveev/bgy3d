@@ -824,7 +824,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, v, t)
+    call post_process (method, beta, rho, sites, sites, dr, dk, v, t)
 
   contains
 
@@ -936,7 +936,7 @@ contains
     call snes_default (iterate_t, t)
 
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, v, t)
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t)
 
   contains
 
@@ -993,10 +993,11 @@ contains
   end subroutine rism_uv
 
 
-  subroutine post_process (method, beta, rho, solvent, solute, dr, v, t)
+  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t)
     !
     ! Prints some results.
     !
+    use fft, only: fourier_many, FT_FW
     use foreign, only: site, verbosity, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
@@ -1005,7 +1006,7 @@ contains
     real (rk), intent (in) :: rho(:)       ! (m)
     type (site), intent (in) :: solvent(:) ! (m)
     type (site), intent (in) :: solute(:)  ! (n)
-    real (rk), intent (in) :: dr           ! grid step
+    real (rk), intent (in) :: dr, dk       ! grid steps
     real (rk), intent (in) :: v(:, :, :)   ! (nrad, n, m)
     real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
     ! *** end of interface ***
@@ -1018,15 +1019,18 @@ contains
 
     block
        integer :: p, i, j
-       real (rk) :: r(nrad)
+       real (rk) :: r(nrad), k(nrad)
        real (rk) :: c(nrad, n, m)
        real (rk) :: cl(nrad, n, m)
        real (rk) :: h(nrad, n, m)
        real (rk) :: g(nrad, n, m)
+       real (rk) :: x(nrad), x0(nrad), x1(nrad) ! qhq in k-space
 
-       ! Dont like to pass redundant info, recompute r(:) from dr:
+       ! Dont like to pass redundant  info, recompute r(:) from dr and
+       ! k(:) from dk:
        forall (i = 1:nrad)
           r(i) = (2 * i - 1) * dr / 2
+          k(i) = (2 * i - 1) * dk / 2
        end forall
 
        ! For the same reason recomute c and g:
@@ -1061,6 +1065,80 @@ contains
           enddo
        end block
 
+       ! Small-k behavior of qh(k)q  which is essential for dielectric
+       ! permittivity:
+       h = fourier_many (h) * (dr**3 / FT_FW)
+
+       block
+          integer :: i, j, p
+          real (rk) :: q(size (solvent))
+          real (rk) :: y, fac0, fac1
+          real (rk), parameter :: eps = 78.4d0
+
+          ! FIXME: dipole_density() assumes all solvent sites have the
+          ! same number density:
+          y = dipole_density (beta, rho(1), solvent)
+
+          print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
+
+          !
+          ! The coefficient in the  low-k expansion of the "dielectric
+          ! susceptibility".    We   need    a    better   name    for
+          ! that.  Ref.  [PP92b]  refers  to it  as  "weighted  second
+          ! moment":
+          !
+          !                            k²
+          !   Σ   z  ρ h  (k) ρ z  ~  --- [(ε - 1)/ε - 3y]
+          !    ij  i    ij       j    4πβ
+          !
+          ! Cp.  to  e.g. Eq.  (35)  of Ref.  [HS76]  or  Eq. (15)  of
+          ! Ref. [PP92b].
+          !
+          ! [HS76] Dielectric constant in terms of atom–atom
+          !   correlation functions, Johan S.  Høye and G.  Stell, J.
+          !   Chem.  Phys.  65, 18 (1976);
+          !   http://dx.doi.org/10.1063/1.432793
+          !
+          ! [PP92b] A site–site theory for finite concentration saline
+          !   solutions, John Perkyns and B. Montgomery Pettitt,
+          !   J. Chem. Phys. 97, 7656 (1992);
+          !   http://dx.doi.org/10.1063/1.463485
+          !
+          fac0 = ((eps - 1) / eps - 3 * y) / (4 * pi * beta)
+
+          !
+          ! When ε  = 1 + 3y  as predicted by  RISM, the corresponding
+          ! expression for the factor becomes
+          !
+          !   fac1 = (-9 * y**2 / (1 + 3 * y)) / (4 * pi * beta)
+          !
+          ! Though we compute it in the same way:
+          !
+          associate (eps => 1 + 3 * y)
+            fac1 = ((eps - 1) / eps - 3 * y) / (4 * pi * beta)
+          end associate
+
+          print *, "# ((e-1) / e 3 * y) / (4 * pi * beta) = ", fac0
+          print *, "# -9 * y**2 / (1 + 3 * y) / (4 * pi * beta) = ", fac1
+
+          ! q = ρ * z:
+          q(:) = rho(:) * solvent(:) % charge
+
+          ! Note  the  extra  EPSILON0INV   factor,  it  seems  to  be
+          ! necessary to get the kcal/A³ units right:
+          x = 0.0
+          do i = 1, size (solvent)
+             do j = 1, size (solvent)
+                do p = 1, nrad
+                   x(p) = x(p) + q(i) * h(p, i, j) * q(j) * EPSILON0INV
+                enddo
+             enddo
+          enddo
+          ! where (k < 2.0) x = x - fac * k**2
+          x0 = fac0 * k**2
+          x1 = fac1 * k**2
+       end block
+
        ! This prints a lot of data on tty!
        if (verbosity > 1) then
           print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
@@ -1069,7 +1147,8 @@ contains
                   &     ((g(p, i, j), i=1,n), j=1,m), &
                   &     ((v(p, i, j), i=1,n), j=1,m), &
                   &     ((t(p, i, j), i=1,n), j=1,m), &
-                  &     ((c(p, i, j), i=1,n), j=1,m)
+                  &     ((c(p, i, j), i=1,n), j=1,m), &
+                  &      k(p), x(p), x0(p), x1(p)
           enddo
        endif
     end block
