@@ -1080,6 +1080,9 @@ contains
           y = dipole_density (beta, rho(1), solvent)
 
           print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
+          print *, "# ε = ", epsilon_rism (beta, rho(1), solvent)
+          print *, "# A(1 + 3 * y, y) = ", dipole_factor (1 + 3 * y, y)
+          print *, "# A(ε, y) = ", dipole_factor (eps, y)
 
           !
           ! The coefficient in the  low-k expansion of the "dielectric
@@ -1118,8 +1121,8 @@ contains
             fac1 = ((eps - 1) / eps - 3 * y) / (4 * pi * beta)
           end associate
 
-          print *, "# ((e-1) / e 3 * y) / (4 * pi * beta) = ", fac0
-          print *, "# -9 * y**2 / (1 + 3 * y) / (4 * pi * beta) = ", fac1
+          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0
+          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1
 
           ! q = ρ * z:
           q(:) = rho(:) * solvent(:) % charge
