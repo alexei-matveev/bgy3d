@@ -1495,13 +1495,21 @@ contains
     !
     ! RISM equation, here for h and c:
     !
-    !   h = ω * c * ω + ρ ω * c * h
+    !   h = ω * c * ω + ω * c * ρ * h
     !
     ! or
-    !                    -1
-    !   h = (1 - ρ ω * c)   * ω * c * ω
+    !                      -1
+    !   h = (1 - ω * c * ρ)   * ω * c * ω
     !
-    ! To use  this code for  mixtures of otherwise  uncorrelated sites
+    !                              -1
+    !     = ω * c * (1 - ρ * ω * c)   * ω
+    !
+    !                                  -1
+    !     = ω * c * ω * (1 - ρ * c * ω)
+    !
+    ! All three expressions are equivalent --- this can be verified by
+    ! a series expansion of the inverse, given that ρ * ω = ω * ρ.  To
+    ! use  this  code for  mixtures  of  otherwise uncorrelated  sites
     ! supply  unity matrix  for  ω. A  mixture  of molecular  solvents
     ! should  be represented  by  an ω-matrix  with  a suitable  block
     ! structure.
@@ -1521,10 +1529,10 @@ contains
     ! H := WC, temporarily:
     H = matmul (W, C)
 
-    ! T := 1  - ρWC. The output matrix  T is used here as  a free work
+    ! T := 1  - WCρ. The output matrix  T is used here as  a free work
     ! array:
     forall (i = 1:m, j = 1:m)
-       T(i, j) = delta (i, j) - rho(i) * H(i, j)
+       T(i, j) = delta (i, j) - H(i, j) * rho(j)
     end forall
 
     ! H := WCW.  Still temporarily --- it will be overwritten with the
@@ -1536,7 +1544,7 @@ contains
     ! the total correlation matrix (input T is destroyed):
     !
     !       -1                 -1
-    ! H := T   * H == (1 - ρWC)   * WCW
+    ! H := T   * H == (1 - WCρ)   * WCW
     !
     call sles (m, T, H)         ! FIXME: copy in/out.
 
