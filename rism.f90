@@ -1922,6 +1922,47 @@ contains
   end function epsilon_rism
 
 
+  function dipole_factor (e, y) result (a)
+    !
+    ! Cummings and Stell [CS81] argued that the long-range asymptotics
+    ! of the site-site correlation function for a rigid dipolar liquid
+    ! differs from the "intuitive" form -βqq/r by a scalar factor A:
+    !
+    !       1 + ε(3y - 1)
+    !   A = -------------
+    !         3y(ε - 1)
+    !
+    ! where ε  and y  have their usual  meaning.  Conversely, if  A is
+    ! known or otherwise enforced then the corresponding ε is given by
+    !
+    !          1 + 3Ay
+    !   ε = -------------
+    !       1 + 3(A - 1)y
+    !
+    ! Note that assuming  A = 1 as e.g. is implied  in the HNC closure
+    ! leads to the "ideal gas" result
+    !
+    !   ε = 1 + 3y
+    !
+    ! Also A is  independent of the site pair  and A -> 2/3 as  y -> 0
+    ! beacause in this regime ε ~ 1 + 3y + 3y².
+    !
+    ! [CS81] Exact asymptotic form of the site-site direct correlation
+    !   function for rigid polar molecules, Peter T. Cummings and
+    !   G. Stell, Molecular Physics: An International Journal at the
+    !   Interface Between Chemistry and Physics, Volume 44, Issue 2,
+    !   1981, pages 529-531,
+    !   http://dx.doi.org/10.1080/00268978100102621
+    !
+    implicit none
+    real (rk), intent (in) :: e, y
+    real (rk) :: a
+    ! *** end of interface ***
+
+    a = (1 + e * (3 * y - 1)) / (3 * y * (e - 1))
+  end function dipole_factor
+
+
   function dipole (sites) result (m)
     use foreign, only: site
     implicit none
