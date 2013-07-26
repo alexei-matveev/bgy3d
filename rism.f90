@@ -1790,7 +1790,44 @@ contains
   end subroutine show_sites
 
 
+  function dipole_density (beta, rho, sites) result (y)
+    !
+    ! Computes dipole density
+    !
+    !       4 π    2
+    !   y = --- βρμ
+    !        9
+    !
+    use foreign, only: site
+    implicit none
+    real (rk), intent (in) :: beta, rho
+    type (site), intent (in) :: sites(:)
+    real (rk) :: y
+    ! *** end of interface ***
+
+    !
+    ! Here ρμ² has  the dimension of electrostatic energy  which is by
+    ! convention    converted   to    kcal    by   multiplying    with
+    ! EPSILON0INV.  The inverse  temperature is  supposed to  have the
+    ! dimension of 1/kcal here:
+    !
+    y = 4 * pi * beta * EPSILON0INV * rho * norm2 (dipole (sites))**2 / 9
+  end function dipole_density
+
+
   function epsilon_rism (beta, rho, sites) result (e)
+    !
+    ! Computes dielectric constant as  should be predicted by the RISM
+    ! theory:
+    !
+    !   ε = 1 + 3y
+    !
+    ! where y is the usual dipole density
+    !
+    !       4 π    2
+    !   y = --- βρμ
+    !        9
+    !
     use foreign, only: site
     implicit none
     real (rk), intent (in) :: beta, rho
@@ -1800,13 +1837,7 @@ contains
 
     real (rk) :: y
 
-    !
-    ! Here ρμ² has  the dimension of electrostatic energy  which is by
-    ! convention    converted   to    kcal    by   multiplying    with
-    ! EPSILON0INV.  The inverse  temperature is  supposed to  have the
-    ! dimension of 1/kcal here:
-    !
-    y = 4 * pi * beta * EPSILON0INV * rho * norm2 (dipole (sites))**2 / 9
+    y = dipole_density (beta, rho, sites)
 
     e = 1 + 3 * y
   end function epsilon_rism
