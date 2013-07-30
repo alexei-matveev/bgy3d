@@ -157,55 +157,103 @@
                (list 'text line)))      ; ... otherwise dont do that.
          text)))
 
+
+;;;
+;;; Extract  (atom ...) entries  from the  parameter file  contents as
+;;; returned by  tinker-slurp but strip the redundant  CAR position in
+;;; result.
+;;;
+(define (atom-table contents)
+  (map cdr ; strip redundant 'atom in car position common for all entries
+       (filter (lambda (row)
+                 (equal? 'atom (first row)))
+               contents)))
+
+;;;
+;;; In general, atom class is not exactly in one-to-one correspondence
+;;; with atom  symbol. Some TINKER  force fields not  even distinguish
+;;; between atom type and atom  class.  However, for some force fields
+;;; there is such a correspondence, namely for:
+;;;
+;;;   charmm19 charmm22cmap charmm22 hoch iwater oplsaa smoothaa water
+;;;
+;;; For AMBER force  fields there is just one  conflict see "Formyl H"
+;;; entry that quotes 0 as  the atom class whereas all other hydrogens
+;;; have class 29.
+;;;
+(define (verify-class/symbol-equivalence atom-table)
+  (let ((classes (map second atom-table))
+        (symbols (map third atom-table))
+        (class->symbol/table (make-hash-table (length atom-table)))
+        (symbol->class/table (make-hash-table (length atom-table))))
+    (for-each
+        (lambda (class symbol)
+          (hash-set! class->symbol/table class symbol)
+          (hash-set! symbol->class/table symbol class))
+      classes
+      symbols)
+    (for-each
+        (lambda (c s)
+          (let ((s' (hash-ref class->symbol/table c))
+                (c' (hash-ref symbol->class/table s)))
+            (unless (and (equal? c c')
+                         (equal? s s'))
+                    (pretty-print (list "ERROR: Do not match" c c' s s')))))
+      classes
+      symbols)))
+
 ;;;
 ;;; These are distributed with TINKER:
 ;;;
-(define *files*
-  '("amber94.prm"
-    "amber96.prm"
-    "amber98.prm"
-    "amber99.prm"
-    "amber99sb.prm"
-    "amoeba04.prm"
-    "amoeba09.prm"
-    "amoebabio09.prm"
-    "amoebapro04.prm"
-    "amoebapro13.prm"
-    "charmm19.prm"
-    "charmm22cmap.prm"
-    "charmm22.prm"
-    "dang.prm"
-    "hoch.prm"
-    "iwater.prm"
-    "mm2.prm"
-    "mm3.prm"
-    "mm3pro.prm"
-    "mmff.prm"
-    "oplsaal.prm"
-    "oplsaa.prm"
-    "oplsua.prm"
-    "smoothaa.prm"
-    "smoothua.prm"
-    "tiny.prm"
-    "water.prm"))
+(define *force-fields*
+  '(amber94
+    amber96
+    amber98
+    amber99
+    amber99sb
+    amoeba04
+    amoeba09
+    amoebabio09
+    amoebapro04
+    amoebapro13
+    charmm19
+    charmm22cmap
+    charmm22
+    dang
+    hoch
+    iwater
+    mm2
+    mm3
+    mm3pro
+    mmff
+    oplsaal
+    oplsaa
+    oplsua
+    smoothaa
+    smoothua
+    tiny
+    water))
 
 
+(define *tinker-parameter-dir*
+  "/home/alexei/devel/tinker/params/")
+
+(define (tinker-parameter-file force-field)
+  (string-append *tinker-parameter-dir*
+                 (symbol->string force-field)
+                 ".prm"))
 ;;;
 ;;; Is used to test ideas:
 ;;;
 (define (tinker-test)
   (for-each
-   ;; (lambda (file)
-   ;;   (let ((content (tinker-slurp (string-append "/home/alexei/devel/tinker/params/" file))))
-   ;;     (for-each (lambda (row)
-   ;;                 (display (second row))
-   ;;                 (newline))
-   ;;               (filter (lambda (row) (equal? (car row) 'text))
-   ;;                       content)))
-   (lambda (file)
-     (with-output-to-file file
-       (lambda ()
-         (pretty-print
-          (tinker-slurp (string-append "/home/alexei/devel/tinker/params/"
-                                       file))))))
-   *files*))
+   (lambda (force-field)
+     (let ((input-file (tinker-parameter-file force-field))
+           (output-file (string-append (symbol->string force-field) ".scm")))
+       (with-output-to-file output-file
+         (lambda ()
+           (pretty-print input-file)
+           (let ((contents (tinker-slurp input-file)))
+             (verify-class/symbol-equivalence (atom-table contents))
+             (pretty-print (atom-table contents)))))))
+   *force-fields*))
