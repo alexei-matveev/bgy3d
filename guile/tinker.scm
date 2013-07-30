@@ -26,10 +26,25 @@
 ;;; writing semicolons were used only in #-commented sections.
 ;;;
 ;;; FIXME: unfortunately there is at  least one use of the #-character
-;;; in atomic  class symbols C#.   See e.g.  atom  types 897 &  898 in
-;;; oplsaa.prm.
+;;; in  atomic class  symbol ---  C#.   See atom  types 897  & 898  in
+;;; oplsaa.prm and smoothaa.prm. It happens  that this C# atom type is
+;;; the only  place where the  char # is  not preceeded by a  space or
+;;; another # (cf.  grep "[^ #]#" *.prm).
 ;;;
 (define (rewrite! str)
+  (let ((n (string-length str)))
+    (let loop ((i 0)                    ; pointer into the string
+               (f #t)) ; should we interprete evential # as a comment sign?
+      (if (< i n)
+          (let ((c (string-ref str i))
+                (i++ (+ 1 i)))
+            (if (and f (equal? c #\#))
+                (begin
+                  (string-set! str i #\;)
+                  (loop i++ #t))
+                (loop i++ (char-whitespace? c))))))))
+
+(define (rewrite!! str)
   (string-map! (lambda (c)
                  (case c
                    ((#\#) #\;)          ; # -> ;
