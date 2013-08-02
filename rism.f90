@@ -1256,6 +1256,7 @@ contains
     !   ω(r) = δ(r - R) / 4πR²
     !
     use foreign, only: site
+    use bessel, only: j0
     implicit none
     type (site), intent (in) :: sites(:)                  ! (m)
     real (rk), intent (in) :: k(:)                        ! (nrad)
@@ -1278,24 +1279,9 @@ contains
           rab = norm2 (xa - xb)
 
           ! Rigid bond correlation on a k-grid:
-          wk(:, i, j) = sinc (k * rab)
+          wk(:, i, j) = j0 (k * rab)
        enddo
     enddo
-
-  contains
-
-    elemental function sinc (x) result (f)
-      implicit none
-      real (rk), intent (in) :: x
-      real (rk) :: f
-      ! *** end of interface ***
-
-      if (x == 0.0) then
-         f = 1.0
-      else
-         f = sin (x) / x
-      endif
-    end function sinc
   end function omega_fourier
 
 
