@@ -7,6 +7,10 @@ http://webbook.nist.gov/chemistry/ and renamed with the names listed in
 the (*.sdf, *.mol) files. Format converting from CRLF to LF was
 performed before recording in our repository.
 
+The 3D structures(*.sdf files) in the NIST Chemistry WebBook were
+generated computationally, not from experiments. For more details please
+check the page http://webbook.nist.gov/chemistry/3d-structs/
+
 Current available molecules:
 ----------------------------
 
