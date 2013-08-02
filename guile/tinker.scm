@@ -45,12 +45,6 @@
                   (loop i++ #t))
                 (loop i++ (char-whitespace? c))))))))
 
-(define (rewrite!! str)
-  (string-map! (lambda (c)
-                 (case c
-                   ((#\#) #\;)          ; # -> ;
-                   (else c)))           ; leave the rest alone
-               str))
 
 ;;;
 ;;; (Incomplete) list of TINKER keywords used in parameter files:
