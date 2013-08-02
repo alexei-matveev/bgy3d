@@ -4,6 +4,7 @@
 (define-module (guile tinker)
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (ice-9 rdelim)           ; read-line
+  #:use-module (ice-9 match)            ; match-lambda
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:export
   (tinker-slurp
@@ -34,7 +35,7 @@
 (define (rewrite! str)
   (let ((n (string-length str)))
     (let loop ((i 0)                    ; pointer into the string
-               (f #t)) ; should we interprete evential # as a comment sign?
+               (f #t)) ; should we interprete eventual # as a comment sign?
       (if (< i n)
           (let ((c (string-ref str i))
                 (i++ (+ 1 i)))
@@ -159,15 +160,65 @@
 
 
 ;;;
-;;; Extract  (atom ...) entries  from the  parameter file  contents as
-;;; returned by  tinker-slurp but strip the redundant  CAR position in
-;;; result.
+;;; Extract entries  from the parameter  file contents as  returned by
+;;; tinker-slurp having  specific symbol  in car position.   Strip the
+;;; redundant CAR position in result.
 ;;;
-(define (atom-table contents)
-  (map cdr ; strip redundant 'atom in car position common for all entries
+(define (filter-contents symbol contents)
+  (map cdr ; strip redundant symbol in car position common for all entries
        (filter (lambda (row)
-                 (equal? 'atom (first row)))
+                 (equal? symbol (first row)))
                contents)))
+
+
+;;;
+;;; Make a table by combining  atom-, vdw-, and charge entries for all
+;;; atom types:
+;;;
+(define (make-table contents)
+  (let ((atm-tab (filter-contents 'atom contents))
+        (vdw-tab (filter-contents 'vdw contents))
+        (chg-tab (filter-contents 'charge contents)))
+    (map (match-lambda*
+          ;;
+          ;; Case 1. Type and class:
+          ;;
+          ;; Argument list is a 3-list having the following structure:
+          ;;
+          (((type class symbol descr atnum weight ligand)
+            (type sigma epsilon)
+            (type charge))
+           ;; ->
+           `((type . ,type)
+             (class . ,class)
+             (symbol . ,symbol)
+             (descr . ,descr)
+             (atnum . ,atnum)
+             (weight . ,weight)
+             (ligand . ,ligand)
+             (sigma . ,sigma)
+             (epsilon . ,epsilon)
+             (charge . ,charge)))
+          ;;
+          ;; Case 2. Type but no class:
+          ;;
+          (((type symbol descr atnum weight ligand)
+            (type sigma epsilon)
+            (type charge))
+           ;; ->
+           `((type . ,type)
+             (class . ,type)            ; FIXME: type == class?
+             (symbol . ,symbol)
+             (descr . ,descr)
+             (atnum . ,atnum)
+             (weight . ,weight)
+             (ligand . ,ligand)
+             (sigma . ,sigma)
+             (epsilon . ,epsilon)
+             (charge . ,charge))))
+         atm-tab
+         vdw-tab
+         chg-tab)))
 
 ;;;
 ;;; In general, atom class is not exactly in one-to-one correspondence
@@ -222,9 +273,13 @@
     dang
     hoch
     iwater
-    mm2
-    mm3
-    mm3pro
+    ;;
+    ;; These three have charge entries only for a few of atom
+    ;; types. This breaks the simplified logic of make-table:
+    ;;
+    ;; mm2
+    ;; mm3
+    ;; mm3pro
     mmff
     oplsaal
     oplsaa
@@ -248,12 +303,15 @@
 (define (tinker-test)
   (for-each
    (lambda (force-field)
+     ;; (pk force-field)
      (let ((input-file (tinker-parameter-file force-field))
            (output-file (string-append (symbol->string force-field) ".scm")))
        (with-output-to-file output-file
          (lambda ()
            (pretty-print input-file)
            (let ((contents (tinker-slurp input-file)))
-             (verify-class/symbol-equivalence (atom-table contents))
-             (pretty-print (atom-table contents)))))))
-   *force-fields*))
+             ;; (verify-class/symbol-equivalence (filter-contents 'atom contents))
+             (pretty-print (make-table contents)))))))
+   *force-fields*
+   ;; (list 'oplsbb)
+   ))
