@@ -619,7 +619,13 @@ computes the sum of all vector elements."
             (let ((v (vec-load path)))
               (vec-print v)
               (vec-destroy v)))
-          args))))))
+          args))
+        ;;
+        ("find-molecule"
+         (for-each
+             (lambda (name)
+               (pretty-print (find-molecule name)))
+           args))))))
 
 
 (define (bgy3d-test)
