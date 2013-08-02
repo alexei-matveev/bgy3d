@@ -1,0 +1,39 @@
+Formic acid
+  NIST    05100211103D 1   1.00000     0.00000
+Copyright by the U.S. Sec. Commerce on behalf of U.S.A. All rights reserved.
+  5  4  0     0  0              1 v2000
+    1.9226    0.9205    1.8422 O   0  0  0  0  0  0           0  0  0
+    0.9364    0.3495    1.1289 C   0  0  0  0  0  0           0  0  0
+    1.2026    0.0000    0.0000 O   0  0  0  0  0  0           0  0  0
+    2.7325    0.9756    1.3421 H   0  0  0  0  0  0           0  0  0
+    0.0000    0.2800    1.6921 H   0  0  0  0  0  0           0  0  0
+  1  2  1  0     0  0
+  1  4  1  0     0  0
+  2  3  2  0     0  0
+  2  5  1  0     0  0
+M  END
+>  <DATE>
+2002-05-10
+
+>  <COPYRIGHT>
+Collection (C) 2012 copyright by the U.S. Secretary of Commerce on behalf of the United States of America. All rights reserved.
+
+>  <NAME>
+Formic acid
+
+>  <CAS.NUMBER>
+64-18-6
+
+>  <METHOD>
+PM3
+
+>  <CONTRIBUTOR>
+Karl Irikura
+
+>  <REVIEWER>
+Karl Irikura and Joel Liebman
+
+>  <STATUS>
+Checked
+
+$$$$

@@ -1,0 +1,31 @@
+
+  NIST    07251209253D 1   1.00000  -114.50047
+Copyright by the U.S. Sec. Commerce on behalf of U.S.A. All rights reserved.
+  4  3  0  0  0  0  0  0  0  0999 V2000
+   17.0000   30.0178    0.0000 O    0  0  0  0  0  0  0  0  0  0  0  0
+   17.0000   28.8111    0.0000 C    0  0  0  0  0  0  0  0  0  0  0  0
+   16.0617   28.2171    0.0000 H    0  0  0  0  0  0  0  0  0  0  0  0
+   17.9383   28.2171    0.0000 H    0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  2  0
+  2  3  1  0
+  2  4  1  0
+M  END
+>  <DATE>
+2012-07-25
+
+>  <COPYRIGHT>
+Collection (C) 2012 copyright by the U.S. Secretary of Commerce on behalf of the United States of America. All rights reserved.
+
+>  <CAS.NUMBER>
+50-00-0
+
+>  <METHOD>
+B3LYP/6-31G*
+
+>  <ELECTRONIC.ENERGY>
+-114.500472 hartree
+
+>  <CONTRIBUTOR>
+Alexander Yang
+
+$$$$

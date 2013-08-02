@@ -1,0 +1,45 @@
+Acetic acid
+  NIST    05100211103D 1   1.00000     0.00000
+Copyright by the U.S. Sec. Commerce on behalf of U.S.A. All rights reserved.
+  8  7  0     0  0              1 v2000
+    0.7649    0.9627    1.0051 C   0  0  0  0  0  0           0  0  0
+    2.0422    1.7381    0.9144 C   0  0  0  0  0  0           0  0  0
+    3.1225    1.0260    0.5122 O   0  0  0  0  0  0           0  0  0
+    2.2424    2.9166    1.1481 O   0  0  0  0  0  0           0  0  0
+    0.0000    1.5240    1.5565 H   0  0  0  0  0  0           0  0  0
+    0.3742    0.7552    0.0000 H   0  0  0  0  0  0           0  0  0
+    0.9140    0.0000    1.5112 H   0  0  0  0  0  0           0  0  0
+    3.8882    1.5907    0.4746 H   0  0  0  0  0  0           0  0  0
+  1  2  1  0     0  0
+  1  5  1  0     0  0
+  1  6  1  0     0  0
+  1  7  1  0     0  0
+  2  3  1  0     0  0
+  2  4  2  0     0  0
+  3  8  1  0     0  0
+M  END
+>  <DATE>
+2002-05-10
+
+>  <COPYRIGHT>
+Collection (C) 2012 copyright by the U.S. Secretary of Commerce on behalf of the United States of America. All rights reserved.
+
+>  <NAME>
+Acetic acid
+
+>  <CAS.NUMBER>
+64-19-7
+
+>  <METHOD>
+PM3
+
+>  <CONTRIBUTOR>
+Karl Irikura
+
+>  <REVIEWER>
+Karl Irikura and Joel Liebman
+
+>  <STATUS>
+Checked
+
+$$$$

@@ -1,0 +1,23 @@
+
+Molecule strucutre from NIST database
+=====================================
+
+All the structures are downloaded from
+http://webbook.nist.gov/chemistry/ and renamed with the names listed in
+the (*.sdf, *.mol) files. Format converting from CRLF to LF was
+performed before recording in our repository.
+
+Current available molecules:
+----------------------------
+
+Alcohols      Aldehydes       Carboxylic acids
+----------    ------------    -----------------
+methanol      formaldehyde    formic acid
+ethanol       acetaldehyde    acetic acid
+1-propanol    propanal        propanoic acid^a^
+1-butanol     butanal         butanoic acid
+1-pentanol    pentanal        pentanoic acid
+-----------------------------------------------
+
+a) only 2d strucuture file is available for propanoic acid
+   (propanoic_acid.mol), in which hydrogen atoms are missing
