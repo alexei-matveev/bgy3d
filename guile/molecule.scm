@@ -103,24 +103,32 @@
 (define (molecule-name solute) (first solute))
 (define (molecule-sites solute) (second solute))
 
-;; Return   the  force   field  parameter   table  in   each  molecule
-;; description.  FIXME: should check whether there is a "table" there
+;;;
+;;; Return  the   force  field   parameter  table  in   each  molecule
+;;; description.  FIXME: should check whether there is a "table" there
+;;;
 (define (molecule-ff-tab solute) (third solute))
 
-;; This will return the ff index ("CT3" 77 77)
+;;;
+;;; This will return the ff index ("CT3" 77 77)
+;;;
 (define (ff-tab-find-site site ff-tab)
-  (let ((sitename (site-name site)))
-	(or (assoc sitename ff-tab)
-	    (error "Not in the table:" sitename))))
+  (let ((site-name (site-name site))) ; site-name redefined in this scope!
+    (or (assoc site-name ff-tab)
+        (error "Not in the table:" site-name))))
 
-;; This will return a list from wholefile matching the given atom type
-;; (78 13 CT "Alkane -CH2-" 6 12.011 4)
+;;;
+;;; This will  return a  list from wholefile  matching the  given atom
+;;; type (78 13 CT "Alkane -CH2-" 6 12.011 4)
+;;;
 (define (find-ff atm-idx whole-file)
   (or (assoc atm-idx whole-file)
       (error "Not in the file:" atm-idx)))
 
-;; For  a   single  site,  find  its  relevant   ff  information  from
-;; "wholefile" and bind them together
+;;;
+;;; For  a  single  site,   find  its  relevant  ff  information  from
+;;; whole-file and bind them together
+;;;
 (define (append-ff-site site ff-tab whole-file)
   (let* ((ff-idx (ff-tab-find-site site ff-tab))
 	 (atm-idx (second ff-idx))
@@ -128,8 +136,10 @@
     ;; Bind sites with ff information
     (append site ff-info)))
 
-;; Example to load the ff database as a list, which could be obtained by
-;; tinker-test module
+;;;
+;;; Example to load the ff database as a list, which could be obtained
+;;; by tinker-test module
+;;;
 (define *tinker-ff-parameter-file*
   "guile/oplsaa.scm")
 
@@ -165,11 +175,14 @@
 ;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
-;; This will be  called from outside, append each  site in solute with
-;; force field information
+;;;
+;;; This will be called from  outside, append each site in solute with
+;;; force field information
+;;;
 (define (tabulate-ff solute)
   (let ((sites (molecule-sites solute))
         (ff-tab (molecule-ff-tab solute))
         (whole-file (load-ff-file)))
     (map (lambda (site)
-           (append-ff-site site ff-tab whole-file)) sites)))
+           (append-ff-site site ff-tab whole-file))
+         sites)))
