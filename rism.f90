@@ -618,6 +618,93 @@ contains
 end module bessel
 
 
+module linalg
+  use kinds, only: rk
+  implicit none
+  private
+
+  public :: eigv
+
+  interface
+     subroutine dsyev (jobz, uplo, n, a, lda, w, work, lwork, info)
+       use kinds, only: rk
+       implicit none
+       character (len=1), intent (in) :: jobz, uplo
+       integer, intent (in) :: lda, lwork, n
+       integer, intent (out) :: info
+       real (rk), intent (inout) :: a(lda, *)
+       real (rk), intent (out) :: w(*)
+       real (rk), intent (out) :: work(*)
+     end subroutine dsyev
+  end interface
+
+contains
+
+  subroutine eigv (h, e, v)
+    implicit none
+    real (rk), intent (in)  :: h(:, :) ! (n, n)
+    real (rk), intent (out) :: e(:)    ! (n)
+    real (rk), intent (out) :: v(:, :) ! (n, n)
+    ! *** end of interface ***
+
+    integer :: i
+    real (rk) :: a(size (e), size (e))
+
+    a = h
+
+    call dsyev90 (a, e)
+
+    do i = 1, size (e)
+       v(:, i) =  a(:, i)
+    enddo
+  end subroutine eigv
+
+
+  subroutine dsyev90 (a, e)
+    !
+    ! Symmetric eigenvalue problem  solver for real symmetric matrices
+    ! (LAPACK DSYEV)
+    !
+    !   A * V = V * e
+    !
+    ! A (inout):
+    !   (in) A upper triangle
+    !   (out) eigenvectors
+    !
+    ! E (out):
+    !    eigenvalues
+    !
+    implicit none
+    real (rk), intent (inout) :: a(:,:)
+    real (rk), intent (out) :: e(:)
+    ! *** end of interface ***
+
+    integer :: n
+    integer :: lwork, info
+    real (rk), allocatable :: work(:)
+
+    n = size (e)
+
+    allocate (work(1))
+
+    call dsyev ('V', 'U', n, a, n, e, work, -1, info)
+    if (info /= 0) error stop "dsyev: returned nonzero (1)"
+
+    lwork = nint (work(1))
+
+    deallocate (work)
+
+    allocate (work(lwork))
+
+    call dsyev ('V', 'U', n, a, n, e, work, lwork, info)
+    if (info /= 0) error stop "dsyev: returned nonzero (2)"
+
+    deallocate (work)
+  end subroutine dsyev90
+
+end module linalg
+
+
 module rism
   use kinds, only: rk
   implicit none
