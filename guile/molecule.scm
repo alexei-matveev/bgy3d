@@ -20,7 +20,8 @@
    site-charge
    site-x
    site-y
-   site-z))
+   site-z
+   tabulate-ff))
 
 ;;;
 ;;; ITC Calorie here. See also bgy3d.h:
@@ -101,6 +102,35 @@
 
 (define (molecule-name solute) (first solute))
 (define (molecule-sites solute) (second solute))
+;; return the force field parameter table in each molecule description
+;; FIXME: should check whether there is a "table" there
+(define (molecule-fftab solute) (third solute))
+
+;; this will return the ff index ("CT3" 77 77)
+(define (fftab-find-site site fftab)
+  (or (let* ((sitename (site-name site)))
+	(assoc sitename fftab))
+   (error "Not in the table:"
+      sitename)))
+;; this will return a list from wholefile matching the given atom type
+;; (78 13 CT "Alkane -CH2-" 6 12.011 4)
+(define (find-ff atmidx wholefile) (or (assoc atmidx wholefile)
+				       (error "Not in the file:"
+					      atmidx)))
+;; for a single site, find its relevant ff information from "wholefile"
+;; and bind them together
+(define (append-ff-site site fftab wholefile)
+  (let* ((ffidx (fftab-find-site site fftab))
+	 (atmidx (second ffidx))
+	 (ffinfo (find-ff atmidx wholefile)))
+;; bind sites with ff information
+    (append! site ffinfo)))
+
+;; example to load the ff database as a list
+(define *tinker-ff-parameter-file*
+  "guile/oplsaa.scm")
+(define (load-ff-file)
+  (second (slurp (find-file *tinker-ff-parameter-file*))))
 
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
@@ -130,3 +160,11 @@
 
 ;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
+
+;; this will be called from outside, append each site in solute with
+;; force field information
+(define (tabulate-ff solute)
+  (let* ((sites (molecule-sites solute))
+	 (fftab (molecule-fftab solute))
+	 (wholefile (load-ff-file)))
+    (map (lambda(site) (append-ff-site site fftab wholefile)) sites)))
