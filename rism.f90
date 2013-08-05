@@ -623,9 +623,20 @@ module linalg
   implicit none
   private
 
+  public :: sles
   public :: eigv
 
   interface
+     subroutine dgesv (n, nrhs, a, lda, ipiv, b, ldb, info)
+       use kinds, only: rk
+       implicit none
+       integer, intent (in) :: n, nrhs, lda, ldb
+       real (rk), intent (inout) :: a(lda,*)
+       integer, intent (out) :: ipiv(*)
+       real (rk), intent (inout) :: b(ldb,*)
+       integer, intent (out) :: info
+     end subroutine dgesv
+
      subroutine dsyev (jobz, uplo, n, a, lda, w, work, lwork, info)
        use kinds, only: rk
        implicit none
@@ -639,6 +650,39 @@ module linalg
   end interface
 
 contains
+
+  subroutine sles (m, a, b)
+    !
+    ! Solve linear equations  A X = B. As in LAPACK  the matrix A is
+    ! destroyed and the result is returned in B.
+    !
+    implicit none
+    integer, intent (in) :: m
+    real (rk), intent (inout) :: a(m, m), b(m, m)
+    ! *** end of interface ***
+
+    integer :: ipiv(m), info
+
+    ! B will  be overwriten with  the result, A will  be overwritten
+    ! with its factorization:
+    call dgesv (m, m, a, m, ipiv, b, m, info)
+
+    if (info /= 0) then
+       block
+          integer :: i
+          print *, "a="
+          do i = 1, m
+             print *, a(i, :)
+          enddo
+          print *, "b="
+          do i = 1, m
+             print *, b(i, :)
+          enddo
+          print *, "info=", info
+       end block
+       stop "dgesv failed, see tty"
+    endif
+  end subroutine sles
 
   subroutine eigv (h, e, v)
     implicit none
@@ -1673,6 +1717,7 @@ contains
     ! should  be represented  by  an ω-matrix  with  a suitable  block
     ! structure.
     !
+    use linalg, only: sles
     implicit none
     real (rk), intent (in) :: rho(:)       ! (m)
     real (rk), intent (in) :: C(:, :)      ! (m, m)
@@ -1730,38 +1775,6 @@ contains
       endif
     end function delta
 
-    subroutine sles (m, a, b)
-      !
-      ! Solve linear equations  A X = B. As in LAPACK  the matrix A is
-      ! destroyed and the result is returned in B.
-      !
-      implicit none
-      integer, intent (in) :: m
-      real (rk), intent (inout) :: a(m, m), b(m, m)
-      ! *** end of interface ***
-
-      integer :: ipiv(m), info
-
-      ! B will  be overwriten with  the result, A will  be overwritten
-      ! with its factorization:
-      call dgesv (m, m, a, m, ipiv, b, m, info)
-
-      if (info /= 0) then
-         block
-            integer :: i
-            print *, "a="
-            do i = 1, m
-               print *, a(i, :)
-            enddo
-            print *, "b="
-            do i = 1, m
-               print *, b(i, :)
-            enddo
-            print *, "info=", info
-         end block
-         stop "dgesv failed, see tty"
-      endif
-    end subroutine sles
   end function oz_vv_equation_c_t_MxM
 
 
