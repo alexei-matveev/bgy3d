@@ -2042,13 +2042,12 @@ contains
           this_rho = 0.0
        endif
 
-       print *, "#", i, &
-            &        pad (sites(i) % name), &
-            &        sites(i) % sigma, &
-            &        sites(i) % epsilon, &
-            &        sites(i) % charge, &
-            &        this_rho
+       write (*, 100) i, pad (sites(i) % name), &
+            sites(i) % x, &
+            sites(i) % sigma, sites(i) % epsilon, sites(i) % charge, &
+            this_rho
     enddo
+100 format (' #', I2, 1X, A5, 7F12.4)
   end subroutine show_sites
 
 
