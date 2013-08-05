@@ -126,7 +126,7 @@
 	 (atmidx (second ffidx))
 	 (ffinfo (find-ff atmidx wholefile)))
     ;; Bind sites with ff information
-    (append! site ffinfo)))
+    (append site ffinfo)))))
 
 ;; example to load the ff database as a list
 (define *tinker-ff-parameter-file*
