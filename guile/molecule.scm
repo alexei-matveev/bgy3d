@@ -183,6 +183,7 @@
   (let ((sites (molecule-sites solute))
         (ff-tab (molecule-ff-tab solute))
         (whole-file (load-ff-file)))
-    (map (lambda (site)
-           (append-ff-site site ff-tab whole-file))
-         sites)))
+        (let ((newsites
+		(map (lambda (site)
+		       (append-ff-site site ff-tab whole-file)) sites)))
+    (make-molecule (molecule-name solute) newsites ))))
