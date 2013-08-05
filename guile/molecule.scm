@@ -105,30 +105,31 @@
 
 ;; Return   the  force   field  parameter   table  in   each  molecule
 ;; description.  FIXME: should check whether there is a "table" there
-(define (molecule-fftab solute) (third solute))
+(define (molecule-ff-tab solute) (third solute))
 
 ;; This will return the ff index ("CT3" 77 77)
-(define (fftab-find-site site fftab)
+(define (ff-tab-find-site site ff-tab)
   (let ((sitename (site-name site)))
-	(or (assoc sitename fftab)
+	(or (assoc sitename ff-tab)
 	    (error "Not in the table:" sitename))))
 
 ;; This will return a list from wholefile matching the given atom type
 ;; (78 13 CT "Alkane -CH2-" 6 12.011 4)
-(define (find-ff atmidx wholefile)
-  (or (assoc atmidx wholefile)
-      (error "Not in the file:" atmidx)))
+(define (find-ff atm-idx whole-file)
+  (or (assoc atm-idx whole-file)
+      (error "Not in the file:" atm-idx)))
 
 ;; For  a   single  site,  find  its  relevant   ff  information  from
 ;; "wholefile" and bind them together
-(define (append-ff-site site fftab wholefile)
-  (let* ((ffidx (fftab-find-site site fftab))
-	 (atmidx (second ffidx))
-	 (ffinfo (find-ff atmidx wholefile)))
+(define (append-ff-site site ff-tab whole-file)
+  (let* ((ff-idx (ff-tab-find-site site ff-tab))
+	 (atm-idx (second ff-idx))
+	 (ff-info (find-ff atm-idx whole-file)))
     ;; Bind sites with ff information
-    (append site ffinfo)))))
+    (append site ff-info)))
 
-;; example to load the ff database as a list
+;; Example to load the ff database as a list, which could be obtained by
+;; tinker-test module
 (define *tinker-ff-parameter-file*
   "guile/oplsaa.scm")
 
@@ -168,7 +169,7 @@
 ;; force field information
 (define (tabulate-ff solute)
   (let ((sites (molecule-sites solute))
-        (fftab (molecule-fftab solute))
-        (wholefile (load-ff-file)))
+        (ff-tab (molecule-ff-tab solute))
+        (whole-file (load-ff-file)))
     (map (lambda (site)
-           (append-ff-site site fftab wholefile)) sites)))
+           (append-ff-site site ff-tab whole-file)) sites)))
