@@ -109,9 +109,9 @@
 
 ;; This will return the ff index ("CT3" 77 77)
 (define (fftab-find-site site fftab)
-  (or (let ((sitename (site-name site)))
-	(assoc sitename fftab))
-      (error "Not in the table:" sitename)))
+  (let ((sitename (site-name site)))
+	(or (assoc sitename fftab)
+	    (error "Not in the table:" sitename))))
 
 ;; This will return a list from wholefile matching the given atom type
 ;; (78 13 CT "Alkane -CH2-" 6 12.011 4)
