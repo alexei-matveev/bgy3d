@@ -765,6 +765,13 @@ module rism
   real (rk), parameter :: pi = 4 * atan (1.0_rk)
 
   !
+  ! Working  units  *are* angstroms.   Still  when  you  wish to  make
+  ! dimensions explicit  (and you should) use combinations  like 0.5 *
+  ! angstrom, or 1.2 * angstrom**(-1), etc:
+  !
+  real (rk), parameter :: angstrom = 1
+
+  !
   ! The interaction energy of two unit charges separated by 1 A is
   !                  -1
   !   E = 1 * 1 / 1 A   = 0.529 au = 332 kcal [/ mol]
@@ -798,7 +805,8 @@ module rism
   ! radius σ = 3.16 A. There are no visible changes in the RDF with or
   ! without short range Coulomb and the charges of the order ±1.
   !
-  real (rk), parameter :: ALPHA = 1.2
+
+  real (rk), parameter :: ALPHA = 1.2d0 / angstrom
 
 contains
 
