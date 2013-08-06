@@ -542,10 +542,12 @@ module bessel
   !
   ! In particular:
   !
-  !   j (x) = sin(x) / x
+  !                               2         4
+  !   j (x) = sin(x) / x  ~  1 - x / 6 + o(x )
   !    0
   !
-  !   j (x) = (sin(x) / x - cos(x)) / x
+  !                                                    3
+  !   j (x) = (sin(x) / x - cos(x)) / x  ~  x / 3 + o(x )
   !    1
   !
   use kinds, only: rk
