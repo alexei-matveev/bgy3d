@@ -1238,7 +1238,12 @@ contains
     real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
     ! *** end of interface ***
 
+    real (rk), parameter :: eps = 78.4d0
     integer :: nrad, n, m
+
+    nrad = size (t, 1)
+    n = size (t, 2)
+    m = size (t, 3)
 
     block
        integer :: j
@@ -1270,10 +1275,6 @@ contains
        print *, "# Dipole after =", dipole (sites)
     end block
 
-    nrad = size (t, 1)
-    n = size (t, 2)
-    m = size (t, 3)
-
     block
        integer :: p, i, j
        real (rk) :: r(nrad), k(nrad)
@@ -1281,7 +1282,8 @@ contains
        real (rk) :: cl(nrad, n, m)
        real (rk) :: h(nrad, n, m)
        real (rk) :: g(nrad, n, m)
-       real (rk) :: x(nrad), x0(nrad), x1(nrad) ! qhq in k-space
+       real (rk) :: x(nrad), x0(nrad), x1(nrad), x2(nrad), xx(nrad) ! qhq in k-space
+       real (rk) :: xd(nrad, m, m)
 
        ! Dont like to pass redundant  info, recompute r(:) from dr and
        ! k(:) from dk:
@@ -1329,8 +1331,7 @@ contains
        block
           integer :: i, j, p
           real (rk) :: q(size (solvent))
-          real (rk) :: y, fac0, fac1
-          real (rk), parameter :: eps = 78.4d0
+          real (rk) :: y, fac0, fac1, fac2
 
           ! FIXME: dipole_density() assumes all solvent sites have the
           ! same number density:
@@ -1378,26 +1379,37 @@ contains
             fac1 = ((eps - 1) / eps - 3 * y) / (4 * pi * beta)
           end associate
 
+          associate (eps0 => 1 + 3 * y)
+            fac2 = (eps - eps0) / (4 * pi * beta)
+          end associate
+
           print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0
           print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1
+          print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2
 
           ! q = ρ * z:
           q(:) = rho(:) * solvent(:) % charge
 
+          xd = dipole_correction (beta, rho(1), eps, solvent, k)
+
           ! Note  the  extra  EPSILON0INV   factor,  it  seems  to  be
           ! necessary to get the kcal/A³ units right:
           x = 0.0
+          xx = 0.0
           do i = 1, size (solvent)
              do j = 1, size (solvent)
                 do p = 1, nrad
                    x(p) = x(p) + q(i) * h(p, i, j) * q(j) * EPSILON0INV
+                   xx(p) = xx(p) + q(i) * xd(p, i, j) * q(j) * EPSILON0INV
                 enddo
              enddo
           enddo
           ! where (k < 2.0) x = x - fac * k**2
           x0 = fac0 * k**2
           x1 = fac1 * k**2
+          x2 = fac2 * k**2
        end block
+
 
        ! This prints a lot of data on tty!
        if (verbosity > 1) then
@@ -1408,7 +1420,7 @@ contains
                   &     ((v(p, i, j), i=1,n), j=1,m), &
                   &     ((t(p, i, j), i=1,n), j=1,m), &
                   &     ((c(p, i, j), i=1,n), j=1,m), &
-                  &      k(p), x(p), x0(p), x1(p)
+                  &      k(p), x(p), x0(p), x1(p), x2(p), xx(p)
           enddo
        endif
     end block
@@ -2315,7 +2327,7 @@ contains
 
     !
     ! The other two axes should be orthogonal to the dipole vector. It
-    ! is somewhat unsettling that  the two remaining axes are somewhat
+    ! is  unsettling   that  the  two  remaining   axes  are  somewhat
     ! arbitrary. This is just one  of the many possible ways to choose
     ! them:
     !
@@ -2448,6 +2460,101 @@ contains
        enddo
     enddo
   end function local_coords
+
+
+  function dipole_correction (beta, rho, eps, sites, k) result (xk)
+    !
+    ! The   site-site  correction  for   dipole  species   in  Fourier
+    ! representation (see e.g. Ref. [KH00a]):
+    !
+    !   χ  (k) = f (k) h (k) f (k)
+    !    ab       a     c     b
+    !
+    ! with a short k-range
+    !
+    !                                         2
+    !   h (k) = (ε - 1 - 3y) / (ρy) exp[- (ks) / 4] ~ o(1)
+    !    c
+    !
+    ! and the site-specific functions
+    !
+    !   f (k) = j (kx ) j (ky ) j (kz ) ~ kz / 3
+    !    a       0   a   0   a   1   a      a
+    !
+    ! where the site parameters
+    !
+    !   (x , y , z )
+    !     a   a   a
+    !
+    ! are the site coordinates bound to a local coordiante system with
+    ! z-axis collinear to the dipole  vector. The center of the system
+    ! and  the two  other  axes appear  to  be left  arbitrary in  the
+    ! literature (I would like a counterexample).
+    !
+    ! Note that by construction the charge-weighted sum
+    !
+    !   Σ  q  f (k)  ~  (k / 3) Σ q  z   =  kμ / 3
+    !    a  a  a                 a a  a
+    !
+    ! at small k. And thus, the double sum
+    !
+    !                                      2
+    !  Σ   q  ρ χ  (k) ρ q   ~  h (0) (kρμ) / 9
+    !   ab  a    ab       b      c
+    !
+    !                            2
+    !                        =  k  [ε - 1 - 3y] / 4πβ
+    !
+    !
+    ! [KH00a] Potentials of mean force of simple ions in ambient
+    !   aqueous solution. I. Three-dimensional reference interaction
+    !   site model approach, Andriy Kovalenko and Fumio Hirata,
+    !   J. Chem. Phys. 112, 10391 (2000);
+    !   http://dx.doi.org/10.1063/1.481676
+    !
+    use foreign, only: site
+    use bessel, only: j0, j1
+    implicit none
+    real (rk), intent (in) :: beta, rho
+    real (rk), intent (in) :: eps        ! target epsilon
+    type (site), intent (in) :: sites(:) ! (m)
+    real (rk), intent (in) :: k(:)       ! (nrad)
+    real (rk) :: xk(size (k), size (sites), size (sites)) ! (nrad, m, m)
+    ! *** end of inteface ***
+
+    real (rk), parameter :: s = 0.5 * angstrom ! Ref. [KH00a]
+    integer :: i, j
+    real (rk) :: x(3, size (sites))
+    real (rk) :: f(size (k), size (sites))
+    real (rk) :: h(size (k))
+    real (rk) :: y              ! dipole density
+
+    ! Make a choice for the center of the species and local axes, then
+    ! compute  the local  coordinates.  The (third)  z-axis should  be
+    ! collinear with the dipole vector:
+    x = local_coords (sites, dipole_axes (sites))
+
+    ! Precompute j0 * j0 * j1 for each site:
+    do i = 1, size (sites)
+       associate (d => x(:, i))
+         f(:, i) = j0 (k * d(1)) * j0 (k * d(2)) * j1 (k * d(3))
+       end associate
+    enddo
+
+    y = dipole_density (beta, rho, sites)
+
+    ! h(k), common for all sites. Note the the term is proportional to
+    ! the difference  of target and rism dielectric  constants --- the
+    ! unmodified  RISM theory  gives  e =  1  + 3y  as the  dielectric
+    ! constant:
+    h = (eps - (1 + 3 * y)) / (rho * y) * exp (- (k * s)**2 / 4)
+
+    do j = 1, size (sites)
+       do i = 1, size (sites)
+          xk(:, i, j) = f (:, i) * h(:) * f(:, j)
+       enddo
+    enddo
+  end function dipole_correction
 
 
 end module rism
