@@ -926,9 +926,7 @@ contains
 
     integer :: nrad
     real (rk) :: rmax
-    real (rk) :: rho(size (solvent))
 
-    rho = pd % rho              ! all site densities are the same
     rmax = rism_rmax (pd)
     nrad = rism_nrad (pd)
 
@@ -938,7 +936,7 @@ contains
 
        call bgy3d_problem_data_print (pd)
 
-       call show_sites ("Solvent", solvent, rho)
+       call show_sites ("Solvent", solvent, pd % rho)
 
        if (present (solute)) then
           call show_sites ("Solute", solute)
@@ -958,11 +956,13 @@ contains
        ! Solvent susceptibility χ = ω + ρh:
        real (rk) :: chi_fft(nrad, size (solvent), size (solvent))
 
-       call rism_vv (pd % closure, nrad, rmax, pd % beta, rho, solvent, gam, chi_fft)
+       call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
+            solvent, gam, chi_fft)
 
 
        if (present (solute)) then
-          call rism_uv (pd % closure, nrad, rmax, pd % beta, rho, solvent, chi_fft, solute)
+          call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
+               solvent, chi_fft, solute)
        endif
 
        ! Output, if requested:
@@ -986,7 +986,7 @@ contains
     integer, intent (in) :: nrad            ! grid size
     real (rk), intent (in) :: rmax          ! cell size
     real (rk), intent (in) :: beta          ! inverse temp
-    real (rk), intent (in) :: rho(:)        ! (m)
+    real (rk), intent (in) :: rho
     type (site), intent (in) :: sites(:)    ! (m)
     real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m)
     real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m)
@@ -1045,7 +1045,7 @@ contains
 
        do i = 1, m
           do j = 1, m
-             chi(:, i, j) = wk(:, i, j) + rho(i) * h(:, i, j)
+             chi(:, i, j) = wk(:, i, j) + rho * h(:, i, j)
           enddo
        enddo
     end block
@@ -1116,7 +1116,7 @@ contains
     integer, intent (in) :: nrad           ! grid size
     real (rk), intent (in) :: rmax         ! cell size
     real (rk), intent (in) :: beta         ! inverse temp
-    real (rk), intent (in) :: rho(:)       ! (m)
+    real (rk), intent (in) :: rho
     type (site), intent (in) :: solvent(:) ! (m)
     real (rk), intent(in) :: chi(:, :, :)  ! (nrad, m, m)
     type (site), intent (in) :: solute(:)  ! (n)
@@ -1230,7 +1230,7 @@ contains
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: beta         ! inverse temperature
-    real (rk), intent (in) :: rho(:)       ! (m)
+    real (rk), intent (in) :: rho
     type (site), intent (in) :: solvent(:) ! (m)
     type (site), intent (in) :: solute(:)  ! (n)
     real (rk), intent (in) :: dr, dk       ! grid steps
@@ -1335,10 +1335,10 @@ contains
 
           ! FIXME: dipole_density() assumes all solvent sites have the
           ! same number density:
-          y = dipole_density (beta, rho(1), solvent)
+          y = dipole_density (beta, rho, solvent)
 
           print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
-          print *, "# ε = ", epsilon_rism (beta, rho(1), solvent)
+          print *, "# ε = ", epsilon_rism (beta, rho, solvent)
           print *, "# A(1 + 3 * y, y) = ", dipole_factor (1 + 3 * y, y)
           print *, "# A(ε, y) = ", dipole_factor (eps, y)
 
@@ -1388,9 +1388,9 @@ contains
           print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2
 
           ! q = ρ * z:
-          q(:) = rho(:) * solvent(:) % charge
+          q(:) = rho * solvent(:) % charge
 
-          xd = dipole_correction (beta, rho(1), eps, solvent, k)
+          xd = dipole_correction (beta, rho, eps, solvent, k)
 
           ! Note  the  extra  EPSILON0INV   factor,  it  seems  to  be
           ! necessary to get the kcal/A³ units right:
@@ -1701,7 +1701,7 @@ contains
   !
   function oz_vv_equation_c_t (rho, C, W) result (T)
     implicit none
-    real (rk), intent (in) :: rho(:)             ! (m)
+    real (rk), intent (in) :: rho
     real (rk), intent (in) :: C(:, :, :)         ! (nrad, m, m)
     real (rk), intent (in) :: W(:, :, :)         ! (nrad, m, m)
     real (rk) :: T(size (C, 1), size (C, 2), size (C, 3))
@@ -1711,15 +1711,15 @@ contains
 
     ! There is  no reason to  handle the 1x1 case  differently, except
     ! clarity.  The MxM branch should be able to handle that case too.
-    if (size (rho) == 1) then
+    if (size (C, 3) == 1) then
        ! FIXME: it  is implied here  that W =  1. See comments  on the
        ! value of ω(k) for i == j in omega_fourier().
        do i = 1, size (C, 1)
-          T(i, 1, 1) = oz_vv_equation_c_t_1x1 (rho(1), C(i, 1, 1))
+          T(i, 1, 1) = oz_vv_equation_c_t_1x1 (rho, C(i, 1, 1))
        enddo
     else
        do i = 1, size (C, 1)
-          T(i, :, :) = oz_vv_equation_c_t_MxM (rho(:), C(i, :, :), W(i, :, :))
+          T(i, :, :) = oz_vv_equation_c_t_MxM (rho, C(i, :, :), W(i, :, :))
        enddo
     endif
   end function oz_vv_equation_c_t
@@ -1771,16 +1771,16 @@ contains
     !
     use linalg, only: sles
     implicit none
-    real (rk), intent (in) :: rho(:)       ! (m)
+    real (rk), intent (in) :: rho
     real (rk), intent (in) :: C(:, :)      ! (m, m)
     real (rk), intent (in) :: W(:, :)      ! (m, m)
-    real (rk) :: T(size (rho), size (rho)) ! (m, m)
+    real (rk) :: T(size (C, 1), size (C, 1)) ! (m, m)
     ! *** end of interface ***
 
-    real (rk), dimension (size (rho), size (rho)) :: H
+    real (rk), dimension (size (C, 1), size (C, 1)) :: H
     integer :: i, j, m
 
-    m = size (rho)
+    m = size (C, 1)
 
     ! H := WC, temporarily:
     H = matmul (W, C)
@@ -1788,7 +1788,7 @@ contains
     ! T := 1  - WCρ. The output matrix  T is used here as  a free work
     ! array:
     forall (i = 1:m, j = 1:m)
-       T(i, j) = delta (i, j) - H(i, j) * rho(j)
+       T(i, j) = delta (i, j) - H(i, j) * rho
     end forall
 
     ! H := WCW.  Still temporarily --- it will be overwritten with the
@@ -1997,7 +1997,7 @@ contains
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho(:)      ! (m)
+    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
     real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
     real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
@@ -2032,11 +2032,11 @@ contains
              ! functional  (no such  term) and  -∞ for  HNC functional
              ! (contributes unconditionally):
              if (-h(p, i, j) > thresh) then
-                muH = muH + rho(j) * h(p, i, j)**2 / 2
+                muH = muH + rho * h(p, i, j)**2 / 2
              endif
 
-             muS = muS + rho(j) * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
-             muL = muL + rho(j) * (             - h(p, i, j) * cl(p, i, j) / 2)
+             muS = muS + rho * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
+             muL = muL + rho * (             - h(p, i, j) * cl(p, i, j) / 2)
           enddo
        enddo
 
@@ -2056,7 +2056,7 @@ contains
     use fft, only: integrate
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho(:)      ! (m)
+    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
     real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
     real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
@@ -2078,7 +2078,7 @@ contains
     implicit none
     character (len=*), intent (in) :: name
     type (site), intent (in) :: sites(:)
-    real (rk), optional, intent (in) :: rho(:)
+    real (rk), optional, intent (in) :: rho
     ! *** end of interface ***
 
     integer :: i
@@ -2089,7 +2089,7 @@ contains
     do i = 1, size (sites)
 
        if (present (rho)) then
-          this_rho = rho(i)
+          this_rho = rho
        else
           this_rho = 0.0
        endif
