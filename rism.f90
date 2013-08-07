@@ -1392,14 +1392,15 @@ contains
           enddo
        end block
 
-       ! Small-k behavior of qh(k)q  which is essential for dielectric
-       ! permittivity:
-       h = fourier_many (h) * (dr**3 / FT_FW)
-
        block
           integer :: i, j, p
           real (rk) :: q(size (solvent))
           real (rk) :: y, fac0, fac1, fac2
+          real (rk) :: hk(nrad, n, m)
+
+          ! Small-k  behavior   of  qh(k)q  which   is  essential  for
+          ! dielectric permittivity:
+          hk = fourier_many (h) * (dr**3 / FT_FW)
 
           ! FIXME: dipole_density() assumes all solvent sites have the
           ! same number density:
@@ -1467,7 +1468,7 @@ contains
           do i = 1, size (solvent)
              do j = 1, size (solvent)
                 do p = 1, nrad
-                   x(p) = x(p) + q(i) * h(p, i, j) * q(j) * EPSILON0INV
+                   x(p) = x(p) + q(i) * hk(p, i, j) * q(j) * EPSILON0INV
                    xx(p) = xx(p) + q(i) * xd(p, i, j) * q(j) * EPSILON0INV
                 enddo
              enddo
