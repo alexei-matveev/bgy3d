@@ -1292,6 +1292,7 @@ contains
     ! Prints some results.
     !
     use fft, only: fourier_many, FT_FW
+    use linalg, only: polyfit
     use foreign, only: site, verbosity, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
@@ -1475,6 +1476,21 @@ contains
           x0 = fac0 * k**2
           x1 = fac1 * k**2
           x2 = fac2 * k**2
+
+          block
+             real (rk) :: a(3)
+             integer :: i, n, npts(3) = [3, 5, 15]
+
+             do i = 1, size (npts)
+                n = npts(i)
+                if (nrad < n) cycle
+
+                a = polyfit (k(1:n), x(1:n), 2)
+                print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(3) , "e =", epsln (beta, y, a(3))
+                print *, "# fitted coefficients = ", a(:)
+                print *, "# fitted k-range = ", k(1), "...", k(n), "with", n, "pts"
+             enddo
+          end block
        end block
 
 
