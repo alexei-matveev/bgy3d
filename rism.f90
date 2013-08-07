@@ -2525,19 +2525,20 @@ contains
     ! The   site-site  correction  for   dipole  species   in  Fourier
     ! representation (see e.g. Ref. [KH00a]):
     !
-    !   χ  (k) = f (k) h (k) f (k)
+    !                                     2
+    !   χ  (k) = f (k) h (k) f (k)  ~  o(k )
     !    ab       a     c     b
     !
     ! with a short k-range
     !
     !                                         2
-    !   h (k) = (ε - 1 - 3y) / (ρy) exp[- (ks) / 4] ~ o(1)
+    !   h (k) = (ε - 1 - 3y) / (ρy) exp[- (ks) / 4]  ~  o(1)
     !    c
     !
     ! and the site-specific functions
     !
-    !   f (k) = j (kx ) j (ky ) j (kz ) ~ kz / 3
-    !    a       0   a   0   a   1   a      a
+    !   f (k) = j (kx ) j (ky ) j (kz )  ~  kz / 3
+    !    a       0   a   0   a   1   a        a
     !
     ! where the site parameters
     !
