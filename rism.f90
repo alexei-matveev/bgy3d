@@ -627,6 +627,7 @@ module linalg
 
   public :: sles
   public :: eigv
+  public :: polyfit
 
   interface
      subroutine dgesv (n, nrhs, a, lda, ipiv, b, ldb, info)
@@ -649,6 +650,25 @@ module linalg
        real (rk), intent (out) :: w(*)
        real (rk), intent (out) :: work(*)
      end subroutine dsyev
+
+     subroutine dgetrf (m, n, a, lda, ipiv, info)
+       use kinds, only: rk
+       implicit none
+       integer, intent (in) :: lda, m, n
+       integer, intent (out) :: info
+       integer, intent (out) :: ipiv( * )
+       real (rk), intent (inout) :: a(lda, *)
+     end subroutine dgetrf
+
+     subroutine dgetri (n, a, lda, ipiv, work, lwork, info)
+       use kinds, only: rk
+       implicit none
+       integer, intent (in) :: lda, lwork, n
+       integer, intent (out) :: info
+       integer, intent (in) :: ipiv(*)
+       real (rk), intent (out) :: work(lwork)
+       real (rk), intent (inout) :: a(lda, *)
+     end subroutine dgetri
   end interface
 
 contains
@@ -747,6 +767,53 @@ contains
 
     deallocate (work)
   end subroutine dsyev90
+
+
+  function polyfit (vx, vy, d) result (a)
+    implicit none
+    real (rk), intent (in) :: vx(:), vy(:)
+    integer, intent (in) :: d
+    real (rk) :: a(d + 1)
+    ! *** end of interface ***
+
+    integer :: n, lwork
+
+    n = d + 1
+    lwork = n
+
+    block
+       integer :: i, j
+       integer :: info
+       real (rk) :: x(size (vx), n)
+       real (rk) :: xt(n, size (vx))
+       real (rk) :: xtx(n, n)
+       real (rk) :: work(lwork)
+       integer :: ipiv(n)
+
+       ! Prepare the matrix
+       do i = 0, d
+          do j = 1, size (vx)
+             x(j, i + 1) = vx(j)**i
+          end do
+       end do
+
+       xt  = transpose (x)
+       xtx = matmul (xt, x)
+
+       ! Calls to LAPACK subs DGETRF and DGETRI
+       call dgetrf (n, n, xtx, size (xtx, 1), ipiv, info)
+       if (info /= 0) then
+          error stop "dgetrf failed!"
+       end if
+
+       call dgetri (n, xtx, size (xtx, 1), ipiv, work, lwork, info)
+       if (info /= 0) then
+          error stop "dgetri failed!"
+       end if
+
+       a = matmul (matmul (xtx, xt), vy)
+    end block
+  end function
 
 end module linalg
 
