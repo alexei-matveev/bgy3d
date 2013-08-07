@@ -138,7 +138,7 @@ contains
   end function fourier
 
 
-  function integrate (f) result (g)
+  pure function integrate (f) result (g)
     !
     ! Approximates 4π  ∫f(r)r²dr.  Should  be "related" to  the k  = 0
     ! component of the  FT. This is also the  only reason the function
