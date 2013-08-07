@@ -936,7 +936,7 @@ contains
 
        call bgy3d_problem_data_print (pd)
 
-       call show_sites ("Solvent", solvent, pd % rho)
+       call show_sites ("Solvent", solvent)
 
        if (present (solute)) then
           call show_sites ("Solute", solute)
@@ -1253,7 +1253,7 @@ contains
        type (site) :: sites(size (solvent))
 
        sites = solvent
-       call show_sites ("Before!", sites, rho)
+       call show_sites ("Before!", sites)
        print *, "# Dipole before =", dipole (sites)
 
        print *, "# Solvent axes:"
@@ -1271,7 +1271,7 @@ contains
        do j = 1, size (sites)
           sites(j) % x = x(:, j)
        enddo
-       call show_sites ("After!", sites, rho)
+       call show_sites ("After!", sites)
        print *, "# Dipole after =", dipole (sites)
     end block
 
@@ -2073,33 +2073,24 @@ contains
   end function chempot
 
 
-  subroutine show_sites (name, sites, rho)
+  subroutine show_sites (name, sites)
     use foreign, only: site
     implicit none
     character (len=*), intent (in) :: name
     type (site), intent (in) :: sites(:)
-    real (rk), optional, intent (in) :: rho
     ! *** end of interface ***
 
     integer :: i
-    real (rk) :: this_rho
 
     print *, "# ", name
 
     do i = 1, size (sites)
 
-       if (present (rho)) then
-          this_rho = rho
-       else
-          this_rho = 0.0
-       endif
-
        write (*, 100) i, pad (sites(i) % name), &
             sites(i) % x, &
-            sites(i) % sigma, sites(i) % epsilon, sites(i) % charge, &
-            this_rho
+            sites(i) % sigma, sites(i) % epsilon, sites(i) % charge
     enddo
-100 format (' #', I2, 1X, A5, 7F12.4)
+100 format (' #', I2, 1X, A5, 6F12.4)
   end subroutine show_sites
 
 
