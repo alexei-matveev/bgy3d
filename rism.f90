@@ -1450,8 +1450,8 @@ contains
             fac2 = (eps - eps0) / (4 * pi * beta)
           end associate
 
-          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0
-          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1
+          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, "e =", epsln (beta, y, fac0)
+          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, "e =", epsln (beta, y, fac1)
           print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2
 
           ! q = ρ * z:
@@ -1491,6 +1491,25 @@ contains
           enddo
        endif
     end block
+
+  contains
+
+    pure function epsln (beta, y, c) result (e)
+      !
+      ! Solves for e in
+      !
+      !   c = [(e - 1) / e - 3y] / 4πβ
+      !
+      implicit none
+      real (rk), intent (in) :: beta, y, c
+      real (rk) :: e
+      ! *** end of interface ***
+
+      associate (x => 4 * pi * beta * c + 3 * y)
+        e = 1 / (1 - x)         ! x = (e - 1) / e
+      end associate
+    end function epsln
+
   end subroutine post_process
 
 
