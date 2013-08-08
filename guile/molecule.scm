@@ -107,9 +107,13 @@
 
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
-;;; description.  FIXME: should check whether there is a "table" there
+;;; description.  FIXME:  A missing table  is interpreted as  an empty
+;;; table:
 ;;;
-(define (molecule-ff-tab solute) (third solute))
+(define (molecule-ff-tab solute)
+  (match solute
+    ((name sites table) table) ; return the third entry, if there is such
+    (_ '())))                  ; otherwise return an empty list
 
 ;;;
 ;;; This will return the ff index ("CT3" 77 77)
