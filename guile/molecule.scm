@@ -13,7 +13,7 @@
    molecule-charge
    molecule-dipole
    find-molecule
-   molecule-print/xyz
+   print-molecule/xyz
    make-site
    site-name
    site-position
@@ -208,7 +208,7 @@
           (dot q y)
           (dot q z))))
 
-(define (molecule-print/xyz solute)
+(define (print-molecule/xyz solute)
   (let ((name   (molecule-name solute))
         (sites  (molecule-sites solute)))
     (format #t "~a\n" (length sites))
@@ -221,7 +221,7 @@
                         (site-z site)))
               sites)))
 
-;; (for-each molecule-print/xyz (slurp (find-file "guile/solutes.scm")))
+;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
 ;;;
