@@ -36,7 +36,7 @@ bool bgy3d_getopt_real (const char key[], double *val)
   return (int) test;
 }
 
-bool bgy3d_getopt_string (const char key[], char *val, size_t len)
+bool bgy3d_getopt_string (const char key[], int len, char val[len])
 {
   PetscBool test;
 

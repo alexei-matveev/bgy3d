@@ -97,7 +97,7 @@ ProblemData bgy3d_problem_data (void)
   /* Closure is only used in  HNC-like methods. Supply default for the
      case the command line does not provide it: */
   char closure[] = "HNC";
-  bgy3d_getopt_string ("--closure", closure, sizeof closure);
+  bgy3d_getopt_string ("--closure", sizeof closure, closure);
 
   if (strcmp (closure, "HNC") == 0)
     PD.closure = CLOSURE_HNC;

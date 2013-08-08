@@ -12,7 +12,7 @@
 void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 {
   char solver[20] = "newton";
-  bgy3d_getopt_string ("--snes-solver", solver, sizeof solver);
+  bgy3d_getopt_string ("--snes-solver", sizeof solver, solver);
 
   if (strcmp (solver, "newton") == 0)
     bgy3d_snes_newton (PD, ctx, F, x);

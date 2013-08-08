@@ -995,7 +995,7 @@ Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini)
   char name[200] = "hydrogen chloride"; /* default solute */
 
   /* Solutes name, HCl by default: */
-  bgy3d_getopt_string ("--solute", name, sizeof(name));
+  bgy3d_getopt_string ("--solute", sizeof name, name);
 
   /* Code used to be verbose: */
   PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);

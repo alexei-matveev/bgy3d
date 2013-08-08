@@ -928,7 +928,7 @@ Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
   char name[200] = "LJ";        /* solvent & default solute */
 
   /* Get solvent name or stay with the default: */
-  bgy3d_getopt_string ("--solvent", name, sizeof name);
+  bgy3d_getopt_string ("--solvent", sizeof name, name);
 
   /* Get the number of solvent sites and their parameters. Get it from
      the solute tables: */
@@ -1519,7 +1519,7 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   char name[200] = "LJ";        /* solvent & default solute */
 
   /* Get solvent name or stay with the default: */
-  bgy3d_getopt_string ("--solvent", name, sizeof name);
+  bgy3d_getopt_string ("--solvent", sizeof name, name);
 
   /* Get the number of solvent sites and their parameters. Get it from
      the solute tables: */
@@ -1532,7 +1532,7 @@ Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
   PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
 
   /* Get solute name or stay with the default: */
-  bgy3d_getopt_string ("--solute", name, sizeof name);
+  bgy3d_getopt_string ("--solute", sizeof name, name);
 
   /* Get the solute from the tables: */
   bgy3d_solute_get (name, &n, &solute);

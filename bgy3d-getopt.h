@@ -3,4 +3,4 @@
 bool bgy3d_getopt_test (const char key[]);
 bool bgy3d_getopt_int (const char key[], int *val);
 bool bgy3d_getopt_real (const char key[], double *val);
-bool bgy3d_getopt_string (const char key[], char *val, size_t len);
+bool bgy3d_getopt_string (const char key[], int len, char val[len]);
