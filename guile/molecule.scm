@@ -55,13 +55,12 @@
 ;;; Find a solute/solvent in a database or die:
 ;;;
 (define (find-molecule name)
-  (or
-   (and-let* ((solutes (slurp (find-file "guile/solutes.scm")))
-              (molecule (or (assoc name solutes)
-                            (error "Not in the list:"
-                                   name
-                                   (map first solutes)))))
-     (eval-units molecule))))
+  (and-let* ((solutes (slurp (find-file "guile/solutes.scm")))
+             (molecule (or (assoc name solutes)
+                           (error "Not in the list:"
+                                  name
+                                  (map first solutes)))))
+    (eval-units molecule)))
 
 
 
