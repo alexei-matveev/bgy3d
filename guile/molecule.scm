@@ -138,11 +138,10 @@
 
 ;;;
 ;;; Example to load the ff database as a list, which could be obtained
-;;; by tinker-test module
+;;; by tinker-test module.  This is  for test, ff parameters appear in
+;;; each line
 ;;;
 (define *tinker-ff-parameter-file*
-;;  "guile/oplsaa.scm")
-;;  This is for test, ff parameters appear in each line
   "guile/oplsaa-test")
 
 (define (load-ff-file)
@@ -151,9 +150,11 @@
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
 
-;; Get necessary elements to make a site with format which could be read
-;; by other parts of the code. Beware the fixed order of "sigma",
-;; "epsilon" and "charge" in test ff parameter file
+;;;
+;;; Get necessary elements  to make a site with  format which could be
+;;; read  by  other parts  of  the code.  Beware  the  fixed order  of
+;;; "sigma", "epsilon" and "charge" in test ff parameter file
+;;;
 (define (make-new-site site ff-tab whole-file)
   (let ((site-ff (append-ff-site site ff-tab whole-file)))
     (let ((name (site-name site-ff))
@@ -197,8 +198,7 @@
   (let ((sites (molecule-sites solute))
         (ff-tab (molecule-ff-tab solute))
         (whole-file (load-ff-file)))
-    (let ((newsites
-	    (map (lambda (site)
-;;		   (append-ff-site site ff-tab whole-file)) sites)))
-		   (make-new-site site ff-tab whole-file)) sites)))
-      (make-molecule (molecule-name solute) newsites ))))
+    (let ((new-sites
+           (map (lambda (site)
+                  (make-new-site site ff-tab whole-file)) sites)))
+      (make-molecule (molecule-name solute) new-sites))))
