@@ -10,6 +10,8 @@
   (make-molecule
    molecule-name
    molecule-sites
+   molecule-charge
+   molecule-dipole
    find-molecule
    molecule-print/xyz
    make-site
@@ -179,6 +181,29 @@
 (define (site-x site) (first (site-position site)))
 (define (site-y site) (second (site-position site)))
 (define (site-z site) (third (site-position site)))
+
+;;;
+;;; This extracts the  charge field from every site  and sums them up.
+;;; The  molecule needs  to be  in  the "canonical"  format, with  the
+;;; force-field parameters expanded to numbers:
+;;;
+(define (molecule-charge mol)
+  (apply + (map site-charge (molecule-sites mol))))
+
+;;;
+;;; Dipole moment. Same constraints as for molecule-charge:
+;;;
+(define (molecule-dipole mol)
+  (define (dot a b)
+    (apply + (map * a b)))
+  (let* ((sites (molecule-sites mol))
+         (q (map site-charge sites))
+         (x (map site-x sites))
+         (y (map site-y sites))
+         (z (map site-z sites)))
+    (list (dot q x)
+          (dot q y)
+          (dot q z))))
 
 (define (molecule-print/xyz solute)
   (let ((name   (molecule-name solute))
