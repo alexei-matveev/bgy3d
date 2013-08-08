@@ -2389,7 +2389,7 @@ contains
     !   ε = 1 + 3y
     !
     ! Also A is  independent of the site pair  and A -> 2/3 as  y -> 0
-    ! beacause in this regime ε ~ 1 + 3y + 3y².
+    ! because in this regime ε ~ 1 + 3y + 3y².
     !
     ! [CS81] Exact asymptotic form of the site-site direct correlation
     !   function for rigid polar molecules, Peter T. Cummings and
@@ -2556,8 +2556,8 @@ contains
           e(j) = dot_product (v(:, j), v(:, j))
        enddo
 
-       ! The one that has the smalles magnitude was the closest to the
-       ! m-axis:
+       ! The one  that has the  smallest magnitude was the  closest to
+       ! the m-axis:
        loc = minloc (e)
        i = loc(1)
 
