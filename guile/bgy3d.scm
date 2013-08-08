@@ -621,6 +621,12 @@ computes the sum of all vector elements."
               (vec-destroy v)))
           args))
         ;;
+        ("print-molecule"
+         (for-each
+             (lambda (name)
+               (print-molecule/xyz (find-molecule name)))
+           args))
+        ;;
         ("find-molecule"
          (for-each
              (lambda (name)
