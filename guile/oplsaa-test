@@ -1,3 +1,4 @@
+;;; -*- mode: scheme; -*- vim: set syntax=scheme:
 "oplsaa"
 ((  1    F     "Fluoride -CH2-F (UA)"         18.998     2.9400     0.0610   -0.2200)
 (  2    C2    "Fluoride -CH2-F (UA)"         14.027     3.9050     0.1180    0.2200)
