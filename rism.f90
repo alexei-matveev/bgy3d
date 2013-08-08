@@ -537,7 +537,7 @@ module bessel
   ! One of the many equivalent expresssions:
   !
   !               n  / 1  d \ n  sin(x)
-  !   j (x) = (-x)  |  - --- |   ------
+  !   j (x) = (-x)  (  - --- )   ------
   !    n             \ x dx /      x
   !
   ! In particular:
@@ -567,13 +567,12 @@ contains
     real (rk) :: f
     ! *** end of interface ***
 
-    real (rk), parameter :: c0 = 1
-    real (rk), parameter :: c1 = -c0 / 6.0d0
-    real (rk), parameter :: c2 =  c0 / 120.0d0
-    real (rk), parameter :: c3 = -c0 / 5040.0d0
-    real (rk), parameter :: c4 =  c0 / 362880.0d0
-    real (rk), parameter :: c5 = -c0 / 39916800.0d0
-    real (rk), parameter :: c6 =  c0 / 6227020800.0d0 ! > 2^32, use doubles
+    real (rk), parameter :: c1 = -1 / 6.0d0
+    real (rk), parameter :: c2 =  1 / 120.0d0
+    real (rk), parameter :: c3 = -1 / 5040.0d0
+    real (rk), parameter :: c4 =  1 / 362880.0d0
+    real (rk), parameter :: c5 = -1 / 39916800.0d0
+    real (rk), parameter :: c6 =  1 / 6227020800.0d0 ! > 2^32, use doubles
 
     if (abs (x) < 0.5) then
       block
@@ -597,12 +596,11 @@ contains
     real (rk) :: f
     ! *** end of interface ***
 
-   real (rk), parameter :: c0 = 1
-   real (rk), parameter :: c1 = -c0 / 10.0d0
-   real (rk), parameter :: c2 =  c0 / 280.0d0
-   real (rk), parameter :: c3 = -c0 / 15120.0d0
-   real (rk), parameter :: c4 =  c0 / 1330560.0d0
-   real (rk), parameter :: c5 = -c0 / 172972800.0d0
+   real (rk), parameter :: c1 = -1 / 10.0d0
+   real (rk), parameter :: c2 =  1 / 280.0d0
+   real (rk), parameter :: c3 = -1 / 15120.0d0
+   real (rk), parameter :: c4 =  1 / 1330560.0d0
+   real (rk), parameter :: c5 = -1 / 172972800.0d0
 
    if (abs (x) < 0.25) then
       block
@@ -610,7 +608,7 @@ contains
 
          y = x * x
          sum = 1 + y * (c1 + y * (c2 + y * (c3 + y * (c4 + y * c5))))
-         f = x / 3 * sum;
+         f = x / 3 * sum
       end block
    else
       f = (sin (x) / x - cos (x)) / x
