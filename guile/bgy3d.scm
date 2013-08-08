@@ -624,7 +624,20 @@ computes the sum of all vector elements."
         ("find-molecule"
          (for-each
              (lambda (name)
-               (pretty-print (find-molecule name)))
+               (let* ((mol (find-molecule name))
+                      (charge-sum (molecule-charge mol))
+                      (dipole-vec (molecule-dipole mol))
+                      (dipole-mag (sqrt (apply + (map * dipole-vec dipole-vec)))))
+                 ;;
+                 ;; Abuse debugging helper to print commented expressions:
+                 ;;
+                 (pk 'CHARGE-SUM: charge-sum)
+                 (pk 'DIPOLE-VEC: dipole-vec)
+                 (pk 'DIPOLE-MAG: dipole-mag)
+                 ;;
+                 ;; Actual data:
+                 ;;
+                 (pretty-print mol)))
            args))))))
 
 
