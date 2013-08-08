@@ -153,7 +153,7 @@ contains
 
     n = size (f)
 
-    g = 0
+    g = 0.0
     do i = n, 1, -1
        g = g + f(i) * (2 * i - 1)**2 / 4
     enddo
