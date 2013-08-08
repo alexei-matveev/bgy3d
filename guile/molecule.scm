@@ -235,5 +235,12 @@
         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
     (let ((new-sites
            (map (lambda (site)
-                  (make-new-site site ff-tab whole-file)) sites)))
+                  (match site
+                    ((name (x y z) sigma epsilon charge) ; canonical form
+                     ;; -> keep a valid site as is
+                     site)
+                    ((name (x y z))    ; ff is missing
+                     ;; -> append force field params
+                     (make-new-site site ff-tab whole-file))))
+                sites)))
       (make-molecule (molecule-name solute) new-sites))))
