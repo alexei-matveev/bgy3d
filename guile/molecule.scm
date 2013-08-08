@@ -144,8 +144,14 @@
 (define *tinker-ff-parameter-file*
   "guile/oplsaa-test")
 
-(define (load-ff-file)
-  (second (slurp (find-file *tinker-ff-parameter-file*))))
+(define (load-ff-file file)
+  (let* ((contents (slurp (find-file file)))
+         (force-field (assoc "oplsaa" contents))) ; FIXME: literal here
+    ;;
+    ;; Force-field name in CAR  position is irrelevant for the rest of
+    ;; the code, return only the list of entries:
+    ;;
+    (cdr force-field)))
 
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
@@ -197,7 +203,7 @@
 (define (tabulate-ff solute)
   (let ((sites (molecule-sites solute))
         (ff-tab (molecule-ff-tab solute))
-        (whole-file (load-ff-file)))
+        (whole-file (load-ff-file *tinker-ff-parameter-file*)))
     (let ((new-sites
            (map (lambda (site)
                   (make-new-site site ff-tab whole-file)) sites)))

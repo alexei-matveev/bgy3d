@@ -1,6 +1,6 @@
 ;;; -*- mode: scheme; -*- vim: set syntax=scheme:
-"oplsaa"
-((  1    F     "Fluoride -CH2-F (UA)"         18.998     2.9400     0.0610   -0.2200)
+("oplsaa"
+(  1    F     "Fluoride -CH2-F (UA)"         18.998     2.9400     0.0610   -0.2200)
 (  2    C2    "Fluoride -CH2-F (UA)"         14.027     3.9050     0.1180    0.2200)
 (  3    C     "Acetic Acid -COOH (UA)"       12.011     3.7500     0.1050    0.5500)
 (  4    O     "Acetic Acid >C=O (UA)"        15.999     2.9600     0.2100   -0.5000)
