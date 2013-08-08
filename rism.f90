@@ -1512,6 +1512,7 @@ contains
           integer :: i, j, p
           real (rk) :: q(size (solvent))
           real (rk) :: y, fac0, fac1, fac2
+          real (rk) :: qhq(nrad)
           real (rk) :: hk(nrad, n, m)
 
           ! Small-k  behavior   of  qh(k)q  which   is  essential  for
@@ -1568,8 +1569,10 @@ contains
             fac2 = (eps - eps0) / (4 * pi * beta)
           end associate
 
-          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, "e =", epsln (beta, y, fac0)
-          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, "e =", epsln (beta, y, fac1)
+          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, &
+               "e =", epsln (beta, y, fac0)
+          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, &
+               "e =", epsln (beta, y, fac1)
           print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2
 
           ! q = ρ * z:
@@ -1579,11 +1582,13 @@ contains
 
           ! Note  the  extra  EPSILON0INV   factor,  it  seems  to  be
           ! necessary to get the kcal/A³ units right:
+          qhq = 0.0
           x = 0.0
           xx = 0.0
           do i = 1, size (solvent)
              do j = 1, size (solvent)
                 do p = 1, nrad
+                   qhq(p) = qhq(p) + q(i) * h(p, i, j) * q(j) * EPSILON0INV
                    x(p) = x(p) + q(i) * hk(p, i, j) * q(j) * EPSILON0INV
                    xx(p) = xx(p) + q(i) * xd(p, i, j) * q(j) * EPSILON0INV
                 enddo
@@ -1595,17 +1600,26 @@ contains
           x2 = fac2 * k**2
 
           block
-             real (rk) :: a(3)
+             real (rk) :: a(0:2), c(0:2)
              integer :: i, n, npts(3) = [3, 5, 15]
+
+             do n = 0, 2
+                c(n) = moment (n, qhq, dr)
+             enddo
+             print *, "# [(e - 1) / e - 3y] / 4πβ = ", -c(2) / 6, &
+                  "e =", epsln (beta, y, -c(2) / 6)
+             print *, "# first three moments = ", c(:)
 
              do i = 1, size (npts)
                 n = npts(i)
                 if (nrad < n) cycle
 
                 a = polyfit (k(1:n), x(1:n), 2)
-                print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(3) , "e =", epsln (beta, y, a(3))
+                print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(2) , &
+                     "e =", epsln (beta, y, a(2))
                 print *, "# fitted coefficients = ", a(:)
-                print *, "# fitted k-range = ", k(1), "...", k(n), "with", n, "pts"
+                print *, "# fitted k-range = ", k(1), "...", k(n), &
+                     "with", n, "pts"
              enddo
           end block
        end block
@@ -1642,6 +1656,27 @@ contains
         e = 1 / (1 - x)         ! x = (e - 1) / e
       end associate
     end function epsln
+
+
+    pure function moment (n, f, dr) result (m)
+      use fft, only: integrate
+      implicit none
+      integer, intent (in) :: n
+      real (rk), intent (in) :: f(:) ! f(r) on the r-grid
+      real (rk), intent (in) :: dr   ! grid spacing
+      real (rk) :: m
+      ! *** end of interface ***
+
+      integer :: i
+      real (rk) :: r(size (f))
+
+      ! Recompute r(:) from dr:
+      forall (i = 1:size (f))
+         r(i) = (2 * i - 1) * dr / 2
+      end forall
+
+      m = integrate (r**n * f) * dr**3
+    end function moment
 
   end subroutine post_process
 
