@@ -454,13 +454,19 @@ end module snes
 
 
 module foreign
-  use iso_c_binding, only: c_int, c_double, c_char
+  use iso_c_binding, only: c_int, c_double, c_char, c_bool
   implicit none
   private
 
   public :: expm1
   public :: bgy3d_problem_data
   public :: bgy3d_problem_data_print
+
+  public :: bgy3d_getopt_test
+  public :: bgy3d_getopt_int
+  public :: bgy3d_getopt_real
+  public :: bgy3d_getopt_string
+
   public :: verbosity           ! extern int
 
   integer (c_int), bind (c) :: verbosity ! see bgy3d.c
@@ -528,6 +534,46 @@ module foreign
        real (c_double), intent (in), value :: x
        real (c_double) :: y
      end function expm1
+
+     !
+     ! Keep these consistent with bgy3d-getopt.{h,c}:
+     !
+     ! bool bgy3d_getopt_test (const char key[]);
+     ! bool bgy3d_getopt_int (const char key[], int *val);
+     ! bool bgy3d_getopt_real (const char key[], double *val);
+     ! bool bgy3d_getopt_string (const char key[], int len, char val[len]);
+     !
+     function bgy3d_getopt_test (key) result (ok) bind (c)
+       import c_bool, c_char
+       implicit none
+       character (kind=c_char), intent (in) :: key(*) ! 0-terminated
+       logical (c_bool) :: ok
+     end function bgy3d_getopt_test
+
+     function bgy3d_getopt_int (key, val) result (ok) bind (c)
+       import c_bool, c_char, c_int
+       implicit none
+       character (kind=c_char), intent (in) :: key(*) ! 0-terminated
+       integer (c_int), intent (inout) :: val
+       logical (c_bool) :: ok
+     end function bgy3d_getopt_int
+
+     function bgy3d_getopt_real (key, val) result (ok) bind (c)
+       import c_bool, c_char, c_double
+       implicit none
+       character (kind=c_char), intent (in) :: key(*) ! 0-terminated
+       real (c_double), intent (inout) :: val
+       logical (c_bool) :: ok
+     end function bgy3d_getopt_real
+
+     function bgy3d_getopt_string (key, n, val) result (ok) bind (c)
+       import c_bool, c_char, c_int
+       implicit none
+       character (kind=c_char), intent (in) :: key(*) ! 0-terminated
+       integer (c_int), intent (in), value :: n
+       character (kind=c_char), intent (inout) :: val(n) ! 0-terminated or unchanged
+       logical (c_bool) :: ok
+     end function bgy3d_getopt_string
   end interface
 end module foreign
 
