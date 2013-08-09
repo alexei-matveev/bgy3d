@@ -504,8 +504,8 @@
   ("HC" (-2.439 -1.178 -0.89))
   ("HC" (-3.21 0.157 0.0)))
  (("C" 206 206)  ;; "Carboxylic Acid -COOH"
-  ("O" 208 208)  ;; FIXME: the descriptions in datafile
-  ("OH" 207 207) ;; of these two may need to be swapped
+  ("O" 207 207)  ;; "Carboxylic Acid C=O"
+  ("OH" 208 208) ;; "Carboxylic Acid -OH"
   ("CT2" 78 78)  ;; "Alkane -CH2-"
   ("CT3" 77 77)  ;; "Alkane CH3-"
   ("HO" 209 209) ;; "Carboxylic Acid -COOH", original vdw parameters are
