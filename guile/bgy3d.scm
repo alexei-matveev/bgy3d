@@ -359,6 +359,7 @@ computes the sum of all vector elements."
     (lambda             (value #t)      (predicate ,string->number))
     (solvent            (value #t)      (predicate ,find-molecule)) ; a string
     (solute             (value #t)      (predicate ,find-molecule)) ; a string
+    (dielectric         (value #t)      (predicate ,string->number))
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
     (load-guess         (value #f))
