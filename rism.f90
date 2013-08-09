@@ -1164,6 +1164,7 @@ contains
     use fft, only: fourier_many, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site
+    use options, only: getopt
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -1177,13 +1178,26 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
-         v, vk, t, c, wk
+         v, vk, t, c, wk, xk
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
     real (rk) :: k(nrad), dk
 
     integer :: i, m
+
+    real (rk) :: eps        ! zero if not supplied in the command line
+
+    ! FIXME: try  not to  proliferate use of  "environments", function
+    ! behaviour is better controlled via its arguments:
+    if (.not. getopt ("dielectric", eps)) then
+       !
+       ! Make sure it is not used anywhere if it was not supplied. The
+       ! logic is  if eps  /= 0  then do DRISM,  otherwise ---  do the
+       ! usual RISM with whatever dielectric constant comes out of it:
+       !
+       eps = 0.0
+    endif
 
     m = size (sites)
 
@@ -1201,6 +1215,17 @@ contains
 
     ! Rigid-bond correlations on the k-grid:
     wk = omega_fourier (sites, k)
+
+    !
+    ! FIXME: the  dipole correction x(k) is meaningless  if the dipole
+    ! vector is  zero.  Watch for the warning  issued by dipole_axes()
+    ! in such cases:
+    !
+    if (eps /= 0.0) then
+       xk = dipole_correction (beta, rho, eps, sites, k)
+    else
+       xk = 0.0                 ! maybe useful to avoid branches later
+    endif
 
     ! Intitial guess:
     t = 0.0
@@ -1264,10 +1289,19 @@ contains
       c = c - beta * vk
 
       !
-      ! OZ equation, involves "convolutions", take care of the
-      ! normalization here:
+      ! OZ   equation,  involves  convolutions,   take  care   of  the
+      ! normalization here --- this is one of a few places where it is
+      ! assumed that convolution theorem is factor-less:
       !
-      dt = oz_vv_equation_c_t (rho, c, wk)
+      if (eps /= 0.0) then
+         ! This is going  to break for ρ  = 0 as x(k) ~  1/ρ², it will
+         ! also break if dipole density y = 0:
+         dt = oz_vv_equation_c_t (rho, c, wk + rho * xk) + xk
+      else
+         ! The branch is redundand since x(k)  = 0 in this case. It is
+         ! here only not to waste CPU time:
+         dt = oz_vv_equation_c_t (rho, c, wk)
+      endif
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
