@@ -483,10 +483,10 @@
   ("HC" (-0.699 -0.934 0.609))
   ("OH" (0.558 0.42 -0.278))
   ("HO" (0.716 1.404 0.137)))
- (("CT" 96 96) ;; "Alcohol CH3OH & RCH2OH"
-  ("HC" 95 95) ;;"Methanol CH3-"
-  ("OH" 93 93) ;;"Alcohol -OH"
-  ("HO" 94 94))) ;;"Alcohol -OH", vdw parameters are
+ (("CT" 96) ;; "Alcohol CH3OH & RCH2OH"
+  ("HC" 95) ;;"Methanol CH3-"
+  ("OH" 93) ;;"Alcohol -OH"
+  ("HO" 94))) ;;"Alcohol -OH", vdw parameters are
                  ;; 0.0 in original database
 ("butanoic acid, oplsaa"
  (("C" (1.422 -0.017 0.0))
@@ -503,14 +503,14 @@
   ("HC" (-2.439 -1.178 0.89))
   ("HC" (-2.439 -1.178 -0.89))
   ("HC" (-3.21 0.157 0.0)))
- (("C" 206 206)  ;; "Carboxylic Acid -COOH"
-  ("O" 207 207)  ;; "Carboxylic Acid C=O"
-  ("OH" 208 208) ;; "Carboxylic Acid -OH"
-  ("CT2" 78 78)  ;; "Alkane -CH2-"
-  ("CT3" 77 77)  ;; "Alkane CH3-"
-  ("HO" 209 209) ;; "Carboxylic Acid -COOH", original vdw parameters are
+ (("C" 206)  ;; "Carboxylic Acid -COOH"
+  ("O" 207)  ;; "Carboxylic Acid C=O"
+  ("OH" 208) ;; "Carboxylic Acid -OH"
+  ("CT2" 78)  ;; "Alkane -CH2-"
+  ("CT3" 77)  ;; "Alkane CH3-"
+  ("HO" 209) ;; "Carboxylic Acid -COOH", original vdw parameters are
                  ;; 0.0
-  ("HC" 82 82))) ;; "Alkane H-C"
+  ("HC" 82))) ;; "Alkane H-C"
 
 ("hexane, oplsaa"
  (("CT3" (1.709 -2.812 0.0))
@@ -533,6 +533,6 @@
   ("HC" (-0.696 3.204 -0.89))
   ("HC" (-0.696 3.204 0.89))
   ("HC" (-2.236 3.19 0.0)))
- (("CT3" 77 77) ;; "Alkane CH3-"
-  ("CT2" 78 78) ;; "Alkane -CH2-"
-  ("HC" 82 82))) ;; "Alkane H-C"
+ (("CT3"  77) ;; "Alkane CH3-"
+  ("CT2"  78) ;; "Alkane -CH2-"
+  ("HC"  82))) ;; "Alkane H-C"
