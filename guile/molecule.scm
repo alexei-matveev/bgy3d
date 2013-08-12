@@ -115,33 +115,6 @@
     (_ '())))                  ; otherwise return an empty list
 
 ;;;
-;;; This will return the ff index ("CT3" 77 77)
-;;;
-(define (ff-tab-find-site site ff-tab)
-  (let ((site-name (site-name site))) ; site-name redefined in this scope!
-    (or (assoc site-name ff-tab)
-        (error "Not in the table:" site-name))))
-
-;;;
-;;; This will  return a  list from wholefile  matching the  given atom
-;;; type (78 13 CT "Alkane -CH2-" 6 12.011 4)
-;;;
-(define (find-ff atm-idx whole-file)
-  (or (assoc atm-idx whole-file)
-      (error "Not in the file:" atm-idx)))
-
-;;;
-;;; For  a  single  site,   find  its  relevant  ff  information  from
-;;; whole-file and bind them together
-;;;
-(define (append-ff-site site ff-tab whole-file)
-  (let* ((ff-idx (ff-tab-find-site site ff-tab))
-	 (atm-idx (second ff-idx))
-	 (ff-info (find-ff atm-idx whole-file)))
-    ;; Bind sites with ff information
-    (append site ff-info)))
-
-;;;
 ;;; Example to load the ff database as a list, which could be obtained
 ;;; by tinker-test module.  This is  for test, ff parameters appear in
 ;;; each line
@@ -162,18 +135,16 @@
   (list name position sigma epsilon charge))
 
 ;;;
-;;; Get necessary elements  to make a site with  format which could be
-;;; read  by  other parts  of  the code.  Beware  the  fixed order  of
-;;; "sigma", "epsilon" and "charge" in test ff parameter file
+;;; Get particular column from a data row as stored in the force-field
+;;; data file.   Beware of the  fixed order of "sigma",  "epsilon" and
+;;; "charge" parameters:
 ;;;
-(define (make-new-site site ff-tab whole-file)
-  (let ((site-ff (append-ff-site site ff-tab whole-file)))
-    (let ((name (site-name site-ff))
-	  (position (site-position site-ff))
-	  (sigma (seventh site-ff))
-	  (epsilon (eighth site-ff))
-	  (charge (ninth site-ff)))
-      (make-site name position sigma epsilon charge))))
+;;; (82 HC "Alkane H-C" 1.008 2.5 0.03 0.06)
+;;;
+(define (ff-symbol row) (second row))
+(define (ff-sigma row) (fifth row))
+(define (ff-epsilon row) (sixth row))
+(define (ff-charge row) (seventh row))
 
 (define (site-name site) (first site))
 (define (site-position site) (second site))
@@ -225,21 +196,49 @@
 ;; (exit 0)
 
 ;;;
-;;; This will be called from  outside, append each site in solute with
-;;; force field information
+;;; This will be called from outside, augment each site in solute with
+;;; force field information (if missing):
 ;;;
 (define (tabulate-ff solute)
-  (let ((sites (molecule-sites solute))
-        (ff-tab (molecule-ff-tab solute))
+  (let ((ff-tab (molecule-ff-tab solute))
         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
+    ;;
+    ;; This  will derive the  atom type 77  from a name "CT3"  using a
+    ;; list of entries (("CT3" 77) ...)
+    ;;
+    (define (ff-type name)
+      (second (or (assoc name ff-tab)
+                  (error "Not in the table:" name))))
+    ;;
+    ;; This  will return  a row from  the parameter file  matching the
+    ;; given atom type:
+    ;;
+    (define (ff-row type)
+      (or (assoc type whole-file)
+          (error "Not in the file:" type)))
+
+    ;;
+    ;; Returns  a list of  non-bonding force field  parameters: (sigma
+    ;; epsilon charge)
+    ;;
+    (define (non-bonding name)
+      (let ((row (ff-row (ff-type name))))
+        ;; (if (not (equal? name (symbol->string (ff-symbol row))))
+        ;;     (pk "WARNING: do not match" name row))
+        (list (ff-sigma row)
+              (ff-epsilon row)
+              (ff-charge row))))
+    ;;
+    ;; Build new sites and use them to construct a new molecule:
+    ;;
     (let ((new-sites
            (map (lambda (site)
                   (match site
-                    ((name (x y z) sigma epsilon charge) ; canonical form
+                    ((name position sigma epsilon charge) ; canonical form
                      ;; -> keep a valid site as is
                      site)
-                    ((name (x y z))    ; ff is missing
+                    ((name position)   ; ff is missing
                      ;; -> append force field params
-                     (make-new-site site ff-tab whole-file))))
-                sites)))
+                     (apply make-site name position (non-bonding name)))))
+                (molecule-sites solute))))
       (make-molecule (molecule-name solute) new-sites))))
