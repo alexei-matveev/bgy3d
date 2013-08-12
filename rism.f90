@@ -955,6 +955,9 @@ module rism
   real (rk), parameter :: ANGSTROM = 1
   real (rk), parameter :: KCAL = 1
 
+  ! ITC calorie here, see also bgy3d.h:
+  real (rk), parameter :: KJOULE = KCAL / 4.1868d0 ! only for output
+
   !
   ! The interaction energy of two unit charges separated by 1 A is
   !                  -1
@@ -1539,7 +1542,8 @@ contains
 
           print *, "# Chemical potentials, default is marked with *:"
           do i = 1, size (methods)
-             print *, "# MU =", mu(i), "kcal (", names(i), ")", merge ("*", " ", method == methods(i))
+             print *, "# MU =", mu(i) / KCAL, "kcal =", mu(i) / KJOULE, "kJ", &
+                  " (", names(i), ")", merge ("*", " ", method == methods(i))
           enddo
        end block
 
