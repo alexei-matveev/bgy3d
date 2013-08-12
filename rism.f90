@@ -948,11 +948,12 @@ module rism
   real (rk), parameter :: pi = 4 * atan (1.0_rk)
 
   !
-  ! Working  units  *are* angstroms.   Still  when  you  wish to  make
-  ! dimensions explicit  (and you should) use combinations  like 0.5 *
-  ! angstrom, or 1.2 * angstrom**(-1), etc:
+  ! Working units *are*  angstroms and kcals.  Still when  you wish to
+  ! make dimensions  explicit (and  you should) use  combinations like
+  ! 0.5 * angstrom, or 1.2 * angstrom**(-1), or 332 kcal * angstrom:
   !
-  real (rk), parameter :: angstrom = 1
+  real (rk), parameter :: ANGSTROM = 1
+  real (rk), parameter :: KCAL = 1
 
   !
   ! The interaction energy of two unit charges separated by 1 A is
@@ -977,7 +978,7 @@ module rism
   ! Again, the code appears to use the IT-calorie to define 1/ε₀. Keep
   ! this in sync with bgy3d.h:
   !
-  real (rk), parameter :: EPSILON0INV = 331.84164d0
+  real (rk), parameter :: EPSILON0INV = 331.84164d0 * KCAL * ANGSTROM
 
   !
   ! Inverse range parameter for  separation of the Coulomb into short-
@@ -989,7 +990,7 @@ module rism
   ! without short range Coulomb and the charges of the order ±1.
   !
 
-  real (rk), parameter :: ALPHA = 1.2d0 / angstrom
+  real (rk), parameter :: ALPHA = 1.2d0 * ANGSTROM**(-1)
 
 contains
 
@@ -2802,7 +2803,7 @@ contains
     real (rk) :: xk(size (k), size (sites), size (sites)) ! (nrad, m, m)
     ! *** end of inteface ***
 
-    real (rk), parameter :: s = 0.5 * angstrom ! Ref. [KH00a]
+    real (rk), parameter :: s = 0.5 * ANGSTROM ! Ref. [KH00a]
     integer :: i, j
     real (rk) :: x(3, size (sites))
     real (rk) :: f(size (k), size (sites))
