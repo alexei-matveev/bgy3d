@@ -114,37 +114,8 @@
     ((name sites table) table) ; return the third entry, if there is such
     (_ '())))                  ; otherwise return an empty list
 
-;;;
-;;; Example to load the ff database as a list, which could be obtained
-;;; by tinker-test module.  This is  for test, ff parameters appear in
-;;; each line
-;;;
-(define *tinker-ff-parameter-file*
-  "guile/oplsaa-test")
-
-(define (load-ff-file file)
-  (let* ((contents (slurp (find-file file)))
-         (force-field (assoc "oplsaa" contents))) ; FIXME: literal here
-    ;;
-    ;; Force-field name in CAR  position is irrelevant for the rest of
-    ;; the code, return only the list of entries:
-    ;;
-    (cdr force-field)))
-
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
-
-;;;
-;;; Get particular column from a data row as stored in the force-field
-;;; data file.   Beware of the  fixed order of "sigma",  "epsilon" and
-;;; "charge" parameters:
-;;;
-;;; (82 HC "Alkane H-C" 1.008 2.5 0.03 0.06)
-;;;
-(define (ff-symbol row) (second row))
-(define (ff-sigma row) (fifth row))
-(define (ff-epsilon row) (sixth row))
-(define (ff-charge row) (seventh row))
 
 (define (site-name site) (first site))
 (define (site-position site) (second site))
@@ -194,6 +165,35 @@
 
 ;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
+
+;;;
+;;; Example to load the ff database as a list, which could be obtained
+;;; by tinker-test module.  This is  for test, ff parameters appear in
+;;; each line
+;;;
+(define *tinker-ff-parameter-file*
+  "guile/oplsaa-test")
+
+(define (load-ff-file file)
+  (let* ((contents (slurp (find-file file)))
+         (force-field (assoc "oplsaa" contents))) ; FIXME: literal here
+    ;;
+    ;; Force-field name in CAR  position is irrelevant for the rest of
+    ;; the code, return only the list of entries:
+    ;;
+    (cdr force-field)))
+
+;;;
+;;; Get particular column from a data row as stored in the force-field
+;;; data file.   Beware of the  fixed order of "sigma",  "epsilon" and
+;;; "charge" parameters:
+;;;
+;;; (82 HC "Alkane H-C" 1.008 2.5 0.03 0.06)
+;;;
+(define (ff-symbol row) (second row))
+(define (ff-sigma row) (fifth row))
+(define (ff-epsilon row) (sixth row))
+(define (ff-charge row) (seventh row))
 
 ;;;
 ;;; This will be called from outside, augment each site in solute with
