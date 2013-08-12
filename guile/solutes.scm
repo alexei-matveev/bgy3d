@@ -16,23 +16,48 @@
 ;;; Atom        x (A)   y (A)   z (A)   ε (kJ/mol)   σ (A)    q (e)
 ;;; ----------------------------------------------------------------
 ;;; K+                                  0.3640       3.14265   1
-;;; Cl-                                 0.0422       4.04468  -1
+;;; Cl-                                 0.0422*      4.04468  -1
 ;;; O(water)    0.000   0.000   0.000   0.6359       3.15080  -0.834
 ;;; H(water) +/-0.757   0.000   0.586   0.1921       0.40000   0.417
 ;;;
-;;; Force  field  parameters  for  water is  a  TIP3P  parametrization
-;;; according to  Ref.  [1]  with 0.4 A  hydrogens (see  "water" entry
-;;; below).  In Ref. [1]  the authors used the "logarithmically spaced
-;;; grid ranging from 0.0059 to 164.02 A", T = 298.15 K, ρ = 0.0333295
-;;; A^-3 and the dielectric constant 78.4 for DRISM equations.
+;;; *) ε probably wrong, see comments below.
+;;;
+;;; Force field for water is a TIP3P parametrization according to Ref.
+;;; [1] with 0.4  A hydrogens (see "water" entry  below).  In Ref. [1]
+;;; the  authors used  the "logarithmically  spaced grid  ranging from
+;;; 0.0059 to  164.02 A",  T = 298.15  K, ρ  = 0.0333295 A^-3  and the
+;;; dielectric constant 78.4 for DRISM equations.
+;;;
+;;; Note that  the Cl- parameters appear  wrong as quoted  in Ref. [1]
+;;; and the table above. The Ref. [1] redirects to [2] which says
+;;;
+;;;   "Lennard-Jones parameters of the ions were ε = 0.087/0.15 kcal
+;;;    mol-1 and Rmin/2 = 1.76375/2.27 A for K+/Cl- ..."
+;;;
+;;; From which I derive the following table:
+;;;
+;;;        σ (A)         ε (kJ/mol)
+;;; ----------------------------------
+;;; K+    3.14265      0.3643  0.3640*
+;;; Cl-   4.04468      0.6280  0.6276*
+;;;
+;;; *) Using thermochemical kcal of 4.184 kJ.
 ;;;
 ;;; [1] Treatment of charged solutes in three-dimensional integral
-;;;     equation theory Thomas Kloss and Stefan M. Kast
+;;;     equation theory, Thomas Kloss and Stefan M. Kast
 ;;;     J. Chem. Phys. 128, 134505 (2008)
 ;;;     http://dx.doi.org/10.1063/1.2841967
 ;;;
-("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kJ 0.3640) 1.0)))
-("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kJ 0.0422) -1.0)))
+;;; [2] Molecular Dynamics Simulation of the Cytosolic Mouth in
+;;;     Kcv-Type Potassium Channels, Sascha Tayefeh, Thomas Kloss,
+;;;     Gerhard Thiel, Brigitte Hertel, Anna Moroni, and Stefan
+;;;     M. Kast, Biochemistry, 2007, 46 (16), pp 4826–4839,
+;;;     http://dx.doi.org/10.1021/bi602468r
+;;;
+;; ("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kJ 0.3640) 1.0)))
+;; ("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kJ 0.0422) -1.0))) ; ε wrong?
+("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kcal 0.087) 1.0)))
+("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kcal 0.15) -1.0)))
 
 ;;;
 ;;; Almost the same as "water":
