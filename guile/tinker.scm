@@ -295,9 +295,32 @@
   (string-append *tinker-parameter-dir*
                  (symbol->string force-field)
                  ".prm"))
+
+
 ;;;
-;;; Is used to test ideas:
+;;; Reads and parses a file to return a list of rows:
 ;;;
 (define (tinker-table force-field)
   (make-table (tinker-slurp (tinker-parameter-file force-field))))
+
+
+;;;
+;;; Let-over-lambda  here.   Given a  function  (f  x)  The result  of
+;;; (memoize f)  is a  function (f' x)  == (f  x) that will  cache all
+;;; results.  FIXME: make it work for arbitrary number of arguments.
+;;;
+(define (memoize f)
+  (let ((*cache* '()))                  ; empty cache
+    (lambda (x)
+      (cdr (or (assoc x *cache*)        ; first check the cache
+               (let* ((y (f x))         ; otherwise invoke f
+                      (p (cons x y)))   ; make dictionary pair
+                 (set! *cache* (cons p *cache*)) ; cache new pair
+                 p))))))                         ; and return it too
+
+;;;
+;;; The  new  tinker-table should  cache  the  results (hopefully  the
+;;; force-field is not going to change between two calls):
+;;;
+(set! tinker-table (memoize tinker-table))
 
