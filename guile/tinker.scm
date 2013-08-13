@@ -183,16 +183,18 @@
             (type sigma epsilon)
             (type charge))
            ;; ->
-           (list type
-                 class
-                 symbol
-                 descr
-                 atnum
-                 weight
-                 ligand
-                 sigma
-                 epsilon
-                 charge))
+           (list
+            type                        ; 1
+            symbol                      ; 2
+            descr                       ; 3
+            weight                      ; 4
+            sigma                       ; 5
+            epsilon                     ; 6
+            charge                      ; 7
+            atnum                       ; 8
+            class                       ; 9
+            ligand                      ; 10
+            ))
           ;;
           ;; Case 2. Type but no class:
           ;;
@@ -200,16 +202,18 @@
             (type sigma epsilon)
             (type charge))
            ;; ->
-           (list type
-                 type                   ; FIXME: type == class?
-                 symbol
-                 descr
-                 atnum
-                 weight
-                 ligand
-                 sigma
-                 epsilon
-                 charge)))
+           (list
+            type                        ; 1
+            symbol                      ; 2
+            descr                       ; 3
+            weight                      ; 4
+            sigma                       ; 5
+            epsilon                     ; 6
+            charge                      ; 7
+            atnum                       ; 8
+            type                        ; 9 FIXME: type == class?
+            ligand                      ; 10
+            )))
          atm-tab
          vdw-tab
          chg-tab)))
