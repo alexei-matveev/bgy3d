@@ -6,6 +6,7 @@
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (ice-9 match)            ; match-lambda
+  #:use-module (guile tinker)           ; tinker-table
   #:export
   (make-molecule
    molecule-name
@@ -188,7 +189,17 @@
 ;;; data file.   Beware of the  fixed order of "sigma",  "epsilon" and
 ;;; "charge" parameters:
 ;;;
-;;; (82 HC "Alkane H-C" 1.008 2.5 0.03 0.06)
+;;;   (82 HC "Alkane H-C" 1.008 2.5 0.03 0.06)
+;;;
+;;; or the longer version
+;;;
+;;;   (157 CT "Benzyl Alcohol -CH2OH" 12.011 3.5 0.066 0.2 6 13 4)
+;;;
+;;; with each field having the following meaning:
+;;;
+;;;   (type symbol descr weight sigma epsilon charge atnum class ligand)
+;;;
+;;; See e.g. ./oplsaa-test or ./tinker.scm for details.
 ;;;
 (define (ff-symbol row) (second row))
 (define (ff-sigma row) (fifth row))
@@ -201,6 +212,7 @@
 ;;;
 (define (tabulate-ff solute)
   (let ((ff-tab (molecule-ff-tab solute))
+        ;; (whole-file (tinker-table 'oplsaa))
         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
     ;;
     ;; This  will derive the  atom type 77  from a name "CT3"  using a
