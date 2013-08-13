@@ -8,7 +8,7 @@
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:export
   (tinker-slurp
-   tinker-test))
+   tinker-table))
 
 ;;;
 ;;; Reads a file and returns a list of lines:
@@ -183,16 +183,16 @@
             (type sigma epsilon)
             (type charge))
            ;; ->
-           `((type . ,type)
-             (class . ,class)
-             (symbol . ,symbol)
-             (descr . ,descr)
-             (atnum . ,atnum)
-             (weight . ,weight)
-             (ligand . ,ligand)
-             (sigma . ,sigma)
-             (epsilon . ,epsilon)
-             (charge . ,charge)))
+           (list type
+                 class
+                 symbol
+                 descr
+                 atnum
+                 weight
+                 ligand
+                 sigma
+                 epsilon
+                 charge))
           ;;
           ;; Case 2. Type but no class:
           ;;
@@ -200,16 +200,16 @@
             (type sigma epsilon)
             (type charge))
            ;; ->
-           `((type . ,type)
-             (class . ,type)            ; FIXME: type == class?
-             (symbol . ,symbol)
-             (descr . ,descr)
-             (atnum . ,atnum)
-             (weight . ,weight)
-             (ligand . ,ligand)
-             (sigma . ,sigma)
-             (epsilon . ,epsilon)
-             (charge . ,charge))))
+           (list type
+                 type                   ; FIXME: type == class?
+                 symbol
+                 descr
+                 atnum
+                 weight
+                 ligand
+                 sigma
+                 epsilon
+                 charge)))
          atm-tab
          vdw-tab
          chg-tab)))
@@ -294,18 +294,6 @@
 ;;;
 ;;; Is used to test ideas:
 ;;;
-(define (tinker-test)
-  (for-each
-   (lambda (force-field)
-     ;; (pk force-field)
-     (let ((input-file (tinker-parameter-file force-field))
-           (output-file (string-append (symbol->string force-field) ".scm")))
-       (with-output-to-file output-file
-         (lambda ()
-           (pretty-print input-file)
-           (let ((contents (tinker-slurp input-file)))
-             ;; (verify-class/symbol-equivalence (filter-contents 'atom contents))
-             (pretty-print (make-table contents)))))))
-   *force-fields*
-   ;; (list 'oplsbb)
-   ))
+(define (tinker-table force-field)
+  (make-table (tinker-slurp (tinker-parameter-file force-field))))
+
