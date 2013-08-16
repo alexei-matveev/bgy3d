@@ -709,3 +709,66 @@ OPLS-AA   MSPC-E     -KH
     E. L. Ratkova, G. N. Chuev, V. P. Sergiievskyi and M. V. Fedorov,
     J. Phys. Chem. B, 2010, 114 (37), pp 12068-12079,
     http://dx.doi.org/10.1021/jp103955r
+
+
+Influence of modified hydrogen parameter
+----------------------------------------
+
+In our regression test, solute "methanol" and "butanoic acid" are
+directly taken from Jager's code. When examining the force field
+parameters listed in these two molecules, we found that most of them are
+from OPLSAA force field with the exception that vdw interaction
+parameters are modified for hydrogen atom on "Alcohol -OH" and
+"Carboxylate acid -COOH":
+
+Site                    sigma(A)    epsilon(kcal/mol)
+---------------------  ---------   ------------------
+Carboxylic Acid -COOH     0.0             0.0
+modified                  3.4             0.046
+Alcohol -OH               0.0             0.0
+modified                  0.4             0.04
+-----------------------------------------------------
+
+These modifications bring different changes in 1D- and 3D-RISM
+calculations(units in kcal/mol):
+
+Solute           KH1      KH1^*^      KH3   KH3^*^
+------------  ------   ---------   ------  -------
+CH~3~OH        2.351   -1045.833    0.997    0.973
+C~3~H~7~COOH  27.818   -1206.856   17.466   11.195
+--------------------------------------------------
+
+^*^Hydrogen vdw parameter modified
+
+
+Alcohols, carboxylate acids and aldehydes in water
+--------------------------------------------------
+
+1D and 3D-RISM results of neutral solutes, molecule coordinates are from
+NIST database. As already seen in last section, the zero vdw parameters
+of hydrogen atom in OPLSAA result in unexpected values in 1D model.
+
+Calculation parameter settting is the same as previous sections, energy
+units is "kcal/mol"
+
+Solute                   KH1       (GF)      KH3    (GF)
+-----------------  ---------  ---------  -------  ------
+Alcohols
+CH~3~OH                4.166     -5.177    2.744  -0.740
+C~2~H~5~OH          -992.651  -1012.942    6.225   1.504
+C~3~H~7~OH          -974.739   -999.246   11.409   5.574
+C~4~H~9~OH          -982.240  -1012.521   14.829   7.915
+C~5~H~11~OH         -974.985  -1011.930   19.347  11.221
+Carboxylate acids
+HCOOH              -1168.869  -1183.655    3.535   0.013
+CH~3~COOH          -1151.262  -1172.668    7.305   2.566
+C~2~H~5~COOH       -1160.520  -1189.519    9.851   4.127
+C~3~H~7~COOH       -1130.024  -1166.344   15.869   8.867
+C~4~H~9~COOH       -1124.953  -1169.595   20.294  12.107
+Aldehydes
+CH~2~O                 5.961     -1.395    4.145   1.030
+C~2~H~4~O             13.080      0.175    8.150   3.778
+C~3~H~6~O             20.547      1.240   12.411   6.882
+C~4~H~8~O             27.879      1.428   16.463   9.842
+C~5~H~10~O            34.337      0.864   20.642  12.837
+--------------------------------------------------------
