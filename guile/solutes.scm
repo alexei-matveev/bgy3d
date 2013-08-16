@@ -752,11 +752,12 @@
 ;;
 ;; 3. Aldehydes:
 ;;
+;; original molecule is translated to make C atom centeral
 ("formaldehyde, nist"
- (("O"  (23.4763  41.2379  -0.0003))
-  ("C"  (23.4767  40.0016  0.0003))
-  ("HCO"  (22.6109  39.5014  0.0011))
-  ("HCO"  (24.3429  39.5019  0.0001)))
+ (("O"  (-0.000 1.236 -0.001))
+  ("C"  (0.000 0.000 0.000))
+  ("HCO"  (-0.866 -0.500 0.001))
+  ("HCO"  (0.866 -0.500 -0.000)))
  (("C" 216)     ;; "Aldehyde/Acyl Halide C=O"
   ("O" 217)     ;; "Aldehyde/Acyl Halide C=O"
   ("HCO" 218))) ;; "Aldehyde/Formamide HCO-"
