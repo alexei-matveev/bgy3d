@@ -91,7 +91,7 @@ ProblemData bgy3d_problem_data (void)
   bgy3d_getopt_int ("--max-iter", &PD.max_iter);
 
   /* Norm tolerance for convergence test: */
-  PD.norm_tol = 1.0e-2;
+  PD.norm_tol = 1.0e-12;
   bgy3d_getopt_real ("--norm-tol", &PD.norm_tol);
 
   /* Closure is only used in  HNC-like methods. Supply default for the
