@@ -92,7 +92,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
     /* Only max-iter  changed. Sometimes it  is convenient to  let the
        solver do just one, or just a few iterations: */
     SNESGetTolerances (snes, &atol, &rtol, &stol, &max_it, &max_funcs);
-    SNESSetTolerances (snes, atol, rtol, stol, PD->max_iter, max_funcs);
+    SNESSetTolerances (snes, atol, PD->norm_tol, stol, PD->max_iter, max_funcs);
     // SNESSetTolerances (snes, 5.0e-2, 1.0e-5, 1.0e-4 , 50, 10000);
   }
 
