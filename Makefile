@@ -17,7 +17,12 @@ include $(PETSC_DIR)/bmake/common/variables # on Lenny
 #
 # Finally, execute
 #
+#   make clean
 #   make -s
+#
+# FIXME: Note that generating  dependencies for Fortran files may fail
+# in a parallel  build (make -j).  A serial  "make clean" as suggested
+# should be sufficient to initally populate *.d files.
 #
 all: bgy3d
 
@@ -107,8 +112,28 @@ ifeq ($(WITH_GUILE),1)
 	USERFLAGS += -DWITH_GUILE
 endif
 
+
+#
+# There is a chicken and  egg problem here.  To make GFortran generate
+# dependencies for Fortran files  the compiler expects all *.mod files
+# the source depends on to be present. The order of the files here was
+# manually crafted so that  a *serial* make will generate dependencies
+# of Fortran modules in  the proper sequence simultaneousely producing
+# the *.mod  files. FIXME:  sill fails for  parallel build as  in make
+# -j4.
+#
 ifeq ($(WITH_FORTRAN),1)
-	f-objs += rism.o lebed/lebed.o lebed/Lebedev-Laikov.o
+	f-objs += \
+		rism.o \
+		snes.o \
+		bessel.o \
+		fft.o \
+		linalg.o \
+		options.o \
+		foreign.o \
+		kinds.o \
+		lebed/lebed.o \
+		lebed/Lebedev-Laikov.o
 	USERFLAGS += -DWITH_FORTRAN
 endif
 
@@ -133,7 +158,7 @@ test-all:
 	$(MAKE) -C ./test
 
 clean:
-	rm -f *.a *.so *.o *.bin *.info
+	rm -f *.a *.so *.o *.mod *.bin *.info
 	rm -f bgy3d
 
 distclean:
@@ -154,11 +179,12 @@ include $(libbgy3d.a:.o=.d)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -M -MF $(*).d -MP $(<)
 
 #
-# FIXME:  this effectively  ignores the  dependencies  between fortran
-# sources:
+# FIXME: running the command also  produces the *.mod file, but no *.o
+# file.  Also GFortran expects the *.mod files of the prerequisites to
+# exist when parsing the source:
 #
 %.d: %.f90
-	touch $(@)
+	$(FC) -cpp -M -MF $(@) $(<)
 
 %.d: %.F
 	touch $(@)
@@ -167,7 +193,7 @@ include $(libbgy3d.a:.o=.d)
 %.o: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(INCDIRS) -o $(*).o -c $(<)
 
-%.o: %.f90
+%.o %.mod: %.f90
 	$(FC) $(FFLAGS) -o $(*).o -c $(<)
 
 # node capital D here, this rule has no effect:
