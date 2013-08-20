@@ -1218,6 +1218,8 @@ contains
     integer :: i, m
 
     real (rk) :: eps        ! zero if not supplied in the command line
+    real (rk) :: A          ! Cummings & Stell factor [CS81]
+
 
     ! FIXME: try  not to  proliferate use of  "environments", function
     ! behaviour is better controlled via its arguments:
@@ -1229,6 +1231,27 @@ contains
        !
        eps = 0.0
     endif
+
+    ! Set  Cummings &  Stell  semi-empiric scaling  factor  A for  the
+    ! long-range  site-site correlation.   This  conflicts with  DRISM
+    ! approach.  FIXME: there is  currently no input control to switch
+    ! to this method (that is why the hardwired no-op branch choice):
+    if (.false.) then
+       block
+          real (rk) :: y
+
+          y = dipole_density (beta=beta, rho=rho, sites=sites)
+
+          ! FIXME: this factor  is infinite when y ->  0 (e.g. zero
+          ! dipole) while keeping the target ε - 1 finite:
+          A = dipole_factor (e=eps, y=y)
+          print *, "# Scaling the long-range asymptotics by A=", A, "for e=", eps
+       end block
+    else
+       ! A = 1 has no effect:
+       A = 1.0
+    endif
+
 
     m = size (sites)
 
@@ -1290,7 +1313,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v, t)
+    call post_process (method, beta, rho, sites, sites, dr, dk, v, t, A=A, eps=eps)
 
   contains
 
@@ -1317,7 +1340,11 @@ contains
       !   C := C  - βV
       !         S     L
       !
-      c = c - beta * vk
+      ! For dipole solvents Cummings and Stell implied that an overall
+      ! scaling  factor A  in  the long  range  expression for  direct
+      ! correlation is apropriate [CS81]:
+      !
+      c = c - (beta * A) * vk
 
       !
       ! OZ   equation,  involves  convolutions,   take  care   of  the
@@ -1344,7 +1371,9 @@ contains
       !   T  := T - βV
       !    S          L
       !
-      dt = dt - beta * vk
+      ! The factor A is due to Cummings and Stell.
+      !
+      dt = dt - (beta * A) * vk
 
       ! Inverse FT via DST:
       dt = fourier_many (dt) * (dk**3 / FT_BW)
@@ -1411,7 +1440,7 @@ contains
     call snes_default (iterate_t, t)
 
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t)
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, A=1.0d0, eps=0.0d0)
 
   contains
 
@@ -1468,7 +1497,7 @@ contains
   end subroutine rism_uv
 
 
-  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t)
+  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, A, eps)
     !
     ! Prints some results.
     !
@@ -1485,10 +1514,15 @@ contains
     real (rk), intent (in) :: dr, dk       ! grid steps
     real (rk), intent (in) :: v(:, :, :)   ! (nrad, n, m)
     real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
+    real (rk), intent (in) :: A            ! long-range scaling factor
+    real (rk), value :: eps     ! requested dielectric constant, or 0
     ! *** end of interface ***
 
-    real (rk), parameter :: eps = 78.4d0
     integer :: nrad, n, m
+
+    ! FIXME: to make debug  output somewhat meaningfull for plain RISM
+    ! (not DRISM) calculations use a real eps:
+    if (eps == 0.0) eps = 78.4d0 ! has value attribute
 
     nrad = size (t, 1)          ! number of radial point
     n = size (t, 2)             ! number of solute sites
@@ -1546,9 +1580,10 @@ contains
        h = c + t
        g = 1 + h
 
-       ! Real-space rep of the long-range correlation:
+       ! Real-space rep of the  long-range correlation. Note the extra
+       ! scaling factor A:
        forall (p = 1:nrad, i = 1:n, j = 1:m)
-          cl(p, i, j) = -beta * solute(i) % charge * solvent(j) % charge &
+          cl(p, i, j) = - (beta * A) * solute(i) % charge * solvent(j) % charge &
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
