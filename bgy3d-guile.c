@@ -443,6 +443,15 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
 }
 
 
+/* Desctructively updates Vec */
+static SCM guile_vec_shift_x (SCM vec, SCM shift)
+{
+  VecShift (to_vec (vec), scm_to_double (shift));
+
+  return vec;
+}
+
+
 static SCM guile_vec_dot (SCM x, SCM y)
 {
   return scm_from_double (vec_dot (to_vec (x), to_vec (y)));
@@ -523,6 +532,21 @@ guile_rism_rdf (SCM state, SCM g, SCM center, SCM radial_mesh, SCM angular_order
   rism_rdf (to_state (state), to_vec (g), a, n, r, m, rdf);
 
   return from_array (n, rdf);
+}
+
+
+/* (vec-moments domain vec) */
+static SCM
+guile_vec_moments (SCM state, SCM g)
+{
+  real m0, m1[3], m2[3][3];
+
+  /* Does the real work: */
+  bgy3d_moments (to_state (state), to_vec (g), &m0, m1, m2);
+
+  return scm_list_3 (scm_from_double (m0),
+                     from_array (3, m1),
+                     from_array2 (3, 3, m2));
 }
 
 
@@ -776,6 +800,8 @@ static void guile_init_vec_type (void)
   EXPORT ("vec-fft-interp", 3, 0, 0, guile_vec_fft_interp);
   EXPORT ("vec-map1", 2, 0, 0, guile_vec_map1);
   EXPORT ("vec-map2", 3, 0, 0, guile_vec_map2);
+  EXPORT ("vec-moments", 2, 0, 0, guile_vec_moments);
+  EXPORT ("vec-shift!", 2, 0, 0, guile_vec_shift_x);
 
   EXPORT ("rism-rdf", 5, 0, 0, guile_rism_rdf);
   EXPORT ("genpts", 1, 0, 0, guile_genpts);

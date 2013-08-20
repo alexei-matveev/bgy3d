@@ -26,6 +26,8 @@
    vec-fft-interp
    vec-map1
    vec-map2
+   vec-moments
+   vec-shift!
    genpts
    f64dst
    f64+
@@ -71,6 +73,8 @@
 ;;;   vec-fft-interp
 ;;;   vec-map1
 ;;;   vec-map2
+;;;   vec-moments
+;;;   vec-shift!
 ;;;   bgy3d-rank
 ;;;   bgy3d-size
 ;;;   state-make
