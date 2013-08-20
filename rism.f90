@@ -1636,10 +1636,13 @@ contains
           end associate
 
           print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, &
-               "e =", epsln (beta, y, fac0)
+               "e =", epsln (beta, y, fac0), &
+               "(target values)"
           print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, &
-               "e =", epsln (beta, y, fac1)
-          print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2
+               "e =", epsln (beta, y, fac1), &
+               "(RISM limit)"
+          print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2, &
+               "(DRISM correction scale)"
 
           ! q = ρ * z:
           q(:) = rho * solvent(:) % charge
@@ -1673,8 +1676,11 @@ contains
                 c(n) = moment (n, qhq, dr)
              enddo
              print *, "# [(e - 1) / e - 3y] / 4πβ = ", -c(2) / 6, &
-                  "e =", epsln (beta, y, -c(2) / 6)
-             print *, "# first three moments = ", c(:)
+                  "e =", epsln (beta, y, -c(2) / 6), &
+                  "(from second moment)"
+             if (verbosity > 1) then
+                print *, "# first three moments = ", c(:)
+             endif
 
              do i = 1, size (npts)
                 n = npts(i)
@@ -1682,10 +1688,13 @@ contains
 
                 a = polyfit (k(1:n), x(1:n), 2)
                 print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(2) , &
-                     "e =", epsln (beta, y, a(2))
-                print *, "# fitted coefficients = ", a(:)
-                print *, "# fitted k-range = ", k(1), "...", k(n), &
-                     "with", n, "pts"
+                     "e =", epsln (beta, y, a(2)), &
+                     "(", n, "pts)"
+                if (verbosity > 1) then
+                   print *, "# fitted coefficients = ", a(:)
+                   print *, "# fitted k-range = ", k(1), "...", k(n), &
+                        "with", n, "pts"
+                endif
              enddo
           end block
        end block
