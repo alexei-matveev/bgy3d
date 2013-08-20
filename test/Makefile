@@ -37,9 +37,9 @@ TOP ?= ..
 EXE ?= $(TOP)/bgy3d
 
 solutes = \
+	water \
 	hydrogen_chloride \
 	carbon_disulfide \
-	water \
 	methanol \
 	butanoic_acid \
 	hexane
