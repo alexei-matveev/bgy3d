@@ -738,7 +738,7 @@ CH~3~OH        2.351   -1045.833    0.997    0.973
 C~3~H~7~COOH  27.818   -1206.856   17.466   11.195
 --------------------------------------------------
 
-^*^Hydrogen vdw parameter modified
+^*^Hydrogen vdw parameters are zero
 
 
 Alcohols, carboxylate acids and aldehydes in water
@@ -754,7 +754,7 @@ units is "kcal/mol"
 Solute                   KH1       (GF)      KH3    (GF)
 -----------------  ---------  ---------  -------  ------
 Alcohols
-CH~3~OH                4.166     -5.177    2.744  -0.740
+CH~3~OH            -1012.245  -1026.191    2.842  -0.644
 C~2~H~5~OH          -992.651  -1012.942    6.225   1.504
 C~3~H~7~OH          -974.739   -999.246   11.409   5.574
 C~4~H~9~OH          -982.240  -1012.521   14.829   7.915
