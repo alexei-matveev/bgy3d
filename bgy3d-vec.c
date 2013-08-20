@@ -567,24 +567,24 @@ vec_moments2 (const DA da, Vec v, real q[3][3])
 void
 bgy3d_moments (const State *BHD, Vec v, real q[1], real d[3], real Q[3][3])
 {
+  const real dV = volume_element (BHD->PD); /* h[0] * h[1] * h[2] */
   const real *h = BHD->PD->h;   /* h[3] */
-  const real h3 = h[0] * h[1] * h[2];
 
   /* 0th moment: */
-  q[0] = h3 * vec_sum (v);
+  q[0] = dV * vec_sum (v);
 
   /* 1st moments: */
   vec_moments1 (BHD->da, v, d);
 
   for (int i = 0; i < 3; i++)
-    d[i] *= h3 * h[i];
+    d[i] *= dV * h[i];
 
   /* 2nd moments: */
   vec_moments2 (BHD->da, v, Q);
 
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
-      Q[i][j] *= h3 * h[i] * h[j];
+      Q[i][j] *= dV * h[i] * h[j];
 }
 
 
