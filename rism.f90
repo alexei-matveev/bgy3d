@@ -1325,8 +1325,8 @@ contains
       ! assumed that convolution theorem is factor-less:
       !
       if (eps /= 0.0) then
-         ! This is going  to break for ρ  = 0 as x(k) ~  1/ρ², it will
-         ! also break if dipole density y = 0:
+         ! DRISM. This is going to break for  ρ = 0 as x(k) ~ 1/ρ², it
+         ! will also break if dipole density y = 0:
          dt = oz_vv_equation_c_t (rho, c, wk + rho * xk) + xk
       else
          ! The branch is redundand since x(k)  = 0 in this case. It is
@@ -1490,9 +1490,9 @@ contains
     real (rk), parameter :: eps = 78.4d0
     integer :: nrad, n, m
 
-    nrad = size (t, 1)
-    n = size (t, 2)
-    m = size (t, 3)
+    nrad = size (t, 1)          ! number of radial point
+    n = size (t, 2)             ! number of solute sites
+    m = size (t, 3)             ! number of solvent sites
 
     block
        integer :: j
@@ -2287,7 +2287,8 @@ contains
     ! potential μ = 6.86 kcal (wrong because positive!).  By including
     ! the long  range correlation into  the hc-term one  obtains -4.19
     ! kcal instead.  Here N = 4096, L  = 80 A, ρ = 0.033427745 A^-3, β
-    ! = 1.6889 kcal^-1.
+    ! = 1.6889 kcal^-1. (You may  need to use --snes-solver "trial" to
+    ! get SPC/E water converge).
     !
     ! Note  that,   contrary  to  what  is  being   suggested  in  the
     ! literature, these  numbers depend strongly on  the LJ parameters
