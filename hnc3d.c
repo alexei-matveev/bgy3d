@@ -89,13 +89,19 @@
   symmetric, unless ρ is the same for all sites. FIXME: the code makes
   use of this assumption!
 
-  The discussion  above deals  with a special  case of a  more general
-  molecular RISM equation
+  The  corresponding equation  for radial  site-site  distributions in
+  molecular 1d RISM equation in the infinite dilution limit reads
 
-    h   =  ω  * c   * [ω + ρ  h  ]                                (11)
+    h   =  ω  * c   * [ω + ρ  h  ]                               (11a)
      uv     u    uv     v   v  vv
 
-  Where  again the  term is  square brackets  is the  property  of the
+  whereas the generalization to the 3d RISM is missing the convolution
+  with the solute intra-molecular correlation:
+
+    h   =  c   * [ω + ρ  h  ]                                    (11b)
+     uv     uv     v   v  vv
+
+  Here  again the  term  is square  brackets  is the  property of  the
   molecular solvent fixed by  the assumption of the infinite dilution,
   and is a generalization  of the solvent susceptibility for molecular
   solvents:
