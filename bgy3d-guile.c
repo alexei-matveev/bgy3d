@@ -452,6 +452,15 @@ static SCM guile_vec_shift_x (SCM vec, SCM shift)
 }
 
 
+/* Desctructively updates Vec */
+static SCM guile_vec_scale_x (SCM vec, SCM scale)
+{
+  VecScale (to_vec (vec), scm_to_double (scale));
+
+  return vec;
+}
+
+
 static SCM guile_vec_dot (SCM x, SCM y)
 {
   return scm_from_double (vec_dot (to_vec (x), to_vec (y)));
@@ -802,6 +811,7 @@ static void guile_init_vec_type (void)
   EXPORT ("vec-map2", 3, 0, 0, guile_vec_map2);
   EXPORT ("vec-moments", 2, 0, 0, guile_vec_moments);
   EXPORT ("vec-shift!", 2, 0, 0, guile_vec_shift_x);
+  EXPORT ("vec-scale!", 2, 0, 0, guile_vec_scale_x);
 
   EXPORT ("rism-rdf", 5, 0, 0, guile_rism_rdf);
   EXPORT ("genpts", 1, 0, 0, guile_genpts);

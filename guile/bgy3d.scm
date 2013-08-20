@@ -28,6 +28,7 @@
    vec-map2
    vec-moments
    vec-shift!
+   vec-scale!
    genpts
    f64dst
    f64+
@@ -75,6 +76,7 @@
 ;;;   vec-map2
 ;;;   vec-moments
 ;;;   vec-shift!
+;;;   vec-scale!
 ;;;   bgy3d-rank
 ;;;   bgy3d-size
 ;;;   state-make
