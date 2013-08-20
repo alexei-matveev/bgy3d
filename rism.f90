@@ -471,6 +471,8 @@ module foreign
 
   integer (c_int), bind (c) :: verbosity ! see bgy3d.c
 
+  public :: pad                 ! module procedure
+
   ! Keep this in sync with bgy3d-solutes.h:
   type, public, bind (c) :: site
      character (kind=c_char, len=5) :: name ! atom types. What are they used for?
@@ -575,6 +577,31 @@ module foreign
        logical (c_bool) :: ok
      end function bgy3d_getopt_string
   end interface
+
+contains
+
+  function pad (s) result (t)
+    !
+    ! Returns a string of the  len (s) with everything after the first
+    ! null  char   replaced  by  spaces.  May  be   usefull  to  adapt
+    ! null-terminated C-strings.
+    !
+    use iso_c_binding, only: c_null_char
+    implicit none
+    character (len=*), intent (in) :: s
+    character (len=len (s)) :: t
+    ! *** end of interface ***
+
+    integer :: i
+
+    t = s
+    do i = 1, len (t)
+       if (t(i:i) /= c_null_char) cycle
+       t(i:) = " "
+       exit
+    enddo
+  end function pad
+
 end module foreign
 
 
@@ -2219,23 +2246,6 @@ contains
     end function poly
   end subroutine print_info
 
-  function pad (s) result (t)
-    use iso_c_binding, only: c_null_char
-    implicit none
-    character (len=*), intent (in) :: s
-    character (len=len (s)) :: t
-    ! *** end of interface ***
-
-    integer :: i
-
-    t = s
-    do i = 1, len (t)
-       if (t(i:i) /= c_null_char) cycle
-       t(i:) = " "
-       exit
-    enddo
-  end function pad
-
   function chempot_density (method, rho, h, cs, cl) result (mu)
     !
     ! Returns the β-scaled "density" of the chemical potential, βμ(r).
@@ -2367,7 +2377,7 @@ contains
 
 
   subroutine show_sites (name, sites)
-    use foreign, only: site
+    use foreign, only: site, pad
     implicit none
     character (len=*), intent (in) :: name
     type (site), intent (in) :: sites(:)
