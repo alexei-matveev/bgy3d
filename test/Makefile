@@ -122,12 +122,12 @@ make-summary = $(SHELL) ./summary.sh
 #
 %.hnc3d.g2: $(TOP)/bgy3d
 	$(EXE) $(base-flags) | tee $(@).out
-	$(moments) g00.bin > $(@)
+	$(moments) g00.bin g01.bin g02.bin g11.bin g12.bin g22.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
 %.hnc3d.g1: $(TOP)/bgy3d $(solvent).hnc3d.g2
 	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
-	$(moments) g0.bin > $(@)
+	$(moments) g0.bin g1.bin g2.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
 %.g1: $(TOP)/bgy3d hydrogen_chloride.g2
