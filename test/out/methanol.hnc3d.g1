@@ -1,21 +1,21 @@
 Moments from g0.bin
-<1> =  6517.49568077
-<x> =  47.904611958
-<y> =  48.4763928846
-<z> =  45.5712227245
-<xy> =  -0.317349846006
-<yz> =  4.34053346869
-<zx> =  -1.13940099418
-<z^2 - 1/3 * r^2> =  9.60114196512
-<x^2 - y^2> =  -2.77863075437
-<r^2> =  23.5209617817
+<1> =  6517.49568893
+<x> =  47.9046119567
+<y> =  48.4763928909
+<z> =  45.571222732
+<xy> =  -0.317349678142
+<yz> =  4.34053315731
+<zx> =  -1.13940102942
+<z^2 - 1/3 * r^2> =  9.60114167048
+<x^2 - y^2> =  -2.7786307003
+<r^2> =  23.5209625933
 integrated charge = -0.000000 (should be close to zero)
-q_v = 0.000000 (charge of solvent medium)
+q_v = -0.000000 (charge of solvent medium)
 q_u = -0.000000 (charge of solute charge density)
 |<x|ρ_n>| = |-0.320486,  0.282557,  0.262940| = 0.501684 (dipole moment of solute cores)
 |<x|ρ_u>| = |-0.320486,  0.282557,  0.262940| = 0.501684 (dipole moment of solute charge density)
 |<x|ρ_v>| = | 0.332577, -0.304127, -0.252942| = 0.516798 (dipole moment of solvent medium)
-<U_v|ρ_N> = -21.832068 (solvent electrostatic field with solute point nuclei)
+<U_v|ρ_N> = -21.832067 (solvent electrostatic field with solute point nuclei)
 <U_v|ρ_u> = -21.201274 (solvent electrostatic field with diffuse charge density of solute)
 <ρ_v|U_u> = -21.201274 (solvent charge density with long-range electrostatic field of solute)
  # mu = 3.308873 kcal (HNC)
