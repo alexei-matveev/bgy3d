@@ -789,7 +789,14 @@ section we list two options to choose the reasonable non-zero vdw
 parameters.
 
 1. use the parameters for hdyrogen atom "Hw" in modified TIP3P water
-model [1], which acts as solvent in our study
+model [1], which acts as solvent in our study. However, it might not be
+a good idea to apply vdw parameter of "Hw" in other molecules. In [1],
+Reiher also argues that "...the H-H van der Waals $r_{min}$ for water
+hydrogens interacting with each other, 0.45 \AA, is too small when used
+in protein-water and protein-protein interactions. ...The H-H $r_{min}$
+value used in CHARMM for all polar hydrogens, 1.60 \AA, was found to be
+a suitable value for describing H-H protein-water van der Waals
+interactions." (page 4-19)
 
  sigma(A)    epsilon(kcal/mol)
 ---------   ------------------
@@ -815,7 +822,8 @@ C~4~H~9~COOH          32.666     -2.990   20.243  12.056
 --------------------------------------------------------
 
 2. use the rule introduced in [2] for "any model with embedded sites",
-which was designed for modeling water:
+which was first applied to model water when solving RISM equation in
+Amber code:
 
 $$
 \frac{\sigma_e}{2} = \frac{\sigma_h}{2} - b_{he} $$
