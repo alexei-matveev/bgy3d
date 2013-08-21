@@ -55,13 +55,14 @@
 ;;; Find a solute/solvent in a database or die:
 ;;;
 (define (find-molecule name)
-  (and-let* ((solutes (slurp (find-file "guile/solutes.scm")))
+  (and-let* ((solutes (slurp/cached (find-file "guile/solutes.scm")))
              (molecule (or (assoc name solutes)
                            (error "Not in the list:"
                                   name
                                   (map first solutes)))))
     (eval-units (tabulate-ff molecule))))
 
+;; (set! find-molecule (memoize find-molecule))
 
 ;;;
 ;;; Find  a file in  the search  patch, or  die.  Note  that find-file
@@ -83,6 +84,12 @@
           (if (eof-object? sexp)
               (reverse acc)
               (loop (cons sexp acc))))))))
+
+;;;
+;;; Premature optimization  and potential memory hog  here. Cache file
+;;; contents in memory:
+;;;
+(define slurp/cached (memoize slurp))
 
 ;; (write (slurp "guile/solutes.scm"))
 ;; (newline)
@@ -174,7 +181,7 @@
   "guile/oplsaa-test")
 
 (define (load-ff-file file)
-  (let* ((contents (slurp (find-file file)))
+  (let* ((contents (slurp/cached (find-file file)))
          (force-field (assoc "oplsaa" contents))) ; FIXME: literal here
     ;;
     ;; Force-field name in CAR  position is irrelevant for the rest of
