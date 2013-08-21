@@ -23,8 +23,7 @@
    site-charge
    site-x
    site-y
-   site-z
-   tabulate-ff))
+   site-z))
 
 ;;;
 ;;; ITC Calorie here. See also bgy3d.h:
@@ -61,8 +60,7 @@
                            (error "Not in the list:"
                                   name
                                   (map first solutes)))))
-    (eval-units molecule)))
-
+    (eval-units (tabulate-ff molecule))))
 
 
 ;;;
