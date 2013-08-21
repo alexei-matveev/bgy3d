@@ -772,3 +772,94 @@ C~3~H~6~O             20.547      1.240   12.411   6.882
 C~4~H~8~O             27.879      1.428   16.463   9.842
 C~5~H~10~O            34.337      0.864   20.642  12.837
 --------------------------------------------------------
+
+
+Choice of hydrogen vdw parameters for alcohols and carboxylate acids
+--------------------------------------------------------------------
+
+The zero vdw parameters of hydrogen atom in alcohols and carboxylate
+acids will cause the overlap between hyrogen atom and solvent particle
+with opposite charge sign. At least we can observe unphysical chemical
+potential values from converged 1D-RISM calculations from the previous
+section. (FIXME: what about 3D?)
+
+One workaround is assigning non-zero vdw parameters for "polar
+hydrogens", with which the site-overlap would be avoided. In this
+section we list two options to choose the reasonable non-zero vdw
+parameters.
+
+1. use the parameters for hdyrogen atom "Hw" in modified TIP3P water
+model [1], which acts as solvent in our study
+
+ sigma(A)    epsilon(kcal/mol)
+---------   ------------------
+   0.4             0.046
+------------------------------
+
+Excess chemical potential:
+
+Solute                   KH1       (GF)      KH3    (GF)
+-----------------  ---------  ---------  -------  ------
+Alcohols
+CH~3~OH                4.217     -5.122    2.737  -0.747
+C~2~H~5~OH            10.054     -4.981    6.123   1.404
+C~3~H~7~OH            18.710     -3.413   11.318   5.485
+C~4~H~9~OH            24.899     -4.101   14.739   7.826
+C~5~H~11~OH           32.443     -3.875   19.258  11.132
+Carboxylate acids
+HCOOH                  3.894     -4.934    3.478  -0.043
+CH~3~COOH             10.826     -3.775    7.247   2.509
+C~2~H~5~COOH          16.065     -4.682    9.849   4.125
+C~3~H~7~COOH          24.878     -3.180   15.812   8.811
+C~4~H~9~COOH          32.666     -2.990   20.243  12.056
+--------------------------------------------------------
+
+2. use the rule introduced in [2] for "any model with embedded sites",
+which was designed for modeling water:
+
+$$
+\frac{\sigma_e}{2} = \frac{\sigma_h}{2} - b_{he} $$
+$$
+\epsilon_e = 0.1\epsilon_h $$
+
+where $\sigma_e$ is the radius of the embedded site, $\sigma_h$ is the
+radius of the host site, and $b_{he}$ is the bond length between the
+two. Following this rule, we build the new vdw parameters for H in "-OH"
+and "-COOH":
+
+Site    $\sigma_h$  $\epsilon_h$  $b_{he}^*$  $\sigma_e$  $\epsilon_e$
+------ ----------- ------------- ----------- ----------- -------------
+-OH           3.12          0.17      0.9488      1.2224         0.017
+-COOH         3.00          0.17      0.9425       1.095         0.017
+----------------------------------------------------------------------
+
+^*^ $b_{he}$ is calculated by averaging the O-H bond length relatively
+in alcohols and carboxylate acids which we currently use. Note that
+number from pronoic acid is excluded because H atom sites there are
+derived by ViewerPro automatically with bond length equal to 1.0\AA.
+
+Solute                   KH1       (GF)      KH3    (GF)
+-----------------  ---------  ---------  -------  ------
+Alcohols
+CH~3~OH                5.483     -3.818    2.889  -0.607
+C~2~H~5~OH            11.327     -3.647    6.277   1.546
+C~3~H~7~OH            19.887     -2.334   11.401   5.558
+C~4~H~9~OH            26.214     -2.884   14.903   7.978
+C~5~H~11~OH           33.779     -2.660   19.422  11.285
+Carboxylate acids
+HCOOH                  5.789     -2.931    3.758   0.229
+CH~3~COOH             12.706     -1.739    7.515   2.769
+C~2~H~5~COOH          18.211     -2.370   10.242   4.511
+C~3~H~7~COOH          26.804     -1.084   16.079   9.070
+C~4~H~9~COOH          34.503     -0.957   20.517  12.321
+--------------------------------------------------------
+
+[1] Theoretical Studies of Hydrogen Bonding, Reiher, III., W.E., Ph.D.
+    Thesis, Department of Chemistry, Harvard University, Cambridge,
+    MA, USA, 1985
+
+[2] Three-Dimensional Molecular Theory of Solvation Coupled with
+    Molecular Dynamics in Amber, Tyler Luchko, Sergey Gusarov, Daniel R.
+    Roe, Carlos Simmerling, David A. Case , Jack Tuszynski and Andriy
+    Kovalenko, J. Chem. Theory Comput., 2010, 6 (3), pp 607–624
+    http://dx.doi.org/10.1021/ct900460m
