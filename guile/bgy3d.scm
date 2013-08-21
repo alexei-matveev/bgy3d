@@ -597,6 +597,26 @@ computes the sum of all vector elements."
                               settings)
             (map vec-destroy g1)))
         ;;
+        ("moments"
+         ;;
+         ;; Print a few first moments (with respect to the grid
+         ;; center) of each distribution supplied in the command line.
+         ;;
+         ;; mpirun guile/runbgy.scm moments --N 96 --L 10 test/*.bin
+         ;;
+         (let ((domain (state-make settings)))
+           (for-each (lambda (path)
+                       (let* ((h (vec-load path))
+                              (h (vec-shift! h -1.0))
+                              (h (vec-scale! h -1.0))
+                              (moments (vec-moments domain h)))
+                         (begin/serial
+                           (format #t ";;; Moments from ~A\n" path)
+                           (pretty-print moments))
+                         (vec-destroy h)))
+                     args)
+           (state-destroy domain)))
+        ;;
         ("rdf"
          ;;
          ;; Print Gnuplot-ready RDF table. E.g. by executing this:
