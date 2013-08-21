@@ -430,25 +430,26 @@
   ("H" (-2.236 3.19 0.0) 2.5 0.03 0.06)))
 
 ;;;                    2+
-;;; Force fields for UO  ion with the SPC/Fw, TIP3P, TIP4p and TIP5P
+;;; Force fields for UO  ion with  the SPC/Fw, TIP3P,  TIP4p and TIP5P
 ;;;                    2
-;;; water models. See [1] for more details. For the geometry,  since
-;;; it only mentions that U-O bond length is 1.76 Å, we choose the
+;;; water models. See [1] for more details. For the geometry, since it
+;;; only  mentions that  U-O  bond length  is  1.76 Å,  we choose  the
 ;;; orientation along x-axis in consistent with other solutes
 ;;;
-;;; [1] Force Field Development for Actinyl Ions via Quantum Mechanical
-;;;     Calculations: An Approach to Account for Many Body Solvation
-;;;     Effects, Rai, N.; Tiwari, S. P.; Maginn, E. J., The Journal of
-;;;     Physical Chemistry B 2012, 116 (35), 10885-10897.
+;;; [1] Force Field Development for Actinyl Ions via Quantum
+;;;     Mechanical Calculations: An Approach to Account for Many Body
+;;;     Solvation Effects, Rai, N.; Tiwari, S. P.; Maginn, E. J., The
+;;;     Journal of Physical Chemistry B 2012, 116 (35), 10885-10897.
 ;;;     http://dx.doi.org/10.1021/jp3028275
+;;;
 ("uranyl, SPC"
  (("U" (0.0 0.0 0.0) 3.25 0.27 2.5)
   ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
   ("O" (1.76 0.0 0.0) 3.00 1.08 -0.25)))
 
-;; Non-bond FF parameters for TIP3P uranyl is the same with SPC one according
-;; to [1], the difference is that they used flexible model for SPC/Fw and
-;; treated TIP3P water as a rigid molecule.
+;; Non-bond FF  parameters for TIP3P uranyl  is the same  with SPC one
+;; according to [1],  the difference is that they  used flexible model
+;; for SPC/Fw and treated TIP3P water as a rigid molecule.
 ("uranyl, TIP3P"
  (("U" (0.0 0.0 0.0) 3.25 0.27 2.5)
   ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
