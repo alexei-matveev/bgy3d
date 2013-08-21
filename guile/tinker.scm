@@ -8,7 +8,8 @@
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:export
   (tinker-slurp
-   tinker-table))
+   tinker-table
+   memoize))
 
 ;;;
 ;;; Reads a file and returns a list of lines:
