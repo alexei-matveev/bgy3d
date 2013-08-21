@@ -97,14 +97,20 @@
 (define NULL 0)
 
 ;;;
-;;; This  may become  define-syntax some  time, so  do not  assume the
-;;; arguments are evaluated:
+;;; This  form can  be  used for  code  to be  evaluated  only on  one
+;;; (master)  worker. In  particular no  collective procedures  can be
+;;; used from this context. Do not assume the forms are evaluated:
 ;;;
-(define (maybe-print . args)
-  (if (zero? (bgy3d-rank))
-      (begin
-        (apply pretty-print args)
-        (force-output))))
+(define-syntax-rule (begin/serial e ...)
+  (begin
+    (if (zero? (bgy3d-rank))
+        (begin e ...))
+    (if #f #f)))
+
+(define (pretty-print/serial . args)
+  (begin/serial
+   (apply pretty-print args)
+   (force-output)))
 
 ;;;
 ;;; Settings are handled as an  association list. The human input as a
@@ -316,10 +322,10 @@ computes the sum of all vector elements."
                           funptr        ; value
                           settings))    ; alist
     ;; Print on master only:
-    (maybe-print (list 'SETTINGS: settings))
-    (maybe-print (list 'SOLVENT: solvent))
-    (maybe-print (list 'SOLUTE: solute))
-    (maybe-print (list 'RESTART: restart))
+    (pretty-print/serial (list 'SETTINGS: settings))
+    (pretty-print/serial (list 'SOLVENT: solvent))
+    (pretty-print/serial (list 'SOLUTE: solute))
+    (pretty-print/serial (list 'RESTART: restart))
     ;;
     ;; The function  bound to run-solute allocates and  returns a list
     ;; of  Petsc Vecs, a  descriptor for electrostatic  potential, and
@@ -427,8 +433,8 @@ computes the sum of all vector elements."
     ;;
     ;; Only print on master:
     ;;
-    (maybe-print (cons 'core-potentials potentials))
-    (maybe-print (cons 'core-energy energy))))
+    (pretty-print/serial (cons 'core-potentials potentials))
+    (pretty-print/serial (cons 'core-energy energy))))
 
 
 ;;;
@@ -445,8 +451,8 @@ computes the sum of all vector elements."
                             (find-molecule name))) ; Maybe solvent
          (solute (and-let* ((name (option-ref opts 'solute #f)))
                            (find-molecule name)))) ; Maybe solute
-    (maybe-print (list 'solvent: solvent))
-    (maybe-print (list 'solute: solute))
+    (pretty-print/serial (list 'solvent: solvent))
+    (pretty-print/serial (list 'solute: solute))
     (let-values
         (((method run-solvent run-solute) ; three method-dependent values:
           (cond
@@ -612,10 +618,9 @@ computes the sum of all vector elements."
                                rdf))
                            args)))
            (state-destroy domain)
-           (if (zero? (bgy3d-rank))
-               (begin
-                 (format #t "# center = ~A\n" center)
-                 (apply print-columns mesh rdfs)))))
+           (begin/serial
+            (format #t "# center = ~A\n" center)
+            (apply print-columns mesh rdfs))))
         ;;
         ("dump"
          ;;
