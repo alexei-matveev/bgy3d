@@ -3,6 +3,7 @@
 ;;; namespace  we put bgy3d-*  functions into  this module.
 ;;;
 (define-module (guile bgy3d)
+  #:use-module (guile compat)           ; define-syntax-rule for 1.8
   #:use-module (guile molecule)         ; site representation
   #:use-module (guile punch-file)       ; write-punch-file
   #:use-module (srfi srfi-1)            ; list manipulation
