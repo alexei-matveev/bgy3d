@@ -322,6 +322,12 @@ void bgy3d_problem_data_print (const ProblemData *PD);
 /* COMM PRIMITIVES */
 /*******************/
 
+/* Return MPI runk in PETSC_COMM_WORLD: */
+int comm_rank (void);
+
+/* Return MPI size of PETSC_COMM_WORLD: */
+int comm_size (void);
+
 void comm_allreduce (int n, real x[n]);
 
 

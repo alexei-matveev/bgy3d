@@ -259,3 +259,21 @@ void comm_allreduce (int n, real x[n])
   assert (!err);
 }
 
+
+/* Return MPI runk in PETSC_COMM_WORLD: */
+int comm_rank (void)
+{
+  int rank;
+  MPI_Comm_rank (PETSC_COMM_WORLD, &rank);
+  return rank;
+}
+
+
+/* Return MPI size of PETSC_COMM_WORLD: */
+int comm_size (void)
+{
+  int size;
+  MPI_Comm_size (PETSC_COMM_WORLD, &size);
+  return size;
+}
+
