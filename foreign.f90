@@ -12,6 +12,9 @@ module foreign
   public :: bgy3d_getopt_real
   public :: bgy3d_getopt_string
 
+  public :: comm_rank
+  public :: comm_size
+
   public :: verbosity           ! extern int
 
   integer (c_int), bind (c) :: verbosity ! see bgy3d.c
@@ -121,6 +124,21 @@ module foreign
        character (kind=c_char), intent (inout) :: val(n) ! 0-terminated or unchanged
        logical (c_bool) :: ok
      end function bgy3d_getopt_string
+
+     !
+     ! See ./bgy3d.{h,c}:
+     !
+     function comm_rank () result (rank) bind (c)
+       import c_int
+       implicit none
+       integer (c_int) :: rank
+     end function comm_rank
+
+     function comm_size () result (size) bind (c)
+       import c_int
+       implicit none
+       integer (c_int) :: size
+     end function comm_size
   end interface
 
 contains
