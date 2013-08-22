@@ -1100,14 +1100,14 @@ static SCM guile_pot_destroy (SCM iter)
 }
 
 /* Return MPI runk in PETSC_COMM_WORLD: */
-static SCM guile_rank (void)
+static SCM guile_comm_rank (void)
 {
   return scm_from_int (comm_rank ());
 }
 
 
 /* Return MPI size of PETSC_COMM_WORLD: */
-static SCM guile_size (void)
+static SCM guile_comm_size (void)
 {
   return scm_from_int (comm_size ());
 }
@@ -1154,8 +1154,8 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
-  EXPORT ("bgy3d-rank", 0, 0, 0, guile_rank);
-  EXPORT ("bgy3d-size", 0, 0, 0, guile_size);
+  EXPORT ("comm-rank", 0, 0, 0, guile_comm_rank);
+  EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute", 3, 0, 0, guile_rism_solute);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);

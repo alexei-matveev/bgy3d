@@ -78,8 +78,8 @@
 ;;;   vec-moments
 ;;;   vec-shift!
 ;;;   vec-scale!
-;;;   bgy3d-rank
-;;;   bgy3d-size
+;;;   comm-rank
+;;;   comm-size
 ;;;   state-make
 ;;;   state-destroy
 ;;;
@@ -104,7 +104,7 @@
 ;;;
 (define-syntax-rule (begin/serial e ...)
   (begin
-    (if (zero? (bgy3d-rank))
+    (if (zero? (comm-rank))
         (begin e ...))
     (if #f #f)))
 
