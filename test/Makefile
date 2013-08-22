@@ -7,12 +7,12 @@ SHELL = /bin/sh
 #
 BGY-FLAGS = \
 	--bgy \
-	--N 32 \
+	--N $(N) \
+	--L $(L) \
 	--rho 0.018 \
 	--beta 1.1989 \
 	--norm-tol 1.0e-7 \
 	--max-iter 1000 \
-	--L 10.0 \
 	--lambda 0.02 \
 	--solvent "hydrogen chloride" \
 	--snes-solver jager \
@@ -20,8 +20,8 @@ BGY-FLAGS = \
 solvent = water
 HNC-FLAGS = \
 	--hnc \
-	--N 96 \
-	--L 10.0 \
+	--N $(N) \
+	--L $(L) \
 	--beta 1.6889 \
 	--max-iter 1000 \
 	--rho 0.033427745 \
@@ -67,6 +67,10 @@ hnc-tests: $(hnc-diffs)
 #
 # Target specific variables. Four cases (g1, g2) x (BGY, HNC) at most:
 #
+$(bgy-diffs): N = 32
+$(hnc-diffs): N = 96
+$(bgy-diffs): L = 10.0
+$(hnc-diffs): L = 10.0
 $(bgy-diffs): base-flags = $(BGY-FLAGS)
 $(hnc-diffs): base-flags = $(HNC-FLAGS)
 
@@ -101,10 +105,12 @@ out/%:
 
 #
 # Command line  to print  the distribution summary  from *.bin  or *.m
-# file(s). Darcs does not track file attributes, so that the *.py file
-# will not always have an execution bit set in a fresh repository:
+# file(s). The  important flags are  those that specify the  domain (L
+# and N). In fact L could  be arbitrary --- then the units the moments
+# are printed in are arbitrary too:
 #
-moments = python $(TOP)/python/moments.py
+# moments = python $(TOP)/python/moments.py
+moments = $(EXE) moments --L $(L) --N $(N)
 
 #
 # This script is also used in QM regression tests, see ../test-qm:
