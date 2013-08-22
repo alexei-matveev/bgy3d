@@ -23,9 +23,9 @@
   (export-syntax define-syntax-rule)
 
   ;;
-  ;; Re-export all symbols from (ice-9 symcase). Credit to mark_weaver
+  ;; Re-export all symbols from (ice-9 syncase). Credit to mark_weaver
   ;; at #guile. Otherwise the importer of this module, (guile compat),
-  ;; still needs to explicitly import (ice-9 syncase) too in order for
+  ;; still  needs to  explicitly import (ice-9  syncase) in  order for
   ;; define-syntax-rule to work.
   ;;
   (let ((names (module-map (lambda (name var) name)
