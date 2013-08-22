@@ -166,7 +166,8 @@ contains
     !
     ! This one does not need to be interoperable.
     !
-    use foreign, only: problem_data, site, bgy3d_problem_data_print, verbosity
+    use foreign, only: problem_data, site, bgy3d_problem_data_print, &
+         verbosity, comm_rank
     implicit none
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
@@ -181,7 +182,7 @@ contains
     rmax = rism_rmax (pd)
     nrad = rism_nrad (pd)
 
-    if (verbosity > 0) then
+    if (verbosity > 0 .and. comm_rank() == 0) then
        print *, "# L =", rmax, "(for 1d)"
        print *, "# N =", nrad, "(for 1d)"
 
@@ -231,7 +232,7 @@ contains
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi)
     use fft, only: fourier_many, FT_FW, FT_BW, integrate
     use snes, only: snes_default
-    use foreign, only: site
+    use foreign, only: site, comm_rank
     use options, only: getopt
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
@@ -282,7 +283,9 @@ contains
           ! FIXME: this factor  is infinite when y ->  0 (e.g. zero
           ! dipole) while keeping the target ε - 1 finite:
           A = dipole_factor (e=eps, y=y)
-          print *, "# Scaling the long-range asymptotics by A=", A, "for e=", eps
+          if (comm_rank () == 0) then
+             print *, "# Scaling the long-range asymptotics by A=", A, "for e=", eps
+          endif
        end block
     else
        ! A = 1 has no effect:
@@ -540,7 +543,7 @@ contains
     !
     use fft, only: fourier_many, FT_FW
     use linalg, only: polyfit
-    use foreign, only: site, verbosity, &
+    use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
@@ -572,27 +575,29 @@ contains
        real (rk) :: u(3, 3), x(3, size (solvent))
        type (site) :: sites(size (solvent))
 
-       sites = solvent
-       call show_sites ("Before!", sites)
-       print *, "# Dipole before =", dipole (sites)
+       if (comm_rank () == 0) then
+          sites = solvent
+          call show_sites ("Before!", sites)
+          print *, "# Dipole before =", dipole (sites)
 
-       print *, "# Solvent axes:"
-       print *, "# center =", center (sites)
-       u = dipole_axes (sites)
+          print *, "# Solvent axes:"
+          print *, "# center =", center (sites)
+          u = dipole_axes (sites)
 
-       print *, "# diff =", maxval (abs (matmul (u, transpose (u)) - one))
-       print *, "# diff =", maxval (abs (matmul (transpose (u), u) - one))
+          print *, "# diff =", maxval (abs (matmul (u, transpose (u)) - one))
+          print *, "# diff =", maxval (abs (matmul (transpose (u), u) - one))
 
-       do j = 1, 3
-          print *, "# axis(", j, ") =", u(:, j)
-       enddo
+          do j = 1, 3
+             print *, "# axis(", j, ") =", u(:, j)
+          enddo
 
-       x = local_coords (sites, u)
-       do j = 1, size (sites)
-          sites(j) % x = x(:, j)
-       enddo
-       call show_sites ("After!", sites)
-       print *, "# Dipole after =", dipole (sites)
+          x = local_coords (sites, u)
+          do j = 1, size (sites)
+             sites(j) % x = x(:, j)
+          enddo
+          call show_sites ("After!", sites)
+          print *, "# Dipole after =", dipole (sites)
+       endif
     end block
 
     block
@@ -624,7 +629,9 @@ contains
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
-       print *, "# rho =", rho, "beta =", beta, "n =", nrad
+       if (comm_rank () == 0) then
+          print *, "# rho =", rho, "beta =", beta, "n =", nrad
+       endif
 
        ! Chemical potentials:
        block
@@ -639,11 +646,13 @@ contains
              mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
           enddo
 
-          print *, "# Chemical potentials, default is marked with *:"
-          do i = 1, size (methods)
-             print *, "# MU =", mu(i) / KCAL, "kcal =", mu(i) / KJOULE, "kJ", &
-                  " (", names(i), ")", merge ("*", " ", method == methods(i))
-          enddo
+          if (comm_rank () == 0) then
+             print *, "# Chemical potentials, default is marked with *:"
+             do i = 1, size (methods)
+                print *, "# MU =", mu(i) / KCAL, "kcal =", mu(i) / KJOULE, "kJ", &
+                     " (", names(i), ")", merge ("*", " ", method == methods(i))
+             enddo
+          endif
        end block
 
        block
@@ -661,10 +670,12 @@ contains
           ! same number density:
           y = dipole_density (beta, rho, solvent)
 
-          print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
-          print *, "# ε = ", epsilon_rism (beta, rho, solvent)
-          print *, "# A(1 + 3 * y, y) = ", dipole_factor (1 + 3 * y, y)
-          print *, "# A(ε, y) = ", dipole_factor (eps, y)
+          if (comm_rank () == 0) then
+             print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
+             print *, "# ε = ", epsilon_rism (beta, rho, solvent)
+             print *, "# A(1 + 3 * y, y) = ", dipole_factor (1 + 3 * y, y)
+             print *, "# A(ε, y) = ", dipole_factor (eps, y)
+          endif
 
           !
           ! The coefficient in the  low-k expansion of the "dielectric
@@ -707,14 +718,16 @@ contains
             fac2 = (eps - eps0) / (4 * pi * beta)
           end associate
 
-          print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, &
-               "e =", epsln (beta, y, fac0), &
-               "(target values)"
-          print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, &
-               "e =", epsln (beta, y, fac1), &
-               "(RISM limit)"
-          print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2, &
-               "(DRISM correction scale)"
+          if (comm_rank () == 0) then
+             print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, &
+                  "e =", epsln (beta, y, fac0), &
+                  "(target values)"
+             print *, "#    -9y² / (1 + 3y) / 4πβ = ", fac1, &
+                  "e =", epsln (beta, y, fac1), &
+                  "(RISM limit)"
+             print *, "# [ε  -  (1  +  3y)] / 4πβ = ", fac2, &
+                  "(DRISM correction scale)"
+          endif
 
           ! q = ρ * z:
           q(:) = rho * solvent(:) % charge
@@ -747,11 +760,14 @@ contains
              do n = 0, 2
                 c(n) = moment (n, qhq, dr)
              enddo
-             print *, "# [(e - 1) / e - 3y] / 4πβ = ", -c(2) / 6, &
-                  "e =", epsln (beta, y, -c(2) / 6), &
-                  "(from second moment)"
-             if (verbosity > 1) then
-                print *, "# first three moments = ", c(:)
+
+             if (comm_rank () == 0) then
+                print *, "# [(e - 1) / e - 3y] / 4πβ = ", -c(2) / 6, &
+                     "e =", epsln (beta, y, -c(2) / 6), &
+                     "(from second moment)"
+                if (verbosity > 1) then
+                   print *, "# first three moments = ", c(:)
+                endif
              endif
 
              do i = 1, size (npts)
@@ -759,13 +775,16 @@ contains
                 if (nrad < n) cycle
 
                 a = polyfit (k(1:n), x(1:n), 2)
-                print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(2) , &
-                     "e =", epsln (beta, y, a(2)), &
-                     "(", n, "pts)"
-                if (verbosity > 1) then
-                   print *, "# fitted coefficients = ", a(:)
-                   print *, "# fitted k-range = ", k(1), "...", k(n), &
-                        "with", n, "pts"
+
+                if (comm_rank () == 0) then
+                   print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(2) , &
+                        "e =", epsln (beta, y, a(2)), &
+                        "(", n, "pts)"
+                   if (verbosity > 1) then
+                      print *, "# fitted coefficients = ", a(:)
+                      print *, "# fitted k-range = ", k(1), "...", k(n), &
+                           "with", n, "pts"
+                   endif
                 endif
              enddo
           end block
@@ -773,7 +792,7 @@ contains
 
 
        ! This prints a lot of data on tty!
-       if (verbosity > 1) then
+       if (verbosity > 1 .and. comm_rank () == 0) then
           print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
           do p = 1, nrad
              write (*, *) r(p), &
