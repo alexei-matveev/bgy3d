@@ -499,7 +499,7 @@ void bgy3d_fft_interp (const Mat A,
 
   /* Each  worker summed  only over  its own  range of  K[],  sum over
      workers: */
-  bgy3d_comm_allreduce (2 * np, (double*) yc);
+  comm_allreduce (2 * np, (double*) yc);
 
   /*
     FIXME:  Discard imaginary part  which should  be zero  anyway when

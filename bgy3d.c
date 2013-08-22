@@ -247,8 +247,13 @@ void Molecule_free( real **x_M, int N_M)
   free(x_M);
 }
 
+
+/*******************/
+/* COMM PRIMITIVES */
+/*******************/
+
 /* Reduce buffer by summing respective entries on all workeres: */
-void bgy3d_comm_allreduce (int n, real x[n])
+void comm_allreduce (int n, real x[n])
 {
   int err = MPI_Allreduce (MPI_IN_PLACE, x, n, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
   assert (!err);

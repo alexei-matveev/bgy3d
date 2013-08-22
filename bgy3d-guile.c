@@ -437,7 +437,7 @@ static SCM guile_vec_ref (SCM vec, SCM ix)
     vals[0] = 0.0;
 
   /* Make result known on all workers: */
-  bgy3d_comm_allreduce (1, vals);
+  comm_allreduce (1, vals);
 
   return scm_from_double (vals[0]);
 }

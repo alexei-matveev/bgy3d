@@ -586,7 +586,7 @@ void bgy3d_fft_interp (const Mat A,
 
   /* Each  worker summed  only over  its own  range of  K[],  sum over
      workers: */
-  bgy3d_comm_allreduce (np, y);
+  comm_allreduce (np, y);
 
   /*
     FIXME:  *do*  normalize  as  for  interpolation.   This  does  not

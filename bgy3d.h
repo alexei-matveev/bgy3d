@@ -317,7 +317,12 @@ State* bgy3d_state_make (const ProblemData *PD);
 void bgy3d_state_destroy (State *BHD);
 void bgy3d_problem_data_print (const ProblemData *PD);
 
-void bgy3d_comm_allreduce (int n, real x[n]);
+
+/*******************/
+/* COMM PRIMITIVES */
+/*******************/
+
+void comm_allreduce (int n, real x[n]);
 
 
 /* Sum of an integer array: */

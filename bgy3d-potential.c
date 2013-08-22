@@ -522,8 +522,8 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
           }
 
       /* Broadcast results of each worker to total sums: */
-      bgy3d_comm_allreduce (1, &m0);
-      bgy3d_comm_allreduce (3, m1);
+      comm_allreduce (1, &m0);
+      comm_allreduce (3, m1);
 
       const real V = volume (BHD->PD);
       PetscPrintf (PETSC_COMM_WORLD, "Moments divided by cell volume V = %lf: \n", V);
