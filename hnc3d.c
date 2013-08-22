@@ -1156,9 +1156,27 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
+/*************************************************************/
+/* A FEW FUNCTIONS TO MAKE SOLVENT SUSCEPTIBILITY AVAIALBLE. */
+/*************************************************************/
+
+
+/*
+  Layed off  from solvent_kernel().  Reads  χ - 1 into  chi_fft[][] as
+  previousely  written by  solvent solver.   See hnc3d_solvent_solve()
+  above.
+*/
+static void
+solvent_kernel_file3 (int m, Vec chi_fft[m][m]) /* out */
+{
+  bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
+}
+
+
 /* Layed off from  solvent_kernel(). Reads 1d site-site susceptibility
    into a 3d Vec then FFTs it. Not really used. */
-static void from_radial_fft (State *HD, int m, Vec chi_fft[m][m]) /* out */
+static void
+solvent_kernel_file1 (State *HD, int m, Vec chi_fft[m][m]) /* out */
 {
   /*
     Load radial  data from text file.   FIXME: representing long-range
@@ -1184,53 +1202,68 @@ static void from_radial_fft (State *HD, int m, Vec chi_fft[m][m]) /* out */
   vec_destroy2 (m, chi);
 }
 
+/* FIXME: drop these ifdefs together with Lenny! */
+#ifdef WITH_FORTRAN
+/* Layed off  from solvent_kernel().  Puts χ -  1 into  chi_fft[][] as
+   computed by 1d RISM solvent solver. See ./rism.f90. */
+static void
+solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
+                      Vec chi_fft[m][m]) /* out */
+{
+  /*
+    Problem data for use in 1d-RISM  code.  If you do not upscale, the
+    rmax =  max (PD->L) / 2 will  be too low for  interpolation on the
+    r-grid. Though here only the k-grid is of interest.
+  */
+  ProblemData pd = rism_upscale (HD->PD);
 
-/* Reads  χ -  1 into  chi_fft[][] as  previousely written  by solvent
-   solver.  See hnc3d_solvent_solve() above. */
+  const int nrad = rism_nrad (&pd);
+  const real rmax = rism_rmax (&pd);
+
+  real x_fft[m][m][nrad];
+
+  /* 1d-RISM  calculation. Dont  need  indirect correlation,  need
+     χ(k): */
+  rism_solvent (&pd, m, solvent, NULL, x_fft);
+
+  /* The solute/solvent code expects χ - 1: */
+  for (int i = 0; i < m; i++)
+    for (int k = 0; k < nrad; k++)
+      x_fft[i][i][k] -= 1;
+
+  /* dr * dk = π / nrad where dr = rmax / nrad */
+  const real dk = M_PI / rmax;
+
+  /* FIXME: assuming symmetric χ - 1 with aliasing: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      vec_ktab (HD, nrad, x_fft[i][j], dk, chi_fft[i][j]);
+}
+#endif
+
+/*
+  Puts solvent susceptibility χ - 1 into chi_fft[][] by a one of a few
+  available  methods  solver.    The  logic  dispatcher.   See  actual
+  solvent_kernel_*() functions above.
+*/
 static void solvent_kernel (State *HD,
                             int m, const Site solvent[m], /* in */
                             Vec chi_fft[m][m])            /* out */
 {
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
-    from_radial_fft (HD, m, chi_fft);
+    solvent_kernel_file1 (HD, m, chi_fft);
   else
-    bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
-
-#ifndef WITH_FORTRAN
-  (void) solvent;               /* not used */
-#else
-  if (false)
     {
-      /*
-        Problem data for  use in 1d-RISM code. If  you do not upscale,
-        the rmax =  max (PD->L) / 2 will be  too low for interpolation
-        on the r-grid. Though here only the k-grid is of interest.
-      */
-      ProblemData pd = rism_upscale (HD->PD);
-
-      const int nrad = rism_nrad (&pd);
-      const real rmax = rism_rmax (&pd);
-
-      real x_fft[m][m][nrad];
-
-      /* 1d-RISM  calculation. Dont  need  indirect correlation,  need
-         χ(k): */
-      rism_solvent (&pd, m, solvent, NULL, x_fft);
-
-      /* The solute/solvent code expects χ - 1: */
-      for (int i = 0; i < m; i++)
-        for (int k = 0; k < nrad; k++)
-          x_fft[i][i][k] -= 1;
-
-      /* dr * dk = π / nrad where dr = rmax / nrad */
-      const real dk = M_PI / rmax;
-
-      /* FIXME: assuming symmetric χ - 1 with aliasing: */
-      for (int i = 0; i < m; i++)
-        for (int j = 0; j <= i; j++)
-          vec_ktab (HD, nrad, x_fft[i][j], dk, chi_fft[i][j]);
-    }
+#ifndef WITH_FORTRAN
+      (void) solvent;               /* not used */
+      solvent_kernel_file3 (m, chi_fft);
+#else
+      if (true)
+        solvent_kernel_file3 (m, chi_fft);
+      else
+        solvent_kernel_rism1 (HD, m, solvent, chi_fft);
 #endif
+    }
 }
 
 
