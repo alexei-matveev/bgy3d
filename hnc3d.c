@@ -1156,6 +1156,35 @@ static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 }
 
 
+/* Layed off from  solvent_kernel(). Reads 1d site-site susceptibility
+   into a 3d Vec then FFTs it. Not really used. */
+static void from_radial_fft (State *HD, int m, Vec chi_fft[m][m]) /* out */
+{
+  /*
+    Load radial  data from text file.   FIXME: representing long-range
+    on a real-space grid is intrinsically broken!
+  */
+  const real dV = volume_element (HD->PD);
+
+  local Vec chi[m][m];
+  vec_create2 (HD->da, m, chi);
+
+  bgy3d_vec_read_radial2 (HD->da, HD->PD, "x%d%d.txt", m, chi);
+
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      {
+        MatMult (HD->fft_mat, chi[i][j], chi_fft[i][j]);
+        VecScale (chi_fft[i][j], dV);
+
+        /* Translate the distribution to the grid corner. This is what
+           one expects in convolution integrals. */
+        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
+      }
+  vec_destroy2 (m, chi);
+}
+
+
 /* Reads  χ -  1 into  chi_fft[][] as  previousely written  by solvent
    solver.  See hnc3d_solvent_solve() above. */
 static void solvent_kernel (State *HD,
@@ -1163,30 +1192,7 @@ static void solvent_kernel (State *HD,
                             Vec chi_fft[m][m])            /* out */
 {
   if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
-    {
-      /*
-        Load  radial   data  from  text   file.   FIXME:  representing
-        long-range on a real-space grid is intrinsically broken!
-      */
-      const real dV = volume_element (HD->PD);
-
-      local Vec chi[m][m];
-      vec_create2 (HD->da, m, chi);
-
-      bgy3d_vec_read_radial2 (HD->da, HD->PD, "x%d%d.txt", m, chi);
-
-      for (int i = 0; i < m; i++)
-        for (int j = 0; j <= i; j++)
-          {
-            MatMult (HD->fft_mat, chi[i][j], chi_fft[i][j]);
-            VecScale (chi_fft[i][j], dV);
-
-            /* Translate the distribution to  the grid corner. This is
-               what one expects in convolution integrals. */
-            bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
-          }
-      vec_destroy2 (m, chi);
-    }
+    from_radial_fft (HD, m, chi_fft);
   else
     bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
 
