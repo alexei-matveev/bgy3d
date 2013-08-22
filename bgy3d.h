@@ -186,6 +186,7 @@ static inline void assert_is_null (void *x)
 #define local                   /* local */
 #endif
 
+/* Initialized (in the C-speak) in bgy3d.c. See comments there: */
 extern int verbosity;
 
 /*

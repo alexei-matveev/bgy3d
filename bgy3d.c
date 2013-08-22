@@ -9,9 +9,12 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_destroy() */
 #include "bgy3d-dirichlet.h"    /* bgy3d_laplace_create() */
 
-/* Set  on startup  in bgy3d-main.c.   Used read-only  in a  few other
-   files.  Moved here  because  bgy3d-main.c is  not  linked when  the
-   main() is taken from elsewhere: */
+/*
+  Set  on  startup  by  bgy3d_guile_init()  in  bgy3d-guile.c  and  in
+  bgy3d-main.c.   Used read-only  in a  few other  files.   Moved here
+  because bgy3d-main.c  is not  linked when the  main() is  taken from
+  elsewhere:
+*/
 int verbosity = 0;
 
 
