@@ -1102,18 +1102,14 @@ static SCM guile_pot_destroy (SCM iter)
 /* Return MPI runk in PETSC_COMM_WORLD: */
 static SCM guile_rank (void)
 {
-  int rank;
-  MPI_Comm_rank (PETSC_COMM_WORLD, &rank);
-  return scm_from_int (rank);
+  return scm_from_int (comm_rank ());
 }
 
 
 /* Return MPI size of PETSC_COMM_WORLD: */
 static SCM guile_size (void)
 {
-  int size;
-  MPI_Comm_size (PETSC_COMM_WORLD, &size);
-  return scm_from_int (size);
+  return scm_from_int (comm_size ());
 }
 
 
