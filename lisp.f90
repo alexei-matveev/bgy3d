@@ -44,8 +44,34 @@ module lisp
      end function scm_from_double
   end interface num
 
+  interface
+     function scm_from_utf8_stringn (str, len) result (string) bind (c)
+       import
+       implicit none
+       character (kind=c_char), intent (in) :: str(*)
+       integer (c_size_t), intent (in), value :: len
+       type (obj) :: string
+     end function scm_from_utf8_stringn
+  end interface
+
   public :: obj
   public :: cons, nil
   public :: num
+  public :: str
+
+contains
+
+  function str (fstr) result (lstr)
+    implicit none
+    character (len=*), intent (in) :: fstr
+    type (obj) :: lstr
+    ! *** end of interface **
+
+    integer (c_size_t) :: slen
+
+    slen = len (fstr)
+    lstr = scm_from_utf8_stringn (fstr, slen)
+  end function str
+
 
 end module lisp
