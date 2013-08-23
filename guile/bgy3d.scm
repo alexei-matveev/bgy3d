@@ -373,6 +373,7 @@ computes the sum of all vector elements."
     (solvent            (value #t)      (predicate ,find-molecule)) ; a string
     (solute             (value #t)      (predicate ,find-molecule)) ; a string
     (dielectric         (value #t)      (predicate ,string->number))
+    (solvent-1d         (value #f)) ; use solvent susceptibility from 1D RISM
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
     (load-guess         (value #f))
