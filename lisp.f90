@@ -45,6 +45,14 @@ module lisp
   end interface num
 
   interface
+     function scm_from_utf8_symboln (str, len) result (symbol) bind (c)
+       import
+       implicit none
+       character (kind=c_char), intent (in) :: str(*)
+       integer (c_size_t), intent (in), value :: len
+       type (obj) :: symbol
+     end function scm_from_utf8_symboln
+
      function scm_from_utf8_stringn (str, len) result (string) bind (c)
        import
        implicit none
@@ -54,12 +62,23 @@ module lisp
      end function scm_from_utf8_stringn
   end interface
 
-  public :: obj
+  public :: obj                 ! type
+  public :: num, sym, str       ! constructors
   public :: cons, nil
-  public :: num
-  public :: str
 
 contains
+
+  function sym (fstr) result (symb)
+    implicit none
+    character (len=*), intent (in) :: fstr
+    type (obj) :: symb
+    ! *** end of interface **
+
+    integer (c_size_t) :: slen
+
+    slen = len (fstr)
+    symb = scm_from_utf8_symboln (fstr, slen)
+  end function sym
 
   function str (fstr) result (lstr)
     implicit none
@@ -72,6 +91,5 @@ contains
     slen = len (fstr)
     lstr = scm_from_utf8_stringn (fstr, slen)
   end function str
-
 
 end module lisp
