@@ -919,6 +919,7 @@ solute              KH1   (GF)    KH3    (GF)
 ---------------- ------ ------ ------  ------
 Jager(staggered)  2.317 -6.974  0.955  -2.559
 NIST              4.223 -5.119  2.736  -0.748
+diff              1.906  1.855  1.781   1.811
 ---------------------------------------------
 
 [1] Serrallach, Alberto. Conformation of methanol. matrix and gas
