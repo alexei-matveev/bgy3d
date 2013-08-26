@@ -871,3 +871,61 @@ C~4~H~9~COOH          34.503     -0.957   20.517  12.321
     Roe, Carlos Simmerling, David A. Case , Jack Tuszynski and Andriy
     Kovalenko, J. Chem. Theory Comput., 2010, 6 (3), pp 607–624
     http://dx.doi.org/10.1021/ct900460m
+
+
+Effects of molecule conformation, coordinates and location
+----------------------------------------------------------
+
+In the original code, methanol model used by Jager has the eclipsed
+conformation but it has been confirmed both by experimental [1] and
+computational [2] results that staggered conformation is preferred in
+equilibrium structure.
+
+Here we compared the different chemical potential results obtained from
+eclipsed and staggered conformations, the latter of which is built by
+rotating the "-OH" bond 180 degrees along "C-O" axis. Here we used
+option 1 in last section for the force field parameters of H in hydroxyl
+group, the rests are from OPLS-AA.
+
+Conformation   KH1   (GF)    KH3    (GF)
+------------ ----- ------ ------  ------
+eclipsed     2.412 -6.877  0.995  -2.517
+staggered    2.316 -6.975  0.955  -2.558
+----------------------------------------
+
+In order to compare the results between the same type of solute but with
+different atomic coordinates, we first need to examine the changes
+caused by molecule translation, which is actually the consequance of
+boundary condition introduced to obtain solute electrostatic field when
+solving 3D-RISM equation (no such problem in 1D-RISM). In the following
+table, atomic coordinates in methanol(staggered) solute are shifted
+different distances along x axis.
+
+shift($\AA$)    KH3    (GF)
+------------ ------  ------
+no shift      0.955  -2.558
+1.0           0.956  -2.558
+2.0           0.966  -2.547
+5.0           1.118  -2.398
+8.0          -2.259  -5.645
+---------------------------
+
+It could be seen that results don't change much if solute molecule is
+shifted a tiny distance (~ 1.0 \AA). So we could safely translate
+methanol molecules to make C atom at the center of simulation box and
+compare the values of two different sets of atomic coordinates
+
+solute              KH1   (GF)    KH3    (GF)
+---------------- ------ ------ ------  ------
+Jager(staggered)  2.317 -6.974  0.955  -2.559
+NIST              4.223 -5.119  2.736  -0.748
+---------------------------------------------
+
+[1] Serrallach, Alberto. Conformation of methanol. matrix and gas
+    studies, and normal coordinate analysis of methyl alcohol and seven
+    deuterated species Alberto Serrallach. (1973).
+    http://dx.doi.org/10.3929/ethz-a-000086069
+
+[2] Pophristic, V. and L. Goodman, Origin of Staggered Conformational
+    Preference in Methanol. The Journal of Physical Chemistry A, 2002.
+    106(8): p. 1642-1646. http://dx.doi.org/10.1021/jp014287d
