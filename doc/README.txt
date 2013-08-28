@@ -930,3 +930,44 @@ diff              1.906  1.855  1.781   1.811
 [2] Pophristic, V. and L. Goodman, Origin of Staggered Conformational
     Preference in Methanol. The Journal of Physical Chemistry A, 2002.
     106(8): p. 1642-1646. http://dx.doi.org/10.1021/jp014287d
+
+
+Dielectric effect of water solvent
+----------------------------------
+The dielectric constant calculated from RISM equation is very low (~ 20)
+when being compared to the real value (78.4) at the given condition in
+our study. Here we compared the excess chemical potential values of
+alcohols, carboxylate acids and aldehyes in aqueous solution with and
+without consistant dielectric correction.
+
+Again vdw parameters for H in hydroxyl and carboxyl group are set as
+$\sigma$ = 0.4 \AA  and $\epsilon$ = 0.046 kcal/mol. Note that since the
+dielectric correction is only available in 1D-RISM code, comparison
+calculations of 3D both use the 1D solvent susceptibility, which result
+in the slight differences (numbers differ from the second digit after
+decimal point) between unmodified 3D-RISM results here with those using
+solvent susceptibility calculated from 3D machinery.
+
+Solute               KH1    (GF)  KH1^d^  (GF)^d^     KH3    (GF)   KH3^d^  (GF)^d^
+----------------- ------  ------ ------- --------  ------  ------  ------- --------
+Alcohols
+CH~3~OH            4.217  -5.122   3.661   -5.639   2.771  -0.713    2.411   -1.079
+C~2~H~5~OH        10.054  -4.981   9.448   -5.512   6.167   1.447    5.799    1.076
+C~3~H~7~OH        18.710  -3.413  18.160   -3.869  11.364   5.530   11.104    5.270
+C~4~H~9~OH        24.899  -4.101  24.304   -4.565  14.791   7.877   14.539    7.629
+C~5~H~11~OH       32.443  -3.875  31.836   -4.323  19.316  11.189   19.104   10.984
+Carboxylate acids
+HCOOH              3.894  -4.934   3.409   -5.384   3.510  -0.012    3.216   -0.309
+CH~3~COOH         10.826  -3.775  10.341   -4.206   7.286   2.548    7.025    2.285
+C~2~H~5~COOH      16.065  -4.682  15.517   -5.146   9.894   4.170    9.632    3.908
+C~3~H~7~COOH      24.878  -3.180  24.366   -3.584  15.861   8.859   15.685    8.689
+C~4~H~9~COOH      32.666  -2.990  32.153   -3.370  20.298  12.109   20.152   11.973
+Aldehydes
+CH~2~O             5.961  -1.395   5.665   -1.663   4.174   1.059    3.950    0.833
+C~2~H~4~O         13.080   0.175  12.796   -0.006   8.187   3.814    8.010    3.637
+C~3~H~6~O         20.547   1.240  20.272    1.041  12.452   6.923   12.328    6.802
+C~4~H~8~O         27.879   1.428  27.602    1.251  16.509   9.887   16.425    9.809
+C~5~H~10~O        34.337   0.864  34.009    0.676  20.694  12.888   20.628   12.832
+-----------------------------------------------------------------------------------
+
+^d^ marks for dielectric correction
