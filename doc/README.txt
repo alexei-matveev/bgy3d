@@ -751,27 +751,37 @@ of hydrogen atom in OPLSAA result in unexpected values in 1D model.
 Calculation parameter settting is the same as previous sections, energy
 units is "kcal/mol"
 
-Solute                   KH1       (GF)      KH3    (GF)
------------------  ---------  ---------  -------  ------
+Solute                   KH1       (GF)      KH3    (GF)   exp^1^
+-----------------  ---------  ---------  -------  ------  -------
 Alcohols
-CH~3~OH            -1012.245  -1026.191    2.842  -0.644
-C~2~H~5~OH          -992.651  -1012.942    6.225   1.504
-C~3~H~7~OH          -974.739   -999.246   11.409   5.574
-C~4~H~9~OH          -982.240  -1012.521   14.829   7.915
-C~5~H~11~OH         -974.985  -1011.930   19.347  11.221
+CH~3~OH            -1012.245  -1026.191    2.842  -0.644   -5.115
+C~2~H~5~OH          -992.651  -1012.942    6.225   1.504   -5.014
+C~3~H~7~OH          -974.739   -999.246   11.409   5.574   -4.826
+C~4~H~9~OH          -982.240  -1012.521   14.829   7.915   -4.716
+C~5~H~11~OH         -974.985  -1011.930   19.347  11.221   -4.474
 Carboxylate acids
-HCOOH              -1168.869  -1183.655    3.535   0.013
-CH~3~COOH          -1151.262  -1172.668    7.305   2.566
-C~2~H~5~COOH       -1160.520  -1189.519    9.851   4.127
-C~3~H~7~COOH       -1130.024  -1166.344   15.869   8.867
-C~4~H~9~COOH       -1124.953  -1169.595   20.294  12.107
+HCOOH              -1168.869  -1183.655    3.535   0.013     --
+CH~3~COOH          -1151.262  -1172.668    7.305   2.566   -6.704
+C~2~H~5~COOH       -1160.520  -1189.519    9.851   4.127   -6.475
+C~3~H~7~COOH       -1130.024  -1166.344   15.869   8.867   -6.379
+C~4~H~9~COOH       -1124.953  -1169.595   20.294  12.107  -6.2^2^
 Aldehydes
-CH~2~O                 5.961     -1.395    4.145   1.030
-C~2~H~4~O             13.080      0.175    8.150   3.778
-C~3~H~6~O             20.547      1.240   12.411   6.882
-C~4~H~8~O             27.879      1.428   16.463   9.842
-C~5~H~10~O            34.337      0.864   20.642  12.837
---------------------------------------------------------
+CH~2~O                 5.961     -1.395    4.145   1.030     --
+C~2~H~4~O             13.080      0.175    8.150   3.778   -3.504
+C~3~H~6~O             20.547      1.240   12.411   6.882   -3.442
+C~4~H~8~O             27.879      1.428   16.463   9.842   -3.176
+C~5~H~10~O            34.337      0.864   20.642  12.837   -3.031
+-----------------------------------------------------------------
+
+[1] Group contributions to the thermodynamic properties of non-ionic
+    organic solutes in dilute aqueous solution, S. Cabani, P. Gianni,
+    V. Mollica and L. Lepori, J. Solution Chem. 10, 563 (1981),
+    http://dx.doi.org/10.1007/BF00646936
+
+[2] Model for Aqueous Solvation Based on Class IV Atomic Charges and
+    First Solvation Shell Effects, C. C. Chambers, G. D. Hawkins, C. J.
+    Cramer and D. G. Truhlar, The Journal of Physical Chemistry 100,
+    16385 (1996). http://dx.doi.org/10.1021/jp9610776
 
 
 Choice of hydrogen vdw parameters for alcohols and carboxylate acids
