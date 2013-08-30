@@ -808,10 +808,10 @@ value used in CHARMM for all polar hydrogens, 1.60 \AA, was found to be
 a suitable value for describing H-H protein-water van der Waals
 interactions." (page 4-19)
 
- sigma(A)    epsilon(kcal/mol)
----------   ------------------
+ $\sigma$(\AA)    $\epsilon$(kcal/mol)
+--------------   ---------------------
    0.4             0.046
-------------------------------
+--------------------------------------
 
 Excess chemical potential:
 
