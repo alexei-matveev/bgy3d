@@ -925,12 +925,12 @@ shifted a tiny distance (~ 1.0 \AA). So we could safely translate
 methanol molecules to make C atom at the center of simulation box and
 compare the values of two different sets of atomic coordinates
 
-solute              KH1   (GF)    KH3    (GF)
----------------- ------ ------ ------  ------
-Jager(staggered)  2.317 -6.974  0.955  -2.559
-NIST              4.223 -5.119  2.736  -0.748
-diff              1.906  1.855  1.781   1.811
----------------------------------------------
+solute             KH1   (GF)   KH3   (GF)   $\angle$COH   L~CO~   L~OH~
+---------------- ----- ------ ----- ------ ------------- ------- -------
+Jager(staggered) 2.317 -6.974 0.955 -2.559 109.5$^\circ$ 1.41\AA 1.08\AA
+NIST             4.223 -5.119 2.736 -0.748 107.4$^\circ$ 1.39\AA 0.95\AA
+diff             1.906  1.855 1.781  1.811
+------------------------------------------------------------------------
 
 [1] Serrallach, Alberto. Conformation of methanol. matrix and gas
     studies, and normal coordinate analysis of methyl alcohol and seven
