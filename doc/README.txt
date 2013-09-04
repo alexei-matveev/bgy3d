@@ -981,3 +981,34 @@ C~5~H~10~O        34.337   0.864  34.009    0.676  20.694  12.888   20.628   12.
 -----------------------------------------------------------------------------------
 
 ^d^ marks for dielectric correction
+
+3D-RISM coupling QM calculation
+-------------------------------
+
+Here we list results of 3D-RISM coupling PG calcuations. "gp" is short
+for "gas phase" in which we only add the solvation contribution to total
+hamiltonian after SCF is converged, on the other hand, "aq" is short for
+"aqueous", in which total hamiltonian is updated with the contribution
+of solvation during SCF.
+
+Solute               KH3-gp  (GF)-gp    KH3-aq   (GF)-aq
+-----------------  -------- --------  --------  --------
+Alcohols
+CH~3~OH               2.664   -0.871    -1.757    -5.362
+C~2~H~5~OH            7.117    2.356     2.403    -2.431
+C~3~H~7~OH           11.945    6.047     7.826     1.863
+C~4~H~9~OH           15.717    8.730    11.352     4.298
+C~5~H~11~OH          20.104   11.874    15.649     7.352
+Carboxylate acids
+HCOOH                 0.872   -2.718    -3.063    -6.714
+CH~3~COOH             4.139   -0.704    -0.578    -5.497
+C~2~H~5~COOH          7.613    1.784     2.569    -3.342
+C~3~H~7~COOH         12.734    5.591     7.932     0.710
+C~4~H~9~COOH         17.259    8.903    12.489     4.052
+Aldehydes
+CH~2~O                4.973    1.828     1.029    -2.155
+C~2~H~4~O             8.402    3.981     3.517    -0.965
+C~3~H~6~O            12.525    6.934     7.868     2.214
+C~4~H~8~O            16.640    9.941    12.032     5.270
+C~5~H~10~O           21.194   13.287    16.307     8.339
+--------------------------------------------------------
