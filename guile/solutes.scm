@@ -1,3 +1,4 @@
+;; vim: set tw=72:
 ;;;
 ;;; Simplest  species,  single  neutral   site  LJ  particle.   To  be
 ;;; comparable  to  water  one  might   set  β  =  0.261610  and  ρ  =
