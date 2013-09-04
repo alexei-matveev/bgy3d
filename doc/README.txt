@@ -848,13 +848,15 @@ and "-COOH":
 Site    $\sigma_h$  $\epsilon_h$  $b_{he}^*$  $\sigma_e$  $\epsilon_e$
 ------ ----------- ------------- ----------- ----------- -------------
 -OH           3.12          0.17      0.9488      1.2224         0.017
--COOH         3.00          0.17      0.9425       1.095         0.017
+-COOH         3.00          0.17      0.9525       1.095         0.017
 ----------------------------------------------------------------------
 
 ^*^ $b_{he}$ is calculated by averaging the O-H bond length relatively
 in alcohols and carboxylate acids which we currently use. Note that
 number from pronoic acid is excluded because H atom sites there are
-derived by ViewerPro automatically with bond length equal to 1.0\AA.
+derived by ViewerPro automatically with bond length equal to 1.0\AA
+(FIXME: even in optimized strucure, O-H bond in -COOH is still 0.98 \AA
+long).
 
 Solute                   KH1       (GF)      KH3    (GF)
 -----------------  ---------  ---------  -------  ------
