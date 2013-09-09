@@ -934,6 +934,25 @@ NIST             4.223 -5.119 2.736 -0.748 107.4$^\circ$ 1.39\AA 0.95\AA
 diff             1.906  1.855 1.781  1.811
 ------------------------------------------------------------------------
 
+We observed another case of value changes when using different molecule
+geometry for propanoic acid. Since hydrogen site information is missing in the
+original strucure obtained from NIST database, we used ViewerPro to add
+hydrogen atom with C-H and O-H bond length equal to 1.0 \AA, while the
+determined values in other carboxylate acids are about 1.10 \AA and 0.95 \AA
+relatively. The unphysical bond length didn't result in the failure of
+molecular mechanic RISM calculation because all the solutes and solvents are
+treated as rigid molecules, however this is not true in QM calculation. SCF
+calculation in PG diverged (gp) or converged to a unreasonable value (aq) due
+to the unpysical C-H and O-H bond length. Here we also compare the results for
+both molecule structures, "raw" for the one auto-completed by ViewerPro and
+"opt" for that optimized by PG
+
+solute     KH1    (GF)     KH3    (GF)    $\angle$HOC    L~HO~    L~HC~
+------  ------  ------  ------  ------  -------------  -------  -------
+raw     16.065  -4.682   9.849   4.125  109.6$^\circ$  1.00\AA  1.00\AA
+opt     16.855  -4.145  10.943   5.063  107.8$^\circ$  0.98\AA  1.10\AA
+-----------------------------------------------------------------------
+
 [1] Serrallach, Alberto. Conformation of methanol. matrix and gas
     studies, and normal coordinate analysis of methyl alcohol and seven
     deuterated species Alberto Serrallach. (1973).
