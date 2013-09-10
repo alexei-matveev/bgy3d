@@ -168,11 +168,6 @@
 
 
 ;;;
-;;; FIXME: must die, use *defaults* directly:
-;;;
-(define *default-molecule* (assoc-ref (input->settings *defaults*) 'solvent))
-
-;;;
 ;;; Only uses the length of g1 list to generate file names:
 ;;;
 (define (g1-file-names g1)
@@ -450,9 +445,9 @@ computes the sum of all vector elements."
 (define (old-main argv)
   (let* ((opts (getopt-long argv option-spec-all))
          (solvent (and-let* ((name (option-ref opts 'solvent #f)))
-                            (find-molecule name))) ; Maybe solvent
+                    (find-molecule name))) ; Maybe solvent
          (solute (and-let* ((name (option-ref opts 'solute #f)))
-                           (find-molecule name)))) ; Maybe solute
+                   (find-molecule name)))) ; Maybe solute
     (pretty-print/serial (list 'solvent: solvent))
     (pretty-print/serial (list 'solute: solute))
     (let-values
@@ -553,9 +548,11 @@ computes the sum of all vector elements."
 (define (new-main argv)
   (let ((cmd            (car argv))     ; should be non-empty
         (options        (getopt-long argv option-spec-new)))
-    (let ((args         (option-ref options '() '())) ; positional arguments (solute names)
-          (solvent      (find-molecule (option-ref options 'solvent *default-molecule*)))
-          (solute       (find-molecule (option-ref options 'solute *default-molecule*)))
+    (let ((args         (option-ref options '() '())) ; positional arguments
+          (solvent      (and-let* ((name (option-ref options 'solvent #f)))
+                          (find-molecule name))) ; Maybe solvent
+          (solute       (and-let* ((name (option-ref options 'solute #f)))
+                          (find-molecule name))) ; Maybe solute
           (save-binary  (option-ref options 'save-binary #f))
           (settings     (update-settings (input->settings *defaults*) options))) ; defaults updated from command line
       (match cmd
