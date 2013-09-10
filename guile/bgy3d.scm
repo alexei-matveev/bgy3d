@@ -502,11 +502,13 @@ computes the sum of all vector elements."
              ;;
              ;; Solute with solvent:
              ;;
-             (run-solute solute solvent '())
+             (let ((res (run-solute solute solvent '())))
+               (pretty-print/serial res))
              ;;
              ;; Pure solvent:
              ;;
-             (run-solvent solvent '()))) ; use Petsc env
+             (let ((res (run-solvent solvent '())))
+               (pretty-print/serial res))))
         ;;
         ;; Fall through to the new variant:
         ;;
