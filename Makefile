@@ -125,6 +125,7 @@ endif
 ifeq ($(WITH_FORTRAN),1)
 	f-objs += \
 		rism.o \
+		lisp.o \
 		snes.o \
 		bessel.o \
 		fft.o \
