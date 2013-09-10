@@ -569,6 +569,16 @@ computes the sum of all vector elements."
           (save-binary  (option-ref options 'save-binary #f))
           (settings     (update-settings (input->settings *defaults*) options))) ; defaults updated from command line
       (match cmd
+        ;;
+        ("free-energy"
+         (let ((dictionary (if solute
+                               (rism-solute solute solvent settings)
+                               (rism-solvent solvent settings)))
+               (section (if solute 'solute 'solvent))
+               (closure (option-ref settings 'closure *unspecified*)))
+           ;; (pk dictionary)
+           (pretty-print/serial
+            (assoc-ref (assoc-ref dictionary section) closure))))
         ("solvent"
          ;;
          ;; Only then run pure solvent, if --solvent was present in the
