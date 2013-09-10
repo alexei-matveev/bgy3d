@@ -1018,13 +1018,15 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
     solvent  indirect  correlation  nor  solvent  susceptibility  here
     (yet):
   */
-  rism_solvent (&PD, m, solvent_sites, NULL, NULL);
+
+  SCM retval;
+  rism_solvent (&PD, m, solvent_sites, NULL, NULL, &retval);
 
   free (solvent_name);
   free (solvent_sites);
 #endif
 
-  return SCM_UNSPECIFIED;
+  return retval;
 }
 
 
@@ -1063,7 +1065,8 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
   PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
 
-  rism_solute (&PD, n, solute_sites, m, solvent_sites);
+  SCM retval;
+  rism_solute (&PD, n, solute_sites, m, solvent_sites, &retval);
 
   free (solvent_name);
   free (solvent_sites);
@@ -1072,7 +1075,7 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   free (solute_sites);
 #endif
 
-  return SCM_UNSPECIFIED;
+  return retval;
 }
 
 

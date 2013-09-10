@@ -110,7 +110,7 @@ contains
   end function rism_upscale
 
 
-  subroutine rism_solvent (pd, m, solvent, t_buf, x_buf) bind (c)
+  subroutine rism_solvent (pd, m, solvent, t_buf, x_buf, ptr) bind (c)
     !
     ! When either t_buf or x_buf is not NULL it should be a pointer to
     ! a buffer  with sufficient space  to store nrad  * m *  m doubles
@@ -119,61 +119,81 @@ contains
     ! there.  If x_buf is not  NULL then the Fourier representation of
     ! the solvent susceptibility (not offset by one) is written there.
     !
+    ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
+    ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
+    ! non-present optional argument down the call chain.
+    !
     ! Needs to be consistent with ./rism.h
     !
     use iso_c_binding, only: c_int, c_ptr, c_f_pointer
     use foreign, only: problem_data, site, bgy3d_problem_data_print
+    use lisp, only: obj
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
     type (c_ptr), intent (in), value :: t_buf ! double[m][m][nrad] or NULL
     type (c_ptr), intent (in), value :: x_buf ! double[m][m][nrad] or NULL
+    type (c_ptr), intent (in), value :: ptr   ! SCM* or NULL
     ! *** end of interface ***
 
     integer :: nrad
     real (rk), pointer :: t(:, :, :), x(:, :, :)
+    type (obj), pointer :: dict
 
     nrad = rism_nrad (pd)
 
     call c_f_pointer (t_buf, t, shape = [nrad, m, m])
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
+    call c_f_pointer (ptr, dict)
 
     ! Fill supplied  storage with solvent susceptibility.  If NULL, it
     ! is interpreted as not present() in main() and thus ignored:
-    call main (pd, solvent, t=t, x=x)
+    call main (pd, solvent, t=t, x=x, dict=dict)
   end subroutine rism_solvent
 
 
-  subroutine rism_solute (pd, n, solute, m, solvent) bind (c)
+  subroutine rism_solute (pd, n, solute, m, solvent, ptr) bind (c)
+    !
+    ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
+    ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
+    ! non-present optional argument down the call chain.
     !
     ! Needs to be consistent with ./rism.h
     !
-    use iso_c_binding, only: c_int
+    use iso_c_binding, only: c_int, c_ptr, c_f_pointer
     use foreign, only: problem_data, site, bgy3d_problem_data_print
+    use lisp, only: obj
     implicit none
     type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: n, m
     type (site), intent (in) :: solute(n)
     type (site), intent (in) :: solvent(m)
+    type (c_ptr), intent (in), value :: ptr ! SCM* or NULL
     ! *** end of interface ***
 
-    call main (pd, solvent, solute)
+    type (obj), pointer :: dict
+
+    call c_f_pointer (ptr, dict)
+
+    call main (pd, solvent, solute, dict=dict)
   end subroutine rism_solute
 
 
-  subroutine main (pd, solvent, solute, t, x)
+  subroutine main (pd, solvent, solute, t, x, dict)
     !
     ! This one does not need to be interoperable.
     !
     use foreign, only: problem_data, site, bgy3d_problem_data_print, &
          verbosity, comm_rank
+    use lisp, only: obj, nil, cons, sym
     implicit none
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
     real (rk), optional, intent (out) :: t(:, :, :) ! (nrad, m, m)
     real (rk), optional, intent (out) :: x(:, :, :) ! (nrad, m, m)
+    type (obj), intent (out), optional :: dict
     ! *** end of interface ***
 
     integer :: nrad
@@ -208,13 +228,17 @@ contains
        ! Solvent susceptibility χ = ω + ρh:
        real (rk) :: chi_fft(nrad, size (solvent), size (solvent))
 
+       ! Procedures  down  the  call  chain  will set  this  to  valid
+       ! assiciation lists:
+       type (obj) :: vdict, udict
+
        call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
-            solvent, gam, chi_fft)
+            solvent, gam, chi_fft, vdict)
 
 
        if (present (solute)) then
           call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
-               solvent, chi_fft, solute)
+               solvent, chi_fft, solute, udict)
        endif
 
        ! Output, if requested:
@@ -225,15 +249,23 @@ contains
        if (present (x)) then
           x = chi_fft
        endif
+
+       if (present (dict)) then
+          dict = cons (cons (sym ("solvent"), vdict), nil)
+          if (present (solute)) then
+             dict = cons (cons (sym ("solute"), udict), dict)
+          endif
+       endif
     end block
   end subroutine main
 
 
-  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi)
+  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
     use fft, only: fourier_many, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
+    use lisp, only: obj
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -243,7 +275,9 @@ contains
     type (site), intent (in) :: sites(:)    ! (m)
     real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m)
     real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m)
+    type (obj), intent (out) :: dict
     ! *** end of interface ***
+
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
@@ -353,7 +387,8 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v, t, A=A, eps=eps)
+    call post_process (method, beta, rho, sites, sites, dr, dk, v, t, &
+         A=A, eps=eps, dict=dict)
 
   contains
 
@@ -424,10 +459,11 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute)
+  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
     use fft, only: integrate
+    use lisp, only: obj
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -437,6 +473,7 @@ contains
     type (site), intent (in) :: solvent(:) ! (m)
     real (rk), intent(in) :: chi(:, :, :)  ! (nrad, m, m)
     type (site), intent (in) :: solute(:)  ! (n)
+    type (obj), intent (out) :: dict
     ! *** end of interface ***
 
     ! Solute-solvent pair quantities:
@@ -480,7 +517,8 @@ contains
     call snes_default (iterate_t, t)
 
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, A=1.0d0, eps=0.0d0)
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
+         A=1.0d0, eps=0.0d0, dict=dict)
 
   contains
 
@@ -537,7 +575,8 @@ contains
   end subroutine rism_uv
 
 
-  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, A, eps)
+  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
+       A, eps, dict)
     !
     ! Prints some results.
     !
@@ -545,6 +584,7 @@ contains
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use lisp, only: obj, cons, nil, sym, num
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -556,6 +596,7 @@ contains
     real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
     real (rk), intent (in) :: A            ! long-range scaling factor
     real (rk), value :: eps     ! requested dielectric constant, or 0
+    type (obj), intent (out) :: dict
     ! *** end of interface ***
 
     integer :: nrad, n, m
@@ -642,8 +683,13 @@ contains
           real (rk) :: mu(size (methods))
           integer :: i
 
+          ! Initialize intent (out) argument:
+          dict = nil
           do i = 1, size (methods)
              mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
+
+             ! Cons a key/value pair onto the list:
+             dict = cons (cons (sym (trim (names(i))), num (mu(i))), dict)
           enddo
 
           if (comm_rank () == 0) then

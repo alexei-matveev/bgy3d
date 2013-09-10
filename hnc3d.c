@@ -693,8 +693,9 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
     real t_rad[m][m][nrad];
 
-    /* 1d-RISM calculation.  Dont need susceptibility, need t(r): */
-    rism_solvent (&pd, m, solvent, t_rad, NULL);
+    /* 1d-RISM calculation.  Dont  need neither susceptibility nor the
+       result dictionary, need only t(r): */
+    rism_solvent (&pd, m, solvent, t_rad, NULL, NULL);
 
     {
       local Vec t[m][m];
@@ -1222,9 +1223,9 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
 
   real x_fft[m][m][nrad];
 
-  /* 1d-RISM  calculation. Dont  need  indirect correlation,  need
-     χ(k): */
-  rism_solvent (&pd, m, solvent, NULL, x_fft);
+  /* 1d-RISM calculation.  Dont  need neither indirect correlation nor
+     the result dictionary, only need χ(k): */
+  rism_solvent (&pd, m, solvent, NULL, x_fft, NULL);
 
   /* The solute/solvent code expects χ - 1: */
   for (int i = 0; i < m; i++)
