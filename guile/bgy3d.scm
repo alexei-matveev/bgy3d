@@ -404,17 +404,29 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; Returns  new   settings  with   updated  fields  taken   from  the
-;;; getopt-long options:
+;;; getopt-long options. The values from the command line (provided as
+;;; strings) are converted to the proper type derived from the default
+;;; value of the setting.
 ;;;
 (define (update-settings settings options)
-  (let ((update-pair                    ; a function ...
-         (match-lambda
-          ((key . value)                ; that takes a pair ...
-           (let ((op (option-ref options key "")))
-             (cons key                     ; and returns updated pair.
-                   (or (string->number op) ; converts "" -> #f
-                       value)))))))
-    (map update-pair settings)))
+  ;;
+  (define (update-value val str)
+    (cond
+     ((not str) val)                    ; unchanged if str is #f
+     ((string? val) str)
+     ((number? val) (string->number str))
+     ((symbol? val) (string->symbol str))))
+  ;;
+  (define update-pair                   ; a function ...
+    (match-lambda
+     ((key . val)                              ; that takes a pair ...
+      (let ((str (option-ref options key #f))) ; string or #f
+        (cons key (update-value val str)))))) ; and returns updated pair.
+  ;;
+  ;; FIXME: this updates the  defaults, but does not add other entries
+  ;; specified in the command line. Augment the defaults.
+  ;;
+  (map update-pair settings))
 
 
 ;;;
