@@ -131,7 +131,9 @@
     (norm-tol 1.0e-7)                   ; convergence threshold
     (max-iter 1500)                     ; max number of iterations
     (damp-start 1.0)                    ; scaling factor?
-    (lambda 0.02)))                     ; not the scheme lambda
+    (lambda 0.02)                       ; not the scheme lambda
+    (closure HNC)                       ; HNC, KH or PY
+    ))
 
 
 ;;;
@@ -367,6 +369,8 @@ computes the sum of all vector elements."
     (lambda             (value #t)      (predicate ,string->number))
     (solvent            (value #t)      (predicate ,find-molecule)) ; a string
     (solute             (value #t)      (predicate ,find-molecule)) ; a string
+    (closure            (value #t)      (predicate ,(lambda (x)
+                                                      (member x '("HNC" "PY" "KH")))))
     (dielectric         (value #t)      (predicate ,string->number))
     (solvent-1d         (value #f)) ; use solvent susceptibility from 1D RISM
     (from-radial-g2     (value #f))
@@ -397,9 +401,6 @@ computes the sum of all vector elements."
    ((bgy        (value #f))
     (hnc        (value #f))
     (rism       (value #f))
-    (closure    (value #t)
-                (predicate ,(lambda (x)
-                              (member x '("HNC" "PY" "KH")))))
     (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
