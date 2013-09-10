@@ -997,6 +997,8 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
   (void) solvent;
   (void) settings;
   assert (false);
+
+  return SCM_UNSPECIFIED;
 #else
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -1024,9 +1026,9 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
 
   free (solvent_name);
   free (solvent_sites);
-#endif
 
   return retval;
+#endif
 }
 
 
@@ -1043,6 +1045,8 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   (void) solvent;
   (void) settings;
   assert (false);
+
+  return SCM_UNSPECIFIED;
 #else
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
@@ -1073,9 +1077,9 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
 
   free (solute_name);
   free (solute_sites);
-#endif
 
   return retval;
+#endif
 }
 
 
