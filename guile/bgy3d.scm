@@ -6,6 +6,7 @@
   #:use-module (guile compat)           ; define-syntax-rule for 1.8
   #:use-module (guile molecule)         ; site representation
   #:use-module (guile punch-file)       ; write-punch-file
+  #:use-module (guile utils)            ; memoize, ddd
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (srfi srfi-11)           ; let-values
@@ -570,7 +571,7 @@ computes the sum of all vector elements."
           (settings     (update-settings (input->settings *defaults*) options))) ; defaults updated from command line
       (match cmd
         ;;
-        ("free-energy"
+        ((or "energy" "gradients")
          (let* ((section (if solute 'solute 'solvent))
                 (closure (assoc-ref settings 'closure))
                 (m (or solute solvent))
@@ -583,8 +584,14 @@ computes the sum of all vector elements."
                             (d' (assoc-ref d section))
                             (e (assoc-ref d' closure)))
                        e)))
-                (e (f x)))
-           (pretty-print/serial e)))
+                (f (memoize f)))
+           (match cmd
+             ("energy"
+              (let ((e (f x)))
+                (pretty-print/serial e)))
+             ("gradients"
+              (let ((g (ddd f x)))
+                (pretty-print/serial g))))))
         ("solvent"
          ;;
          ;; Only then run pure solvent, if --solvent was present in the
