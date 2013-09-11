@@ -600,6 +600,13 @@ contains
     ! *** end of interface ***
 
     integer :: nrad, n, m
+    integer :: verb
+
+    if (comm_rank () == 0) then
+       verb = verbosity
+    else
+       verb = 0
+    endif
 
     ! FIXME: to make debug  output somewhat meaningfull for plain RISM
     ! (not DRISM) calculations use a real eps:
@@ -616,7 +623,7 @@ contains
        real (rk) :: u(3, 3), x(3, size (solvent))
        type (site) :: sites(size (solvent))
 
-       if (comm_rank () == 0) then
+       if (verb > 0) then
           sites = solvent
           call show_sites ("Before!", sites)
           print *, "# Dipole before =", dipole (sites)
@@ -670,7 +677,7 @@ contains
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
-       if (comm_rank () == 0) then
+       if (verb > 0) then
           print *, "# rho =", rho, "beta =", beta, "n =", nrad
        endif
 
@@ -692,7 +699,7 @@ contains
              dict = cons (cons (sym (trim (names(i))), num (mu(i))), dict)
           enddo
 
-          if (comm_rank () == 0) then
+          if (verb > 0) then
              print *, "# Chemical potentials, default is marked with *:"
              do i = 1, size (methods)
                 print *, "# MU =", mu(i) / KCAL, "kcal =", mu(i) / KJOULE, "kJ", &
@@ -716,7 +723,7 @@ contains
           ! same number density:
           y = dipole_density (beta, rho, solvent)
 
-          if (comm_rank () == 0) then
+          if (verb > 0) then
              print *, "# y = ", y, "e = 1 + 3y =", 1 + 3 * y
              print *, "# ε = ", epsilon_rism (beta, rho, solvent)
              print *, "# A(1 + 3 * y, y) = ", dipole_factor (1 + 3 * y, y)
@@ -764,7 +771,7 @@ contains
             fac2 = (eps - eps0) / (4 * pi * beta)
           end associate
 
-          if (comm_rank () == 0) then
+          if (verb > 0) then
              print *, "# [(ε - 1) / ε - 3y] / 4πβ = ", fac0, &
                   "e =", epsln (beta, y, fac0), &
                   "(target values)"
@@ -807,11 +814,11 @@ contains
                 c(n) = moment (n, qhq, dr)
              enddo
 
-             if (comm_rank () == 0) then
+             if (verb > 0) then
                 print *, "# [(e - 1) / e - 3y] / 4πβ = ", -c(2) / 6, &
                      "e =", epsln (beta, y, -c(2) / 6), &
                      "(from second moment)"
-                if (verbosity > 1) then
+                if (verb > 1) then
                    print *, "# first three moments = ", c(:)
                 endif
              endif
@@ -822,11 +829,11 @@ contains
 
                 a = polyfit (k(1:n), x(1:n), 2)
 
-                if (comm_rank () == 0) then
+                if (verb > 0) then
                    print *, "# [(e - 1) / e - 3y] / 4πβ = ", a(2) , &
                         "e =", epsln (beta, y, a(2)), &
                         "(", n, "pts)"
-                   if (verbosity > 1) then
+                   if (verb > 1) then
                       print *, "# fitted coefficients = ", a(:)
                       print *, "# fitted k-range = ", k(1), "...", k(n), &
                            "with", n, "pts"
@@ -838,7 +845,7 @@ contains
 
 
        ! This prints a lot of data on tty!
-       if (verbosity > 1 .and. comm_rank () == 0) then
+       if (verb > 1) then
           print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
           do p = 1, nrad
              write (*, *) r(p), &
