@@ -5,6 +5,8 @@
   #:export (derivatives
             list-derivatives
             dfridr
+            fmap
+            ddd
             qtrap
             qsimp
             isqrt))
@@ -160,6 +162,68 @@ Translated from Numerical Recipes."
 ;; (cos 1.57)
 ;; =>
 ;; 7.96326710733263e-4
+
+;;;
+;;; Traverse the nested structure x and apply f to every element.
+;;;
+(define (fmap f x)
+  (cond
+   ((null? x) x)
+   ((pair? x) (cons (fmap f (car x)) (fmap f (cdr x))))
+   (else (f x))))
+
+
+;;;
+;;; Given a procedure (d f x) to compute derivatives of a univariate f
+;;; at x use it to  compute partial derivatives of the multivariate (f
+;;; x)  at  x  where  x  is  represented by  a  nested  list  of  real
+;;; numbers. Here  "dd" stays for "do derivatives".   FIXME: what kind
+;;; of operation is this?
+;;;
+(define (dd d f x)
+  (let go ((f f) (x x))
+    (cond
+     ((null? x) x)
+     ((pair? x) (let ((h (car x))
+                      (t (cdr x)))
+                  (cons (go (lambda (x) (f (cons x t))) h)
+                        (go (lambda (x) (f (cons h x))) t))))
+     (else (d f x)))))
+
+;;;
+;;;
+;;;
+(define (ddd f x)
+  (define (d f x)
+    (car (dfridr f x 0.1)))        ; numerical derivative of f(x) at x
+  ;;
+  (dd d f x))
+
+;; (let ((x 1.0)
+;;       (f sin))
+;;   (pretty-print (ddd f x)))
+
+;; (let ((x 2.0)
+;;       (f cos))
+;;   (pretty-print (ddd f x)))
+
+;; (let ((x '(1.0))
+;;       (f (lambda (x) (sin (car x)))))
+;;   (pretty-print (ddd f x)))
+
+;; (let ((x '((1.0)))
+;;       (f (lambda (x) (sin (caar x)))))
+;;   (pretty-print (ddd f x)))
+
+
+;; (let ((x '(1.0 2.0))
+;;       (f (lambda (x) (+ (sin (car x)) (cos (cadr x))))))
+;;   (pretty-print (ddd f x)))
+
+;; (let ((x '(1.0 (2.0)))
+;;       (f (lambda (x) (+ (sin (car x)) (cos (caadr x))))))
+;;   (pretty-print (ddd f x)))
+
 
 (define (derivatives f args h)
   "(derivatives f x h) ->
