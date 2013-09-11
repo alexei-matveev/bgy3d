@@ -9,13 +9,16 @@
   #:use-module (guile tinker)           ; tinker-table
   #:export
   (make-molecule
+   move-molecule
    molecule-name
    molecule-sites
+   molecule-positions
    molecule-charge
    molecule-dipole
    find-molecule
    print-molecule/xyz
    make-site
+   move-site
    site-name
    site-position
    site-sigma
@@ -109,6 +112,13 @@
 
 (define (molecule-name solute) (first solute))
 (define (molecule-sites solute) (second solute))
+(define (molecule-positions solute)
+  (map site-position (molecule-sites solute)))
+
+(define (move-molecule solute positions)
+  (let ((name (molecule-name solute))
+        (sites (molecule-sites solute)))
+    (make-molecule name (map move-site sites positions))))
 
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
@@ -128,6 +138,11 @@
 (define (site-sigma site) (third site))
 (define (site-epsilon site) (fourth site))
 (define (site-charge site) (fifth site))
+
+(define (move-site site new-position)
+  (match site
+    ((name old-position sigma epsilon charge)
+     (make-site name new-position sigma epsilon charge))))
 
 (define (site-x site) (first (site-position site)))
 (define (site-y site) (second (site-position site)))
