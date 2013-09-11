@@ -571,14 +571,20 @@ computes the sum of all vector elements."
       (match cmd
         ;;
         ("free-energy"
-         (let ((dictionary (if solute
-                               (rism-solute solute solvent settings)
-                               (rism-solvent solvent settings)))
-               (section (if solute 'solute 'solvent))
-               (closure (option-ref settings 'closure *unspecified*)))
-           ;; (pk dictionary)
-           (pretty-print/serial
-            (assoc-ref (assoc-ref dictionary section) closure))))
+         (let* ((section (if solute 'solute 'solvent))
+                (closure (assoc-ref settings 'closure))
+                (m (or solute solvent))
+                (x (molecule-positions m))
+                (f (lambda (x)
+                     (let* ((m' (move-molecule m x))
+                            (d (if solute
+                                   (rism-solute m' solvent settings)
+                                   (rism-solvent m' settings)))
+                            (d' (assoc-ref d section))
+                            (e (assoc-ref d' closure)))
+                       e)))
+                (e (f x)))
+           (pretty-print/serial e)))
         ("solvent"
          ;;
          ;; Only then run pure solvent, if --solvent was present in the
