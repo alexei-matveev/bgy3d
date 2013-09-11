@@ -1013,7 +1013,8 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
   to_sites (solvent, &m, &solvent_sites, &solvent_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
+  if (verbosity > 0)
+    PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
 
   /*
     NULL indicates  an optional output argument: we  dont need neither
@@ -1066,8 +1067,11 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
-  PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
+  if (verbosity > 0)
+    {
+      PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
+      PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
+    }
 
   SCM retval;
   rism_solute (&PD, n, solute_sites, m, solvent_sites, &retval);
