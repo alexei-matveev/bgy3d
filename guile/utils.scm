@@ -9,9 +9,24 @@
             ddd
             qtrap
             qsimp
+            memoize
             isqrt))
 
 (use-modules (ice-9 pretty-print))
+
+;;;
+;;; Let-over-lambda  here.   Given a  function  (f  x)  The result  of
+;;; (memoize f)  is a  function (f' x)  == (f  x) that will  cache all
+;;; results.  FIXME: make it work for arbitrary number of arguments.
+;;;
+(define (memoize f)
+  (let ((*cache* '()))                  ; empty cache
+    (lambda (x)
+      (cdr (or (assoc x *cache*)        ; first check the cache
+               (let* ((y (f x))         ; otherwise invoke f
+                      (p (cons x y)))   ; make dictionary pair
+                 (set! *cache* (cons p *cache*)) ; cache new pair
+                 p))))))                         ; and return it too
 
 ;;;
 ;;; See  qtrap(),  trapzd()  in  Numerical  Recepies,  Integration  of

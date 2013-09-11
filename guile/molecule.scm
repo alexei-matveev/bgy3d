@@ -7,6 +7,7 @@
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (guile tinker)           ; tinker-table
+  #:use-module (guile utils)            ; memoize
   #:export
   (make-molecule
    move-molecule
