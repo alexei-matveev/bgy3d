@@ -153,7 +153,7 @@ contains
   end subroutine rism_solvent
 
 
-  subroutine rism_solute (pd, n, solute, m, solvent, ptr) bind (c)
+  subroutine rism_solute (pd, n, solute, m, solvent, x_buf, ptr) bind (c)
     !
     ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
     ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
@@ -169,11 +169,17 @@ contains
     integer (c_int), intent (in), value :: n, m
     type (site), intent (in) :: solute(n)
     type (site), intent (in) :: solvent(m)
+    type (c_ptr), intent (in), value :: x_buf ! double[m][m][nrad] or NULL
     type (c_ptr), intent (in), value :: ptr ! SCM* or NULL
     ! *** end of interface ***
 
+    integer :: nrad
+    real (rk), pointer :: x(:, :, :)
     type (obj), pointer :: dict
 
+    nrad = rism_nrad (pd)
+
+    call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
 
     call main (pd, solvent, solute, dict=dict)

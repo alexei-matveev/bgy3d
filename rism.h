@@ -7,11 +7,12 @@ ProblemData rism_upscale (const ProblemData *PD);
 
 void rism_solvent (const ProblemData *PD,
                    int m, const Site solvent[m],
-                   real t[m][m][*],  /* [m][m][nrad], out or NULL */
-                   real x[m][m][*],  /* [m][m][nrad], out or NULL */
-                   void *retval);    /* SCM*, out or NULL */
+                   real t[m][m][*],  /* [m][m][nrad] or NULL, out */
+                   real x[m][m][*],  /* [m][m][nrad] or NULL, out */
+                   void *retval);    /* SCM* or NULL, out */
 
 void rism_solute (const ProblemData *PD,
                   int n, const Site solute[n],
                   int m, const Site solvent[m],
-                  void *retval); /* SCM*, out or NULL */
+                  real x[m][m][*], /* [m][m][nrad] or NULL, in */
+                  void *retval);   /* SCM* or NULL, out */

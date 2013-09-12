@@ -1064,7 +1064,7 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
 
 
 
-static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
+static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft)
 {
 #ifndef WITH_FORTRAN
   /*
@@ -1075,6 +1075,7 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
   (void) solute;
   (void) solvent;
   (void) settings;
+  (void) chi_fft;
   assert (false);
 
   return SCM_UNSPECIFIED;
@@ -1103,8 +1104,45 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings)
       PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
     }
 
+  /* This association list will contain essential results: */
   SCM retval;
-  rism_solute (&PD, n, solute_sites, m, solvent_sites, &retval);
+  {
+    scm_t_array_handle handle;
+
+    /*
+      By default, there is no solvent susceptibility from a prior pure
+      solvent  calculation  to  be  used here.  The  Fortran  function
+      rism_solute() will have to run a pure solvent calculation too in
+      this case:
+    */
+    const real *x_buf = NULL;
+
+    /*
+      Only if the caller supplied a suitable Guile array, then we pass
+      its contents  further.  The caller  is responsible to  make sure
+      that susceptibility corresponds to  the actual solvent and other
+      settings (notably radial dimensions):
+    */
+    if (!SCM_UNBNDP (chi_fft))
+      {
+        scm_array_get_handle (chi_fft, &handle);
+
+        /*
+          This should have  as much space as a  real array declared as
+          double x_buf[m][m][nrad].  The buffer is  read-only here, so
+          we  cast the  pointer  to (void*)  when  passing further  to
+          silence the warning.
+        */
+        x_buf = scm_array_handle_f64_elements (&handle);
+      }
+
+    /* Actual solute/solvent calculation here: */
+    rism_solute (&PD, n, solute_sites, m, solvent_sites, (void*) x_buf, &retval);
+
+    if (!SCM_UNBNDP (chi_fft))
+      scm_array_handle_release (&handle);
+  }
+
 
   free (solvent_name);
   free (solvent_sites);
@@ -1198,7 +1236,7 @@ static void module_init (void* unused)
   EXPORT ("comm-rank", 0, 0, 0, guile_comm_rank);
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
-  EXPORT ("rism-solute", 3, 0, 0, guile_rism_solute);
+  EXPORT ("rism-solute", 3, 1, 0, guile_rism_solute);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
