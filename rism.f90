@@ -182,7 +182,7 @@ contains
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
 
-    call main (pd, solvent, solute, dict=dict)
+    call main (pd, solvent, solute, x=x, dict=dict)
   end subroutine rism_solute
 
 
@@ -202,8 +202,14 @@ contains
     type (obj), intent (out), optional :: dict
     ! *** end of interface ***
 
+    logical :: vv, uv
     integer :: nrad
     real (rk) :: rmax
+
+    ! We do  vv-caclulation if there is  no solute, or  if the solvent
+    ! susceptibility was not supplied for solute/solvent calculation.
+    uv = present (solute)
+    vv = .not. uv .or. uv .and. .not. present (x)
 
     rmax = rism_rmax (pd)
     nrad = rism_nrad (pd)
@@ -238,27 +244,32 @@ contains
        ! assiciation lists:
        type (obj) :: vdict, udict
 
-       call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
-            solvent, gam, chi_fft, vdict)
+       if (vv) then
+          call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
+               solvent, gam, chi_fft, vdict)
 
+          ! Output, if requested:
+          if (present (t)) then
+             t = gam
+          endif
 
-       if (present (solute)) then
+          if (present (x)) then
+             x = chi_fft
+          endif
+       else
+          if (.not. present (x)) error stop "no way to get chi!"
+          chi_fft = x
+          vdict = nil
+       endif
+
+       if (uv) then
           call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
                solvent, chi_fft, solute, udict)
        endif
 
-       ! Output, if requested:
-       if (present (t)) then
-          t = gam
-       endif
-
-       if (present (x)) then
-          x = chi_fft
-       endif
-
        if (present (dict)) then
           dict = cons (cons (sym ("solvent"), vdict), nil)
-          if (present (solute)) then
+          if (uv) then
              dict = cons (cons (sym ("solute"), udict), dict)
           endif
        endif
