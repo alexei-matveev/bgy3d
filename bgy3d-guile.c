@@ -1016,17 +1016,47 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
   if (verbosity > 0)
     PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
 
-  /*
-    NULL indicates  an optional output argument: we  dont need neither
-    solvent  indirect  correlation  nor  solvent  susceptibility  here
-    (yet):
-  */
 
+  /* Always use this function to derive number of radial points: */
+  const int nrad = rism_nrad (&PD);
+
+  /* Guile m x m x nrad array of doubles: */
+  SCM chi_fft = scm_make_typed_array (scm_from_locale_symbol ("f64"),
+                                      SCM_UNSPECIFIED,
+                                      scm_list_3 (scm_from_int (m),
+                                                  scm_from_int (m),
+                                                  scm_from_int (nrad)));
+
+  /* This association list will contain essential results: */
   SCM retval;
-  rism_solvent (&PD, m, solvent_sites, NULL, NULL, &retval);
+  {
+    scm_t_array_handle handle;
+    scm_array_get_handle (chi_fft, &handle);
+
+    /*
+      This  should have  as much  space as  a real  array  declared as
+      double x_buf[m][m][nrad].  Void* is to silence the warnings:
+    */
+    void *x_buf = scm_array_handle_f64_writable_elements (&handle);
+
+    /*
+      Actual  pure  solvent   calculation  here.   NULL  indicates  an
+      optional output  argument. Supply NULL  if you dont  need either
+      solvent indirect correlation or solvent susceptibility:
+    */
+    rism_solvent (&PD, m, solvent_sites, NULL, x_buf, &retval);
+
+    scm_array_handle_release (&handle);
+  }
 
   free (solvent_name);
   free (solvent_sites);
+
+  /* Cons a  new entry onto  the association list. Note  that printing
+     this m x m x nrad array may take a lot of screen estate: */
+  retval = scm_acons (scm_from_locale_symbol ("susceptibility"),
+                      chi_fft,
+                      retval);
 
   return retval;
 #endif
