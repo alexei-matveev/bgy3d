@@ -572,14 +572,16 @@ computes the sum of all vector elements."
       (match cmd
         ;;
         ((or "energy" "gradients")
-         (let* ((section (if solute 'solute 'solvent))
-                (closure (assoc-ref settings 'closure))
-                (m (or solute solvent))
-                (x (molecule-positions m))
-                (f (lambda (x)
+         (let* ((dct (rism-solvent solvent settings)) ; pure solvent run here!
+                (chi (assoc-ref dct 'susceptibility)) ; extract susceptibility
+                (section (if solute 'solute 'solvent))  ; alist key
+                (closure (assoc-ref settings 'closure)) ; alist key
+                (m (or solute solvent))    ; molecule to be "moved"
+                (x (molecule-positions m)) ; unperturbed geometry
+                (f (lambda (x)             ; free energy surface
                      (let* ((m' (move-molecule m x))
                             (d (if solute
-                                   (rism-solute m' solvent settings)
+                                   (rism-solute m' solvent settings chi)
                                    (rism-solvent m' settings)))
                             (d' (assoc-ref d section))
                             (e (assoc-ref d' closure)))
