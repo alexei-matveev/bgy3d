@@ -357,9 +357,16 @@ computes the sum of all vector elements."
 ;;; for  use with getopt-long.  Most of  these happen  to be  real- or
 ;;; integer numbers:
 ;;;
-(define option-spec-base
+;;; FIXME: ./runbgy.scm invokes old-main at the moment, so that it has
+;;; to accept  the options of  the new-main. This leads  to unhelpfull
+;;; error messages sometimes:
+;;;
+(define option-spec
   (quasiquote
-   ((verbosity          (value #t)      (predicate ,string->number)) ; dont use -v
+   ((bgy                (value #f))
+    (hnc                (value #f))
+    (rism               (value #f))
+    (verbosity          (value #t)      (predicate ,string->number)) ; dont use -v
     (N                  (value #t)      (predicate ,string->number))
     (rho                (value #t)      (predicate ,string->number))
     (beta               (value #t)      (predicate ,string->number))
@@ -385,24 +392,6 @@ computes the sum of all vector elements."
     (no-cage            (value #f)) ; turns off metallic cage boundary
     (no-hacks           (value #f)))))  ; turns off ugly hacks
 
-
-
-(define option-spec-new
-  (quasiquote
-   ((save-binary        (value #f))
-    (unquote-splicing option-spec-base)))) ; common options
-
-;;;
-;;; FIXME: ./runbgy.scm invokes old-main at the moment, so that it has
-;;; to accept  the options of  the new-main. This leads  to unhelpfull
-;;; error messages:
-;;;
-(define option-spec-all
-  (quasiquote
-   ((bgy        (value #f))
-    (hnc        (value #f))
-    (rism       (value #f))
-    (unquote-splicing option-spec-base)))) ; common options
 
 ;;;
 ;;; Returns  new   settings  with   updated  fields  taken   from  the
@@ -457,7 +446,7 @@ computes the sum of all vector elements."
 ;;; bgy3d-solvents.h:
 ;;;
 (define (old-main argv)
-  (let* ((opts (getopt-long argv option-spec-all))
+  (let* ((opts (getopt-long argv option-spec))
          (solvent (and-let* ((name (option-ref opts 'solvent #f)))
                     (find-molecule name))) ; Maybe solvent
          (solute (and-let* ((name (option-ref opts 'solute #f)))
@@ -561,7 +550,7 @@ computes the sum of all vector elements."
 ;;;
 (define (new-main argv)
   (let ((cmd            (car argv))     ; should be non-empty
-        (options        (getopt-long argv option-spec-new)))
+        (options        (getopt-long argv option-spec)))
     (let ((args         (option-ref options '() '())) ; positional arguments
           (solvent      (and-let* ((name (option-ref options 'solvent #f)))
                           (find-molecule name))) ; Maybe solvent
