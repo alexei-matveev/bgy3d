@@ -18,18 +18,8 @@
  (eval load compile)      ; extend %load-path at compile time with 2.0
  (set! %load-path (cons "/users/alexei/darcs/bgy3d" %load-path)))
 
-(use-modules ((guile bgy3d)
-              #:select
-              (old-main
-               new-main)))
+(use-modules (guile bgy3d))             ; bgy3d-main
 
-;;;
-;;; We are  trying to  emulate behaviour of  old executable  unless we
-;;; find a better interface:
-;;;
-(let ((argv (command-line)))
-  (if (string-prefix? "--" (cadr argv)) ; what if no options supplied?
-      (old-main argv)
-      (new-main (cdr argv)))) ; otherwise the first argument should be
-                              ; a subcommand
+
+(bgy3d-main (command-line))
 

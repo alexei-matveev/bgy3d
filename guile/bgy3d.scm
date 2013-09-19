@@ -44,11 +44,9 @@
    bgy3d-run-solute
    bgy3d-restart-destroy)
   #:export
-  (new-main
-   old-main
+  (bgy3d-main
    vec-print
    vec-norm
-   bgy3d-test
    solvent/solvent
    solute/solvent))
 
@@ -574,7 +572,7 @@ computes the sum of all vector elements."
 ;;; "solvent":
 ;;;
 (define (new-main argv)
-  (let* ((settings (parse-command-line (cons "$0" argv))) ; FIXME: fake $0
+  (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
          (args (assoc-ref settings '())) ; positional arguments
          (cmd (car args))                ; first the command ...
          (args (cdr args)))              ; ... then the real args
@@ -733,5 +731,11 @@ computes the sum of all vector elements."
            args))))))
 
 
-(define (bgy3d-test)
-  (pretty-print "does nothing"))
+;;;
+;;; We are  trying to  emulate behaviour of  old executable  unless we
+;;; find a better interface:
+;;;
+(define (bgy3d-main argv)
+  (if (string-prefix? "--" (cadr argv)) ; what if no options supplied?
+      (old-main argv)
+      (new-main argv)))
