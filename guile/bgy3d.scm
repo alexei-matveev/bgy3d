@@ -119,21 +119,25 @@
 ;;; sequence of 2-lists.  This is the  input as it would appear in the
 ;;; file.  These defaults are targeting water at normal conditions.
 ;;;
-;;; OUTDATED?  To get  butanoic  acid and  hexane  (two largest  ones)
-;;; converge when treated by QM one needs about 1500 iterations (well,
-;;; we should make the solver better).
+;;; The  defaults, updated  from the  command  line, will  be used  to
+;;; prepare   the   reall   association   list  with   settings.   See
+;;; parse-command-line below.
 ;;;
 (define *defaults*
-  '((solvent "water")                   ; solvent name
-    (L 10.0)                            ; [-L, L] gives the box size
-    (N 64)                              ; grid dimension
-    (rho 0.033427745)                   ; solvent density
-    (beta 1.6889)                       ; inverse temperature
-    (norm-tol 1.0e-7)                   ; convergence threshold
-    (max-iter 1500)                     ; max number of iterations
-    (damp-start 1.0)                    ; scaling factor?
-    (lambda 0.02)                       ; not the scheme lambda
-    (closure HNC)                       ; HNC, KH or PY
+  '((solvent "water")                 ; solvent name
+    (solute #f)                       ; uninitialized string, actually
+    (L 10.0)                          ; [-L, L] gives the box size
+    (N 64)                            ; grid dimension
+    (rho 0.033427745)                 ; solvent density
+    (beta 1.6889)                     ; inverse temperature
+    (norm-tol 1.0e-7)                 ; convergence threshold
+    (max-iter 1500)                   ; max number of iterations
+    (damp-start 1.0)                  ; scaling factor?
+    (lambda 0.02)                     ; not the scheme lambda
+    (closure HNC)                     ; HNC, KH or PY
+    (hnc #f)                          ; FIXME: exclusive
+    (bgy #f)                          ; FIXME: exclusive
+    (rism #f)                         ; FIXME: exclusive
     ))
 
 
@@ -406,7 +410,14 @@ computes the sum of all vector elements."
      ((not str) val)                    ; unchanged if str is #f
      ((string? val) str)
      ((number? val) (string->number str))
-     ((symbol? val) (string->symbol str))))
+     ((symbol? val) (string->symbol str))
+     ;;
+     ;; Otherwise I don't know what to convert the string to. FIXME:
+     ;; as long as the boolean type is unknown one could specify #f in
+     ;; defaults and it will be updated by a string here.
+     ;; Alternatively, use *unspecified* for that.
+     ;;
+     (else str)))
   ;;
   (define update-pair                   ; a function ...
     (match-lambda
@@ -418,6 +429,20 @@ computes the sum of all vector elements."
   ;; specified in the command line. Augment the defaults.
   ;;
   (map update-pair settings))
+
+
+;;;
+;;; Try  to  keep the  command  line parsing  at  a  single place  for
+;;; re-use. This converts at least some known options to numbers. Note
+;;; that  as  implemented,  the  function  update-settings,  does  not
+;;; introduce new key/value pairs  not present in defaults. FIXME: The
+;;; flags  present  in  option-spec  but  not  in  defaults  are  this
+;;; inaccessible (unless one uses PETSC command line accessors).
+;;;
+(define (parse-command-line argv)
+  (let* ((options (getopt-long argv option-spec))
+         (settings (update-settings (input->settings *defaults*) options)))
+    (acons '() (option-ref options '() '()) settings))) ; positional args
 
 
 ;;;
@@ -446,19 +471,19 @@ computes the sum of all vector elements."
 ;;; bgy3d-solvents.h:
 ;;;
 (define (old-main argv)
-  (let* ((opts (getopt-long argv option-spec))
-         (solvent (and-let* ((name (option-ref opts 'solvent #f)))
+  (let* ((settings (parse-command-line argv))
+         (solvent (and-let* ((name (assoc-ref settings 'solvent)))
                     (find-molecule name))) ; Maybe solvent
-         (solute (and-let* ((name (option-ref opts 'solute #f)))
+         (solute (and-let* ((name (assoc-ref settings 'solute)))
                    (find-molecule name)))) ; Maybe solute
     (pretty-print/serial (list 'solvent: solvent))
     (pretty-print/serial (list 'solute: solute))
     (let-values
         (((method run-solvent run-solute) ; three method-dependent values:
           (cond
-           ((option-ref opts 'hnc #f)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
-           ((option-ref opts 'bgy #f)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
-           ((option-ref opts 'rism #f) (values 'rism rism-solvent rism-solute)))))
+           ((assoc-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
+           ((assoc-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
+           ((assoc-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
       (case method
         ;;
         ;; 3d HNC/BGY.  The functions bound to run-solvent and
@@ -549,15 +574,16 @@ computes the sum of all vector elements."
 ;;; "solvent":
 ;;;
 (define (new-main argv)
-  (let ((cmd            (car argv))     ; should be non-empty
-        (options        (getopt-long argv option-spec)))
-    (let ((args         (option-ref options '() '())) ; positional arguments
-          (solvent      (and-let* ((name (option-ref options 'solvent #f)))
-                          (find-molecule name))) ; Maybe solvent
-          (solute       (and-let* ((name (option-ref options 'solute #f)))
-                          (find-molecule name))) ; Maybe solute
-          (save-binary  (option-ref options 'save-binary #f))
-          (settings     (update-settings (input->settings *defaults*) options))) ; defaults updated from command line
+  (let* ((settings (parse-command-line (cons "$0" argv))) ; FIXME: fake $0
+         (args (assoc-ref settings '())) ; positional arguments
+         (cmd (car args))                ; first the command ...
+         (args (cdr args)))              ; ... then the real args
+    (let ((solvent (and-let* ((name (assoc-ref settings 'solvent)))
+                     (find-molecule name))) ; Maybe solvent
+          (solute (and-let* ((name (assoc-ref settings 'solute)))
+                    (find-molecule name))) ; Maybe solute
+          (save-binary (assoc-ref settings 'save-binary)))
+      ;;
       (match cmd
         ;;
         ((or "energy" "gradients")
