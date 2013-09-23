@@ -481,6 +481,7 @@ contains
     use foreign, only: site
     use fft, only: integrate
     use lisp, only: obj
+    use options, only: getopt
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -495,7 +496,7 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v, vk, t, c
+         v, vk, t, c, exp_B
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: &
@@ -524,6 +525,14 @@ contains
 
     ! Rigid-bond solute-solute correlations on the k-grid:
     wk = omega_fourier (solute, k)
+
+    if ( getopt ("rbc")) then
+        call repulsive_bridge_correction (solute, solvent, beta, r, k, &
+             dk, exp_B)
+    else
+        exp_B = 1.0d0
+    endif
+
 
     ! Intitial guess:
     t = 0.0
@@ -591,6 +600,119 @@ contains
     end function iterate_t
   end subroutine rism_uv
 
+  subroutine repulsive_bridge_correction (solvent, solute, beta, r, k, &
+             dk, exp_B)
+    !
+    ! Calculate repulsive bridge correction B(r)
+    !
+    !
+    ! exp[-B  (r)] = Π ω(r)  * exp[-4βε  (σ  / r)¹²]
+    !       ij      l≠j    il          lj  lj
+    !
+    use fft, only: fourier_many, FT_BW
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: solvent(:)    ! (m)
+    type (site), intent (in) :: solute(:)     ! (n)
+    real (rk), intent (in) :: beta            ! inverse temperature
+    real (rk), intent (in) :: r(:)            ! (nrad)
+    real (rk), intent (in) :: k(:)            ! (nrad)
+    real (rk), intent (in) :: dk
+    real (rk), intent (out) :: exp_B(:, :, :) ! (nrad, n, m)
+    ! *** enf of interface ***
+
+    integer :: m, n
+    integer :: i, j, l, p
+
+    ! Solvent-solvent pair quantities:
+    real (rk), dimension (size(r), size (solvent), size (solvent)) :: &
+         wk, wr
+
+    ! Solute-solvent pari quatities:
+    real (rk), dimension (size(r), size (solute), size (solvent)) :: &
+        vr
+
+    m = size (solvent)
+    n = size (solute)
+
+    ! Solvent rigid-bond correlations on the k-grid:
+    wk = omega_fourier (solvent, k)
+
+    ! Inverse FT via DST:
+    wr = fourier_many (wk) * (dk**3 / FT_BW)
+
+    ! Repulsive part of LJ potential
+    call lj_repulsive (solute, solvent, r, vr)
+
+    ! loop over solvent site
+    do j = 1, m
+        ! loop over solute site
+        do i = 1, n
+            ! begin of product, set initial value to 1.0
+            exp_B (:, i, j) = 1.0
+
+            ! product over all other solvent site l except j
+            do l = 1, m
+                if ( l /= j) then
+                    exp_B (:, i, j) = exp_B (:, i, j) * wr(:, i, l) * &
+                                      exp (-beta * vr(:, l, j))
+                else
+                    exp_B (:, i, j) = exp_B(:, i, j) * 1.0
+                endif
+            enddo
+        enddo
+    enddo
+  end subroutine repulsive_bridge_correction
+
+  subroutine lj_repulsive (asites, bsites, r, vr)
+    !
+    ! only calculate the repulsive part of LJ potential (r^-12 term)
+    !
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: asites(:)       ! (n)
+    type (site), intent (in) :: bsites(:)       ! (m)
+    real (rk), intent (in) :: r(:)              ! (nrad)
+    real (rk), intent (out) :: vr(:, :, :)      ! (nrad, n, m)
+    ! ** end of interface ***
+
+    real (rk) :: sigma, epsilon
+    integer :: i, j
+    type (site) :: a, b
+
+    do j = 1, size (bsites)
+       b = bsites(j)
+       do i = 1, size (asites)
+          a = asites(i)
+
+          epsilon = sqrt (a % epsilon * b % epsilon)
+          sigma = (a % sigma + b % sigma) / 2
+
+          if (sigma /= 0.0) then
+              vr (:, i, j) = epsilon * lj12 (r / sigma)
+          else
+              vr (:, i, j) = 0.0
+          endif
+        enddo
+    enddo
+
+    contains
+        elemental function lj12 (r) result (f)
+          !
+          ! To be called as in eps * lj_repul (r / sigma)
+          !
+          implicit none
+          real (rk), intent (in) :: r   ! r / sigma, in general
+          real (rk) :: f
+          ! *** end of interfce ***
+
+          real (rk) :: sr12
+
+          sr12 = 1 / r**12
+
+          f = 4 * sr12
+        end function lj12
+  end subroutine lj_repulsive
 
   subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
        A, eps, dict)
