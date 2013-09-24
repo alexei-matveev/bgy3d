@@ -507,6 +507,7 @@ contains
     real (rk) :: k(nrad), dk
 
     integer :: i, m, n
+    logical rbc
 
     n = size (solute)
     m = size (solvent)
@@ -527,10 +528,14 @@ contains
     wk = omega_fourier (solute, k)
 
     if ( getopt ("rbc")) then
+        rbc = .true.
+    else
+        rbc = .false.
+    endif
+
+    if (rbc) then
         call repulsive_bridge_correction (solute, solvent, beta, r, k, &
              dk, exp_B)
-    else
-        exp_B = 1.0d0
     endif
 
 
@@ -559,7 +564,11 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure (method, beta, v, t)
+      if (rbc) then
+          c = closure_rbc (method, beta, v, t, exp_B)
+      else
+          c = closure (method, beta, v, t)
+      endif
 
       ! Forward FT via DST:
       c = fourier_many (c) * (dr**3 / FT_FW)

@@ -391,6 +391,7 @@ computes the sum of all vector elements."
                                     (member x '("jager" "newton" "picard" "trial")))))
     (verbose            (single-char #\v)
                         (value #f)) ; use --verbosity num instead
+    (rbc                (value #f)) ; add repulsive bridge correction
     (no-cage            (value #f)) ; turns off metallic cage boundary
     (no-hacks           (value #f)))))  ; turns off ugly hacks
 
