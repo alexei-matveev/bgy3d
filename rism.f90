@@ -1297,6 +1297,37 @@ contains
     c = exp (-beta * v) * (1 + t) - 1 - t
   end function closure_py
 
+  elemental function closure_rbc (method, beta, v, t, exp_B) result (c)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: beta, v, t, exp_B
+    real (rk) :: c
+    ! *** end of interface ***
+
+    select case (method)
+    ! RBC only with HNC now
+    case (HNC)
+       c = closure_hnc_rbc (beta, v, t, exp_B)
+    case default
+       c = huge (c)            ! FIXME: cannot abort in pure functions
+    end select
+  end function closure_rbc
+
+  !
+  ! HNC closure with repulsive bridge correction:
+  !
+  !    c := exp (-βv + γ + B) - 1 - γ
+  !
+  elemental function closure_hnc_rbc (beta, v, t, exp_B) result (c)
+    implicit none
+    real (rk), intent (in) :: beta, v, t, exp_B
+    real (rk) :: c
+    ! *** end of interface ***
+
+    c = exp (-beta * v + t) * exp_B - 1 - t
+  end function closure_hnc_rbc
+
   !
   ! Use the k-representation of Ornstein-Zernike (OZ) equation
   !
