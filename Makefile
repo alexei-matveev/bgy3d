@@ -21,8 +21,10 @@ include $(PETSC_DIR)/bmake/common/variables # on Lenny
 #   make -s
 #
 # FIXME: Note that generating  dependencies for Fortran files may fail
-# in a parallel  build (make -j).  A serial  "make clean" as suggested
-# should be sufficient to initally populate *.d files.
+# in a  parallel build  (make -j).   Delete all the  *.d files  if you
+# encounter  the  problem  with  GFortran  being  unable  to  generate
+# dependencies.  A  serial "make clean" might  be sometimes sufficient
+# to initally populate *.d files.
 #
 all: bgy3d
 
