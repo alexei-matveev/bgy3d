@@ -2207,4 +2207,20 @@ contains
   end function dipole_correction
 
 
+  subroutine gnuplot (r, g)
+    implicit none
+    real (rk), intent (in) :: r(:)       ! (nrad)
+    real (rk), intent (in) :: g(:, :, :) ! (nrad, n, m)
+    ! *** end of interface ***
+
+    integer :: i, j, p
+
+    ! This prints a lot of data on tty!
+    print *, "# r then g(i, j) for",  size (g, 2), "x", size (g, 3), "pairs"
+    do p = 1, size (g, 1)
+       write (*, *) r(p), ((g(p, i, j), i = 1, size (g, 2)), j = 1, size (g, 3))
+    enddo
+  end subroutine gnuplot
+
+
 end module rism
