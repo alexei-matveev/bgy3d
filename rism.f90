@@ -701,23 +701,24 @@ contains
         enddo
     enddo
 
-    contains
-        elemental function lj12 (r) result (f)
-          !
-          ! To be called as in eps * lj_repul (r / sigma)
-          !
-          implicit none
-          real (rk), intent (in) :: r   ! r / sigma, in general
-          real (rk) :: f
-          ! *** end of interfce ***
+  contains
+    elemental function lj12 (r) result (f)
+      !
+      ! To be called as in eps * lj12 (r / sigma)
+      !
+      implicit none
+      real (rk), intent (in) :: r   ! r / sigma, in general
+      real (rk) :: f
+      ! *** end of interfce ***
 
-          real (rk) :: sr12
+      real (rk) :: sr12
 
-          sr12 = 1 / r**12
+      sr12 = 1 / r**12
 
-          f = 4 * sr12
-        end function lj12
+      f = 4 * sr12
+    end function lj12
   end subroutine lj_repulsive
+
 
   subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
        A, eps, dict)
