@@ -496,11 +496,11 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v, vk, t, c, exp_B
+         v, vk, t, c, expB      ! (nrad, n, m)
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: &
-         wk
+         wk                     ! (nrad, m, m)
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -530,8 +530,10 @@ contains
     rbc = getopt ("rbc")
 
     if (rbc) then
-        call repulsive_bridge_correction (solute, solvent, beta, r, k, &
-             dk, exp_B)
+       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+    else
+       ! Not used in this case:
+       expB = 1.0
     endif
 
 
@@ -561,7 +563,7 @@ contains
       ! *** end of interface ***
 
       if (rbc) then
-          c = closure_rbc (method, beta, v, t, exp_B)
+          c = closure_rbc (method, beta, v, t, expB)
       else
           c = closure (method, beta, v, t)
       endif
@@ -605,69 +607,92 @@ contains
     end function iterate_t
   end subroutine rism_uv
 
-  subroutine repulsive_bridge_correction (solvent, solute, beta, r, k, &
-             dk, exp_B)
+
+  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
     !
-    ! Calculate repulsive bridge correction B(r)
+    ! Calculate repulsive bridge correction exp[-B(r)]:
     !
     !
     ! exp[-B  (r)] = Π ω(r)  * exp[-4βε  (σ  / r)¹²]
     !       ij      l≠j    il          lj  lj
     !
-    use fft, only: fourier_many, FT_BW
+    use fft, only: fourier_many, FT_BW, FT_FW
     use foreign, only: site
     implicit none
-    type (site), intent (in) :: solvent(:)    ! (m)
     type (site), intent (in) :: solute(:)     ! (n)
+    type (site), intent (in) :: solvent(:)    ! (m)
     real (rk), intent (in) :: beta            ! inverse temperature
     real (rk), intent (in) :: r(:)            ! (nrad)
     real (rk), intent (in) :: k(:)            ! (nrad)
-    real (rk), intent (in) :: dk
-    real (rk), intent (out) :: exp_B(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: dr, dk
+    real (rk), intent (out) :: expB(:, :, :) ! (nrad, n, m)
     ! *** enf of interface ***
 
     integer :: m, n
-    integer :: i, j, l, p
-
-    ! Solvent-solvent pair quantities:
-    real (rk), dimension (size(r), size (solvent), size (solvent)) :: &
-         wk, wr
-
-    ! Solute-solvent pari quatities:
-    real (rk), dimension (size(r), size (solute), size (solvent)) :: &
-        vr
 
     m = size (solvent)
     n = size (solute)
 
-    ! Solvent rigid-bond correlations on the k-grid:
-    wk = omega_fourier (solvent, k)
+    block
+      ! Solvent-solvent pair quantities:
+      real (rk), dimension (size (r), m, m) :: w
 
-    ! Inverse FT via DST:
-    wr = fourier_many (wk) * (dk**3 / FT_BW)
+      ! Storage for solute-solvent pair quantities (dont take the name
+      ! g literally):
+      real (rk), dimension (size (r), n, m) :: f, g
 
-    ! Repulsive part of LJ potential
-    call lj_repulsive (solute, solvent, r, vr)
+      ! Solvent  rigid-bond   correlations  ω  on   the  k-grid.   The
+      ! self-correlation  is  a  δ-function   (or  1  in  the  Fourier
+      ! representation).
+      w = omega_fourier (solvent, k)
 
-    ! loop over solvent site
-    do j = 1, m
-        ! loop over solute site
-        do i = 1, n
-            ! begin of product, set initial value to 1.0
-            exp_B (:, i, j) = 1.0
+      ! Repulsive part of LJ potential goes to f(:, i, j). First index
+      ! is that of a solute site  i, second index is of a solvent site
+      ! j:
+      call lj_repulsive (solute, solvent, r, f)
 
-            ! product over all other solvent site l except j
-            do l = 1, m
-                if ( l /= j) then
-                    exp_B (:, i, j) = exp_B (:, i, j) * wr(:, i, l) * &
-                                      exp (-beta * vr(:, l, j))
-                else
-                    exp_B (:, i, j) = exp_B(:, i, j) * 1.0
-                endif
-            enddo
+      ! A Mayers (Boltzman) factor due  to the repulsive branch of the
+      ! potential:
+      f = exp (-beta * f)
+
+      ! Fourier transform of the  Boltzman factor exp(-βv). It is this
+      ! factor   which   appears   in   the   convolution   with   the
+      ! intra-molecular solvent-solvent site-site correlation ω:
+      f = fourier_many (f) * (dr**3 / FT_FW)
+
+      ! Compute expB(:,  i, j) as a  product over all  solvent sites l
+      ! except j.  First, set initial value to 1.0:
+      expB(:, :, :) = 1.0
+      block
+        integer :: i, j, l
+
+        ! Loop over solvent sites indexing product terms:
+        do l = 1, m
+           ! Convolution  in the  Fourier space  is a  product  of two
+           ! Fourier representations:
+           do j = 1, m          ! solvent sites
+              do i = 1, n       ! solute sites
+                 g(:, i, j) =  f(:, i, l) * w(:, l, j)
+              enddo
+           enddo
+
+           ! Transform convolutions to the real space:
+           g = fourier_many (g) * (dk**3 / FT_BW)
+
+           ! Here the  product is accumulated.  FIXME:  Note that even
+           ! though the factors  with l == j are  computed above, they
+           ! are excluded from the product:
+           do j = 1, m          ! solvent sites
+              do i = 1, n       ! solute sites
+                 if (j == l) cycle
+                 expB(:, i, j) = expB(:, i, j) * g(:, i, j)
+              enddo
+           enddo
         enddo
-    enddo
-  end subroutine repulsive_bridge_correction
+      end block
+    end block
+  end subroutine bridge
+
 
   subroutine lj_repulsive (asites, bsites, r, vr)
     !
