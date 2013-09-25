@@ -527,11 +527,7 @@ contains
     ! Rigid-bond solute-solute correlations on the k-grid:
     wk = omega_fourier (solute, k)
 
-    if ( getopt ("rbc")) then
-        rbc = .true.
-    else
-        rbc = .false.
-    endif
+    rbc = getopt ("rbc")
 
     if (rbc) then
         call repulsive_bridge_correction (solute, solvent, beta, r, k, &
