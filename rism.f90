@@ -1303,18 +1303,18 @@ contains
     c = exp (-beta * v) * (1 + t) - 1 - t
   end function closure_py
 
-  elemental function closure_rbc (method, beta, v, t, exp_B) result (c)
+  elemental function closure_rbc (method, beta, v, t, expB) result (c)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none
     integer, intent (in) :: method
-    real (rk), intent (in) :: beta, v, t, exp_B
+    real (rk), intent (in) :: beta, v, t, expB
     real (rk) :: c
     ! *** end of interface ***
 
     select case (method)
     ! RBC only with HNC now
     case (HNC)
-       c = closure_hnc_rbc (beta, v, t, exp_B)
+       c = closure_hnc_rbc (beta, v, t, expB)
     case default
        c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
@@ -1325,13 +1325,13 @@ contains
   !
   !    c := exp (-βv + γ + B) - 1 - γ
   !
-  elemental function closure_hnc_rbc (beta, v, t, exp_B) result (c)
+  elemental function closure_hnc_rbc (beta, v, t, expB) result (c)
     implicit none
-    real (rk), intent (in) :: beta, v, t, exp_B
+    real (rk), intent (in) :: beta, v, t, expB
     real (rk) :: c
     ! *** end of interface ***
 
-    c = exp (-beta * v + t) * exp_B - 1 - t
+    c = exp (-beta * v + t) * expB - 1 - t
   end function closure_hnc_rbc
 
   !
