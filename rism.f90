@@ -767,7 +767,7 @@ contains
     density = 0.0
     do j = 1, size (h, 3)
        do i = 1, size (h, 2)
-          density = (expB(:, i, j) - 1) * (1 + h(:, i, j))
+          density = density + (expB(:, i, j) - 1) * (1 + h(:, i, j))
        enddo
     enddo
 
