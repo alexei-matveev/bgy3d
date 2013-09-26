@@ -699,6 +699,45 @@ contains
   end subroutine bridge
 
 
+  function chempot_bridge (beta, rho, h, expB, r, dr) result (mu)
+    !
+    ! Computes   correction  to   the  chemical   potential,   βμ,  by
+    ! integrating the  expression given by  thermodynamic perturbation
+    ! theory over the volume:
+    !
+    !   βμ = 4πρ ∫ [exp(B) - 1] g(r) r²dr
+    !
+    ! Here dr == 1, scale the result by dr³ if that is not the case.
+    !
+    use fft, only: integrate
+    implicit none
+    real (rk), intent (in) :: beta, rho
+    real (rk), intent (in) :: h(:, :, :)    ! (nrad, n, m)
+    real (rk), intent (in) :: expB(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: r(:)          ! (nrad)
+    real (rk), intent (in) :: dr
+    real (rk) :: mu
+    ! *** end of interface ***
+
+    integer :: i, j
+    real (rk) :: density (size (r))
+
+    ! According   to  thermodynamic   perturbation   theory,  chemical
+    ! potential density to be integrated:
+    density = 0.0
+    do j = 1, size (h, 3)
+       do i = 1, size (h, 2)
+          density = (expB(:, i, j) - 1) * (1 + h(:, i, j))
+       enddo
+    enddo
+
+    ! The integration  procedure assumes a  very specific radial  (i +
+    ! 1/2) grid.  Multiply that by dr³ and divide by β to get the real
+    ! number:
+    mu = integrate (density) * (rho * dr**3 / beta)
+  end function chempot_bridge
+
+
   subroutine lj_repulsive (asites, bsites, r, vr)
     !
     ! only calculate the repulsive part of LJ potential (r^-12 term)
