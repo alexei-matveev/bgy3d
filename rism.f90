@@ -964,7 +964,7 @@ contains
 
        block
           integer :: i, j, p
-          real (rk) :: q(size (solvent))
+          real (rk) :: qu(n), qv(m)
           real (rk) :: y, fac0, fac1, fac2
           real (rk) :: qhq(nrad)
           real (rk) :: hk(nrad, n, m)
@@ -1037,21 +1037,30 @@ contains
           endif
 
           ! q = ρ * z:
-          q(:) = rho * solvent(:) % charge
-
-          xd = dipole_correction (beta, rho, eps, solvent, k)
+          qv(:) = rho * solvent(:) % charge
+          qu(:) = rho * solute(:) % charge
 
           ! Note  the  extra  EPSILON0INV   factor,  it  seems  to  be
           ! necessary to get the kcal/A³ units right:
           qhq = 0.0
           x = 0.0
           xx = 0.0
+          do i = 1, size (solute)
+             do j = 1, size (solvent)
+                do p = 1, nrad
+                   qhq(p) = qhq(p) + qu(i) * h(p, i, j) * qv(j) * EPSILON0INV
+                   x(p) = x(p) + qu(i) * hk(p, i, j) * qv(j) * EPSILON0INV
+                enddo
+             enddo
+          enddo
+
+          xd = dipole_correction (beta, rho, eps, solvent, k)
+
+          xx = 0.0
           do i = 1, size (solvent)
              do j = 1, size (solvent)
                 do p = 1, nrad
-                   qhq(p) = qhq(p) + q(i) * h(p, i, j) * q(j) * EPSILON0INV
-                   x(p) = x(p) + q(i) * hk(p, i, j) * q(j) * EPSILON0INV
-                   xx(p) = xx(p) + q(i) * xd(p, i, j) * q(j) * EPSILON0INV
+                   xx(p) = xx(p) + qv(i) * xd(p, i, j) * qv(j) * EPSILON0INV
                 enddo
              enddo
           enddo
