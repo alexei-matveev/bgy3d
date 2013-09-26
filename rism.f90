@@ -1260,6 +1260,21 @@ contains
     end select
   end function closure
 
+
+  elemental function expm1 (x) result (f)
+    !
+    ! Elemental version of libc expm1().
+    !
+    use foreign, only: c_expm1 => expm1
+    implicit none
+    real (rk), intent (in) :: x
+    real (rk) :: f
+    ! *** end of interface ***
+
+    f = c_expm1 (x)
+  end function expm1
+
+
   !
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
   ! correlation function c  in real space.  See OZ  equation below for
@@ -1271,7 +1286,6 @@ contains
   !   c := exp (-βv + γ) - 1 - γ
   !
   elemental function closure_hnc (beta, v, t) result (c)
-    use foreign, only: expm1
     implicit none
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
@@ -1287,7 +1301,6 @@ contains
   ! for positive x:
   !
   elemental function lexpm1 (x) result (y)
-    use foreign, only: expm1
     implicit none
     real (rk), intent (in) :: x
     real (rk) :: y
