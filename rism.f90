@@ -629,11 +629,28 @@ contains
 
   subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
     !
-    ! Calculate repulsive bridge correction exp[-B(r)]:
+    ! Calculate repulsive bridge correction exp(B):
     !
     !
-    ! exp[-B  (r)] = Π ω(r)  * exp[-4βε  (σ  / r)¹²]
-    !       ij      l≠j    il          lj  lj
+    !   exp[B  (r)]  =  Π   exp[-4βε  (σ  / r)¹²] * ω  (r)
+    !        ij        l≠j          il  il           lj
+    !
+    ! Here i is a  solute site index and j and l  are the solvent site
+    ! indices.
+    !
+    ! FIXME: there is some room for improvement with the assymptotics.
+    ! If one  assumes that the  convolution with ω(r) does  not change
+    ! assymptotics, the bridge function should behave as
+    !
+    !  B  (r) ~ - β  Σ  v  (r)  ~  o(1 / r¹²)
+    !   ij          l≠j  il
+    !
+    ! towards infinity.  However, in the chem. pot. density expression
+    ! as it  appears in TPT there  is some "ringing" on  that level if
+    ! you look at r¹² * g * [exp(B) - 1] and it is not due to g (which
+    ! may be verified by setting  g = 1). Fortunately enough the shape
+    ! of 4πr² * g * [exp(B) - 1] is satisfactorily smooth and decaying
+    ! fast enough.
     !
     use fft, only: fourier_many, FT_BW, FT_FW
     use foreign, only: site
@@ -657,8 +674,8 @@ contains
       real (rk), dimension (size (r), m, m) :: w
 
       ! Storage for solute-solvent pair quantities (dont take the name
-      ! g literally):
-      real (rk), dimension (size (r), n, m) :: f, g
+      ! h literally):
+      real (rk), dimension (size (r), n, m) :: f, h
 
       ! Solvent  rigid-bond   correlations  ω  on   the  k-grid.   The
       ! self-correlation  is  a  δ-function   (or  1  in  the  Fourier
@@ -670,13 +687,22 @@ contains
       ! j:
       call lj_repulsive (solute, solvent, r, f)
 
-      ! A  Boltzman  factor  due   to  the  repulsive  branch  of  the
-      ! potential:
-      f = exp (-beta * f)
+      !
+      ! A  Mayer's function  f =  exp(-βv) -  1 due  to  the repulsive
+      ! branch of the potential.  We will assume that convolution of a
+      ! constant with intramolecular correlation ω(r) is unchanged:
+      !
+      !   ω * (1 + f) = 1 + ω * f
+      !
+      ! Such a convolution corresponds  to an averaging over sphere at
+      ! every point.
+      !
+      f = expm1 (-beta * f)
 
-      ! Fourier transform of the  Boltzman factor exp(-βv). It is this
-      ! factor   which   appears   in   the   convolution   with   the
-      ! intra-molecular solvent-solvent site-site correlation ω:
+      ! Fourier transform of  the Mayer's factor exp(-βv) -  1.  It is
+      ! this  factor   (up  to  a  constant)  which   appears  in  the
+      ! convolution with the intra-molecular solvent-solvent site-site
+      ! correlation ω:
       f = fourier_many (f) * (dr**3 / FT_FW)
 
       ! Compute expB(:,  i, j) as a  product over all  solvent sites l
@@ -691,12 +717,12 @@ contains
            ! Fourier representations:
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
-                 g(:, i, j) =  f(:, i, l) * w(:, l, j)
+                 h(:, i, j) =  f(:, i, l) * w(:, l, j)
               enddo
            enddo
 
            ! Transform convolutions to the real space:
-           g = fourier_many (g) * (dk**3 / FT_BW)
+           h = fourier_many (h) * (dk**3 / FT_BW)
 
            ! Here the  product is accumulated.  FIXME:  Note that even
            ! though the factors  with l == j are  computed above, they
@@ -704,7 +730,7 @@ contains
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
                  if (j == l) cycle
-                 expB(:, i, j) = expB(:, i, j) * g(:, i, j)
+                 expB(:, i, j) = expB(:, i, j) * (1 + h(:, i, j))
               enddo
            enddo
         enddo
