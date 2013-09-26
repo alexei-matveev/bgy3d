@@ -59,6 +59,11 @@ module rism
 
   real (rk), parameter :: ALPHA = 1.2d0 * ANGSTROM**(-1)
 
+  interface gnuplot
+     module procedure gnuplot1
+     module procedure gnuplot3
+  end interface gnuplot
+
 contains
 
   function rism_nrad (pd) result (nrad) bind (c)
@@ -2220,7 +2225,23 @@ contains
   end function dipole_correction
 
 
-  subroutine gnuplot (r, g)
+  subroutine gnuplot1 (r, g)
+    implicit none
+    real (rk), intent (in) :: r(:) ! (nrad)
+    real (rk), intent (in) :: g(:) ! (nrad)
+    ! *** end of interface ***
+
+    integer :: p
+
+    ! This prints a lot of data on tty!
+    print *, "# r then g"
+    do p = 1, size (g)
+       write (*, *) r(p), g(p)
+    enddo
+  end subroutine gnuplot1
+
+
+  subroutine gnuplot3 (r, g)
     implicit none
     real (rk), intent (in) :: r(:)       ! (nrad)
     real (rk), intent (in) :: g(:, :, :) ! (nrad, n, m)
@@ -2233,7 +2254,6 @@ contains
     do p = 1, size (g, 1)
        write (*, *) r(p), ((g(p, i, j), i = 1, size (g, 2)), j = 1, size (g, 3))
     enddo
-  end subroutine gnuplot
-
+  end subroutine gnuplot3
 
 end module rism
