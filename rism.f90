@@ -410,7 +410,7 @@ contains
 
     ! Done with it, print results. Here solute == solvent:
     call post_process (method, beta, rho, sites, sites, dr, dk, v, t, &
-         A=A, eps=eps, dict=dict)
+         A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
 
@@ -566,7 +566,7 @@ contains
 
     ! Done with it, print results:
     call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
-         A=1.0d0, eps=0.0d0, dict=dict)
+         A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
   contains
 
@@ -830,7 +830,7 @@ contains
 
 
   subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
-       A, eps, dict)
+       A, eps, dict, rbc)
     !
     ! Prints some results.
     !
@@ -851,6 +851,7 @@ contains
     real (rk), intent (in) :: A            ! long-range scaling factor
     real (rk), value :: eps     ! requested dielectric constant, or 0
     type (obj), intent (out) :: dict
+    logical, value :: rbc
     ! *** end of interface ***
 
     integer :: nrad, n, m
@@ -911,6 +912,7 @@ contains
        real (rk) :: g(nrad, n, m)
        real (rk) :: x(nrad), x0(nrad), x1(nrad), x2(nrad), xx(nrad) ! qhq in k-space
        real (rk) :: xd(nrad, m, m)
+       real (rk) :: expB(nrad, n, m)
 
        ! Dont like to pass redundant  info, recompute r(:) from dr and
        ! k(:) from dk:
@@ -920,7 +922,13 @@ contains
        end forall
 
        ! For the same reason recomute c and g:
-       c = closure (method, beta, v, t)
+       if (rbc) then
+          call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+          c = closure_rbc (method, beta, v, t, expB)
+       else
+          expB = 1.0
+          c = closure (method, beta, v, t)
+       endif
        h = c + t
        g = 1 + h
 
