@@ -550,6 +550,20 @@ contains
     ! Lenny does not support that:
     call snes_default (iterate_t, t)
 
+    ! As  a part  of  post-processing, compute  the bridge  correction
+    ! using TPT:
+    block
+      real (rk) :: e, h(nrad, n, m), expB(nrad, n, m)
+
+      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+
+      ! h = c + t:
+      h = closure (method, beta, v, t) + t
+
+      e = chempot_bridge (beta, rho, h, expB, r, dr)
+      print *, "# XXX: TPT bridge correction =", e, "rbc =", rbc
+    end block
+
     ! Done with it, print results:
     call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
          A=1.0d0, eps=0.0d0, dict=dict)
