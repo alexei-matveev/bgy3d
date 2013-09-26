@@ -626,7 +626,7 @@ contains
     real (rk), intent (in) :: k(:)            ! (nrad)
     real (rk), intent (in) :: dr, dk
     real (rk), intent (out) :: expB(:, :, :) ! (nrad, n, m)
-    ! *** enf of interface ***
+    ! *** end of interface ***
 
     integer :: m, n
 
@@ -651,7 +651,7 @@ contains
       ! j:
       call lj_repulsive (solute, solvent, r, f)
 
-      ! A Mayers (Boltzman) factor due  to the repulsive branch of the
+      ! A  Boltzman  factor  due   to  the  repulsive  branch  of  the
       ! potential:
       f = exp (-beta * f)
 
