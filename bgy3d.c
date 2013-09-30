@@ -58,10 +58,10 @@ ProblemData bgy3d_problem_data (void)
   */
   assert (N < 26755);
 
-  /* FIXME: N^3 should not overflow, this condition ensures that N^3 <
-     2^31: */
-  if (!bgy3d_getopt_test ("--rism"))
-    assert (N < 1291);
+  /* FIXME: N^3 should not overflow in 3D runs. For 1D the restriction
+     is void. Print a warning if N^3 >= 2^31: */
+  if (N >= 1291)
+    fprintf (stderr, "Warning: N=%d may be too large for 3D!\n", N);
 
   /* Inverse temperature: */
   PD.beta = 1.6889;
