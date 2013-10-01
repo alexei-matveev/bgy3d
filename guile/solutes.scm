@@ -254,7 +254,7 @@
 ;;
 ;; Here  A and  B  parametrize LJ  as  -(A/r)^6 +  (B/r)^12, cf.   the
 ;; dimensions.  Hydrogen bond of a pair is -30.0 kJ/mol which slightly
-;; more than -27.6 kJ/mol of the original SPC model [1].
+;; more than -27.6 kJ/mol of the original SPC model [BGS97].
 ;;
 ;; * AB-form to σε-form:
 ;;
@@ -275,9 +275,9 @@
 ;;
 ;; References:
 ;;
-;; [1] "The Missing Term in Effective Pair Potentials", H.  J.  C.
-;;     Berendsen, J.  R.  Grigera, and T.  P.  Straatsma, J.  Phys.
-;;     Chem 1987, 91, 6269-6271. http://dx.doi.org/10.1021/j100308a038
+;; [BGS97] "The Missing Term in Effective Pair Potentials", H.  J.  C.
+;;   Berendsen, J.  R.  Grigera, and T.  P.  Straatsma, J.  Phys.
+;;   Chem 1987, 91, 6269-6271. http://dx.doi.org/10.1021/j100308a038
 ;;
 ;; [2] "Theoretical study for the basicities of methylamines in
 ;;     aqueous solution: A RISM-SCF calculation of solvation
@@ -431,6 +431,62 @@
   ("H" (-2.236 3.19 0.0) 2.5 0.03 0.06)))
 
 ;;;
+;;; FIXME: I am still not quite sure  about the relation of R = 1.58 A
+;;; as a  property of  Uranium atom [GW96]  and the form  of site-site
+;;; pair interaction potentials.  Every single paper I checked implies
+;;; that  such a radius  (or rather  an *average*  of two  such radii)
+;;; corresponds to a minumum of the pair interaction potential:
+;;;
+;;;   - Most  of them quote the shape of the  potential as given below
+;;;     with r = R being the minumum.
+;;;
+;;;   - Some  of them either imply, or  explicitly state that combined
+;;;     radius  is an  (arithmetic)  average of  the  two radii,  e.g.
+;;;     Refs. [GW96] and also a much more recent [KC13].
+;;;
+;;; For instance, according to the the notes to Table 1 in Ref. [KC13]
+;;; the Ow in SPC water model is  characterized by R ~ 1.78 A.  A pair
+;;; U-Ow would then be characterized by R ~ 1.68 A and a pair of Ow-Ow
+;;; by R ~ 1.78  A. I think it is WRONG to  interpret these numbers as
+;;; minimuma  of  respective pair  potential  terms  --- because  both
+;;; numbers are too small:
+;;;
+;;;   - The Ow-Ow water peak in RDF between two electrostatically
+;;;     repulsive centers is beyond 3 A.
+;;;
+;;;   - The U-Ow bonds between electrostatically attractive centers
+;;;     are of the order of 2.4 A e.g. according to the very same
+;;;     [KC13].
+;;;
+;;;   - The value of σ(Ow) sometimes used to characterize the SPC
+;;;     model of water is about 3.16 A, the corresponding σ for a
+;;;     Ow-Ow pair is thus again 3.16 A.  So, by the trivial math the
+;;;     corresponding minumum is at 2^(1/6) σ with is even more.
+;;;
+;;; The text accompanying this  particular choice of atomic parameters
+;;; for pair  interactions is  sometimes unclear, misleading,  or even
+;;; wrong.   FIXME:  My guess  is  that  the  primary reason  for  the
+;;; confusion  is operating  with the  atomic radii  R =  σ  / 2^(5/6)
+;;; defined so that the minima of pair term for the like centers is at
+;;; 2^(1/6) σ =  2 R.  The combination rule to  obtain the location of
+;;; the minimum  of the  pair term is  thus never an  *averaging*, but
+;;; rather  *adding*  two  atomic   radii  which  is  not  being  made
+;;; sufficiently explicit in the text.
+;;;
+;;; Here a few  argument that make me think so:
+;;;
+;;;   - The radius R = 1.7412 A as quoted for Sr^2+ ion in Ref. [GW96]
+;;;     as derived from the 6-12 parameters of Aaqvist, C6 = 20.54^2
+;;;     kcal * A^6 and C12 = 613.5^2 kcal * A^12, Table II Ref.
+;;;     [Aaqvist90] (but note the squares), happens to compare very
+;;;     well with 1.7413 A obtained for a minumum of the non-bonding
+;;;     VdW term in Sr^2+ - Sr^2+ interaction.
+;;;
+;;;   - With σ(Ow) of SPC water being 3.166 A (which may be derived
+;;;     from the original Ref.  [BGS97]) the corresponding atomic
+;;;     parameter would be R = 3.166 / 2^(5/6) = 1.777 A exactly as
+;;;     quoted in Ref. [KC13].
+;;;
 ;;; Original Guilbaud-Wipff force field parametrization uses this from
 ;;; of LJ potential between two species:
 ;;;
@@ -443,19 +499,26 @@
 ;;; each other we may (and do) treat R-parameters as just another type
 ;;; of length units specified by (r0 ...)  form.
 ;;;
-;;; The "atomic radius"  with the overall scale may  be related to the
-;;; σε-parametrization by
+;;; To add to  the confusion the atoms are  characterized by an atomic
+;;; (VdW) radius R to be combined into the pair interaction parameters
+;;; by adding them (not by averaging as some of the texts erroneousely
+;;; imply or state):
+;;;
+;;;   R   =  R  + R
+;;;    ab     a    b
+;;;
+;;; Hence,  the atomic  radii  together with  the overall  interaction
+;;; strengths are related to the atomic parameters σ and ε by
 ;;;
 ;;;            5/6
 ;;;   σ = R * 2
 ;;;   ε = ε
 ;;;
-;;; Naturally,  the default arithmetic  average mixing  rule for  σ is
-;;; equivalent  the the same  arithmetic average  mixing rule  for VdW
-;;; radii:
+;;; The minimum of the  pair-interaction potential of the like-species
+;;; is at
 ;;;
-;;;   R   =  (R  + R ) / 2
-;;;    ab      a    b
+;;;    1/6          1/6 + 5/6
+;;;   2    σ = R * 2          = R + R
 ;;;
 ;;;   2+
 ;;; Sr  :  R = 1.7412 A, ε = 0.1182 kcal / mol (σ ~ 3.1025 A)
@@ -466,6 +529,16 @@
 ;;;   P. Guilbaud, G. Wipff, Journal of Molecular Structure: THEOCHEM,
 ;;;   Volume 366, Issues 1–2, 31 July 1996, Pages
 ;;;   55–63. http://dx.doi.org/10.1016/0166-1280(96)04496-X
+;;;
+;;; [KC13] Structure, Kinetics, and Thermodynamics of the Aqueous
+;;;   Uranyl(VI) Cation, Sebastien Kerisit, Chongxuan Liu,
+;;;   J. Phys. Chem. A, 2013, 117 (30), pp 6421–6432,
+;;;   http://dx.doi.org/10.1021/jp404594p
+;;;
+;;; [Aaqvist90] Ion-water interaction potentials derived from free
+;;;   energy perturbation simulations, Johan. Aaqvist, J. Phys. Chem.,
+;;;   1990, 94 (21), pp 8021–8024,
+;;;   http://dx.doi.org/10.1021/j100384a009
 ;;;
 ("Sr2+"
  (("Sr2+" (0.0 0.0 0.0) (r0 (A 1.7412)) (kcal 0.1182) 2.0)))
