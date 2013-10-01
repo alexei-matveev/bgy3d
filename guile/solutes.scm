@@ -430,6 +430,49 @@
   ("H" (-0.696 3.204 0.89) 2.5 0.03 0.06)
   ("H" (-2.236 3.19 0.0) 2.5 0.03 0.06)))
 
+;;;
+;;; Original Guilbaud-Wipff force field parametrization uses this from
+;;; of LJ potential between two species:
+;;;
+;;;                    12          6
+;;;   v  (r) = ε [(R/r)   - 2 (R/r) ]
+;;;    LJ
+;;;
+;;; Parameter R is the location of the minimum of that function and -ε
+;;; is the value at that point.  By assuming the mixing rule
+;;;
+;;;   R   =  R  + R
+;;;    ab     a    b
+;;;
+;;; The "atomic radius"  with the overall scale may  be related to the
+;;; σε-parametrization by
+;;;
+;;;            5/6
+;;;   σ = R * 2
+;;;   ε = ε
+;;;
+;;; Since R and σ are proportional to each other we may (and do) treat
+;;; R-parameters as just  another type of units specified  by (r0 ...)
+;;; form.
+;;;
+;;;   2+
+;;; Sr  :  R = 1.7412 A, ε = 0.1182 kcal / mol (σ ~ 3.1025 A)
+;;;
+;;; [GW96] Force field representation of the UO22+ cation from free
+;;;   energy MD simulations in water. Tests on its 18-crown-6 and NO3−
+;;;   adducts, and on its calix[6]arene6− and CMPO complexes,
+;;;   P. Guilbaud, G. Wipff, Journal of Molecular Structure: THEOCHEM,
+;;;   Volume 366, Issues 1–2, 31 July 1996, Pages
+;;;   55–63. http://dx.doi.org/10.1016/0166-1280(96)04496-X
+;;;
+("Sr2+"
+ (("Sr2+" (0.0 0.0 0.0) (r0 (A 1.7412)) (kcal 0.1182) 2.0)))
+
+("uranyl, GW96"
+ (("U" (0.0 0.0 0.0) (r0 (A 1.58)) (kcal 0.4) 2.5)
+  ("O" (-1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)
+  ("O" (1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)))
+
 ;;;                    2+
 ;;; Force fields for UO  ion with  the SPC/Fw, TIP3P,  TIP4p and TIP5P
 ;;;                    2
