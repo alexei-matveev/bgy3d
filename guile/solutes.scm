@@ -482,6 +482,51 @@
 ;;; only  mentions that  U-O  bond length  is  1.76 Å,  we choose  the
 ;;; orientation along x-axis in consistent with other solutes
 ;;;
+;;; BL: Made stupid mistakes when tabulating parameters from literature,
+;;; so it's better to copy the original table here to avoid any
+;;; human-made mistake in future. Note that these are pair parameters
+;;;
+;;;                         Bare Uranyl
+;;;                     ------------------------------
+;;;                     SPC/Fw   TIP3P   TIP4P   TIP5P
+;;; --------------------------------------------------
+;;; qUU (e)              3.08    3.08    3.08    3.08
+;;; qOU (e)              -0.54   -0.54   -0.54   -0.54
+;;; σUU-OW (Å)           2.32    2.35    2.31    2.37
+;;; σOU-OW (Å)           2.39    2.49    2.24    2.50
+;;; εUU-OW (kJ/mol)      21.92   16.32   21.92   19.00
+;;; εOU-OW (kJ/mol)      2.72    0.84    8.08    1.72
+;;;
+;;;             Solvated Uranyl (Recommended for Use)
+;;;             --------------------------------------
+;;;                     SPC/Fw   TIP3P   TIP4P   TIP5P
+;;; --------------------------------------------------
+;;; qUU (e)              2.50    2.50    2.50    2.50
+;;; qOU (e)              -0.25   -0.25   -0.25   -0.25
+;;; σUU-OW (Å)           3.25    3.25    2.78    3.26
+;;; σOU-OW (Å)           3.00    3.00    3.07    2.92
+;;; εUU-OW (kJ/mol)      0.27    0.27    1.39    0.26
+;;; εOU-OW (kJ/mol)      1.08    1.08    0.85    1.47
+;;;
+;;; By applying LB mixing rule (which is used in our code), we could
+;;; derive the LJ parameter of each site in UO2+ (using thermochemical
+;;; kcal of 4.184 kJ).
+;;;
+;;;                       Solvated Uranyl
+;;;             -----------------------------------
+;;;                     SPC/Fw         TIP3P
+;;; -----------------------------------------------
+;;; σUU-OW (Å)           3.25          3.25
+;;; σOU-OW (Å)           3.00          3.00
+;;; σOW (Å)              3.1656        3.1506
+;;; σUU (Å)              3.3334        3.3494
+;;; σOU (Å)              2.8344        2.8494
+;;; εUU-OW (kcal/mol)    0.0645315488  0.0645315488
+;;; εOU-OW (kcal/mol)    0.258126195   0.258126195
+;;; εOW (kcal/mol)       0.1553        0.1521
+;;; εUU (kcal/mol)       0.0268146893  0.0273788349
+;;; εOU (kcal/mol)       0.4290349811  0.4380613581
+;;;
 ;;; [1] Force Field Development for Actinyl Ions via Quantum
 ;;;     Mechanical Calculations: An Approach to Account for Many Body
 ;;;     Solvation Effects, Rai, N.; Tiwari, S. P.; Maginn, E. J., The
@@ -489,22 +534,14 @@
 ;;;     http://dx.doi.org/10.1021/jp3028275
 ;;;
 ("uranyl, SPC"
- (("U" (0.0 0.0 0.0) 3.25 0.27 2.5)
-  ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
-  ("O" (1.76 0.0 0.0) 3.00 1.08 -0.25)))
+ (("U" (0.0 0.0 0.0) 3.3334 0.0268146893 2.5)
+  ("O" (-1.76 0.0 0.0) 2.8344 0.4290349811 -0.25)
+  ("O" (1.76 0.0 0.0) 2.8344 0.4290349811 -0.25)))
 
-;; Non-bond FF  parameters for TIP3P uranyl  is the same  with SPC one
-;; according to [1],  the difference is that they  used flexible model
-;; for SPC/Fw and treated TIP3P water as a rigid molecule.
 ("uranyl, TIP3P"
- (("U" (0.0 0.0 0.0) 3.25 0.27 2.5)
-  ("O" (-1.76 0.0 0.0) 3.00 1.08 -0.25)
-  ("O" (1.76 0.0 0.0) 3.00 1.08 -0.25)))
-
-("uranyl, TIP4P"
- (("U" (0.0 0.0 0.0) 2.78 1.39 2.5)
-  ("O" (-1.76 0.0 0.0) 3.07 0.85 -0.25)
-  ("O" (1.76 0.0 0.0) 3.07 0.85 -0.25)))
+ (("U" (0.0 0.0 0.0) 3.3494 0.0273788349 2.5)
+  ("O" (-1.76 0.0 0.0) 2.8494 0.4380613581 -0.25)
+  ("O" (1.76 0.0 0.0) 2.8494 0.4380613581 -0.25)))
 
 ("uranyl, TIP5P"
  (("U" (0.0 0.0 0.0) 3.26 0.26 2.5)
