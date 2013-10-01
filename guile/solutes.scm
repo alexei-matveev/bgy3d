@@ -439,10 +439,9 @@
 ;;;    LJ
 ;;;
 ;;; Parameter R is the location of the minimum of that function and -ε
-;;; is the value at that point.  By assuming the mixing rule
-;;;
-;;;   R   =  R  + R
-;;;    ab     a    b
+;;; is the  value at that  point.  Since R  and σ are  proportional to
+;;; each other we may (and do) treat R-parameters as just another type
+;;; of length units specified by (r0 ...)  form.
 ;;;
 ;;; The "atomic radius"  with the overall scale may  be related to the
 ;;; σε-parametrization by
@@ -451,9 +450,11 @@
 ;;;   σ = R * 2
 ;;;   ε = ε
 ;;;
-;;; Since R and σ are proportional to each other we may (and do) treat
-;;; R-parameters as just  another type of units specified  by (r0 ...)
-;;; form.
+;;; Naturally,  the  default  arithmetic  average mixing  rule  for  σ
+;;; implies the the same arithemtic average mixing rule for VdW radii:
+;;;
+;;;   R   =  (R  + R ) / 2
+;;;    ab      a    b
 ;;;
 ;;;   2+
 ;;; Sr  :  R = 1.7412 A, ε = 0.1182 kcal / mol (σ ~ 3.1025 A)
