@@ -47,11 +47,14 @@
       ast
       (match ast
         (('A num)
-         num)                           ; for completeness, default
+         (eval-units num))              ; for completeness, default
+        (('r0 num)
+         (* (eval-units num)
+            (expt 2 (/ 5 6))))          ; (r0 x) -> x * 2^(5/6)
         (('kcal num)
-         num)                           ; for completeness, default
+         (eval-units num))              ; for completeness, default
         (('kJ num)
-         (kj->kcal num))                ; (kJ 0.3640) -> 0.08694
+         (kj->kcal (eval-units num)))   ; (kJ 0.3640) -> 0.08694
         (ast
          (map eval-units ast)))))
 
