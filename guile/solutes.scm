@@ -450,8 +450,9 @@
 ;;;   σ = R * 2
 ;;;   ε = ε
 ;;;
-;;; Naturally,  the  default  arithmetic  average mixing  rule  for  σ
-;;; implies the the same arithemtic average mixing rule for VdW radii:
+;;; Naturally,  the default arithmetic  average mixing  rule for  σ is
+;;; equivalent  the the same  arithmetic average  mixing rule  for VdW
+;;; radii:
 ;;;
 ;;;   R   =  (R  + R ) / 2
 ;;;    ab      a    b
