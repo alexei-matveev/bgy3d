@@ -43,7 +43,9 @@ module rism
   !   => 331.84164
   !
   ! Again, the code appears to use the IT-calorie to define 1/ε₀. Keep
-  ! this in sync with bgy3d.h:
+  ! this in sync with bgy3d.h.   Fun fact: some historical works, e.g.
+  ! J. Aaqvist, J.  Phys.  Chem.   94, 8021 (1990), even use the exact
+  ! 332 for electrostatics:
   !
   real (rk), parameter :: EPSILON0INV = 331.84164d0 * KCAL * ANGSTROM
 
