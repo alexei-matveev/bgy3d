@@ -5,61 +5,7 @@ module rism
 
   public :: rism_solvent
   public :: rism_solute
-  !
   ! *** END OF INTERFACE ***
-  !
-
-  real (rk), parameter :: pi = 4 * atan (1.0_rk)
-
-  !
-  ! Working units *are*  angstroms and kcals.  Still when  you wish to
-  ! make dimensions  explicit (and  you should) use  combinations like
-  ! 0.5 * angstrom, or 1.2 * angstrom**(-1), or 332 kcal * angstrom:
-  !
-  real (rk), parameter :: ANGSTROM = 1
-  real (rk), parameter :: KCAL = 1
-
-  ! ITC calorie here, see also bgy3d.h:
-  real (rk), parameter :: KJOULE = KCAL / 4.1868d0 ! only for output
-
-  !
-  ! The interaction energy of two unit charges separated by 1 A is
-  !                  -1
-  !   E = 1 * 1 / 1 A   = 0.529 au = 332 kcal [/ mol]
-  !
-  ! The next parameter appears to have the meaning of this interaction
-  ! energy of such two unit charges:
-  !
-  !   EPSILON0INV = 1 / ε₀
-  !
-  ! and  is  used  to  covert electrostatic  interaction  energies  to
-  ! working units.   It has  to be consistent  with other  force field
-  ! parameters defined in bgy3d-solvents.h, notably with Lennard-Jones
-  ! parameters σ and ε (FIXME: so maybe it was not a good idea to move
-  ! it here). These are the original comments:
-  !
-  !   You have: e^2/4/pi/epsilon0/angstrom, you want: kcal/avogadro/mol
-  !
-  !   => 331.84164
-  !
-  ! Again, the code appears to use the IT-calorie to define 1/ε₀. Keep
-  ! this in sync with bgy3d.h.   Fun fact: some historical works, e.g.
-  ! J. Aaqvist, J.  Phys.  Chem.   94, 8021 (1990), even use the exact
-  ! 332 for electrostatics:
-  !
-  real (rk), parameter :: EPSILON0INV = 331.84164d0 * KCAL * ANGSTROM
-
-  !
-  ! Inverse range parameter for  separation of the Coulomb into short-
-  ! and long range components. The  inverse of this number 1/α has the
-  ! dimension of length. FIXME: with the hardwired parameter like this
-  ! the  short-range  Coulomb is  effectively  killed alltogether  for
-  ! water-like particles  --- a water-like  particle has a  typical LJ
-  ! radius σ = 3.16 A. There are no visible changes in the RDF with or
-  ! without short range Coulomb and the charges of the order ±1.
-  !
-
-  real (rk), parameter :: ALPHA = 1.2d0 * ANGSTROM**(-1)
 
   interface gnuplot
      module procedure gnuplot1
@@ -290,6 +236,7 @@ contains
     use foreign, only: site, comm_rank
     use options, only: getopt
     use lisp, only: obj
+    use units, only: pi
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -489,6 +436,7 @@ contains
     use fft, only: integrate
     use lisp, only: obj, cons, sym, num
     use options, only: getopt
+    use units, only: pi
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -845,6 +793,7 @@ contains
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, cons, nil, sym, num
+    use units, only: pi, ALPHA, EPSILON0INV, KCAL, KJOULE
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -1143,6 +1092,7 @@ contains
       !
       !   c = [(e - 1) / e - 3y] / 4πβ
       !
+      use units, only: pi
       implicit none
       real (rk), intent (in) :: beta, y, c
       real (rk) :: e
@@ -1226,6 +1176,7 @@ contains
     ! represented by array vk on the k-grid.
     !
     use foreign, only: site
+    use units, only: EPSILON0INV, ALPHA
     implicit none
     type (site), intent (in) :: asites(:)  ! (n)
     type (site), intent (in) :: bsites(:)  ! (m)
@@ -1303,6 +1254,7 @@ contains
   ! different.
   !
   elemental function coulomb_long_fourier (k, alpha) result (f)
+    use units, only: pi
     implicit none
     real (rk), intent (in) :: k, alpha
     real (rk) :: f
@@ -1322,6 +1274,7 @@ contains
     ! interactions are  best specified  on the k-grid  and not  on the
     ! r-grid. See coulomb_long_fourier() instead.
     !
+    use units, only: pi
     implicit none
     real (rk), intent (in) :: r, alpha
     real (rk) :: f
@@ -1679,6 +1632,7 @@ contains
     ! ρ      =β    [0.90735-0.27120β+0.91784β -1.16270β +0.68012β -0.15284β ]
     !  liquid
     !
+    use units, only: pi
     implicit none
     real (rk), intent (in) :: rho, beta
     ! *** end of interface ***
@@ -1881,6 +1835,7 @@ contains
     !        9
     !
     use foreign, only: site
+    use units, only: pi, EPSILON0INV
     implicit none
     real (rk), intent (in) :: beta, rho
     type (site), intent (in) :: sites(:)
@@ -2284,6 +2239,7 @@ contains
     !
     use foreign, only: site
     use bessel, only: j0, j1
+    use units, only: ANGSTROM
     implicit none
     real (rk), intent (in) :: beta, rho
     real (rk), intent (in) :: eps        ! target epsilon
