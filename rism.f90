@@ -487,7 +487,7 @@ contains
     use snes, only: snes_default
     use foreign, only: site
     use fft, only: integrate
-    use lisp, only: obj
+    use lisp, only: obj, cons, sym, num
     use options, only: getopt
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
@@ -552,6 +552,10 @@ contains
     ! Lenny does not support that:
     call snes_default (iterate_t, t)
 
+    ! Done with it, print results:
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
+         A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
+
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT:
     block
@@ -564,11 +568,11 @@ contains
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
       print *, "# XXX: TPT bridge correction =", e, "rbc =", rbc
-    end block
 
-    ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
-         A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
+      ! Cons  a dictionary  entry with  RBC TPT  correction  to result
+      ! collection:
+      dict = cons (cons (sym ("RBC-TPT"), num (e)), dict)
+    end block
 
   contains
 
