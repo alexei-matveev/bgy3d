@@ -134,6 +134,7 @@ ifeq ($(WITH_FORTRAN),1)
 		linalg.o \
 		options.o \
 		foreign.o \
+		units.o \
 		kinds.o \
 		lebed/lebed.o \
 		lebed/Lebedev-Laikov.o
