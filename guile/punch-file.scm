@@ -2,17 +2,11 @@
 ;;; Code to write a GAMESS-UK punch file.
 ;;;
 (define-module (guile punch-file)
-  #:use-module (guile molecule)         ; site representation
   #:use-module (srfi srfi-1)            ; list manipulation
+  #:use-module (guile molecule)         ; site representation
+  #:use-module (guile utils)            ; angstrom->bohr
   #:export
   (write-punch-file))
-
-;;;
-;;; BGY3d code  operates in  angstroms, QM codes  use atomic  units by
-;;; convention:
-;;;
-(define (bohr->angstrom x) (* x 0.52917706))
-(define (angstrom->bohr x) (/ x 0.52917706))
 
 ;;;
 ;;; Brain-dead implementation of cubic root:

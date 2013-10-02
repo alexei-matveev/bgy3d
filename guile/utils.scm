@@ -10,9 +10,20 @@
             qtrap
             qsimp
             memoize
+            bohr->angstrom
+            angstrom->bohr
             isqrt))
 
 (use-modules (ice-9 pretty-print))
+
+
+;;;
+;;; Some  codes  operate in  angstroms,  others  use  atomic units  by
+;;; convention:
+;;;
+(define (bohr->angstrom x) (* x 0.52917706))
+(define (angstrom->bohr x) (/ x 0.52917706))
+
 
 ;;;
 ;;; Let-over-lambda  here.   Given a  function  (f  x)  The result  of
