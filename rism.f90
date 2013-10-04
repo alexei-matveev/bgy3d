@@ -735,6 +735,21 @@ contains
   end function chempot_bridge
 
 
+  subroutine pair (a, b, sigma, epsilon)
+    !
+    ! Place to implement combination rules.
+    !
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: a, b
+    real (rk), intent (out) :: sigma, epsilon
+    ! *** end of interface ***
+
+    sigma = (a % sigma + b % sigma) / 2
+    epsilon = sqrt (a % epsilon * b % epsilon)
+  end subroutine pair
+
+
   subroutine lj_repulsive (asites, bsites, r, vr)
     !
     ! only calculate the repulsive part of LJ potential (r^-12 term)
@@ -749,15 +764,11 @@ contains
 
     real (rk) :: sigma, epsilon
     integer :: i, j
-    type (site) :: a, b
 
     do j = 1, size (bsites)
-       b = bsites(j)
        do i = 1, size (asites)
-          a = asites(i)
-
-          epsilon = sqrt (a % epsilon * b % epsilon)
-          sigma = (a % sigma + b % sigma) / 2
+          ! Derive parameters of pair interaction:
+          call pair (asites(i), bsites(j), sigma, epsilon)
 
           if (sigma /= 0.0) then
               vr (:, i, j) = epsilon * lj12 (r / sigma)
@@ -1199,9 +1210,8 @@ contains
        b = bsites(j)
        do i = 1, size (asites)
           a = asites(i)
-
-          epsilon = sqrt (a % epsilon * b % epsilon)
-          sigma = (a % sigma + b % sigma) / 2
+          ! Derive pair interaction parameters:
+          call pair (a, b, sigma, epsilon)
           charge = a % charge * b % charge
 
           ! Short range on the r-grid:
