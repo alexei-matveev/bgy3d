@@ -57,8 +57,8 @@
 ;;;
 ;; ("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kJ 0.3640) 1.0)))
 ;; ("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kJ 0.0422) -1.0))) ; ε wrong?
-("K+" (("K+" (0.0 0.0 0.0) (A 3.14265) (kcal 0.087) 1.0)))
-("Cl-" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kcal 0.15) -1.0)))
+("K+, Kloss & Kast" (("K+" (0.0 0.0 0.0) (A 3.14265) (kcal 0.087) 1.0)))
+("Cl-, Kloss & Kast" (("Cl-" (0.0 0.0 0.0) (A 4.04468) (kcal 0.15) -1.0)))
 
 ;;;
 ;;; Almost the same as "water":
@@ -540,13 +540,65 @@
 ;;;   1990, 94 (21), pp 8021–8024,
 ;;;   http://dx.doi.org/10.1021/j100384a009
 ;;;
-("Sr2+"
+("Sr2+, GW96"                           ; use "Sr2+" instead
  (("Sr2+" (0.0 0.0 0.0) (r0 (A 1.7412)) (kcal 0.1182) 2.0)))
 
 ("uranyl, GW96"
  (("U" (0.0 0.0 0.0) (r0 (A 1.58)) (kcal 0.4) 2.5)
   ("O" (-1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)
   ("O" (1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)))
+
+;;;
+;;; Lennard-Jones parameters and calculated hydration free energies of
+;;; alkali-metal- and alkaline-earth-metal ions [Aaqvist90].  Here x =
+;;; √C6 and  y = √C12  --- Aaqvist used the  following parametrization
+;;; for pair VdW interactions (albeit a different notation):
+;;;
+;;;                     6            12
+;;;   v  (r) = - x x / r  +  y y  / r
+;;;    LJ         i j         i j
+;;;
+;;; Here the numbers from OCRed  PDF (Table 11 Ref. [Aaqvist90]), note
+;;; the order of y and x:
+;;;
+;;;   Ion       y     x     dG
+;;;   ------------------------
+;;;   Li+    25.0  2.60 -122.2
+;;;   Na+   143.7  3.89  -98.5
+;;;   K+    522.7  4.35  -80.9
+;;;   Rb+   824.4  4.64  -75.5
+;;;   Cs+  1647.9  5.44  -67.7
+;;;   ------------------------
+;;;   Mg2+   37.0  8.32 -455.9
+;;;   Ca2+  264.1 18.82 -380.6
+;;;   Sr2+  613.5 20.54 -345.9
+;;;   Ba2+ 1341.5 24.13 -314.6
+;;;
+;;; The basic units are kcal and angstrom so that the actual units for
+;;; x is (kcal  * A^6)^(1/2) and for y (kcal *  A^12)^(1/2).  dG is in
+;;; kcals, naturally.  The actual C6  and C12 coefficients may are the
+;;; products (or squares) of the table entries.
+;;;
+;;; FIXME:  does   anyone  dare  to  introduce   (kcal*A^6  ...)   and
+;;; (kcal*A^12 ...) forms?
+;;;
+;;; Conversion from either AB-, or 6-12-, or this weired "3-6" (FIXME:
+;;; does it  have a  name?)  parametrization to  σε-parametrization is
+;;; not just two separate unit  conversion of two numbers. Here a form
+;;; with two  arguments appears  in place of  two LJ  parameters. This
+;;; form   is   interpreted   by   tabulate-ff  function   called   by
+;;; find-molecule. Note that  (^2 ...)  form is not  a unit conversion
+;;; either --- it squares the argument.
+;;;
+("Li+"  (("Li+"  (0.0 0.0 0.0) (c6/c12 (^2  2.60) (^2   25.0)) 1.0)))
+("Na+"  (("Na+"  (0.0 0.0 0.0) (c6/c12 (^2  3.89) (^2  143.7)) 1.0)))
+("K+"   (("K+"   (0.0 0.0 0.0) (c6/c12 (^2  4.35) (^2  522.7)) 1.0)))
+("Rb+"  (("Rb+"  (0.0 0.0 0.0) (c6/c12 (^2  4.64) (^2  824.4)) 1.0)))
+("Cs+"  (("Cs+"  (0.0 0.0 0.0) (c6/c12 (^2  5.44) (^2 1647.9)) 1.0)))
+("Mg2+" (("Mg2+" (0.0 0.0 0.0) (c6/c12 (^2  8.32) (^2   37.0)) 2.0)))
+("Ca2+" (("Ca2+" (0.0 0.0 0.0) (c6/c12 (^2 18.82) (^2  264.1)) 2.0)))
+("Sr2+" (("Sr2+" (0.0 0.0 0.0) (c6/c12 (^2 20.54) (^2  613.5)) 2.0)))
+("Ba2+" (("Ba2+" (0.0 0.0 0.0) (c6/c12 (^2 24.13) (^2 1341.5)) 2.0)))
 
 ;;;                    2+
 ;;; Force fields for UO  ion with  the SPC/Fw, TIP3P,  TIP4p and TIP5P
