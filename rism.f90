@@ -740,13 +740,33 @@ contains
     ! Place to implement combination rules.
     !
     use foreign, only: site
+    use options, only: getopt
     implicit none
     type (site), intent (in) :: a, b
     real (rk), intent (out) :: sigma, epsilon
     ! *** end of interface ***
 
-    sigma = (a % sigma + b % sigma) / 2
-    epsilon = sqrt (a % epsilon * b % epsilon)
+    integer :: rule
+
+    if (.not. getopt ("comb-rule", rule)) then
+       rule = 0
+    endif
+
+    select case (rule)
+    case (0)
+       ! Arithmetic average for sigma:
+       sigma = (a % sigma + b % sigma) / 2
+       epsilon = sqrt (a % epsilon * b % epsilon)
+    case (1)
+       ! Both are geometric averages.  The same rule as with geometric
+       ! averages of 6-12 coefficients:
+       sigma = sqrt (a % sigma * b % sigma)
+       epsilon = sqrt (a % epsilon * b % epsilon)
+    case default
+       sigma = -1.0
+       epsilon = huge (epsilon)
+       error stop "no such rule!"
+    end select
   end subroutine pair
 
 
