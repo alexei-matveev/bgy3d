@@ -101,7 +101,7 @@
                            (error "Not in the list:"
                                   name
                                   (map first solutes)))))
-    (eval-units (tabulate-ff molecule))))
+    (tabulate-ff (eval-units molecule))))
 
 ;; (set! find-molecule (memoize find-molecule))
 
@@ -304,6 +304,11 @@
     (let ((new-sites
            (map (lambda (site)
                   (match site
+                    ((name position ('c6/c12 . cc) charge) ; -> derive σε from C6 & C12
+                     (let* ((ff (from-cc cc)) ; cc is a list of two numbers
+                            (sigma (first ff))
+                            (epsilon (second ff)))
+                       (make-site name position sigma epsilon charge)))
                     ((name position sigma epsilon charge) ; canonical form
                      ;; -> keep a valid site as is
                      site)
