@@ -51,6 +51,9 @@
         (('r0 num)
          (* (eval-units num)
             (expt 2 (/ 5 6))))          ; (r0 x) -> x * 2^(5/6)
+        (('^2 num)                      ; (^2 x) -> x^2
+         (let ((num (eval-units num)))
+           (* num num)))
         (('kcal num)
          (eval-units num))              ; for completeness, default
         (('kJ num)
