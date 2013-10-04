@@ -382,6 +382,7 @@ computes the sum of all vector elements."
     (closure            (value #t)      (predicate ,(lambda (x)
                                                       (member x '("HNC" "PY" "KH")))))
     (dielectric         (value #t)      (predicate ,string->number))
+    (comb-rule          (value #t)      (predicate ,string->number))
     (solvent-1d         (value #f)) ; use solvent susceptibility from 1D RISM
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
