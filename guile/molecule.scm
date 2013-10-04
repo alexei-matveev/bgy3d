@@ -18,6 +18,9 @@
    molecule-dipole
    find-molecule
    print-molecule/xyz
+   from-ab
+   from-re
+   from-cc
    make-site
    move-site
    site-name
@@ -60,6 +63,34 @@
          (kj->kcal (eval-units num)))   ; (kJ 0.3640) -> 0.08694
         (ast
          (map eval-units ast)))))
+
+
+;;;
+;;; LJ-type VdW interaction may take several forms.
+;;;
+;;; σε form: 4ε [-(σ/r)^6 + (σ/r)^12]
+;;; Rε form: ε [-2(R/r)^6 + (R/r)^12]
+;;; AB form: -(A/r)^6 + (B/r)^12
+;;; 6-12 form: -C6 / r^6 + C12 / r^12
+;;;
+(define (from-ab params)
+  (let ((A (first params))
+        (B (second params)))
+    (list (/ (* B B) A)                 ; σ = B^2/A
+          (/ (expt (/ A B) 12) 4))))    ; ε = (A/B)^12 / 4
+
+(define (from-re params)
+  (let ((r (first params))
+        (e (second params)))
+    (list (* r (expt 2 (/ 5 6)))        ; σ = r * 2^(5/6)
+          e)))                          ; ε = ε
+
+(define (from-cc params)
+  (let ((c6 (first params))
+        (c12 (second params)))
+    (list (expt (/ c12 c6) (/ 1 6))     ; σ = (c12/c6)^(1/6)
+          (/ (* c6 c6) (* 4 c12)))))    ; ε = c6^2/4c12
+
 
 ;;;
 ;;; Find a solute/solvent in a database or die:
