@@ -669,17 +669,25 @@
   ("O" (1.76 0.0 0.0) 2.8494 0.4380613581 -0.25)))
 
 ;;;
-;;; Another set of force field which is also developed by E. J. Maginn
-;;; et.al., see [1] for more details. Explicit parameters could be found
-;;; in the Gromac input file provided by the author:
-;;; http://www.rsc.org/suppdata/cp/c3/c3cp52444b/c3cp52444b_2.pdf
+;;; Another set of  force field parameters which is  also developed by
+;;; E.  J.  Maginn  et. al.,  see [PM13]  for more  details.  Explicit
+;;; parameters could  be found in  the Gromacs input file  provided by
+;;; the authors:
 ;;;
-;;; [1] Development and application of effective pairwise potentials for
-;;;     UO2n+, NpO2n+, PuO2n+, and AmO2n+ (n = 1, 2) ions with water,
-;;;     Vladimir Pomogaev, Surya Prakash Tiwari, Neeraj Rai,
-;;;     George S. Goff, Wolfgang Runde, William F. Schneider and
-;;;     Edward J. Maginn, Phys. Chem. Chem. Phys., 2013, Advance Article
-;;;     http://dx.doi.org/10.1039/C3CP52444B
+;;;   http://www.rsc.org/suppdata/cp/c3/c3cp52444b/c3cp52444b_2.pdf
+;;;
+;;; The  file specifies  both,  the pair  parameters for  uranyl-water
+;;; interactions and atomic parameters  for uranyl and water sites. It
+;;; seems that  the pair interaction parameters are  consistent (up to
+;;; three digits) to  those derived from the atomic  parameters by the
+;;; LB rule. Thus, this database uses the atomic parameters.
+;;;
+;;; [PM13] Development and application of effective pairwise
+;;;   potentials for UO2n+, NpO2n+, PuO2n+, and AmO2n+ (n = 1, 2) ions
+;;;   with water, Vladimir Pomogaev, Surya Prakash Tiwari, Neeraj Rai,
+;;;   George S. Goff, Wolfgang Runde, William F. Schneider and Edward
+;;;   J. Maginn, Phys. Chem. Chem. Phys., 2013, Advance Article
+;;;   http://dx.doi.org/10.1039/C3CP52444B
 ;;;
 ("uranyl, PM13" ;;; FIXME: need better name
  (("U" (0.0 0.0 0.0) (A 2.95) (kJ 0.530) 2.5)
