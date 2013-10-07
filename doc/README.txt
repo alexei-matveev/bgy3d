@@ -1113,8 +1113,8 @@ diverged. Convergence quality degrades towards the larger distances.
 Uranyl in TIP3P water using these command line settings:
 
 ~~~
-./rism --solvent "water" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096 \
-       --solute "uranyl, TIP3P" --norm-tol 1e-14 --dielectric 78.4
+--solvent "water" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096 \
+--solute "uranyl, TIP3P" --norm-tol 1e-14 --dielectric 78.4
 ~~~
 
 The grid stepping for L=160 and N=4096 corresponds to dr = 0.039 A and
@@ -1154,7 +1154,7 @@ d(UO), au   dG(hnc), kcal      dG(gf), kcal       dG(rbc tpt), kcal
 3.75        -315.802435722865  -342.633560189514  -11.5524629912869
 
 Now  almost  the  same  with  SPC/E  water  and  corresponding  uranyl
-parametrization. Command linesettings;
+parametrization. Command line settings:
 
 ~~~
 --solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096 \
