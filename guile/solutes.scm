@@ -683,8 +683,8 @@
 ;;;
 ("uranyl, PM13" ;;; FIXME: need better name
  (("U" (0.0 0.0 0.0) (A 2.95) (kJ 0.530) 2.5)
-  ("O" (-1.761 0.0 0.0) (A 3.85) (kJ 0.057) -0.25)
-  ("O" (1.761 0.0 0.0) (A 3.85) (kJ 0.057) -0.25)))
+  ("O" (-1.761 0.0 0.0) (A 3.83) (kJ 0.057) -0.25)
+  ("O" (1.761 0.0 0.0) (A 3.83) (kJ 0.057) -0.25)))
 
 ;;;
 ;;; This  is a fake  solute which  tabulates some  half-way meaningful
