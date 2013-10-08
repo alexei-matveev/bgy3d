@@ -1110,6 +1110,20 @@ d(UO), au    E(gp), au         E(pcm), au
 (a) The two PCM energies at the largest d(UO) separation
 diverged. Convergence quality degrades towards the larger distances.
 
+There  are  a  few  water  models  in  use  and  also  several  uranyl
+parametrization. This  is the matrix  of excess chemical  potential in
+kcal (kJ) as an overview:
+
+                     SPC/E             TIP3P
+-------------   ---------------   ---------------
+Uranyl, SPC     -322.19 (-1349)   -305.18 (-1278)
+Uranyl, TIP3P   -320.15 (-1340)   -303.39 (-1270)
+Uranyl, GW96    -312.39 (-1308)   -296.51 (-1241)
+Uranyl, PM13    -309.46 (-1296)   -293.80 (-1230)
+
+Here $\rho =  0.0333295$, $\beta = 1.6889$, $L = 160$,  $N = 4096$ and
+dielectric constant is 78.4 (see example command line flags below).
+
 Uranyl in TIP3P water using these command line settings:
 
 ~~~
