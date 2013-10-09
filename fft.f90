@@ -90,15 +90,19 @@ contains
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
+    !$omp parallel workshare private(p, i, j)
     forall (p = 1:n, i = 1:size (f, 2), j = 1:size (f, 3))
        g(p, i, j) =  f(p, i, j) * (2 * n * (2 * p - 1))
     end forall
+    !$omp end parallel workshare
 
     call dst_many (g)
 
+    !$omp parallel workshare private(p, i, j)
     forall (p = 1:n, i = 1:size (g, 2), j = 1:size (g, 3))
        g(p, i, j) = g(p, i, j) / (2 * p - 1)
     end forall
+    !$omp end parallel workshare
   end function fourier_many
 
 
