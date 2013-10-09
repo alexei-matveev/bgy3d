@@ -549,6 +549,35 @@
   ("O" (1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)))
 
 ;;;
+;;; Lennard-Jones parameters (R₀ and ε) for Alkali and halide ion
+;;; developed in [JC08], which were later used in [JLC13] to compare
+;;; DRISM and MD results. There are three sets of parameters in [JC08]
+;;; for use with TIP3P, TIP4P and SPC/E respectively, but only those
+;;; with SPC/E were later applied in [JLC13]. Results obtained with our
+;;; 1D-RISM code (with dielectric correction) are in good agreement with
+;;; [JLC13].
+;;;
+;;; [JC08] Determination of Alkali and Halide Monovalent Ion Parameters
+;;;   for Use in Explicitly Solvated Biomolecular Simulations, I. S.
+;;;   Joung and T. E. Cheatham, The Journal of Physical Chemistry B,
+;;;   2008, 112 (30), pp 9020-9041
+;;;   http://dx.doi.org/10.1021/jp8001614
+;;; [JLC13] Simple electrolyte solutions: Comparison of DRISM and
+;;;   molecular dynamics results for alkali halide solutions, In Suk
+;;;   Joung, Tyler Luchko, and David A. Case, J. Chem. Phys. 138, 044103
+;;;   (2013), http://dx.doi.org/10.1063/1.4775743
+;;;
+("Li+, JC08, SPC/E" (("Li" (0.0 0.0 0.0) (r0 (A 0.791)) (kcal 0.3367344) 1.0)))
+("Na+, JC08, SPC/E" (("Na" (0.0 0.0 0.0) (r0 (A 1.212)) (kcal 0.3526418) 1.0)))
+("K+, JC08, SPC/E" (("K" (0.0 0.0 0.0) (r0 (A 1.593)) (kcal 0.4297054) 1.0)))
+("Rb+, JC08, SPC/E" (("Rb" (0.0 0.0 0.0) (r0 (A 1.737)) (kcal 0.4451036) 1.0)))
+("Cs+, JC08, SPC/E" (("Cs" (0.0 0.0 0.0) (r0 (A 2.021)) (kcal 0.0898565) 1.0)))
+("F-, JC08, SPC/E" (("F" (0.0 0.0 0.0) (r0 (A 2.257)) (kcal 0.0074005) -1.0)))
+("Cl-, JC08, SPC/E" (("Cl" (0.0 0.0 0.0) (r0 (A 2.711)) (kcal 0.0127850) -1.0)))
+("Br-, JC08, SPC/E" (("Br" (0.0 0.0 0.0) (r0 (A 2.751)) (kcal 0.0269586) -1.0)))
+("I-, JC08, SPC/E" (("I" (0.0 0.0 0.0) (r0 (A 2.919)) (kcal 0.0427845) -1.0)))
+
+;;;
 ;;; Lennard-Jones parameters and calculated hydration free energies of
 ;;; alkali-metal- and alkaline-earth-metal ions [Aaqvist90].  Here x =
 ;;; √C6 and  y = √C12  --- Aaqvist used the  following parametrization
