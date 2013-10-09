@@ -1180,6 +1180,28 @@
 ;;
 ;; Ions
 ;;
+;; In [CFCRS08], Chuev et al. reported results of RISM-HNC/KH+RBC for
+;; ions with OPLS force field. However, after checking the cited paper
+;; [JUT04], LJ parameters in "oplsaa.prm" are different with those cited
+;; by Chuev, parameters in another file "oplsaal.prm", seem to be more
+;; close to those in [JUT04]. Note that the original OPLSAA paper
+;; doesn't contain force field for alkali and halide ions and there is
+;; no obvious clue indicating the source for those FF parameters of ions
+;; in "oplsaa.prm"
+;;
+;; [CFCRS08] Hydration of ionic species studied by the reference
+;;   interaction site model with a repulsive bridge correction, Gennady
+;;   N.  Chuev, Maxim V. Fedorov, Sandro Chiodo, Nino Russo, Emilia
+;;   Sicilia, Journal of Computational Chemistry, Volume 29, Issue 14,
+;;   pages 2406–2415, 15 November 2008
+;;   http://dx.doi.org/10.1002/jcc.20979
+;;
+;; [JUT04] Free Energies of Hydration from a Generalized Born Model and
+;;   an All-Atom Force Field, W. L. Jorgensen, J. P. Ulmschneider and J.
+;;   Tirado-Rives, The Journal of Physical Chemistry B, 2004, 104 (41),
+;;   pp 16264-16270
+;;   http://dx.doi.org/10.1021/jp0484579
+;;
 ("Na+, oplsaa" (("Na+" (0.0 0.0 0.0))) (("Na+" 346)))
 
 ("Cl-, oplsaa" (("Cl-" (0.0 0.0 0.0))) (("Cl-" 341)))
