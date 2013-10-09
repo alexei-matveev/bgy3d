@@ -1079,6 +1079,41 @@ NH~3               -11.679500598278  -11.685839458397    -3.97757133607131
 HCN                -15.983500809327  -15.990357517679    -4.30251592379648
 --------------------------------------------------------------------------
 
+1D-RISM for ions
+----------------
+
+Joung et al. showed comparion of DRISM and MD results for akali halide
+solutions [JLC13], with a newly developed force field for different
+water models [JC08]. Using the same force field, our 1D-RISM code
+produced quite close values. Settings used in the following table:
+
+~~~
+--solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096 \
+--solute "Ion, JC08, SPC/E" --norm-tol 1e-14 --dielectric 78.4
+~~~
+
+Ion          KH    KH^*^       HNC   HNC^*^   MD^*^    Exp^*^
+-----  -------- --------  -------- --------  -------  -------
+Li+     -108.63  -108.30   -111.42  -111.87   -113.3   -113.8
+Na+      -85.15   -84.95    -86.24   -86.48    -88.4    -88.7
+K+       -68.83   -68.57    -69.35   -69.64    -71.0    -71.2
+Cl-      -77.03   -78.09    -79.51   -78.48    -89.3    -89.1
+Br-      -71.53   -72.20    -73.72   -73.09    -82.7    -82.7
+I-       -62.41   -62.65    -64.46   -64.28    -74.4    -74.3
+-------------------------------------------------------------
+^*^ values are from [JLC13]
+
+[JC08] Determination of Alkali and Halide Monovalent Ion Parameters for
+  Use in Explicitly Solvated Biomolecular Simulations, I. S.  Joung and
+  T.  E. Cheatham, The Journal of Physical Chemistry B, 2008, 112 (30),
+  pp 9020-9041 http://dx.doi.org/10.1021/jp8001614
+
+[JLC13] Simple electrolyte solutions: Comparison of DRISM and molecular
+  dynamics results for alkali halide solutions, In Suk Joung, Tyler
+  Luchko, and David A. Case, J. Chem. Phys. 138, 044103 (2013),
+  http://dx.doi.org/10.1063/1.4775743
+
+
 Free energy surface of uranyl
 -----------------------------
 
