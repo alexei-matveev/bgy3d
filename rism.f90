@@ -1641,9 +1641,11 @@ contains
     integer :: p
 
     ! Many associative matrix multiplies: NxN * (NxM * MxM) - NxM
+    !$omp parallel do
     do p = 1, size (cuv, 1)
        tuv(p, :, :) = matmul (wuu(p, :, :), matmul (cuv(p, :, :), xvv(p, :, :))) - cuv(p, :, :)
     enddo
+    !$omp end parallel do
   end function oz_uv_equation_c_t
 
 
