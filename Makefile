@@ -69,9 +69,22 @@ srcdir = .
 # Compiler and compiler options
 CC       = gcc
 FC       = gfortran
-CFLAGS   = -std=c99 -Wall -Wextra -O3 $(USERFLAGS) $(if $(shared), -fPIC)
-FFLAGS   = -std=f2008 -Wall -O3 $(if $(shared), -fPIC)
-LDFLAGS  =
+CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USERFLAGS)
+FFLAGS = -g -std=f2008 -Wall -O3 $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
+LDFLAGS  = $(OMP-FLAGS)
+
+# Flags to generate position independent code (PIC) for shared objects
+# happen to be the same for gcc and gfortran:
+PIC-FLAGS = $(if $(shared), -fPIC)
+
+# I was not able to get a real speedup for urany/water with N=8192, so
+# this  remains disabled.   Note  that -fompenp  is  accepted by  both
+# gcc/gfortran (not used in C though) and also needs to be supplied at
+# link stage:
+OMP-FLAGS = # -fopenmp
+
+# Fortran flags to assist debugging and experiments:
+DBG-FFLAGS = # -fcheck-array-temporaries -fbounds-check -fexternal-blas -fblas-matmul-limit=1
 
 
 
