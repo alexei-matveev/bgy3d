@@ -515,7 +515,9 @@ contains
       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
 
       ! h = c + t:
-      h = closure (method, beta, v, t) + t
+      ! call closure with RBC TPT correction
+      ! FIXME: only HNC is implemented now, be careful when using others
+      h = closure_rbc (method, beta, v, t, expB) + t
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
       print *, "# XXX: TPT bridge correction =", e, "rbc =", rbc
