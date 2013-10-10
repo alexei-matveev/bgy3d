@@ -1160,26 +1160,26 @@ Here $\rho =  0.0333295$, $\beta = 1.6889$, $L = 160$,  $N = 4096$ and
 dielectric constant is 78.4 (see example command line flags below).
 
 To  estimate the effect  of the  finite LJ  potential on  the hydrogen
-atoms of a modified SPC/E water  we vary slightly the ε(H) and observe
-the  excess chemical  potential of  uranyl. The  last row  contains an
-estimate of  a (dimensionless) slope that reflects  the sensitivity of
-the results with respect to the input ε(H):
+atoms of a modified SPC/E water  we vary slightly the $\epsilon$(H) and
+observe the  excess chemical  potential of  uranyl. The  last row
+contains an estimate of  a (dimensionless) slope that reflects  the
+sensitivity of the results with respect to the input $\epsilon$(H):
 
-dε, kcal   dG(hnc), kcal    dG(gf), kcal      ddG(rbc), kcal
---------  ----------------- ----------------- -----------------
--0.0015   -322.066056282789 -355.601006217798 -15.1127353301548
--0.001    -322.108485948297 -355.664512331336 -15.1241598092300
--5.0e-4   -322.134819602101 -355.711740869483 -15.1354954986111
- 0.0      -322.191083707032 -355.788724192364 -15.1467436581335
-+5.0e-4   -322.229503240141 -355.847684712192 -15.1579054513841
-+0.001    -322.292239631960 -355.930798268651 -15.1689839525631
-+0.0015   -322.312339116943 -355.971098261618 -15.1799785845785
-Slope      -85.79           -127.06           -22.41
+d$\epsilon$, kcal  dG(hnc), kcal     dG(gf), kcal      ddG(rbc), kcal
+-----------------  ----------------- ----------------- -----------------
+-0.0015            -322.066056282789 -355.601006217798 -15.1127353301548
+-0.001             -322.108485948297 -355.664512331336 -15.1241598092300
+-5.0e-4            -322.134819602101 -355.711740869483 -15.1354954986111
+ 0.0               -322.191083707032 -355.788724192364 -15.1467436581335
++5.0e-4            -322.229503240141 -355.847684712192 -15.1579054513841
++0.001             -322.292239631960 -355.930798268651 -15.1689839525631
++0.0015            -322.312339116943 -355.971098261618 -15.1799785845785
+Slope              -85.79            -127.06           -22.41
 
-Given the  factual ε(H)  = 0.0545  kcal instead of  plain zero  in our
-modified SPC/E  water an extrapolation to  ε(H) = 0 would  result in a
-dG(hnc) by 4.6 kcal lower in  an absolute value. For GF functional the
-corresponding number would be 6.9 kcal.
+Given the  factual $\epsilon$(H)  = 0.0545  kcal instead of  plain zero
+in our modified SPC/E  water an extrapolation to  $\epsilon$(H) = 0
+would result in a dG(hnc) by 4.6 kcal lower in  an absolute value. For
+GF functional the corresponding number would be 6.9 kcal.
 
 Uranyl in TIP3P water using these command line settings:
 
