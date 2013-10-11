@@ -567,6 +567,29 @@ computes the sum of all vector elements."
          columns))
 
 
+(define (make-pes solute solvent settings)
+  (let* ((dct (rism-solvent solvent settings)) ; pure solvent run here!
+         (chi (assoc-ref dct 'susceptibility)) ; extract susceptibility
+         (section (if solute 'solute 'solvent))         ; alist key
+         (closure (assoc-ref settings 'closure))        ; alist key
+         (m (or solute solvent))           ; molecule to be "moved"
+         (x (molecule-positions m))        ; unperturbed geometry
+         (f (lambda (x)                    ; free energy surface
+              (let* ((m' (move-molecule m x))
+                     (d (if solute
+                            (rism-solute m' solvent settings chi)
+                            (rism-solvent m' settings)))
+                     (d' (assoc-ref d section))
+                     (e (assoc-ref d' closure)))
+                e)))
+         (f (memoize f)))
+    ;;
+    ;; Return a PES function f and initial geometry as multiple
+    ;; values:
+    ;;
+    (values f x)))
+
+
 ;;;
 ;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
 ;;; "solutes" interprete each argument as the name of the solute. Note
@@ -587,21 +610,7 @@ computes the sum of all vector elements."
       (match cmd
         ;;
         ((or "energy" "gradients")
-         (let* ((dct (rism-solvent solvent settings)) ; pure solvent run here!
-                (chi (assoc-ref dct 'susceptibility)) ; extract susceptibility
-                (section (if solute 'solute 'solvent))  ; alist key
-                (closure (assoc-ref settings 'closure)) ; alist key
-                (m (or solute solvent))    ; molecule to be "moved"
-                (x (molecule-positions m)) ; unperturbed geometry
-                (f (lambda (x)             ; free energy surface
-                     (let* ((m' (move-molecule m x))
-                            (d (if solute
-                                   (rism-solute m' solvent settings chi)
-                                   (rism-solvent m' settings)))
-                            (d' (assoc-ref d section))
-                            (e (assoc-ref d' closure)))
-                       e)))
-                (f (memoize f)))
+         (let-values (((f x) (make-pes solute solvent settings)))
            (match cmd
              ("energy"
               (let ((e (f x)))
