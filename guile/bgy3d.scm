@@ -618,6 +618,37 @@ computes the sum of all vector elements."
              ("gradients"
               (let ((g (ddd f x)))
                 (pretty-print/serial g))))))
+        ;;
+        ;; Start a server that communicates with a client via two
+        ;; named pipes for input/output:
+        ;;
+        ("server"
+         (let ((finp (first args))  ; coordinates or #f read from here
+               (fout (second args))) ; resulting energy is written here
+           ;;
+           ;; Make a function of 3d geometry. The initial geometry is
+           ;; not used:
+           ;;
+           (let-values (((f x0) (make-pes solute solvent settings)))
+             (let loop ()
+               ;;
+               ;; Read the input pipe. This will block utill the
+               ;; client writes the geometry from the other side. Note
+               ;; that only the first s-expression is read:
+               ;;
+               (let ((x (with-input-from-file finp read)))
+                 ;;
+                 ;; Convention is when the input is #f, then
+                 ;; terminate. Otherwise evaluate PES at this point
+                 ;; and write the resulting energy to our side of the
+                 ;; output pipe. This will block utill the client
+                 ;; reads the results from his end:
+                 ;;
+                 (when x
+                   (let ((e (f x)))     ; compute the energy
+                     (with-output-to-file fout
+                       (lambda () (write e))))
+                   (loop)))))))
         ("solvent"
          ;;
          ;; Only then run pure solvent, if --solvent was present in the
