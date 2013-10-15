@@ -21,7 +21,7 @@ def sexp (x):
 # Request  is  an s-expression  in  text  form  encoding an  array  of
 # numbers, reply is just a number again in text form:
 #
-def protocall (server):
+def protocol (server):
     def f (x):
         return float (server (sexp (x)))
     return f
@@ -65,7 +65,7 @@ def Server (args):
         return y
 
     # The control returns to the "with" statement body:
-    yield protocall (server)
+    yield protocol (server)
 
     # When leaving  the "with" statement body execute  this.  Tell the
     # daemon process to terminate:
