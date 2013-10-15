@@ -567,27 +567,33 @@ computes the sum of all vector elements."
          columns))
 
 
+;;;
+;;; Construct a PES as a  function of solute (or solvent) geometry and
+;;; return that together with the initial geometry as multiple values.
+;;; The solvent  susceptibility χ is precomuted lazily  and forced the
+;;; first time the PES is used (if at all).
+;;;
 (define (make-pes solute solvent settings)
-  (let* ((dct (rism-solvent solvent settings)) ; pure solvent run here!
-         (chi (assoc-ref dct 'susceptibility)) ; extract susceptibility
-         (section (if solute 'solute 'solvent))         ; alist key
-         (closure (assoc-ref settings 'closure))        ; alist key
-         (m (or solute solvent))           ; molecule to be "moved"
-         (x (molecule-positions m))        ; unperturbed geometry
-         (f (lambda (x)                    ; free energy surface
-              (let* ((m' (move-molecule m x))
-                     (d (if solute
-                            (rism-solute m' solvent settings chi)
-                            (rism-solvent m' settings)))
-                     (d' (assoc-ref d section))
-                     (e (assoc-ref d' closure)))
-                e)))
-         (f (memoize f)))
-    ;;
-    ;; Return a PES function f and initial geometry as multiple
-    ;; values:
-    ;;
-    (values f x)))
+  (let ((chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
+                      (assoc-ref dct 'susceptibility)))) ; extract susceptibility
+        (section (if solute 'solute 'solvent))           ; alist key
+        (closure (assoc-ref settings 'closure)))         ; alist key
+    (let* ((m (or solute solvent))      ; molecule to be "moved"
+           (x (molecule-positions m))   ; unperturbed geometry
+           (f (lambda (x)               ; free energy surface
+                (let* ((m' (move-molecule m x))
+                       (d (if solute
+                              (rism-solute m' solvent settings (force chi))
+                              (rism-solvent m' settings)))
+                       (d' (assoc-ref d section))
+                       (e (assoc-ref d' closure)))
+                  e)))
+           (f (memoize f)))
+      ;;
+      ;; Return a PES function f and initial geometry as multiple
+      ;; values:
+      ;;
+      (values f x))))
 
 
 ;;;
