@@ -3,6 +3,7 @@
 
 import sys
 import os
+import shlex
 from tempfile import mkdtemp
 from subprocess import Popen
 from contextlib import contextmanager
@@ -38,6 +39,11 @@ def protocall (server):
 #
 @contextmanager
 def Server (args):
+    # FIXME: this  is convenience hack, one should  decide either args
+    # is a list or a string:
+    if type (args) == type (""):
+        args = shlex.split (args)
+
     # Root process such as naive backup can still enter this directory
     # and read/write to the fifo pipes:
     tmp = mkdtemp()
