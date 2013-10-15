@@ -7,11 +7,7 @@ import shlex
 from tempfile import mkdtemp
 from subprocess import Popen
 from contextlib import contextmanager
-from numpy import array
 
-x = array ([[-0.2929, 0.0, 0.0],
-            [0.2929, 0.757, 0.0],
-            [0.2929, -0.757, 0.0]])
 
 def sexp (x):
     "Convert array of numbers to a nested s-expression."
@@ -89,6 +85,12 @@ def main (cmd):
     # code. That code should still belive it works with a callable.
     #
     from pts.func import NumDiff
+    from numpy import array
+
+    x = array ([[-0.2929, 0.0, 0.0],
+                [0.2929, 0.757, 0.0],
+                [0.2929, -0.757, 0.0]])
+
     with Server (["/home/alexei/darcs/bgy3d/guile/runbgy.scm"]) as f:
         for _ in range (10):
             print f(x)
