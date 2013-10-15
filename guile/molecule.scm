@@ -18,6 +18,10 @@
    molecule-dipole
    find-molecule
    print-molecule/xyz
+   kj->kcal
+   kcal->kj
+   kelvin->kcal
+   kcal->kelvin
    from-ab
    from-re
    from-cc
@@ -39,6 +43,13 @@
   (/ num 4.1868))
 (define (kcal->kj num)
   (* num 4.1868))
+
+(define (kelvin->kcal T)
+  (let ((kboltzman (/ 8.3144621 (kcal->kj 1000))))
+    (* kboltzman T)))
+(define (kcal->kelvin E)
+  (let ((kboltzman (/ 8.3144621 (kcal->kj 1000))))
+    (/ E kboltzman)))
 
 ;;;
 ;;; Database  contains  entries in  non-native  units  such as  kJ/mol
