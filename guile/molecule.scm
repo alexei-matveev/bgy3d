@@ -317,6 +317,25 @@
               (ff-epsilon row)
               (ff-charge row))))
     ;;
+    ;; This  function adds missing  foce-field parameters to  the site
+    ;; description:
+    ;;
+    (define (new-site site)
+      (match site
+        ;; 1) Canonical form -> keep a valid site as is
+        ((name position sigma epsilon charge)
+         site)
+        ;; 2) FF is missing -> append force field params
+        ((name position)
+         (apply make-site name position (non-bonding name)))
+        ;; 3) A form  instead of literal sigma and epsilon
+        ;; -> derive σε from C6 & C12
+        ((name position ('c6/c12 . cc) charge)
+         (let* ((ff (from-cc cc))       ; cc is a list of two numbers
+                (sigma (first ff))
+                (epsilon (second ff)))
+           (make-site name position sigma epsilon charge)))))
+    ;;
     ;; FIXME: use ff-sym to get  the FF data instead. This check is so
     ;; far down because of the  "define"s above that have to be put at
     ;; the beginning of the scope.
@@ -326,21 +345,5 @@
     ;;
     ;; Build new sites and use them to construct a new molecule:
     ;;
-    (let ((new-sites
-           (map (lambda (site)
-                  (match site
-                    ;; 1) Canonical form -> keep a valid site as is
-                    ((name position sigma epsilon charge)
-                     site)
-                    ;; 2) FF is missing -> append force field params
-                    ((name position)
-                     (apply make-site name position (non-bonding name)))
-                    ;; 3) A form  instead of literal sigma and epsilon
-                    ;; -> derive σε from C6 & C12
-                    ((name position ('c6/c12 . cc) charge)
-                     (let* ((ff (from-cc cc)) ; cc is a list of two numbers
-                            (sigma (first ff))
-                            (epsilon (second ff)))
-                       (make-site name position sigma epsilon charge)))))
-                (molecule-sites solute))))
+    (let ((new-sites (map new-site (molecule-sites solute))))
       (make-molecule (molecule-name solute) new-sites))))
