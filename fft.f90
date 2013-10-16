@@ -59,7 +59,7 @@ module fft
        real (c_double), intent (in) :: in(n)
      end subroutine rism_dst
 
-     subroutine rism_dst_many (m, n, buf) bind (c)
+     subroutine rism_dst_columns (m, n, buf) bind (c)
        !
        ! Performs DST of size n in-place for each of the m columns. In
        ! FFTW terms this is RODFT11  (or DST-IV) which is self inverse
@@ -71,7 +71,21 @@ module fft
        implicit none
        integer (c_int), intent (in), value :: m, n
        real (c_double), intent (inout) :: buf(n, m)
-     end subroutine rism_dst_many
+     end subroutine rism_dst_columns
+
+     subroutine rism_dst_rows (n, m, buf) bind (c)
+       !
+       ! Performs DST  of size n in-place  for each of the  m rows. In
+       ! FFTW terms this is RODFT11  (or DST-IV) which is self inverse
+       ! up to a normalization factor.
+       !
+       ! See ./rism-dst.c
+       !
+       use iso_c_binding, only: c_int, c_double
+       implicit none
+       integer (c_int), intent (in), value :: m, n
+       real (c_double), intent (inout) :: buf(m, n)
+     end subroutine rism_dst_rows
   end interface
 
 contains
@@ -96,7 +110,7 @@ contains
     end forall
     !$omp end parallel workshare
 
-    call dst_many (g)
+    call dst_columns (g)
 
     !$omp parallel workshare private(p, i, j)
     forall (p = 1:n, i = 1:size (g, 2), j = 1:size (g, 3))
@@ -156,10 +170,10 @@ contains
   end function integrate
 
 
-  subroutine dst_many (f)
+  subroutine dst_columns (f)
     use iso_c_binding, only: c_int
     implicit none
-    real (rk), intent (inout) :: f(:, :, :)
+    real (rk), intent (inout) :: f(:, :, :) ! ~ (n, m)
     ! *** end of interface ***
 
     integer (c_int) :: m, n
@@ -168,8 +182,24 @@ contains
     n = size (f, 1)
     m = size (f) / n
 
-    call rism_dst_many (m, n, f)
-  end subroutine dst_many
+    call rism_dst_columns (m, n, f)
+  end subroutine dst_columns
+
+
+  subroutine dst_rows (f)
+    use iso_c_binding, only: c_int
+    implicit none
+    real (rk), intent (inout) :: f(:, :, :) ! ~ (m, n)
+    ! *** end of interface ***
+
+    integer (c_int) :: m, n
+
+    ! cast to c_int
+    n = size (f, 3)
+    m = size (f) / n
+
+    call rism_dst_rows (n, m, f)
+  end subroutine dst_rows
 
 
   function dst (a) result (b)
