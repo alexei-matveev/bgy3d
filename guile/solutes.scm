@@ -549,23 +549,24 @@
   ("O" (1.80 0.0 0.0) (r0 (A 1.75)) (kcal 0.2) -0.25)))
 
 ;;;
-;;; Lennard-Jones parameters (R₀ and ε) for Alkali and halide ion
-;;; developed in [JC08], which were later used in [JLC13] to compare
+;;; Lennard-Jones  parameters (R₀  and ε)  for Alkali  and  halide ion
+;;; developed in [JC08],  which were later used in  [JLC13] to compare
 ;;; DRISM and MD results. There are three sets of parameters in [JC08]
-;;; for use with TIP3P, TIP4P and SPC/E respectively, but only those
-;;; with SPC/E were later applied in [JLC13]. Results obtained with our
-;;; 1D-RISM code (with dielectric correction) are in good agreement with
-;;; [JLC13].
+;;; for use with  TIP3P, TIP4P and SPC/E respectively,  but only those
+;;; with SPC/E  were later applied  in [JLC13]. Results  obtained with
+;;; our  1D-RISM  code  (with   dielectric  correction)  are  in  good
+;;; agreement with [JLC13].
 ;;;
-;;; [JC08] Determination of Alkali and Halide Monovalent Ion Parameters
-;;;   for Use in Explicitly Solvated Biomolecular Simulations, I. S.
-;;;   Joung and T. E. Cheatham, The Journal of Physical Chemistry B,
-;;;   2008, 112 (30), pp 9020-9041
+;;; [JC08] Determination of Alkali and Halide Monovalent Ion
+;;;   Parameters for Use in Explicitly Solvated Biomolecular
+;;;   Simulations, I. S.  Joung and T. E. Cheatham, The Journal of
+;;;   Physical Chemistry B, 2008, 112 (30), pp 9020-9041
 ;;;   http://dx.doi.org/10.1021/jp8001614
+;;;
 ;;; [JLC13] Simple electrolyte solutions: Comparison of DRISM and
 ;;;   molecular dynamics results for alkali halide solutions, In Suk
-;;;   Joung, Tyler Luchko, and David A. Case, J. Chem. Phys. 138, 044103
-;;;   (2013), http://dx.doi.org/10.1063/1.4775743
+;;;   Joung, Tyler Luchko, and David A. Case, J. Chem. Phys. 138,
+;;;   044103 (2013), http://dx.doi.org/10.1063/1.4775743
 ;;;
 ("Li+, JC08, SPC/E" (("Li" (0.0 0.0 0.0) (r0 (A 0.791)) (kcal 0.3367344) 1.0)))
 ("Na+, JC08, SPC/E" (("Na" (0.0 0.0 0.0) (r0 (A 1.212)) (kcal 0.3526418) 1.0)))
