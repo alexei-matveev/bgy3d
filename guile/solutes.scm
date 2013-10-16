@@ -461,7 +461,7 @@
 ;;;   - The value of σ(Ow) sometimes used to characterize the SPC
 ;;;     model of water is about 3.16 A, the corresponding σ for a
 ;;;     Ow-Ow pair is thus again 3.16 A.  So, by the trivial math the
-;;;     corresponding minumum is at 2^(1/6) σ with is even more.
+;;;     corresponding minumum is at 2^(1/6) σ which is even more.
 ;;;
 ;;; The text accompanying this  particular choice of atomic parameters
 ;;; for pair  interactions is  sometimes unclear, misleading,  or even
