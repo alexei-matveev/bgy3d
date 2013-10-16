@@ -33,7 +33,8 @@ module fft
   !
   !   dr * dk = 2π / 2n
   !
-  public :: fourier_many        ! f(1:n, *) -> g(1:n, *)
+  public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
+  public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
   public :: integrate           ! f(1:n) -> scalar
   !
   ! *** END OF INTERFACE ***
@@ -90,7 +91,37 @@ module fft
 
 contains
 
-  function fourier_many (f) result (g)
+  function fourier_rows (f) result (g)
+    implicit none
+    real (rk), intent (in) :: f(:, :, :)
+    real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
+    ! *** end of interface ***
+
+    integer :: p, i, j, n
+
+    n = size (f, 3)
+    !
+    ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
+    ! around j  = n - 0.5".   Here we use integer  arithmetics and the
+    ! identity (2 * j - 1) / 2 == j - 0.5.
+    !
+    !$omp parallel workshare private(p, i, j)
+    forall (p = 1:n, i = 1:size (f, 1), j = 1:size (f, 2))
+       g(i, j, p) =  f(i, j, p) * (2 * n * (2 * p - 1))
+    end forall
+    !$omp end parallel workshare
+
+    call dst_rows (g)
+
+    !$omp parallel workshare private(p, i, j)
+    forall (p = 1:n, i = 1:size (g, 1), j = 1:size (g, 2))
+       g(i, j, p) = g(i, j, p) / (2 * p - 1)
+    end forall
+    !$omp end parallel workshare
+  end function fourier_rows
+
+
+  function fourier_cols (f) result (g)
     implicit none
     real (rk), intent (in) :: f(:, :, :)
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
@@ -117,7 +148,7 @@ contains
        g(p, i, j) = g(p, i, j) / (2 * p - 1)
     end forall
     !$omp end parallel workshare
-  end function fourier_many
+  end function fourier_cols
 
 
   function fourier (f) result (g)

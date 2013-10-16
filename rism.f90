@@ -232,7 +232,7 @@ contains
 
 
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
-    use fft, only: fourier_many, FT_FW, FT_BW, integrate
+    use fft, only: fourier_cols, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
@@ -351,7 +351,7 @@ contains
        real (rk) :: h(nrad, m, m)
        integer :: i, j
 
-       h = fourier_many (c + t) * (dr**3 / FT_FW)
+       h = fourier_cols (c + t) * (dr**3 / FT_FW)
 
        do i = 1, m
           do j = 1, m
@@ -379,7 +379,7 @@ contains
       c = closure (method, beta, v, t)
 
       ! Forward FT via DST:
-      c = fourier_many (c) * (dr**3 / FT_FW)
+      c = fourier_cols (c) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -425,7 +425,7 @@ contains
       dt = dt - (beta * A) * vk
 
       ! Inverse FT via DST:
-      dt = fourier_many (dt) * (dk**3 / FT_BW)
+      dt = fourier_cols (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -552,7 +552,7 @@ contains
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
       ! ... Implements procedure(f_iterator).
       !
-      use fft, only: fourier_many, FT_FW, FT_BW
+      use fft, only: fourier_cols, FT_FW, FT_BW
       implicit none
       real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
@@ -565,7 +565,7 @@ contains
       endif
 
       ! Forward FT via DST:
-      c = fourier_many (c) * (dr**3 / FT_FW)
+      c = fourier_cols (c) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -596,7 +596,7 @@ contains
       dt = dt - beta * vk
 
       ! Inverse FT via DST:
-      dt = fourier_many (dt) * (dk**3 / FT_BW)
+      dt = fourier_cols (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -629,7 +629,7 @@ contains
     ! of 4πr² * g * [exp(B) - 1] is satisfactorily smooth and decaying
     ! fast enough.
     !
-    use fft, only: fourier_many, FT_BW, FT_FW
+    use fft, only: fourier_cols, FT_BW, FT_FW
     use foreign, only: site
     implicit none
     type (site), intent (in) :: solute(:)     ! (n)
@@ -680,7 +680,7 @@ contains
       ! this  factor   (up  to  a  constant)  which   appears  in  the
       ! convolution with the intra-molecular solvent-solvent site-site
       ! correlation ω:
-      f = fourier_many (f) * (dr**3 / FT_FW)
+      f = fourier_cols (f) * (dr**3 / FT_FW)
 
       ! Compute expB(:,  i, j) as a  product over all  solvent sites l
       ! except j.  First, set initial value to 1.0:
@@ -699,7 +699,7 @@ contains
            enddo
 
            ! Transform convolutions to the real space:
-           h = fourier_many (h) * (dk**3 / FT_BW)
+           h = fourier_cols (h) * (dk**3 / FT_BW)
 
            ! Here the  product is accumulated.  FIXME:  Note that even
            ! though the factors  with l == j are  computed above, they
@@ -842,7 +842,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_many, FT_FW
+    use fft, only: fourier_cols, FT_FW
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
@@ -990,7 +990,7 @@ contains
 
           ! Small-k  behavior   of  qh(k)q  which   is  essential  for
           ! dielectric permittivity:
-          hk = fourier_many (h) * (dr**3 / FT_FW)
+          hk = fourier_cols (h) * (dr**3 / FT_FW)
 
           ! FIXME: dipole_density() assumes all solvent sites have the
           ! same number density:
