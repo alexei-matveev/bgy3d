@@ -329,16 +329,18 @@
     (let ((new-sites
            (map (lambda (site)
                   (match site
-                    ((name position ('c6/c12 . cc) charge) ; -> derive σε from C6 & C12
+                    ;; 1) Canonical form -> keep a valid site as is
+                    ((name position sigma epsilon charge)
+                     site)
+                    ;; 2) FF is missing -> append force field params
+                    ((name position)
+                     (apply make-site name position (non-bonding name)))
+                    ;; 3) A form  instead of literal sigma and epsilon
+                    ;; -> derive σε from C6 & C12
+                    ((name position ('c6/c12 . cc) charge)
                      (let* ((ff (from-cc cc)) ; cc is a list of two numbers
                             (sigma (first ff))
                             (epsilon (second ff)))
-                       (make-site name position sigma epsilon charge)))
-                    ((name position sigma epsilon charge) ; canonical form
-                     ;; -> keep a valid site as is
-                     site)
-                    ((name position)   ; ff is missing
-                     ;; -> append force field params
-                     (apply make-site name position (non-bonding name)))))
+                       (make-site name position sigma epsilon charge)))))
                 (molecule-sites solute))))
       (make-molecule (molecule-name solute) new-sites))))
