@@ -98,6 +98,8 @@ contains
     ! *** end of interface ***
 
     integer :: p, i, j, n
+    real (rk) :: fac
+    real (rk), parameter :: one = 1
 
     n = size (f, 3)
     !
@@ -105,19 +107,29 @@ contains
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
-    !$omp parallel workshare private(p, i, j)
-    forall (p = 1:n, i = 1:size (f, 1), j = 1:size (f, 2))
-       g(i, j, p) =  f(i, j, p) * (2 * n * (2 * p - 1))
-    end forall
-    !$omp end parallel workshare
+    !$omp parallel do private(fac, p, i, j)
+    do p = 1, n
+       fac = 2 * n * (2 * p - 1)
+       do j = 1, size (f, 2)
+          do i = 1, size (f, 1)
+             g(i, j, p) =  f(i, j, p) * fac
+          enddo
+       enddo
+    enddo
+    !$omp end parallel do
 
     call dst_rows (g)
 
-    !$omp parallel workshare private(p, i, j)
-    forall (p = 1:n, i = 1:size (g, 1), j = 1:size (g, 2))
-       g(i, j, p) = g(i, j, p) / (2 * p - 1)
-    end forall
-    !$omp end parallel workshare
+    !$omp parallel do private(fac, p, i, j)
+    do p = 1, n
+       fac = one / (2 * p - 1)
+       do j = 1, size (g, 2)
+          do i = 1, size (g, 1)
+             g(i, j, p) = g(i, j, p) * fac
+          enddo
+       enddo
+    enddo
+    !$omp end parallel do
   end function fourier_rows
 
 
