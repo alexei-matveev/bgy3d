@@ -174,7 +174,7 @@
 ;;; description.  FIXME:  A missing table  is interpreted as  an empty
 ;;; OPLSAA table:
 ;;;
-(define (molecule-ff-tab solute)
+(define (molecule-force-field solute)
   (match solute
     ((name sites table) table) ; return the third entry, if there is such
     (_ '(oplsaa))))            ; otherwise return an empty table
@@ -285,7 +285,7 @@
   ;; used  to retrive  the respective force  field parametrs.   So far
   ;; OPLSAA is always assumed.
   ;;
-  (let* ((ff-form (molecule-ff-tab solute))
+  (let* ((ff-form (molecule-force-field solute))
          (ff-sym (car ff-form))
          (ff-tab (cdr ff-form))
          ;; (whole-file (tinker-table 'oplsaa))
