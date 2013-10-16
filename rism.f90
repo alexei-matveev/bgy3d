@@ -433,7 +433,7 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
+  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi_kvv, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
     use fft, only: integrate
@@ -446,9 +446,9 @@ contains
     real (rk), intent (in) :: rmax         ! cell size
     real (rk), intent (in) :: beta         ! inverse temp
     real (rk), intent (in) :: rho
-    type (site), intent (in) :: solvent(:) ! (m)
-    real (rk), intent(in) :: chi(:, :, :)  ! (nrad, m, m)
-    type (site), intent (in) :: solute(:)  ! (n)
+    type (site), intent (in) :: solvent(:)    ! (m)
+    real (rk), intent(in) :: chi_kvv(:, :, :) ! (nrad, m, m)
+    type (site), intent (in) :: solute(:)     ! (n)
     type (obj), intent (out) :: dict
     ! *** end of interface ***
 
@@ -457,8 +457,9 @@ contains
          v, vk, t, c, expB      ! (nrad, n, m)
 
     ! Solute-solute pair quantities:
-    real (rk), dimension (nrad, size (solute), size (solute)) :: &
-         wk                     ! (nrad, m, m)
+    real (rk), dimension (nrad, size (solute), size (solute)) :: w_kuu ! (nrad, n, n)
+    real (rk), dimension (size (solute), size (solute), nrad) :: w_uuk ! (n, n, nrad)
+    real (rk), dimension (size (solvent), size (solvent), nrad) :: chi_vvk ! (m, m, nrad)
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -483,7 +484,24 @@ contains
     call force_field (solute, solvent, r, k, v, vk)
 
     ! Rigid-bond solute-solute correlations on the k-grid:
-    wk = omega_fourier (solute, k)
+    w_kuu = omega_fourier (solute, k)
+
+    ! Here "transposed" version of w_kuu(:, :, :) for use in matmul():
+    block
+      integer :: i, j, k
+      forall (i=1:n, j=1:n, k=1:nrad)
+         w_uuk (i, j, k) = w_kuu(k, i, j)
+      end forall
+    end block
+
+    ! Here  "transposed"  version  of  chi_kvv(:,  :, :)  for  use  in
+    ! matmul():
+    block
+      integer :: i, j, k
+      forall (i=1:m, j=1:m, k=1:nrad)
+         chi_vvk (i, j, k) = chi_kvv(k, i, j)
+      end forall
+    end block
 
     rbc = getopt ("rbc")
 
@@ -563,7 +581,7 @@ contains
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
       !
-      dt = oz_uv_equation_c_t (c, wk, chi)
+      dt = oz_uv_equation_c_t (c, w_uuk, chi_vvk)
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
@@ -1614,7 +1632,7 @@ contains
   end function oz_vv_equation_c_t_MxM
 
 
-  function oz_uv_equation_c_t (cuv, wuu, xvv) result (tuv)
+  function oz_uv_equation_c_t (c_kuv, w_uuk, x_vvk) result (t_kuv)
     !
     ! RISM equation, here for h and c:
     !
@@ -1634,31 +1652,31 @@ contains
     !    uv     uv    uv
     !
     implicit none
-    real (rk), intent (in) :: cuv(:, :, :)         ! (nrad, n, m)
-    real (rk), intent (in) :: wuu(:, :, :)         ! (nrad, n, n)
-    real (rk), intent (in) :: xvv(:, :, :)         ! (nrad, m, m)
-    real (rk) :: tuv(size (cuv, 1), size (cuv, 2), size (cuv, 3))
+    real (rk), intent (in) :: c_kuv(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: w_uuk(:, :, :) ! (n, n, nrad)
+    real (rk), intent (in) :: x_vvk(:, :, :) ! (m, m, nrad)
+    real (rk) :: t_kuv(size (c_kuv, 1), size (c_kuv, 2), size (c_kuv, 3))
     ! *** end of interface ***
 
     integer :: p, n, m
 
-    n = size (cuv, 2)
-    m = size (cuv, 3)
+    n = size (c_kuv, 2)
+    m = size (c_kuv, 3)
 
     block
-      real (rk) :: uu(n, n), uv(n, m), vv(m, m)
+      real (rk) :: uv(n, m)
 
       !
-      ! Many associative matrix multiplies: NxM  = NxN * (NxM * MxM) -
+      ! Many associative  matrix multiplies: NxM =  NxN * NxM  * MxM -
       ! NxM or in u/v terms: uv = uu * uv * vv - uv
       !
-      !$omp parallel do private (uu, uv, vv)
-      do p = 1, size (cuv, 1)
-         uu = wuu(p, :, :)
-         uv = cuv(p, :, :)
-         vv = xvv(p, :, :)
-         uv = matmul (uu, matmul (uv, vv)) - uv
-         tuv(p, :, :) = uv
+      !$omp parallel do private (uv)
+      do p = 1, size (c_kuv, 1)
+         uv = c_kuv(p, :, :)
+         associate (uu => w_uuk(:, :, p), vv => x_vvk(:, :, p))
+           uv = matmul (uu, matmul (uv, vv)) - uv
+         end associate
+         t_kuv(p, :, :) = uv
       enddo
       !$omp end parallel do
     end block
