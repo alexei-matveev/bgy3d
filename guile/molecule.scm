@@ -64,7 +64,7 @@
          (eval-units num))              ; for completeness, default
         (('r0 num)
          (* (eval-units num)
-            (expt 2 (/ 5 6))))          ; (r0 x) -> x * 2^(5/6)
+            (expt 2 5/6)))              ; (r0 x) -> x * 2^(5/6)
         (('^2 num)                      ; (^2 x) -> x^2
          (let ((num (eval-units num)))
            (* num num)))
@@ -93,13 +93,13 @@
 (define (from-re params)
   (let ((r (first params))
         (e (second params)))
-    (list (* r (expt 2 (/ 5 6)))        ; σ = r * 2^(5/6)
+    (list (* r (expt 2 5/6))            ; σ = r * 2^(5/6)
           e)))                          ; ε = ε
 
 (define (from-cc params)
   (let ((c6 (first params))
         (c12 (second params)))
-    (list (expt (/ c12 c6) (/ 1 6))     ; σ = (c12/c6)^(1/6)
+    (list (expt (/ c12 c6) 1/6)         ; σ = (c12/c6)^(1/6)
           (/ (* c6 c6) (* 4 c12)))))    ; ε = c6^2/4c12
 
 
