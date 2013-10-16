@@ -283,13 +283,25 @@
   (let ((ff-tab (molecule-ff-tab solute))
         ;; (whole-file (tinker-table 'oplsaa))
         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
+
+    ;;
+    ;; ff-tab is a null list or a list with force field symbol at the
+    ;; CAR position, return CDR of the list if symbol is oplsaa
+    ;;
+    (define (map-ff-tab ff-tab)
+      (if (null? ff-tab)
+	  ff-tab
+	  (if (equal? 'oplsaa (car ff-tab))
+	    (cdr ff-tab)
+	    (error "Wrong force field symbol"))))
     ;;
     ;; This  will derive the  atom type 77  from a name "CT3"  using a
     ;; list of entries (("CT3" 77) ...)
     ;;
     (define (ff-type name)
-      (second (or (assoc name ff-tab)
-                  (error "Not in the table:" name))))
+      (let ((ff-map (map-ff-tab ff-tab)))
+        (second (or (assoc name ff-map)
+                  (error "Not in the table:" name)))))
     ;;
     ;; This  will return  a row from  the parameter file  matching the
     ;; given atom type:
