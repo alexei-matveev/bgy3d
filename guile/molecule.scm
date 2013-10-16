@@ -172,12 +172,12 @@
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
 ;;; description.  FIXME:  A missing table  is interpreted as  an empty
-;;; table:
+;;; OPLSAA table:
 ;;;
 (define (molecule-ff-tab solute)
   (match solute
     ((name sites table) table) ; return the third entry, if there is such
-    (_ '())))                  ; otherwise return an empty list
+    (_ '(oplsaa))))            ; otherwise return an empty table
 
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
@@ -280,28 +280,23 @@
 ;;; force field information (if missing):
 ;;;
 (define (tabulate-ff solute)
-  (let ((ff-tab (molecule-ff-tab solute))
-        ;; (whole-file (tinker-table 'oplsaa))
-        (whole-file (load-ff-file *tinker-ff-parameter-file*)))
-
-    ;;
-    ;; ff-tab is a null list or a list with force field symbol at the
-    ;; CAR position, return CDR of the list if symbol is oplsaa
-    ;;
-    (define (map-ff-tab ff-tab)
-      (if (null? ff-tab)
-	  ff-tab
-	  (if (equal? 'oplsaa (car ff-tab))
-	    (cdr ff-tab)
-	    (error "Wrong force field symbol"))))
+  ;;
+  ;; The car  position of the FF table (ignored at  the moment) can be
+  ;; used  to retrive  the respective force  field parametrs.   So far
+  ;; OPLSAA is always assumed.
+  ;;
+  (let* ((ff-form (molecule-ff-tab solute))
+         (ff-sym (car ff-form))
+         (ff-tab (cdr ff-form))
+         ;; (whole-file (tinker-table 'oplsaa))
+         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
     ;;
     ;; This  will derive the  atom type 77  from a name "CT3"  using a
-    ;; list of entries (("CT3" 77) ...)
+    ;; list of entries (("CT3" 77) ...) in the FF table.
     ;;
     (define (ff-type name)
-      (let ((ff-map (map-ff-tab ff-tab)))
-        (second (or (assoc name ff-map)
-                  (error "Not in the table:" name)))))
+      (second (or (assoc name ff-tab)
+                  (error "Not in the table:" name))))
     ;;
     ;; This  will return  a row from  the parameter file  matching the
     ;; given atom type:
@@ -321,6 +316,13 @@
         (list (ff-sigma row)
               (ff-epsilon row)
               (ff-charge row))))
+    ;;
+    ;; FIXME: use ff-sym to get  the FF data instead. This check is so
+    ;; far down because of the  "define"s above that have to be put at
+    ;; the beginning of the scope.
+    ;;
+    (unless (equal? ff-sym 'oplsaa)
+      (error "Dont know this force-field:" ff-sym))
     ;;
     ;; Build new sites and use them to construct a new molecule:
     ;;
