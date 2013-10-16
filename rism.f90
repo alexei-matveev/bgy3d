@@ -1640,14 +1640,28 @@ contains
     real (rk) :: tuv(size (cuv, 1), size (cuv, 2), size (cuv, 3))
     ! *** end of interface ***
 
-    integer :: p
+    integer :: p, n, m
 
-    ! Many associative matrix multiplies: NxN * (NxM * MxM) - NxM
-    !$omp parallel do
-    do p = 1, size (cuv, 1)
-       tuv(p, :, :) = matmul (wuu(p, :, :), matmul (cuv(p, :, :), xvv(p, :, :))) - cuv(p, :, :)
-    enddo
-    !$omp end parallel do
+    n = size (cuv, 2)
+    m = size (cuv, 3)
+
+    block
+      real (rk) :: uu(n, n), uv(n, m), vv(m, m)
+
+      !
+      ! Many associative matrix multiplies: NxM  = NxN * (NxM * MxM) -
+      ! NxM or in u/v terms: uv = uu * uv * vv - uv
+      !
+      !$omp parallel do private (uu, uv, vv)
+      do p = 1, size (cuv, 1)
+         uu = wuu(p, :, :)
+         uv = cuv(p, :, :)
+         vv = xvv(p, :, :)
+         uv = matmul (uu, matmul (uv, vv)) - uv
+         tuv(p, :, :) = uv
+      enddo
+      !$omp end parallel do
+    end block
   end function oz_uv_equation_c_t
 
 
