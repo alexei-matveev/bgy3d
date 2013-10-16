@@ -159,8 +159,11 @@
 (define (make-molecule name sites)
   (list name sites))
 
-(define (molecule-name solute) (first solute))
-(define (molecule-sites solute) (second solute))
+(define molecule-name first)
+(define molecule-sites second)
+;;; There  is also  an *optional*  third  field in  the molecule,  see
+;;; molecule-force-field.
+
 (define (molecule-positions solute)
   (map site-position (molecule-sites solute)))
 
@@ -182,11 +185,11 @@
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
 
-(define (site-name site) (first site))
-(define (site-position site) (second site))
-(define (site-sigma site) (third site))
-(define (site-epsilon site) (fourth site))
-(define (site-charge site) (fifth site))
+(define site-name first)
+(define site-position second)
+(define site-sigma third)
+(define site-epsilon fourth)
+(define site-charge fifth)
 
 (define (move-site site new-position)
   (match site
@@ -270,10 +273,10 @@
 ;;;
 ;;; See e.g. ./oplsaa-test or ./tinker.scm for details.
 ;;;
-(define (ff-symbol row) (second row))
-(define (ff-sigma row) (fifth row))
-(define (ff-epsilon row) (sixth row))
-(define (ff-charge row) (seventh row))
+(define ff-symbol second)
+(define ff-sigma fifth)
+(define ff-epsilon sixth)
+(define ff-charge seventh)
 
 ;;;
 ;;; This will be called from outside, augment each site in solute with
