@@ -1,6 +1,6 @@
 from ase.calculators.paragauss import ParaGauss
 from ase.io import read
-from pts.cfunc import Affine, Justcarts as Cartesian
+from pts.cfunc import Affine, Cartesian
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal, eV, Hartree, angstrom
 from pts.func import compose, NumDiff
