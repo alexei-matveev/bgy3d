@@ -151,8 +151,8 @@ contains
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
-    real (rk), optional, intent (out) :: t(:, :, :) ! (nrad, m, m)
-    real (rk), optional, intent (out) :: x(:, :, :) ! (nrad, m, m)
+    real (rk), optional, intent (out) :: t(:, :, :) ! (nrad, m, m), sic!
+    real (rk), optional, intent (inout) :: x(:, :, :) ! (nrad, m, m), sic!
     type (obj), intent (out), optional :: dict
     ! *** end of interface ***
 
