@@ -746,17 +746,18 @@ contains
     ! *** end of interface ***
 
     integer :: i, j, p
-    real (rk) :: density (size (r))
+    real (rk) :: acc, density (size (r))
 
     ! According   to  thermodynamic   perturbation   theory,  chemical
     ! potential density to be integrated:
     do p = 1, size (h, 3)
-       density(p) = 0.0
+       acc = 0.0
        do j = 1, size (h, 2)
           do i = 1, size (h, 1)
-             density(p) = density(p) + (expB(i, j, p) - 1) * (1 + h(i, j, p))
+             acc = acc + (expB(i, j, p) - 1) * (1 + h(i, j, p))
           enddo
        enddo
+       density(p) = acc
     enddo
 
     ! The integration  procedure assumes a  very specific radial  (i +
