@@ -96,6 +96,10 @@ contains
 
     nrad = rism_nrad (pd)
 
+    ! FIXME:  The  code operates  with  arrays  of  the [m,  m,  nrad]
+    ! shape. However,  for historical reasons  the C-interface assumes
+    ! the  transposed shape.   Conversion between  the two  layouts is
+    ! perfomed by main().
     call c_f_pointer (t_buf, t, shape = [nrad, m, m])
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
@@ -132,6 +136,10 @@ contains
 
     nrad = rism_nrad (pd)
 
+    ! FIXME:  The  code operates  with  arrays  of  the [m,  m,  nrad]
+    ! shape. However,  for historical reasons  the C-interface assumes
+    ! the  transposed shape.   Conversion between  the two  layouts is
+    ! perfomed by main().
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
 
