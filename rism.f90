@@ -255,7 +255,7 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (size (sites), size (sites), nrad) :: &
-         v_vvr, v_vvk, w_vvk, x_vvk, t, c
+         vr, vk, wk, xk, t, c
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -313,10 +313,10 @@ contains
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (sites, sites, r, k, v_vvr, v_vvk)
+    call force_field (sites, sites, r, k, vr, vk)
 
     ! Rigid-bond correlations on the k-grid:
-    w_vvk = omega_fourier (sites, k)
+    wk = omega_fourier (sites, k)
 
 
     !
@@ -325,9 +325,9 @@ contains
     ! in such cases:
     !
     if (eps /= 0.0) then
-       x_vvk = dipole_correction (beta, rho, eps, sites, k)
+       xk = dipole_correction (beta, rho, eps, sites, k)
     else
-       x_vvk = 0.0                 ! maybe useful to avoid branches later
+       xk = 0.0                 ! maybe useful to avoid branches later
     endif
 
     ! Intitial guess:
@@ -340,7 +340,7 @@ contains
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
-    c = closure (method, beta, v_vvr, t)
+    c = closure (method, beta, vr, t)
 
     !
     ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
@@ -355,11 +355,11 @@ contains
        h = fourier_rows (c + t) * (dr**3 / FT_FW)
 
        ! χ = ω + ρh
-       chi = w_vvk + rho * h
+       chi = wk + rho * h
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v_vvr, t, &
+    call post_process (method, beta, rho, sites, sites, dr, dk, vr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
@@ -374,7 +374,7 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure (method, beta, v_vvr, t)
+      c = closure (method, beta, vr, t)
 
       ! Forward FT via DST:
       c = fourier_rows (c) * (dr**3 / FT_FW)
@@ -391,7 +391,7 @@ contains
       ! scaling  factor A  in  the long  range  expression for  direct
       ! correlation is apropriate [CS81]:
       !
-      c = c - (beta * A) * v_vvk
+      c = c - (beta * A) * vk
 
       !
       ! OZ   equation,  involves  convolutions,   take  care   of  the
@@ -401,11 +401,11 @@ contains
       if (eps /= 0.0) then
          ! DRISM. This is going to break for  ρ = 0 as x(k) ~ 1/ρ², it
          ! will also break if dipole density y = 0:
-         dt = oz_vv_equation_c_t (rho, c, w_vvk + rho * x_vvk) + x_vvk
+         dt = oz_vv_equation_c_t (rho, c, wk + rho * xk) + xk
       else
          ! The branch is redundand since x(k)  = 0 in this case. It is
          ! here only not to waste CPU time:
-         dt = oz_vv_equation_c_t (rho, c, w_vvk)
+         dt = oz_vv_equation_c_t (rho, c, wk)
       endif
 
       !
@@ -420,7 +420,7 @@ contains
       !
       ! The factor A is due to Cummings and Stell.
       !
-      dt = dt - (beta * A) * v_vvk
+      dt = dt - (beta * A) * vk
 
       ! Inverse FT via DST:
       dt = fourier_rows (dt) * (dk**3 / FT_BW)
