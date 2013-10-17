@@ -255,7 +255,7 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (size (sites), size (sites), nrad) :: &
-         v_vvr, v_vvk, w_vvk, t_vvx, x_vvk, t, c
+         v_vvr, v_vvk, w_vvk, x_vvk, t, c
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -359,7 +359,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v_vvr, t_vvx, &
+    call post_process (method, beta, rho, sites, sites, dr, dk, v_vvr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
