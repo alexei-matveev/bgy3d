@@ -556,7 +556,7 @@ contains
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT:
     block
-      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
+      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad), h2(n, m, nrad), e2
 
       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
 
@@ -566,8 +566,14 @@ contains
       h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
+
+      ! Print TPT correction again with unmodified correlation function
+      h2 = closure (method, beta, v_uvr, t_uvx) + t_uvx
+      e2 = chempot_bridge (beta, rho, h2, expB, r, dr)
+
       if (verbosity > -1) then
          print *, "# TPT bridge correction =", e, "rbc =", rbc
+         print *, "# TPT bridge correction (unmodified) =", e2, "rbc =", rbc
       endif
 
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
