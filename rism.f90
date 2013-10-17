@@ -232,7 +232,7 @@ contains
 
 
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
-    use fft, only: fourier_cols, FT_FW, FT_BW, integrate
+    use fft, only: fourier_rows, FT_FW, FT_BW, integrate
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
@@ -247,18 +247,15 @@ contains
     real (rk), intent (in) :: beta          ! inverse temp
     real (rk), intent (in) :: rho
     type (site), intent (in) :: sites(:)    ! (m)
-    real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m)
-    real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m)
+    real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m), sic!
+    real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m), sic!
     type (obj), intent (out) :: dict
     ! *** end of interface ***
 
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
-    real (rk), dimension (nrad, size (sites), size (sites)) :: &
-         v_rvv, v_kvv, t, c, w_kvv, xk
-
     real (rk), dimension (size (sites), size (sites), nrad) :: &
-         v_vvr, v_vvk, w_vvk, t_vvx, x_vvk
+         v_vvr, v_vvk, w_vvk, t_vvx, x_vvk, t, c
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -318,25 +315,8 @@ contains
     ! long-range pairwise potential vk() on the k-grid:
     call force_field (sites, sites, r, k, v_vvr, v_vvk)
 
-    ! Here "un-transposed" version of v(:, :, :) is built:
-    block
-      integer :: i, j, k
-      forall (i=1:m, j=1:m, k=1:nrad)
-         v_rvv (k, i, j) = v_vvr(i, j, k)
-         v_kvv (k, i, j) = v_vvk(i, j, k)
-      end forall
-    end block
-
     ! Rigid-bond correlations on the k-grid:
     w_vvk = omega_fourier (sites, k)
-
-    ! Here "un-transposed" version of w(:, :, :) is built:
-    block
-      integer :: i, j, k
-      forall (i=1:m, j=1:m, k=1:nrad)
-         w_kvv (k, i, j) = w_vvk(i, j, k)
-      end forall
-    end block
 
 
     !
@@ -350,14 +330,6 @@ contains
        x_vvk = 0.0                 ! maybe useful to avoid branches later
     endif
 
-    ! Here "un-transposed" version of x is built:
-    block
-      integer :: i, j, k
-      forall (i=1:m, j=1:m, k=1:nrad)
-         xk(k, i, j) = x_vvk(i, j, k)
-      end forall
-    end block
-
     ! Intitial guess:
     t = 0.0
 
@@ -368,33 +340,34 @@ contains
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
-    c = closure (method, beta, v_rvv, t)
+    c = closure (method, beta, v_vvr, t)
 
     !
     ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
     ! solvent susceptibility χ(k) in Fourier rep:
     !
-    gam = t
-
     block
-       real (rk) :: h(nrad, m, m)
        integer :: i, j
-
-       h = fourier_cols (c + t) * (dr**3 / FT_FW)
-
+       ! FIXME: gam() is untransposed here:
        do i = 1, m
           do j = 1, m
-             chi(:, i, j) = w_kvv(:, i, j) + rho * h(:, i, j)
+             gam(:, i, j) = t(i, j, :)
           enddo
        enddo
     end block
 
-    ! Here "transposed" version of t(:, :, :) is constructed:
     block
-      integer :: i, j, p
-      forall (i=1:m, j=1:m, p=1:nrad)
-         t_vvx (i, j, p) = t(p, i, j)
-      end forall
+       real (rk) :: h(m, m, nrad)
+       integer :: i, j
+
+       h = fourier_rows (c + t) * (dr**3 / FT_FW)
+
+       ! FIXME: chi() is untransposed here:
+       do i = 1, m
+          do j = 1, m
+             chi(:, i, j) = w_vvk(i, j, :) + rho * h(i, j, :)
+          enddo
+       enddo
     end block
 
     ! Done with it, print results. Here solute == solvent:
@@ -409,14 +382,14 @@ contains
       ! ... Implements procedure(f_iterator).
       !
       implicit none
-      real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
+      real (rk), intent (in) :: t(:, :, :) ! (m, m, nrad)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure (method, beta, v_rvv, t)
+      c = closure (method, beta, v_vvr, t)
 
       ! Forward FT via DST:
-      c = fourier_cols (c) * (dr**3 / FT_FW)
+      c = fourier_rows (c) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -430,7 +403,7 @@ contains
       ! scaling  factor A  in  the long  range  expression for  direct
       ! correlation is apropriate [CS81]:
       !
-      c = c - (beta * A) * v_kvv
+      c = c - (beta * A) * v_vvk
 
       !
       ! OZ   equation,  involves  convolutions,   take  care   of  the
@@ -440,11 +413,11 @@ contains
       if (eps /= 0.0) then
          ! DRISM. This is going to break for  ρ = 0 as x(k) ~ 1/ρ², it
          ! will also break if dipole density y = 0:
-         dt = oz_vv_equation_c_t (rho, c, w_kvv + rho * xk) + xk
+         dt = oz_vv_equation_c_t (rho, c, w_vvk + rho * x_vvk) + x_vvk
       else
          ! The branch is redundand since x(k)  = 0 in this case. It is
          ! here only not to waste CPU time:
-         dt = oz_vv_equation_c_t (rho, c, w_kvv)
+         dt = oz_vv_equation_c_t (rho, c, w_vvk)
       endif
 
       !
@@ -459,10 +432,10 @@ contains
       !
       ! The factor A is due to Cummings and Stell.
       !
-      dt = dt - (beta * A) * v_kvv
+      dt = dt - (beta * A) * v_vvk
 
       ! Inverse FT via DST:
-      dt = fourier_cols (dt) * (dk**3 / FT_BW)
+      dt = fourier_rows (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -597,7 +570,7 @@ contains
       if (rbc) then
          c_uvx = closure_rbc (method, beta, v_uvr, t, expB)
       else
-          c_uvx = closure (method, beta, v_uvr, t)
+         c_uvx = closure (method, beta, v_uvr, t)
       endif
 
       ! Forward FT via DST:
@@ -1542,8 +1515,8 @@ contains
   function oz_vv_equation_c_t (rho, C, W) result (T)
     implicit none
     real (rk), intent (in) :: rho
-    real (rk), intent (in) :: C(:, :, :)         ! (nrad, m, m)
-    real (rk), intent (in) :: W(:, :, :)         ! (nrad, m, m)
+    real (rk), intent (in) :: C(:, :, :) ! (m, m, nrad)
+    real (rk), intent (in) :: W(:, :, :) ! (m, m, nrad)
     real (rk) :: T(size (C, 1), size (C, 2), size (C, 3))
     ! *** end of interface ***
 
@@ -1551,15 +1524,15 @@ contains
 
     ! There is  no reason to  handle the 1x1 case  differently, except
     ! clarity.  The MxM branch should be able to handle that case too.
-    if (size (C, 3) == 1) then
+    if (size (C, 1) == 1) then
        ! FIXME: it  is implied here  that W =  1. See comments  on the
        ! value of ω(k) for i == j in omega_fourier().
-       do i = 1, size (C, 1)
-          T(i, 1, 1) = oz_vv_equation_c_t_1x1 (rho, C(i, 1, 1))
+       do i = 1, size (C, 3)
+          T(1, 1, i) = oz_vv_equation_c_t_1x1 (rho, C(1, 1, i))
        enddo
     else
-       do i = 1, size (C, 1)
-          T(i, :, :) = oz_vv_equation_c_t_MxM (rho, C(i, :, :), W(i, :, :))
+       do i = 1, size (C, 3)
+          T(:, :, i) = oz_vv_equation_c_t_MxM (rho, C(:, :, i), W(:, :, i))
        enddo
     endif
   end function oz_vv_equation_c_t
