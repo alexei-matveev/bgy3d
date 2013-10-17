@@ -435,7 +435,7 @@ contains
 
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi_kvv, solute, dict)
     use snes, only: snes_default
-    use foreign, only: site
+    use foreign, only: site, verbosity
     use fft, only: integrate
     use lisp, only: obj, cons, sym, num
     use options, only: getopt
@@ -454,10 +454,10 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v_ruv, v_kuv, t_xuv, expB ! (nrad, n, m)
+         v_ruv, v_kuv, t_xuv    ! (nrad, n, m)
 
     real (rk), dimension (size (solute), size (solvent), nrad) :: &
-         v_uvr, v_uvk, t_uvx, c_uvx ! (n, m, nrad)
+         v_uvr, v_uvk, t_uvx, c_uvx, expB_uvr ! (n, m, nrad)
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: w_kuu ! (nrad, n, n)
@@ -518,10 +518,10 @@ contains
     rbc = getopt ("rbc")
 
     if (rbc) then
-       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+       call bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
     else
        ! Not used in this case:
-       expB = 1.0
+       expB_uvr = 1.0
     endif
 
 
@@ -548,17 +548,27 @@ contains
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT:
     block
-      real (rk) :: e, h(nrad, n, m), expB(nrad, n, m)
+      real (rk) :: e, h(nrad, n, m), expB_uvr(n, m, nrad), expB_ruv(nrad, n, m)
 
-      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+      call bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
+
+      ! Here "un-transposed" version of expB(:, :, :) is constructed:
+      block
+        integer :: i, j, p
+        forall (i=1:n, j=1:m, p=1:nrad)
+           expB_ruv (p, i, j) = expB_uvr(i, j, p)
+        end forall
+      end block
 
       ! h = c + t:
       ! call closure with RBC TPT correction
       ! FIXME: only HNC is implemented now, be careful when using others
-      h = closure_rbc (method, beta, v_ruv, t_xuv, expB) + t_xuv
+      h = closure_rbc (method, beta, v_ruv, t_xuv, expB_ruv) + t_xuv
 
-      e = chempot_bridge (beta, rho, h, expB, r, dr)
-      print *, "# XXX: TPT bridge correction =", e, "rbc =", rbc
+      e = chempot_bridge (beta, rho, h, expB_ruv, r, dr)
+      if (verbosity > -1) then
+         print *, "# TPT bridge correction =", e, "rbc =", rbc
+      endif
 
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
       ! collection:
@@ -579,8 +589,7 @@ contains
       ! *** end of interface ***
 
       if (rbc) then
-         error stop "expB wrong shape"
-         c_uvx = closure_rbc (method, beta, v_uvr, t, expB)
+         c_uvx = closure_rbc (method, beta, v_uvr, t, expB_uvr)
       else
           c_uvx = closure (method, beta, v_uvr, t)
       endif
@@ -625,7 +634,7 @@ contains
   end subroutine rism_uv
 
 
-  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
+  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
     !
     ! Calculate repulsive bridge correction exp(B):
     !
@@ -659,7 +668,7 @@ contains
     real (rk), intent (in) :: r(:)            ! (nrad)
     real (rk), intent (in) :: k(:)            ! (nrad)
     real (rk), intent (in) :: dr, dk
-    real (rk), intent (out) :: expB(:, :, :) ! (nrad, n, m)
+    real (rk), intent (out) :: expB_uvr(:, :, :) ! (n, m, nrad)
     ! *** end of interface ***
 
     integer :: m, n
@@ -668,6 +677,10 @@ contains
     n = size (solute)
 
     block
+      ! FIXME: expB() is uvr-shape (the  radial index is the last) but
+      ! the temporary quantities used to  compute it here are ruv- and
+      ! kuv-shaped (grid index first).
+      !
       ! Solvent-solvent pair quantities:
       real (rk), dimension (size (r), m, m) :: w
 
@@ -703,9 +716,9 @@ contains
       ! correlation ω:
       f = fourier_cols (f) * (dr**3 / FT_FW)
 
-      ! Compute expB(:,  i, j) as a  product over all  solvent sites l
+      ! Compute expB(i,  j, :) as a  product over all  solvent sites l
       ! except j.  First, set initial value to 1.0:
-      expB(:, :, :) = 1.0
+      expB_uvr(:, :, :) = 1.0
       block
         integer :: i, j, l
 
@@ -728,7 +741,7 @@ contains
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
                  if (j == l) cycle
-                 expB(:, i, j) = expB(:, i, j) * (1 + h(:, i, j))
+                 expB_uvr(i, j, :) = expB_uvr(i, j, :) * (1 + h(:, i, j))
               enddo
            enddo
         enddo
