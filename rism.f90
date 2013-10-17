@@ -189,10 +189,10 @@ contains
 
     block
        ! Indirect correlation γ aka t = h - c:
-       real (rk) :: gam(nrad, size (solvent), size (solvent))
+       real (rk) :: gam(size (solvent), size (solvent), nrad)
 
        ! Solvent susceptibility χ = ω + ρh:
-       real (rk) :: chi_fft(nrad, size (solvent), size (solvent))
+       real (rk) :: chi(size (solvent), size (solvent), nrad)
 
        ! Procedures  down  the  call  chain  will set  this  to  valid
        ! assiciation lists:
@@ -200,25 +200,25 @@ contains
 
        if (vv) then
           call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
-               solvent, gam, chi_fft, vdict)
+               solvent, gam, chi, vdict)
 
           ! Output, if requested:
           if (present (t)) then
-             t = gam
+             t = clayout (gam)
           endif
 
           if (present (x)) then
-             x = chi_fft
+             x = clayout (chi)
           endif
        else
           if (.not. present (x)) error stop "no way to get chi!"
-          chi_fft = x
+          chi = flayout (x)
           vdict = nil
        endif
 
        if (uv) then
           call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
-               solvent, chi_fft, solute, udict)
+               solvent, chi, solute, udict)
        endif
 
        if (present (dict)) then
@@ -247,8 +247,8 @@ contains
     real (rk), intent (in) :: beta          ! inverse temp
     real (rk), intent (in) :: rho
     type (site), intent (in) :: sites(:)    ! (m)
-    real (rk), intent (out) :: gam(:, :, :) ! (nrad, m, m), sic!
-    real (rk), intent (out) :: chi(:, :, :) ! (nrad, m, m), sic!
+    real (rk), intent (out) :: gam(:, :, :) ! (m, m, nrad)
+    real (rk), intent (out) :: chi(:, :, :) ! (m, m, nrad)
     type (obj), intent (out) :: dict
     ! *** end of interface ***
 
@@ -346,20 +346,16 @@ contains
     ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
     ! solvent susceptibility χ(k) in Fourier rep:
     !
-    ! FIXME: gam() is untransposed here:
-    gam = clayout (t)
+    gam = t
 
     block
-       real (rk) :: x(m, m, nrad)
+       real (rk) :: h(m, m, nrad)
 
-       ! x(k) := h(k) == c(k) + t(k)
-       x = fourier_rows (c + t) * (dr**3 / FT_FW)
+       ! h(k) = c(k) + t(k)
+       h = fourier_rows (c + t) * (dr**3 / FT_FW)
 
-       ! x(k) := χ == ω + ρh
-       x = w_vvk + rho * x
-
-       ! FIXME: chi() is untransposed here:
-       chi = clayout (x)
+       ! χ = ω + ρh
+       chi = w_vvk + rho * h
     end block
 
     ! Done with it, print results. Here solute == solvent:
@@ -435,7 +431,7 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi_kvv, solute, dict)
+  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site, verbosity
     use fft, only: integrate
@@ -448,9 +444,9 @@ contains
     real (rk), intent (in) :: rmax         ! cell size
     real (rk), intent (in) :: beta         ! inverse temp
     real (rk), intent (in) :: rho
-    type (site), intent (in) :: solvent(:)    ! (m)
-    real (rk), intent(in) :: chi_kvv(:, :, :) ! (nrad, m, m)
-    type (site), intent (in) :: solute(:)     ! (n)
+    type (site), intent (in) :: solvent(:) ! (m)
+    real (rk), intent(in) :: chi(:, :, :)  ! (m, m, nrad)
+    type (site), intent (in) :: solute(:)  ! (n)
     type (obj), intent (out) :: dict
     ! *** end of interface ***
 
@@ -460,7 +456,6 @@ contains
 
     ! Solute-solute pair quantities:
     real (rk), dimension (size (solute), size (solute), nrad) :: w_uuk ! (n, n, nrad)
-    real (rk), dimension (size (solvent), size (solvent), nrad) :: chi_vvk ! (m, m, nrad)
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -486,10 +481,6 @@ contains
 
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
-
-    ! FIXME: Here the input chi_kvv is "untransposed"
-    chi_vvk = flayout (chi_kvv)
-
 
     rbc = getopt ("rbc")
 
@@ -577,7 +568,7 @@ contains
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
       !
-      dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi_vvk)
+      dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
