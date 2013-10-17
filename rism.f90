@@ -457,7 +457,7 @@ contains
          v_ruv, v_kuv, t_xuv    ! (nrad, n, m)
 
     real (rk), dimension (size (solute), size (solvent), nrad) :: &
-         v_uvr, v_uvk, t_uvx, c_uvx, expB_uvr ! (n, m, nrad)
+         v_uvr, v_uvk, t_uvx, c_uvx, expB ! (n, m, nrad)
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: w_kuu ! (nrad, n, n)
@@ -518,10 +518,10 @@ contains
     rbc = getopt ("rbc")
 
     if (rbc) then
-       call bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
+       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
     else
        ! Not used in this case:
-       expB_uvr = 1.0
+       expB = 1.0
     endif
 
 
@@ -581,7 +581,7 @@ contains
       ! *** end of interface ***
 
       if (rbc) then
-         c_uvx = closure_rbc (method, beta, v_uvr, t, expB_uvr)
+         c_uvx = closure_rbc (method, beta, v_uvr, t, expB)
       else
           c_uvx = closure (method, beta, v_uvr, t)
       endif
@@ -626,7 +626,7 @@ contains
   end subroutine rism_uv
 
 
-  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
+  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
     !
     ! Calculate repulsive bridge correction exp(B):
     !
@@ -660,7 +660,7 @@ contains
     real (rk), intent (in) :: r(:)            ! (nrad)
     real (rk), intent (in) :: k(:)            ! (nrad)
     real (rk), intent (in) :: dr, dk
-    real (rk), intent (out) :: expB_uvr(:, :, :) ! (n, m, nrad)
+    real (rk), intent (out) :: expB(:, :, :) ! (n, m, nrad)
     ! *** end of interface ***
 
     integer :: m, n
@@ -710,7 +710,7 @@ contains
 
       ! Compute expB(i,  j, :) as a  product over all  solvent sites l
       ! except j.  First, set initial value to 1.0:
-      expB_uvr(:, :, :) = 1.0
+      expB(:, :, :) = 1.0
       block
         integer :: i, j, l
 
@@ -733,7 +733,7 @@ contains
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
                  if (j == l) cycle
-                 expB_uvr(i, j, :) = expB_uvr(i, j, :) * (1 + h(:, i, j))
+                 expB(i, j, :) = expB(i, j, :) * (1 + h(:, i, j))
               enddo
            enddo
         enddo
