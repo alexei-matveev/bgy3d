@@ -548,24 +548,16 @@ contains
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT:
     block
-      real (rk) :: e, h(nrad, n, m), expB_uvr(n, m, nrad), expB_ruv(nrad, n, m)
+      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
 
-      call bridge (solute, solvent, beta, r, dr, k, dk, expB_uvr)
-
-      ! Here "un-transposed" version of expB(:, :, :) is constructed:
-      block
-        integer :: i, j, p
-        forall (i=1:n, j=1:m, p=1:nrad)
-           expB_ruv (p, i, j) = expB_uvr(i, j, p)
-        end forall
-      end block
+      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
 
       ! h = c + t:
       ! call closure with RBC TPT correction
       ! FIXME: only HNC is implemented now, be careful when using others
-      h = closure_rbc (method, beta, v_ruv, t_xuv, expB_ruv) + t_xuv
+      h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
 
-      e = chempot_bridge (beta, rho, h, expB_ruv, r, dr)
+      e = chempot_bridge (beta, rho, h, expB, r, dr)
       if (verbosity > -1) then
          print *, "# TPT bridge correction =", e, "rbc =", rbc
       endif
@@ -763,22 +755,24 @@ contains
     use fft, only: integrate
     implicit none
     real (rk), intent (in) :: beta, rho
-    real (rk), intent (in) :: h(:, :, :)    ! (nrad, n, m)
-    real (rk), intent (in) :: expB(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: h(:, :, :)    ! (n, m, nrad)
+    real (rk), intent (in) :: expB(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: r(:)          ! (nrad)
     real (rk), intent (in) :: dr
     real (rk) :: mu
     ! *** end of interface ***
 
-    integer :: i, j
+    integer :: i, j, p
     real (rk) :: density (size (r))
 
     ! According   to  thermodynamic   perturbation   theory,  chemical
     ! potential density to be integrated:
-    density = 0.0
-    do j = 1, size (h, 3)
-       do i = 1, size (h, 2)
-          density = density + (expB(:, i, j) - 1) * (1 + h(:, i, j))
+    do p = 1, size (h, 3)
+       density(p) = 0.0
+       do j = 1, size (h, 2)
+          do i = 1, size (h, 1)
+             density(p) = density(p) + (expB(i, j, p) - 1) * (1 + h(i, j, p))
+          enddo
        enddo
     enddo
 
