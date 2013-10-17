@@ -255,9 +255,10 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
-         v, vk, t, c, w_kvv, xk
+         v_rvv, v_kvv, t, c, w_kvv, xk
 
-    real (rk), dimension (size (sites), size (sites), nrad) :: w_vvk
+    real (rk), dimension (size (sites), size (sites), nrad) :: &
+         v_vvr, v_vvk, w_vvk
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -315,7 +316,16 @@ contains
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (sites, sites, r, k, v, vk)
+    call force_field (sites, sites, r, k, v_vvr, v_vvk)
+
+    ! Here "un-transposed" version of v(:, :, :) is built:
+    block
+      integer :: i, j, k
+      forall (i=1:m, j=1:m, k=1:nrad)
+         v_rvv (k, i, j) = v_vvr(i, j, k)
+         v_kvv (k, i, j) = v_vvk(i, j, k)
+      end forall
+    end block
 
     ! Rigid-bond correlations on the k-grid:
     w_vvk = omega_fourier (sites, k)
@@ -350,7 +360,7 @@ contains
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
-    c = closure (method, beta, v, t)
+    c = closure (method, beta, v_rvv, t)
 
     !
     ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
@@ -372,7 +382,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v, t, &
+    call post_process (method, beta, rho, sites, sites, dr, dk, v_rvv, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
@@ -387,7 +397,7 @@ contains
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
-      c = closure (method, beta, v, t)
+      c = closure (method, beta, v_rvv, t)
 
       ! Forward FT via DST:
       c = fourier_cols (c) * (dr**3 / FT_FW)
@@ -404,7 +414,7 @@ contains
       ! scaling  factor A  in  the long  range  expression for  direct
       ! correlation is apropriate [CS81]:
       !
-      c = c - (beta * A) * vk
+      c = c - (beta * A) * v_kvv
 
       !
       ! OZ   equation,  involves  convolutions,   take  care   of  the
@@ -433,7 +443,7 @@ contains
       !
       ! The factor A is due to Cummings and Stell.
       !
-      dt = dt - (beta * A) * vk
+      dt = dt - (beta * A) * v_kvv
 
       ! Inverse FT via DST:
       dt = fourier_cols (dt) * (dk**3 / FT_BW)
@@ -465,7 +475,7 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v_ruv, v_kuv, t_xuv    ! (nrad, n, m)
+         v_ruv, t_xuv           ! (nrad, n, m)
 
     real (rk), dimension (size (solute), size (solvent), nrad) :: &
          v_uvr, v_uvk, t_uvx, c_uvx, expB ! (n, m, nrad)
@@ -494,16 +504,7 @@ contains
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (solute, solvent, r, k, v_ruv, v_kuv)
-
-    ! Here "transposed" version of v(:, :, :) is constructed:
-    block
-      integer :: i, j, k
-      forall (i=1:n, j=1:m, k=1:nrad)
-         v_uvr (i, j, k) = v_ruv(k, i, j)
-         v_uvk (i, j, k) = v_kuv(k, i, j)
-      end forall
-    end block
+    call force_field (solute, solvent, r, k, v_uvr, v_uvk)
 
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
@@ -540,6 +541,14 @@ contains
       integer :: i, j, p
       forall (i=1:n, j=1:m, p=1:nrad)
          t_xuv (p, i, j) = t_uvx(i, j, p)
+      end forall
+    end block
+
+    ! Here "un-transposed" version of v(:, :, :) is constructed:
+    block
+      integer :: i, j, k
+      forall (i=1:n, j=1:m, k=1:nrad)
+         v_ruv(k, i, j) =  v_uvr (i, j, k)
       end forall
     end block
 
@@ -1264,8 +1273,8 @@ contains
     type (site), intent (in) :: bsites(:)  ! (m)
     real (rk), intent (in) :: r(:)         ! (nrad)
     real (rk), intent (in) :: k(:)         ! (nrad)
-    real (rk), intent (out) :: vr(:, :, :) ! (nrad, n, m)
-    real (rk), intent (out) :: vk(:, :, :) ! (nrad, n, m)
+    real (rk), intent (out) :: vr(:, :, :) ! (n, m, nrad)
+    real (rk), intent (out) :: vk(:, :, :) ! (n, m, nrad)
     ! *** end of inteface ***
 
     real (rk) :: epsilon, sigma, charge
@@ -1282,15 +1291,15 @@ contains
 
           ! Short range on the r-grid:
           if (sigma /= 0.0) then
-             vr(:, i, j) = epsilon * lj (r / sigma) + &
+             vr(i, j, :) = epsilon * lj (r / sigma) + &
                   EPSILON0INV * charge * coulomb_short (r, ALPHA)
           else
-             vr(:, i, j) = &
+             vr(i, j, :) = &
                   EPSILON0INV * charge * coulomb_short (r, ALPHA)
           endif
 
           ! Long range on the k-grid:
-          vk(:, i, j) = &
+          vk(i, j, :) = &
                EPSILON0INV * charge * coulomb_long_fourier (k, ALPHA)
        enddo
     enddo
