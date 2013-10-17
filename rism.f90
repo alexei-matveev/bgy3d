@@ -258,7 +258,7 @@ contains
          v_rvv, v_kvv, t, c, w_kvv, xk
 
     real (rk), dimension (size (sites), size (sites), nrad) :: &
-         v_vvr, v_vvk, w_vvk
+         v_vvr, v_vvk, w_vvk, t_vvx, x_vvk
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -345,10 +345,18 @@ contains
     ! in such cases:
     !
     if (eps /= 0.0) then
-       xk = dipole_correction (beta, rho, eps, sites, k)
+       x_vvk = dipole_correction (beta, rho, eps, sites, k)
     else
-       xk = 0.0                 ! maybe useful to avoid branches later
+       x_vvk = 0.0                 ! maybe useful to avoid branches later
     endif
+
+    ! Here "un-transposed" version of x is built:
+    block
+      integer :: i, j, k
+      forall (i=1:m, j=1:m, k=1:nrad)
+         xk(k, i, j) = x_vvk(i, j, k)
+      end forall
+    end block
 
     ! Intitial guess:
     t = 0.0
@@ -381,8 +389,16 @@ contains
        enddo
     end block
 
+    ! Here "transposed" version of t(:, :, :) is constructed:
+    block
+      integer :: i, j, p
+      forall (i=1:m, j=1:m, p=1:nrad)
+         t_vvx (i, j, p) = t(p, i, j)
+      end forall
+    end block
+
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, v_rvv, t, &
+    call post_process (method, beta, rho, sites, sites, dr, dk, v_vvr, t_vvx, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
@@ -474,9 +490,6 @@ contains
     ! *** end of interface ***
 
     ! Solute-solvent pair quantities:
-    real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v_ruv, t_xuv           ! (nrad, n, m)
-
     real (rk), dimension (size (solute), size (solvent), nrad) :: &
          v_uvr, v_uvk, t_uvx, c_uvx, expB ! (n, m, nrad)
 
@@ -536,24 +549,8 @@ contains
     ! Lenny does not support that:
     call snes_default (iterate_t, t_uvx)
 
-    ! Here "un-transposed" version of t(:, :, :) is constructed:
-    block
-      integer :: i, j, p
-      forall (i=1:n, j=1:m, p=1:nrad)
-         t_xuv (p, i, j) = t_uvx(i, j, p)
-      end forall
-    end block
-
-    ! Here "un-transposed" version of v(:, :, :) is constructed:
-    block
-      integer :: i, j, k
-      forall (i=1:n, j=1:m, k=1:nrad)
-         v_ruv(k, i, j) =  v_uvr (i, j, k)
-      end forall
-    end block
-
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v_ruv, t_xuv, &
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     ! As  a part  of  post-processing, compute  the bridge  correction
@@ -877,7 +874,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_cols, FT_FW
+    use fft, only: fourier_rows, FT_FW
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
@@ -892,8 +889,8 @@ contains
     type (site), intent (in) :: solvent(:) ! (m)
     type (site), intent (in) :: solute(:)  ! (n)
     real (rk), intent (in) :: dr, dk       ! grid steps
-    real (rk), intent (in) :: v(:, :, :)   ! (nrad, n, m)
-    real (rk), intent (in) :: t(:, :, :)   ! (nrad, n, m)
+    real (rk), intent (in) :: v(:, :, :)   ! (n, m, nrad)
+    real (rk), intent (in) :: t(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: A            ! long-range scaling factor
     real (rk), value :: eps     ! requested dielectric constant, or 0
     type (obj), intent (out) :: dict
@@ -913,9 +910,9 @@ contains
     ! (not DRISM) calculations use a real eps:
     if (eps == 0.0) eps = 78.4d0 ! has value attribute
 
-    nrad = size (t, 1)          ! number of radial point
-    n = size (t, 2)             ! number of solute sites
-    m = size (t, 3)             ! number of solvent sites
+    n = size (t, 1)             ! number of solute sites
+    m = size (t, 2)             ! number of solvent sites
+    nrad = size (t, 3)          ! number of radial point
 
     block
        integer :: j
@@ -952,13 +949,13 @@ contains
     block
        integer :: p, i, j
        real (rk) :: r(nrad), k(nrad)
-       real (rk) :: c(nrad, n, m)
-       real (rk) :: cl(nrad, n, m)
-       real (rk) :: h(nrad, n, m)
-       real (rk) :: g(nrad, n, m)
+       real (rk) :: c(n, m, nrad)
+       real (rk) :: cl(n, m, nrad)
+       real (rk) :: h(n, m, nrad)
+       real (rk) :: g(n, m, nrad)
        real (rk) :: x(nrad), x0(nrad), x1(nrad), x2(nrad), xx(nrad) ! qhq in k-space
-       real (rk) :: xd(nrad, m, m)
-       real (rk) :: expB(nrad, n, m)
+       real (rk) :: xd(m, m, nrad)
+       real (rk) :: expB(n, m, nrad)
 
        ! Dont like to pass redundant  info, recompute r(:) from dr and
        ! k(:) from dk:
@@ -981,7 +978,7 @@ contains
        ! Real-space rep of the  long-range correlation. Note the extra
        ! scaling factor A:
        forall (p = 1:nrad, i = 1:n, j = 1:m)
-          cl(p, i, j) = - (beta * A) * solute(i) % charge * solvent(j) % charge &
+          cl(i, j, p) = - (beta * A) * solute(i) % charge * solvent(j) % charge &
                * EPSILON0INV * coulomb_long (r(p), ALPHA)
        end forall
 
@@ -1021,11 +1018,11 @@ contains
           real (rk) :: qu(n), qv(m)
           real (rk) :: y, fac0, fac1, fac2
           real (rk) :: qhq(nrad)
-          real (rk) :: hk(nrad, n, m)
+          real (rk) :: hk(n, m, nrad)
 
           ! Small-k  behavior   of  qh(k)q  which   is  essential  for
           ! dielectric permittivity:
-          hk = fourier_cols (h) * (dr**3 / FT_FW)
+          hk = fourier_rows (h) * (dr**3 / FT_FW)
 
           ! FIXME: dipole_density() assumes all solvent sites have the
           ! same number density:
@@ -1102,8 +1099,8 @@ contains
           do i = 1, size (solute)
              do j = 1, size (solvent)
                 do p = 1, nrad
-                   qhq(p) = qhq(p) + qu(i) * h(p, i, j) * qv(j) * EPSILON0INV
-                   x(p) = x(p) + qu(i) * hk(p, i, j) * qv(j) * EPSILON0INV
+                   qhq(p) = qhq(p) + qu(i) * h(i, j, p) * qv(j) * EPSILON0INV
+                   x(p) = x(p) + qu(i) * hk(i, j, p) * qv(j) * EPSILON0INV
                 enddo
              enddo
           enddo
@@ -1114,7 +1111,7 @@ contains
           do i = 1, size (solvent)
              do j = 1, size (solvent)
                 do p = 1, nrad
-                   xx(p) = xx(p) + qv(i) * xd(p, i, j) * qv(j) * EPSILON0INV
+                   xx(p) = xx(p) + qv(i) * xd(i, j, p) * qv(j) * EPSILON0INV
                 enddo
              enddo
           enddo
@@ -1166,10 +1163,10 @@ contains
           print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
           do p = 1, nrad
              write (*, *) r(p), &
-                  &     ((g(p, i, j), i=1,n), j=1,m), &
-                  &     ((v(p, i, j), i=1,n), j=1,m), &
-                  &     ((t(p, i, j), i=1,n), j=1,m), &
-                  &     ((c(p, i, j), i=1,n), j=1,m), &
+                  &     ((g(i, j, p), i=1,n), j=1,m), &
+                  &     ((v(i, j, p), i=1,n), j=1,m), &
+                  &     ((t(i, j, p), i=1,n), j=1,m), &
+                  &     ((c(i, j, p), i=1,n), j=1,m), &
                   &      k(p), x(p), x0(p), x1(p), x2(p), xx(p)
           enddo
        endif
@@ -1827,10 +1824,10 @@ contains
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho
-    real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
-    real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
-    real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
-    real (rk) :: mu(size (h, 1))
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: mu(size (h, 3))
     ! *** end of interface ***
 
     integer :: p, i, j
@@ -1848,24 +1845,24 @@ contains
        thresh = huge (thresh)
     end select
 
-    do p = 1, size (h, 1)       ! nrad
+    do p = 1, size (h, 3)       ! nrad
        muH = 0.0
        muS = 0.0
        muL = 0.0
-       do j = 1, size (h, 3)    ! m
-          do i = 1, size (h, 2) ! n
+       do j = 1, size (h, 2)    ! m
+          do i = 1, size (h, 1) ! n
              ! The h² term contributes conditionally. Eventually, only
              ! depletion regions  (h < 0)  contribute (KH).  Threshold
              ! is  supposed to  be  0.0 for  KH functional  (depletion
              ! regions contribute),  anywhere between 1 and  +∞ for GF
              ! functional  (no such  term) and  -∞ for  HNC functional
              ! (contributes unconditionally):
-             if (-h(p, i, j) > thresh) then
-                muH = muH + rho * h(p, i, j)**2 / 2
+             if (-h(i, j, p) > thresh) then
+                muH = muH + rho * h(i, j, p)**2 / 2
              endif
 
-             muS = muS + rho * (-cs(p, i, j) - h(p, i, j) * cs(p, i, j) / 2)
-             muL = muL + rho * (             - h(p, i, j) * cl(p, i, j) / 2)
+             muS = muS + rho * (-cs(i, j, p) - h(i, j, p) * cs(i, j, p) / 2)
+             muL = muL + rho * (             - h(i, j, p) * cl(i, j, p) / 2)
           enddo
        enddo
 
@@ -1886,13 +1883,13 @@ contains
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho
-    real (rk), intent (in) :: h(:, :, :)  ! (nrad, n, m)
-    real (rk), intent (in) :: cs(:, :, :) ! (nrad, n, m)
-    real (rk), intent (in) :: cl(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
     real (rk) :: mu
     ! *** end of interface ***
 
-    real (rk) :: density (size (h, 1))
+    real (rk) :: density (size (h, 3))
 
     ! Chemical potential density to be integrated:
     density = chempot_density (method, rho, h, cs, cl)

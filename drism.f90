@@ -433,13 +433,13 @@ contains
     real (rk), intent (in) :: eps        ! target epsilon
     type (site), intent (in) :: sites(:) ! (m)
     real (rk), intent (in) :: k(:)       ! (nrad)
-    real (rk) :: xk(size (k), size (sites), size (sites)) ! (nrad, m, m)
+    real (rk) :: xk(size (sites), size (sites), size (k)) ! (m, m, nrad)
     ! *** end of inteface ***
 
     real (rk), parameter :: s = 0.5 * ANGSTROM ! Ref. [KH00a]
     integer :: i, j
     real (rk) :: x(3, size (sites))
-    real (rk) :: f(size (k), size (sites))
+    real (rk) :: f(size (k), size (sites)) ! (nrad, m)
     real (rk) :: h(size (k))
     real (rk) :: y              ! dipole density
 
@@ -465,7 +465,7 @@ contains
 
     do j = 1, size (sites)
        do i = 1, size (sites)
-          xk(:, i, j) = f (:, i) * h(:) * f(:, j)
+          xk(i, j, :) = f (:, i) * h(:) * f(:, j)
        enddo
     enddo
   end function dipole_correction
