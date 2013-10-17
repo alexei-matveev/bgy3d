@@ -346,28 +346,20 @@ contains
     ! Return the  indirect correlation t(r)  aka γ(r) in real  rep and
     ! solvent susceptibility χ(k) in Fourier rep:
     !
-    block
-       integer :: i, j
-       ! FIXME: gam() is untransposed here:
-       do i = 1, m
-          do j = 1, m
-             gam(:, i, j) = t(i, j, :)
-          enddo
-       enddo
-    end block
+    ! FIXME: gam() is untransposed here:
+    gam = clayout (t)
 
     block
-       real (rk) :: h(m, m, nrad)
-       integer :: i, j
+       real (rk) :: x(m, m, nrad)
 
-       h = fourier_rows (c + t) * (dr**3 / FT_FW)
+       ! x(k) := h(k) == c(k) + t(k)
+       x = fourier_rows (c + t) * (dr**3 / FT_FW)
+
+       ! x(k) := χ == ω + ρh
+       x = w_vvk + rho * x
 
        ! FIXME: chi() is untransposed here:
-       do i = 1, m
-          do j = 1, m
-             chi(:, i, j) = w_vvk(i, j, :) + rho * h(i, j, :)
-          enddo
-       enddo
+       chi = clayout (x)
     end block
 
     ! Done with it, print results. Here solute == solvent:
@@ -495,14 +487,9 @@ contains
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
 
-    ! Here  "transposed"  version  of  chi_kvv(:,  :, :)  for  use  in
-    ! matmul():
-    block
-      integer :: i, j, k
-      forall (i=1:m, j=1:m, k=1:nrad)
-         chi_vvk (i, j, k) = chi_kvv(k, i, j)
-      end forall
-    end block
+    ! FIXME: Here the input chi_kvv is "untransposed"
+    chi_vvk = flayout (chi_kvv)
+
 
     rbc = getopt ("rbc")
 
@@ -1930,5 +1917,47 @@ contains
        write (*, *) r(p), ((g(p, i, j), i = 1, size (g, 2)), j = 1, size (g, 3))
     enddo
   end subroutine gnuplot3
+
+
+  function clayout (x) result (y)
+    implicit none
+    real (rk), intent (in) :: x(:, :, :) ! (n, m, nrad)
+    real (rk) :: y(size (x, 3), size (x, 1), size (x, 2)) ! (nrad, n, m)
+    ! *** end of interface ***
+
+    integer :: na, nb
+
+    na = size (x, 1) * size (x, 2)
+    nb = size (x, 3)
+
+    call trans (na, nb, x, y)
+  end function clayout
+
+
+  function flayout (y) result (x)
+    implicit none
+    real (rk), intent (in) :: y(:, :, :) ! (nrad, n, m)
+    real (rk) :: x(size (y, 2), size (y, 3), size (y, 1)) ! (n, m, nrad)
+    ! *** end of interface ***
+
+    integer :: na, nb
+
+    na = size (y, 2) * size (y, 3)
+    nb = size (y, 1)
+
+    call trans (nb, na, y, x)
+  end function flayout
+
+
+  subroutine trans (na, nb, x, y)
+    implicit none
+    integer, intent (in) :: na, nb
+    real (rk), intent (in) :: x(na, nb)
+    real (rk), intent (out) :: y(nb, na)
+    ! *** end of interface ***
+
+    y = transpose (x)
+  end subroutine trans
+
 
 end module rism
