@@ -255,7 +255,9 @@ contains
 
     ! Pair quantities. FIXME: they are symmetric, one should use that:
     real (rk), dimension (nrad, size (sites), size (sites)) :: &
-         v, vk, t, c, wk, xk
+         v, vk, t, c, w_kvv, xk
+
+    real (rk), dimension (size (sites), size (sites), nrad) :: w_vvk
 
     ! Radial grids:
     real (rk) :: r(nrad), dr
@@ -316,7 +318,16 @@ contains
     call force_field (sites, sites, r, k, v, vk)
 
     ! Rigid-bond correlations on the k-grid:
-    wk = omega_fourier (sites, k)
+    w_vvk = omega_fourier (sites, k)
+
+    ! Here "un-transposed" version of w(:, :, :) is built:
+    block
+      integer :: i, j, k
+      forall (i=1:m, j=1:m, k=1:nrad)
+         w_kvv (k, i, j) = w_vvk(i, j, k)
+      end forall
+    end block
+
 
     !
     ! FIXME: the  dipole correction x(k) is meaningless  if the dipole
@@ -355,7 +366,7 @@ contains
 
        do i = 1, m
           do j = 1, m
-             chi(:, i, j) = wk(:, i, j) + rho * h(:, i, j)
+             chi(:, i, j) = w_kvv(:, i, j) + rho * h(:, i, j)
           enddo
        enddo
     end block
@@ -403,11 +414,11 @@ contains
       if (eps /= 0.0) then
          ! DRISM. This is going to break for  ρ = 0 as x(k) ~ 1/ρ², it
          ! will also break if dipole density y = 0:
-         dt = oz_vv_equation_c_t (rho, c, wk + rho * xk) + xk
+         dt = oz_vv_equation_c_t (rho, c, w_kvv + rho * xk) + xk
       else
          ! The branch is redundand since x(k)  = 0 in this case. It is
          ! here only not to waste CPU time:
-         dt = oz_vv_equation_c_t (rho, c, wk)
+         dt = oz_vv_equation_c_t (rho, c, w_kvv)
       endif
 
       !
@@ -460,7 +471,6 @@ contains
          v_uvr, v_uvk, t_uvx, c_uvx, expB ! (n, m, nrad)
 
     ! Solute-solute pair quantities:
-    real (rk), dimension (nrad, size (solute), size (solute)) :: w_kuu ! (nrad, n, n)
     real (rk), dimension (size (solute), size (solute), nrad) :: w_uuk ! (n, n, nrad)
     real (rk), dimension (size (solvent), size (solvent), nrad) :: chi_vvk ! (m, m, nrad)
 
@@ -496,15 +506,7 @@ contains
     end block
 
     ! Rigid-bond solute-solute correlations on the k-grid:
-    w_kuu = omega_fourier (solute, k)
-
-    ! Here "transposed" version of w_kuu(:, :, :) for use in matmul():
-    block
-      integer :: i, j, k
-      forall (i=1:n, j=1:n, k=1:nrad)
-         w_uuk (i, j, k) = w_kuu(k, i, j)
-      end forall
-    end block
+    w_uuk = omega_fourier (solute, k)
 
     ! Here  "transposed"  version  of  chi_kvv(:,  :, :)  for  use  in
     ! matmul():
@@ -651,7 +653,7 @@ contains
     ! of 4πr² * g * [exp(B) - 1] is satisfactorily smooth and decaying
     ! fast enough.
     !
-    use fft, only: fourier_cols, FT_BW, FT_FW
+    use fft, only: fourier_rows, FT_BW, FT_FW
     use foreign, only: site
     implicit none
     type (site), intent (in) :: solute(:)     ! (n)
@@ -669,16 +671,12 @@ contains
     n = size (solute)
 
     block
-      ! FIXME: expB() is uvr-shape (the  radial index is the last) but
-      ! the temporary quantities used to  compute it here are ruv- and
-      ! kuv-shaped (grid index first).
-      !
       ! Solvent-solvent pair quantities:
-      real (rk), dimension (size (r), m, m) :: w
+      real (rk), dimension (m, m, size (r)) :: w
 
       ! Storage for solute-solvent pair quantities (dont take the name
       ! h literally):
-      real (rk), dimension (size (r), n, m) :: f, h
+      real (rk), dimension (n, m, size (r)) :: f, h
 
       ! Solvent  rigid-bond   correlations  ω  on   the  k-grid.   The
       ! self-correlation  is  a  δ-function   (or  1  in  the  Fourier
@@ -706,7 +704,7 @@ contains
       ! this  factor   (up  to  a  constant)  which   appears  in  the
       ! convolution with the intra-molecular solvent-solvent site-site
       ! correlation ω:
-      f = fourier_cols (f) * (dr**3 / FT_FW)
+      f = fourier_rows (f) * (dr**3 / FT_FW)
 
       ! Compute expB(i,  j, :) as a  product over all  solvent sites l
       ! except j.  First, set initial value to 1.0:
@@ -720,12 +718,12 @@ contains
            ! Fourier representations:
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
-                 h(:, i, j) =  f(:, i, l) * w(:, l, j)
+                 h(i, j, :) =  f(i, l, :) * w(l, j, :)
               enddo
            enddo
 
            ! Transform convolutions to the real space:
-           h = fourier_cols (h) * (dk**3 / FT_BW)
+           h = fourier_rows (h) * (dk**3 / FT_BW)
 
            ! Here the  product is accumulated.  FIXME:  Note that even
            ! though the factors  with l == j are  computed above, they
@@ -733,7 +731,7 @@ contains
            do j = 1, m          ! solvent sites
               do i = 1, n       ! solute sites
                  if (j == l) cycle
-                 expB(i, j, :) = expB(i, j, :) * (1 + h(:, i, j))
+                 expB(i, j, :) = expB(i, j, :) * (1 + h(i, j, :))
               enddo
            enddo
         enddo
@@ -827,7 +825,7 @@ contains
     type (site), intent (in) :: asites(:)       ! (n)
     type (site), intent (in) :: bsites(:)       ! (m)
     real (rk), intent (in) :: r(:)              ! (nrad)
-    real (rk), intent (out) :: vr(:, :, :)      ! (nrad, n, m)
+    real (rk), intent (out) :: vr(:, :, :)      ! (n, m, nrad)
     ! ** end of interface ***
 
     real (rk) :: sigma, epsilon
@@ -839,9 +837,9 @@ contains
           call pair (asites(i), bsites(j), sigma, epsilon)
 
           if (sigma /= 0.0) then
-              vr (:, i, j) = epsilon * lj12 (r / sigma)
+              vr (i, j, :) = epsilon * lj12 (r / sigma)
           else
-              vr (:, i, j) = 0.0
+              vr (i, j, :) = 0.0
           endif
         enddo
     enddo
@@ -1211,7 +1209,7 @@ contains
   end subroutine post_process
 
 
-  function omega_fourier (sites, k) result (wk)
+  function omega_fourier (sites, k) result (w_vvk)
     !
     ! The  intra-molecular force-field  amounts to  rigid  bonds. This
     ! function computes the Fourier representation
@@ -1227,7 +1225,7 @@ contains
     implicit none
     type (site), intent (in) :: sites(:)                  ! (m)
     real (rk), intent (in) :: k(:)                        ! (nrad)
-    real (rk) :: wk(size (k), size (sites), size (sites)) ! (nrad, m, m)
+    real (rk) :: w_vvk(size (sites), size (sites), size (k)) ! (m, m, nrad)
     ! *** end of inteface ***
 
     real (rk) :: xa(3), xb(3), rab
@@ -1246,7 +1244,7 @@ contains
           rab = norm2 (xa - xb)
 
           ! Rigid bond correlation on a k-grid:
-          wk(:, i, j) = j0 (k * rab)
+          w_vvk(i, j, :) = j0 (k * rab)
        enddo
     enddo
   end function omega_fourier
