@@ -454,7 +454,10 @@ contains
 
     ! Solute-solvent pair quantities:
     real (rk), dimension (nrad, size (solute), size (solvent)) :: &
-         v, vk, t, c, expB      ! (nrad, n, m)
+         v_ruv, v_kuv, t_xuv, expB ! (nrad, n, m)
+
+    real (rk), dimension (size (solute), size (solvent), nrad) :: &
+         v_uvr, v_uvk, t_uvx, c_uvx ! (n, m, nrad)
 
     ! Solute-solute pair quantities:
     real (rk), dimension (nrad, size (solute), size (solute)) :: w_kuu ! (nrad, n, n)
@@ -481,7 +484,16 @@ contains
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (solute, solvent, r, k, v, vk)
+    call force_field (solute, solvent, r, k, v_ruv, v_kuv)
+
+    ! Here "transposed" version of v(:, :, :) is constructed:
+    block
+      integer :: i, j, k
+      forall (i=1:n, j=1:m, k=1:nrad)
+         v_uvr (i, j, k) = v_ruv(k, i, j)
+         v_uvk (i, j, k) = v_kuv(k, i, j)
+      end forall
+    end block
 
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_kuu = omega_fourier (solute, k)
@@ -514,15 +526,23 @@ contains
 
 
     ! Intitial guess:
-    t = 0.0
+    t_uvx = 0.0
 
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
     ! function as a callback is an F08 feature. GFortran 4.3 on Debian
     ! Lenny does not support that:
-    call snes_default (iterate_t, t)
+    call snes_default (iterate_t, t_uvx)
+
+    ! Here "un-transposed" version of t(:, :, :) is constructed:
+    block
+      integer :: i, j, p
+      forall (i=1:n, j=1:m, p=1:nrad)
+         t_xuv (p, i, j) = t_uvx(i, j, p)
+      end forall
+    end block
 
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
+    call post_process (method, beta, rho, solvent, solute, dr, dk, v_ruv, t_xuv, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     ! As  a part  of  post-processing, compute  the bridge  correction
@@ -535,7 +555,7 @@ contains
       ! h = c + t:
       ! call closure with RBC TPT correction
       ! FIXME: only HNC is implemented now, be careful when using others
-      h = closure_rbc (method, beta, v, t, expB) + t
+      h = closure_rbc (method, beta, v_ruv, t_xuv, expB) + t_xuv
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
       print *, "# XXX: TPT bridge correction =", e, "rbc =", rbc
@@ -552,20 +572,21 @@ contains
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
       ! ... Implements procedure(f_iterator).
       !
-      use fft, only: fourier_cols, FT_FW, FT_BW
+      use fft, only: fourier_rows, FT_FW, FT_BW
       implicit none
-      real (rk), intent (in) :: t(:, :, :) ! (nrad, m, m)
+      real (rk), intent (in) :: t(:, :, :) ! (n, m, nrad)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
       ! *** end of interface ***
 
       if (rbc) then
-          c = closure_rbc (method, beta, v, t, expB)
+         error stop "expB wrong shape"
+         c_uvx = closure_rbc (method, beta, v_uvr, t, expB)
       else
-          c = closure (method, beta, v, t)
+          c_uvx = closure (method, beta, v_uvr, t)
       endif
 
       ! Forward FT via DST:
-      c = fourier_cols (c) * (dr**3 / FT_FW)
+      c_uvx = fourier_rows (c_uvx) * (dr**3 / FT_FW)
 
       !
       ! The  real-space representation  encodes  only the  short-range
@@ -575,13 +596,13 @@ contains
       !   C := C  - βV
       !         S     L
       !
-      c = c - beta * vk
+      c_uvx = c_uvx - beta * v_uvk
 
       !
       ! OZ equation, involves "convolutions", take care of the
       ! normalization here:
       !
-      dt = oz_uv_equation_c_t (c, w_uuk, chi_vvk)
+      dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi_vvk)
 
       !
       ! Since we plugged  in the Fourier transform of  the full direct
@@ -593,10 +614,10 @@ contains
       !   T  := T - βV
       !    S          L
       !
-      dt = dt - beta * vk
+      dt = dt - beta * v_uvk
 
       ! Inverse FT via DST:
-      dt = fourier_cols (dt) * (dk**3 / FT_BW)
+      dt = fourier_rows (dt) * (dk**3 / FT_BW)
 
       ! Return the increment that vanishes at convergence:
       dt = dt - t
@@ -1632,7 +1653,7 @@ contains
   end function oz_vv_equation_c_t_MxM
 
 
-  function oz_uv_equation_c_t (c_kuv, w_uuk, x_vvk) result (t_kuv)
+  function oz_uv_equation_c_t (c_uvk, w_uuk, x_vvk) result (t_uvk)
     !
     ! RISM equation, here for h and c:
     !
@@ -1652,34 +1673,25 @@ contains
     !    uv     uv    uv
     !
     implicit none
-    real (rk), intent (in) :: c_kuv(:, :, :) ! (nrad, n, m)
+    real (rk), intent (in) :: c_uvk(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: w_uuk(:, :, :) ! (n, n, nrad)
     real (rk), intent (in) :: x_vvk(:, :, :) ! (m, m, nrad)
-    real (rk) :: t_kuv(size (c_kuv, 1), size (c_kuv, 2), size (c_kuv, 3))
+    real (rk) :: t_uvk(size (c_uvk, 1), size (c_uvk, 2), size (c_uvk, 3))
     ! *** end of interface ***
 
-    integer :: p, n, m
+    integer :: k
 
-    n = size (c_kuv, 2)
-    m = size (c_kuv, 3)
-
-    block
-      real (rk) :: uv(n, m)
-
-      !
-      ! Many associative  matrix multiplies: NxM =  NxN * NxM  * MxM -
-      ! NxM or in u/v terms: uv = uu * uv * vv - uv
-      !
-      !$omp parallel do private (uv)
-      do p = 1, size (c_kuv, 1)
-         uv = c_kuv(p, :, :)
-         associate (uu => w_uuk(:, :, p), vv => x_vvk(:, :, p))
-           uv = matmul (uu, matmul (uv, vv)) - uv
-         end associate
-         t_kuv(p, :, :) = uv
-      enddo
-      !$omp end parallel do
-    end block
+    !
+    ! Many associative  matrix multiplies: NxM =  NxN * NxM  * MxM -
+    ! NxM or in u/v terms: uv = uu * uv * vv - uv
+    !
+    !$omp parallel do
+    do k = 1, size (c_uvk, 3)
+       associate (uv => c_uvk(:, :, k), uu => w_uuk(:, :, k), vv => x_vvk(:, :, k))
+         t_uvk(:, :, k) = matmul (uu, matmul (uv, vv)) - uv
+       end associate
+    enddo
+    !$omp end parallel do
   end function oz_uv_equation_c_t
 
 
