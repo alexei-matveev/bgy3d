@@ -33,8 +33,8 @@ module fft
   !
   !   dr * dk = 2π / 2n
   !
-  public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
+! public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: integrate           ! f(1:n) -> scalar
   !
   ! *** END OF INTERFACE ***
