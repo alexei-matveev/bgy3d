@@ -1389,35 +1389,39 @@ contains
 
   end function spec_id
 
-  function self_energy (sites, spec) result (se)
+
+  function self_energy (sites, spec) result (e)
     !
-    ! calculate the energy summation between each pair of residues for a
-    ! given site
+    ! Calculate the energy summation between each pair of residues for
+    ! a given site.
     !
     use foreign, only: site
     use units, only: ALPHA, EPSILON0INV
     implicit none
     type (site), intent (in) :: sites(:) ! (m)
     integer, intent (in) :: spec(:)      ! (m)
-    real (rk) :: se
+    real (rk) :: e
     ! *** end of interface ***
 
     integer i, j, m
 
-    m = size(sites)
+    m = size (sites)
 
-    se = 0.0
-    do j = 1, m - 1
-      do i = j + 1, m
-        if (spec(i) /= spec(j)) then
-          se = se + pair_energy (sites(i), sites(j))
-        endif
-      enddo
+    ! Loop over upper triangle with i <= j <= m, not to count the same
+    ! interaction twice.
+    e = 0.0
+    do j = 1, m
+       do i = 1, j
+          ! Self-interaction  of each  site is  automatically excluded
+          ! because of this:
+          if (spec(i) == spec(j)) cycle
+          e = e + pair_energy (sites(i), sites(j))
+       enddo
     enddo
 
     contains
 
-      function pair_energy (asite, bsite) result (pe)
+      function pair_energy (a, b) result (e)
         !
         ! Return the interaction energy between two sites: Pari_energy =
         ! LJ + Coulomb_short + Coulomb_long
@@ -1425,28 +1429,29 @@ contains
         use foreign, only: site
         use units, only: EPSILON0INV, ALPHA
         implicit none
-        type (site), intent (in) :: asite, bsite
-        real (rk) :: pe
+        type (site), intent (in) :: a, b
+        real (rk) :: e
         ! *** end of interface ***
 
-        real (rk) :: epsilon, sigma, charge, rab
+        real (rk) :: epsilon, sigma, rab, coul
 
-        ! combining LJ parameters
-        call pair (asite, bsite, sigma, epsilon)
+        ! Combining LJ parameters:
+        call pair (a, b, sigma, epsilon)
 
-        rab = norm2 (asite % x - bsite % x)
-        charge = asite % charge * bsite % charge
+        rab = norm2 (a % x - b % x)
 
-        if ( sigma /= 0.0) then
-          pe = epsilon * lj (rab / sigma) + &
-               EPSILON0INV * charge * coulomb_short (rab, ALPHA) + &
-               EPSILON0INV * charge * coulomb_long (rab, ALPHA)
+        ! Coulomb long + short energy happens  to be just 1 / rab, but
+        ! in this  way we do not  rely on that equality  should it not
+        ! hold for some reason:
+        coul = EPSILON0INV * a % charge * b % charge * &
+             (coulomb_short (rab, ALPHA) + coulomb_long (rab, ALPHA))
+
+        if (sigma /= 0.0) then
+          e = coul + epsilon * lj (rab / sigma)
         else
-          pe = EPSILON0INV * charge * coulomb_short (rab, ALPHA) + &
-               EPSILON0INV * charge * coulomb_long (rab, ALPHA)
+          e = coul
         endif
       end function pair_energy
-
   end function self_energy
 
 
