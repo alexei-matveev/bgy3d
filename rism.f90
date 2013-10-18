@@ -1285,6 +1285,29 @@ contains
     f = 4 * sr6 * (sr6 - 1)
   end function lj
 
+  function sites_dist_mat (sites) result (rij)
+    !
+    ! Calculate distance matrix of each atomic pair for a given site
+    !
+    use foreign, only: site
+    implicit none
+    type (site), intent (in) :: sites(:)         ! (m)
+    real (rk) :: rij(size (sites), size (sites)) ! (m, m)
+    ! *** end of interface ***
+
+    real (rk) :: xa(3), xb(3)
+    integer i, j, m
+
+    m = size(sites)
+
+    do j = 1, m
+       xb = sites(j) % x
+       do i = 1, m
+          xa = sites(i) % x
+          rij(i, j) = norm2 (xa - xb)
+       enddo
+    enddo
+  end function sites_dist_mat
 
   !
   ! In the most general case
