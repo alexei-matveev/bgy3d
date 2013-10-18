@@ -545,7 +545,7 @@ contains
       integer :: spec(n), i
 
       ! Get distance matrix
-      rij = sites_dist_mat (solute)
+      rij = distance_matrix (solute)
 
       ! Get specy ID
       spec = spec_id (rij)
@@ -1293,6 +1293,7 @@ contains
 
   end subroutine force_field
 
+
   elemental function lj (r) result (f)
     !
     ! To be called as in eps * lj (r / sigma)
@@ -1309,9 +1310,10 @@ contains
     f = 4 * sr6 * (sr6 - 1)
   end function lj
 
-  function sites_dist_mat (sites) result (rij)
+
+  function distance_matrix (sites) result (rij)
     !
-    ! Calculate distance matrix of each atomic pair for a given site
+    ! Calculate distance matrix of each atomic pair for a given site.
     !
     use foreign, only: site
     implicit none
@@ -1319,19 +1321,17 @@ contains
     real (rk) :: rij(size (sites), size (sites)) ! (m, m)
     ! *** end of interface ***
 
-    real (rk) :: xa(3), xb(3)
     integer i, j, m
 
-    m = size(sites)
+    m = size (sites)
 
     do j = 1, m
-       xb = sites(j) % x
        do i = 1, m
-          xa = sites(i) % x
-          rij(i, j) = norm2 (xa - xb)
+          rij(i, j) = norm2 (sites(i) % x - sites(j) % x)
        enddo
     enddo
-  end function sites_dist_mat
+  end function distance_matrix
+
 
   function spec_id (rij) result (spec)
     !
