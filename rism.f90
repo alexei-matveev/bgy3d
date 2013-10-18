@@ -445,7 +445,7 @@ contains
     use fft, only: integrate
     use lisp, only: obj, cons, sym, num
     use options, only: getopt
-    use units, only: pi
+    use units, only: pi, angstrom
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -547,8 +547,10 @@ contains
       ! Get distance matrix
       rij = distance_matrix (solute)
 
-      ! Get specy ID
-      spec = spec_id (rij)
+      ! Get  species ID.   Sites belong  to  the same  species if  the
+      ! distance  is below  some fixed  value. FIXME:  here  a literal
+      ! constant:
+      spec = identify_species (rij, 2.0 * angstrom)
 
       if (verbosity > 1) then
          do i = 1, n
@@ -1333,61 +1335,57 @@ contains
   end function distance_matrix
 
 
-  function spec_id (rij) result (spec)
+  function identify_species (rij, r0) result (spec)
     !
-    ! Given the distance matrix rij(m, m), get the specy ID for each
-    ! site spec(m). If the distance between two sites is less than 2.0 Å
-    ! (FIXME), then they belong to the same specy
+    ! Given the distance matrix rij(m, m), get the species ID for each
+    ! site spec(m). If the distance  between two sites is less than r0
+    ! (~ 2.0 A), then they belong to the same species.
     !
     implicit none
     real (rk), intent (in) :: rij(:, :) ! (m, m)
+    real (rk), intent (in) :: r0
     integer :: spec(size(rij, 1))       ! (m)
     ! *** end of interface ***
 
-    integer i, j, m, spec_count
+    integer i, j, m, species
 
-    m = size(rij, 1)
+    m = size (rij, 1)
 
-    if ( m /= size(rij, 2)) then
+    if (m /= size (rij, 2)) then
       error stop "distance matrix should be square"
     endif
 
-    ! Initialize specy ID and specy number
-    spec_count = 0
+    ! Initialize species ID to and invalid ID (here 0).  Valid IDs are
+    ! positive. There is zero identified species at the moment:
     spec(:) = 0
+    species = 0
+    do j = 1, m
+       ! First  see  if the  current  site  j  belongs to  an  already
+       ! identified species.  Only loop over previousely assined sites
+       ! and skip the diagonal i == j:
+       do i = 1, j - 1
+          ! Sites i and j belong to  the same species if r(i, j) < r0.
+          ! FIXME:  for  the  current  study (aqueous  solution)  it's
+          ! first-come-first-served.    What  if   a  site   is  close
+          ! connected with more than  one neighbours while they belong
+          ! to different species?
+          if (rij(i, j) < r0) then
+             spec(j) = spec(i)
+          else
+             ! otherwise spec(j) remains 0
+          endif
+       enddo
 
-    ! Only loop over half of the distance matrix and skip the diagonal
-    do j = 1, m - 1
+       ! If site j was assigned, proceed to the next:
+       if (spec(j) /= 0) cycle
 
-      ! increment specy count if found an unassigned specy ID
-      if (spec(j) == 0) then
-        spec_count = spec_count + 1
-        spec(j) = spec_count
-      endif
-
-      do i = j + 1, m
-
-        ! i-j sites have the same sepcy ID if rij < 2.0
-        ! FIXME: for current study (aqueous solution) it's
-        ! first-come-first-served.  What if a site is close connectted
-        ! with more than one neighbours while they belong to different
-        ! species?
-        if (spec(i) == 0 .and. rij(i, j) < 2.0) then
-          spec(i) = spec(j)
-        endif
-      enddo
+       ! Otherwise we  have found a  new species --  increment species
+       ! count and assign new ID:
+       species = species + 1
+       spec(j) = species
     enddo
-
-    ! for those who failed to find its partner after the matching loop,
-    ! mark them as new
-    do i = 1, m
-      if (spec(i) == 0) then
-        spec_count = spec_count + 1
-        spec(i) = spec_count
-      endif
-    enddo
-
-  end function spec_id
+    if (any (spec == 0)) error stop "cannot happen!"
+  end function identify_species
 
 
   function self_energy (sites, spec) result (e)
