@@ -1380,7 +1380,7 @@ contains
 
     ! for those who failed to find its partner after the matching loop,
     ! mark them as new
-    do j = 1, m
+    do i = 1, m
       if (spec(i) == 0) then
         spec_count = spec_count + 1
         spec(i) = spec_count
