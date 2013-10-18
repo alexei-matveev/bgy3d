@@ -541,16 +541,13 @@ contains
     end block
 
     block
-      real (rk) :: rij(n, n), se
+      real (rk) :: se
       integer :: spec(n), i
-
-      ! Get distance matrix
-      rij = distance_matrix (solute)
 
       ! Get  species ID.   Sites belong  to  the same  species if  the
       ! distance  is below  some fixed  value. FIXME:  here  a literal
       ! constant:
-      spec = identify_species (rij, 2.0 * angstrom)
+      spec = identify_species (solute, 2.0 * angstrom)
 
       if (verbosity > 1) then
          do i = 1, n
@@ -1335,31 +1332,30 @@ contains
   end function distance_matrix
 
 
-  function identify_species (rij, r0) result (spec)
+  function identify_species (sites, r0) result (spec)
     !
     ! Given the distance matrix rij(m, m), get the species ID for each
     ! site spec(m). If the distance  between two sites is less than r0
     ! (~ 2.0 A), then they belong to the same species.
     !
+    use foreign, only: site
     implicit none
-    real (rk), intent (in) :: rij(:, :) ! (m, m)
+    type (site), intent (in) :: sites(:) ! (m)
     real (rk), intent (in) :: r0
-    integer :: spec(size(rij, 1))       ! (m)
+    integer :: spec(size (sites)) ! (m)
     ! *** end of interface ***
 
-    integer i, j, m, species
+    real (rk) :: rij(size (sites), size (sites)) ! (m, m)
+    integer i, j, species
 
-    m = size (rij, 1)
-
-    if (m /= size (rij, 2)) then
-      error stop "distance matrix should be square"
-    endif
+    ! Get distance matrix
+    rij = distance_matrix (sites)
 
     ! Initialize species ID to and invalid ID (here 0).  Valid IDs are
     ! positive. There is zero identified species at the moment:
     spec(:) = 0
     species = 0
-    do j = 1, m
+    do j = 1, size (sites)
        ! First  see  if the  current  site  j  belongs to  an  already
        ! identified species.  Only loop over previousely assined sites
        ! and skip the diagonal i == j:
