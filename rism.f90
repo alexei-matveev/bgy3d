@@ -1267,24 +1267,23 @@ contains
        enddo
     enddo
 
-  contains
-
-    elemental function lj (r) result (f)
-      !
-      ! To be called as in eps * lj (r / sigma)
-      !
-      implicit none
-      real (rk), intent (in) :: r   ! r / sigma, in general
-      real (rk) :: f
-      ! *** end of interfce ***
-
-      real (rk) :: sr6
-
-      sr6 = 1 / r**6
-
-      f = 4 * sr6 * (sr6 - 1)
-    end function lj
   end subroutine force_field
+
+  elemental function lj (r) result (f)
+    !
+    ! To be called as in eps * lj (r / sigma)
+    !
+    implicit none
+    real (rk), intent (in) :: r   ! r / sigma, in general
+    real (rk) :: f
+    ! *** end of interfce ***
+
+    real (rk) :: sr6
+
+    sr6 = 1 / r**6
+
+    f = 4 * sr6 * (sr6 - 1)
+  end function lj
 
 
   !
