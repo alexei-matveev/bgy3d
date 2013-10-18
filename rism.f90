@@ -540,6 +540,30 @@ contains
       dict = cons (cons (sym ("RBC-TPT"), num (e)), dict)
     end block
 
+    block
+      real (rk) :: rij(n, n), se
+      integer :: spec(n), i
+
+      ! Get distance matrix
+      rij = sites_dist_mat (solute)
+
+      ! Get specy ID
+      spec = spec_id (rij)
+
+      if (verbosity > 1) then
+         do i = 1, n
+            print *, solute(i) % name, spec(i)
+         enddo
+      endif
+
+      se = self_energy (solute, spec)
+
+      print *, "# Self energy = ", se, " kcal/mol"
+
+      dict = cons (cons (sym ("SELF-ENERGY"), num (se)), dict)
+
+    end block
+
   contains
 
     function iterate_t (t) result (dt)
