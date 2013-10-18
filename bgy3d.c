@@ -53,15 +53,12 @@ ProblemData bgy3d_problem_data (void)
 
   /*
     At this point N, h and L have consistent values.  FIXME: N^2 + N^2
-    +  N^2 should  not overflow,  this condition  ensures that  3N^2 <
-    2^31:
+    + N^2 should not overflow  in 3D, this condition ensures that 3N^2
+    <  2^31.  Also  N^3  should not  ne  too large.   But  for 1D  the
+    restriction is void so do not abort if N^3 >= 2^31:
   */
   assert (N < 26755);
-
-  /* FIXME: N^3 should not overflow in 3D runs. For 1D the restriction
-     is void. Print a warning if N^3 >= 2^31: */
-  if (N >= 1291)
-    fprintf (stderr, "Warning: N=%d may be too large for 3D!\n", N);
+  // assert (N < 1291);
 
   /* Inverse temperature: */
   PD.beta = 1.6889;
@@ -120,6 +117,16 @@ ProblemData bgy3d_problem_data (void)
 
 State* bgy3d_state_make (const ProblemData *PD)
 {
+  /*
+    FIXME: Memory limits? Accidentally  calling 3D code with a typical
+    dimension  of   1D?   Anyway,  N^3  should  not   overflow  in  3D
+    runs. Print a warning if N^3 is definitely over 2^31:
+  */
+  const int nmax = 1291;
+  if (PD->N[0] >= nmax && PD->N[1] >= nmax && PD->N[2] >= nmax)
+    fprintf (stderr, "Warning: grid %d x %d x %d too large for 3D!\n",
+             PD->N[0], PD->N[1], PD->N[2]);
+
   /* Also initialize all pointers stored in State to NULL: */
   State *BHD = calloc (1, sizeof *BHD);
 
