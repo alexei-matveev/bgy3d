@@ -1365,6 +1365,67 @@ contains
 
   end function spec_id
 
+  function self_energy (sites, spec) result (se)
+    !
+    ! calculate the energy summation between each pair of residues for a
+    ! given site
+    !
+    use foreign, only: site
+    use units, only: ALPHA, EPSILON0INV
+    implicit none
+    type (site), intent (in) :: sites(:) ! (m)
+    integer, intent (in) :: spec(:)      ! (m)
+    real (rk) :: se
+    ! *** end of interface ***
+
+    integer i, j, m
+
+    m = size(sites)
+
+    se = 0.0
+    do j = 1, m - 1
+      do i = j + 1, m
+        if (spec(i) /= spec(j)) then
+          se = se + pair_energy (sites(i), sites(j))
+        endif
+      enddo
+    enddo
+
+    contains
+
+      function pair_energy (asite, bsite) result (pe)
+        !
+        ! Return the interaction energy between two sites: Pari_energy =
+        ! LJ + Coulomb_short + Coulomb_long
+        !
+        use foreign, only: site
+        use units, only: EPSILON0INV, ALPHA
+        implicit none
+        type (site), intent (in) :: asite, bsite
+        real (rk) :: pe
+        ! *** end of interface ***
+
+        real (rk) :: epsilon, sigma, charge, rab
+
+        ! combining LJ parameters
+        call pair (asite, bsite, sigma, epsilon)
+
+        rab = norm2 (asite % x - bsite % x)
+        charge = asite % charge * bsite % charge
+
+        if ( sigma /= 0.0) then
+          pe = epsilon * lj (rab / sigma) + &
+               EPSILON0INV * charge * coulomb_short (rab, ALPHA) + &
+               EPSILON0INV * charge * coulomb_long (rab, ALPHA)
+        else
+          pe = EPSILON0INV * charge * coulomb_short (rab, ALPHA) + &
+               EPSILON0INV * charge * coulomb_long (rab, ALPHA)
+        endif
+      end function pair_energy
+
+  end function self_energy
+
+
   !
   ! In the most general case
   !
