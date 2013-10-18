@@ -1309,6 +1309,62 @@ contains
     enddo
   end function sites_dist_mat
 
+  function spec_id (rij) result (spec)
+    !
+    ! Given the distance matrix rij(m, m), get the specy ID for each
+    ! site spec(m). If the distance between two sites is less than 2.0 Å
+    ! (FIXME), then they belong to the same specy
+    !
+    implicit none
+    real (rk), intent (in) :: rij(:, :) ! (m, m)
+    integer :: spec(size(rij, 1))       ! (m)
+    ! *** end of interface ***
+
+    integer i, j, m, spec_count
+
+    m = size(rij, 1)
+
+    if ( m /= size(rij, 2)) then
+      error stop "distance matrix should be square"
+    endif
+
+    ! Initialize specy ID and specy number
+    spec_count = 0
+    spec(:) = 0
+
+    ! Only loop over half of the distance matrix and skip the diagonal
+    do j = 1, m - 1
+
+      ! increment specy count if found an unassigned specy ID
+      if (spec(j) == 0) then
+        spec_count = spec_count + 1
+        spec(j) = spec_count
+      endif
+
+      do i = j + 1, m
+
+        ! i-j sites have the same sepcy ID if rij < 2.0
+        ! FIXME: for current study (aqueous solution) it's
+        ! first-come-first-served.  What if a site is close connectted
+        ! with more than one neighbours while they belong to different
+        ! species?
+        if (spec(i) == 0 .and. rij(i, j) < 2.0) then
+          spec(i) = spec(j)
+        endif
+      enddo
+    enddo
+
+    ! for those who failed to find its partner after the matching loop,
+    ! mark them as new
+    do j = 1, m
+      if (spec(i) == 0) then
+        spec_count = spec_count + 1
+        spec(i) = spec_count
+      endif
+    enddo
+
+  end function spec_id
+
   !
   ! In the most general case
   !
