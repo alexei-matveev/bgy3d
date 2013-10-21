@@ -16,6 +16,7 @@
    molecule-positions
    molecule-charge
    molecule-dipole
+   molecule-species
    find-molecule
    print-molecule/xyz
    kj->kcal
@@ -200,6 +201,15 @@
 (define (site-y site) (second (site-position site)))
 (define (site-z site) (third (site-position site)))
 
+(define (dot a b)
+  (apply + (map * a b)))
+
+(define (site-distance a b)
+  (let ((xa (site-position a))
+        (xb (site-position b)))
+    (let ((d (map - xa xb)))
+      (sqrt (dot d d)))))
+
 ;;;
 ;;; This extracts the  charge field from every site  and sums them up.
 ;;; The  molecule needs  to be  in  the "canonical"  format, with  the
@@ -212,8 +222,6 @@
 ;;; Dipole moment. Same constraints as for molecule-charge:
 ;;;
 (define (molecule-dipole mol)
-  (define (dot a b)
-    (apply + (map * a b)))
   (let* ((sites (molecule-sites mol))
          (q (map site-charge sites))
          (x (map site-x sites))
@@ -222,6 +230,33 @@
     (list (dot q x)
           (dot q y)
           (dot q z))))
+
+(define (molecule-species solute rmax)
+  ;;
+  ;; Comparator for  two sites. Returns true if  sites are closer than
+  ;; rmax. It will be used to compare the keys (sites) in a dictionary
+  ;; (association list). FIXME: this is NOT an equivalence relation as
+  ;; it is not transitive, is it a problem? Yes, it is!
+  ;;
+  (define (close? a b)
+    (< (site-distance a b) rmax))
+  ;;
+  ;; Loop over all sites, collecting a dictionary of site IDs:
+  ;;
+  (let loop ((n 0)
+             (alist '())
+             (sites (molecule-sites solute)))
+    (if (null? sites)
+        (reverse (map cdr alist))       ; return only IDs, so far
+        (let ((site (car sites))
+              (rest (cdr sites)))
+          (let ((n' (let ((pair (assoc site alist close?)))
+                            (and pair (cdr pair)))))
+            (if n'
+                (loop n (acons site n' alist) rest)
+                (let ((n (+ 1 n)))
+                  (loop n (acons site n alist) rest))))))))
+
 
 (define (print-molecule/xyz solute)
   (let ((name   (molecule-name solute))
