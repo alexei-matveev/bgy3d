@@ -1,3 +1,13 @@
+#
+# Tell Python interpreter where to find custom modules:
+#
+#   export PYTHONPATH=~/PYTHON:~/darcs/bgy3d/python
+#
+# For the  rubgy.scm script to run  one might need to  set the library
+# search path:
+#
+# export LD_LIBRARY_PATH=~/darcs/bgy3d
+#
 from ase.calculators.paragauss import ParaGauss
 from ase.io import read
 from pts.cfunc import Affine, Cartesian
