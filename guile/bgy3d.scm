@@ -600,6 +600,18 @@ computes the sum of all vector elements."
       ;;
       (values f x))))
 
+;;;
+;;; "Gas-phase" PES:
+;;;
+(define (make-pes/gp solute settings)
+  (let* ((rmax (assoc-ref settings 'bond-length-thresh))
+         (species (molecule-species solute rmax))
+         (x0 (molecule-positions solute))
+         (f (lambda (x)
+              (let ((solute' (move-molecule solute x)))
+                (rism-self-energy solute' species)))))
+    (values f x0)))
+
 
 ;;;
 ;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
@@ -776,14 +788,12 @@ computes the sum of all vector elements."
            args)))
         ;;
         ("self-energy"
-         (let ((rmax (assoc-ref settings 'bond-length-thresh)))
-           (for-each
-            (lambda (name)
-              (let* ((solute (find-molecule name))
-                     (species (molecule-species solute rmax))
-                     (e (rism-self-energy solute species)))
-                (pretty-print/serial e)))
-            args)))
+         (for-each
+          (lambda (name)
+            (let-values (((f x0) (make-pes/gp (find-molecule name) settings)))
+              (let ((e (f x0)))
+                (pretty-print/serial e))))
+          args))
         ;;
         ("find-molecule"
          (for-each
