@@ -936,4 +936,9 @@
  (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
  (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
 
+;;;
+;;; This FF is  taken by default if a  solute/solvent description does
+;;; not say otherwise:
+;;;
+(empty)
 
