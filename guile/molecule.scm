@@ -284,7 +284,7 @@
 
 (define (load-ff-file file)
   (let* ((contents (slurp/cached (find-file file)))
-         (force-field (assoc "oplsaa" contents))) ; FIXME: literal here
+         (force-field (assoc 'oplsaa contents))) ; FIXME: literal here
     ;;
     ;; Force-field name in CAR  position is irrelevant for the rest of
     ;; the code, return only the list of entries:
