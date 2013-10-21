@@ -3,8 +3,13 @@ module rism
   implicit none
   private
 
+  ! These are  all bind(c)  and are not  used in Fortran  sources, but
+  ! from C-side:
   public :: rism_solvent
   public :: rism_solute
+  public :: rism_nrad
+  public :: rism_rmax
+  public :: rism_upscale
   ! *** END OF INTERFACE ***
 
   interface gnuplot
