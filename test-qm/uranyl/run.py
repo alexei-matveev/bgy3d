@@ -14,9 +14,11 @@ from pts.cfunc import Affine, Cartesian
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal, eV, Hartree, angstrom
 from pts.func import compose, NumDiff
+from pts.zmat import ZMat
 from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
+from numpy import max, abs
 
 cmd = \
 """
@@ -32,9 +34,28 @@ atoms = read ("uo22+,gp.xyz")
 
 x = atoms.get_positions ()
 
-trafo = compose (Cartesian (), Affine (x.reshape (x.size, 1)))
+if False:
+    trafo = compose (Cartesian (), Affine (x.reshape (x.size, 1)))
+else:
+    # Z-matrix for a linear UOO molecule:
+    zm = ZMat ([(None, None, None),
+                (0, None, None),
+                (0, 1, None)])
 
+    # 2 -> 3 linear trafo
+    reduc = Affine ([[1, 0],
+                     [1, 0],
+                     [0, 1]])
+
+    # Two bond length are constrained to be the same:
+    trafo = compose (zm, reduc)
+
+# Internal coordinates:
 s = trafo.pinv (x)
+print "XXX: internals = ", s
+print  trafo (s)
+print "XXX: fprime = ", trafo.fprime (s)
+# exit (1)
 
 with QFunc (atoms, calc) as f, Server (cmd) as g:
     f = Memoize (f, DirStore (salt="uo22+, gp, qm"))
