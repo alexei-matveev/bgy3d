@@ -759,6 +759,16 @@ computes the sum of all vector elements."
                (print-molecule/xyz (find-molecule name)))
            args))
         ;;
+        ("print-species"
+         (for-each
+             (lambda (name)
+               (let ((mol (find-molecule name)))
+                 (pretty-print/serial
+                  (map cons
+                       (map site-name (molecule-sites mol))
+                       (molecule-species mol 2.0))))) ; FIXME: literal!
+           args))
+        ;;
         ("find-molecule"
          (for-each
              (lambda (name)
