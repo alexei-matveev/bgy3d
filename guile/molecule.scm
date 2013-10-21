@@ -176,12 +176,12 @@
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
 ;;; description.  FIXME:  A missing table  is interpreted as  an empty
-;;; OPLSAA table:
+;;; table that refers to an empty force field:
 ;;;
 (define (molecule-force-field solute)
   (match solute
     ((name sites table) table) ; return the third entry, if there is such
-    (_ '(oplsaa))))            ; otherwise return an empty table
+    (_ '(empty))))             ; otherwise return an empty table
 
 (define (make-site name position sigma epsilon charge)
   (list name position sigma epsilon charge))
