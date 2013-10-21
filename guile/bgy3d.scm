@@ -629,6 +629,13 @@ computes the sum of all vector elements."
               (let ((g (ddd f x)))
                 (pretty-print/serial g))))))
         ;;
+        ("self-energy"
+         (if solute
+             (let* ((species (molecule-species solute 2.0)) ; FIXME: literal
+                    (e (rism-self-energy solute species)))
+               (pretty-print/serial e))
+             (error "Did you forget to specify --solute?")))
+        ;;
         ;; Start a server that communicates with a client via two
         ;; named pipes for input/output:
         ;;
