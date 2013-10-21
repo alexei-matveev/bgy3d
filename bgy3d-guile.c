@@ -181,7 +181,7 @@ to_int1 (SCM x, int n, int y[n])
 
 
 static void
-to_array (SCM x, int n, double y[n])
+to_double1 (SCM x, int n, double y[n])
 {
   for (int i = 0; i < n; i++)
     {
@@ -192,7 +192,7 @@ to_array (SCM x, int n, double y[n])
 
 
 static SCM
-from_array (int n, double x[n])
+from_double1 (int n, double x[n])
 {
   SCM y = SCM_EOL;
 
@@ -204,12 +204,12 @@ from_array (int n, double x[n])
 
 
 static SCM
-from_array2 (int m, int n, double x[m][n])
+from_double2 (int m, int n, double x[m][n])
 {
   SCM y = SCM_EOL;
 
   while (m-- > 0)
-    y = scm_cons (from_array (n, x[m]), y);
+    y = scm_cons (from_double1 (n, x[m]), y);
 
   return y;
 }
@@ -241,7 +241,7 @@ static Site to_site (SCM s)
   // printf ("len=%ld, str=>%s<\n", len, S.name);
 
   /* Fill an array of length three from the list: */
-  to_array (x, 3, S.x);
+  to_double1 (x, 3, S.x);
 
   S.sigma = scm_to_double (scm_car (ff));
   S.epsilon = scm_to_double (scm_cadr (ff));
@@ -534,14 +534,14 @@ guile_rism_rdf (SCM state, SCM g, SCM center, SCM radial_mesh, SCM angular_order
 {
   /* RDF center: */
   double a[3];
-  to_array (center, 3, a);
+  to_double1 (center, 3, a);
 
   /* Number of radial pioints: */
   const int n = scm_to_int (scm_length (radial_mesh));
 
   /* Radial points: */
   double r[n];
-  to_array (radial_mesh, n, r);
+  to_double1 (radial_mesh, n, r);
 
   const int m = scm_to_int (angular_order);
 
@@ -551,7 +551,7 @@ guile_rism_rdf (SCM state, SCM g, SCM center, SCM radial_mesh, SCM angular_order
   /* Does the real work: */
   rism_rdf (to_state (state), to_vec (g), a, n, r, m, rdf);
 
-  return from_array (n, rdf);
+  return from_double1 (n, rdf);
 }
 
 
@@ -565,8 +565,8 @@ guile_vec_moments (SCM state, SCM g)
   bgy3d_moments (to_state (state), to_vec (g), &m0, m1, m2);
 
   return scm_list_3 (scm_from_double (m0),
-                     from_array (3, m1),
-                     from_array2 (3, 3, m2));
+                     from_double1 (3, m1),
+                     from_double2 (3, 3, m2));
 }
 
 
@@ -587,7 +587,7 @@ guile_genpts (SCM M)
   assert (n <= m);
 
   /* n == m */
-  return scm_values (scm_list_2 (from_array2 (n, 3, x), from_array (n, w)));
+  return scm_values (scm_list_2 (from_double2 (n, 3, x), from_double1 (n, w)));
 }
 
 
@@ -1196,7 +1196,7 @@ static SCM guile_pot_interp (SCM iter, SCM x)
   double x_[1][3], v_[1];
 
   /* list -> array: */
-  to_array (x, 3, x_[0]);
+  to_double1 (x, 3, x_[0]);
 
   /* printf ("guile_pot_interp: x = (% f, % f, % f)\n", */
   /*         x_[0][0], x_[0][1], x_[0][2]); */
