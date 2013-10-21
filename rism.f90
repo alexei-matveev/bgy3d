@@ -1769,7 +1769,7 @@ contains
     !       -1                 -1
     ! H := T   * H == (1 - WCρ)   * WCW
     !
-    call sles (m, T, H)         ! FIXME: copy in/out.
+    call sles (m, T, H)
 
     !
     ! The  same  effect  is  achieved  in  1x1  version  of  the  code
