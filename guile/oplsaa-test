@@ -920,10 +920,10 @@
 ;;; See comments on "UO2_5H2O, SPC" in ./solutes.scm:
 ;;;
 (uranyl/spc
- (1006   U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
- (1007   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25)
- (1010   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
- (1011   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+ (U    U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
+ (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25)
+ (HW   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
 
 ;;;
 ;;; See comments on "UO2_5H2O,  TIP3P" in ./solutes.scm.  FIXME: OW is
@@ -931,9 +931,9 @@
 ;;; tables.
 ;;;
 (uranyl/t3p
- (1008   U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
- (1009   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25)
- (1012   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
- (  53   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
+ (U    U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
+ (OU   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25)
+ (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
+ (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
 
 

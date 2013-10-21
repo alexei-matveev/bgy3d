@@ -747,10 +747,10 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/spc
-   ("U" 1006) ;; SPC uranyl
-   ("OU" 1007)
-   ("HW" 1010)
-   ("OW" 1011)))
+   ("U" U) ;; SPC uranyl
+   ("OU" OU)
+   ("HW" HW)
+   ("OW" OW)))
 
 ;;;
 ;;; Geometry is the same as in "UO2_5H2O, SPC".
@@ -775,10 +775,10 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/t3p
-   ("U" 1008) ;; TIP3P uranyl
-   ("OU" 1009)
-   ("HW" 1012)
-   ("OW" 53)))
+   ("U" U) ;; TIP3P uranyl
+   ("OU" OU)
+   ("HW" HW)
+   ("OW" OW)))
 
 ;;;
 ;;; This  is a fake  solute which  tabulates some  half-way meaningful
