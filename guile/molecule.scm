@@ -283,13 +283,12 @@
   "guile/oplsaa-test")
 
 (define (load-ff-file file)
-  (let* ((contents (slurp/cached (find-file file)))
-         (force-field (assoc 'oplsaa contents))) ; FIXME: literal here
+  (let ((contents (slurp/cached (find-file file))))
     ;;
     ;; Force-field name in CAR  position is irrelevant for the rest of
     ;; the code, return only the list of entries:
     ;;
-    (cdr force-field)))
+    (assoc-ref contents 'oplsaa)))
 
 ;;;
 ;;; Get particular column from a data row as stored in the force-field
