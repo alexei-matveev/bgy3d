@@ -282,13 +282,13 @@
 (define *tinker-ff-parameter-file*
   "guile/oplsaa-test")
 
-(define (load-ff-file file)
-  (let ((contents (slurp/cached (find-file file))))
+(define (force-field-table force-field)
+  (let ((contents (slurp/cached (find-file *tinker-ff-parameter-file*))))
     ;;
     ;; Force-field name in CAR  position is irrelevant for the rest of
     ;; the code, return only the list of entries:
     ;;
-    (assoc-ref contents 'oplsaa)))
+    (assoc-ref contents force-field)))
 
 ;;;
 ;;; Get particular column from a data row as stored in the force-field
@@ -325,8 +325,8 @@
   (let* ((ff-form (molecule-force-field solute))
          (ff-sym (car ff-form))
          (ff-tab (cdr ff-form))
-         ;; (whole-file (tinker-table 'oplsaa))
-         (whole-file (load-ff-file *tinker-ff-parameter-file*)))
+         ;; (whole-file (tinker-table ff-sym))
+         (whole-file (force-field-table ff-sym)))
     ;;
     ;; This  will derive the  atom type 77  from a name "CT3"  using a
     ;; list of entries (("CT3" 77) ...) in the FF table.
@@ -373,12 +373,11 @@
                 (epsilon (second ff)))
            (make-site name position sigma epsilon charge)))))
     ;;
-    ;; FIXME: use ff-sym to get  the FF data instead. This check is so
-    ;; far down because of the  "define"s above that have to be put at
-    ;; the beginning of the scope.
+    ;; FIXME: This check is so far down because of the "define"s above
+    ;; that have to be put at the beginning of the scope.
     ;;
-    (unless (equal? ff-sym 'oplsaa)
-      (error "Dont know this force-field:" ff-sym))
+    (unless whole-file
+      (error "Did not find force-field:" ff-sym))
     ;;
     ;; Build new sites and use them to construct a new molecule:
     ;;
