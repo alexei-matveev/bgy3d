@@ -630,14 +630,6 @@ computes the sum of all vector elements."
               (let ((g (ddd f x)))
                 (pretty-print/serial g))))))
         ;;
-        ("self-energy"
-         (if solute
-             (let* ((rmax (assoc-ref settings 'bond-length-thresh))
-                    (species (molecule-species solute rmax))
-                    (e (rism-self-energy solute species)))
-               (pretty-print/serial e))
-             (error "Did you forget to specify --solute?")))
-        ;;
         ;; Start a server that communicates with a client via two
         ;; named pipes for input/output:
         ;;
@@ -782,6 +774,16 @@ computes the sum of all vector elements."
                      (map site-name (molecule-sites mol))
                      (molecule-species mol rmax)))))
            args)))
+        ;;
+        ("self-energy"
+         (let ((rmax (assoc-ref settings 'bond-length-thresh)))
+           (for-each
+            (lambda (name)
+              (let* ((solute (find-molecule name))
+                     (species (molecule-species solute rmax))
+                     (e (rism-self-energy solute species)))
+                (pretty-print/serial e)))
+            args)))
         ;;
         ("find-molecule"
          (for-each
