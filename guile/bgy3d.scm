@@ -38,6 +38,7 @@
    f64scale
    rism-solvent
    rism-solute
+   rism-self-energy
    hnc3d-run-solvent
    hnc3d-run-solute
    bgy3d-run-solvent
@@ -53,6 +54,9 @@
 ;;;
 ;;; The list of the procedures defined in bgy3d-guile.c includes
 ;;;
+;;;   rism-solvent
+;;;   rism-solute
+;;;   rism-self-energy
 ;;;   hnc3d-run-solvent
 ;;;   hnc3d-run-solute
 ;;;   bgy3d-run-solvent

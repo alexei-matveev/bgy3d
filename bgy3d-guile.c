@@ -170,6 +170,17 @@ static ProblemData problem_data (SCM alist)
 
 
 static void
+to_int1 (SCM x, int n, int y[n])
+{
+  for (int i = 0; i < n; i++)
+    {
+      y[i] = scm_to_int (scm_car (x));
+      x = scm_cdr (x);
+    }
+}
+
+
+static void
 to_array (SCM x, int n, double y[n])
 {
   for (int i = 0; i < n; i++)
@@ -1156,6 +1167,30 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft
 
 
 
+static SCM
+guile_rism_self_energy (SCM solute, SCM species)
+{
+  int n;                        /* number of solute sites */
+  Site *solute_sites;           /* solute_sites[n] */
+  char *solute_name;
+
+  to_sites (solute, &n, &solute_sites, &solute_name);
+
+  int spec[n];
+
+  /* SCM species is a list of integers: */
+  to_int1 (species, n, spec);
+
+  const double e = rism_self_energy (n, solute_sites, spec);
+
+  free (solute_name);
+  free (solute_sites);
+
+  return scm_from_double (e);
+}
+
+
+
 static SCM guile_pot_interp (SCM iter, SCM x)
 {
   double x_[1][3], v_[1];
@@ -1237,6 +1272,7 @@ static void module_init (void* unused)
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute", 3, 1, 0, guile_rism_solute);
+  EXPORT ("rism-self-energy", 2, 0, 0, guile_rism_self_energy);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
