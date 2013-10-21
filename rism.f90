@@ -68,6 +68,26 @@ contains
   end function rism_upscale
 
 
+  function rism_self_energy (n, sites, spec) result (e) bind (c)
+    !
+    ! Calculate the energy summation between each pair of residues for
+    ! a given site.
+    !
+    ! Needs to be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int, c_double
+    use foreign, only: site
+    implicit none
+    integer (c_int), intent (in), value :: n
+    type (site), intent (in) :: sites(n)
+    integer (c_int), intent (in) :: spec(n)
+    real (c_double) :: e
+    ! *** end of interface ***
+
+    e = self_energy (sites, spec)
+  end function rism_self_energy
+
+
   subroutine rism_solvent (pd, m, solvent, t_buf, x_buf, ptr) bind (c)
     !
     ! When either t_buf or x_buf is not NULL it should be a pointer to
