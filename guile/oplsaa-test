@@ -921,6 +921,8 @@
 (1003   H     "Ammonia NH3"                   1.008     0.4000     0.0460    0.3400)
 (1004   HS    "Hydrogen Sulfide H2S"          1.008     0.4000     0.0460    0.2350)
 (1005   H     "Amine -NH2"                    1.008     0.4000     0.0460    0.36)
+(1006   Na    "Sodium Ion Na+"               22.990     3.3300     0.00277   1.0) ; Jorgensen(2004)
+(1007   HO    "Hydroxide Ion OH-"             1.008     0.4000     0.0460    0.3000)
 )
 ;;;
 ;;; See comments on "UO2_5H2O, SPC" in ./solutes.scm:
