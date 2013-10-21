@@ -1351,29 +1351,47 @@ contains
     ! *** end of interface ***
 
     real (rk) :: rij(size (sites), size (sites)) ! (m, m)
-    integer i, j, species
+    integer i, j, k, species
 
     ! Get distance matrix
     rij = distance_matrix (sites)
 
-    ! Initialize species ID to and invalid ID (here 0).  Valid IDs are
+    ! Initialize species ID to an  invalid ID (here 0).  Valid IDs are
     ! positive. There is zero identified species at the moment:
     spec(:) = 0
     species = 0
     do j = 1, size (sites)
        ! First  see  if the  current  site  j  belongs to  an  already
-       ! identified species.  Only loop over previousely assined sites
-       ! and skip the diagonal i == j:
+       ! identified  species.   Only  loop over  previousely  assigned
+       ! sites and skip the diagonal i == j:
        do i = 1, j - 1
+          !
           ! Sites i and j belong to  the same species if r(i, j) < r0.
           ! FIXME:  for  the  current  study (aqueous  solution)  it's
           ! first-come-first-served.    What  if   a  site   is  close
           ! connected with more than  one neighbours while they belong
           ! to different species?
+          !
+          ! It  may happen  that  upon  addition of  the  site j  that
+          ! connects two  species into one the number  of species goes
+          ! down.  The sites of  the previousely separate species need
+          ! to be re-labeled:
+          !
           if (rij(i, j) < r0) then
-             spec(j) = spec(i)
+             if (spec(j) == 0) then
+                spec(j) = spec(i)
+             else if (spec(j) /= spec(i)) then
+                ! All sites of species  i need to be re-labled: FIXME:
+                ! verify when encontered and remove the statement:
+                error stop "unverified yet!"
+                do k = 1, j
+                   if (spec(k) /= spec(i)) cycle
+                   spec(k) = spec(j)
+                enddo
+             endif
+             ! At this point spec(i) == spec(j) and both are valid.
           else
-             ! otherwise spec(j) remains 0
+             ! Otherwise both spec(j) and spec(i) remain unchanged.
           endif
        enddo
 
