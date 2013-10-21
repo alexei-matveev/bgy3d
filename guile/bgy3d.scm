@@ -601,7 +601,9 @@ computes the sum of all vector elements."
       (values f x))))
 
 ;;;
-;;; "Gas-phase" PES:
+;;; "Gas-phase" PES. Hm,  you cannot search for a  minimum on this PES
+;;; without  introducing intra-molecular  interactions or  making each
+;;; species rigid.
 ;;;
 (define (make-pes/gp solute settings)
   (let* ((rmax (assoc-ref settings 'bond-length-thresh))
