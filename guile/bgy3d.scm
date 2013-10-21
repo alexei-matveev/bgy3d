@@ -126,11 +126,11 @@
 ;;; parse-command-line below.
 ;;;
 (define *defaults*
-  '((solvent "water")                 ; solvent name
-    (solute #f)                       ; uninitialized string, actually
+  '((solvent #f)                      ; uninitialized string, actually
+    (solute #f)                       ; uninitialized string
     (L 10.0)                          ; [-L, L] gives the box size
     (N 64)                            ; grid dimension
-    (rho 0.033427745)                 ; solvent density
+    (rho 0.033427745)                 ; solvent density (1 g/cm^3)
     (beta 1.6889)                     ; inverse temperature
     (norm-tol 1.0e-7)                 ; convergence threshold
     (max-iter 1500)                   ; max number of iterations
@@ -635,7 +635,9 @@ computes the sum of all vector elements."
       (match cmd
         ;;
         ((or "energy" "gradients")
-         (let-values (((f x) (make-pes solute solvent settings)))
+         (let-values (((f x) (if solvent
+                                 (make-pes solute solvent settings)
+                                 (make-pes/gp solute settings))))
            (match cmd
              ("energy"
               (let ((e (f x)))
