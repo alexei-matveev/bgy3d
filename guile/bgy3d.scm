@@ -136,6 +136,7 @@
     (max-iter 1500)                   ; max number of iterations
     (damp-start 1.0)                  ; scaling factor?
     (lambda 0.02)                     ; not the scheme lambda
+    (bond-length-thresh 2.0) ; lower bound for non-bonding interactions, in A.
     (closure HNC)                     ; HNC, KH or PY
     (hnc #f)                          ; FIXME: exclusive
     (bgy #f)                          ; FIXME: exclusive
@@ -631,7 +632,8 @@ computes the sum of all vector elements."
         ;;
         ("self-energy"
          (if solute
-             (let* ((species (molecule-species solute 2.0)) ; FIXME: literal
+             (let* ((rmax (assoc-ref settings 'bond-length-thresh))
+                    (species (molecule-species solute rmax))
                     (e (rism-self-energy solute species)))
                (pretty-print/serial e))
              (error "Did you forget to specify --solute?")))
@@ -771,14 +773,15 @@ computes the sum of all vector elements."
            args))
         ;;
         ("print-species"
-         (for-each
-             (lambda (name)
-               (let ((mol (find-molecule name)))
-                 (pretty-print/serial
-                  (map cons
-                       (map site-name (molecule-sites mol))
-                       (molecule-species mol 2.0))))) ; FIXME: literal!
-           args))
+         (let ((rmax (assoc-ref settings 'bond-length-thresh)))
+          (for-each
+           (lambda (name)
+             (let ((mol (find-molecule name)))
+               (pretty-print/serial
+                (map cons
+                     (map site-name (molecule-sites mol))
+                     (molecule-species mol rmax)))))
+           args)))
         ;;
         ("find-molecule"
          (for-each
