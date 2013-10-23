@@ -593,6 +593,28 @@ contains
       ! collection. Note that the correction is "wrong" when RDFs were
       ! obtained in an SCF procedure with rbc == .true.
       dict = cons (cons (sym ("RBC-TPT"), num (e)), dict)
+
+      ! II. Call closure with RBC TPT correction: h = c + t
+      h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
+
+      e = chempot_bridge (beta, rho, h, expB, r, dr)
+
+      if (verbosity > -1) then
+         print *, "# SCF bridge correction =", e, "rbc =", rbc
+         ! Add a warning when iterations were performed without RBC
+         if (.not. rbc) then
+           print *, "# WARNING: distribution is perturbed, RBC/SCF is approximate"
+         endif
+      endif
+
+      ! Cons  a dictionary  entry with  RBC SCF  correction  to result
+      ! collection.  Note  that this number  may be still  "wrong" for
+      ! two reasons:  (a) when rbc  = .false.  the RDFs  are perturbed
+      ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
+      ! advertise  the   use  of  RBC   in  thermodynamic  integration
+      ! procedure (RBC-TI) instead.
+      dict = cons (cons (sym ("RBC-SCF"), num (e)), dict)
+
     end block
 
     block
