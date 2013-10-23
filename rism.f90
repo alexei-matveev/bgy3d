@@ -537,43 +537,46 @@ contains
     call post_process (method, beta, rho, solvent, solute, dr, dk, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
+    !
     ! As  a part  of  post-processing, compute  the bridge  correction
-    ! using TPT:
+    ! using TPT.
     !
-    ! As claimed in [KH00c], in general the solvation chemical potential
-    ! is no longer of an analytic form if a nonzero bridge correction is
-    ! included into the closure. Direct numerical evaluation of chemical
-    ! potential can be carried out by integration over the LJ diameter
-    ! parameter. See expression (20) in [KH00c].
+    ! As  claimed  in  [KH00c],  in  general  the  solvation  chemical
+    ! potential is no  longer of an analytic form  if a nonzero bridge
+    ! correction  is  included  into  the  closure.  Direct  numerical
+    ! evaluation  of   chemical  potential  can  be   carried  out  by
+    ! integration over the LJ  diameter parameter. See expression (20)
+    ! in [KH00c].
     !
-    ! So with our current implementation, calculations involving RBC
+    ! So with  our current implementation,  calculations involving RBC
     ! could be split into two parts:
     !
     ! 1. Don't apply bridge correction when solving t, only add energy
-    ! contribution to excess chemical potential in the spirit of
-    ! thermodynamic perturbation theory (TPT). In this case the value of
-    ! solvaiton chemical potential is corrected but correlation function
-    ! is not perturbed, for some solutes, e.g. OH-, one can observe
-    ! an unphsically high peak for Ow(OH-)-Hw(H2O) pair;
-    ! 2. In order to get a reasonable (water) solvent structure,
-    ! especially for those solutes which have an atomic site of large
-    ! negative charge, we need to "switch on" RBC in closure when
-    ! solving OZ equation iteratively. However, in this case evaluation
-    ! of chemical potential is not implemented (FIXME).
+    !    contribution to excess chemical potential in the spirit of
+    !    thermodynamic perturbation theory (TPT).  In this case the
+    !    value of solvaiton chemical potential is corrected but
+    !    correlation function is not perturbed, for some solutes, e.g.
+    !    OH-, one can observe an unphsically high peak for
+    !    O(OH-)-H(H2O) pair.
     !
-    ! [KH00c] Hydration free energy of hydrophobic solutes studied by a
-    !   reference interaction site model with a repulsive bridge
+    ! 2. In order to get a reasonable (water) solvent structure,
+    !    especially for those solutes which have an atomic site of
+    !    large negative charge, we need to "switch on" RBC in closure
+    !    when solving OZ equation iteratively. However, in this case
+    !    evaluation of chemical potential is not implemented (FIXME).
+    !
+    ! [KH00c] Hydration free energy of hydrophobic solutes studied by
+    !   a reference interaction site model with a repulsive bridge
     !   correction and a thermodynamic perturbation method, Andriy
     !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
     !   http://dx.doi.org/10.1063/1.1305885
-
+    !
     block
       real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
 
       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
 
-      ! h = c + t:
-      ! call closure with RBC TPT correction
+      ! I. Call closure (without RBC TPT correction): h = c + t
       h = closure (method, beta, v_uvr, t_uvx) + t_uvx
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
@@ -582,12 +585,13 @@ contains
          print *, "# TPT bridge correction =", e, "rbc =", rbc
          ! Add a warning when distribution is perturbed by RBC
          if (rbc) then
-           print *, "# WARNING: distribution is perturbed, TPT-RBC here is not true"
+           print *, "# WARNING: distribution is perturbed, RBC/TPT is approximate"
          endif
       endif
 
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
-      ! collection:
+      ! collection. Note that the correction is "wrong" when RDFs were
+      ! obtained in an SCF procedure with rbc == .true.
       dict = cons (cons (sym ("RBC-TPT"), num (e)), dict)
     end block
 
