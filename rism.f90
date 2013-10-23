@@ -539,25 +539,51 @@ contains
 
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT:
+    !
+    ! As claimed in [KH00c], in general the solvation chemical potential
+    ! is no longer of an analytic form if a nonzero bridge correction is
+    ! included into the closure. Direct numerical evaluation of chemical
+    ! potential can be carried out by integration over the LJ diameter
+    ! parameter. See expression (20) in [KH00c].
+    !
+    ! So with our current implementation, calculations involving RBC
+    ! could be split into two parts:
+    !
+    ! 1. Don't apply bridge correction when solving t, only add energy
+    ! contribution to excess chemical potential in the spirit of
+    ! thermodynamic perturbation theory (TPT). In this case the value of
+    ! solvaiton chemical potential is corrected but correlation function
+    ! is not perturbed, for some solutes, e.g. OH-, one can observe
+    ! an unphsically high peak for Ow(OH-)-Hw(H2O) pair;
+    ! 2. In order to get a reasonable (water) solvent structure,
+    ! especially for those solutes which have an atomic site of large
+    ! negative charge, we need to "switch on" RBC in closure when
+    ! solving OZ equation iteratively. However, in this case evaluation
+    ! of chemical potential is not implemented (FIXME).
+    !
+    ! [KH00c] Hydration free energy of hydrophobic solutes studied by a
+    !   reference interaction site model with a repulsive bridge
+    !   correction and a thermodynamic perturbation method, Andriy
+    !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
+    !   http://dx.doi.org/10.1063/1.1305885
+
     block
-      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad), h2(n, m, nrad), e2
+      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
 
       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
 
       ! h = c + t:
       ! call closure with RBC TPT correction
-      ! FIXME: only HNC is implemented now, be careful when using others
-      h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
+      h = closure (method, beta, v_uvr, t_uvx) + t_uvx
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
 
-      ! Print TPT correction again with unmodified correlation function
-      h2 = closure (method, beta, v_uvr, t_uvx) + t_uvx
-      e2 = chempot_bridge (beta, rho, h2, expB, r, dr)
-
       if (verbosity > -1) then
          print *, "# TPT bridge correction =", e, "rbc =", rbc
-         print *, "# TPT bridge correction (unmodified) =", e2, "rbc =", rbc
+         ! Add a warning when distribution is perturbed by RBC
+         if (rbc) then
+           print *, "# WARNING: distribution is perturbed, TPT-RBC here is not true"
+         endif
       endif
 
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
