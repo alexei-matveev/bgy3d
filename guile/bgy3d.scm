@@ -656,7 +656,9 @@ computes the sum of all vector elements."
            ;; Make a function of 3d geometry. The initial geometry is
            ;; not used:
            ;;
-           (let-values (((f x0) (make-pes solute solvent settings)))
+           (let-values (((f x0) (if solvent
+                                    (make-pes solute solvent settings)
+                                    (make-pes/gp solute settings))))
              (let loop ()
                ;;
                ;; Read the input pipe. This will block utill the
