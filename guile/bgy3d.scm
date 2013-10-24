@@ -616,10 +616,10 @@ computes the sum of all vector elements."
 
 
 ;;;
-;;; Act  according  to the  subcommand  in  (car  argv). With  cmd  ==
-;;; "solutes" interprete each argument as the name of the solute. Note
-;;; that you may  need to first run a solvent  calculation with cmd ==
-;;; "solvent":
+;;; Act   according   to   the   subcommand  (the   first   positional
+;;; argument). With  cmd == "solutes" interprete each  argument as the
+;;; name of the solute. Note that  you may need to first run a solvent
+;;; calculation with cmd == "solvent":
 ;;;
 (define (new-main argv)
   (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
@@ -821,9 +821,12 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; We are  trying to  emulate behaviour of  old executable  unless we
-;;; find a better interface:
+;;; find a better  interface. The old behaviour is  triggered only for
+;;; --bgy, --hnc and --rism options:
 ;;;
 (define (bgy3d-main argv)
-  (if (string-prefix? "--" (cadr argv)) ; what if no options supplied?
+  (if (or (member "--bgy" argv)
+          (member "--hnc" argv)
+          (member "--rism" argv))
       (old-main argv)
       (new-main argv)))
