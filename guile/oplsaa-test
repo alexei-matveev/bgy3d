@@ -944,6 +944,46 @@
  (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
  (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
 
+
+;;;
+;;; Atomic ions, see coments about "Monoatomic ions" in ./solutes.scm
+;;;
+(jut04
+ (Li    Li    "Lithium Ion Li+"               6.941     2.126   0.01828   1.0)
+ (Na    Na    "Sodium Ion Na+"               22.990     3.330   0.00277   1.0)
+ (K    K     "Potassium Ion K+"              39.098     4.935   0.00033   1.0)
+ (Rb    Rb    "Rubidium Ion Rb+"             85.468     5.622   0.00017   1.0)
+ (Cs    Cs    "Cesium Ion Cs+"              132.905     6.716   0.00008   1.0)
+ (Mg    Mg    "Magnesium Ion Mg+2"           24.305     1.644   0.87504   2.0)
+ (Ca    Ca    "Calcium Ion Ca+2"             40.080     2.412   0.44966   2.0)
+ (Sr    Sr    "Strontium Ion Sr+2"           87.620     3.103   0.11823   2.0)
+ (Ba    Ba    "Barium Ion Ba+2"             137.330     3.817   0.04710   2.0)
+ (F    F     "Fluoride Ion F-"              18.998      2.733   0.720    -1.0)
+ (Cl    Cl    "Chloride Ion Cl-"            35.453      4.417   0.118    -1.0)
+ (Br    Br    "Bromide Ion Br-"             79.904      4.624   0.090    -1.0)
+ (I    I     "Iodide Ion I-"               126.905      5.400   0.070    -1.0))
+
+;;;
+;;; Polyatomic ions. See comments about "CFCRS08 polyatomic ions" in ./solutes.scm
+;;;
+
+(cfcrs08
+  (1   HW    "H of H3O+"                      1.008     0.4     0.046     0.5189)
+  (2   OW    "O of H3O+"                     15.999     3.166   0.1554   -0.5569)
+  (3   HW    "H of OH-"                       1.008     0.4     0.046     0.2463)
+  (4   OW    "O of OH-"                      15.999     3.166   0.1554   -1.2463)
+  (5   H     "O of NH4+"                      1.008     1.2     0.0157    0.4683)
+  (6   N3    "N of NH4+"                     14.007     3.25    0.17     -0.8732)
+  (7   C     "C of CN-"                      12.011     3.816   0.086    -0.5693)
+  (8   N3    "N of CN-"                      15.999     3.25    0.17     -0.4307)
+  (9   C     "C of CHOO-"                    12.011     3.816   0.086     0.6228)
+  (10  O2    "O of CHOO-"                    15.999     2.96    0.21     -0.7367)
+  (11  HC    "H of CHOO-"                     1.008     2.5     0.03     -0.1494)
+  (12  C     "C of COO- in CH3COO-"          12.011     3.75    0.105     0.8061)
+  (13  O2    "O of COO- in CH3COO-"          15.999     2.96    0.21     -0.7809)
+  (14  CT    "C of CH3 in CH3COO-"           12.011     3.5     0.066    -0.4200)
+  (15  HC    "H of CH3 in CH3COO-"            1.008     2.5     0.03      0.0569))
+
 ;;;
 ;;; This FF is  taken by default if a  solute/solvent description does
 ;;; not say otherwise:
