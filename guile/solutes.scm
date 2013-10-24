@@ -1286,12 +1286,166 @@
 
 ("Cl-, oplsaa" (("Cl-" (0.0 0.0 0.0))) (oplsaa ("Cl-" 341)))
 
+;;
+;; Monoatomic ions cited by [CFCRS08], parameters could be found in
+;; [JUT04]. As far as I have observed, bivalent ions here have almost
+;; the same parameters with those ./oplsaa-test table, only less
+;; digits, but there are more significant difference in monovalent ions
+;;
+("Li+, JUT04" (("Li+" (0.0 0.0 0.0))) (jut04 ("Li+" Li)))
+("Na+, JUT04" (("Na+" (0.0 0.0 0.0))) (jut04 ("Na+" Na)))
+("K+, JUT04" (("K+" (0.0 0.0 0.0))) (jut04 ("K+" K)))
+("Rb+, JUT04" (("K+" (0.0 0.0 0.0))) (jut04 ("Rb+" Rb)))
+("Cs+, JUT04" (("Cs+" (0.0 0.0 0.0))) (jut04 ("Cs+" Cs)))
 
-("hydroxyl anion, nist"
+("Mg2+, JUT04" (("Mg2+" (0.0 0.0 0.0))) (jut04 ("Mg2+" Mg)))
+("Ca2+, JUT04" (("Ca2+" (0.0 0.0 0.0))) (jut04 ("Ca2+" Ca)))
+("Sr2+, JUT04" (("Sr2+" (0.0 0.0 0.0))) (jut04 ("Sr2+" Sr)))
+("Ba2+, JUT04" (("Ba2+" (0.0 0.0 0.0))) (jut04 ("Ba2+" Ba)))
+
+("F-, JUT04" (("F-" (0.0 0.0 0.0))) (jut04 ("F-" F)))
+("Cl-, JUT04" (("Cl-" (0.0 0.0 0.0))) (jut04 ("Cl-" Cl)))
+("Br-, JUT04" (("Br-" (0.0 0.0 0.0))) (jut04 ("Br-" Br)))
+("I-, JUT04" (("I-" (0.0 0.0 0.0))) (jut04 ("I-" I)))
+
+;;
+;; CFCRS08 polyatomic ions:
+;;
+;; Several polyatomic ions which are studied in [CFCRS08] (see above).
+;; Determined structures which could be found in NIST databse are for
+;; OH-, CHOO-, CN-, NH4+.
+;;
+;; For CH3COO-, since there is only a 2D-mol file in NIST database in
+;; which hydrogen atoms are missing, the structure here is optimized in
+;; PG by removing H of -COOH and set the molecule with -1 charge,
+;; minimal basis set (crenbl_ecp + ahlrichs coulomb fitting) is used.
+;;
+;; For H3O+, in the 2D-mol file ("hydronium cation-2d") of H3O+ from
+;; NIST database all the atoms are in a plane and in the 3D-sdf
+;; ("hydronium cation-3d") file Ow-H distance is larger than 3.0 A, but
+;; according to Ion, H3O+ has a trigonal pyrameid geometry and the
+;; strucutre he used is also included here ("hydronium cation"). FIXME:
+;; using the minimal basis set I still get a nearly planar structure
+;; after geometry optimization.
+;;
+;; It should be noticed that in [CFCRS08], atomic charges are derived
+;; from QM calculation while LJ parameters are basically from OPLS force
+;; field. Since there is no entry for H3O+ in OPLSAA, I think perhaps we
+;; have to derive atomic charge for polyatomic ions by ourselves.
+;;
+("hydroxyl anion, CFCRS08"
+  (("OW"  (-0.0203  0.0000  0.0000))
+   ("HW"  (0.9623  0.0000  0.0000)))
+  (cfcrs08
+   ("HW" 3)
+   ("OW" 4)))
+
+("formate, CFCRS08"
+ (("O2"  (1.9226  0.9205  1.8422))
+  ("C"  (0.9364  0.3495  1.1289))
+  ("O2"  (1.2026  0.0000  0.0000))
+  ("HC" (0.0000  0.2800  1.6921)))
+ (cfcrs08
+   ("O2" 10)
+   ("C"  9)
+   ("HC" 11)))
+
+("cyanide ion, CFCRS08"
+  (("C"  (1.0256  0.0000  0.0000))
+   ("N3"  (2.0000  0.0000  0.0000)))
+  (cfcrs08
+    ("C" 7)
+    ("N3" 8)))
+
+("ammonium cation, CFCRS08"
+  (("N3"  (0.0000  0.0000  -0.0001))
+   ("H"  (1.0847  -0.0002  0.0270))
+   ("H"  (-0.3619  1.0226  0.0267))
+   ("H"  (-0.3395  -0.4804  -0.9124))
+   ("H"  (-0.3832  -0.5417  0.8585)))
+  (cfcrs08
+    ("N3" 6)
+    ("H" 5)))
+
+;; Optimized in PG
+("acetate, CFCRS08"
+ (("C"  (2.1371  1.7060  0.8952))
+  ("O2"  (3.1306  0.9770  0.4943))
+  ("O2"  (2.1315  2.9685  1.1820))
+  ("CT"  (0.7645  0.9594  1.0071))
+  ("HC"  (0.0241  1.5696  1.5617))
+  ("HC"  (0.3692  0.7573  -0.0088))
+  ("HC"  (0.9032  -0.0151  1.5161)))
+ (cfcrs08
+  ("C" 12)
+  ("O2" 13)
+  ("CT" 14)
+  ("HC" 15)))
+
+;; Provided by Ion
+("hydronium cation, CFCRS08"
+  (("O"  (0.0958  0.1509  0.0011))
+   ("H"  (-0.0258  -0.7738  0.3312))
+   ("H"  (-0.3383  0.8303  0.5747))
+   ("H"  (1.0366  0.3670  -0.2158)))
+  (cfcrs08
+    ("OW" 2)
+    ("HW" 1)))
+
+;; From 2D mol file
+("hydronium cation-2d, CFCRS08"
+  (("HW"  (0.8664  1.4994  0.0000))
+   ("OW"  (0.8664  0.4998  0.0000))
+   ("HW"  (0.0000  0.0000  0.0000))
+   ("HW"  (1.7327  0.0000  0.0000)))
+  (cfcrs08
+    ("OW" 2)
+    ("HW" 1)))
+
+;; From 3D sdf file
+("hydronium cation-3d, CFCRS08"
+  (("HW"  (1.0931  1.8747  0.0677))
+   ("OW"  (0.5910  1.0469  -0.0260))
+   ("HW"  (-0.1327  1.1487  0.6157))
+   ("HW"  (2.8317  0.6876  -1.4673)))
+  (cfcrs08
+    ("OW" 2)
+    ("HW" 1)))
+
+;;;
+;;; Force field parameters for these polyatomic ions could also be found
+;;; in ./oplsaa-test table. Structures are the same with their "CFRCS08"
+;;; counterparts listed above
+;;;
+("hydroxyl anion, oplsaa"
   (("OH"  (-0.0203  0.0000  0.0000))
    ("HO"  (0.9623  0.0000  0.0000)))
   (oplsaa
    ("OH" 373)
    ;; ("HO" 374)))
-   ("HO" 1007)))                        ; FIXME: same as OU?
+   ("HO" 1007)))  ;; again, use finite-size hydrogen
 
+("formate, oplsaa"
+ (("O"  (1.9226  0.9205  1.8422))
+  ("C"  (0.9364  0.3495  1.1289))
+  ("O"  (1.2026  0.0000  0.0000))
+  ("HCO"  (0.0000  0.2800  1.6921)))
+ (oplsaa
+  ("C" 210)    ;; "Carboxylic Acid -COOH"
+  ("O" 211)    ;; "Carboxylic Acid C=O"
+  ("HCO" 218)));; FIXME: "Aldehyde/Formamide HCO-" is the only H in the
+               ;; table which has +1 charge
+
+("acetate, oplsaa"
+ (("C"  (2.1371  1.7060  0.8952))
+  ("O"  (3.1306  0.9770  0.4943))
+  ("O"  (2.1315  2.9685  1.1820))
+  ("CT"  (0.7645  0.9594  1.0071))
+  ("HC"  (0.0241  1.5696  1.5617))
+  ("HC"  (0.3692  0.7573  -0.0088))
+  ("HC"  (0.9032  -0.0151  1.5161)))
+ (oplsaa
+  ("C" 210)
+  ("CT" 212)
+  ("O" 211)
+  ("HC" 82)))
