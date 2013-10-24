@@ -52,8 +52,10 @@ def Server (args):
     os.mkfifo (out)
 
     # args[]  is supposed  to include  the executable  and  flags, the
-    # subcommand will be inserted. FIXME: this is ugly.
-    proc = Popen ([args[0]] + ["server", inp, out] + args[1:])
+    # subcommand   and   two  more   positional   arguments  will   be
+    # appended. The  "server" subcommand must be  the first positional
+    # argument in order to be interpreted as such:
+    proc = Popen (args + ["server", inp, out])
 
     # This  function  takes  input  text  and returns  output  of  the
     # subprocess, both communicated via the fifos:
