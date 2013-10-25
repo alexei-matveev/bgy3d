@@ -12,13 +12,12 @@ from ase.calculators.paragauss import ParaGauss
 from ase.io import read
 from pts.cfunc import Affine, Cartesian
 from pts.memoize import Memoize, DirStore
-from pts.units import kcal, eV, Hartree, angstrom
+from pts.units import kcal, eV, Hartree
 from pts.func import compose, NumDiff
 from pts.zmat import ZMat
 from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
-from numpy import max, abs
 
 cmd = \
 """
