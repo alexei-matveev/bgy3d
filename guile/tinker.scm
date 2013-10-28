@@ -3,6 +3,7 @@
 ;;;
 (define-module (guile tinker)
   #:use-module (guile utils)            ; memoize
+  #:use-module (guile compat)           ; unless
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (ice-9 rdelim)           ; read-line
   #:use-module (ice-9 match)            ; match-lambda

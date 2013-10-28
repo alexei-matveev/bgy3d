@@ -8,6 +8,7 @@
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (guile tinker)           ; tinker-table
   #:use-module (guile utils)            ; memoize
+  #:use-module (guile compat)           ; unless
   #:export
   (make-molecule
    move-molecule
