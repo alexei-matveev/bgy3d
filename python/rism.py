@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- mode: python; c-basic-offset: 4 -*- vim: set sw=4 tw=70 et sta ai:
+from __future__ import with_statement
 
 import sys
 import os
