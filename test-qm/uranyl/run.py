@@ -1,3 +1,4 @@
+from __future__ import with_statement
 #
 # Tell Python interpreter where to find custom modules:
 #
@@ -56,27 +57,28 @@ print  trafo (s)
 print "XXX: fprime = ", trafo.fprime (s)
 # exit (1)
 
-with QFunc (atoms, calc) as f, Server (cmd) as g:
-    f = Memoize (f, DirStore (salt="uo22+, gp, qm"))
-    f = compose (f, trafo)
-    g1 = Memoize (g, DirStore (salt="uo22+, rism"))
-    g = lambda x: g1(x) * kcal
-    g = compose (g, trafo)
-    g = NumDiff (g)
+with QFunc (atoms, calc) as f:
+    with Server (cmd) as g:
+        f = Memoize (f, DirStore (salt="uo22+, gp, qm"))
+        f = compose (f, trafo)
+        g1 = Memoize (g, DirStore (salt="uo22+, rism"))
+        g = lambda x: g1(x) * kcal
+        g = compose (g, trafo)
+        g = NumDiff (g)
 
-    e = f + g
+        e = f + g
 
-    print "s(start)=", s
-    print "x(start)=\n", trafo (s)
+        print "s(start)=", s
+        print "x(start)=\n", trafo (s)
 
-    s, info = minimize (e, s, algo=1)
+        s, info = minimize (e, s, algo=1)
 
-    print "converged =", info["converged"], "in", info["iterations"], "iterations"
-    print "s(min)=", s
-    print "x(min)=\n", trafo (s)
+        print "converged =", info["converged"], "in", info["iterations"], "iterations"
+        print "s(min)=", s
+        print "x(min)=\n", trafo (s)
 
-    units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
-    for u, uu in units:
-        print "e = ", f(s)/u, "+", g(s)/u, "=", e(s)/u, "(%s)" % uu
-    for u, uu in units:
-        print "g = ", f.fprime(s)/u, "+", g.fprime(s)/u, "=", e.fprime(s)/u, "(%s/Unit)" % uu
+        units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
+        for u, uu in units:
+            print "e = ", f(s)/u, "+", g(s)/u, "=", e(s)/u, "(%s)" % uu
+        for u, uu in units:
+            print "g = ", f.fprime(s)/u, "+", g.fprime(s)/u, "=", e.fprime(s)/u, "(%s/Unit)" % uu
