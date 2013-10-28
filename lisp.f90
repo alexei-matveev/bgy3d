@@ -45,21 +45,21 @@ module lisp
   end interface num
 
   interface
-     function scm_from_utf8_symboln (str, len) result (symbol) bind (c)
+     function scm_from_locale_symboln (str, len) result (symbol) bind (c)
        import
        implicit none
        character (kind=c_char), intent (in) :: str(*)
        integer (c_size_t), intent (in), value :: len
        type (obj) :: symbol
-     end function scm_from_utf8_symboln
+     end function scm_from_locale_symboln
 
-     function scm_from_utf8_stringn (str, len) result (string) bind (c)
+     function scm_from_locale_stringn (str, len) result (string) bind (c)
        import
        implicit none
        character (kind=c_char), intent (in) :: str(*)
        integer (c_size_t), intent (in), value :: len
        type (obj) :: string
-     end function scm_from_utf8_stringn
+     end function scm_from_locale_stringn
   end interface
 
   public :: obj                 ! type
@@ -77,7 +77,7 @@ contains
     integer (c_size_t) :: slen
 
     slen = len (fstr)
-    symb = scm_from_utf8_symboln (fstr, slen)
+    symb = scm_from_locale_symboln (fstr, slen)
   end function sym
 
   function str (fstr) result (lstr)
@@ -89,7 +89,7 @@ contains
     integer (c_size_t) :: slen
 
     slen = len (fstr)
-    lstr = scm_from_utf8_stringn (fstr, slen)
+    lstr = scm_from_locale_stringn (fstr, slen)
   end function str
 
 end module lisp
