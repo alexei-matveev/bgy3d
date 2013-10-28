@@ -23,6 +23,19 @@
   (export-syntax define-syntax-rule)
 
   ;;
+  ;; When/uless were added in 2.0:
+  ;;
+  (define-syntax-rule (when test stmt stmt* ...)
+    (if test (begin stmt stmt* ...)))
+
+  (export-syntax when)
+
+  (define-syntax-rule (unless test stmt stmt* ...)
+    (if (not test) (begin stmt stmt* ...)))
+
+  (export-syntax unless)
+
+  ;;
   ;; Re-export all symbols from (ice-9 syncase). Credit to mark_weaver
   ;; at #guile. Otherwise the importer of this module, (guile compat),
   ;; still  needs to  explicitly import (ice-9  syncase) in  order for
