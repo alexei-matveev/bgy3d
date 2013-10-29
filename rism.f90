@@ -940,7 +940,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_rows, FT_FW
+    use fft, only: fourier_rows, FT_FW, integrate
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
@@ -1022,6 +1022,7 @@ contains
        real (rk) :: x(nrad), x0(nrad), x1(nrad), x2(nrad), xx(nrad) ! qhq in k-space
        real (rk) :: xd(m, m, nrad)
        real (rk) :: expB(n, m, nrad)
+       real (rk) :: ni(n, m, nrad) ! number integral
 
        ! Dont like to pass redundant  info, recompute r(:) from dr and
        ! k(:) from dk:
@@ -1224,12 +1225,20 @@ contains
        end block
 
 
+       ! compute number integral
+       block
+          forall (p = 1:nrad, i = 1:n, j = 1:m)
+              ni (i, j, p) = integrate (g(i, j, 1:p)) * rho * dr**3
+          endforall
+       end block
+
        ! This prints a lot of data on tty!
        if (verb > 1) then
-          print *, "# r(i) then g(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
+          print *, "# r(i) then g(i), ni(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
           do p = 1, nrad
              write (*, *) r(p), &
                   &     ((g(i, j, p), i=1,n), j=1,m), &
+                  &     ((ni(i, j, p), i=1,n), j=1,m), &
                   &     ((v(i, j, p), i=1,n), j=1,m), &
                   &     ((t(i, j, p), i=1,n), j=1,m), &
                   &     ((c(i, j, p), i=1,n), j=1,m), &
