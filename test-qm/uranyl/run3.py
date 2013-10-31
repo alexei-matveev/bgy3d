@@ -128,6 +128,5 @@ with QFunc (atoms, calc) as f:
 
     units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
     for u, uu in units:
-        print "e = ", e(s)/u, "(%s)" % uu
-    for u, uu in units:
-        print "g = ", e.fprime(s)/u, "(%s/Unit)" % uu
+        print "e = ", e(s) / u, "%s," % uu, \
+            "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
