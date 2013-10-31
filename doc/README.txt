@@ -1297,3 +1297,33 @@ z(U), au    dG(hnc), kcal     dG(gf), kcal      ddG(rbc), kcal
  0.4      -322.673057828630 -356.463816279918 -15.1702584270580
  0.45     -322.793975751603 -356.644958825941 -15.1759846238602
 
+
+First peak and number integral of uranyl
+----------------------------------------
+
+The numbers in the following table need to be used carefllly, because
+the location and values for first maximum and minimum and obtained from
+the linear interpolated function of RDF. Values for number integral are
+also from interpolation. Calulation settings are the same as those for
+free energy.
+
+SPC/E water:
+
+                r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
+-------------  -------  ----------  -------  ----------  -----------
+Uranyl, GW96    2.4805     12.2095   3.2227      0.0136       6.5223
+Uranyl, SPC     2.4414     12.7423   3.1835      0.0102       6.7195
+Uranyl, TIP3P   2.4414     12.8229   3.1836      0.0110       6.6563
+Uranyl, PM13    2.4414     12.3047   3.1836      0.0069       5.9763
+--------------------------------------------------------------------
+
+
+TIP3P water:
+
+                r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
+-------------  -------  ----------  -------  ----------  -----------
+Uranyl, GW96    2.4805     10.4640   3.1837      0.0124       5.4828
+Uranyl, SPC     2.4023     11.1529   3.1445      0.0092       5.6217
+Uranyl, TIP3P   2.4023     10.6985   3.1445      0.0099       5.5713
+Uranyl, PM13    2.4414     10.7749   3.1445      0.0066       5.0567
+--------------------------------------------------------------------
