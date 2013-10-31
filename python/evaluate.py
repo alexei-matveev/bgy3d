@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import fmin
 
 # Set to 1 if need to show plots
-PLOT = 1
+PLOT = 0
 
 def loadbin(path):
     '''
