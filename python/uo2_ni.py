@@ -20,11 +20,11 @@ def uo2_ni(path):
     # first column is r
     r = data[:, 0]
 
-    # 1:n*m+1 columns are g(r)
-    g = data[:, 1:n*m+1]
+    # 1:n*m columns are g(r)
+    g = data[:, 1:n*m]
 
-    # n*m+2 : 2*n*m+2 columns are ni(r)
-    ni = data[:, n*m+2:2*n*m+2]
+    # n*m+1 : 2*n*m columns are ni(r)
+    ni = data[:, n*m+1:2*n*m]
 
     # Get a short part from g, which contains the first local maximum and minimum
     rinter, ginter = get_interval(r, g[:, 0], interval = (0.0, 3.5))
