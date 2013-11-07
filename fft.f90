@@ -36,6 +36,7 @@ module fft
   public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
 ! public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: integrate           ! f(1:n) -> scalar
+  public :: integrate_array     ! f(1:n) -> g(1:n)
   !
   ! *** END OF INTERFACE ***
   !
@@ -211,6 +212,33 @@ contains
     enddo
     g = 4 * pi * g
   end function integrate
+
+  pure function integrate_array (f) result (g)
+    !
+    ! using the same integration algorithm as integrate(), but return
+    !                        x
+    ! an array as g(x) = 4π ∫ f(r)r²dr instead of a scalar g, here
+    !                        x₀
+    ! x₀ = 0.5 * dr, x = dr * (2 * i - 1) / 2 
+    !
+    implicit none
+    real (rk), intent (in) :: f(:)
+    real (rk) :: g(size(f))
+    ! *** end of interface ***
+
+    integer :: i, n
+
+    n = size (f)
+
+    do i = 1, n
+       if (i == 1) then
+          g(i) = f(i) * (2 * i - 1)**2 / 4
+       else
+          g(i) = g(i - 1) + f(i) * (2 * i - 1)**2 / 4
+       endif
+    enddo
+    g = 4 * pi * g
+  end function integrate_array
 
 
   subroutine dst_columns (f)
