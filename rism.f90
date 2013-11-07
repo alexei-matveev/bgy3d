@@ -940,7 +940,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_rows, FT_FW, integrate
+    use fft, only: fourier_rows, FT_FW, integrate_array
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
@@ -1227,8 +1227,9 @@ contains
 
        ! compute number integral
        block
-          forall (p = 1:nrad, i = 1:n, j = 1:m)
-              ni (i, j, p) = integrate (g(i, j, 1:p)) * rho * dr**3
+
+          forall (i = 1:n, j = 1:m)
+              ni (i, j, :) = integrate_array (g(i, j, :)) * rho * dr**3
           endforall
        end block
 
