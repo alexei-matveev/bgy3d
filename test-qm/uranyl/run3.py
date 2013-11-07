@@ -14,7 +14,8 @@ from ase.io import read, write
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal, Hartree, eV
 from pts.func import compose, NumDiff
-from pts.zmat import ZMat, Rigid, Fixed, ManyBody
+from pts.cfunc import Affine
+from pts.zmat import ZMat, Rigid, Fixed, ManyBody, Move, relate
 from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
@@ -43,21 +44,21 @@ x = atoms.get_positions ()
 #
 # Z-matrix for water:
 #
-trafo = ZMat ([(None, None, None),
-               (1, None, None),
-               (1, 2, None)], base=1)
+zmt = ZMat ([(None, None, None),
+             (1, None, None),
+             (1, 2, None)], base=1)
 
 #
 # Initial values of internal coordinates:
 #
-s = trafo.pinv (x)
-assert max (abs (s - trafo.pinv (trafo (s)))) < 1.0e-10
+s = zmt.pinv (x)
+assert max (abs (s - zmt.pinv (zmt (s)))) < 1.0e-10
 
 clean ()
 
 with QFunc (atoms, calc) as f:
     f = Memoize (f, DirStore (salt="h2o, qm"))
-    e = compose (f, trafo)
+    e = compose (f, zmt)
 
     print s, e (s)
     s, info = minimize (e, s, algo=1, ftol=1.0e-2, xtol=1.0e-2)
@@ -71,7 +72,7 @@ with QFunc (atoms, calc) as f:
 #
 # Rigid water with optimized internal coordinates:
 #
-X = Rigid (trafo (s))
+X = Rigid (zmt (s))
 
 # Five optimized  rigid waters, actual location and  orientation to be
 # specified ...
@@ -82,7 +83,7 @@ xa = atoms.get_positions ()
 
 # Bond length and the bond angle for uranyl, use the same Z-matrix for
 # uranyl:
-s = trafo.pinv (xa[:3])
+s = zmt.pinv (xa[:3])
 
 # Average bond length and 180 degrees angle:
 s_bond = sum (s[:2]) / 2
@@ -90,7 +91,7 @@ s = [s_bond, s_bond, pi]
 
 # Uranyl  will be  fixed, but  to adjust  orientation, rotate  a rigid
 # object:
-Y = Rigid (trafo (s))
+Y = Rigid (zmt (s))
 uranyl = Fixed (Y (Y.pinv (xa[:3])))
 
 trafo = ManyBody (uranyl, *waters)
@@ -100,13 +101,69 @@ trafo = ManyBody (uranyl, *waters)
 # fixed:
 s = trafo.pinv (xa)
 
-# print "s=", s
-# print "xa=\n", xa
-# print "x0=\n", trafo (s)
-# print "diff=\n", xa - trafo (s)
-# exit (1)
-
 calc = ParaGauss (cmdline=command, input="uranyl+water.scm")
+
+clean ()
+
+with QFunc (atoms, calc) as f:
+    f = Memoize (f, DirStore (salt="uranyl+water, qm"))
+    e = compose (f, trafo)
+
+    print "s(start)=", s
+    print "x(start)=\n", trafo (s)
+    print "e(start)=", e (s)  / kcal
+
+    s, info = minimize (e, s, algo=1, ftol=1.0e-2, xtol=1.0e-2)
+
+    print "converged =", info["converged"], "in", info["iterations"], "iterations"
+    print "s(min)=", s
+    print "x(min)=\n", trafo (s)
+    atoms.set_positions (trafo (s))
+    write ("a50.xyz", atoms)
+
+    units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
+    for u, uu in units:
+        print "e = ", e(s) / u, "%s," % uu, \
+            "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
+
+
+xa = trafo (s)
+print "x(min=)\n", xa
+
+# Bond length and the bond angle for uranyl, use the same Z-matrix for
+# uranyl:
+s = zmt.pinv (xa[:3])
+print "s(min)=", s
+
+# Average bond length:
+s_bond = sum (s[:2]) / 2
+s = [s_bond]
+
+# Geometry  of uranyl  as a  function  of single  argument. FIXME:  no
+# special case for scalar argument!
+def uranyl (v):
+    z, = v
+    return [[0, 0, 0],
+            [0, 0, z],
+            [0, 0, -z]]
+
+# A linear Func() of a 1-array:
+uranyl = Affine (uranyl, s)
+
+# Relative position of second geometry wrt the first as a 6-array:
+q = relate (uranyl (s), xa[:3])
+
+# Move/rotate output of uranyl() Func():
+uranyl = Move (q, uranyl)
+
+# Flexible uranyl and five rigid waters at their (more or less) proper
+# positions.   Each water is  characterised by  6 degrees  of freedom,
+# uranyl by just one:
+trafo = ManyBody (uranyl, *waters, dof=[1, 6, 6, 6, 6, 6])
+
+# Initial values for all of degrees of freedom:
+s = trafo.pinv (xa)
+print "diff\n", max (abs (trafo (s) - xa))
 
 clean ()
 
