@@ -1305,16 +1305,19 @@ The numbers in the following table need to be used carefllly, because
 the location and values for first maximum and minimum and obtained from
 the linear interpolated function of RDF. Values for number integral are
 also from interpolation. Calulation settings are the same as those for
-free energy.
+free energy except L=16, since interpolation in a small range [0.0, 3.0]
+can not be accurate for L=160, especially it's hard to locate the peaks.
+The energy difference is less than 0.1 kcal/mol even L is shortened to
+1/10 (see last section).
 
 SPC/E water:
 
                 r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
 -------------  -------  ----------  -------  ----------  -----------
-Uranyl, GW96    2.4805     12.2095   3.2227      0.0136       6.2542
-Uranyl, SPC     2.4414     12.7423   3.1835      0.0102       6.1402
-Uranyl, TIP3P   2.4414     12.8229   3.1836      0.0110       6.1250
-Uranyl, PM13    2.4414     12.3047   3.1836      0.0069       5.8000
+Uranyl, GW96    2.4902     12.2846   3.2402      0.0136       6.2542
+Uranyl, SPC     2.4238     13.1930   3.1699      0.0102       6.1388
+Uranyl, TIP3P   2.4316     12.9512   3.1816      0.0110       6.1241
+Uranyl, PM13    2.4238     12.7383   3.1778      0.0069       5.7993
 --------------------------------------------------------------------
 
 
@@ -1322,8 +1325,8 @@ TIP3P water:
 
                 r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
 -------------  -------  ----------  -------  ----------  -----------
-Uranyl, GW96    2.4805     10.4640   3.1837      0.0124       5.2053
-Uranyl, SPC     2.4023     11.1529   3.1445      0.0092       5.0931
-Uranyl, TIP3P   2.4023     10.6985   3.1445      0.0099       5.0831
-Uranyl, PM13    2.4414     10.7749   3.1445      0.0066       4.8436
+Uranyl, GW96    2.4746     10.4921   3.2011      0.0124       5.2053
+Uranyl, SPC     2.4082     11.2197   3.1348      0.0092       5.0920
+Uranyl, TIP3P   2.4199     11.0207   3.1426      0.0099       5.0823
+Uranyl, PM13    2.4121     10.8627   3.1387      0.0066       4.8429
 --------------------------------------------------------------------
