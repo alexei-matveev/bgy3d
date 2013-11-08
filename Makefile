@@ -78,7 +78,7 @@ LDFLAGS  = $(OMP-FLAGS)
 PIC-FLAGS = $(if $(shared), -fPIC)
 
 # I was not able to get a real speedup for urany/water with N=8192, so
-# this  remains disabled.   Note  that -fompenp  is  accepted by  both
+# this  remains disabled.   Note  that -fopenmp  is  accepted by  both
 # gcc/gfortran (not used in C though) and also needs to be supplied at
 # link stage:
 OMP-FLAGS = # -fopenmp
@@ -214,7 +214,7 @@ include $(libbgy3d.a:.o=.d)
 %.o %.mod: %.f90
 	$(FC) $(FFLAGS) -o $(*).o -c $(<)
 
-# node capital D here, this rule has no effect:
+# Note capital D here, this rule has no effect:
 %.D: %.c
 	set -e; $(CC) -M $(CFLAGS) $(LDFLAGS) $(INCDIRS) $< \
 	| sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@; \
