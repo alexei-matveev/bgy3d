@@ -73,12 +73,19 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
     MatCreateSNESMF (snes, &J);
 
     /*
-      Petsc provides a placeholder for this case:
+      Petsc provides a convenience  function for Jacobian update which
+      cooperates   with  the   matrix-free  Jacobian   J   created  by
+      MatCreateSNESMF() as above:
 
         PetscErrorCode
         MatMFFDComputeJacobian (SNES, Vec, Mat*, Mat*, MatStructure*, void*)
 
-      The last argument is a user context for jacobian evaluation:
+      The  last argument is  a user  context for  Jacobian evaluation.
+      This function  is only  used to *update*  the Jacobian.   In the
+      matrix-free  case  an update  amounts  to  noting (copying)  the
+      location Vec  r at  which the Jacobian  J(r) is to  be evaluated
+      next time it is applied as  in J(r) * dr. The application itself
+      is performed by Mat J matrix shell.
     */
     SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
     MatDestroy (&J);         /* I hope SNES saved a ref to that Mat? */
@@ -353,6 +360,10 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   is zero.  May be eventually used  from Fortran, so  if ever changing
   the interface  update the  corresponding interface block  in Fortran
   sources.
+
+  FIXME:  in parallel  runs with  P workers  this function  appears to
+  operate  with a  distributed Vec  of  total length  n *  P built  of
+  redundant sections of length n on each worker.
 */
 void rism_snes (void *ctx, ArrayFunc f, int n, real x_[n])
 {
