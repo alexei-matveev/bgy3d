@@ -15,7 +15,7 @@ typedef PetscErrorCode (*Destructor)(Mat A);
 
 /* Untyped  convinience wrapper,  not all  matrices have  a meaningful
    context: */
-static void* context (Mat A)
+static void* mat_shell_context (Mat A)
 {
   void *ctx;
   MatShellGetContext (A, &ctx);

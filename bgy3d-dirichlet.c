@@ -394,7 +394,7 @@ static PetscErrorCode mat_destroy_op (Mat A)
     printf ("mat_destroy_op(%p)\n", A);
 
   /* Only Operators are accepted here: */
-  Operator *op = context (A);
+  Operator *op = mat_shell_context (A);
 
   op_destroy (op);
 
@@ -407,7 +407,7 @@ static PetscErrorCode mat_mult_op_lap (Mat A, Vec x, Vec y)
 {
   /* Only  matrices  constructed   by  mat_create_lap()  are  accepted
      here: */
-  const Operator *lap = context (A);
+  const Operator *lap = mat_shell_context (A);
 
   const real *h = lap->h;       /* h[3] */
 
@@ -492,7 +492,7 @@ static PetscErrorCode mat_mult_op_bnd (Mat A, Vec x, Vec y)
 {
   mat_mult_op_lap (A, x, y);    /* y := Δx */
 
-  Operator *lap = context (A);
+  Operator *lap = mat_shell_context (A);
 
   /* Untill  now we compute  plain-old Δx,  now the  boundary specific
      staff. Copy the values at the boundary from x to y as is: */
@@ -569,7 +569,7 @@ static KSP ksp_create (Mat M)
    (B): */
 static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
 {
-  KSP ksp = context (A);
+  KSP ksp = mat_shell_context (A);
 
   KSPSolve (ksp, x, y);
 
@@ -591,7 +591,7 @@ static PetscErrorCode mat_destroy_inv (Mat A)
   if (verbosity > 0)
     printf ("mat_destroy_inv(%p)\n", A);
 
-  KSP ksp = context (A);
+  KSP ksp = mat_shell_context (A);
 
   KSPDestroy (&ksp);
 
@@ -627,7 +627,7 @@ static PetscErrorCode mat_destroy_dir (Mat A)
   if (verbosity > 0)
     printf ("mat_destroy_dir(%p)\n", A);
 
-  Dirichlet *op = context (A);
+  Dirichlet *op = mat_shell_context (A);
 
   DMDestroy (&op->da);
 
@@ -644,7 +644,7 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 /* Side effects: uses one temp Vec. */
 static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
 {
-  Dirichlet *op = context (L);
+  Dirichlet *op = mat_shell_context (L);
 
   /* Complete postponed initialization: */
   if (op->A == NULL)
