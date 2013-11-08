@@ -15,7 +15,7 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
   bgy3d_getopt_string ("--snes-solver", sizeof solver, solver);
 
   if (strcmp (solver, "newton") == 0)
-    bgy3d_snes_newton (PD, ctx, F, x);
+    bgy3d_snes_newton (PD, ctx, F, NULL, x); /* No Jacobian */
   else if (strcmp (solver, "picard") == 0)
     bgy3d_snes_picard (PD, ctx, F, x);
   else if (strcmp (solver, "jager") == 0)
@@ -37,7 +37,9 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
   function h, the direct correlation function should be fixed (or be a
   function of h).
 */
-void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
+void
+bgy3d_snes_newton (const ProblemData *PD, void *ctx,
+                   VecFunc1 F, VecFunc2 dF, Vec x)
 {
   /* Create the snes environment */
   SNES snes;
@@ -233,7 +235,7 @@ void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
     bgy3d_snes_picard (&pd, ctx, F, x);
   }
   /* Then continue with Newton: */
-  bgy3d_snes_newton (PD, ctx, F, x);
+  bgy3d_snes_newton (PD, ctx, F, NULL, x); /* No Jacobian */
 }
 
 
@@ -401,7 +403,10 @@ void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
   ProblemData pd = bgy3d_problem_data ();
 
   /* Petsc does real work: */
-  bgy3d_snes_default (&pd, ctx, F, x);
+  if (df)
+    bgy3d_snes_newton (&pd, ctx, F, dF, x);
+  else
+    bgy3d_snes_default (&pd, ctx, F, x); /* dF is never NULL */
 
   vec_destroy (&x);       /*  should  not free() */
 }
