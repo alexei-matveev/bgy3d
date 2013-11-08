@@ -98,7 +98,7 @@
 #include "bgy3d-dirichlet.h"    /* Laplace staff */
 #include "bgy3d-potential.h"    /* Context, etc. */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
-#include "bgy3d-snes.h"         /* bgy3d_snes_newton() */
+#include "bgy3d-snes.h"         /* bgy3d_snes_jager() */
 #include "bgy3d-impure.h"
 
 #include <stdbool.h>            /* bool */
