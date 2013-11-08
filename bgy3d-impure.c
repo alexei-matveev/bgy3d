@@ -821,7 +821,7 @@ static void solute_solve (State *BHD,
           bgy3d_snes_jager(),
           bgy3d_snes_newton().
         */
-        bgy3d_snes_jager (PD, &ctx, (VectorFunc) iterate_u, U);
+        bgy3d_snes_jager (PD, &ctx, (VecFunc1) iterate_u, U);
       }
 
       /*

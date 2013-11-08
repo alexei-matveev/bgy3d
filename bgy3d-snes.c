@@ -6,10 +6,10 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"          /* vec_duplicate() */
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_string() */
-#include "bgy3d-snes.h"         /* VectorFunc, ArrayFunc */
+#include "bgy3d-snes.h"         /* VecFunc1, ArrFunc1 */
 
 
-void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 {
   char solver[20] = "newton";
   bgy3d_getopt_string ("--snes-solver", sizeof solver, solver);
@@ -37,7 +37,7 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   function h, the direct correlation function should be fixed (or be a
   function of h).
 */
-void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 {
   /* Create the snes environment */
   SNES snes;
@@ -188,7 +188,7 @@ void bgy3d_snes_newton (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   SNESDestroy (&snes);
 }
 
-void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 {
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -223,7 +223,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 }
 
 
-void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 {
   /* First do a few "slow" iterations: */
   {
@@ -237,7 +237,7 @@ void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 }
 
 
-void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 {
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -355,9 +355,9 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
 
 
 /*
-  A solver  for an untyped (array) form-function  ArrayFunc.  Finds an
-  x_[n] such that dx_[n] as returned  by ArrayFunc f (ctx, n, x_, dx_)
-  is zero.  May be eventually used  from Fortran, so  if ever changing
+  A solver  for an untyped  (array) form-function ArrFunc1.   Finds an
+  x_[n] such that  dx_[n] as returned by ArrFunc1 f  (ctx, n, x_, dx_)
+  is zero.  May  be eventually used from Fortran,  so if ever changing
   the interface  update the  corresponding interface block  in Fortran
   sources.
 
@@ -365,17 +365,17 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VectorFunc F, Vec x)
   operate  with a  distributed Vec  of  total length  n *  P built  of
   redundant sections of length n on each worker.
 */
-void rism_snes (void *ctx, ArrayFunc f, int n, real x_[n])
+void rism_snes (void *ctx, ArrFunc1 f, int n, real x_[n])
 {
   local Vec x = vec_from_array (n, x_);
 
-  /* Implements VectorFunc interface: */
+  /* Implements VecFunc1 interface: */
   void F (void *ctx, Vec y, Vec dy)
   {
     local real *y_ = vec_get_array (y);
     local real *dy_ = vec_get_array (dy);
 
-    /* Implements ArrayFunc interface: */
+    /* Implements ArrFunc1 interface: */
     f (ctx, n, y_, dy_);
 
     vec_restore_array (y, &y_);
