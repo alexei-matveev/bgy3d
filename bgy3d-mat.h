@@ -25,21 +25,23 @@ static void* context (Mat A)
 
 /* Creates a matix  shell, but does not associate  any operations with
    it: */
-static Mat mat_create_shell (int n, int N, void *ctx)
+static Mat mat_create_shell (int n, void *ctx)
 {
   Mat A;
-  MatCreateShell (PETSC_COMM_WORLD, n, n, N, N, ctx, &A);
+  MatCreateShell (PETSC_COMM_WORLD,
+                  n, n, PETSC_DETERMINE, PETSC_DETERMINE,
+                  ctx, &A);
   return A;
 }
 
 
-static Mat mat_create (int n, int N, void *ctx,
+static Mat mat_create (int n, void *ctx,
                        Operation mat_mult,
                        Destructor mat_destroy)
 {
   /* Create  matrix shell  with  proper dimensions  and associate  the
      context with it: */
-  Mat A = mat_create_shell (n, N, ctx);
+  Mat A = mat_create_shell (n, ctx);
 
   /* Set matrix operations: */
   MatShellSetOperation (A, MATOP_MULT,
