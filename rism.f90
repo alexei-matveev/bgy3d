@@ -400,7 +400,7 @@ contains
     function iterate_t (t) result (dt)
       !
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
-      ! ... Implements procedure(f_iterator).
+      ! ... Implements procedure(func1).
       !
       implicit none
       real (rk), intent (in) :: t(:, :, :) ! (m, m, nrad)
@@ -645,7 +645,7 @@ contains
     function iterate_t (t) result (dt)
       !
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
-      ! ... Implements procedure(f_iterator).
+      ! ... Implements procedure(func1).
       !
       use fft, only: fourier_rows, FT_FW, FT_BW
       implicit none

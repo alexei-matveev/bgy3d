@@ -24,12 +24,12 @@ module snes
   ! the carefully designed logic of some non-linear solvers.
   !
   abstract interface
-     function f_iterator (x) result (dx)
+     function func1 (x) result (dx)
        import rk
        implicit none
        real (rk), intent (in) :: x(:, :, :)
        real (rk) :: dx(size (x, 1), size (x, 2), size (x, 3))
-     end function f_iterator
+     end function func1
 
      ! b = f(a):
      subroutine arrfunc1 (ctx, n, a, b) bind (c)
@@ -80,13 +80,13 @@ module snes
   !
   ! A pointer to to the structure of this type will serve as a closure
   ! context to be passed to the C-world. Upon callback the Fortran sub
-  ! implementing a procedure(arrfunc1) can use the procedure pointer
+  ! implementing a procedure (arrfunc1)  can use the procedure pointer
   ! to perform the actual work.  I wish closures could be made simpler
   ! than that.
   !
   type context
      integer :: shape(3)
-     procedure (f_iterator), pointer, nopass :: f
+     procedure (func1), pointer, nopass :: f
   end type context
 
 contains
@@ -99,7 +99,7 @@ contains
     !    n+1    n       n
     !
     implicit none
-    procedure (f_iterator) :: f  ! (x) -> dx
+    procedure (func1) :: f  ! (x) -> dx
     real (rk), intent (inout) :: x(:, :, :)
     ! *** end of interface ***
 
@@ -131,7 +131,7 @@ contains
     !
     use iso_c_binding, only: c_ptr, c_loc, c_null_funptr
     implicit none
-    procedure (f_iterator) :: f  ! (x) -> dx
+    procedure (func1) :: f  ! (x) -> dx
     real (rk), intent (inout) :: x(:, :, :)
     ! *** end of interface ***
 
@@ -164,7 +164,7 @@ contains
     type (context), pointer :: f_ctx
 
     ! We  dont  do any  work  ourselves,  just  extract a  pointer  to
-    ! procedure(f_iterator) an let it do the rest:
+    ! procedure (func1) an let it do the rest:
     call c_f_pointer (ctx, f_ctx)
 
     block
