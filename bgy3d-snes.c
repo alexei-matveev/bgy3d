@@ -365,7 +365,7 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
   operate  with a  distributed Vec  of  total length  n *  P built  of
   redundant sections of length n on each worker.
 */
-void rism_snes (void *ctx, ArrFunc1 f, int n, real x_[n])
+void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
 {
   local Vec x = vec_from_array (n, x_);
 
@@ -380,6 +380,21 @@ void rism_snes (void *ctx, ArrFunc1 f, int n, real x_[n])
 
     vec_restore_array (y, &y_);
     vec_restore_array (dy, &dy_);
+  }
+
+  /* Implements VecFunc2 interface: */
+  void dF (void *ctx, Vec a, Vec b, Vec c)
+  {
+    local real *a_ = vec_get_array (a);
+    local real *b_ = vec_get_array (b);
+    local real *c_ = vec_get_array (c);
+
+    /* Implements ArrFunc2 interface: */
+    df (ctx, n, a_, b_, c_);
+
+    vec_restore_array (a, &a_);
+    vec_restore_array (b, &b_);
+    vec_restore_array (c, &c_);
   }
 
   /* The result depends on the command line and affects the solver: */

@@ -31,36 +31,47 @@ module snes
        real (rk) :: dx(size (x, 1), size (x, 2), size (x, 3))
      end function f_iterator
 
-     subroutine c_iterator (ctx, n, x, dx) bind (c)
+     ! b = f(a):
+     subroutine arrfunc1 (ctx, n, a, b) bind (c)
        use iso_c_binding, only: c_ptr, c_int, c_double
        implicit none
        type (c_ptr), intent (in), value :: ctx
        integer (c_int), intent (in), value :: n
-       real (c_double), intent (in), target :: x(n)
-       real (c_double), intent (out), target :: dx(n)
-     end subroutine c_iterator
+       real (c_double), intent (in), target :: a(n)
+       real (c_double), intent (out), target :: b(n)
+     end subroutine arrfunc1
+
+     ! c = f(a, b):
+     subroutine arrfunc2 (ctx, n, a, b, c) bind (c)
+       use iso_c_binding, only: c_ptr, c_int, c_double
+       implicit none
+       type (c_ptr), intent (in), value :: ctx
+       integer (c_int), intent (in), value :: n
+       real (c_double), intent (in), target :: a(n), b(n)
+       real (c_double), intent (out), target :: c(n)
+     end subroutine arrfunc2
   end interface
 
   !
   ! This is a concrete function, implemented in C:
   !
   interface
-     subroutine rism_snes (ctx, f, n, x) bind (c)
+     subroutine rism_snes (ctx, f, df, n, x) bind (c)
        !
-       ! void rism_snes (void *ctx, ArrayFunc f,
-       !                 int n, real x_[n])
+       ! void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df,
+       !                 int n, real x[n])
        !
-       ! using procedure (c_iterator) or in C-lang ArrayFunc:
-       !
-       ! typedef void (*ArrayFunc) (void *ctx,
-       !                            int n, const real x[n], real r[n]);
+       ! using procedure  (arrfunc1) as objective and  (when not null)
+       ! procedure  (arrfunc2)  as  Jacobian.   In  C-lang  these  are
+       ! ArrFunc1 and ArrFunc2.
        !
        ! See ./bgy3d-snes.c
        !
        use iso_c_binding, only: c_ptr, c_int, c_double
        implicit none
        type (c_ptr), intent (in), value :: ctx
-       procedure (c_iterator) :: f
+       procedure (arrfunc1) :: f
+       procedure (arrfunc2) :: df
        integer (c_int), intent (in), value :: n
        real (c_double), intent (inout) :: x(n)
      end subroutine rism_snes
@@ -69,7 +80,7 @@ module snes
   !
   ! A pointer to to the structure of this type will serve as a closure
   ! context to be passed to the C-world. Upon callback the Fortran sub
-  ! implementing a procedure(c_iterator) can use the procedure pointer
+  ! implementing a procedure(arrfunc1) can use the procedure pointer
   ! to perform the actual work.  I wish closures could be made simpler
   ! than that.
   !
@@ -118,7 +129,7 @@ contains
     !
     ! Delegates the actual work to Petsc by way of C-func rism_snes().
     !
-    use iso_c_binding, only: c_ptr, c_loc
+    use iso_c_binding, only: c_ptr, c_loc, c_null_funptr
     implicit none
     procedure (f_iterator) :: f  ! (x) -> dx
     real (rk), intent (inout) :: x(:, :, :)
@@ -126,18 +137,19 @@ contains
 
     type (context), target :: f_ctx
     type (c_ptr) :: ctx
+    procedure (arrfunc2), pointer :: df => NULL()
 
     f_ctx % f => f
     f_ctx % shape = shape (x)
     ctx = c_loc (f_ctx)
 
-    call rism_snes (ctx, iterator, size (x), x)
+    call rism_snes (ctx, iterator, df, size (x), x)
   end subroutine snes_default
 
 
   subroutine iterator (ctx, n, x, dx) bind (c)
     !
-    ! Implements  procedure(c_iterator)  and  will  be passed  to  the
+    ! Implements  procedure(arrfunc1)  and  will  be passed  to  the
     ! rism_snes()   together   with   the   suitable   context.    See
     ! snes_default().
     !
