@@ -369,7 +369,7 @@ contains
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
     ! function as a callback is an F08 feature. GFortran 4.3 on Debian
     ! Lenny does not support that:
-    call snes_default (iterate_t, t)
+    call snes_default (t, iterate_t)
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
@@ -531,7 +531,7 @@ contains
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
     ! function as a callback is an F08 feature. GFortran 4.3 on Debian
     ! Lenny does not support that:
-    call snes_default (iterate_t, t_uvx)
+    call snes_default (t_uvx, iterate_t)
 
     ! Done with it, print results:
     call post_process (method, beta, rho, solvent, solute, dr, dk, v_uvr, t_uvx, &

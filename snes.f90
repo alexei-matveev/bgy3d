@@ -31,6 +31,13 @@ module snes
        real (rk) :: dx(size (x, 1), size (x, 2), size (x, 3))
      end function func1
 
+     function func2 (a, b) result (c)
+       import rk
+       implicit none
+       real (rk), intent (in) :: a(:, :, :), b(:, :, :)
+       real (rk) :: c(size (a, 1), size (a, 2), size (a, 3))
+     end function func2
+
      ! b = f(a):
      subroutine arrfunc1 (ctx, n, a, b) bind (c)
        use iso_c_binding, only: c_ptr, c_int, c_double
@@ -85,13 +92,14 @@ module snes
   ! than that.
   !
   type context
-     integer :: shape(3)
-     procedure (func1), pointer, nopass :: f
+     integer :: shape(3) = -1
+     procedure (func1), pointer, nopass :: f => NULL()
+     procedure (func2), pointer, nopass :: df => NULL()
   end type context
 
 contains
 
-  subroutine snes_picard (f, x)
+  subroutine snes_picard (x, f)
     !
     ! Simple Picard iteration
     !
@@ -99,8 +107,8 @@ contains
     !    n+1    n       n
     !
     implicit none
-    procedure (func1) :: f  ! (x) -> dx
     real (rk), intent (inout) :: x(:, :, :)
+    procedure (func1) :: f  ! (x) -> dx
     ! *** end of interface ***
 
     real (rk), parameter :: alpha = 0.02
@@ -125,31 +133,40 @@ contains
   end subroutine snes_picard
 
 
-  subroutine snes_default (f, x)
+  subroutine snes_default (x, f, df)
     !
     ! Delegates the actual work to Petsc by way of C-func rism_snes().
     !
     use iso_c_binding, only: c_ptr, c_loc, c_null_funptr
     implicit none
-    procedure (func1) :: f  ! (x) -> dx
     real (rk), intent (inout) :: x(:, :, :)
+    procedure (func1) :: f            ! (x) -> dx
+    procedure (func2), optional :: df ! (x, dx) -> df
     ! *** end of interface ***
 
     type (context), target :: f_ctx
     type (c_ptr) :: ctx
-    procedure (arrfunc2), pointer :: df => NULL()
+    procedure (arrfunc2), pointer :: jac
 
-    f_ctx % f => f
-    f_ctx % shape = shape (x)
     ctx = c_loc (f_ctx)
+    f_ctx % shape = shape (x)
+    f_ctx % f => f
 
-    call rism_snes (ctx, iterator, df, size (x), x)
+    if (present (df)) then
+       f_ctx % df => df
+       jac => jacobian
+    else
+       f_ctx % df => NULL()
+       jac => NULL()
+    endif
+
+    call rism_snes (ctx, objective, jac, size (x), x)
   end subroutine snes_default
 
 
-  subroutine iterator (ctx, n, x, dx) bind (c)
+  subroutine objective (ctx, n, x, dx) bind (c)
     !
-    ! Implements  procedure(arrfunc1)  and  will  be passed  to  the
+    ! Implements  procedure  (arrfunc1)  and  will be  passed  to  the
     ! rism_snes()   together   with   the   suitable   context.    See
     ! snes_default().
     !
@@ -181,5 +198,43 @@ contains
        ! http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55855
        dy = f_ctx % f (y)
     end block
-  end subroutine iterator
+  end subroutine objective
+
+
+  subroutine jacobian (ctx, n, x, dx, df) bind (c)
+    !
+    ! Implements  procedure  (arrfunc2)  and  will be  passed  to  the
+    ! rism_snes()   together   with   the   suitable   context.    See
+    ! snes_default().
+    !
+    use iso_c_binding, only: c_f_pointer, c_ptr, c_int
+    implicit none
+    type (c_ptr), intent (in), value :: ctx
+    integer (c_int), intent (in), value :: n
+    real (rk), intent (in), target :: x(n), dx(n)
+    real (rk), intent (out), target :: df(n)
+    ! *** end of interface ***
+
+    type (context), pointer :: f_ctx
+
+    ! We  dont  do any  work  ourselves,  just  extract a  pointer  to
+    ! procedure (func2) an let it do the rest:
+    call c_f_pointer (ctx, f_ctx)
+
+    block
+       real (rk), pointer :: y(:, :, :), dy(:, :, :), dz(:, :, :)
+
+       ! F03 way to create aliases:
+       associate (n => f_ctx % shape)
+         ! F03 pointer association with contiguous array:
+         y(1:n(1), 1:n(2), 1:n(3)) => x
+         dy(1:n(1), 1:n(2), 1:n(3)) => dx
+         dz(1:n(1), 1:n(2), 1:n(3)) => df
+       end associate
+
+       ! The warning by GF 4.6 and 4.7 is incorrect:
+       ! http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55855
+       dz = f_ctx % df (y, dy)
+    end block
+  end subroutine jacobian
 end module snes
