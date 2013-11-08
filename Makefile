@@ -11,8 +11,8 @@
 # update-alternatives.   The  structure  of config  directory  changed
 # around Petsc 3.0 --- adapt the path accordingly:
 #
-include $(PETSC_DIR)/bmake/common/variables # on Lenny
-# include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
+# include $(PETSC_DIR)/bmake/common/variables # on Lenny
+include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
 
 #
 # Finally, execute
@@ -35,14 +35,14 @@ SHELL = /bin/sh
 # Guile  is  a  Scheme interpreter.  Set  this  to  one to  compile  a
 # BGY3d-enabled interpreter:
 #
-WITH_GUILE = 0
+WITH_GUILE = 1
 
 #
 # Some  code  is  written  in  Fortran using  F2008  features.   Older
 # compilers   including   GFortran   4.3   on  Lenny   cannot   handle
 # that. Disable those features:
 #
-WITH_FORTRAN = 0
+WITH_FORTRAN = 1
 
 #
 # Compile  a   shared  library  libbgy3d.so  and  link   that  to  the
