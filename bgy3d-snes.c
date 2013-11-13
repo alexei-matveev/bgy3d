@@ -6,6 +6,7 @@
 #include "bgy3d.h"
 #include "bgy3d-vec.h"          /* vec_duplicate() */
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_string() */
+#include "bgy3d-mat.h"          /* mat_shell_create() */
 #include "bgy3d-snes.h"         /* VecFunc1, ArrFunc1 */
 
 
@@ -28,6 +29,75 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
       exit (1);
     }
 }
+
+
+/* Matrix-free  Jacobian,   J(r).  The  content   of  the  Vec   r  is
+   occasionally updated by PETSC invokin jupdate. */
+typedef struct Ctx
+{
+  void *data;
+  Vec r;
+  VecFunc2 j;
+} Ctx;
+
+
+/* Apply J. An Operation that takes  a Mat and a Vec and fills another
+   Vec: */
+static PetscErrorCode
+japply (Mat J, Vec x, Vec y)
+{
+  const Ctx *ctx = mat_shell_context (J);
+
+  /* y = J(r) * x */
+  ctx->j (ctx->data, ctx->r, x, y);
+  return 0;
+}
+
+
+/* Destroy J. A Destructor that takes a Mat and destroys internals: */
+static PetscErrorCode
+jdestroy (Mat J)
+{
+  Ctx *ctx = mat_shell_context (J);
+  vec_destroy (&ctx->r);        /* vec_ref() in jcreate() */
+  free (ctx);                   /* malloc() in jcreate() */
+  return 0;
+}
+
+
+static Mat
+jcreate (void *data, Vec r, VecFunc2 j)
+{
+  Ctx *ctx = malloc (sizeof *ctx); /* free() in jdestroy() */
+
+  /* Inrement  referenc count,  to  allow the  caller  to destroy  the
+     Vec. The corresponding vec_destroy() in jdestroy(): */
+  *ctx = (struct Ctx) {data, vec_ref (r), j};
+
+  /* A square matrix with one Operation and Destructor: */
+  return mat_shell_create (vec_local_size (r), ctx, japply, jdestroy);
+}
+
+
+/*
+  This  one is  called  by the  SNES  solver to  update (re-seat)  the
+  Jacobian   J(r)   ->   J(r').    The   interface   is   rigid,   see
+  MatMFFDComputeJacobian()
+*/
+static PetscErrorCode
+jupdate (SNES snes, Vec r, Mat *J, Mat *B, MatStructure *s, void *data)
+{
+  (void) snes;
+  (void) B;
+  (void) s;
+  (void) data;
+
+  Ctx *ctx = mat_shell_context (*J);
+  VecCopy (r, ctx->r);
+
+  return 0;
+}
+
 
 
 /*
@@ -60,6 +130,25 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
   /* line search: SNESLS, trust region: SNESTR */
   SNESSetType (snes, SNESLS);
 
+  if (dF)
+    {
+      /* The point  to compute (rather  apply) Jacobian will  be saved
+         here: */
+      local Vec r0 = vec_duplicate (r);
+
+      /* Self-made  matrix-free Jacobian  based  on the  user-supplied
+         VecFunc2:  */
+      Mat J = jcreate (ctx, r0, dF); /* FIXME: should be local */
+
+      /* Stuck it into SNES object: */
+      SNESSetJacobian (snes, J, J, jupdate, ctx);
+
+      /* Both  Mat  J  and  SNES  snes  should  have  incremented  the
+         refcounts: */
+      MatDestroy (&J);          /* FIXME: should nullify J */
+      vec_destroy (&r0);
+    }
+  else
   {
     /*
       This has the same effect as specifying "-snes_mf" in the command
