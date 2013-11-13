@@ -508,7 +508,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
                            const Boundary *vol)
 {
   /* Allocates storage for a Operator struct. Make sure to it is freed
-     in mat_destroy(): */
+     in corresponding destructor: */
   Operator *op = op_create (da, h, vol);
 
   /* Get the shape of the future matrix: */
