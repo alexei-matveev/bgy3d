@@ -1,6 +1,20 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 #include "bgy3d.h"
 
+
+/* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
+   they take the pointer to a Petsc object and nullify it: */
+static inline
+void mat_destroy (Mat *A)
+{
+  /* Since Petsc 3.2, MatDestroy() also zeroed out the buffer and
+   * takes the address instead of vector as input argument */
+  MatDestroy (A);
+  /* FIXME: only needed before Petsc 3.2 */
+  *A = NULL;
+}
+
+
 /*
   Convenience   types   and    functions   to   create   matrix   free
   implementations of linear operators:
