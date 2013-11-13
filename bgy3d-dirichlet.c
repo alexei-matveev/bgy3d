@@ -519,9 +519,9 @@ static Mat lap_mat_create (const DA da, const real h[3],
   /* Build either a true Laplacian operator or the one adapted for the
      boundary problem: */
   if (vol)
-    A = mat_create (n, op, mat_mult_op_bnd, mat_destroy_op);
+    A = mat_shell_create (n, op, mat_mult_op_bnd, mat_destroy_op);
   else
-    A = mat_create (n, op, mat_mult_op_lap, mat_destroy_op);
+    A = mat_shell_create (n, op, mat_mult_op_lap, mat_destroy_op);
 
   return A;
 }
@@ -609,7 +609,7 @@ static Mat mat_inverse (Mat A)
   int n, N;
   msizes (A, &n, &N);
 
-  return mat_create (n, ksp, mat_mult_inv, mat_destroy_inv);
+  return mat_shell_create (n, ksp, mat_mult_inv, mat_destroy_inv);
 }
 
 
@@ -710,7 +710,7 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
   int n, N;
   asizes (op->da, &n, &N);
 
-  return mat_create (n, op, mat_mult_dir, mat_destroy_dir);
+  return mat_shell_create (n, op, mat_mult_dir, mat_destroy_dir);
 }
 
 

@@ -4,18 +4,19 @@
 /*
   Convenience   types   and    functions   to   create   matrix   free
   implementations of linear operators:
- */
+*/
 
 /* Functions that take a Mat and a Vec and update another Vec: */
 typedef PetscErrorCode (*Operation)(Mat A, Vec x, Vec y);
 
-/* Functions that take a Mat and destroy them: */
+/* Functions that take a Mat and destroy its internals: */
 typedef PetscErrorCode (*Destructor)(Mat A);
 
 
-/* Untyped  convinience wrapper,  not all  matrices have  a meaningful
+/* Untyped convinience  wrapper.  Not  all matrices have  a meaningful
    context: */
-static void* mat_shell_context (Mat A)
+static inline void*
+mat_shell_context (Mat A)
 {
   void *ctx;
   MatShellGetContext (A, &ctx);
@@ -23,32 +24,19 @@ static void* mat_shell_context (Mat A)
 }
 
 
-/* Creates a matix  shell, but does not associate  any operations with
-   it: */
-static Mat mat_create_shell (int n, void *ctx)
+static inline Mat
+mat_shell_create (int n, void *ctx, Operation mult, Destructor destroy)
 {
+  /* Create  matrix shell  with  proper dimensions  and associate  the
+     context with it: */
   Mat A;
   MatCreateShell (PETSC_COMM_WORLD,
                   n, n, PETSC_DETERMINE, PETSC_DETERMINE,
                   ctx, &A);
-  return A;
-}
-
-
-static Mat mat_create (int n, void *ctx,
-                       Operation mat_mult,
-                       Destructor mat_destroy)
-{
-  /* Create  matrix shell  with  proper dimensions  and associate  the
-     context with it: */
-  Mat A = mat_create_shell (n, ctx);
 
   /* Set matrix operations: */
-  MatShellSetOperation (A, MATOP_MULT,
-                        (void (*)(void)) mat_mult);
-
-  MatShellSetOperation (A, MATOP_DESTROY,
-                        (void (*)(void)) mat_destroy);
+  MatShellSetOperation (A, MATOP_MULT, (void (*)(void)) mult);
+  MatShellSetOperation (A, MATOP_DESTROY, (void (*)(void)) destroy);
 
   return A;
 }
