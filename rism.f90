@@ -613,7 +613,6 @@ contains
       ! advertise  the   use  of  RBC   in  thermodynamic  integration
       ! procedure (RBC-TI) instead.
       dict = cons (cons (sym ("RBC-SCF"), num (e)), dict)
-
     end block
 
     block
@@ -636,7 +635,6 @@ contains
       print *, "# Self energy = ", se, " kcal/mol"
 
       dict = cons (cons (sym ("SELF-ENERGY"), num (se)), dict)
-
     end block
 
   contains
