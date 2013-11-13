@@ -693,6 +693,43 @@ contains
       ! Return the increment that vanishes at convergence:
       dt = dt - t
     end function iterate_t
+
+    function jacobian_t (t, dt) result (ddt)
+      !
+      ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
+      ! ... Implements procedure(func1).
+      !
+      use fft, only: fourier_rows, FT_FW, FT_BW
+      implicit none
+      real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
+      real (rk), intent (in) :: dt(:, :, :) ! (n, m, nrad)
+      real (rk) :: ddt(size (t, 1), size (t, 2), size (t, 3))
+      ! *** end of interface ***
+
+      ! In this  procedure the variable c_uvx has  a different meaning
+      ! than in iterate_t(). Here  it is a *differential* increment dc
+      ! of c due to t -> t + dt.
+      if (rbc) then
+         ! c_uvx = closure_rbc1 (method, beta, v_uvr, t, dt, expB)
+         stop "not implemented"
+      else
+         c_uvx = closure1 (method, beta, v_uvr, t, dt)
+      endif
+
+      ! Forward FT via DST:
+      c_uvx = fourier_rows (c_uvx) * (dr**3 / FT_FW)
+
+      ! OZ  equation,  involves   "convolutions",  take  care  of  the
+      ! normalization here.   As a  functional of c  this is  a linear
+      ! relation:
+      ddt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
+
+      ! Inverse FT via DST:
+      ddt = fourier_rows (ddt) * (dk**3 / FT_BW)
+
+      ! Return the increment that vanishes at convergence:
+      ddt = ddt - dt
+    end function jacobian_t
   end subroutine rism_uv
 
 
@@ -1635,6 +1672,28 @@ contains
   end function closure
 
 
+  elemental function closure1 (method, beta, v, t, dt) result (dc)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: beta, v, t, dt
+    real (rk) :: dc
+    ! *** end of interface ***
+
+    ! FIXME: the other two are not yet implemented:
+    select case (method)
+    case (HNC)
+       dc = closure_hnc1 (beta, v, t, dt)
+    ! case (KH)
+    !    dc = closure_kh1 (beta, v, t, dt)
+    ! case (PY)
+    !    dc = closure_py1 (beta, v, t, dt)
+    case default
+       dc = huge (dc)          ! FIXME: cannot abort in pure functions
+    end select
+  end function closure1
+
+
   elemental function expm1 (x) result (f)
     !
     ! Elemental version of libc expm1().
@@ -1668,6 +1727,17 @@ contains
     ! c = exp (-beta * v + t) - 1 - t
     c = expm1 (-beta * v + t) - t
   end function closure_hnc
+
+
+  elemental function closure_hnc1 (beta, v, t, dt) result (dc)
+    implicit none
+    real (rk), intent (in) :: beta, v, t, dt
+    real (rk) :: dc
+    ! *** end of interface ***
+
+    ! dc = [exp (-beta * v + t) - 1] dt
+    dc = expm1 (-beta * v + t) * dt
+  end function closure_hnc1
 
 
   !
