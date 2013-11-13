@@ -138,14 +138,14 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
 
       /* Self-made  matrix-free Jacobian  based  on the  user-supplied
          VecFunc2:  */
-      Mat J = jcreate (ctx, r0, dF); /* FIXME: should be local */
+      local Mat J = jcreate (ctx, r0, dF);
 
       /* Stuck it into SNES object: */
       SNESSetJacobian (snes, J, J, jupdate, ctx);
 
       /* Both  Mat  J  and  SNES  snes  should  have  incremented  the
          refcounts: */
-      MatDestroy (&J);          /* FIXME: should nullify J */
+      mat_destroy (&J);
       vec_destroy (&r0);
     }
   else
@@ -160,7 +160,7 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
         form-function.  The form-function has to already be associated
         with the SNES object, see above.
       */
-      Mat J;                    /* I guess we need to destroy it? */
+      local Mat J;              /* I guess we need to destroy it? */
       MatCreateSNESMF (snes, &J);
 
       /*
@@ -179,7 +179,7 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
         itself is performed by Mat J matrix shell.
       */
       SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
-      MatDestroy (&J);      /* I hope SNES saved a ref to that Mat? */
+      mat_destroy (&J);     /* I hope SNES saved a ref to that Mat? */
     }
 
   /* set atol, rtol, stol , its, fct. eval. */

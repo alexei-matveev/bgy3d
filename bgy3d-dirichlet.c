@@ -633,7 +633,7 @@ static PetscErrorCode mat_destroy_dir (Mat A)
 
   /* Only if the matrix was really used: */
   if (op->A)
-    MatDestroy (&op->A);         /* FIXME: take the address in 3.2 */
+    mat_destroy (&op->A);
 
   free (op);
 
@@ -650,13 +650,13 @@ static PetscErrorCode mat_mult_dir (Mat L, Vec v, Vec x)
   if (op->A == NULL)
     {
       /* I created you ... */
-      Mat B = lap_mat_create (op->da, op->h, &op->vol);
+      local Mat B = lap_mat_create (op->da, op->h, &op->vol);
 
-      op->A = mat_inverse (B);           /* MatDestroy() it! */
+      op->A = mat_inverse (B);  /* mat_destroy() it! */
 
       /* ...   so  I  will  destroy  you  too  (Mat  A  holds  another
          reference): */
-      MatDestroy (&B);
+      mat_destroy (&B);
     }
 
   /* Work vector to hold projection on the boundary: */
