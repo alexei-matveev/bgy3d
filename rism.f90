@@ -265,7 +265,7 @@ contains
 
 
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
-    use fft, only: fourier_rows, FT_FW, FT_BW, integrate
+    use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
@@ -467,7 +467,6 @@ contains
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site, verbosity
-    use fft, only: integrate
     use lisp, only: obj, cons, sym, num
     use options, only: getopt
     use units, only: pi, angstrom
@@ -940,7 +939,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_rows, FT_FW, integrate_array
+    use fft, only: fourier_rows, FT_FW, integral
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
@@ -1225,13 +1224,10 @@ contains
        end block
 
 
-       ! compute number integral
-       block
-
-          forall (i = 1:n, j = 1:m)
-              ni (i, j, :) = integrate_array (g(i, j, :)) * rho * dr**3
-          endforall
-       end block
+       ! Compute number integral
+       forall (i = 1:n, j = 1:m)
+          ni(i, j, :) = integral (g(i, j, :)) * (rho * dr**3)
+       end forall
 
        ! This prints a lot of data on tty!
        if (verb > 1) then

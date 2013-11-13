@@ -36,7 +36,7 @@ module fft
   public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
 ! public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: integrate           ! f(1:n) -> scalar
-  public :: integrate_array     ! f(1:n) -> g(1:n)
+  public :: integral            ! f(1:n) -> g(1:n)
   !
   ! *** END OF INTERFACE ***
   !
@@ -206,6 +206,8 @@ contains
 
     n = size (f)
 
+    ! Integrating backwards because we assume that f(r) -> 0 for large
+    ! r:
     g = 0.0
     do i = n, 1, -1
        g = g + f(i) * (2 * i - 1)**2 / 4
@@ -213,13 +215,18 @@ contains
     g = 4 * pi * g
   end function integrate
 
-  pure function integrate_array (f) result (g)
+
+  pure function integral (f) result (g)
     !
-    ! using the same integration algorithm as integrate(), but return
-    !                        x
-    ! an array as g(x) = 4π ∫ f(r)r²dr instead of a scalar g, here
-    !                        x₀
-    ! x₀ = 0.5 * dr, x = dr * (2 * i - 1) / 2 
+    ! Approximate  indefinite  integral  using  the  same  integration
+    ! algorithm as integrate():
+    !
+    !             R
+    !   g(R) = 4π ∫ f(r)r²dr
+    !             0
+    !
+    ! integral(f)  returns  an array  whereas  integrate(f) returns  a
+    ! scalar.
     !
     implicit none
     real (rk), intent (in) :: f(:)
@@ -227,18 +234,17 @@ contains
     ! *** end of interface ***
 
     integer :: i, n
+    real (rk) :: acc
 
     n = size (f)
 
+    ! Integrating forward for the lack of better ideas:
+    acc = 0.0
     do i = 1, n
-       if (i == 1) then
-          g(i) = f(i) * (2 * i - 1)**2 / 4
-       else
-          g(i) = g(i - 1) + f(i) * (2 * i - 1)**2 / 4
-       endif
+       acc = acc + 4 * pi * f(i) * (2 * i - 1)**2 / 4
+       g(i) = acc
     enddo
-    g = 4 * pi * g
-  end function integrate_array
+  end function integral
 
 
   subroutine dst_columns (f)
