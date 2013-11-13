@@ -149,38 +149,38 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
       vec_destroy (&r0);
     }
   else
-  {
-    /*
-      This has the same effect as specifying "-snes_mf" in the command
-      line.  We  do it  explicitly here in  order not to  require that
-      switch from the user. MF stays for Matrix-Free.
+    {
+      /*
+        This  has the  same  effect as  specifying  "-snes_mf" in  the
+        command  line.  We  do  it  explicitly here  in  order not  to
+        require that switch from the user. MF stays for Matrix-Free.
 
-      The  idea  is  that  matrix-vector products  with  Jacobian  are
-      computed   by   numerical   differentiation  of   the   original
-      form-function.  The  form-function has to  already be associated
-      with the SNES object, see above.
-    */
-    Mat J;                      /* I guess we need to destroy it? */
-    MatCreateSNESMF (snes, &J);
+        The  idea is  that  matrix-vector products  with Jacobian  are
+        computed   by  numerical   differentiation  of   the  original
+        form-function.  The form-function has to already be associated
+        with the SNES object, see above.
+      */
+      Mat J;                    /* I guess we need to destroy it? */
+      MatCreateSNESMF (snes, &J);
 
-    /*
-      Petsc provides a convenience  function for Jacobian update which
-      cooperates   with  the   matrix-free  Jacobian   J   created  by
-      MatCreateSNESMF() as above:
+      /*
+        Petsc  provides  a convenience  function  for Jacobian  update
+        which cooperates  with the  matrix-free Jacobian J  created by
+        MatCreateSNESMF() as above:
 
         PetscErrorCode
         MatMFFDComputeJacobian (SNES, Vec, Mat*, Mat*, MatStructure*, void*)
 
-      The  last argument is  a user  context for  Jacobian evaluation.
-      This function  is only  used to *update*  the Jacobian.   In the
-      matrix-free  case  an update  amounts  to  noting (copying)  the
-      location Vec  r at  which the Jacobian  J(r) is to  be evaluated
-      next time it is applied as  in J(r) * dr. The application itself
-      is performed by Mat J matrix shell.
-    */
-    SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
-    MatDestroy (&J);         /* I hope SNES saved a ref to that Mat? */
-  }
+        The last  argument is a user context  for Jacobian evaluation.
+        This function is  only used to *update* the  Jacobian.  In the
+        matrix-free  case an  update amounts  to noting  (copying) the
+        location Vec r  at which the Jacobian J(r)  is to be evaluated
+        next  time it  is applied  as in  J(r) *  dr.  The application
+        itself is performed by Mat J matrix shell.
+      */
+      SNESSetJacobian (snes, J, J, MatMFFDComputeJacobian, NULL);
+      MatDestroy (&J);      /* I hope SNES saved a ref to that Mat? */
+    }
 
   /* set atol, rtol, stol , its, fct. eval. */
   {
