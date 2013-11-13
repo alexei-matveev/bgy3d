@@ -642,7 +642,7 @@ contains
     function iterate_t (t) result (dt)
       !
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
-      ! ... Implements procedure(func1).
+      ! ... Implements procedure (func1).
       !
       use fft, only: fourier_rows, FT_FW, FT_BW
       implicit none
@@ -697,7 +697,7 @@ contains
     function jacobian_t (t, dt) result (ddt)
       !
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
-      ! ... Implements procedure(func1).
+      ! ... Implements procedure (func2).
       !
       use fft, only: fourier_rows, FT_FW, FT_BW
       implicit none
