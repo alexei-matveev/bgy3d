@@ -283,6 +283,9 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
 void bgy3d_snes_picard (const ProblemData *PD, void *ctx,
                         VecFunc1 F, VecFunc2 dF, Vec x)
 {
+  if (dF)
+    fprintf (stderr, "bgy3d_snes_picard: Warning: not using Jacobian!");
+
   /* Mixing parameter */
   const real lambda = PD->lambda;
 
@@ -334,6 +337,9 @@ void bgy3d_snes_trial (const ProblemData *PD, void *ctx,
 void bgy3d_snes_jager (const ProblemData *PD, void *ctx,
                        VecFunc1 F, VecFunc2 dF, Vec x)
 {
+  if (dF)
+    fprintf (stderr, "bgy3d_snes_jager: Warning: not using Jacobian!");
+
   /* Mixing parameter */
   const real lambda = PD->lambda;
 
