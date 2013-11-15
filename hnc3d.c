@@ -764,7 +764,8 @@ void hnc3d_solvent_solve (const ProblemData *PD,
           .w_fft = (void*) w_fft,           /* in */
         };
 
-      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t2, T);
+      /* FIXME: no Jacobian yet! */
+      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t2, NULL, T);
     }
 
     /* Free local stuff */
@@ -1413,7 +1414,8 @@ void hnc3d_solute_solve (const ProblemData *PD,
           .t_fft = t_fft,             /* [m], work for t(c(t))) */
         };
 
-      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, T);
+      /* FIXME: no Jacobian yet! */
+      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, NULL, T);
     }
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);

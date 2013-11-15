@@ -10,19 +10,20 @@
 #include "bgy3d-snes.h"         /* VecFunc1, ArrFunc1 */
 
 
-void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
+void bgy3d_snes_default (const ProblemData *PD, void *ctx,
+                         VecFunc1 F, VecFunc2 dF, Vec x)
 {
   char solver[20] = "newton";
   bgy3d_getopt_string ("--snes-solver", sizeof solver, solver);
 
   if (strcmp (solver, "newton") == 0)
-    bgy3d_snes_newton (PD, ctx, F, NULL, x); /* No Jacobian */
+    bgy3d_snes_newton (PD, ctx, F, dF, x);
   else if (strcmp (solver, "picard") == 0)
-    bgy3d_snes_picard (PD, ctx, F, x);
+    bgy3d_snes_picard (PD, ctx, F, dF, x);
   else if (strcmp (solver, "jager") == 0)
-    bgy3d_snes_jager (PD, ctx, F, x);
+    bgy3d_snes_jager (PD, ctx, F, dF, x);
   else if (strcmp (solver, "trial") == 0)
-    bgy3d_snes_trial (PD, ctx, F, x);
+    bgy3d_snes_trial (PD, ctx, F, dF, x);
   else
     {
       PetscPrintf (PETSC_COMM_WORLD, "No such SNES solver: %s\n", solver);
@@ -279,7 +280,8 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
   SNESDestroy (&snes);
 }
 
-void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
+void bgy3d_snes_picard (const ProblemData *PD, void *ctx,
+                        VecFunc1 F, VecFunc2 dF, Vec x)
 {
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -314,21 +316,23 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
 }
 
 
-void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
+void bgy3d_snes_trial (const ProblemData *PD, void *ctx,
+                       VecFunc1 F, VecFunc2 dF, Vec x)
 {
   /* First do a few "slow" iterations: */
   {
     ProblemData pd = *PD;       /* modify a copy, not the original */
     pd.max_iter = 100;
     pd.lambda = 0.02;
-    bgy3d_snes_picard (&pd, ctx, F, x);
+    bgy3d_snes_picard (&pd, ctx, F, dF, x);
   }
   /* Then continue with Newton: */
-  bgy3d_snes_newton (PD, ctx, F, NULL, x); /* No Jacobian */
+  bgy3d_snes_newton (PD, ctx, F, dF, x);
 }
 
 
-void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x)
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx,
+                       VecFunc1 F, VecFunc2 dF, Vec x)
 {
   /* Mixing parameter */
   const real lambda = PD->lambda;
@@ -493,9 +497,9 @@ void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
 
   /* Petsc does real work: */
   if (df)
-    bgy3d_snes_newton (&pd, ctx, F, dF, x);
+    bgy3d_snes_default (&pd, ctx, F, dF, x);
   else
-    bgy3d_snes_default (&pd, ctx, F, x); /* dF is never NULL */
+    bgy3d_snes_default (&pd, ctx, F, NULL, x); /* dF is never NULL */
 
   vec_destroy (&x);       /*  should  not free() */
 }

@@ -37,11 +37,17 @@ void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n]);
   context,  initial guess,  and some  user input  eventually affecting
   convergence criteria:
 */
-void bgy3d_snes_default (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x);
+void bgy3d_snes_default (const ProblemData *PD, void *ctx,
+                         VecFunc1 F, VecFunc2 dF, Vec x);
 
 void bgy3d_snes_newton (const ProblemData *PD, void *ctx,
                         VecFunc1 F, VecFunc2 dF, Vec x);
 
-void bgy3d_snes_picard (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x);
-void bgy3d_snes_jager (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x);
-void bgy3d_snes_trial (const ProblemData *PD, void *ctx, VecFunc1 F, Vec x);
+void bgy3d_snes_picard (const ProblemData *PD, void *ctx,
+                        VecFunc1 F, VecFunc2 dF, Vec x);
+
+void bgy3d_snes_jager (const ProblemData *PD, void *ctx,
+                       VecFunc1 F, VecFunc2 dF, Vec x);
+
+void bgy3d_snes_trial (const ProblemData *PD, void *ctx,
+                       VecFunc1 F, VecFunc2 dF, Vec x);
