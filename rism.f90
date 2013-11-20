@@ -1363,6 +1363,53 @@ contains
   end function omega_fourier
 
 
+  function omega_fourier1 (sites, k, n, dx) result (dw)
+    !
+    ! Differential of ω(k) in response do displacment dx of site n.
+    !
+    use foreign, only: site
+    use bessel, only: j1
+    implicit none
+    type (site), intent (in) :: sites(:) ! (m)
+    real (rk), intent (in) :: k(:)       ! (nrad)
+    integer, intent (in) :: n            ! moving site
+    real (rk), intent (in) :: dx(3)      ! site displacement
+    real (rk) :: dw(size (sites), size (sites), size (k)) ! (m, m, nrad)
+    ! *** end of inteface ***
+
+    real (rk) :: xa(3), xb(3), xab(3), rab, drab
+    integer :: i, m
+
+    m = size (sites)
+
+    ! Only  the the  n-th row  and n-th  column of  the matrix  dω are
+    ! non-zero.  The diagonal element at  (n, n) is zero though (since
+    ! diagonal elements  of ω are  1, their derivative is  zero).  All
+    ! other elements vanish:
+    dw(:, :, :) = 0.0
+
+    ! Coordinates of the moving site:
+    xa = sites(n) % x
+
+    ! Loop over other sites, i /= n:
+    do i = 1, m
+       if (i == n) cycle
+
+       xb = sites(i) % x
+
+       xab = xa - xb
+       rab = norm2 (xab)
+       drab = dot_product (xab, dx) / rab
+
+       ! d/dx j0(x) = -j1(x):
+       dw(i, n, :) = -j1 (k * rab) * k * drab
+
+       ! The matrix and its differential are symmetric:
+       dw(n, i, :) = dw(i, n, :)
+    enddo
+  end function omega_fourier1
+
+
   subroutine force_field (asites, bsites, r, k, vr, vk)
     !
     ! Force field  is represented by two contributions,  the first one
