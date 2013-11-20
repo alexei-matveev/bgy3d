@@ -54,13 +54,13 @@ WITH_FORTRAN = 1
 #
 # shared = 1
 
-USERFLAGS = -DFFT_FFTW
-USERFLAGS += -DL_BOUNDARY
-#USERFLAGS += -DH2O
-#USERFLAGS += -DCS2
-#USERFLAGS += -DPROPANE
-#USERFLAGS += -DN2
-USERFLAGS += -DHCl
+USR-FLAGS = -DFFT_FFTW
+USR-FLAGS += -DL_BOUNDARY
+# USR-FLAGS += -DH2O
+# USR-FLAGS += -DCS2
+# USR-FLAGS += -DPROPANE
+# USR-FLAGS += -DN2
+USR-FLAGS += -DHCl
 
 # Path to sources
 srcdir = .
@@ -68,7 +68,7 @@ srcdir = .
 # Compiler and compiler options
 CC       = gcc
 FC       = gfortran
-CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USERFLAGS)
+CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USR-FLAGS)
 FFLAGS = -g -std=f2008 -Wall -O3 $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
 LDFLAGS  = $(OMP-FLAGS)
 
@@ -123,7 +123,7 @@ ifeq ($(WITH_GUILE),1)
 	c-objs += bgy3d-guile.o
 	LIBS += $(shell guile-config link)
 	INCDIRS += $(shell guile-config compile)
-	USERFLAGS += -DWITH_GUILE
+	USR-FLAGS += -DWITH_GUILE
 endif
 
 
@@ -151,7 +151,7 @@ ifeq ($(WITH_FORTRAN),1)
 		kinds.o \
 		lebed/lebed.o \
 		lebed/Lebedev-Laikov.o
-	USERFLAGS += -DWITH_FORTRAN
+	USR-FLAGS += -DWITH_FORTRAN
 endif
 
 OBJECTS = bgy3d-main.o
