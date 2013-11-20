@@ -1,6 +1,7 @@
 module bessel
   !
-  ! One of the many equivalent expresssions:
+  ! One of  the many equivalent expresssions for  the spherical Bessel
+  ! functions:
   !
   !               n  / 1  d \ n  sin(x)
   !   j (x) = (-x)  (  - --- )   ------
@@ -15,6 +16,12 @@ module bessel
   !                                                    3
   !   j (x) = (sin(x) / x - cos(x)) / x  ~  x / 3 + o(x )
   !    1
+  !
+  ! Note that
+  !
+  !    d
+  !   --- j (x) = -j (x)
+  !    dx  0        1
   !
   use kinds, only: rk
   implicit none
