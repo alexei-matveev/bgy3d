@@ -1322,7 +1322,7 @@ contains
   end subroutine post_process
 
 
-  function omega_fourier (sites, k) result (w_vvk)
+  function omega_fourier (sites, k) result (w)
     !
     ! The  intra-molecular force-field  amounts to  rigid  bonds. This
     ! function computes the Fourier representation
@@ -1336,9 +1336,9 @@ contains
     use foreign, only: site
     use bessel, only: j0
     implicit none
-    type (site), intent (in) :: sites(:)                  ! (m)
-    real (rk), intent (in) :: k(:)                        ! (nrad)
-    real (rk) :: w_vvk(size (sites), size (sites), size (k)) ! (m, m, nrad)
+    type (site), intent (in) :: sites(:)                 ! (m)
+    real (rk), intent (in) :: k(:)                       ! (nrad)
+    real (rk) :: w(size (sites), size (sites), size (k)) ! (m, m, nrad)
     ! *** end of inteface ***
 
     real (rk) :: xa(3), xb(3), rab
@@ -1357,7 +1357,7 @@ contains
           rab = norm2 (xa - xb)
 
           ! Rigid bond correlation on a k-grid:
-          w_vvk(i, j, :) = j0 (k * rab)
+          w(i, j, :) = j0 (k * rab)
        enddo
     enddo
   end function omega_fourier
