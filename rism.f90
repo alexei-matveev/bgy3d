@@ -221,7 +221,7 @@ contains
     ! call print_info (rho = pd % rho, beta = pd % beta)
 
     block
-       ! Indirect correlation γ aka t = h - c:
+       ! Indirect correlation t = h - c aka γ (hence the name):
        real (rk) :: gam(size (solvent), size (solvent), nrad)
 
        ! Solvent susceptibility χ = ω + ρh:
@@ -1712,11 +1712,10 @@ contains
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
   ! correlation function c  in real space.  See OZ  equation below for
   ! the   second  relation   between  two   unknowns.    The  indirect
-  ! correlation γ = h - c is denoted by latin "t" in other sources. We
-  ! will  use  that to  avoid  greek  identifiers  and confusion  with
-  ! distribution functions:
+  ! correlation t = h - c is denoted by greek "γ" in other sources. We
+  ! will avoid greek identifiers utill better times.
   !
-  !   c := exp (-βv + γ) - 1 - γ
+  !   c = exp (-βv + t) - 1 - t
   !
   elemental function closure_hnc (beta, v, t) result (c)
     implicit none
@@ -1789,9 +1788,9 @@ contains
 
 
   ! 3)  Percus-Yevick  (PY)   closure  relation  between  direct-  and
-  ! indirect correlation c and γ:
+  ! indirect correlation c and t:
   !
-  !   c := exp (-βv) [1 + γ] - 1 - γ
+  !   c := exp (-βv) [1 + t] - 1 - t
   elemental function closure_py (beta, v, t) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t
@@ -1821,7 +1820,7 @@ contains
   !
   ! HNC closure with repulsive bridge correction:
   !
-  !    c := exp (-βv + γ + B) - 1 - γ
+  !    c := exp (-βv + t + B) - 1 - t
   !
   elemental function closure_hnc_rbc (beta, v, t, expB) result (c)
     implicit none
@@ -1837,10 +1836,10 @@ contains
   !
   !   h = c + ρ c * h
   !
-  ! to compute γ =  h - c form c:
+  ! to compute t =  h - c form c:
   !
   !                -1                -1   2
-  !   γ =  (1 - ρc)   c - c = (1 - ρc)  ρc
+  !   t =  (1 - ρc)   c - c = (1 - ρc)  ρc
   !
   ! If you scale c by h3 beforehand  or pass rho' = rho * h3 and scale
   ! the result  by h3 in addition,  you will compute  exactly what the
