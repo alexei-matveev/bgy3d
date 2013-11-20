@@ -1684,8 +1684,8 @@ contains
     select case (method)
     case (HNC)
        dc = closure_hnc1 (beta, v, t, dt)
-    ! case (KH)
-    !    dc = closure_kh1 (beta, v, t, dt)
+    case (KH)
+       dc = closure_kh1 (beta, v, t, dt)
     ! case (PY)
     !    dc = closure_py1 (beta, v, t, dt)
     case default
@@ -1739,27 +1739,13 @@ contains
     dc = expm1 (-beta * v + t) * dt
   end function closure_hnc1
 
-
   !
-  ! For x <= 0 the same as exp(x) - 1, but does not grow exponentially
-  ! for positive x:
+  ! 2)  Kovalenko-Hirata (KH)  closure.   Same as  HNC in  "depletion"
+  ! regions but avoids exponential grows:
   !
-  elemental function lexpm1 (x) result (y)
-    implicit none
-    real (rk), intent (in) :: x
-    real (rk) :: y
-    ! *** end of interface ***
-
-    if (x <= 0.0) then
-       y = expm1 (x)
-    else
-       y = x
-    endif
-  end function lexpm1
-
-
-  !
-  ! 2) Kovalenko-Hirata (KH) closure.
+  !        / exp (-βv + t) - 1 - t, if -βv + t <= 0
+  !   c = <
+  !        \ -βv, otherwise
   !
   elemental function closure_kh (beta, v, t) result (c)
     implicit none
@@ -1767,9 +1753,39 @@ contains
     real (rk) :: c
     ! *** end of interface ***
 
-    ! Note that lexpm1() /= expm1():
-    c = lexpm1 (-beta * v + t) - t
+    real (rk) :: x
+
+    x = -beta * v + t
+
+    ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
+    ! positive x:
+    if (x <= 0.0) then
+       c = expm1 (x) - t
+    else
+       c = -beta * v
+    endif
   end function closure_kh
+
+
+  elemental function closure_kh1 (beta, v, t, dt) result (dc)
+    implicit none
+    real (rk), intent (in) :: beta, v, t, dt
+    real (rk) :: dc
+    ! *** end of interface ***
+
+    real (rk) :: x
+
+    x = -beta * v + t
+
+    ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
+    ! positive x:
+    if (x <= 0.0) then
+       ! dc = [exp (-beta * v + t) - 1] dt
+       dc = expm1 (x) * dt
+    else
+       dc = 0.0
+    endif
+  end function closure_kh1
 
 
   ! 3)  Percus-Yevick  (PY)   closure  relation  between  direct-  and
