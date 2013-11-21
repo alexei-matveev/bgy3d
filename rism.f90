@@ -802,7 +802,7 @@ contains
       ! representation).
       w = omega_fourier (solvent, k)
 
-      ! Repulsive part of LJ potential goes to f(:, i, j). First index
+      ! Repulsive part of LJ potential goes to f(i, j, :). First index
       ! is that of a solute site  i, second index is of a solvent site
       ! j:
       call lj_repulsive (solute, solvent, r, f)
