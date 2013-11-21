@@ -1331,6 +1331,33 @@ Uranyl, TIP3P   2.4199     11.0207   3.1426      0.0099       5.0823
 Uranyl, PM13    2.4121     10.8627   3.1387      0.0066       4.8429
 --------------------------------------------------------------------
 
+Note that for two water models above, the number integral of first shell
+differs with the magnitude of 1. Remembering that we used different
+finite-size parameters for hydrogen in two models, especially, $\sigma$
+in our TIP3P water is 0.4 \AA and it is 1.0 \AA in SPC/E model. By only
+exchanging the value of $\sigma$, we can see the changes to number
+integral.
+
+SPC/E water ($\sigma$ = 0.4 \AA):
+
+                r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
+-------------  -------  ----------  -------  ----------  -----------
+Uranyl, GW96    2.4824     10.5536   3.2051      0.0124       5.2674
+Uranyl, SPC     2.4160     11.3030   3.1387      0.0091       5.1536
+Uranyl, TIP3P   2.4239     11.0978   3.1504      0.0098       5.1440
+Uranyl, PM13    2.4161     10.9357   3.1465      0.0066       4.9035
+--------------------------------------------------------------------
+
+TIP3P water ($\sigma$ = 1.0 \AA):
+
+                r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
+-------------  -------  ----------  -------  ----------  -----------
+Uranyl, GW96    2.4824     12.1588   3.2285      0.0137       6.1451
+Uranyl, SPC     2.4160     13.0401   3.1621      0.0103       6.0301
+Uranyl, TIP3P   2.4238     12.7981   3.1699      0.0111       6.0152
+Uranyl, PM13    2.4160     12.5927   3.1699      0.0070       5.6963
+--------------------------------------------------------------------
+
 
 Water moleule
 =============
