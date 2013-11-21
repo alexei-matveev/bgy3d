@@ -637,27 +637,8 @@ contains
       dict = acons (sym ("RBC-SCF"), num (e), dict)
     end block
 
-    block
-      real (rk) :: se
-      integer :: spec(n), i
-
-      ! Get  species ID.   Sites belong  to  the same  species if  the
-      ! distance  is below  some fixed  value. FIXME:  here  a literal
-      ! constant:
-      spec = identify_species (solute, 2.0 * angstrom)
-
-      if (verbosity > 1) then
-         do i = 1, n
-            print *, solute(i) % name, spec(i)
-         enddo
-      endif
-
-      se = self_energy (solute, spec)
-
-      print *, "# Self energy = ", se, " kcal/mol"
-
-      dict = acons (sym ("SELF-ENERGY"), num (se), dict)
-    end block
+    ! Adds an entry with self energy to the dictionary:
+    call guess_self_energy (solute, dict)
 
   contains
 
@@ -767,6 +748,40 @@ contains
       ddt = ddt - dt
     end function jacobian_t
   end subroutine rism_uv
+
+
+  subroutine guess_self_energy (solute, dict)
+    !
+    ! Adds an entry with self energy to the dictionary.
+    !
+    use foreign, only: site, verbosity
+    use lisp, only: obj, acons, sym, num
+    use units, only: kcal, angstrom
+    implicit none
+    type (site), intent (in) :: solute(:) ! (n)
+    type (obj), intent (inout) :: dict
+    ! *** end of interface ***
+
+    real (rk) :: e
+    integer :: spec(size (solute)), i
+
+    ! Get  species  ID.  Sites  belong  to  the  same species  if  the
+    ! distance  is  below some  fixed  value.  FIXME:  here a  literal
+    ! constant:
+    spec = identify_species (solute, 2.0 * angstrom)
+
+    if (verbosity > 1) then
+       do i = 1, size (solute)
+          print *, solute(i) % name, spec(i)
+       enddo
+    endif
+
+    e = self_energy (solute, spec)
+
+    print *, "# Self energy = ", e / kcal, " kcal/mol"
+
+    dict = acons (sym ("SELF-ENERGY"), num (e), dict)
+  end subroutine guess_self_energy
 
 
   subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
