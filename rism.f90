@@ -2037,24 +2037,29 @@ contains
   end function oz_vv_equation_c_t_MxM
 
 
+  !
+  ! RISM equation, here for h and c:
+  !
+  !   h   =  ω  * c   * [ω + ρ h  ]
+  !    uv     u    uv     v     vv
+  !
+  ! The term is square brackets  is the solvent property (fixed by the
+  ! assumption of the infinite dilution)  and is passed as the solvent
+  ! susceptibility
+  !
+  !   χ   =  ω + ρ h
+  !    vv     v     vv
+  !
+  ! The first of the two functions returns the indirect correlation
+  !
+  !   t   =  h  -  c
+  !    uv     uv    uv
+  !
+  ! whereas the second returns the direct correlation h = t + c.
+  !
   function oz_uv_equation_c_t (c_uvk, w_uuk, x_vvk) result (t_uvk)
     !
-    ! RISM equation, here for h and c:
-    !
-    !   h   =  ω  * c   * [ω + ρ h  ]
-    !    uv     u    uv     v     vv
-    !
-    ! The term  is square brackets  is the solvent property  (fixed by
-    ! the assumption  of the infinite  dilution) and is passed  as the
-    ! solvent susceptibility
-    !
-    !   χ   =  ω + ρ h
-    !    vv     v     vv
-    !
-    ! The returned value is the indirect correlation
-    !
-    !   t   =  h  -  c
-    !    uv     uv    uv
+    ! Solute-solvent OZ: c -> t
     !
     implicit none
     real (rk), intent (in) :: c_uvk(:, :, :) ! (n, m, nrad)
@@ -2077,6 +2082,29 @@ contains
     enddo
     !$omp end parallel do
   end function oz_uv_equation_c_t
+
+
+  function oz_uv_equation_c_h (c_uvk, w_uuk, x_vvk) result (h_uvk)
+    !
+    ! Solute-solvent OZ: c -> h
+    !
+    implicit none
+    real (rk), intent (in) :: c_uvk(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: w_uuk(:, :, :) ! (n, n, nrad)
+    real (rk), intent (in) :: x_vvk(:, :, :) ! (m, m, nrad)
+    real (rk) :: h_uvk(size (c_uvk, 1), size (c_uvk, 2), size (c_uvk, 3))
+    ! *** end of interface ***
+
+    integer :: k
+
+    !$omp parallel do
+    do k = 1, size (c_uvk, 3)
+       associate (uv => c_uvk(:, :, k), uu => w_uuk(:, :, k), vv => x_vvk(:, :, k))
+         h_uvk(:, :, k) = matmul (uu, matmul (uv, vv))
+       end associate
+    enddo
+    !$omp end parallel do
+  end function oz_uv_equation_c_h
 
 
   subroutine print_info (rho, beta)
