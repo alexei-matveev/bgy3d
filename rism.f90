@@ -2321,22 +2321,12 @@ contains
   !     Chem.  B, 2005, 109 (36), pp 17290–17295,
   !     http://dx.doi.org/10.1021/jp053259i
   !
-  function chempot_density (method, rho, h, cs, cl) result (mu)
-    !
-    ! Returns the β-scaled density of the chemical potential, βμ(r).
-    !
+  function threshold (method) result (thresh)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
-    integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
-    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
-    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
-    real (rk) :: mu(size (h, 3))
+    integer, intent (in) :: method ! HNC, KH, or anything else
+    real (rk) :: thresh
     ! *** end of interface ***
-
-    integer :: p, i, j
-    real (rk) :: muH, muS, muL, thresh
 
     select case (method)
     case (KH)
@@ -2349,6 +2339,27 @@ contains
        ! There is no h² term otherwise (GF):
        thresh = huge (thresh)
     end select
+  end function threshold
+
+
+  function chempot_density (method, rho, h, cs, cl) result (mu)
+    !
+    ! Returns the β-scaled density of the chemical potential, βμ(r).
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rho
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: mu(size (h, 3))
+    ! *** end of interface ***
+
+    integer :: p, i, j
+    real (rk) :: muH, muS, muL, thresh
+
+    ! The h² term contributes conditionally:
+    thresh = threshold (method)
 
     do p = 1, size (h, 3)       ! nrad
        muH = 0.0
