@@ -2342,7 +2342,7 @@ contains
   end function threshold
 
 
-  function chempot_density (method, rho, h, cs, cl) result (mu)
+  function chempot_density (method, rho, h, c, cl) result (mu)
     !
     ! Returns the β-scaled density of the chemical potential, βμ(r).
     !
@@ -2350,41 +2350,38 @@ contains
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
     real (rk) :: mu(size (h, 3))
     ! *** end of interface ***
 
-    integer :: p, i, j
-    real (rk) :: muH, muS, muL, thresh
+    integer :: i, j, p
+    real (rk) :: thresh, acc
 
-    ! The h² term contributes conditionally:
+    ! The   h²  term   contributes  conditionally.   Eventually,  only
+    ! depletion  regions  (h  <  0)  contribute  (KH).   Threshold  is
+    ! supposed  to  be  0.0   for  KH  functional  (depletion  regions
+    ! contribute),  anywhere between 1  and +∞  for GF  functional (no
+    ! such   term)   and    -∞   for   HNC   functional   (contributes
+    ! unconditionally):
     thresh = threshold (method)
-
     do p = 1, size (h, 3)       ! nrad
-       muH = 0.0
-       muS = 0.0
-       muL = 0.0
+       acc = 0.0
        do j = 1, size (h, 2)    ! m
           do i = 1, size (h, 1) ! n
-             ! The h² term contributes conditionally. Eventually, only
-             ! depletion regions  (h < 0)  contribute (KH).  Threshold
-             ! is  supposed to  be  0.0 for  KH functional  (depletion
-             ! regions contribute),  anywhere between 1 and  +∞ for GF
-             ! functional  (no such  term) and  -∞ for  HNC functional
-             ! (contributes unconditionally):
-             if (-h(i, j, p) > thresh) then
-                muH = muH + rho * h(i, j, p)**2 / 2
-             endif
-
-             muS = muS + rho * (-cs(i, j, p) - h(i, j, p) * cs(i, j, p) / 2)
-             muL = muL + rho * (             - h(i, j, p) * cl(i, j, p) / 2)
+             associate (h => h(i, j, p), c => c(i, j, p), cl => cl(i, j, p))
+               if (-h > thresh) then
+                  acc = acc + h**2 / 2
+               endif
+               acc = acc - c - h * (c + cl) / 2
+             end associate
           enddo
        enddo
 
-       mu(p) = muH + muS + muL
+       mu(p) = rho * acc
     enddo
   end function chempot_density
+
 
   function chempot (method, rho, h, cs, cl) result (mu)
     !
