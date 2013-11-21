@@ -178,7 +178,7 @@ contains
     !
     use foreign, only: problem_data, site, bgy3d_problem_data_print, &
          verbosity, comm_rank
-    use lisp, only: obj, nil, cons, sym
+    use lisp, only: obj, nil, acons, sym
     use drism, only: epsilon_rism
     implicit none
     type (problem_data), intent (in) :: pd
@@ -255,9 +255,9 @@ contains
        endif
 
        if (present (dict)) then
-          dict = cons (cons (sym ("solvent"), vdict), nil)
+          dict = acons (sym ("solvent"), vdict, nil)
           if (uv) then
-             dict = cons (cons (sym ("solute"), udict), dict)
+             dict = acons (sym ("solute"), udict, dict)
           endif
        endif
     end block
@@ -482,7 +482,7 @@ contains
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site, verbosity
-    use lisp, only: obj, cons, sym, num
+    use lisp, only: obj, acons, sym, num
     use options, only: getopt
     use units, only: angstrom
     implicit none
@@ -601,7 +601,7 @@ contains
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
       ! collection. Note that the correction is "wrong" when RDFs were
       ! obtained in an SCF procedure with rbc == .true.
-      dict = cons (cons (sym ("RBC-TPT"), num (e)), dict)
+      dict = acons (sym ("RBC-TPT"), num (e), dict)
 
       ! II. Call closure with RBC TPT correction: h = c + t
       h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
@@ -622,7 +622,7 @@ contains
       ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
       ! advertise  the   use  of  RBC   in  thermodynamic  integration
       ! procedure (RBC-TI) instead.
-      dict = cons (cons (sym ("RBC-SCF"), num (e)), dict)
+      dict = acons (sym ("RBC-SCF"), num (e), dict)
     end block
 
     block
@@ -644,7 +644,7 @@ contains
 
       print *, "# Self energy = ", se, " kcal/mol"
 
-      dict = cons (cons (sym ("SELF-ENERGY"), num (se)), dict)
+      dict = acons (sym ("SELF-ENERGY"), num (se), dict)
     end block
 
   contains
@@ -1002,7 +1002,7 @@ contains
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    use lisp, only: obj, cons, nil, sym, num
+    use lisp, only: obj, acons, nil, sym, num
     use units, only: pi, EPSILON0INV, KCAL, KJOULE
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
@@ -1119,7 +1119,7 @@ contains
              mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
-             dict = cons (cons (sym (trim (names(i))), num (mu(i))), dict)
+             dict = acons (sym (trim (names(i))), num (mu(i)), dict)
           enddo
 
           if (verb > 0) then
