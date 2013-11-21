@@ -264,13 +264,33 @@ contains
   end subroutine main
 
 
+  subroutine mkgrid (rmax, r, dr, k, dk)
+    use units, only: pi
+    implicit none
+    real (rk), intent (in) :: rmax
+    real (rk), intent (out) :: r(:), dr, k(:), dk ! (nrad)
+    ! *** end of interface ***
+
+    integer :: i, nrad
+
+    nrad = size (r)
+
+    ! dr * dk = 2π/2n:
+    dr = rmax / nrad
+    dk = pi / rmax
+    forall (i = 1:nrad)
+       r(i) = (2 * i - 1) * dr / 2
+       k(i) = (2 * i - 1) * dk / 2
+    end forall
+  end subroutine mkgrid
+
+
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
     use lisp, only: obj
-    use units, only: pi
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
     implicit none
@@ -294,7 +314,7 @@ contains
     real (rk) :: r(nrad), dr
     real (rk) :: k(nrad), dk
 
-    integer :: i, m
+    integer :: m
 
     real (rk) :: eps        ! zero if not supplied in the command line
     real (rk) :: A          ! Cummings & Stell factor [CS81]
@@ -336,13 +356,8 @@ contains
 
     m = size (sites)
 
-    ! dr * dk = 2π/2n:
-    dr = rmax / nrad
-    dk = pi / rmax
-    forall (i = 1:nrad)
-       r(i) = (2 * i - 1) * dr / 2
-       k(i) = (2 * i - 1) * dk / 2
-    end forall
+    ! Prepare grid, dr * dk = 2π/2n:
+    call mkgrid (rmax, r, dr, k, dk)
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
@@ -392,7 +407,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, beta, rho, sites, sites, dr, dk, vr, t, &
+    call post_process (method, rmax, beta, rho, sites, sites, vr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
   contains
@@ -469,7 +484,7 @@ contains
     use foreign, only: site, verbosity
     use lisp, only: obj, cons, sym, num
     use options, only: getopt
-    use units, only: pi, angstrom
+    use units, only: angstrom
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -493,19 +508,14 @@ contains
     real (rk) :: r(nrad), dr
     real (rk) :: k(nrad), dk
 
-    integer :: i, m, n
+    integer :: m, n
     logical rbc
 
     n = size (solute)
     m = size (solvent)
 
-    ! dr * dk = 2π/2n:
-    dr = rmax / nrad
-    dk = pi / rmax
-    forall (i = 1:nrad)
-       r(i) = (2 * i - 1) * dr / 2
-       k(i) = (2 * i - 1) * dk / 2
-    end forall
+    ! Prepare grid, dr * dk = 2π/2n:
+    call mkgrid (rmax, r, dr, k, dk)
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
@@ -533,7 +543,7 @@ contains
     call snes_default (t_uvx, iterate_t)
 
     ! Done with it, print results:
-    call post_process (method, beta, rho, solvent, solute, dr, dk, v_uvr, t_uvx, &
+    call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     !
@@ -983,7 +993,7 @@ contains
   end subroutine lj_repulsive
 
 
-  subroutine post_process (method, beta, rho, solvent, solute, dr, dk, v, t, &
+  subroutine post_process (method, rmax, beta, rho, solvent, solute, v, t, &
        A, eps, dict, rbc)
     !
     ! Prints some results.
@@ -998,11 +1008,11 @@ contains
          epsilon_rism, dipole_factor, dipole_correction
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
+    real (rk), intent (in) :: rmax         ! grid length
     real (rk), intent (in) :: beta         ! inverse temperature
     real (rk), intent (in) :: rho
     type (site), intent (in) :: solvent(:) ! (m)
     type (site), intent (in) :: solute(:)  ! (n)
-    real (rk), intent (in) :: dr, dk       ! grid steps
     real (rk), intent (in) :: v(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: t(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: A            ! long-range scaling factor
@@ -1062,7 +1072,7 @@ contains
 
     block
        integer :: p, i, j
-       real (rk) :: r(nrad), k(nrad)
+       real (rk) :: r(nrad), k(nrad), dr, dk
        real (rk) :: c(n, m, nrad)
        real (rk) :: cl(n, m, nrad)
        real (rk) :: h(n, m, nrad)
@@ -1072,12 +1082,8 @@ contains
        real (rk) :: expB(n, m, nrad)
        real (rk) :: ni(n, m, nrad) ! number integral
 
-       ! Dont like to pass redundant  info, recompute r(:) from dr and
-       ! k(:) from dk:
-       forall (i = 1:nrad)
-          r(i) = (2 * i - 1) * dr / 2
-          k(i) = (2 * i - 1) * dk / 2
-       end forall
+       ! Dont like to pass redundant info, recompute grid from rmax:
+       call mkgrid (rmax, r, dr, k, dk)
 
        ! For the same reason recomute c and g:
        if (rbc) then
