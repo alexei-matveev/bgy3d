@@ -560,8 +560,8 @@ contains
 
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
-    call bridge_correction (rbc, method, rmax, beta, rho, solute, solvent, &
-         v_uvr, t_uvx, dict)
+    call bridge_correction (method, rmax, beta, rho, solute, solvent, &
+         v_uvr, t_uvx, dict=dict, rbc=rbc)
 
     ! Adds an entry with self energy to the dictionary:
     call guess_self_energy (solute, dict)
@@ -742,15 +742,14 @@ contains
   !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
   !   http://dx.doi.org/10.1063/1.1305885
   !
-  subroutine bridge_correction (rbc, method, rmax, beta, rho, &
-       solute, solvent, v, t, dict)
+  subroutine bridge_correction (method, rmax, beta, rho, &
+       solute, solvent, v, t, dict, rbc)
     !
     ! Compute the bridge correction using TPT.
     !
     use foreign, only: site, verbosity
     use lisp, only: obj, acons, sym, num
     implicit none
-    logical, intent (in) :: rbc
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
     type (site), intent (in) :: solute(:)  ! (n)
@@ -758,6 +757,7 @@ contains
     real (rk), intent (in) :: v(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: t(:, :, :)   ! (n, m, nrad)
     type (obj), intent (inout) :: dict
+    logical, intent (in) :: rbc
     ! *** end of interface ***
 
     integer :: n, m, nrad
@@ -1077,7 +1077,7 @@ contains
     real (rk), intent (in) :: A            ! long-range scaling factor
     real (rk), value :: eps     ! requested dielectric constant, or 0
     type (obj), intent (out) :: dict
-    logical, value :: rbc
+    logical, intent (in) :: rbc
     ! *** end of interface ***
 
     integer :: nrad, n, m
