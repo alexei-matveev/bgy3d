@@ -2267,57 +2267,63 @@ contains
     end function poly
   end subroutine print_info
 
+
+  !
+  ! Chemical Potential (ChemPot).
+  !
+  ! The next function, chempot_density(), returns the β-scaled density
+  ! of  the chemical  potential, βμ(r).   To get  the  excess chemical
+  ! potential integrate it over the volume and divide by β, cf.:
+  !
+  !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+  !
+  ! The first h²-term  in the definition of the  chemical potential is
+  ! of  short  range  and   should  not  present  any  difficulty  for
+  ! integration.
+  !
+  ! Assuming that  the long-range component of  the direct correlation
+  ! c₁₂(r)  of two  sites,  1 and  2,  is proportional  to the  charge
+  ! product q₁  and q₂ as  in -βq₁q₂v(r) one  may deduce that  ρ₁c₁₁ +
+  ! ρ₂c₂₁ vanishes  identically for  *neutral* systems.  In  this case
+  ! the Coulomb tails  of the direct correlation in  the second c-term
+  ! do  not contribute  to the  chemical  potential.  This  is a  good
+  ! thing, because otherwise an integral 4π∫r²dr/r would diverge.
+  !
+  ! The third  hc-term is  of the  short range due  to h.  However the
+  ! long-range  Coulomb-type  correction  to the  direct  correlation,
+  ! since weighted by a pair  specific total correlation h₁₂, does not
+  ! vanish in such a sum.
+  !
+  ! To get an  idea about the order of magnitude  of such a long-range
+  ! correction: for SPC/E water with σ(H)  = 1.0 A, ε(H) = 0.0545 kcal
+  ! [1], and  using the short-range correlation  with range separation
+  ! parameter α  = 1.2  A^-1 gives the  excess chemical potential  μ =
+  ! 6.86 kcal (wrong because  positive!).  By including the long range
+  ! correlation into the hc-term one obtains -4.19 kcal instead.  Here
+  ! N = 4096, L = 80 A, ρ = 0.033427745 A^-3, β = 1.6889 kcal^-1. (You
+  ! may  need  to  use   --snes-solver  "trial"  to  get  SPC/E  water
+  ! converge).
+  !
+  ! Note that, contrary to what  is being suggested in the literature,
+  ! these   numbers  depend   strongly   on  the   LJ  parameters   of
+  ! hydrogens. With σ(H)  = 0.8 A and ε(H) =  0.046 kcal [Leipzig] one
+  ! gets μ =  -4.97 kcal and with  σ(H) = 1.1656 A and  ε(H) = 0.01553
+  ! kcal [Amber] one gets μ =  -3.66 kcal.  At least one source quotes
+  ! yet a  different number -3.41 kcal [1].   The corresponding result
+  ! for modified TIP3P water with σ(H)  = 0.4 A, and ε(H) = 0.046 kcal
+  ! is -6.35 kcal.
+  !
+  ! FIXME: what do we do for charged systems?
+  !
+  ! [1] "Comparative Study on Solvation Free Energy Expressions in
+  !     Reference Interaction Site Model Integral Equation Theory",
+  !     Kazuto Sato, Hiroshi Chuman, and Seiichiro Ten-no, J.  Phys.
+  !     Chem.  B, 2005, 109 (36), pp 17290–17295,
+  !     http://dx.doi.org/10.1021/jp053259i
+  !
   function chempot_density (method, rho, h, cs, cl) result (mu)
     !
-    ! Returns the β-scaled "density" of the chemical potential, βμ(r).
-    ! To  get the  excess  chemical potential  integrate  it over  the
-    ! volume and divide by β, cf.:
-    !
-    !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
-    !
-    ! The first h²-term in the definition of the chemical potential is
-    ! of  short  range  and  should  not present  any  difficulty  for
-    ! integration.
-    !
-    ! Assuming that the long-range component of the direct correlation
-    ! c₁₂(r)  of two sites,  1 and  2, is  proportional to  the charge
-    ! product q₁ and  q₂ as in -βq₁q₂v(r) one may  deduce that ρ₁c₁₁ +
-    ! ρ₂c₂₁ vanishes identically for  *neutral* systems.  In this case
-    ! the Coulomb tails of the direct correlation in the second c-term
-    ! do not  contribute to  the chemical potential.   This is  a good
-    ! thing, because otherwise an integral 4π∫r²dr/r would diverge.
-    !
-    ! The third  hc-term is of the  short range due to  h. However the
-    ! long-range  Coulomb-type correction  to the  direct correlation,
-    ! since weighted  by a pair  specific total correlation  h₁₂, does
-    ! not vanish in such a sum.
-    !
-    ! To get an idea about the order of magnitude of such a long-range
-    ! correction: for  SPC/E water  with σ(H) =  1.0 A, ε(H)  = 0.0545
-    ! kcal  [1],  and using  the  short-range  correlation with  range
-    ! separation  parameter α  = 1.2  A^-1 gives  the  excess chemical
-    ! potential μ = 6.86 kcal (wrong because positive!).  By including
-    ! the long  range correlation into  the hc-term one  obtains -4.19
-    ! kcal instead.  Here N = 4096, L  = 80 A, ρ = 0.033427745 A^-3, β
-    ! = 1.6889 kcal^-1. (You may  need to use --snes-solver "trial" to
-    ! get SPC/E water converge).
-    !
-    ! Note  that,   contrary  to  what  is  being   suggested  in  the
-    ! literature, these  numbers depend strongly on  the LJ parameters
-    ! of hydrogens. With σ(H) = 0.8  A and ε(H) = 0.046 kcal [Leipzig]
-    ! one gets  μ = -4.97  kcal and  with σ(H) =  1.1656 A and  ε(H) =
-    ! 0.01553  kcal [Amber] one  gets μ  = -3.66  kcal.  At  least one
-    ! source  quotes  yet a  different  number  -3.41  kcal [1].   The
-    ! corresponding result for modified TIP3P water with σ(H) = 0.4 A,
-    ! and ε(H) = 0.046 kcal is -6.35 kcal.
-    !
-    ! FIXME: what do we do for charged systems?
-    !
-    ! [1] "Comparative  Study on Solvation Free  Energy Expressions in
-    !     Reference Interaction Site  Model Integral Equation Theory",
-    !     Kazuto   Sato,  Hiroshi   Chuman,   and  Seiichiro   Ten-no,
-    !     J.  Phys.   Chem.  B,   2005,  109  (36),   pp  17290–17295,
-    !     http://dx.doi.org/10.1021/jp053259i
+    ! Returns the β-scaled density of the chemical potential, βμ(r).
     !
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
