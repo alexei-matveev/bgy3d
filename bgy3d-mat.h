@@ -1,6 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
 #include "bgy3d.h"
 
+/* Returns an inverse matrix. */
+Mat mat_inverse (Mat A);
+
 
 /* Petsc  3.2 changed the  interface of  XXXDestroy() methods  so that
    they take the pointer to a Petsc object and nullify it: */

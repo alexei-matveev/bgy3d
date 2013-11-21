@@ -137,26 +137,6 @@ static void set_boundary (DA da, const Boundary *vol, Vec g, real value)
 
 /*
   To create a matrix one needs  the local and total size of the matrix
-  (section).  This  is how  to get it  from another matrix.   See also
-  asizes()
-*/
-static void msizes (const Mat A, int *n3, int *N3)
-{
-  int m, n;
-  MatGetLocalSize (A, &m, &n);
-  assert (m == n);
-
-  int M, N;
-  MatGetSize (A, &M, &N);
-  assert (M == N);
-
-  *n3 = n;
-  *N3 = N;
-}
-
-
-/*
-  To create a matrix one needs  the local and total size of the matrix
   (section). This  is how  to get it  from the array  descriptor.  See
   also msizes().
 */
@@ -526,91 +506,6 @@ static Mat lap_mat_create (const DA da, const real h[3],
   return A;
 }
 #endif  /* ifndef MATRIX_FREE */
-
-/*
- *
- * Matrix-free implementation of the matrix inverse.
- *
- */
-
-/* KSP  stays for  Krylov Sub-Space,  used to  solve system  of linear
-   equations: */
-static KSP ksp_create (Mat M)
-{
-  PC pc;
-  KSP ksp;
-
-  /* Create ksp environment */
-  KSPCreate (PETSC_COMM_WORLD, &ksp);
-  KSPGetPC (ksp, &pc);
-
-  /* FIXME: literal tolerances here: */
-  KSPSetTolerances (ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
-
-  /* Set Matrix */
-  //KSPSetOperators (*ksp, M, M, SAME_NONZERO_PATTERN);
-  KSPSetOperators (ksp, M, M, SAME_PRECONDITIONER);
-
-  /* Set preconditioner */
-  PCSetType (pc, PCBJACOBI);
-
-  /* This is the place which is  supposed to tell KSP solver to re-use
-     the supplied vector as initial guess: */
-  KSPSetInitialGuessNonzero (ksp, PETSC_TRUE);
-
-  /* runtime options will override default parameters */
-  //KSPSetFromOptions(BHD->ksp);
-
-  return ksp;
-}
-
-
-/* Does y = A x where A  = B^-1 and was constructed as A = mat_inverse
-   (B): */
-static PetscErrorCode mat_mult_inv (Mat A, Vec x, Vec y)
-{
-  KSP ksp = mat_shell_context (A);
-
-  KSPSolve (ksp, x, y);
-
-  /* If you think you need to know how many iteration were required to
-     solve the equation do this: */
-  if (verbosity > 0)
-    {
-      int iter;
-      KSPGetIterationNumber (ksp, &iter);
-      PetscPrintf (PETSC_COMM_WORLD, "ksp(%2d) ", iter);
-    }
-
-  return 0;
-}
-
-
-static PetscErrorCode mat_destroy_inv (Mat A)
-{
-  if (verbosity > 0)
-    printf ("mat_destroy_inv(%p)\n", A);
-
-  KSP ksp = mat_shell_context (A);
-
-  KSPDestroy (&ksp);
-
-  return 0;
-}
-
-
-static Mat mat_inverse (Mat A)
-{
-  /* An  inverse operator  needs to  solve linear  equations  with the
-     original matrix.  Presumable KSP object will hold a reference: */
-  KSP ksp = ksp_create (A);
-
-  /* Get the shape of the future matrix: */
-  int n, N;
-  msizes (A, &n, &N);
-
-  return mat_shell_create (n, ksp, mat_mult_inv, mat_destroy_inv);
-}
 
 
 typedef struct Dirichlet
