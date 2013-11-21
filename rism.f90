@@ -558,84 +558,10 @@ contains
       dict = acons (sym ("XXX"), num (mu), dict)
     end block
 
-    !
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
-    !
-    ! As  claimed  in  [KH00c],  in  general  the  solvation  chemical
-    ! potential is no  longer of an analytic form  if a nonzero bridge
-    ! correction  is  included  into  the  closure.  Direct  numerical
-    ! evaluation  of   chemical  potential  can  be   carried  out  by
-    ! integration over the LJ  diameter parameter. See expression (20)
-    ! in [KH00c].
-    !
-    ! So with  our current implementation,  calculations involving RBC
-    ! could be split into two parts:
-    !
-    ! 1. Don't apply bridge correction when solving t, only add energy
-    !    contribution to excess chemical potential in the spirit of
-    !    thermodynamic perturbation theory (TPT).  In this case the
-    !    value of solvaiton chemical potential is corrected but
-    !    correlation function is not perturbed, for some solutes, e.g.
-    !    OH-, one can observe an unphsically high peak for
-    !    O(OH-)-H(H2O) pair.
-    !
-    ! 2. In order to get a reasonable (water) solvent structure,
-    !    especially for those solutes which have an atomic site of
-    !    large negative charge, we need to "switch on" RBC in closure
-    !    when solving OZ equation iteratively. However, in this case
-    !    evaluation of chemical potential is not implemented (FIXME).
-    !
-    ! [KH00c] Hydration free energy of hydrophobic solutes studied by
-    !   a reference interaction site model with a repulsive bridge
-    !   correction and a thermodynamic perturbation method, Andriy
-    !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
-    !   http://dx.doi.org/10.1063/1.1305885
-    !
-    block
-      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
-
-      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
-
-      ! I. Call closure (without RBC TPT correction): h = c + t
-      h = closure (method, beta, v_uvr, t_uvx) + t_uvx
-
-      e = chempot_bridge (beta, rho, h, expB, r, dr)
-
-      if (verbosity > -1) then
-         print *, "# TPT bridge correction =", e, "rbc =", rbc
-         ! Add a warning when distribution is perturbed by RBC
-         if (rbc) then
-           print *, "# WARNING: distribution is perturbed, RBC/TPT is approximate"
-         endif
-      endif
-
-      ! Cons  a dictionary  entry with  RBC TPT  correction  to result
-      ! collection. Note that the correction is "wrong" when RDFs were
-      ! obtained in an SCF procedure with rbc == .true.
-      dict = acons (sym ("RBC-TPT"), num (e), dict)
-
-      ! II. Call closure with RBC TPT correction: h = c + t
-      h = closure_rbc (method, beta, v_uvr, t_uvx, expB) + t_uvx
-
-      e = chempot_bridge (beta, rho, h, expB, r, dr)
-
-      if (verbosity > -1) then
-         print *, "# SCF bridge correction =", e, "rbc =", rbc
-         ! Add a warning when iterations were performed without RBC
-         if (.not. rbc) then
-           print *, "# WARNING: distribution is perturbed, RBC/SCF is approximate"
-         endif
-      endif
-
-      ! Cons  a dictionary  entry with  RBC SCF  correction  to result
-      ! collection.  Note  that this number  may be still  "wrong" for
-      ! two reasons:  (a) when rbc  = .false.  the RDFs  are perturbed
-      ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
-      ! advertise  the   use  of  RBC   in  thermodynamic  integration
-      ! procedure (RBC-TI) instead.
-      dict = acons (sym ("RBC-SCF"), num (e), dict)
-    end block
+    call bridge_correction (rbc, method, rmax, beta, rho, solute, solvent, &
+         v_uvr, t_uvx, dict)
 
     ! Adds an entry with self energy to the dictionary:
     call guess_self_energy (solute, dict)
@@ -782,6 +708,112 @@ contains
 
     dict = acons (sym ("SELF-ENERGY"), num (e), dict)
   end subroutine guess_self_energy
+
+
+  !
+  ! Repulsive Bridge Correction (RBC).
+  !
+  ! As claimed in [KH00c], in general the solvation chemical potential
+  ! is no longer of an analytic form if a nonzero bridge correction is
+  ! included  into  the   closure.   Direct  numerical  evaluation  of
+  ! chemical potential can  be carried out by integration  over the LJ
+  ! diameter parameter. See expression (20) in [KH00c].
+  !
+  ! So  with our  current implementation,  calculations  involving RBC
+  ! could be split into two parts:
+  !
+  ! 1. Don't apply bridge correction when solving t, only add energy
+  !    contribution to excess chemical potential in the spirit of
+  !    thermodynamic perturbation theory (TPT).  In this case the
+  !    value of solvaiton chemical potential is corrected but
+  !    correlation function is not perturbed, for some solutes, e.g.
+  !    OH-, one can observe an unphsically high peak for O(OH-) -
+  !    H(H2O) pair.
+  !
+  ! 2. In order to get a reasonable (water) solvent structure,
+  !    especially for those solutes which have an atomic site of large
+  !    negative charge, we need to "switch on" RBC in closure when
+  !    solving OZ equation iteratively. However, in this case
+  !    evaluation of chemical potential is not implemented (FIXME).
+  !
+  ! [KH00c] Hydration free energy of hydrophobic solutes studied by a
+  !   reference interaction site model with a repulsive bridge
+  !   correction and a thermodynamic perturbation method, Andriy
+  !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
+  !   http://dx.doi.org/10.1063/1.1305885
+  !
+  subroutine bridge_correction (rbc, method, rmax, beta, rho, &
+       solute, solvent, v, t, dict)
+    !
+    ! Compute the bridge correction using TPT.
+    !
+    use foreign, only: site, verbosity
+    use lisp, only: obj, acons, sym, num
+    implicit none
+    logical, intent (in) :: rbc
+    integer, intent (in) :: method
+    real (rk), intent (in) :: rmax, beta, rho
+    type (site), intent (in) :: solute(:)  ! (n)
+    type (site), intent (in) :: solvent(:) ! (m)
+    real (rk), intent (in) :: v(:, :, :)   ! (n, m, nrad)
+    real (rk), intent (in) :: t(:, :, :)   ! (n, m, nrad)
+    type (obj), intent (inout) :: dict
+    ! *** end of interface ***
+
+    integer :: n, m, nrad
+
+    n = size (t, 1)
+    m  = size (t, 2)
+    nrad = size (t, 3)
+
+    block
+      real (rk) :: r(nrad), k(nrad), dr, dk
+      real (rk) :: e, h(n, m, nrad), expB(n, m, nrad)
+
+      call mkgrid (rmax, r, dr, k, dk)
+
+      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+
+      ! I. Call closure (without RBC TPT correction): h = c + t
+      h = closure (method, beta, v, t) + t
+
+      e = chempot_bridge (beta, rho, h, expB, r, dr)
+
+      if (verbosity > -1) then
+         print *, "# TPT bridge correction =", e, "rbc =", rbc
+         ! Add a warning when distribution is perturbed by RBC
+         if (rbc) then
+           print *, "# WARNING: distribution is perturbed, RBC/TPT is approximate"
+         endif
+      endif
+
+      ! Cons  a dictionary  entry with  RBC TPT  correction  to result
+      ! collection. Note that the correction is "wrong" when RDFs were
+      ! obtained in an SCF procedure with rbc == .true.
+      dict = acons (sym ("RBC-TPT"), num (e), dict)
+
+      ! II. Call closure with RBC TPT correction: h = c + t
+      h = closure_rbc (method, beta, v, t, expB) + t
+
+      e = chempot_bridge (beta, rho, h, expB, r, dr)
+
+      if (verbosity > -1) then
+         print *, "# SCF bridge correction =", e, "rbc =", rbc
+         ! Add a warning when iterations were performed without RBC
+         if (.not. rbc) then
+           print *, "# WARNING: distribution is perturbed, RBC/SCF is approximate"
+         endif
+      endif
+
+      ! Cons  a dictionary  entry with  RBC SCF  correction  to result
+      ! collection.  Note  that this number  may be still  "wrong" for
+      ! two reasons:  (a) when rbc  = .false.  the RDFs  are perturbed
+      ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
+      ! advertise  the   use  of  RBC   in  thermodynamic  integration
+      ! procedure (RBC-TI) instead.
+      dict = acons (sym ("RBC-SCF"), num (e), dict)
+    end block
+  end subroutine bridge_correction
 
 
   subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
