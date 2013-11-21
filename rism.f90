@@ -670,8 +670,18 @@ contains
       c_uvx = c_uvx - beta * v_uvk
 
       !
-      ! OZ equation, involves "convolutions", take care of the
-      ! normalization here:
+      ! OZ  equation,  involves   "convolutions",  take  care  of  the
+      ! normalization here.   As a  functional of c  this is  a linear
+      ! relation  t =  C'(c).  FIXME:  Because of  this  linearity one
+      ! could have handled the long range term added to c above and to
+      ! resulting t below differently:
+      !
+      !   t := C'(c + x) + x = C'(c) + [C'(x) + x]
+      !
+      ! with x  = -βv.   Here the second  term in the  square brackets
+      ! derived  from  the  fixed  long-range assymptotics  of  direct
+      ! correlation  is constant.   This  would be  just one  addition
+      ! after computing C'(c) instead of one before and one after.
       !
       dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
 
@@ -679,8 +689,9 @@ contains
       ! Since we plugged  in the Fourier transform of  the full direct
       ! correlation including the long range part into the OZ equation
       ! what we get out is the full indirect correlation including the
-      ! long-range part.  The menmonic is  C + T is short range.  Take
-      ! it out:
+      ! long-range part.   Note however  that assymptotically C  and T
+      ! differ  by just a  sign ---  the menmonic  is C  + T  is short
+      ! range.  Take the assymptote of T out making it short range:
       !
       !   T  := T - βV
       !    S          L
@@ -719,9 +730,12 @@ contains
       ! Forward FT via DST:
       c_uvx = fourier_rows (c_uvx) * (dr**3 / FT_FW)
 
+      !
       ! OZ  equation,  involves   "convolutions",  take  care  of  the
       ! normalization here.   As a  functional of c  this is  a linear
-      ! relation:
+      ! relation. See the comments in interate_t() on why the constant
+      ! long-range term does not contribute to the Jacobian.
+      !
       ddt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
 
       ! Inverse FT via DST:
