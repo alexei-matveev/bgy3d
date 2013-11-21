@@ -558,14 +558,6 @@ contains
       dict = acons (sym ("XXX"), num (mu), dict)
     end block
 
-    ! As  a part  of  post-processing, compute  the bridge  correction
-    ! using TPT.
-    call bridge_correction (method, rmax, beta, rho, solute, solvent, &
-         v_uvr, t_uvx, dict=dict, rbc=rbc)
-
-    ! Adds an entry with self energy to the dictionary:
-    call guess_self_energy (solute, dict)
-
   contains
 
     function iterate_t (t) result (dt)
@@ -1354,6 +1346,14 @@ contains
           enddo
        endif
     end block
+
+    ! As  a part  of  post-processing, compute  the bridge  correction
+    ! using TPT.
+    call bridge_correction (method, rmax, beta, rho, solute, solvent, &
+         v, t, dict=dict, rbc=rbc)
+
+    ! Adds an entry with self energy to the dictionary:
+    call guess_self_energy (solute, dict)
 
   contains
 
