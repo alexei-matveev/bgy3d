@@ -4,6 +4,7 @@ module snes
   private
 
   public :: snes_default, snes_picard
+  public :: krylov
 
   !
   ! *** END OF INTERFACE ***
@@ -237,4 +238,30 @@ contains
        dz = f_ctx % df (y, dy)
     end block
   end subroutine jacobian
+
+
+  function krylov (f, b) result (x)
+    !
+    ! Solves for f(x) = b.
+    !
+    implicit none
+    procedure (func1) :: f
+    real (rk), intent (in) :: b(:, :, :)
+    real (rk) :: x(size (b, 1), size (b, 2), size (b, 3))
+    ! *** end of interface ***
+
+    ! FIXME: abusing SNES solver for (presumably) linear problem:
+    x = 0.0
+    call snes_default (x, fb)
+  contains
+
+    function fb (x) result (y)
+      implicit none
+      real (rk), intent (in) :: x(:, :, :)
+      real (rk) :: y(size (x, 1), size (x, 2), size (x, 3))
+      ! *** end of interface ***
+
+      y = f(x) - b
+    end function fb
+  end function krylov
 end module snes
