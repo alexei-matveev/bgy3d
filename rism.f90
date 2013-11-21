@@ -546,6 +546,18 @@ contains
     call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
+    ! Chemical potential (SCF) ...
+    block
+      real (rk) :: v_uvl (n, m, nrad), mu
+
+      ! Long range potential on the real space grid:
+      v_uvl = force_field_long (solute, solvent, r)
+
+      ! Chemical potential as a functional of converged t:
+      mu = chempot0 (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
+      dict = acons (sym ("XXX"), num (mu), dict)
+    end block
+
     !
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
