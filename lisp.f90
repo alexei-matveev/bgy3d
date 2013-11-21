@@ -65,6 +65,7 @@ module lisp
   public :: obj                 ! type
   public :: num, sym, str       ! constructors
   public :: cons, nil
+  public :: acons
 
 contains
 
@@ -91,5 +92,17 @@ contains
     slen = len (fstr)
     lstr = scm_from_locale_stringn (fstr, slen)
   end function str
+
+  function acons (key, val, old) result (new)
+    !
+    ! (acons k v lst) => (cons (cons k v) lst)
+    !
+    implicit none
+    type (obj), intent (in) :: key, val, old
+    type (obj) :: new
+    ! *** end of interface **
+
+    new = cons (cons (key, val), old)
+  end function acons
 
 end module lisp
