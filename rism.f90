@@ -1003,7 +1003,7 @@ contains
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, cons, nil, sym, num
-    use units, only: pi, ALPHA, EPSILON0INV, KCAL, KJOULE
+    use units, only: pi, EPSILON0INV, KCAL, KJOULE
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
     implicit none
@@ -1098,10 +1098,7 @@ contains
 
        ! Real-space rep of the  long-range correlation. Note the extra
        ! scaling factor A:
-       forall (p = 1:nrad, i = 1:n, j = 1:m)
-          cl(i, j, p) = - (beta * A) * solute(i) % charge * solvent(j) % charge &
-               * EPSILON0INV * coulomb_long (r(p), ALPHA)
-       end forall
+       cl = - (beta * A) * force_field_long (solute, solvent, r)
 
        if (verb > 0) then
           print *, "# rho =", rho, "beta =", beta, "n =", nrad
@@ -1476,6 +1473,42 @@ contains
     enddo
 
   end subroutine force_field
+
+
+  function force_field_long (solute, solvent, r) result (v)
+    !
+    ! Computes  the  real-space   representation  of  the  long  range
+    ! potential. It only exists because  an FFT of v(k) as returned by
+    ! force_field() is not feasible  numerically. Used to compute long
+    ! range direct correlation for use in chemical potential integral.
+    !
+    ! Even if  the relation  between long range  v(k) and v(r)  is not
+    ! exact in the sence of  discreete FT the two should be consistent
+    ! physically and asymptotically for large grids.
+    !
+    use foreign, only: site
+    use units, only: EPSILON0INV, ALPHA
+    implicit none
+    type (site), intent (in) :: solute(:)  ! (n)
+    type (site), intent (in) :: solvent(:) ! (m)
+    real (rk), intent (in) :: r(:)         ! (nrad)
+    real (rk) :: v(size (solute), size (solvent), size (r)) ! (n, m, nrad)
+    ! *** end of interface ***
+
+    integer :: n, m, nrad
+    integer :: i, j, p
+
+    n = size (solute)
+    m = size (solvent)
+    nrad = size (r)
+
+    ! Real-space rep of the  long-range correlation. Note the extra
+    ! scaling factor A:
+    forall (i = 1:n, j = 1:m, p = 1:nrad)
+       v(i, j, p) = solute(i) % charge * solvent(j) % charge &
+            * EPSILON0INV * coulomb_long (r(p), ALPHA)
+    end forall
+  end function force_field_long
 
 
   elemental function lj (r) result (f)
