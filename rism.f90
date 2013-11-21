@@ -2339,6 +2339,51 @@ contains
   end function chempot
 
 
+  function chempot0 (method, rmax, beta, rho, v, vl, t) result (mu)
+    !
+    ! Computes  the  chemical  potential,  μ(t)  using  the  specified
+    ! method. Note  that the  same method is  used to derive  c(t) and
+    ! h(t) and to define the functional μ[h, c].
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rmax, beta, rho
+    real (rk), intent (in) :: v(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: vl(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
+    real (rk) :: mu
+    ! *** end of interface ***
+
+    integer :: n, m, nrad
+
+    n = size (t, 1)
+    m = size (t, 2)
+    nrad = size (t, 3)
+
+    block
+      real (rk) :: r(nrad), k(nrad), dr, dk
+      real (rk) :: c(n, m, nrad)
+      real (rk) :: h(n, m, nrad)
+      real (rk) :: cl(n, m, nrad)
+
+      call mkgrid (rmax, r, dr, k, dk)
+
+      ! Real-space rep of the short range correlation:
+      c = closure (method, beta, v, t)
+
+      ! Real-space rep of the long range correlation:
+      cl = - beta * vl
+
+      ! Total correlation h = g - 1:
+      h = c + t
+
+      ! This   evaluates  method-specific   functional   μ[h,  c]   from
+      ! pre-computed h and c:
+      mu = chempot (method, rho, h, c, cl) * (dr**3 / beta)
+    end block
+  end function chempot0
+
+
   subroutine show_sites (name, sites)
     use foreign, only: site, pad
     implicit none
