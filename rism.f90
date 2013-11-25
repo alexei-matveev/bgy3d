@@ -178,7 +178,7 @@ contains
     !
     use foreign, only: problem_data, site, bgy3d_problem_data_print, &
          verbosity, comm_rank
-    use lisp, only: obj, nil, acons, sym
+    use lisp, only: obj, nil, acons, symbol
     use drism, only: epsilon_rism
     implicit none
     type (problem_data), intent (in) :: pd
@@ -255,9 +255,9 @@ contains
        endif
 
        if (present (dict)) then
-          dict = acons (sym ("solvent"), vdict, nil)
+          dict = acons (symbol ("solvent"), vdict, nil)
           if (uv) then
-             dict = acons (sym ("solute"), udict, dict)
+             dict = acons (symbol ("solute"), udict, dict)
           endif
        endif
     end block
@@ -482,7 +482,7 @@ contains
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
-    use lisp, only: obj, acons, sym, num
+    use lisp, only: obj, acons, symbol, float
     use options, only: getopt
     use units, only: angstrom
     implicit none
@@ -555,7 +555,7 @@ contains
 
       ! Chemical potential as a functional of converged t:
       mu = chempot0 (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
-      dict = acons (sym ("XXX"), num (mu), dict)
+      dict = acons (symbol ("XXX"), float (mu), dict)
     end block
 
     ! Derivatives  with respect to  all 3n  displacements of  n solute
@@ -787,7 +787,7 @@ contains
     ! Adds an entry with self energy to the dictionary.
     !
     use foreign, only: site, verbosity
-    use lisp, only: obj, acons, sym, num
+    use lisp, only: obj, acons, symbol, float
     use units, only: kcal, angstrom
     implicit none
     type (site), intent (in) :: solute(:) ! (n)
@@ -812,7 +812,7 @@ contains
 
     print *, "# Self energy = ", e / kcal, " kcal/mol"
 
-    dict = acons (sym ("SELF-ENERGY"), num (e), dict)
+    dict = acons (symbol ("SELF-ENERGY"), float (e), dict)
   end subroutine guess_self_energy
 
 
@@ -854,7 +854,7 @@ contains
     ! Compute the bridge correction using TPT.
     !
     use foreign, only: site, verbosity
-    use lisp, only: obj, acons, sym, num
+    use lisp, only: obj, acons, symbol, float
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -896,7 +896,7 @@ contains
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
       ! collection. Note that the correction is "wrong" when RDFs were
       ! obtained in an SCF procedure with rbc == .true.
-      dict = acons (sym ("RBC-TPT"), num (e), dict)
+      dict = acons (symbol ("RBC-TPT"), float (e), dict)
 
       ! II. Call closure with RBC TPT correction: h = c + t
       h = closure_rbc (method, beta, v, t, expB) + t
@@ -917,7 +917,7 @@ contains
       ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
       ! advertise  the   use  of  RBC   in  thermodynamic  integration
       ! procedure (RBC-TI) instead.
-      dict = acons (sym ("RBC-SCF"), num (e), dict)
+      dict = acons (symbol ("RBC-SCF"), float (e), dict)
     end block
   end subroutine bridge_correction
 
@@ -1167,7 +1167,7 @@ contains
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    use lisp, only: obj, acons, nil, sym, num
+    use lisp, only: obj, acons, nil, symbol, float
     use units, only: pi, EPSILON0INV, KCAL, KJOULE
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
@@ -1284,7 +1284,7 @@ contains
              mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
-             dict = acons (sym (trim (names(i))), num (mu(i)), dict)
+             dict = acons (symbol (trim (names(i))), float (mu(i)), dict)
           enddo
 
           if (verb > 0) then

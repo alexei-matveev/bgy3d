@@ -21,7 +21,23 @@ module lisp
      end function scm_cons
   end interface cons
 
-  interface num
+  interface float
+     function scm_from_double (d) result (inexact) bind (c)
+       import
+       implicit none
+       real (c_double), intent (in), value :: d
+       type (obj) :: inexact
+     end function scm_from_double
+
+     function scm_to_double (inexact) result (d) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: inexact
+       real (c_double) :: d
+     end function scm_to_double
+  end interface float
+
+  interface int
      function scm_from_int32 (i) result (exact) bind (c)
        import
        implicit none
@@ -36,13 +52,13 @@ module lisp
        type (obj) :: exact
      end function scm_from_int64
 
-     function scm_from_double (d) result (inexact) bind (c)
+     function scm_to_int32 (exact) result (i) bind (c)
        import
        implicit none
-       real (c_double), intent (in), value :: d
-       type (obj) :: inexact
-     end function scm_from_double
-  end interface num
+       type (obj), intent (in), value :: exact
+       integer (c_int32_t) :: i
+     end function scm_to_int32
+  end interface int
 
   interface
      function scm_from_locale_symboln (str, len) result (symbol) bind (c)
@@ -62,14 +78,14 @@ module lisp
      end function scm_from_locale_stringn
   end interface
 
-  public :: obj                 ! type
-  public :: num, sym, str       ! constructors
+  public :: obj                        ! type
+  public :: float, int, symbol, string ! constructors
   public :: cons, nil
   public :: acons
 
 contains
 
-  function sym (fstr) result (symb)
+  function symbol (fstr) result (symb)
     implicit none
     character (len=*), intent (in) :: fstr
     type (obj) :: symb
@@ -79,9 +95,9 @@ contains
 
     slen = len (fstr)
     symb = scm_from_locale_symboln (fstr, slen)
-  end function sym
+  end function symbol
 
-  function str (fstr) result (lstr)
+  function string (fstr) result (lstr)
     implicit none
     character (len=*), intent (in) :: fstr
     type (obj) :: lstr
@@ -91,7 +107,7 @@ contains
 
     slen = len (fstr)
     lstr = scm_from_locale_stringn (fstr, slen)
-  end function str
+  end function string
 
   function acons (key, val, old) result (new)
     !
