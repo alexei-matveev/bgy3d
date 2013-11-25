@@ -566,10 +566,19 @@ contains
     ! sites. FIXME:  this is a waste  of time given  that some species
     ! are rigid and some more degrees  of freedom may be frozen by the
     ! user:
-    if (.false.) then
-       call derivatives (method, rmax, beta, rho, solute, solvent, &
-            chi, v_uvr, v_uvk, t_uvx, jacobian_t0)
-    endif
+    block
+      logical :: flag
+
+      ! False if unspecified:
+      if (.not. getopt (env, "derivatives", flag)) then
+         flag = .false.
+      endif
+
+      if (flag) then
+         call derivatives (method, rmax, beta, rho, solute, solvent, &
+              chi, v_uvr, v_uvk, t_uvx, jacobian_t0)
+      endif
+    end block
 
   contains
 
