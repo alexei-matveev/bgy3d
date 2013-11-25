@@ -481,7 +481,7 @@ contains
 
   subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
-    use foreign, only: site, verbosity
+    use foreign, only: site
     use lisp, only: obj, acons, sym, num
     use options, only: getopt
     use units, only: angstrom
