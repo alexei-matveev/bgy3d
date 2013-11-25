@@ -485,7 +485,7 @@ contains
   subroutine rism_uv (env, method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
-    use lisp, only: obj, acons, symbol, float
+    use lisp, only: obj, nil, cons, acons, symbol, float
     use options, only: getopt
     use units, only: angstrom
     implicit none
@@ -568,6 +568,9 @@ contains
     ! user:
     block
       logical :: flag
+      integer :: i, j
+      real (rk) :: gradients(3, n)
+      type (obj) :: grads, vec
 
       ! False if unspecified:
       if (.not. getopt (env, "derivatives", flag)) then
@@ -576,7 +579,19 @@ contains
 
       if (flag) then
          call derivatives (method, rmax, beta, rho, solute, solvent, &
-              chi, v_uvr, v_uvk, t_uvx, jacobian_t0)
+              chi, v_uvr, v_uvk, t_uvx, jacobian_t0, gradients)
+
+         grads = nil
+         do j = n, 1, -1
+            vec = nil
+            do i = 3, 1, -1
+               vec = cons (float (gradients(i, j)), vec)
+            enddo
+            grads = cons (vec, grads)
+         enddo
+         ! call display (grads)
+         ! call newline ()
+         dict = acons (symbol ("XXX-GRADIENTS"), grads, dict)
       endif
     end block
 
@@ -703,7 +718,7 @@ contains
 
 
   subroutine derivatives (method, rmax, beta, rho, solute, solvent, &
-       chi_vvk, v_uvr, v_uvk, t_uvr, jacobian)
+       chi_vvk, v_uvr, v_uvk, t_uvr, jacobian, gradients)
     !
     ! Derivatives of the chemical  potential with respect to geometric
     ! distortions of the solute.
@@ -721,6 +736,7 @@ contains
     real (rk), intent (in) :: v_uvk(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: t_uvr(:, :, :)   ! (n, m, nrad)
     procedure (func1) :: jacobian ! (n, m, nrad) -> (n, m, nrad)
+    real (rk), intent (out) :: gradients(:, :) ! (3, n)
     ! *** end of interface ***
 
     integer :: n, m, nrad
@@ -736,7 +752,6 @@ contains
       real (rk) :: dw(n, n, nrad)
       real (rk) :: c(n, m, nrad), df(n, m, nrad), dt(n, m, nrad)
       real (rk) :: vl_uvr (n, m, nrad), dmu
-      real (rk) :: gradients(3, n)
       real (rk) :: r(nrad), k(nrad), dr, dk
 
       call mkgrid (rmax, r, dr, k, dk)
