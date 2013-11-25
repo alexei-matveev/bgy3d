@@ -88,7 +88,7 @@ contains
   end function rism_self_energy
 
 
-  subroutine rism_solvent (pd, m, solvent, t_buf, x_buf, ptr) bind (c)
+  subroutine rism_solvent (env, pd, m, solvent, t_buf, x_buf, ptr) bind (c)
     !
     ! When either t_buf or x_buf is not NULL it should be a pointer to
     ! a buffer  with sufficient space  to store nrad  * m *  m doubles
@@ -107,6 +107,7 @@ contains
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     use lisp, only: obj
     implicit none
+    type (obj), intent (in), value :: env  ! SCM alist
     type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
@@ -131,11 +132,11 @@ contains
 
     ! Fill supplied  storage with solvent susceptibility.  If NULL, it
     ! is interpreted as not present() in main() and thus ignored:
-    call main (pd, solvent, t=t, x=x, dict=dict)
+    call main (env, pd, solvent, t=t, x=x, dict=dict)
   end subroutine rism_solvent
 
 
-  subroutine rism_solute (pd, n, solute, m, solvent, x_buf, ptr) bind (c)
+  subroutine rism_solute (env, pd, n, solute, m, solvent, x_buf, ptr) bind (c)
     !
     ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
     ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
@@ -147,7 +148,8 @@ contains
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     use lisp, only: obj
     implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE
+    type (obj), intent (in), value :: env  ! SCM association list
+    type (problem_data), intent (in) :: pd  ! no VALUE
     integer (c_int), intent (in), value :: n, m
     type (site), intent (in) :: solute(n)
     type (site), intent (in) :: solvent(m)
@@ -168,11 +170,11 @@ contains
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
 
-    call main (pd, solvent, solute, x=x, dict=dict)
+    call main (env, pd, solvent, solute, x=x, dict=dict)
   end subroutine rism_solute
 
 
-  subroutine main (pd, solvent, solute, t, x, dict)
+  subroutine main (env, pd, solvent, solute, t, x, dict)
     !
     ! This one does not need to be interoperable.
     !
@@ -181,6 +183,7 @@ contains
     use lisp, only: obj, nil, acons, symbol
     use drism, only: epsilon_rism
     implicit none
+    type (obj), intent (in) :: env ! SCM alist
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
@@ -250,7 +253,7 @@ contains
        endif
 
        if (uv) then
-          call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
+          call rism_uv (env, pd % closure, nrad, rmax, pd % beta, pd % rho, &
                solvent, chi, solute, udict)
        endif
 
@@ -479,13 +482,14 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
+  subroutine rism_uv (env, method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
     use lisp, only: obj, acons, symbol, float
     use options, only: getopt
     use units, only: angstrom
     implicit none
+    type (obj), intent (in) :: env ! SCM alist
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
     real (rk), intent (in) :: rmax         ! cell size
