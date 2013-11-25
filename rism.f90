@@ -293,7 +293,7 @@ contains
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
-    use lisp, only: obj
+    use lisp, only: obj, acons, symbol, float
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
     implicit none
@@ -412,6 +412,18 @@ contains
     ! Done with it, print results. Here solute == solvent:
     call post_process (method, rmax, beta, rho, sites, sites, vr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
+
+    ! Chemical potential (SCF) ...
+    block
+      real (rk) :: vl (m, m, nrad), mu
+
+      ! Long range potential on the real space grid:
+      vl = force_field_long (sites, sites, r)
+
+      ! Chemical potential as a functional of converged t:
+      mu = chempot0 (method, rmax, beta, rho, vr, vl, t)
+      dict = acons (symbol ("XXX"), float (mu), dict)
+    end block
 
   contains
 
