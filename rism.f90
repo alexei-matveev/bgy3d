@@ -811,12 +811,8 @@ contains
 
             ! Differential of chemical potential due to dt:
             dmu = chempot01 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr, dt)
-            print *, "XXX: dmu=", dmu / step
             gradients(j, i) = dmu / step
          enddo
-      enddo
-      do i = 1, size (gradients, 2)
-         print *, "XXX:", gradients(:, i)
       enddo
     end block
   end subroutine derivatives
