@@ -53,7 +53,7 @@ module lisp
      end function scm_cons
   end interface cons
 
-  interface float
+  interface flonum
      function scm_from_double (d) result (inexact) bind (c)
        import
        implicit none
@@ -67,7 +67,7 @@ module lisp
        type (obj), intent (in), value :: inexact
        real (c_double) :: d
      end function scm_to_double
-  end interface float
+  end interface flonum
 
   interface int
      function scm_from_int32 (i) result (exact) bind (c)
@@ -146,7 +146,7 @@ module lisp
   end interface
 
   public :: obj                              ! type
-  public :: float, int, symbol, string, bool ! constructors
+  public :: flonum, int, symbol, string, bool ! constructors
   public :: cons, nil
   public :: car, cdr
   public :: acons, assoc, not

@@ -57,7 +57,7 @@ contains
 
 
   function getenv_real (env, key, val) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool, cdr, float
+    use lisp, only: obj, assoc, symbol, not, bool, cdr, flonum
     implicit none
     type (obj), intent (in) :: env
     character (len=*), intent (in) :: key
@@ -69,7 +69,7 @@ contains
 
     pair = assoc (symbol (key), env)
     ok = .not. bool (not (pair))
-    if (ok) val = float (cdr (pair))
+    if (ok) val = flonum (cdr (pair))
   end function getenv_real
 
 

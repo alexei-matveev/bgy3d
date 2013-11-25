@@ -293,7 +293,7 @@ contains
     use snes, only: snes_default
     use foreign, only: site, comm_rank
     use options, only: getopt
-    use lisp, only: obj, acons, symbol, float
+    use lisp, only: obj, acons, symbol, flonum
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
     implicit none
@@ -422,7 +422,7 @@ contains
 
       ! Chemical potential as a functional of converged t:
       mu = chempot0 (method, rmax, beta, rho, vr, vl, t)
-      dict = acons (symbol ("XXX"), float (mu), dict)
+      dict = acons (symbol ("XXX"), flonum (mu), dict)
     end block
 
   contains
@@ -497,7 +497,7 @@ contains
   subroutine rism_uv (env, method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
-    use lisp, only: obj, nil, cons, acons, symbol, float
+    use lisp, only: obj, nil, cons, acons, symbol, flonum
     use options, only: getopt
     use units, only: angstrom
     implicit none
@@ -571,7 +571,7 @@ contains
 
       ! Chemical potential as a functional of converged t:
       mu = chempot0 (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
-      dict = acons (symbol ("XXX"), float (mu), dict)
+      dict = acons (symbol ("XXX"), flonum (mu), dict)
     end block
 
     ! Derivatives  with respect to  all 3n  displacements of  n solute
@@ -597,7 +597,7 @@ contains
          do j = n, 1, -1
             vec = nil
             do i = 3, 1, -1
-               vec = cons (float (gradients(i, j)), vec)
+               vec = cons (flonum (gradients(i, j)), vec)
             enddo
             grads = cons (vec, grads)
          enddo
@@ -823,7 +823,7 @@ contains
     ! Adds an entry with self energy to the dictionary.
     !
     use foreign, only: site, verbosity
-    use lisp, only: obj, acons, symbol, float
+    use lisp, only: obj, acons, symbol, flonum
     use units, only: kcal, angstrom
     implicit none
     type (site), intent (in) :: solute(:) ! (n)
@@ -848,7 +848,7 @@ contains
 
     print *, "# Self energy = ", e / kcal, " kcal/mol"
 
-    dict = acons (symbol ("SELF-ENERGY"), float (e), dict)
+    dict = acons (symbol ("SELF-ENERGY"), flonum (e), dict)
   end subroutine guess_self_energy
 
 
@@ -890,7 +890,7 @@ contains
     ! Compute the bridge correction using TPT.
     !
     use foreign, only: site, verbosity
-    use lisp, only: obj, acons, symbol, float
+    use lisp, only: obj, acons, symbol, flonum
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -932,7 +932,7 @@ contains
       ! Cons  a dictionary  entry with  RBC TPT  correction  to result
       ! collection. Note that the correction is "wrong" when RDFs were
       ! obtained in an SCF procedure with rbc == .true.
-      dict = acons (symbol ("RBC-TPT"), float (e), dict)
+      dict = acons (symbol ("RBC-TPT"), flonum (e), dict)
 
       ! II. Call closure with RBC TPT correction: h = c + t
       h = closure_rbc (method, beta, v, t, expB) + t
@@ -953,7 +953,7 @@ contains
       ! only  in  a  post-SCF  fashion  and (b)  literature  seems  to
       ! advertise  the   use  of  RBC   in  thermodynamic  integration
       ! procedure (RBC-TI) instead.
-      dict = acons (symbol ("RBC-SCF"), float (e), dict)
+      dict = acons (symbol ("RBC-SCF"), flonum (e), dict)
     end block
   end subroutine bridge_correction
 
@@ -1203,7 +1203,7 @@ contains
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    use lisp, only: obj, acons, nil, symbol, float
+    use lisp, only: obj, acons, nil, symbol, flonum
     use units, only: pi, EPSILON0INV, KCAL, KJOULE
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
@@ -1320,7 +1320,7 @@ contains
              mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
-             dict = acons (symbol (trim (names(i))), float (mu(i)), dict)
+             dict = acons (symbol (trim (names(i))), flonum (mu(i)), dict)
           enddo
 
           if (verb > 0) then
