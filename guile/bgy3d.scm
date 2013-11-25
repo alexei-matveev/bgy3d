@@ -141,6 +141,7 @@
     (hnc #f)                          ; FIXME: exclusive
     (bgy #f)                          ; FIXME: exclusive
     (rism #f)                         ; FIXME: exclusive
+    (derivatives #f)                  ; #t or #f
     ))
 
 
@@ -392,6 +393,7 @@ computes the sum of all vector elements."
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
     (load-guess         (value #f))
+    (derivatives        (value #f))
     (snes-solver        (value #t)
                         (predicate ,(lambda (x)
                                     (member x '("jager" "newton" "picard" "trial")))))
