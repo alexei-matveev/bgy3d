@@ -2383,7 +2383,45 @@ contains
   end function chempot_density
 
 
-  function chempot (method, rho, h, cs, cl) result (mu)
+  function chempot_density1 (method, rho, h, dh, c, dc, cl) result (dmu)
+    !
+    ! Differential of chempot_density().
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rho
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dc(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: dmu(size (h, 3))
+    ! *** end of interface ***
+
+    integer :: i, j, p
+    real (rk) :: thresh, acc
+
+    thresh = threshold (method)
+    do p = 1, size (h, 3)       ! nrad
+       acc = 0.0
+       do j = 1, size (h, 2)    ! m
+          do i = 1, size (h, 1) ! n
+             associate (h => h(i, j, p), dh => dh(i, j, p), c => c(i, j, p), &
+                  dc => dc(i, j, p), cl => cl(i, j, p))
+               if (-h > thresh) then
+                  acc = acc + h * dh
+               endif
+               acc = acc - dc - dh * (c + cl) / 2 - h * dc / 2
+             end associate
+          enddo
+       enddo
+
+       dmu(p) = rho * acc
+    enddo
+  end function chempot_density1
+
+
+  function chempot (method, rho, h, c, cl) result (mu)
     !
     ! Computes  the chemical  potential, βμ,  by integration  over the
     ! volume:
@@ -2397,19 +2435,35 @@ contains
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: cs(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
     real (rk) :: mu
     ! *** end of interface ***
 
-    real (rk) :: density (size (h, 3))
-
-    ! Chemical potential density to be integrated:
-    density = chempot_density (method, rho, h, cs, cl)
-
-    ! Multiply that by dr³ and divide by β to get the real number:
-    mu = integrate (density)
+    ! Inegrate chemical  potential density.  Multiply that  by dr³ and
+    ! divide by β to get the real number:
+    mu = integrate (chempot_density (method, rho, h, c, cl))
   end function chempot
+
+
+  function chempot1 (method, rho, h, dh, c, dc, cl) result (dmu)
+    !
+    ! Differential of chempot()
+    !
+    use fft, only: integrate
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rho
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dc(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: dmu
+    ! *** end of interface ***
+
+    dmu = integrate (chempot_density1 (method, rho, h, dh, c, dc, cl))
+  end function chempot1
 
 
   function chempot0 (method, rmax, beta, rho, v, vl, t) result (mu)
@@ -2455,6 +2509,52 @@ contains
       mu = chempot (method, rho, h, c, cl) * (dr**3 / beta)
     end block
   end function chempot0
+
+
+  function chempot01 (method, rmax, beta, rho, v, vl, t, dt) result (dmu)
+    !
+    ! Differential of chempot0()
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rmax, beta, rho
+    real (rk), intent (in) :: v(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: vl(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dt(:, :, :) ! (n, m, nrad)
+    real (rk) :: dmu
+    ! *** end of interface ***
+
+    integer :: n, m, nrad
+
+    n = size (t, 1)
+    m = size (t, 2)
+    nrad = size (t, 3)
+
+    block
+      real (rk) :: r(nrad), k(nrad), dr, dk
+      real (rk) :: c(n, m, nrad), dc(n, m, nrad)
+      real (rk) :: h(n, m, nrad), dh(n, m, nrad)
+      real (rk) :: cl(n, m, nrad)
+
+      call mkgrid (rmax, r, dr, k, dk)
+
+      ! Real-space rep of the short range correlation:
+      c = closure (method, beta, v, t)
+      dc = closure1 (method, beta, v, t, dt)
+
+      ! Real-space rep of the long range correlation:
+      cl = - beta * vl
+
+      ! Total correlation h = g - 1:
+      h = c + t
+      dh = dc + dt
+
+      ! This   evaluates  method-specific   functional   μ[h,  c]   from
+      ! pre-computed h and c:
+      dmu = chempot1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
+    end block
+  end function chempot01
 
 
   subroutine show_sites (name, sites)
