@@ -558,6 +558,15 @@ contains
       dict = acons (sym ("XXX"), num (mu), dict)
     end block
 
+    ! Derivatives  with respect to  all 3n  displacements of  n solute
+    ! sites. FIXME:  this is a waste  of time given  that some species
+    ! are rigid and some more degrees  of freedom may be frozen by the
+    ! user:
+    if (.false.) then
+       call derivatives (method, rmax, beta, rho, solute, solvent, &
+            chi, v_uvr, v_uvk, t_uvx, jacobian_t0)
+    endif
+
   contains
 
     function iterate_t (t) result (dt)
@@ -665,7 +674,112 @@ contains
       ! Return the increment that vanishes at convergence:
       ddt = ddt - dt
     end function jacobian_t
+
+    function jacobian_t0 (dt) result (ddt)
+      !
+      ! Closure over t0 == t_uvx.  Implements procedure (func1).
+      !
+      implicit none
+      real (rk), intent (in) :: dt(:, :, :) ! (n, m, nrad)
+      real (rk) :: ddt(size (dt, 1), size (dt, 2), size (dt, 3))
+      ! *** end of interface ***
+
+      ddt = jacobian_t (t_uvx, dt)
+    end function jacobian_t0
   end subroutine rism_uv
+
+
+  subroutine derivatives (method, rmax, beta, rho, solute, solvent, &
+       chi_vvk, v_uvr, v_uvk, t_uvr, jacobian)
+    !
+    ! Derivatives of the chemical  potential with respect to geometric
+    ! distortions of the solute.
+    !
+    use foreign, only: site
+    use fft, only: fourier_rows, FT_FW, FT_BW
+    use snes, only: func1, krylov
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: rmax, beta, rho
+    type (site), intent (in) :: solute(:)      ! (n)
+    type (site), intent (in) :: solvent(:)     ! (m)
+    real (rk), intent (in) :: chi_vvk(:, :, :) ! (m, m, nrad)
+    real (rk), intent (in) :: v_uvr(:, :, :)   ! (n, m, nrad)
+    real (rk), intent (in) :: v_uvk(:, :, :)   ! (n, m, nrad)
+    real (rk), intent (in) :: t_uvr(:, :, :)   ! (n, m, nrad)
+    procedure (func1) :: jacobian ! (n, m, nrad) -> (n, m, nrad)
+    ! *** end of interface ***
+
+    integer :: n, m, nrad
+
+    n = size (t_uvr, 1)
+    m = size (t_uvr, 2)
+    nrad = size (t_uvr, 3)
+
+    block
+      integer :: i, j
+      real (rk), parameter :: step = 1.0d0 ! does not need to be small
+      real (rk) :: dx(3)
+      real (rk) :: dw(n, n, nrad)
+      real (rk) :: c(n, m, nrad), df(n, m, nrad), dt(n, m, nrad)
+      real (rk) :: vl_uvr (n, m, nrad), dmu
+      real (rk) :: gradients(3, n)
+      real (rk) :: r(nrad), k(nrad), dr, dk
+
+      call mkgrid (rmax, r, dr, k, dk)
+
+      ! Long range potential on the real space grid. We do not use the
+      ! fourier representation v(k) supplied as the input in v_uvk:
+      vl_uvr = force_field_long (solute, solvent, r)
+
+      ! Chemical  potential as a  functional of  converged t  could be
+      ! computed like this:
+      !
+      !   mu = chempot0 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr)
+      !
+      ! Use closure to compute  convered c(k) including the long-range
+      ! assymptotics:
+      c = closure (method, beta, v_uvr, t_uvr)
+
+      c = fourier_rows (c) * (dr**3 / FT_FW)
+
+      c = c - beta * v_uvk
+
+      do i = 1, n
+         do j = 1, 3
+            dx = 0.0
+            dx(j) = step
+
+            ! This one is proportional to x * j1(x) = sinc(x) - cos(x)
+            ! with x  = kl.  So it  is relatively "long  range" in the
+            ! k-space.  The  hope is, it  is applied as  a convolution
+            ! kernel  to  something that  is  sufficiently smooth  (or
+            ! differentiable):
+            dw = omega_fourier1 (solute, k, i, dx)
+
+            ! Fix point equation we solve is this: F(t) = T(t) - t = 0
+            ! with F(t)  represented by  iterate_t().  A change  dw in
+            ! parameters  of  this  fix   point  problem  leads  to  a
+            ! linearization  J(t)  *  dt  =  -df(t) with  df  in  that
+            ! equation being the differential due to dw only.
+            df = oz_uv_equation_c_h (c, dw, chi_vvk)
+            df = fourier_rows (df) * (dk**3 / FT_BW)
+
+            ! Solving the  linearized problem amounts to  finding a dt
+            ! such that jacobian(dt) == - df.
+            dt = krylov (jacobian, -df)
+
+            ! Differential of chemical potential due to dt:
+            dmu = chempot01 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr, dt)
+            print *, "XXX: dmu=", dmu / step
+            gradients(j, i) = dmu / step
+         enddo
+      enddo
+      do i = 1, size (gradients, 2)
+         print *, "XXX:", gradients(:, i)
+      enddo
+    end block
+  end subroutine derivatives
 
 
   subroutine guess_self_energy (solute, dict)
