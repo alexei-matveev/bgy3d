@@ -540,7 +540,7 @@ contains
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
     ! function as a callback is an F08 feature. GFortran 4.3 on Debian
     ! Lenny does not support that:
-    call snes_default (t_uvx, iterate_t)
+    call snes_default (t_uvx, iterate_t, jacobian_t)
 
     ! Done with it, print results:
     call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
