@@ -3,6 +3,7 @@ module snes
   implicit none
   private
 
+  public :: func1, func2        ! abstract interfaces
   public :: snes_default, snes_picard
   public :: krylov
 
