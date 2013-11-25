@@ -410,25 +410,29 @@ computes the sum of all vector elements."
 ;;;
 (define (update-settings settings options)
   ;;
-  (define (update-value val str)
+  ;; Here "old" is the default and should have the proper type (e.g. a
+  ;; number, where numbers are expected), "new" is either a string or
+  ;; boolean (for pure or missing options). FIXME: there is an ugly
+  ;; exception though --- we use old == #f to indicate no meanigful
+  ;; default for solute and solvent strings.
+  ;;
+  (define (update old new)
     (cond
-     ((not str) val)                    ; unchanged if str is #f
-     ((string? val) str)
-     ((number? val) (string->number str))
-     ((symbol? val) (string->symbol str))
-     ;;
-     ;; Otherwise I don't know what to convert the string to. FIXME:
-     ;; as long as the boolean type is unknown one could specify #f in
-     ;; defaults and it will be updated by a string here.
-     ;; Alternatively, use *unspecified* for that.
-     ;;
-     (else str)))
+     ((and (boolean? old) (boolean? new)) new) ; for pure options
+     ((not new) old) ; keep the default if not specified in command line
+     ((string? old) new)
+     ((number? old) (string->number new))
+     ((symbol? old) (string->symbol new))
+     ((not old) new))) ; FIXME: if the default is #f use new, whatever that is
+  ;;
+  ;; ... otherwise someting went wrong and the return value of (update
+  ;; old new) will be unspecified.
   ;;
   (define update-pair                   ; a function ...
     (match-lambda
      ((key . val)                              ; that takes a pair ...
       (let ((str (option-ref options key #f))) ; string or #f
-        (cons key (update-value val str)))))) ; and returns updated pair.
+        (cons key (update val str)))))) ; and returns updated pair.
   ;;
   ;; FIXME: this updates the  defaults, but does not add other entries
   ;; specified in the command line. Augment the defaults.
