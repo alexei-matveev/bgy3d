@@ -1095,16 +1095,21 @@ uranyl calcualtions.
 --solute "Ion, JC08, SPC/E" --norm-tol 1e-14 --dielectric 78.4
 ~~~
 
-Ion          KH    KH^*^       HNC   HNC^*^   MD^*^    Exp^*^
------  -------- --------  -------- --------  -------  -------
-Li+     -108.63  -108.30   -111.42  -111.87   -113.3   -113.8
-Na+      -85.15   -84.95    -86.24   -86.48    -88.4    -88.7
-K+       -68.83   -68.57    -69.35   -69.64    -71.0    -71.2
-Cl-      -77.03   -78.09    -79.51   -78.48    -89.3    -89.1
-Br-      -71.53   -72.20    -73.72   -73.09    -82.7    -82.7
-I-       -62.41   -62.65    -64.46   -64.28    -74.4    -74.3
--------------------------------------------------------------
-^*^ values are from [JLC13]
+Ion          KH    KH^1^    KH^2^       HNC   HNC^1^   HNC^2^    MD^1^   Exp^1^
+-----  -------- -------- --------  -------- -------- --------  -------  -------
+Li+     -108.63  -108.30  -103.35   -111.42  -111.87  -105.35   -113.3   -113.8
+Na+      -85.15   -84.95   -82.22    -86.24   -86.48   -83.08    -88.4    -88.7
+K+       -68.83   -68.57   -67.05    -69.35   -69.64   -67.67    -71.0    -71.2
+Cl-      -77.03   -78.09   -80.95    -79.51   -78.48   -82.29    -89.3    -89.1
+Br-      -71.53   -72.20   -74.59    -73.72   -73.09   -75.98    -82.7    -82.7
+I-       -62.41   -62.65   -64.11    -64.46   -64.28   -65.73    -74.4    -74.3
+-------------------------------------------------------------------------------
+^1^ values are from [JLC13]
+^2^ values obtained by setting $\sigma = 0.4 \AA$ in SPC/E water.
+Default "--snes solver newton" diverged for KH closure in this case,
+numbers for KH are generated with "--snes solver trial", which has
+almost no influence to those numbers with $\sigma = 1.0 \AA$, at least
+to the third digit after decimal point.
 
 [JC08] Determination of Alkali and Halide Monovalent Ion Parameters for
   Use in Explicitly Solvated Biomolecular Simulations, I. S.  Joung and
