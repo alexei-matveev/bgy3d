@@ -1087,8 +1087,11 @@ solutions [JLC13], with a newly developed force field for different
 water models [JC08]. Using the same force field, our 1D-RISM code
 produced quite close values. Settings used in the following table:
 
+Note that the density here used is slightly different with that in
+uranyl calcualtions.
+
 ~~~
---solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096 \
+--solvent "water, SPC/E" --rho 0.033427745 --beta 1.6889 --L 160 --N 4096 \
 --solute "Ion, JC08, SPC/E" --norm-tol 1e-14 --dielectric 78.4
 ~~~
 
