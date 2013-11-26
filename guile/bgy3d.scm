@@ -606,14 +606,16 @@ computes the sum of all vector elements."
            (settings (if (assoc-ref settings 'derivatives)
                          settings       ; for the sake of memoization
                          (acons 'derivatives #t settings)))
-           ;; PES gradients (g x) -> gradients:
-           (g (lambda (x)
-                (assoc-ref (rism x settings) 'XXX-GRADIENTS))))
+           ;; PES tuple (fg x) -> energy, gradients:
+           (fg (lambda (x)
+                 (let ((dict (rism x settings)))
+                   (values (assoc-ref dict 'XXX)
+                           (assoc-ref dict 'XXX-GRADIENTS))))))
       ;;
-      ;; Return initial  geometry, PES function f, and  its gradient g
-      ;; as multiple values:
+      ;; Return initial geometry, PES function f, and its Taylor
+      ;; expansion fg as multiple values:
       ;;
-      (values x0 f g))))
+      (values x0 f fg))))
 
 ;;;
 ;;; "Gas-phase" PES. Hm,  you cannot search for a  minimum on this PES
@@ -628,8 +630,10 @@ computes the sum of all vector elements."
               (let ((solute' (move-molecule solute x)))
                 (rism-self-energy solute' species))))
          (g (lambda (x)                 ; x -> gradients
-              (ddd f x))))
-    (values x0 f g)))
+              (ddd f x)))
+         (fg (lambda (x)
+               (values (f x) (g x)))))
+    (values x0 f fg)))
 
 
 ;;;
@@ -651,17 +655,20 @@ computes the sum of all vector elements."
       ;;
       (match cmd
         ;;
-        ((or "energy" "gradients")
-         (let-values (((x f g) (if solvent
-                                   (make-pes solute solvent settings)
-                                   (make-pes/gp solute settings))))
+        ((or "energy" "gradients" "taylor")
+         (let-values (((x f fg) (if solvent
+                                    (make-pes solute solvent settings)
+                                    (make-pes/gp solute settings))))
            (match cmd
              ("energy"
               (let ((e (f x)))
                 (pretty-print/serial e)))
              ("gradients"
-              (let ((g (g x)))
-                (pretty-print/serial g))))))
+              (let-values (((e g) (fg x)))
+                (pretty-print/serial g)))
+             ("taylor"
+              (let-values (((e g) (fg x)))
+                (pretty-print/serial (cons e g)))))))
         ;;
         ;; Start a server that communicates with a client via two
         ;; named pipes for input/output:
@@ -673,9 +680,9 @@ computes the sum of all vector elements."
            ;; Make a function of 3d geometry. The initial geometry is
            ;; not used:
            ;;
-           (let-values (((x0 f g) (if solvent
-                                      (make-pes solute solvent settings)
-                                      (make-pes/gp solute settings))))
+           (let-values (((x0 f fg) (if solvent
+                                       (make-pes solute solvent settings)
+                                       (make-pes/gp solute settings))))
              (let loop ()
                ;;
                ;; Read the input pipe. This will block utill the
@@ -813,7 +820,7 @@ computes the sum of all vector elements."
         ("self-energy"
          (for-each
           (lambda (name)
-            (let-values (((x0 f g) (make-pes/gp (find-molecule name) settings)))
+            (let-values (((x0 f fg) (make-pes/gp (find-molecule name) settings)))
               (let ((e (f x0)))
                 (pretty-print/serial e))))
           args))
