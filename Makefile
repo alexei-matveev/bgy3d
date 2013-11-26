@@ -141,12 +141,12 @@ ifeq ($(WITH_FORTRAN),1)
 	f-objs += \
 		rism.o \
 		drism.o \
-		lisp.o \
 		snes.o \
 		bessel.o \
 		fft.o \
 		linalg.o \
 		options.o \
+		lisp.o \
 		foreign.o \
 		units.o \
 		kinds.o \
