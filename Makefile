@@ -83,7 +83,7 @@ PIC-FLAGS = $(if $(shared), -fPIC)
 OMP-FLAGS = # -fopenmp
 
 # Fortran flags to assist debugging and experiments:
-DBG-FFLAGS = # -fcheck-array-temporaries -fbounds-check -fexternal-blas -fblas-matmul-limit=1
+DBG-FFLAGS = -fexternal-blas -fblas-matmul-limit=1 # -fcheck-array-temporaries -fbounds-check
 
 
 
