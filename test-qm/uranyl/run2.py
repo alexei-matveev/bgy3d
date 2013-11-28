@@ -9,6 +9,7 @@ from __future__ import with_statement
 #
 # export LD_LIBRARY_PATH=~/darcs/bgy3d
 #
+import os
 from ase.calculators.paragauss import ParaGauss
 from ase.io import read, write
 from pts.memoize import Memoize, DirStore
@@ -45,14 +46,28 @@ s = trafo.pinv (x) # s == zeros (6 * len (fs) - 6)
 assert max (abs (s)) == 0.0
 assert max (abs (trafo (s) - x)) < 1.0e-10
 
+#
+# FIXME: PG will  choke on gxfile, and saved_scfstate  from a previous
+# calculation unless you clean:
+#
+def clean ():
+    files = ["./gxfile", "./saved_scfstate.dat"]
+    for path in files:
+        try:
+            os.unlink (path)
+        except:
+            pass
+
+clean ()
+
+
 with QFunc (atoms, calc) as f:
     with Server (cmd) as g:
         f = Memoize (f, DirStore (salt="uo22+, 5h2o, qm"))
+        g = Memoize (g, DirStore (salt=cmd))
+
         f = compose (f, trafo)
-        g1 = Memoize (g, DirStore (salt="uo22+, rism"))
-        g = lambda x: g1(x) * kcal
         g = compose (g, trafo)
-        g = NumDiff (g)
 
         e = f # + g
 
