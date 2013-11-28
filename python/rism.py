@@ -8,24 +8,94 @@ import shlex
 from tempfile import mkdtemp
 from subprocess import Popen
 from contextlib import contextmanager
+from pyparsing import Regex, Suppress, Forward, ZeroOrMore, Group
+from numpy import array
+from pts.func import Func
+from pts.units import kcal
 
 
-def sexp (x):
+def to_sexp (x):
     "Convert array of numbers to a nested s-expression."
     try:
         n = len (x)
     except:
         return repr (x)
-    return "(" + " ".join (sexp (y) for y in x) + ")"
+    return "(" + " ".join (to_sexp (y) for y in x) + ")"
+
+
+def make_sexp_parser ():
+    """
+    Returns a  simple parser for  nested lists of real  numbers. Round
+    parens () are assumed as customary in lisps.
+    """
+
+    # Punctuation literals (note round parens):
+    LPAR, RPAR = map (Suppress, "()")
+
+    # Real numbers:
+    real_string = Regex (r"[+-]?\d+\.\d*([eE][+-]?\d+)?")
+    real = real_string.setParseAction (lambda tokens: float (tokens[0]))
+
+    # Voodoo:
+    sexp = Forward ()
+    sexp_list = Group (LPAR + ZeroOrMore (sexp) + RPAR)
+    sexp << (real | sexp_list)
+
+    return lambda s: sexp.parseString (s)[0]
+
+from_sexp = make_sexp_parser ()
+
 
 #
 # Request  is  an s-expression  in  text  form  encoding an  array  of
-# numbers, reply is just a number again in text form:
+# numbers, reply is an s-expression (e .  g) where g is itself a n x 3
+# nested list  of numbers  again all in  text form.  The  parser turns
+# nested list back into Python nested lists.
 #
 def protocol (server):
-    def f (x):
-        return float (server (sexp (x)))
-    return f
+    """
+    The result  is a  Func() derived from  the protocol  function fg()
+    that implements  a "Taylor  expansion" of a  scalar PES at  x.  It
+    returns a tuple of energy and gradients:
+
+      fg: array (n x 3) -> number, array (n x 3)
+
+    Server is supposed to turn text into text (meanigfully):
+
+      server: text -> text
+
+    For the properties  of Func() see module pts.func.   Ah, and there
+    is another gotcha --- PTS python code operates in eV and angstroms
+    whereas the server accepts angstroms but returns kcals.
+    """
+
+    def fg (x):
+        # The parser  returns an object almost isomorphic  to a nested
+        # list, but  not quite. In particular  array() constructor may
+        # choke on such an object:
+        y = from_sexp (server (to_sexp (x)))
+        # print "XXX:\n", x, "->\n", y
+
+        # Energy:
+        e = y[0]
+
+        # Gradients
+        g = array (y[1:])
+
+        return e * kcal, g * kcal
+
+    #
+    # The value  returned from here  is the value yielded  in Server()
+    # context manager and is used in PTS code as this:
+    #
+    #   with Server (cmd) as f:
+    #       # ... assuming f is a Func() here.
+    #
+    # So we have  to turn tuple valued fg()  into proper Func() either
+    # here or  in the body of the  Server(). But since this  is also a
+    # protocol thing we do it here:
+    #
+    return Func (taylor=fg)
 
 
 #
@@ -88,7 +158,6 @@ def main (cmd):
     # code. That code should still belive it works with a callable.
     #
     from pts.func import NumDiff
-    from numpy import array
 
     x = array ([[-0.2929, 0.0, 0.0],
                 [0.2929, 0.757, 0.0],

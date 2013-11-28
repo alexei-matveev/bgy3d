@@ -60,11 +60,12 @@ print "XXX: fprime = ", trafo.fprime (s)
 with QFunc (atoms, calc) as f:
     with Server (cmd) as g:
         f = Memoize (f, DirStore (salt="uo22+, gp, qm"))
+        g = Memoize (g, DirStore (salt=cmd))
+
+        # One could compose  (f + g, trafo), but we  use f(s) and g(s)
+        # below as functions of internal coordinates:
         f = compose (f, trafo)
-        g1 = Memoize (g, DirStore (salt="uo22+, rism"))
-        g = lambda x: g1(x) * kcal
         g = compose (g, trafo)
-        g = NumDiff (g)
 
         e = f + g
 

@@ -693,14 +693,15 @@ computes the sum of all vector elements."
                  ;;
                  ;; Convention is when the input is #f, then
                  ;; terminate. Otherwise evaluate PES at this point
-                 ;; and write the resulting energy to our side of the
-                 ;; output pipe. This will block utill the client
+                 ;; and write the resulting energy and gradients to
+                 ;; our side of the output pipe as a single
+                 ;; s-expression. This will block utill the client
                  ;; reads the results from his end:
                  ;;
                  (when x
-                   (let ((e (f x)))     ; compute the energy
+                   (let-values (((e g) (fg x))) ; get energy, gradient
                      (with-output-to-file fout
-                       (lambda () (write e))))
+                       (lambda () (write (cons e g))))) ; or (list e g)?
                    (loop)))))))
         ("solvent"
          ;;
