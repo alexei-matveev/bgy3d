@@ -32,6 +32,10 @@ typedef void (*VecFunc2) (void *ctx, Vec x, Vec dx, Vec r /* out */);
 */
 void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n]);
 
+/* Solves for f(x) = b  iteratively. Has to be consistent with Fortran
+   declarations in snes.f90: */
+void rism_krylov (void *ctx, ArrFunc1 f, int n, real b_[n], real x_[n]);
+
 /*
   A  few solvers  for  F(x) =  0  taking a  VecFunc1, its  execution
   context,  initial guess,  and some  user input  eventually affecting

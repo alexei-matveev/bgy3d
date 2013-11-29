@@ -32,8 +32,54 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx,
 }
 
 
-/* Matrix-free  Jacobian,   J(r).  The  content   of  the  Vec   r  is
-   occasionally updated by PETSC invokin jupdate. */
+/* Matrix-free matrix  based on linear  VecFunc1. Note it is  the user
+   responsibility to guarantee that VecFunc1 is linear. */
+typedef struct Mtx
+{
+  void *data;
+  VecFunc1 f;
+} Mtx;
+
+
+/* [Operation] Apply  J. An Operation that  takes a Mat and  a Vec and
+   fills another Vec: */
+static PetscErrorCode
+mapply (Mat J, Vec x, Vec y)
+{
+  const Mtx *ctx = mat_shell_context (J);
+
+  /* y = J * x */
+  ctx->f (ctx->data, x, y);
+  return 0;
+}
+
+
+/* [Destructor]   A  Destructor   that  takes   a  Mat   and  destroys
+   internals: */
+static PetscErrorCode
+mdestroy (Mat J)
+{
+  free (mat_shell_context (J)); /* malloc() in mcreate() */
+  return 0;
+}
+
+
+/* [Constructor] */
+static Mat
+mcreate (int n, void *data, VecFunc1 f)
+{
+  Mtx *ctx = malloc (sizeof *ctx); /* free() in mdestroy() */
+
+  *ctx = (struct Mtx) {data, f};
+
+  /* A square matrix with one  Operation and Destructor. Here n is the
+     size of the local vector section the matrix operates upon. */
+  return mat_shell_create (n, ctx, mapply, mdestroy);
+}
+
+
+/* Matrix-free  Jacobian,   J(r).   The  content  of  the   Vec  r  is
+   occasionally updated by PETSC invoking jupdate(). */
 typedef struct Ctx
 {
   void *data;
@@ -42,8 +88,7 @@ typedef struct Ctx
 } Ctx;
 
 
-/* Apply J. An Operation that takes  a Mat and a Vec and fills another
-   Vec: */
+/* [Operation] Apply J(r): */
 static PetscErrorCode
 japply (Mat J, Vec x, Vec y)
 {
@@ -55,7 +100,7 @@ japply (Mat J, Vec x, Vec y)
 }
 
 
-/* Destroy J. A Destructor that takes a Mat and destroys internals: */
+/* [Destructor] Destroy internals of J(r): */
 static PetscErrorCode
 jdestroy (Mat J)
 {
@@ -66,6 +111,7 @@ jdestroy (Mat J)
 }
 
 
+/* [Constructor] */
 static Mat
 jcreate (void *data, Vec r, VecFunc2 j)
 {
@@ -508,4 +554,58 @@ void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
     bgy3d_snes_default (&pd, ctx, F, NULL, x); /* dF is never NULL */
 
   vec_destroy (&x);       /*  should  not free() */
+}
+
+
+/* For solving linear equation F x = b iteratively. */
+static void
+krylov (void *ctx, VecFunc1 F, Vec b, Vec x)
+{
+  local Mat A = mcreate (vec_local_size (b), ctx, F);
+
+  /* B := A^-1 */
+  local Mat B = mat_inverse (A);
+  mat_destroy (&A);
+
+  /* x := B * b == A^-1 * b */
+  MatMult (B, b, x);
+
+  mat_destroy (&B);
+}
+
+
+/*
+  Assumes f(x) is linear and solves for f(x) = b.
+
+  FIXME: adapt for multiple RHSs.
+
+  FIXME:  in parallel  runs with  P workers  this function  appears to
+  operate  with a  distributed Vec  of  total length  n *  P built  of
+  redundant sections of length n on each worker.
+*/
+void
+rism_krylov (void *ctx, ArrFunc1 f, int n, real b_[n], real x_[n])
+{
+  local Vec b = vec_from_array (n, b_);
+  local Vec x = vec_from_array (n, x_);
+
+  /* Implements VecFunc1 interface: */
+  void F (void *ctx, Vec y, Vec dy)
+  {
+    local real *y_ = vec_get_array (y);
+    local real *dy_ = vec_get_array (dy);
+
+    /* Implements ArrFunc1 interface: */
+    f (ctx, n, y_, dy_);
+
+    vec_restore_array (y, &y_);
+    vec_restore_array (dy, &dy_);
+  }
+
+  /* Petsc does the real work: */
+  krylov (ctx, F, b, x);
+
+  /* Should not free() */
+  vec_destroy (&x);
+  vec_destroy (&b);
 }
