@@ -139,30 +139,28 @@ contains
     !
     ! Delegates the actual work to Petsc by way of C-func rism_snes().
     !
-    use iso_c_binding, only: c_ptr, c_loc, c_null_funptr
+    use iso_c_binding, only: c_ptr, c_loc
     implicit none
     real (rk), intent (inout) :: x(:, :, :)
     procedure (func1) :: f            ! (x) -> dx
     procedure (func2), optional :: df ! (x, dx) -> df
     ! *** end of interface ***
 
-    type (context), target :: f_ctx
-    type (c_ptr) :: ctx
+    type (context), target :: ctx
     procedure (arrfunc2), pointer :: jac
 
-    ctx = c_loc (f_ctx)
-    f_ctx % shape = shape (x)
-    f_ctx % f => f
+    ctx % shape = shape (x)
+    ctx % f => f
 
     if (present (df)) then
-       f_ctx % df => df
+       ctx % df => df
        jac => jacobian
     else
-       f_ctx % df => NULL()
+       ctx % df => NULL()
        jac => NULL()
     endif
 
-    call rism_snes (ctx, objective, jac, size (x), x)
+    call rism_snes (c_loc (ctx), objective, jac, size (x), x)
   end subroutine snes_default
 
 
