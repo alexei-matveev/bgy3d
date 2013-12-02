@@ -255,7 +255,7 @@ contains
   end subroutine jacobian
 
 
-  function krylov (f, b) result (x)
+  function krylov0 (f, b) result (x)
     !
     ! Solves for f(x) = b. May be abused as poor man solver for linear
     ! equations.
@@ -279,10 +279,10 @@ contains
 
       y = f(x) - b
     end function fb
-  end function krylov
+  end function krylov0
 
 
-  function krylov1 (f, b) result (x)
+  function krylov (f, b) result (x)
     !
     ! Solves for f(x) = b assuming linear f(x).
     !
@@ -301,6 +301,6 @@ contains
 
     x = 0.0
     call rism_krylov (c_loc (ctx), objective, size (b), b, x)
-  end function krylov1
+  end function krylov
 
 end module snes
