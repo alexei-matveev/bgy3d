@@ -84,6 +84,22 @@ module snes
        integer (c_int), intent (in), value :: n
        real (c_double), intent (inout) :: x(n)
      end subroutine rism_snes
+
+     subroutine rism_krylov (ctx, f, n, b, x) bind (c)
+       !
+       ! void rism_krylov (void *ctx, ArrFunc1 f,
+       !                   int n, real b[n], real x[n])
+       !
+       ! See ./bgy3d-snes.c
+       !
+       use iso_c_binding, only: c_ptr, c_int, c_double
+       implicit none
+       type (c_ptr), intent (in), value :: ctx
+       procedure (arrfunc1) :: f
+       integer (c_int), intent (in), value :: n
+       real (c_double), intent (in) :: b(n)
+       real (c_double), intent (inout) :: x(n)
+     end subroutine rism_krylov
   end interface
 
   !
@@ -241,7 +257,8 @@ contains
 
   function krylov (f, b) result (x)
     !
-    ! Solves for f(x) = b.
+    ! Solves for f(x) = b. May be abused as poor man solver for linear
+    ! equations.
     !
     implicit none
     procedure (func1) :: f
@@ -263,4 +280,27 @@ contains
       y = f(x) - b
     end function fb
   end function krylov
+
+
+  function krylov1 (f, b) result (x)
+    !
+    ! Solves for f(x) = b assuming linear f(x).
+    !
+    use iso_c_binding, only: c_loc
+    implicit none
+    procedure (func1) :: f
+    real (rk), intent (in) :: b(:, :, :)
+    real (rk) :: x(size (b, 1), size (b, 2), size (b, 3))
+    ! *** end of interface ***
+
+    type (context), target :: ctx
+
+    ctx % shape = shape (b)
+    ctx % f => f
+    ! ctx % df is NULL by default
+
+    x = 0.0
+    call rism_krylov (c_loc (ctx), objective, size (b), b, x)
+  end function krylov1
+
 end module snes
