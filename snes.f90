@@ -139,7 +139,7 @@ contains
     !
     ! Delegates the actual work to Petsc by way of C-func rism_snes().
     !
-    use iso_c_binding, only: c_ptr, c_loc
+    use iso_c_binding, only: c_loc
     implicit none
     real (rk), intent (inout) :: x(:, :, :)
     procedure (func1) :: f            ! (x) -> dx
