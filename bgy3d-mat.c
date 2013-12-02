@@ -34,12 +34,10 @@ msizes (const Mat A, int *n3, int *N3)
 static KSP
 ksp_create (Mat M)
 {
-  PC pc;
   KSP ksp;
 
   /* Create ksp environment */
   KSPCreate (PETSC_COMM_WORLD, &ksp);
-  KSPGetPC (ksp, &pc);
 
   /* Set rtol, atol, dtol, maxits */
   {
@@ -63,8 +61,35 @@ ksp_create (Mat M)
   /* Set the matrix: */
   KSPSetOperators (ksp, M, M, SAME_PRECONDITIONER);
 
-  /* Set preconditioner */
-  PCSetType (pc, PCBJACOBI);
+  /* Set preconditioner: PCLU, PCNONE, PCJACOBI, PCBJACOBI, ... */
+  {
+    PC pc;
+    KSPGetPC (ksp, &pc);
+
+    /*
+      This code is executed for explicit (bgy3d-dirichlet.c) and shell
+      matrices  (bgy3d-snes.c).  The  shell matrix  cannot  use Jacobi
+      preconditioner.  The  symptom is an  error message at  the first
+      call to KSPSolve() mentioning
+
+        "MatGetSubMatrices() line ... in ... Mat type shell".
+
+      This error  occurs with  PETSC 3.2 but  not with 3.1.   See also
+      comments in bgy3d-snes.c.
+    */
+    const MatType mtype;        /* const char *mtype */
+    MatGetType (M, &mtype);
+
+    /*
+      The MatType  strings do  not seem to  be "interned" so  that one
+      should compare  values, not  pointers.  MATSHELL is  #defined to
+      "shell" by PETSC:
+    */
+    if (strcmp (mtype, MATSHELL) == 0)
+      PCSetType (pc, PCNONE);
+    else
+      PCSetType (pc, PCBJACOBI);
+  }
 
   /* This is the place which is  supposed to tell KSP solver to re-use
      the supplied vector as initial guess: */
