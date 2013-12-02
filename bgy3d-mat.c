@@ -41,11 +41,26 @@ ksp_create (Mat M)
   KSPCreate (PETSC_COMM_WORLD, &ksp);
   KSPGetPC (ksp, &pc);
 
-  /* FIXME: literal tolerances here: */
-  KSPSetTolerances (ksp, 1.0e-4, 1.0e-4, 1.0e+5, 1000);
+  /* Set rtol, atol, dtol, maxits */
+  {
+    real rtol, abstol, dtol;
+    int maxits;
+    KSPGetTolerances (ksp, &rtol, &abstol, &dtol, &maxits);
+    /*
+      FIXME:  literal numbers  here, decide  on how  to  control these
+      settings from the  user side.  Defaults are at  the mercy of the
+      library:  rtol = 1e-5,  abstol =  1e-50, dtol  = 1e+4,  maxits =
+      10000.
 
-  /* Set Matrix */
-  //KSPSetOperators (*ksp, M, M, SAME_NONZERO_PATTERN);
+      This  particular solver  is  used to  find  solutions of  linear
+      equations A  x = b. One  has to assume the  ultimate accuracy is
+      desired here. The default RTOL is too large though, decrease it.
+      Compare to the motivation and settings in bgy3d-snes.c:
+    */
+    KSPSetTolerances (ksp, rtol / 1000, abstol, 10 * dtol, maxits / 10);
+  }
+
+  /* Set the matrix: */
   KSPSetOperators (ksp, M, M, SAME_PRECONDITIONER);
 
   /* Set preconditioner */
