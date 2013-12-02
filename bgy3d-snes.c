@@ -271,6 +271,13 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
         search direction:
       */
       KSPSetTolerances (ksp, 100 * rtol, abstol, 10 * dtol, maxits / 10);
+
+      /*
+        A call to  KSPSetFromOptions() will eventually overwrite these
+        settigns   by  the   runtime  options   (including   those  in
+        ~/.petscrc).  Presumably,  an equivalent of this  call is made
+        from the body of SNESSetFromOptions(), see below.
+      */
     }
 
     /*
