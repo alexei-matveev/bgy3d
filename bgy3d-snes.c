@@ -247,7 +247,7 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
     KSP ksp;
     SNESGetKSP (snes, &ksp);    /* no need to destroy, apparently */
 
-    /* set rtol, atol, dtol, maxits */
+    /* Set rtol, atol, dtol, maxits */
     {
       real rtol, abstol, dtol;
       int maxits;
@@ -265,10 +265,11 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
         solver  wastes  unnecessarily much  time  refining  δx in  the
         equivalent of linear equation J δx = -r in the region far from
         SNES convergence.  Therefore,  the somewhat drastic factor 100
-        here.   With the defaults  above the  code below  requires the
-        norm of  the residual of the *linear*  Jacobian sub-problem to
-        be reduced  by at  least factor  1000 in order  to be  used as
-        search direction:
+        here (compare to the  motivation and settings in bgy3d-mat.c).
+        With the  defaults above the  code below requires the  norm of
+        the  residual  of  the  *linear* Jacobian  sub-problem  to  be
+        reduced by at least factor 1000  in order to be used as search
+        direction:
       */
       KSPSetTolerances (ksp, 100 * rtol, abstol, 10 * dtol, maxits / 10);
 
