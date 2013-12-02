@@ -29,7 +29,7 @@ msizes (const Mat A, int *n3, int *N3)
  * Implementation of the matrix inverse by an iterative solver.
  */
 
-/* KSP  stays for  Krylov Sub-Space,  used to  solve system  of linear
+/* KSP stays  for Krylov  Sub-Space, used to  solve systems  of linear
    equations: */
 static KSP
 ksp_create (Mat M)
@@ -55,8 +55,9 @@ ksp_create (Mat M)
      the supplied vector as initial guess: */
   KSPSetInitialGuessNonzero (ksp, PETSC_TRUE);
 
-  /* runtime options will override default parameters */
-  //KSPSetFromOptions(BHD->ksp);
+  /* Runtime  options (including  those in  ~/.petscrc)  will override
+     default parameters: */
+  KSPSetFromOptions (ksp);
 
   return ksp;
 }
