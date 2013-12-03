@@ -587,7 +587,9 @@ computes the sum of all vector elements."
 (define (make-pes solute solvent settings)
   (let ((chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
                       (assoc-ref dct 'susceptibility)))) ; extract susceptibility
-        (section (if solute 'solute 'solvent)))          ; alist key
+        (s-key (if solute 'solute 'solvent))
+        (e-key 'XXX)
+        (g-key 'XXX-GRADIENTS))         ; alist keys
     (let* ((m (or solute solvent))      ; molecule to be "moved"
            (x0 (molecule-positions m))  ; unperturbed geometry
            (rism (memoize               ; FIXME: leaking much?
@@ -596,10 +598,10 @@ computes the sum of all vector elements."
                            (d (if solute
                                   (rism-solute m' solvent s (force chi))
                                   (rism-solvent m' s))))
-                      (assoc-ref d section))))) ; u or v
+                      (assoc-ref d s-key))))) ; u or v section
            ;; PES (f x) -> energy:
            (f (lambda (x)
-                (assoc-ref (rism x settings) 'XXX)))
+                (assoc-ref (rism x settings) e-key)))
            ;; Make sure to request evaluation of gradients for (g x)
            ;; but not for (f x). Using two different settings impedes
            ;; memoization:
@@ -609,8 +611,8 @@ computes the sum of all vector elements."
            ;; PES tuple (fg x) -> energy, gradients:
            (fg (lambda (x)
                  (let ((dict (rism x settings)))
-                   (values (assoc-ref dict 'XXX)
-                           (assoc-ref dict 'XXX-GRADIENTS))))))
+                   (values (assoc-ref dict e-key)
+                           (assoc-ref dict g-key))))))
       ;;
       ;; Return initial geometry, PES function f, and its Taylor
       ;; expansion fg as multiple values:
