@@ -497,7 +497,7 @@ contains
   subroutine rism_uv (env, method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
-    use lisp, only: obj, nil, cons, acons, symbol, flonum
+    use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     use units, only: angstrom
     implicit none
@@ -580,9 +580,8 @@ contains
     ! user:
     block
       logical :: flag
-      integer :: i, j
       real (rk) :: gradients(3, n)
-      type (obj) :: grads, vec
+      type (obj) :: grads
 
       ! False if unspecified:
       if (.not. getopt (env, "derivatives", flag)) then
@@ -593,14 +592,7 @@ contains
          call derivatives (method, rmax, beta, rho, solute, solvent, &
               chi, v_uvr, v_uvk, t_uvx, jacobian_t0, gradients)
 
-         grads = nil
-         do j = n, 1, -1
-            vec = nil
-            do i = 3, 1, -1
-               vec = cons (flonum (gradients(i, j)), vec)
-            enddo
-            grads = cons (vec, grads)
-         enddo
+         grads = list2 (gradients)
          ! call display (grads)
          ! call newline ()
          dict = acons (symbol ("XXX-GRADIENTS"), grads, dict)
@@ -2795,5 +2787,36 @@ contains
     y = transpose (x)
   end subroutine trans
 
+
+  function list1 (array) result (lst)
+    use lisp, only: obj, nil, cons, flonum
+    implicit none
+    real (rk), intent (in) :: array(:)
+    type (obj) :: lst
+    ! *** end of interface ***
+
+    integer :: i
+
+    lst = nil
+    do i = size (array), 1, -1
+       lst = cons (flonum (array(i)), lst)
+    end do
+  end function list1
+
+
+  function list2 (array) result (lst)
+    use lisp, only: obj, nil, cons
+    implicit none
+    real (rk), intent (in) :: array(:, :)
+    type (obj) :: lst
+    ! *** end of interface ***
+
+    integer :: i
+
+    lst = nil
+    do i = size (array, 2), 1, -1
+       lst = cons (list1 (array(:, i)), lst)
+    end do
+  end function list2
 
 end module rism
