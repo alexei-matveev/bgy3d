@@ -1835,38 +1835,35 @@ contains
     ! a given site.
     !
     use foreign, only: site
-    use units, only: ALPHA, EPSILON0INV
     implicit none
     type (site), intent (in) :: sites(:) ! (m)
     integer, intent (in) :: spec(:)      ! (m)
     real (rk) :: e
     ! *** end of interface ***
 
-    integer i, j, m
-
-    m = size (sites)
+    integer :: i, j
 
     ! Loop over upper triangle with i <= j <= m, not to count the same
     ! interaction twice.
     e = 0.0
-    do j = 1, m
+    do j = 1, size (sites)
        do i = 1, j
           ! Self-interaction  of each  site is  automatically excluded
           ! because of this:
           if (spec(i) == spec(j)) cycle
-          e = e + pair_energy (sites(i), sites(j))
+          e = e + energy (sites(i), sites(j))
        enddo
     enddo
 
     contains
 
-      function pair_energy (a, b) result (e)
+      function energy (a, b) result (e)
         !
         ! Return the interaction energy between two sites: Pari_energy =
         ! LJ + Coulomb_short + Coulomb_long
         !
         use foreign, only: site
-        use units, only: EPSILON0INV, ALPHA
+        use units, only: EPSILON0INV
         implicit none
         type (site), intent (in) :: a, b
         real (rk) :: e
@@ -1879,18 +1876,16 @@ contains
 
         rab = norm2 (a % x - b % x)
 
-        ! Coulomb long + short energy happens  to be just 1 / rab, but
-        ! in this  way we do not  rely on that equality  should it not
-        ! hold for some reason:
-        coul = EPSILON0INV * a % charge * b % charge * &
-             (coulomb_short (rab, ALPHA) + coulomb_long (rab, ALPHA))
+        ! coulomb_long() + coulomb_short() happens to be just 1 / rab.
+        ! FIXME: we rely on that equality here.
+        coul = EPSILON0INV * a % charge * b % charge / rab
 
         if (sigma /= 0.0) then
           e = coul + epsilon * lj (rab / sigma)
         else
           e = coul
         endif
-      end function pair_energy
+      end function energy
   end function self_energy
 
 
