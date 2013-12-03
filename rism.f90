@@ -84,7 +84,9 @@ contains
     real (c_double) :: e
     ! *** end of interface ***
 
-    e = self_energy (sites, spec)
+    real (rk) :: g(3, n)
+
+    call self_energy (sites, spec, e, g)
   end function rism_self_energy
 
 
@@ -822,7 +824,7 @@ contains
     type (obj), intent (inout) :: dict
     ! *** end of interface ***
 
-    real (rk) :: e
+    real (rk) :: e, g(3, size (solute))
     integer :: spec(size (solute)), i
 
     ! Get  species  ID.  Sites  belong  to  the  same species  if  the
@@ -836,11 +838,12 @@ contains
        enddo
     endif
 
-    e = self_energy (solute, spec)
+    call self_energy (solute, spec, e, g)
 
     print *, "# Self energy = ", e / kcal, " kcal/mol"
 
     dict = acons (symbol ("SELF-ENERGY"), flonum (e), dict)
+    dict = acons (symbol ("SELF-ENERGY-GRADIENTS"), list2 (g), dict)
   end subroutine guess_self_energy
 
 
@@ -1729,6 +1732,20 @@ contains
   end function lj
 
 
+  elemental function lj1 (r, dr) result (df)
+    implicit none
+    real (rk), intent (in) :: r, dr
+    real (rk) :: df
+    ! *** end of interfce ***
+
+    real (rk) :: sr6
+
+    sr6 = 1 / r**6
+
+    df = 4 * sr6 * (6 - 12 * sr6) * dr / r
+  end function lj1
+
+
   function distance_matrix (sites) result (rij)
     !
     ! Calculate distance matrix of each atomic pair for a given site.
@@ -1821,7 +1838,7 @@ contains
   end function identify_species
 
 
-  function self_energy (sites, spec) result (e)
+  subroutine self_energy (sites, spec, e, g)
     !
     ! Calculate the energy summation between each pair of residues for
     ! a given site.
@@ -1830,55 +1847,87 @@ contains
     implicit none
     type (site), intent (in) :: sites(:) ! (m)
     integer, intent (in) :: spec(:)      ! (m)
-    real (rk) :: e
+    real (rk), intent (out) :: e
+    real (rk), intent (out) :: g(3, size (sites)) ! (3, m)
     ! *** end of interface ***
 
     integer :: i, j
+    real (rk) :: f(3)
 
     ! Loop over upper triangle with i <= j <= m, not to count the same
     ! interaction twice.
     e = 0.0
+    g = 0.0
     do j = 1, size (sites)
        do i = 1, j
           ! Self-interaction  of each  site is  automatically excluded
           ! because of this:
           if (spec(i) == spec(j)) cycle
           e = e + energy (sites(i), sites(j))
+          f = force (sites(i), sites(j))
+          g(:, i) = g(:, i) - f
+          g(:, j) = g(:, j) + f
        enddo
     enddo
 
-    contains
+  contains
 
-      function energy (a, b) result (e)
-        !
-        ! Return the interaction energy between two sites: Pari_energy =
-        ! LJ + Coulomb_short + Coulomb_long
-        !
-        use foreign, only: site
-        use units, only: EPSILON0INV
-        implicit none
-        type (site), intent (in) :: a, b
-        real (rk) :: e
-        ! *** end of interface ***
+    function energy (a, b) result (e)
+      !
+      ! Return the interaction energy between two sites: Pair energy =
+      ! LJ + Coulomb short + Coulomb long.
+      !
+      use foreign, only: site
+      use units, only: EPSILON0INV
+      implicit none
+      type (site), intent (in) :: a, b
+      real (rk) :: e
+      ! *** end of interface ***
 
-        real (rk) :: epsilon, sigma, rab, coul
+      real (rk) :: epsilon, sigma, rab, coul
 
-        ! Combining LJ parameters:
-        call pair (a, b, sigma, epsilon)
+      ! Combining LJ parameters:
+      call pair (a, b, sigma, epsilon)
 
-        rab = norm2 (a % x - b % x)
+      rab = norm2 (b % x - a % x)
 
-        ! coulomb_long() + coulomb_short() happens to be just 1 / rab.
-        ! FIXME: we rely on that equality here.
-        coul = EPSILON0INV * a % charge * b % charge / rab
+      ! coulomb_long() +  coulomb_short() happens to be just  1 / rab.
+      ! FIXME: we rely on that equality here.
+      coul = EPSILON0INV * a % charge * b % charge / rab
 
-        if (sigma /= 0.0) then
-          e = coul + epsilon * lj (rab / sigma)
-        else
-          e = coul
-        endif
-      end function energy
-  end function self_energy
+      if (sigma /= 0.0) then
+         e = coul + epsilon * lj (rab / sigma)
+      else
+         e = coul
+      endif
+    end function energy
+
+    function force (a, b) result (df)
+      use foreign, only: site
+      use units, only: EPSILON0INV
+      implicit none
+      type (site), intent (in) :: a, b
+      real (rk) :: df(3)
+      ! *** end of interface ***
+
+      real (rk) :: ab(3), fr
+      real (rk) :: epsilon, sigma, rab
+
+      ! Combining LJ parameters:
+      call pair (a, b, sigma, epsilon)
+
+      ab = b % x - a % x
+      rab = norm2 (ab)
+
+      fr = - EPSILON0INV * a % charge * b % charge / rab**2
+
+      if (sigma /= 0.0) then
+         fr = fr + (epsilon / sigma) * lj1 (rab / sigma, 1.0d0)
+      endif
+
+      df = (ab / rab) * fr
+    end function force
+  end subroutine self_energy
 
 
   !
