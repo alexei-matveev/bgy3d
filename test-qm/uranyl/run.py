@@ -9,6 +9,7 @@ from __future__ import with_statement
 #
 # export LD_LIBRARY_PATH=~/darcs/bgy3d
 #
+import os
 from ase.calculators.paragauss import ParaGauss
 from ase.io import read
 from pts.cfunc import Affine, Cartesian
@@ -20,19 +21,41 @@ from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
 
-cmd = \
+#
+# FIXME: PG will  choke on gxfile, and saved_scfstate  from a previous
+# calculation unless you clean:
+#
+def clean ():
+    files = ["./gxfile", "./saved_scfstate.dat"]
+    for path in files:
+        try:
+            os.unlink (path)
+        except:
+            pass
+
+ucmd = \
 """
-/home/alexei/darcs/bgy3d/guile/runbgy.scm
+/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
 --solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
 """
 
-calc = ParaGauss(cmdline="mpirun -np 4 ~/darcs/ttfs-mac/runqm",
-                       input="uranyl.scm")
+wcmd = \
+"""
+/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+--solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
+--solute "water, SPC/E" --norm-tol 1e-14 --dielectric 78.4
+"""
 
-atoms = read ("uo22+,gp.xyz")
+command = "salloc -n8 mpirun ~/darcs/ttfs-mac/runqm"
 
-x = atoms.get_positions ()
+ucalc = ParaGauss (cmdline=command, input="uranyl.scm")
+wcalc = ParaGauss (cmdline=command, input="water.scm")
+
+uatoms = read ("uo22+,gp.xyz")
+watoms = read ("h2o.xyz")
+
+x = uatoms.get_positions ()
 
 if False:
     trafo = compose (Cartesian (), Affine (x.reshape (x.size, 1)))
@@ -57,10 +80,12 @@ print  trafo (s)
 print "XXX: fprime = ", trafo.fprime (s)
 # exit (1)
 
-with QFunc (atoms, calc) as f:
-    with Server (cmd) as g:
-        f = Memoize (f, DirStore (salt="uo22+, gp, qm"))
-        g = Memoize (g, DirStore (salt=cmd))
+clean ()
+
+with QFunc (uatoms, ucalc) as f:
+    with Server (ucmd) as g:
+        f = Memoize (f, DirStore (salt="uo22+, gp, qm Dec 9"))
+        g = Memoize (g, DirStore (salt=ucmd + "Dec 9"))
 
         # One could compose  (f + g, trafo), but we  use f(s) and g(s)
         # below as functions of internal coordinates:
@@ -73,6 +98,7 @@ with QFunc (atoms, calc) as f:
         print "x(start)=\n", trafo (s)
 
         s, info = minimize (e, s, algo=1)
+        print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
 
         print "converged =", info["converged"], "in", info["iterations"], "iterations"
         print "s(min)=", s
@@ -83,3 +109,61 @@ with QFunc (atoms, calc) as f:
             print "e = ", f(s)/u, "+", g(s)/u, "=", e(s)/u, "(%s)" % uu
         for u, uu in units:
             print "g = ", f.fprime(s)/u, "+", g.fprime(s)/u, "=", e.fprime(s)/u, "(%s/Unit)" % uu
+
+
+
+print "==================== WATER ======================"
+x = watoms.get_positions ()
+
+#
+# Z-matrix for water:
+#
+zmt = ZMat ([(None, None, None),
+             (1, None, None),
+             (1, 2, None)], base=1)
+trafo = zmt
+
+#
+# Initial values of internal coordinates:
+#
+s = trafo.pinv (x)
+assert max (abs (s - trafo.pinv (zmt (s)))) < 1.0e-10
+
+clean ()
+
+with QFunc (watoms, wcalc) as f, Server (wcmd) as g:
+    f = Memoize (f, DirStore (salt="water Dec 9"))
+    g = Memoize (g, DirStore (salt=wcmd + "Dec 9"))
+
+    # One could compose  (f + g, trafo), but we  use f(s) and g(s)
+    # below as functions of internal coordinates:
+    f = compose (f, trafo)
+    g = compose (g, trafo)
+
+    e = f + g
+
+    print "s(start)=", s
+    print "x(start)=\n", trafo (s)
+
+    s, info = minimize (f, s, algo=1)
+    print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+
+    s0 = s
+
+    s, info = minimize (e, s, algo=1)
+    print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+
+
+    print "f: ", f(s) / kcal, f(s0) / kcal, (f(s) - f(s0)) / kcal
+    print "g: ", g(s) / kcal, g(s0) / kcal, (g(s) - g(s0)) / kcal
+    print "e: ", e(s) / kcal, e(s0) / kcal, (e(s) - e(s0)) / kcal
+
+    watoms = read ("spc.xyz")
+    x = watoms.get_positions ()
+    s1 = trafo.pinv (x)
+    print s1, e (s1), "eV", e (s1) / kcal, "kcal"
+
+    print "f: ", f(s) / kcal, f(s1) / kcal, (f(s) - f(s1)) / kcal
+    print "g: ", g(s) / kcal, g(s1) / kcal, (g(s) - g(s1)) / kcal
+    print "e: ", e(s) / kcal, e(s1) / kcal, (e(s) - e(s1)) / kcal
+
