@@ -1330,3 +1330,66 @@ Uranyl, SPC     2.4082     11.2197   3.1348      0.0092       5.0920
 Uranyl, TIP3P   2.4199     11.0207   3.1426      0.0099       5.0823
 Uranyl, PM13    2.4121     10.8627   3.1387      0.0066       4.8429
 --------------------------------------------------------------------
+
+
+QM uranyl optimized structure:
+
+   r(UO) = 1.7179 A
+   <(OUO) = 180 deg
+   e = -764850.758999 eV = -17637871.2698 kcal
+
+QM+RISM uranyl optimized structure:
+
+   r(UO) = 1.7422 A
+   <(OUO) = 180 deg
+   e = -764864.64735 eV = -17638191.5427 kcal
+
+Solvation  energy as a  difference between  the gas-phase  and QM+RISM
+energies  is 320.3 kcal  (13.9 eV).  Bond elongation  by 2.4  pm. RISM
+options used here were
+
+~~~
+--solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
+--solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
+~~~
+
+QM water optimized structure:
+
+   r(OH) = 0.9848 A
+   <(HOH) = 1.8812 rad = 107.8 deg
+   e = -466.843980099 eV = -10765.6741229 kcal
+   d = 0.96449 au (dipole)
+
+QM+RISM water uptimized structure:
+
+   r(OH) = 1.0019 A
+   <(HOH) =  1.7819 rad = 102.1 deg
+   e = -467.065657581 eV = -10770.7861253 kcal
+   d = 0.99028 (dipole)
+
+QM+RISM at fixed SPC water geometry:
+
+    r(OH) = 1.0 A
+    <(HOH) = 1.9106 rad = 109.5 deg
+    e = -467.031914553 eV = -10770.0079929 kcal
+
+RISM options are the same as for uranyl above, except
+
+~~~
+--solute "water, SPC/E"
+~~~
+
+Solvation  energy  as the  difference  between  gas-phase and  QM+RISM
+energies is 5.1  kcal (0.22 eV). Bond elongation is  1.7 pm, the angle
+is sharper  by ~5 deg.  Note that  the change is dipole  is likely not
+significant as the QM+RISM  model lacks the coupling between electrons
+and RISM  water.  Longer  bonds and shaper  angle are  consistent with
+increased dipole moment though.
+
+The  difference  of  expectation  values  of  the  QM+RISM  energy  at
+gas-phase and optimized geometry is 0.6 kcal which originates from 1.2
+kcal gain  in solvation  energy and  0.6 kcal loss  in QM  energy upon
+relaxation. The difference of expectation values of the QM+RISM energy
+at SPC water optimized geometry  is 0.8 kcal which originates from 1.1
+kcal gain  in solvation  energy and  0.3 kcal loss  in QM  energy upon
+relaxation from SPC start.
