@@ -25,7 +25,7 @@ from numpy import max, abs, zeros
 # or self-energy of the solute:
 cmd = \
 """
-/home/alexei/darcs/bgy3d/guile/runbgy.scm
+/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solute "UO2_5H2O, SPC"
 """
 
@@ -34,14 +34,14 @@ cmd = \
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
 """
-/home/alexei/darcs/bgy3d/guile/runbgy.scm
+/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "water, SPC/E"
 --solute "UO2_5H2O, SPC"
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 20 --N 512
 """
 
-calc = ParaGauss (cmdline="mpirun --np 4 ~/darcs/ttfs-mac/runqm",
+calc = ParaGauss (cmdline="salloc -n16 mpirun ~/darcs/ttfs-mac/runqm",
                   input="uranyl+water.scm")
 
 atoms = read ("uo22+,5h2o.xyz")
@@ -85,7 +85,25 @@ if True:
 else:
     uranyl = Fixed (xs[0])      # may be bent
 
-waters = [Rigid (y) for y in xs[1:]]
+def read_xyz (path):
+    atoms = read (path)
+    return atoms.get_positions ()
+
+def make_waters (xs):
+    # All waters will be rigid objects with the same geometry:
+    w = Rigid (read_xyz ("spc.xyz"))
+    # print xs
+    # print read_xyz ("spc.xyz")
+
+    # But at different locations and orientation:
+    ss = [w.pinv (x) for x in xs]
+
+    return [Rigid (w (s)) for s in ss]
+
+
+waters = make_waters (xs[1:])
+# waters = [Rigid (y) for y in xs[1:]]
+
 trafo = ManyBody (uranyl, *waters)
 
 # 6 dof per rigid water:
@@ -105,6 +123,10 @@ def clean ():
 
 clean ()
 
+# Destructively updates "atoms"
+def write_xyz (path, x):
+    atoms.set_positions (x)
+    write (path, atoms)
 
 with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h:
     # Change  the  salts  to   discard  memoized  results  (or  delete
@@ -117,30 +139,64 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h:
     g = compose (g, trafo)  # MM self-energy
     h = compose (h, trafo)  # RISM solvation energy
 
-    e = g + h # + f
+    def opt (e, s, name, **kwargs):
+        print "XXX: " + name + "..."
 
-    print "s(start)=", s
-    print "x(start)=\n", trafo (s)
-    print "e(start)=", e (s) / kcal, "g(start)=", g (s) / kcal, "h(start)=", h (s) / kcal
+        print name + ": s(0)=", s
+        print name + ": x(0)=\n", trafo (s)
+        print name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit"
 
-    s, info = minimize (e, s, algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = minimize (e, s, **kwargs)
 
-    print "converged =", info["converged"], "in", info["iterations"], "iterations"
-    print "s(min)=", s
-    print "x(min)=\n", trafo (s)
-    atoms.set_positions (trafo (s))
-    write ("a50.xyz", atoms)
+        print name + "converged =", info["converged"], "in", info["iterations"], "iterations"
+        print name + "s(min)=", s
+        print name + "x(min)=\n", trafo (s)
+        write_xyz (name + ".xyz", trafo (s))
 
-    units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
-    for u, uu in units:
-        print "e = ", g(s)/u, "+", h(s)/u, "=", e(s)/u, "(%s)" % uu
+        units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
+        for u, uu in units:
+            print "e = ", g(s)/u, "+", h(s)/u, "=", e(s)/u, "(%s)" % uu
 
-    for u, uu in units:
-        print "e = ", e(s) / u, "%s," % uu, \
-            "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
+        for u, uu in units:
+            print "e = ", e(s) / u, "%s," % uu, \
+                "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
+
+        # print info
+        traj = info["trajectory"]
+        print map(e, traj)
+        for i, si in enumerate (traj):
+            # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
+            pass
+
+        return s, info
 
 
-    e = f + h
-    for u, uu in units:
-        print "e = ", e(s) / u, "%s," % uu, \
-            "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
+    # MM self-energy:
+    with g as e:
+        s, info = opt (e, s, "uranyl+water,mm", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s0 = s
+
+    # MM self-energy with RISM solvation:
+    with g + h as e:
+        s, info = opt (e, s, "uranyl+water,mm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s1 = s
+
+    # QM self-energy (start with MM geom):
+    with f as e:
+        s, info = opt (e, s0, "uranyl+water,qm", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        print "XXX: QM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s2 = s
+
+    # QM self-energy with RISM solvation (diverges):
+    with f + h as e:
+        s, info = opt (e, s, "uranyl+water,qm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s3 = s
+
+    ss = [s0, s1, s2, s3]
+    with f + h as e, g + h as e1:
+        for s in ss:
+            print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
+                "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
