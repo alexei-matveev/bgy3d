@@ -147,23 +147,18 @@ with QFunc (watoms, wcalc) as f, Server (wcmd) as g:
 
     s, info = minimize (f, s, algo=1)
     print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-
     s0 = s
 
     s, info = minimize (e, s, algo=1)
     print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s1 = s
 
-
-    print "f: ", f(s) / kcal, f(s0) / kcal, (f(s) - f(s0)) / kcal
-    print "g: ", g(s) / kcal, g(s0) / kcal, (g(s) - g(s0)) / kcal
-    print "e: ", e(s) / kcal, e(s0) / kcal, (e(s) - e(s0)) / kcal
-
+    # SPC geometry
     watoms = read ("spc.xyz")
     x = watoms.get_positions ()
-    s1 = trafo.pinv (x)
-    print s1, e (s1), "eV", e (s1) / kcal, "kcal"
+    s2 = trafo.pinv (x)
 
-    print "f: ", f(s) / kcal, f(s1) / kcal, (f(s) - f(s1)) / kcal
-    print "g: ", g(s) / kcal, g(s1) / kcal, (g(s) - g(s1)) / kcal
-    print "e: ", e(s) / kcal, e(s1) / kcal, (e(s) - e(s1)) / kcal
+    ss = [s0, s1, s2]
+    for s in ss:
+        print "f=", f (s) / kcal, "g=", g (s) / kcal, e (s) / kcal, "(kcal)"
 
