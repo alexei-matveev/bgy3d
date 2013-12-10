@@ -1455,3 +1455,14 @@ geometry) and uranyl (in gas-phase QM geometry):
 Thus the binding energy of five rigid QM waters in SPC geometry in the
 QM  structure of  [UO2(H2O)5]2+ is  -318.9  kcal which  appears to  be
 significantly more than MM value of -217.0 kcal.
+
+
+Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
+---------  --------------  ---------------  --------------  --------------  --------------
+MM         -17692015.9572  -217.030081986   -140.047374828  -17692156.0046  -357.077456814
+MM+RISM    -17692015.7808  -216.922999286   -140.255351328  -17692156.0361  -357.178350614
+QM         -17692017.0095  -215.201544584   -139.828713865  -17692156.8382  -355.030258449
+QM+RISM*   -17691837.0445    16.1582574367  -345.911274525  -17692182.9558  -329.753017088
+------------------------------------------------------------------------------------------
+
+*) not converged.
