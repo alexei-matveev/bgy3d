@@ -1332,6 +1332,9 @@ Uranyl, PM13    2.4121     10.8627   3.1387      0.0066       4.8429
 --------------------------------------------------------------------
 
 
+Bare uranyl
+===========
+
 QM uranyl optimized structure:
 
    r(UO) = 1.7179 A
@@ -1353,6 +1356,10 @@ options used here were
 --solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
 ~~~
 
+
+Water moleule
+=============
+
 QM water optimized structure:
 
    r(OH) = 0.9848 A
@@ -1372,6 +1379,7 @@ QM+RISM at fixed SPC water geometry:
     r(OH) = 1.0 A
     <(HOH) = 1.9106 rad = 109.5 deg
     e = -467.031914553 eV = -10770.0079929 kcal
+    d = 0.95021 au (QM dipole, not SPC dipole)
 
 RISM options are the same as for uranyl above, except
 
@@ -1393,3 +1401,47 @@ relaxation. The difference of expectation values of the QM+RISM energy
 at SPC water optimized geometry  is 0.8 kcal which originates from 1.1
 kcal gain  in solvation  energy and  0.3 kcal loss  in QM  energy upon
 relaxation from SPC start.
+
+For three  geometries of water  considered, SPC, QM, and  QM+RISM, the
+summary of QM, RISM, and total energies follows:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -10765.3624728  -4.64552006291  -10770.0079929
+QM       -10765.6741187  -4.54207816895  -10770.2161969
+QM+RISM  -10765.070689   -5.71543629631  -10770.7861253
+-------------------------------------------------------
+
+Uranyl with explicit water molecules
+====================================
+
+MM stucture of [UO2(H2O)5]2+:
+
+   e = -9.41131842917 eV = -217.030081986 kcal
+
+This energy  is the  MM prediction for  the interacton of  uranyl with
+five rigid waters.
+
+MM+RISM structure of [UO2(H2O)5]2+:
+
+   e = -15.4887247098 eV = -357.178350614 kcal
+
+This  is the prediction  for the  total free  energy of  this specific
+conformation  of  the  complex  in  water.   This  value  is  only  an
+approximation  to the  true solvation  energy as  it does  not include
+statistic averaging over various complex geometries.
+
+QM structure of [UO2(H2O)5]2+:
+
+   e = -767198.741329 eV = -17692017.0095 kcal
+
+This value includes both  the uranyl-water interactions in the complex
+and the self-energy of the  six molecular species.  To compare with MM
+structure we subtract the self-energy  of five water molecules (in SPC
+geometry) and uranyl (in gas-phase QM geometry):
+
+   -10765.3624728 * 5 - 17637871.2698 = -17691698.0821640 kcal
+
+Thus the binding energy of five rigid QM waters in SPC geometry in the
+QM  structure of  [UO2(H2O)5]2+ is  -318.9  kcal which  appears to  be
+significantly more than MM value of -217.0 kcal.
