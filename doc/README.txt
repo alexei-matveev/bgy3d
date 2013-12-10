@@ -1412,9 +1412,18 @@ options used here were
 --solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
 ~~~
 
+The summary of the the energy terms at two uranyl geometries:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+QM       -17637871.2698  -319.535897816  -17638190.8057
+QM+RISM  -17637870.4826  -321.060033016  -17638191.5427
+
 
 Uranyl with explicit water molecules
 ====================================
+
+FIXME: the numbers were obtained with `--L 20 --N 512`!
 
 MM stucture of [UO2(H2O)5]2+:
 
