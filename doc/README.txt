@@ -1332,31 +1332,6 @@ Uranyl, PM13    2.4121     10.8627   3.1387      0.0066       4.8429
 --------------------------------------------------------------------
 
 
-Bare uranyl
-===========
-
-QM uranyl optimized structure:
-
-   r(UO) = 1.7179 A
-   <(OUO) = 180 deg
-   e = -764850.758999 eV = -17637871.2698 kcal
-
-QM+RISM uranyl optimized structure:
-
-   r(UO) = 1.7422 A
-   <(OUO) = 180 deg
-   e = -764864.64735 eV = -17638191.5427 kcal
-
-Solvation  energy as a  difference between  the gas-phase  and QM+RISM
-energies  is 320.3 kcal  (13.9 eV).  Bond elongation  by 2.4  pm. RISM
-options used here were
-
-~~~
---solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
---solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
-~~~
-
-
 Water moleule
 =============
 
@@ -1381,7 +1356,7 @@ QM+RISM at fixed SPC water geometry:
     e = -467.031914553 eV = -10770.0079929 kcal
     d = 0.95021 au (QM dipole, not SPC dipole)
 
-RISM options are the same as for uranyl above, except
+RISM options are the same as for uranyl (see below), except
 
 ~~~
 --solute "water, SPC/E"
@@ -1411,6 +1386,32 @@ SPC      -10765.3624728  -4.64552006291  -10770.0079929
 QM       -10765.6741187  -4.54207816895  -10770.2161969
 QM+RISM  -10765.070689   -5.71543629631  -10770.7861253
 -------------------------------------------------------
+
+
+Bare uranyl
+===========
+
+QM uranyl optimized structure:
+
+   r(UO) = 1.7179 A
+   <(OUO) = 180 deg
+   e = -764850.758999 eV = -17637871.2698 kcal
+
+QM+RISM uranyl optimized structure:
+
+   r(UO) = 1.7422 A
+   <(OUO) = 180 deg
+   e = -764864.64735 eV = -17638191.5427 kcal
+
+Solvation  energy as a  difference between  the gas-phase  and QM+RISM
+energies  is 320.3 kcal  (13.9 eV).  Bond elongation  by 2.4  pm. RISM
+options used here were
+
+~~~
+--solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
+--solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
+~~~
+
 
 Uranyl with explicit water molecules
 ====================================
