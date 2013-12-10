@@ -82,33 +82,31 @@ print "XXX: fprime = ", trafo.fprime (s)
 
 clean ()
 
-with QFunc (uatoms, ucalc) as f:
-    with Server (ucmd) as g:
-        f = Memoize (f, DirStore (salt="uo22+, gp, qm Dec 9"))
-        g = Memoize (g, DirStore (salt=ucmd + "Dec 9"))
+with QFunc (uatoms, ucalc) as f, Server (ucmd) as g:
+    f = Memoize (f, DirStore (salt="uo22+, gp, qm Dec 9"))
+    g = Memoize (g, DirStore (salt=ucmd + "Dec 9"))
 
-        # One could compose  (f + g, trafo), but we  use f(s) and g(s)
-        # below as functions of internal coordinates:
-        f = compose (f, trafo)
-        g = compose (g, trafo)
+    # One could compose  (f + g, trafo), but we  use f(s) and g(s)
+    # below as functions of internal coordinates:
+    f = compose (f, trafo)
+    g = compose (g, trafo)
 
-        e = f + g
+    print "s(start)=", s
+    print "x(start)=\n", trafo (s)
 
-        print "s(start)=", s
-        print "x(start)=\n", trafo (s)
-
+    with f as e:
         s, info = minimize (e, s, algo=1)
         print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s0 = s
 
-        print "converged =", info["converged"], "in", info["iterations"], "iterations"
-        print "s(min)=", s
-        print "x(min)=\n", trafo (s)
+    with f + g as e:
+        s, info = minimize (e, s, algo=1)
+        print s, e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    s1 = s
 
-        units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
-        for u, uu in units:
-            print "e = ", f(s)/u, "+", g(s)/u, "=", e(s)/u, "(%s)" % uu
-        for u, uu in units:
-            print "g = ", f.fprime(s)/u, "+", g.fprime(s)/u, "=", e.fprime(s)/u, "(%s/Unit)" % uu
+    ss = [s0, s1]
+    for s in ss:
+        print "f=", f (s) / kcal, "g=", g (s) / kcal, "e=", e (s) / kcal, "(kcal)"
 
 
 
@@ -160,5 +158,5 @@ with QFunc (watoms, wcalc) as f, Server (wcmd) as g:
 
     ss = [s0, s1, s2]
     for s in ss:
-        print "f=", f (s) / kcal, "g=", g (s) / kcal, e (s) / kcal, "(kcal)"
+        print "f=", f (s) / kcal, "g=", g (s) / kcal, "e=", e (s) / kcal, "(kcal)"
 
