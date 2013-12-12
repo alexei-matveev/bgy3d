@@ -131,7 +131,7 @@ def write_xyz (path, x):
 with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h:
     # Change  the  salts  to   discard  memoized  results  (or  delete
     # ./cache.d):
-    f = Memoize (f, DirStore (salt="uo22+, 5h2o, qm"))
+    f = Memoize (f, DirStore (salt="uo22+, 5h2o, bp"))
     g = Memoize (g, DirStore (salt=cmd + "Dec3(b)"))
     h = Memoize (h, DirStore (salt=alt + "Dec3(b)"))
 

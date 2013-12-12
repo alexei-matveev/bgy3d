@@ -83,7 +83,7 @@ print "XXX: fprime = ", trafo.fprime (s)
 clean ()
 
 with QFunc (uatoms, ucalc) as f, Server (ucmd) as g:
-    f = Memoize (f, DirStore (salt="uo22+, gp, qm Dec 9"))
+    f = Memoize (f, DirStore (salt="uo22+, bp"))
     g = Memoize (g, DirStore (salt=ucmd + "Dec 9"))
 
     # One could compose  (f + g, trafo), but we  use f(s) and g(s)
@@ -130,7 +130,7 @@ assert max (abs (s - trafo.pinv (zmt (s)))) < 1.0e-10
 clean ()
 
 with QFunc (watoms, wcalc) as f, Server (wcmd) as g:
-    f = Memoize (f, DirStore (salt="water Dec 9"))
+    f = Memoize (f, DirStore (salt="water, bp"))
     g = Memoize (g, DirStore (salt=wcmd + "Dec 9"))
 
     # One could compose  (f + g, trafo), but we  use f(s) and g(s)

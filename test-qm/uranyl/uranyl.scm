@@ -32,7 +32,7 @@
  (mixing (chmix 0.1) (start-after-cycle 5))
  (grid (sym-reduce #t) (weight-grads #t))
  (rep 3 (gridatom (nrad 50) (nang 291)))
- (xc-control (xc "pbe"))
+ (xc-control (xc "bp"))
  (occupation (charge 2.0))
  (convergence-list
   (max-geo-iteration 0))

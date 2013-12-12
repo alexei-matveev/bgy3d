@@ -37,13 +37,13 @@
  (~ "O_9.5.1_5.4.1")
  (~ "O_9.5.1_5.4.1")
  (rep 5
-      (ecp "nwchem" "O" "crenbl_ecp" "ahlrichs_coulomb_fitting")
-      (bas "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting")
-      (bas "nwchem" "H" "crenbl_ecp" "ahlrichs_coulomb_fitting"))
+      (~ "O_9.5.1_5.4.1")
+      (~ "H_6.1_4.1")
+      (~ "H_6.1_4.1"))
  (mixing (chmix 0.1) (start-after-cycle 5))
  (grid (sym-reduce #t) (weight-grads #t))
  (rep 18 (gridatom (nrad 50) (nang 291)))
- (xc-control (xc "pbe"))
+ (xc-control (xc "bp"))
  (occupation (charge 2.0))
  (convergence-list
   (max-geo-iteration 0))
