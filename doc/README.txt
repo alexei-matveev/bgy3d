@@ -1337,26 +1337,33 @@ Water moleule
 
 QM water optimized structure:
 
-PBE:
+PBE, NR:
    r(OH) = 0.9848 A
    <(HOH) = 107.8 deg
    d = 0.96449 au (dipole)
 
-BP:
+BP, NR:
    r(OH) = 0.9716 A
-   <(HOH) =  104.7 deg
+   <(HOH) = 104.7 deg
 
+BP:
+   r(OH) = 0.9717 A
+   <(HOH) = 104.6 deg
 
 QM+RISM water optimized structure:
 
-PBE:
+PBE, NR:
    r(OH) = 1.0019 A
    <(HOH) =  102.1 deg
    d = 0.99028 (dipole)
 
-BP:
+BP, NR:
    r(OH) = 0.9857 A
    <(HOH) = 99.3 deg (!!!)
+
+BP:
+   r(OH) = 0.9857 A
+   <(HOH) = 99.2 deg (!!!)
 
 QM+RISM at fixed SPC water geometry:
 
@@ -1382,7 +1389,7 @@ borderline an artifact.
 For three  geometries of water  considered, SPC, QM, and  QM+RISM, the
 summary of QM, RISM, and total energies follows:
 
-PBE:
+PBE, NR:
 
 Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
 -------  --------------  --------------  --------------
@@ -1391,13 +1398,27 @@ QM       -10765.6741187  -4.54207816895  -10770.2161969
 QM+RISM  -10765.070689   -5.71543629631  -10770.7861253
 -------------------------------------------------------
 
-BP:
+BP, NR:
 
 Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
 -------  --------------  --------------  --------------
 SPC     -47975.5924937  -4.64552006291  -47980.2380138
 QM      -47976.91108    -4.67305110692  -47981.5841311
 QM+RISM -47976.3590973  -5.74833990429  -47982.1074372
+
+BP:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -48006.3334282  -4.64552006291  -48010.9789482
+QM       -48007.6598565  -4.68209355587  -48012.34195
+QM+RISM  -48007.1075688  -5.757929019    -48012.8654979
+
+Note  that using  the non-relativistic  model for  water  results into
+total QM energies by about 30.7 kcal higher. Non-relativistic energies
+should  not be  used to  compute the  binding energies  as  the uranyl
+complex  is necessarily  treated by  relativisitc model.  Even  if the
+geometry of water may suggest that the relativity has no effect.
 
 Conversion to  kcals is  achived by multiplying  QM energies in  au by
 27.211395655517308   eV/Hartee  (ase.units.Hartree)  within   ASE  and
@@ -1479,11 +1500,15 @@ geometry) and uranyl (in gas-phase QM geometry):
 
 or
 
-   -47975.5924937 * 5 - 17639787.4033 = -17879665.3657685 kcal (BP)
+   -48006.3334282 * 5 - 17639787.4033 = -17879819.0704410 kcal (BP)
+
+FIXME:   the  PBE   energy   of   ECP  water   at   SPC  geometry   is
+non-relativistic!
 
 Thus the binding energy of five rigid QM waters in SPC geometry in the
-QM structure of [UO2(H2O)5]2+ is -318.9 kcal (PBE) or even -424.5 kcal
-(BP) which is significantly more than MM value of -217.0 kcal.
+QM structure of [UO2(H2O)5]2+ is -318.9 kcal (PBE, FIXME: water is NR)
+or rather -270.8  kcal (BP) which is noticably more  than the MM value
+of -217.0 kcal.
 
 PBE:
 
@@ -1508,10 +1533,10 @@ QM+RISM*   -17879851.5553   116.678561869   -449.728945808  -17880301.2842  -333
 *) geometry not converged in 100 iterations.
 
 This is the same data where QM energies where offset by self-energy of
-5 water  and uranyl (-17691698.0821640 kcal  PBE and -17879665.3657685
-BP):
+5 water  and uranyl  (-17691698.0821640 kcal PBE  [FIXME: water  is NR
+here!] and -17879819.0704410 BP):
 
-PBE:
+PBE, FIXME: water self-energy is NR here!:
 
 Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
 ---------   ------   ------   ------   ----------  ----------
@@ -1525,8 +1550,8 @@ BP:
 
 Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
 ---------   ------   ------   ------   ----------  ----------
-MM          -423.8   -217.0   -140.0   -563.9      -357.1
-MM+RISM     -423.7   -216.9   -140.3   -563.9      -357.2
-QM          -424.5   -216.0   -139.9   -564.4      -355.9
-QM+RISM*    -186.2    116.7   -449.7   -635.9      -333.1
+MM          -270.1   -217.0   -140.0   -410.2      -357.1
+MM+RISM     -270.0   -216.9   -140.3   -410.2      -357.2
+QM          -270.8   -216.0   -139.9   -410.7      -355.9
+QM+RISM*     -32.5    116.7   -449.7   -482.2      -333.1
 -------------------------------------------------------------
