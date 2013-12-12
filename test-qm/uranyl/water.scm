@@ -11,7 +11,7 @@
   (operations-solvation-effect #f))
  (main-options
   (integrals-on-file #f)                ; This is faster
-  (relativistic "false")                ; This is an AE calculation
+  (relativistic "true")                 ; This is an AE calculation
   (spin-restricted #t))                 ; water is closed shell
  (geo
   (units angstrom)

@@ -130,7 +130,7 @@ assert max (abs (s - trafo.pinv (zmt (s)))) < 1.0e-10
 clean ()
 
 with QFunc (watoms, wcalc) as f, Server (wcmd) as g:
-    f = Memoize (f, DirStore (salt="water, bp"))
+    f = Memoize (f, DirStore (salt="water, bp, rel"))
     g = Memoize (g, DirStore (salt=wcmd + "Dec 9"))
 
     # One could compose  (f + g, trafo), but we  use f(s) and g(s)
