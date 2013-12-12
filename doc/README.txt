@@ -1346,6 +1346,10 @@ BP, NR:
    r(OH) = 0.9716 A
    <(HOH) = 104.7 deg
 
+PBE:
+   r(OH) = 0.9845 A
+   <(HOH) = 107.8 deg
+
 BP:
    r(OH) = 0.9717 A
    <(HOH) = 104.6 deg
@@ -1361,6 +1365,10 @@ BP, NR:
    r(OH) = 0.9857 A
    <(HOH) = 99.3 deg (!!!)
 
+PBE:
+   r(OH) = 1.0017 A
+   <(HOH) = 102.1 deg
+
 BP:
    r(OH) = 0.9857 A
    <(HOH) = 99.2 deg (!!!)
@@ -1369,7 +1377,10 @@ QM+RISM at fixed SPC water geometry:
 
     r(OH) = 1.0 A
     <(HOH) = 109.5 deg
-    d = 0.95021 au (PBE) or 0.81594 au (BP, NR) or 0.81435 (BP)
+    d = 0.95021 au (PBE, NR) or
+        0.95073 au (PBE) or
+        0.81594 au (BP, NR) or
+        0.81435 (BP)
 
 RISM options are the same as for uranyl (see below), except
 
@@ -1406,6 +1417,15 @@ SPC     -47975.5924937  -4.64552006291  -47980.2380138
 QM      -47976.91108    -4.67305110692  -47981.5841311
 QM+RISM -47976.3590973  -5.74833990429  -47982.1074372
 
+PBE:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -10766.9978509  -4.64552006291  -10771.643371
+QM       -10767.3137638  -4.53192073301  -10771.8456845
+QM+RISM  -10766.7105864  -5.70482321288  -10772.4154096
+-------------------------------------------------------
+
 BP:
 
 Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
@@ -1417,8 +1437,11 @@ QM+RISM  -48007.1075688  -5.757929019    -48012.8654979
 Note  that using  the non-relativistic  model for  water  results into
 total QM energies by about 30.7 kcal higher. Non-relativistic energies
 should  not be  used to  compute the  binding energies  as  the uranyl
-complex  is necessarily  treated by  relativisitc model.  Even  if the
-geometry of water may suggest that the relativity has no effect.
+complex  is necessarily treated  by relativisitc  model.  Even  if the
+geometry of water  may suggest that the relativity  has no effect. For
+ECP water used in PBE calculations this is less important. Still there
+is a difference of ~1.6 kcal between non-relativistic and relativistic
+energies.
 
 Conversion to  kcals is  achived by multiplying  QM energies in  au by
 27.211395655517308   eV/Hartee  (ase.units.Hartree)  within   ASE  and
@@ -1496,19 +1519,15 @@ and the self-energy of the  six molecular species.  To compare with MM
 structure we subtract the self-energy  of five water molecules (in SPC
 geometry) and uranyl (in gas-phase QM geometry):
 
-   -10765.3624728 * 5 - 17637871.2698 = -17691698.0821640 kcal (PBE)
+   -10766.9978509 * 5 - 17637871.2698 = -17691706.2590545 kcal (PBE)
 
 or
 
    -48006.3334282 * 5 - 17639787.4033 = -17879819.0704410 kcal (BP)
 
-FIXME:   the  PBE   energy   of   ECP  water   at   SPC  geometry   is
-non-relativistic!
-
 Thus the binding energy of five rigid QM waters in SPC geometry in the
-QM structure of [UO2(H2O)5]2+ is -318.9 kcal (PBE, FIXME: water is NR)
-or rather -270.8  kcal (BP) which is noticably more  than the MM value
-of -217.0 kcal.
+QM structure of [UO2(H2O)5]2+ is -310.8 kcal (PBE) or -270.8 kcal (BP)
+which is noticably more than the MM value of -217.0 kcal.
 
 PBE:
 
@@ -1533,17 +1552,19 @@ QM+RISM*   -17879851.5553   116.678561869   -449.728945808  -17880301.2842  -333
 *) geometry not converged in 100 iterations.
 
 This is the same data where QM energies where offset by self-energy of
-5 water  and uranyl  (-17691698.0821640 kcal PBE  [FIXME: water  is NR
-here!] and -17879819.0704410 BP):
+5 water  and uranyl (-17691706.2590545 kcal  PBE and -17879819.0704410
+BP, see  above).  Using  non-relativistic energy of  ECP water  in PBE
+calculations  as a reference  would increase  the binding  energies by
+about 8 kcal.
 
-PBE, FIXME: water self-energy is NR here!:
+PBE:
 
 Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
 ---------   ------   ------   ------   ----------  ----------
-MM          -317.8   -217.0   -140.0   -457.9      -357.1
-MM+RISM     -317.7   -216.9   -140.3   -458.0      -357.2
-QM          -318.9   -215.2   -139.8   -458.8      -355.0
-QM+RISM*    -139.0     16.2   -345.9   -484.9      -329.8
+MM          -309.7   -217.0   -140.0   -449.7      -357.1
+MM+RISM     -309.5   -216.9   -140.3   -449.8      -357.2
+QM          -310.8   -215.2   -139.8   -450.6      -355.0
+QM+RISM*    -130.8     16.2   -345.9   -476.7      -329.8
 -------------------------------------------------------------
 
 BP:
