@@ -840,7 +840,7 @@ computes the sum of all vector elements."
                  ;;
                  (pk 'CHARGE-SUM: charge-sum)
                  (pk 'DIPOLE-VEC: dipole-vec)
-                 (pk 'DIPOLE-MAG: dipole-mag)
+                 (pk 'DIPOLE-MAG: dipole-mag 'eA '= (eA->debye dipole-mag) 'D)
                  ;;
                  ;; Actual data:
                  ;;
