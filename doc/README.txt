@@ -1377,10 +1377,13 @@ QM+RISM at fixed SPC water geometry:
 
     r(OH) = 1.0 A
     <(HOH) = 109.5 deg
-    d = 0.95021 au (PBE, NR) or
-        0.95073 au (PBE) or
-        0.81594 au (BP, NR) or
-        0.81435 (BP)
+    d = 0.92476 au = 2.35 D (MM) or
+        0.95021 au = 2.42 D (PBE, NR) or
+        0.95073 au = 2.42 D (PBE) or
+        0.81594 au = 2.07 D (BP, NR) or
+        0.81435 au = 2.07 D (BP)
+
+We use 1 D = 0.393430307 au here.
 
 RISM options are the same as for uranyl (see below), except
 
