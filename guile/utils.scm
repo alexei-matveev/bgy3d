@@ -12,6 +12,8 @@
             memoize
             bohr->angstrom
             angstrom->bohr
+            eA->debye
+            debye->eA
             isqrt))
 
 (use-modules (ice-9 pretty-print))
@@ -24,6 +26,15 @@
 (define (bohr->angstrom x) (* x 0.52917706))
 (define (angstrom->bohr x) (/ x 0.52917706))
 
+;;;
+;;; Custom units for dipole moment is Debye [1].
+;;;
+;;; [1] http://en.wikipedia.org/wiki/Debye
+;;;
+(define (au->debye d) (/ d 0.393430307))
+(define (debye->au d) (/ d 0.393430307))
+(define (eA->debye d) (au->debye (angstrom->bohr d)))
+(define (debye->eA d) (bohr->angstrom (debye->au d)))
 
 ;;;
 ;;; Let-over-lambda here.  Given  a function (f x ...)   The result of
