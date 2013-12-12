@@ -1337,24 +1337,32 @@ Water moleule
 
 QM water optimized structure:
 
+PBE:
    r(OH) = 0.9848 A
-   <(HOH) = 1.8812 rad = 107.8 deg
-   e = -466.843980099 eV = -10765.6741229 kcal
+   <(HOH) = 107.8 deg
    d = 0.96449 au (dipole)
 
-QM+RISM water uptimized structure:
+BP:
+   r(OH) = 0.9716 A
+   <(HOH) =  104.7 deg
 
+
+QM+RISM water optimized structure:
+
+PBE:
    r(OH) = 1.0019 A
-   <(HOH) =  1.7819 rad = 102.1 deg
-   e = -467.065657581 eV = -10770.7861253 kcal
+   <(HOH) =  102.1 deg
    d = 0.99028 (dipole)
+
+BP:
+   r(OH) = 0.9857 A
+   <(HOH) = 99.3 deg (!!!)
 
 QM+RISM at fixed SPC water geometry:
 
     r(OH) = 1.0 A
-    <(HOH) = 1.9106 rad = 109.5 deg
-    e = -467.031914553 eV = -10770.0079929 kcal
-    d = 0.95021 au (QM dipole, not SPC dipole)
+    <(HOH) = 109.5 deg
+    d = 0.95021 au (PBE) or 0.81594 au (BP)
 
 RISM options are the same as for uranyl (see below), except
 
@@ -1363,22 +1371,18 @@ RISM options are the same as for uranyl (see below), except
 ~~~
 
 Solvation  energy  as the  difference  between  gas-phase and  QM+RISM
-energies is 5.1  kcal (0.22 eV). Bond elongation is  1.7 pm, the angle
-is sharper  by ~5 deg.  Note that  the change is dipole  is likely not
+energies is ~5 kcal (0.2 eV). Bond  elongation is < 2 pm, the angle is
+sharper  by ~5  deg.  Note  that the  change in  dipole is  likely not
 significant as the QM+RISM  model lacks the coupling between electrons
 and RISM  water.  Longer  bonds and shaper  angle are  consistent with
-increased dipole moment though.
-
-The  difference  of  expectation  values  of  the  QM+RISM  energy  at
-gas-phase and optimized geometry is 0.6 kcal which originates from 1.2
-kcal gain  in solvation  energy and  0.6 kcal loss  in QM  energy upon
-relaxation. The difference of expectation values of the QM+RISM energy
-at SPC water optimized geometry  is 0.8 kcal which originates from 1.1
-kcal gain  in solvation  energy and  0.3 kcal loss  in QM  energy upon
-relaxation from SPC start.
+increased dipole  moment though. Though note  the angle <  100 deg for
+the all-electron water with BP functional and RISM solvation energy is
+borderline an artifact.
 
 For three  geometries of water  considered, SPC, QM, and  QM+RISM, the
 summary of QM, RISM, and total energies follows:
+
+PBE:
 
 Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
 -------  --------------  --------------  --------------
@@ -1387,37 +1391,58 @@ QM       -10765.6741187  -4.54207816895  -10770.2161969
 QM+RISM  -10765.070689   -5.71543629631  -10770.7861253
 -------------------------------------------------------
 
+BP:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC     -47975.5924937  -4.64552006291  -47980.2380138
+QM      -47976.91108    -4.67305110692  -47981.5841311
+QM+RISM -47976.3590973  -5.74833990429  -47982.1074372
+
+Conversion to  kcals is  achived by multiplying  QM energies in  au by
+27.211395655517308   eV/Hartee  (ase.units.Hartree)  within   ASE  and
+division  by 0.04336411958672341  eV/kcal  (pts.units.kcal) on  output
+from the driver script.
+
 
 Bare uranyl
 ===========
 
 QM uranyl optimized structure:
 
-   r(UO) = 1.7179 A
+   r(UO) = 1.7179 A (PBE) or 1.7202 A (BP)
    <(OUO) = 180 deg
-   e = -764850.758999 eV = -17637871.2698 kcal
 
 QM+RISM uranyl optimized structure:
 
-   r(UO) = 1.7422 A
+   r(UO) = 1.7422 A (PBE) or 1.7448 A (BP)
    <(OUO) = 180 deg
-   e = -764864.64735 eV = -17638191.5427 kcal
+
+The summary of the energy terms at two uranyl geometries:
+
+PBE:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+QM       -17637871.2698  -319.535897816  -17638190.8057
+QM+RISM  -17637870.4826  -321.060033016  -17638191.5427
+
+BP:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+------------------------------------------------------
+QM       -17639787.4033  -319.678396498 -17640107.0817
+QM+RISM  -17639786.6021  -321.228374489 -17640107.8305
+
 
 Solvation  energy as a  difference between  the gas-phase  and QM+RISM
-energies  is 320.3 kcal  (13.9 eV).  Bond elongation  by 2.4  pm. RISM
+energies  is 320  kcal  (14 eV).   Bond  elongation by  ~2.5 pm.  RISM
 options used here were
 
 ~~~
 --solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
 --solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
 ~~~
-
-The summary of the the energy terms at two uranyl geometries:
-
-Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
--------  --------------  --------------  --------------
-QM       -17637871.2698  -319.535897816  -17638190.8057
-QM+RISM  -17637870.4826  -321.060033016  -17638191.5427
 
 
 Uranyl with explicit water molecules
@@ -1450,12 +1475,17 @@ and the self-energy of the  six molecular species.  To compare with MM
 structure we subtract the self-energy  of five water molecules (in SPC
 geometry) and uranyl (in gas-phase QM geometry):
 
-   -10765.3624728 * 5 - 17637871.2698 = -17691698.0821640 kcal
+   -10765.3624728 * 5 - 17637871.2698 = -17691698.0821640 kcal (PBE)
+
+or
+
+   -47975.5924937 * 5 - 17639787.4033 = -17879665.3657685 kcal (BP)
 
 Thus the binding energy of five rigid QM waters in SPC geometry in the
-QM  structure of  [UO2(H2O)5]2+ is  -318.9  kcal which  appears to  be
-significantly more than MM value of -217.0 kcal.
+QM structure of [UO2(H2O)5]2+ is -318.9 kcal (PBE) or even -424.5 kcal
+(BP) which is significantly more than MM value of -217.0 kcal.
 
+PBE:
 
 Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
 ---------  --------------  ---------------  --------------  --------------  --------------
@@ -1465,4 +1495,38 @@ QM         -17692017.0095  -215.201544584   -139.828713865  -17692156.8382  -355
 QM+RISM*   -17691837.0445    16.1582574367  -345.911274525  -17692182.9558  -329.753017088
 ------------------------------------------------------------------------------------------
 
-*) not converged.
+BP:
+
+Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
+---------  --------------  ---------------  --------------  --------------  --------------
+MM         -17880089.2039  -217.030081986   -140.047374828  -17880229.2513  -357.077456814
+MM+RISM    -17880089.0383  -216.922999286   -140.255351328  -17880229.2936  -357.178350614
+QM         -17880089.8641  -215.988784467   -139.90429832   -17880229.7684  -355.893082787
+QM+RISM*   -17879851.5553   116.678561869   -449.728945808  -17880301.2842  -333.050383939
+------------------------------------------------------------------------------------------
+
+*) geometry not converged in 100 iterations.
+
+This is the same data where QM energies where offset by self-energy of
+5 water  and uranyl (-17691698.0821640 kcal  PBE and -17879665.3657685
+BP):
+
+PBE:
+
+Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
+---------   ------   ------   ------   ----------  ----------
+MM          -317.8   -217.0   -140.0   -457.9      -357.1
+MM+RISM     -317.7   -216.9   -140.3   -458.0      -357.2
+QM          -318.9   -215.2   -139.8   -458.8      -355.0
+QM+RISM*    -139.0     16.2   -345.9   -484.9      -329.8
+-------------------------------------------------------------
+
+BP:
+
+Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
+---------   ------   ------   ------   ----------  ----------
+MM          -423.8   -217.0   -140.0   -563.9      -357.1
+MM+RISM     -423.7   -216.9   -140.3   -563.9      -357.2
+QM          -424.5   -216.0   -139.9   -564.4      -355.9
+QM+RISM*    -186.2    116.7   -449.7   -635.9      -333.1
+-------------------------------------------------------------
