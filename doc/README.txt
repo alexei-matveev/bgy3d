@@ -1383,7 +1383,19 @@ QM+RISM at fixed SPC water geometry:
         0.81594 au = 2.07 D (BP, NR) or
         0.81435 au = 2.07 D (BP)
 
-We use 1 D = 0.393430307 au here.
+We use 1 D = 0.393430307  au here.  An essential difference between MM
+and QM water is that  the latter is polarizable. Polarizability of the
+water molecule is ~1.5 A^3 (~10 au), see e.g. Water properties website
+which quotes numbers ranging from 1.41 to 1.53 A^3.
+
+To visualize the  energy scales an interaction of  two unit charges at
+separation  of  5 Bohr  (2.6  A)  is 1/5  Hartree  or  ~126 kcal.   An
+interation of a +2  charge with a dipole of 1 au  (2.54 D) at the very
+same  distance is  about  2/25 Hartree  or  ~50 kcal  (and depends  on
+orientation, of course). For  a water-like particle with polarizabilty
+of 10 au a +2 ion at 5 au separation will induce a dipole of 10 * 2/25
+au (~2  D).  The  corresponding interaction energy  is about  (10/2) *
+(2/25)^2 Hartee or ~20 kcal and is orientation independent.
 
 RISM options are the same as for uranyl (see below), except
 
