@@ -17,7 +17,7 @@ from pts.units import kcal
 def to_sexp (x):
     "Convert array of numbers to a nested s-expression."
     try:
-        n = len (x)
+        len (x)
     except:
         return repr (x)
     return "(" + " ".join (to_sexp (y) for y in x) + ")"
