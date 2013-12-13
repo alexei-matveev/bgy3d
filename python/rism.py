@@ -101,8 +101,9 @@ def protocol (server):
 #
 # The bulk of python code  operates with callable Objects of type Func
 # for historical  reasons. So that also a  server-based solution needs
-# to be cast  into that pattern. This is supposed to  be one such Func
-# that happens to implement derivatives by finite differences:
+# to  be cast  into that  pattern.  This  is supposed  to be  one such
+# Func. Each  Func is also a context  manager and this is  a rare case
+# when a Func implements a non-trivial context manager protocol.
 #
 @contextmanager
 def Server (args):
