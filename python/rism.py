@@ -131,24 +131,61 @@ def Server (args):
     # This  function  takes  input  text  and returns  output  of  the
     # subprocess, both communicated via the fifos:
     def server (x):
-        with open (inp, "w") as f:
-            f.write (x)
-        with open (out, "r") as f:
-            y = f.read ()
+        try:
+            with open (inp, "w") as f:
+                f.write (x)
+            with open (out, "r") as f:
+                y = f.read ()
+        except KeyboardInterrupt as e:
+            #
+            # FIXME:  If the IO  is screwed,  we will  not be  able to
+            # regularly shut  down the daemon.  Kill  it with SIGTERM.
+            # Some minimal testing showed that proc.poll() will return
+            # something  trueish  afterwards.   Also  if you  catch  a
+            # generic  Exception here  the chances  are slim  that you
+            # will catch  an asynchrounous KeyboardInterrupt  here and
+            # now (see StackOverflow).
+            #
+            proc.terminate()
+            proc.wait()
+            raise e
         return y
 
-    # The control returns to the "with" statement body:
-    yield protocol (server)
+    # This is a valid Func:
+    func = protocol (server)
 
-    # When leaving  the "with" statement body execute  this.  Tell the
-    # daemon process to terminate:
-    with open (inp, "w") as f:
-        f.write ("#f")          # convention
+    # If an  exception happens in the  body of the  "with" statment we
+    # will note it here:
+    try:
+        #
+        # The control returns to the
+        #
+        #   with Server(...) as func:
+        #
+        # statement body:
+        #
+        yield func
+    finally:
+        #
+        # When  leaving  the   "with"  statement  body  execute  this.
+        # Executed  in  any  case,   even  if  exceptions  such  as  a
+        # KeyboardInterrupt occur.  We do  not want zombie daemons and
+        # stray files.
+        #
+        # Tell the daemon process to terminate.  This will not work if
+        # user hit C-c while the  server() was already doing IO on the
+        # fifos. In this case  the process should have been terminated
+        # there.
+        #
+        if not proc.poll():
+            # Regular shutdown sequence:
+            with open (inp, "w") as f:
+                f.write ("#f")  # convention
+            proc.wait ()
 
-    proc.wait ()
-    os.unlink (inp)
-    os.unlink (out)
-    os.rmdir (tmp)
+        os.unlink (inp)
+        os.unlink (out)
+        os.rmdir (tmp)
 
 
 def main (cmd):
