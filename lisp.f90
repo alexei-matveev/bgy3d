@@ -1,5 +1,7 @@
 module lisp
-
+  !
+  ! Copyright (c) 2013 Alexei Matveev
+  !
   use iso_c_binding
   implicit none
   private

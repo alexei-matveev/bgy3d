@@ -1,5 +1,7 @@
 module bessel
   !
+  ! Copyright (c) 2013 Alexei Matveev
+  !
   ! One of  the many equivalent expresssions for  the spherical Bessel
   ! functions:
   !

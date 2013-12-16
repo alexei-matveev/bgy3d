@@ -1,4 +1,8 @@
 module fft
+  !
+  ! Copyright (c) 2013 Alexei Matveev
+  ! Copyright (c) 2013 Bo Li
+  !
   use kinds, only: rk
   implicit none
   private

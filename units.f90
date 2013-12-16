@@ -1,4 +1,7 @@
 module units
+  !
+  ! Copyright (c) 2013 Alexei Matveev
+  !
   use kinds, only: rk
   implicit none
   private
