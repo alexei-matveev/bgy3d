@@ -1,7 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
-/*==========================================================*/
-/*  $Id: bgy3dH2O_solutes.c,v 1.3 2007-08-03 15:59:50 jager Exp $ */
-/*==========================================================*/
+/*
+  Copyright (c) 2007 Lukas Jager
+  Copyright (c) 2013 Alexei Matveev
+  Copyright (c) 2013 Bo Li
+*/
 
 #include <stdbool.h>
 #include "bgy3d.h"

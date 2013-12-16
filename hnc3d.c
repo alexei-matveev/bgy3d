@@ -1,7 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
-/*==========================================================*/
-/*  $Id: hnc3d.c,v 1.13 2006-12-14 17:35:38 jager Exp $ */
-/*==========================================================*/
+/*
+  Copyright (c) 2007 Lukas Jager
+  Copyright (c) 2013 Alexei Matveev
+  Copyright (c) 2013 Bo Li
+*/
 
 /*
   For simple liquids the matrix OZ equation reads

@@ -1,4 +1,7 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
+/*
+  Copyright (c) 2013 Alexei Matveev
+*/
 
 #include "bgy3d.h"              /* State */
 #include "bgy3d-vec.h"          /* vec_create() */

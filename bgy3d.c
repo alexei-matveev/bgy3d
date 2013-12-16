@@ -1,7 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
-/*==========================================================*/
-/*  $Id: bgy3d.c,v 1.48 2007-07-31 17:12:33 jager Exp $ */
-/*==========================================================*/
+/*
+  Copyright (c) 2007 Lukas Jager
+  Copyright (c) 2013 Alexei Matveev
+  Copyright (c) 2013 Bo Li
+*/
 
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"

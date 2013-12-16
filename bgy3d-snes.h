@@ -1,4 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
+/*
+  Copyright (c) 2007 Lukas Jager
+  Copyright (c) 2013 Alexei Matveev
+  Copyright (c) 2013 Bo Li
+*/
 
 /*
   A function  that takes a  context, an input  Vec x and  computes the

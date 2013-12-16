@@ -1,9 +1,9 @@
 /* -*- mode: c; c-basic-offset: 2; -*- vim: set sw=2 tw=70 et sta ai: */
-/*==========================================================*/
-/*  $Id: bgy3dH2O.c,v 1.42 2007-07-31 17:12:33 jager Exp $ */
-/*==========================================================*/
-
-// #include "bgy3d.h"              /* real, EPSILON0INV, CUTOFF, SQR() */
+/*
+  Copyright (c) 2007 Lukas Jager
+  Copyright (c) 2013 Alexei Matveev
+  Copyright (c) 2013 Bo Li
+*/
 
 /* Was ealrier  #defined in bgy3d.h.  Used only  here, #undef'ed below
    after last use: */
