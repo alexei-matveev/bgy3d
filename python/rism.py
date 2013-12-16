@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- mode: python; c-basic-offset: 4 -*- vim: set sw=4 tw=70 et sta ai:
+#
+# Copyright (c) 2013 Alexei Matveev
+#
 from __future__ import with_statement
 
 import sys
