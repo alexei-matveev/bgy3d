@@ -1,4 +1,7 @@
 module lebed
+  !
+  ! Copyright (c) 2013 Alexei Matveev
+  !
   use iso_c_binding, only: ik => c_int, rk => c_double
   implicit none
   private
