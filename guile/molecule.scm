@@ -1,4 +1,7 @@
 ;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;; Copyright (c) 2013 Bo Li
+;;;
 ;;; Representation of molecular solvents and solutes and site-specific
 ;;; force field parameters.
 ;;;

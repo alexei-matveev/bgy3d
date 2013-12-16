@@ -1,4 +1,6 @@
 ;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;;
 ;;; Code to write a GAMESS-UK punch file.
 ;;;
 (define-module (guile punch-file)

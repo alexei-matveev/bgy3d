@@ -1,3 +1,6 @@
+;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;;
 (define-module (guile compat))
 
 (cond-expand

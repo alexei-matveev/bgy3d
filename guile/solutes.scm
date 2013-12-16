@@ -1,5 +1,9 @@
 ;;; vim: set tw=72:
 ;;;
+;;; Copyright (c) 2007 Lukas Jager
+;;; Copyright (c) 2013 Alexei Matveev
+;;; Copyright (c) 2013 Bo Li
+;;;
 ;;; Simplest  species,  single  neutral   site  LJ  particle.   To  be
 ;;; comparable  to  water  one  might   set  β  =  0.261610  and  ρ  =
 ;;; 1.054796. These  numbers have been  derived from LJ  parameters of

@@ -1,6 +1,8 @@
 #!/users/alexei/darcs/bgy3d/bgy3d -s
 !#
 ;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;;
 ;;; The usual trick  with #!/usr/bin/env bgy3d does not  work as guile
 ;;; needs a  -s argument to  work as an  interpeter.  Use the  path to
 ;;; your own bgy3d interpreter, if necessary.

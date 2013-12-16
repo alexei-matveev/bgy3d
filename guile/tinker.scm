@@ -1,4 +1,6 @@
 ;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;;
 ;;; Tools to handle TINKER input such as parameter files.
 ;;;
 (define-module (guile tinker)

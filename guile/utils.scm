@@ -1,4 +1,6 @@
 ;;;
+;;; Copyright (c) 2013 Alexei Matveev
+;;;
 ;;; Utilities that do not require any Guile extension.
 ;;;
 (define-module (guile utils)
