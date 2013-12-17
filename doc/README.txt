@@ -1507,7 +1507,13 @@ options used here were
 Uranyl with explicit water molecules
 ====================================
 
-FIXME: the numbers were obtained with `--L 20 --N 512`!
+FIXME: PBE  numbers (where affected  by RISM) use lower  settings with
+L=20, N=512.
+
+Geometries were pre-optimized  with L=20, N=512.  MM+RISM optimization
+was  continued  with L=160,  N=4096  and  stopped immediately  because
+convergence  criteria were  satisfied.  The  (RISM)  energies computed
+with the higher accuracy were only slightly affected by ~0.1 kcal.
 
 MM stucture of [UO2(H2O)5]2+:
 
@@ -1554,17 +1560,18 @@ QM         -17692017.0095  -215.201544584   -139.828713865  -17692156.8382  -355
 QM+RISM*   -17691837.0445    16.1582574367  -345.911274525  -17692182.9558  -329.753017088
 ------------------------------------------------------------------------------------------
 
-BP:
+BP (pre-optimized at L=40, N=512, refined at L=160, N=4096):
 
 Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
 ---------  --------------  ---------------  --------------  --------------  --------------
-MM         -17880089.2039  -217.030081986   -140.047374828  -17880229.2513  -357.077456814
-MM+RISM    -17880089.0383  -216.922999286   -140.255351328  -17880229.2936  -357.178350614
-QM         -17880089.8641  -215.988784467   -139.90429832   -17880229.7684  -355.893082787
-QM+RISM*   -17879851.5553   116.678561869   -449.728945808  -17880301.2842  -333.050383939
+MM         -17880089.2039  -217.030081986   -140.144006779  -17880229.3479  -357.174088765
+MM+RISM    -17880089.0386  -216.922920199   -140.352223475  -17880229.3908  -357.275143673
+QM         -17880089.8641  -215.988784467   -140.000930251  -17880229.865   -355.989714718
+QM+RISM*   -17879851.5553   116.678561869   -449.825571097  -17880301.3808  -333.147009228
 ------------------------------------------------------------------------------------------
 
-*) geometry not converged in 100 iterations.
+*) Geometry, optimized at L=40, N=512, is not converged in 100
+   iterations. It was not refined further.
 
 This is the same data where QM energies where offset by self-energy of
 5 water  and uranyl (-17691706.2590545 kcal  PBE and -17879819.0704410
@@ -1586,8 +1593,8 @@ BP:
 
 Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
 ---------   ------   ------   ------   ----------  ----------
-MM          -270.1   -217.0   -140.0   -410.2      -357.1
-MM+RISM     -270.0   -216.9   -140.3   -410.2      -357.2
-QM          -270.8   -216.0   -139.9   -410.7      -355.9
-QM+RISM*     -32.5    116.7   -449.7   -482.2      -333.1
+MM          -270.1   -217.0   -140.1   -410.3      -357.2
+MM+RISM     -270.0   -216.9   -140.4   -410.3      -357.3
+QM          -270.8   -216.0   -140.0   -410.8      -356.0
+QM+RISM*     -32.5    116.7   -449.8   -482.3      -333.1
 -------------------------------------------------------------
