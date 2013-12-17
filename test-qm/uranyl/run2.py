@@ -40,8 +40,16 @@ alt = \
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 20 --N 512
 """
+alt1 = \
+"""
+/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+--solvent "water, SPC/E"
+--solute "UO2_5H2O, SPC"
+--norm-tol 1e-14 --dielectric 78.4
+--rho 0.0333295 --beta 1.6889 --L 160 --N 4096
+"""
 
-calc = ParaGauss (cmdline="salloc -n16 mpirun ~/darcs/ttfs-mac/runqm",
+calc = ParaGauss (cmdline="salloc -n8 mpirun ~/darcs/ttfs-mac/runqm",
                   input="uranyl+water.scm")
 
 atoms = read ("uo22+,5h2o.xyz")
@@ -128,38 +136,28 @@ def write_xyz (path, x):
     atoms.set_positions (x)
     write (path, atoms)
 
-with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h:
+with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt1) as h1:
     # Change  the  salts  to   discard  memoized  results  (or  delete
     # ./cache.d):
     f = Memoize (f, DirStore (salt="uo22+, 5h2o, bp"))
     g = Memoize (g, DirStore (salt=cmd + "Dec3(b)"))
     h = Memoize (h, DirStore (salt=alt + "Dec3(b)"))
+    h1 = Memoize (h1, DirStore (salt=alt1 + "Dec 17a"))
 
     f = compose (f, trafo)  # QM self-energy
     g = compose (g, trafo)  # MM self-energy
     h = compose (h, trafo)  # RISM solvation energy
+    h1 = compose (h1, trafo)  # RISM solvation energy, hi precision
 
     def opt (e, s, name, **kwargs):
         print "XXX: " + name + "..."
 
-        print name + ": s(0)=", s
-        print name + ": x(0)=\n", trafo (s)
         print name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit"
 
         s, info = minimize (e, s, **kwargs)
 
         print name + "converged =", info["converged"], "in", info["iterations"], "iterations"
-        print name + "s(min)=", s
-        print name + "x(min)=\n", trafo (s)
         write_xyz (name + ".xyz", trafo (s))
-
-        units = [(kcal, "kcal"), (eV, "eV"), (Hartree, "Hartree")]
-        for u, uu in units:
-            print "e = ", g(s)/u, "+", h(s)/u, "=", e(s)/u, "(%s)" % uu
-
-        for u, uu in units:
-            print "e = ", e(s) / u, "%s," % uu, \
-                "|g| = ", max(abs(e.fprime(s))) / u, "%s/Unit" % uu
 
         # print info
         traj = info["trajectory"]
@@ -200,3 +198,25 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h:
         for s in ss:
             print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
                 "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
+
+
+    clean ()
+
+    # MM self-energy with RISM solvation:
+    with g + h1 as e:
+        s, info = opt (e, s1, "uranyl+water,mm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    S1 = s
+
+    # QM self-energy with RISM solvation (diverges):
+    # with f + h1 as e:
+    #     s, info = opt (e, s3, "uranyl+water,qm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+    #     print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    # S3 = s
+
+    ss = [s0, S1, s2, s3]
+    with h1 as h:
+        with f + h as e, g + h as e1:
+            for s in ss:
+                print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
+                    "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
