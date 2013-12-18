@@ -1,0 +1,491 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Understanding the thermodynamic and structural properties of uranium in
+ aqueous solution is crucial for designing effective processes in the recycling
+ of this radioactive element from used nuclear fuel.
+ 1,2
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Silva95,book:Grenthe92"
+
+\end_inset
+
+ For this purpose, both experimental and theoretical studies have been carried
+ out to elucidate structural and energetic information of uranyl cation
+ in aqueous solution.
+ While researchers have to face the radiotoxicity threat of uranium element
+ in experimental measurement, theoretical methods, including quantum mechanics
+ (QM) and classical molecular mechanics (MM) simulations, provide alternative
+ ways to mimic the solvation environment of uranyl cation with considerable
+ accuracy.
+\end_layout
+
+\begin_layout Standard
+Up to now, the most popular strategy in QM studies of uranyl is using the
+ polarizable continuum model (PCM) to represent water solvent.
+ Although PCM method has been successfully applied in studies of uranyl
+ adsorption and chemical reaction at solvated mineral surface3-5
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kremleva12,Kremleva10,Kremleva08"
+
+\end_inset
+
+, it provides no insight into the thermodynamic fluctuation caused by the
+ microscopic structure of water solvent.
+ On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
+ MC) based on empirical potential model could produce explicit configuration
+ of water solvent around uranyl thus several studies6,7
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hagberg05,Tirler13"
+
+\end_inset
+
+also attempted to combine QM and MM simulations to simultaneously include
+ both the chemical behavior of uranyl solute and the effect of solvent structure.
+ However, the results of such statistical sampling are only as good as the
+ effective force field used to parameterize the solvent-solvent and solute-solve
+nt interactions8
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gordon00"
+
+\end_inset
+
+, and the polarizability of solvent medium has to be taken into account
+ to compete with continuum models in reproducing electrostatic interactions.
+ Meanwhile, Statistical sampling from huge amount of solvent configurations
+ also entails significant additional cost to the combination of QM and MM
+ calculations.
+
+\end_layout
+
+\begin_layout Standard
+Given the difficulties mentioned above, new strategies which combine QM
+ methods with integral equation theory of molecular liquids are regarded
+ as a promising direction to study the chemical reactions and processes
+ in aqueous solution with enough accuracy and affordable cost.
+ One successful approach is the reference interaction site model (RISM)9
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler72"
+
+\end_inset
+
+which could provide detailed solvent structure with site-site radial distributio
+n functions (RDF).
+ One dimensional (1D) RISM method has been applied in the studies of polar
+ and quadru-polar liquids.10,11
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hirata81,Hirata82"
+
+\end_inset
+
+ And by enforcing the desired dielectric constant for all thermodynamic
+ routes, RISM method could be extended as dielectric consistent RISM (DRISM)12
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Perkyns92"
+
+\end_inset
+
+ to solutions containing charged ionic molecules13
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+.
+ In this work, we apply RISM method for the first time to study the behavior
+ of uranyl in aqueous solution.
+ By introducing classical14
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Guilbaud96"
+
+\end_inset
+
+ and newly developed15,16
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pomogaev13,Rai12"
+
+\end_inset
+
+ force field parameterizations for uranyl and selecting the suitable water
+ model, we first produce water solvent structures around simple uranyl ion
+ with 1D-RISM method which are comparable with results obtained from MD
+ simulation.
+ Secondly, we extend 1D-RISM and the same force field parameterization for
+ simple uranyl ion to uranyl-water complexes, in which the first solvation
+ shell of water around uranyl cation is represented by explicit water molecules.
+ Finally, potential energy surfaces (PES) of uranyl-water complexes are
+ generated both with MM and QM methods in the presence of water solvent
+ environment outside the first solvation shell, and geometry optimizations
+ are performed to study the stability of solvation shell structures.
+
+\end_layout
+
+\begin_layout Section
+Methodology
+\end_layout
+
+\begin_layout Standard
+The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
+ could be written as the following simple matrix form for infinite dilutions:
+\begin_inset Formula
+\begin{equation}
+{\rm {\bf h}}^{uv}={\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast{\rm \boldsymbol{\rho}}^{v}{\rm {\bf h}}^{vv}={\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast[{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\rho}}^{v}{\rm \boldsymbol{h}}^{vv}]
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula $\ast$
+\end_inset
+
+donates convolution integral, bold letters
+\begin_inset Formula ${\bf h}^{uv}$
+\end_inset
+
+ and
+\begin_inset Formula ${\rm {\bf c}}^{uv}$
+\end_inset
+
+ are matrices consisting of total correlation functions
+\begin_inset Formula $h_{i\alpha}^{uv}(r)$
+\end_inset
+
+ and direct correlation functions
+\begin_inset Formula $c_{i\alpha}^{uv}$
+\end_inset
+
+.
+ Superscripts
+\begin_inset Formula $u$
+\end_inset
+
+ and
+\begin_inset Formula $v$
+\end_inset
+
+ represent solute and solvent respectively and subscripts
+\begin_inset Formula $i$
+\end_inset
+
+ and
+\begin_inset Formula $\alpha$
+\end_inset
+
+ represent interaction sites of molecules.
+
+\begin_inset Formula ${\rm \boldsymbol{\omega}}^{u}$
+\end_inset
+
+ and
+\begin_inset Formula ${\rm \boldsymbol{\omega}}^{v}$
+\end_inset
+
+ are matrices of intra-molecular correlation functions of solute and solvent
+ and
+\begin_inset Formula ${\rm \boldsymbol{\rho}}^{v}$
+\end_inset
+
+ is a diagonal matrix consisting of density of each solvent specie.
+ Intra-molecular correlation functions have the form of
+\begin_inset Formula
+\begin{equation}
+\omega_{i\alpha}(r)=\delta_{i\alpha}+[1-\delta_{i\alpha}]\frac{\delta(r-r_{i\alpha})}{4\pi r_{i\alpha}}
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula $r_{i\alpha}$
+\end_inset
+
+ is the distance between two interaction sites and
+\begin_inset Formula $\delta_{i\alpha}$
+\end_inset
+
+ is the Dirac
+\begin_inset Formula $\delta$
+\end_inset
+
+-function.
+\end_layout
+
+\begin_layout Standard
+The term in square brackets of (1) refers to solvent susceptibility function
+
+\begin_inset Formula $\chi_{\alpha\gamma}^{vv}(r)$
+\end_inset
+
+:
+\begin_inset Formula
+\begin{equation}
+\chi_{\alpha\gamma}^{vv}(r)=\omega_{\alpha\gamma}^{v}(r)+\rho_{\alpha}^{v}h_{\alpha\gamma}^{vv}(r)
+\end{equation}
+
+\end_inset
+
+which could be obtained from pure solvent-solvent RISM equation:
+\begin_inset Formula
+\begin{equation}
+{\rm {\bf h}}^{vv}={\rm \boldsymbol{\omega}}^{v}\ast{\rm {\bf c}}^{vv}\ast[{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\rho}}^{v}{\rm \boldsymbol{h}}^{vv}]
+\end{equation}
+
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+and is used as input to solve solute-solvent RISM equation (1).
+ Since there are two unknowns in equations (1) and (4), we need to apply
+ closure relations to make the equations complete.
+ One of the most popular formulas is the hypernetted closure (HNC) written
+ as17
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85"
+
+\end_inset
+
+
+\begin_inset Formula
+\begin{equation}
+h_{i\alpha}(r)=exp[-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)]-1
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula $\beta=1/k_{B}T$
+\end_inset
+
+,
+\begin_inset Formula $k_{B}$
+\end_inset
+
+ is Boltzmann factor,
+\begin_inset Formula $T$
+\end_inset
+
+ is the temperature, and
+\begin_inset Formula $u_{i\alpha}(r)$
+\end_inset
+
+ is the pair-wise potential between interaction sites
+\begin_inset Formula $i$
+\end_inset
+
+ and
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ HNC closure has been applied to solve RISM equation in a variety of studies
+ about aqueous solution, however, the uncontrolled exponential term often
+ results in numerical divergence.
+ Another much more numerical stable closure expression, formulated by Kovalenko
+ and Hirata18 with partially linearization of the exponent term, is called
+ KH closure:
+\begin_inset Formula
+\begin{equation}
+\begin{aligned}h_{i\alpha}(r)=\begin{cases}
+exp[d_{i\alpha}(r)]-1 & for\: d_{i\alpha}(r)\leq0\\
+d_{i\alpha}(r) & for\: d_{i\alpha}(r)>0,
+\end{cases}\\
+d_{i\alpha}(r)=-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)
+\end{aligned}
+\end{equation}
+
+\end_inset
+
+Within the framework of the given closure relations mentioned above, one
+ could derive the closed form of excess chemical potential to evaluate the
+ thermodynamic properties of solutes.
+ For HNC closure, the excess chemical potential has the expression17
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85"
+
+\end_inset
+
+:
+\begin_inset Formula
+\begin{equation}
+\Delta\mu^{HNC}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\end{equation}
+
+\end_inset
+
+For KH closure, could be written as18
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+
+\begin_inset Formula
+\begin{equation}
+\Delta\mu^{KH}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[\Theta(h_{i\alpha}^{uv}(r))(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\end{equation}
+
+\end_inset
+
+Additionally, with the assumption of Gaussian fluctuation (GF) of solvent19
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler84"
+
+\end_inset
+
+, we are able to use the following expression to evaluate the excess chemical
+ potential from correlation functions calculated with HNC and KH closure
+ respectively:
+\begin_inset Formula
+\begin{equation}
+\Delta\mu^{GF}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\end{equation}
+
+\end_inset
+
+We used pair-wise potential
+\begin_inset Formula $u_{i\alpha}(r)$
+\end_inset
+
+ to describe the distance-dependent interactions between two molecule sites
+
+\begin_inset Formula $i$
+\end_inset
+
+ and
+\begin_inset Formula $\alpha$
+\end_inset
+
+, which could be expressed as the combination of long-range electrostatic
+ potential
+\begin_inset Formula $u_{i\alpha}^{{\rm el}}(r)$
+\end_inset
+
+ and short-range Lennard-Jones (LJ) potential
+\begin_inset Formula $u_{i\alpha}^{{\rm LJ}}(r)$
+\end_inset
+
+:
+\begin_inset Formula
+\begin{equation}
+\begin{aligned}u_{i\alpha}(r)=u_{i\alpha}^{{\rm el}}(r)+u_{i\alpha}^{{\rm LJ}}(r)\\
+u_{i\alpha}^{{\rm el}}(r)=\frac{q_{i}q_{\alpha}}{r};\, u_{i\alpha}^{{\rm LJ}}(r)=4\epsilon_{i\alpha}\left[\left(\frac{\sigma_{i\alpha}}{r}\right)^{12}-\left(\frac{\sigma_{i\alpha}}{r}\right)^{6}\right]
+\end{aligned}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Computational details
+\end_layout
+
+\begin_layout Section
+Results and discussion
+\end_layout
+
+\begin_layout Section
+Concluding remarks
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "bibuo2"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
