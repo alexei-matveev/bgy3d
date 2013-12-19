@@ -226,53 +226,54 @@ The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
 
 \end_inset
 
-where
+where 
 \begin_inset Formula $\ast$
 \end_inset
 
-donates convolution integral, bold letters
+ donates convolution integral, bold letters 
 \begin_inset Formula ${\bf h}^{uv}$
 \end_inset
 
- and
+ and 
 \begin_inset Formula ${\rm {\bf c}}^{uv}$
 \end_inset
 
- are matrices consisting of total correlation functions
+ are matrices consisting of total correlation functions 
 \begin_inset Formula $h_{i\alpha}^{uv}(r)$
 \end_inset
 
- and direct correlation functions
+ and direct correlation functions 
 \begin_inset Formula $c_{i\alpha}^{uv}$
 \end_inset
 
 .
- Superscripts
+ Superscripts 
 \begin_inset Formula $u$
 \end_inset
 
- and
+ and 
 \begin_inset Formula $v$
 \end_inset
 
- represent solute and solvent respectively and subscripts
+ represent solute and solvent respectively and subscripts 
 \begin_inset Formula $i$
 \end_inset
 
- and
+ and 
 \begin_inset Formula $\alpha$
 \end_inset
 
  represent interaction sites of molecules.
+ 
 \begin_inset Formula ${\rm \boldsymbol{\omega}}^{u}$
 \end_inset
 
- and
+ and 
 \begin_inset Formula ${\rm \boldsymbol{\omega}}^{v}$
 \end_inset
 
  are matrices of intra-molecular correlation functions of solute and solvent
- and
+ and 
 \begin_inset Formula ${\rm \boldsymbol{\rho}}^{v}$
 \end_inset
 
@@ -285,15 +286,15 @@ donates convolution integral, bold letters
 
 \end_inset
 
-where
+where 
 \begin_inset Formula $r_{i\alpha}$
 \end_inset
 
- is the distance between two interaction sites and
+ is the distance between two interaction sites and 
 \begin_inset Formula $\delta_{i\alpha}$
 \end_inset
 
- is the Dirac
+ is the Dirac 
 \begin_inset Formula $\delta$
 \end_inset
 
@@ -302,6 +303,7 @@ where
 
 \begin_layout Standard
 The term in square brackets of (1) refers to solvent susceptibility function
+ 
 \begin_inset Formula $\chi_{\alpha\gamma}^{vv}(r)$
 \end_inset
 
@@ -352,7 +354,7 @@ h_{i\alpha}(r)=\exp[-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)]-1
 
 \end_inset
 
-where
+where 
 \begin_inset Formula $\beta=1/k_{B}T$
 \end_inset
 
@@ -360,19 +362,19 @@ where
 \begin_inset Formula $k_{B}$
 \end_inset
 
- is Boltzmann factor,
+ is Boltzmann factor, 
 \begin_inset Formula $T$
 \end_inset
 
- is the temperature, and
+ is the temperature, and 
 \begin_inset Formula $u_{i\alpha}(r)$
 \end_inset
 
- is the pair-wise potential between interaction sites
+ is the pair-wise potential between interaction sites 
 \begin_inset Formula $i$
 \end_inset
 
- and
+ and 
 \begin_inset Formula $\alpha$
 \end_inset
 
@@ -446,24 +448,25 @@ key "Chandler84"
 
 \end_inset
 
-We used pair-wise potential
+We used pair-wise potential 
 \begin_inset Formula $u_{i\alpha}(r)$
 \end_inset
 
  to describe the distance-dependent interactions between two molecule sites
+ 
 \begin_inset Formula $i$
 \end_inset
 
- and
+ and 
 \begin_inset Formula $\alpha$
 \end_inset
 
 , which could be expressed as the combination of long-range electrostatic
- potential
+ potential 
 \begin_inset Formula $u_{i\alpha}^{{\rm el}}(r)$
 \end_inset
 
- and short-range Lennard-Jones (LJ) potential
+ and short-range Lennard-Jones (LJ) potential 
 \begin_inset Formula $u_{i\alpha}^{{\rm LJ}}(r)$
 \end_inset
 
