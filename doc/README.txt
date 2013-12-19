@@ -1539,8 +1539,8 @@ options used here were
 ~~~
 
 
-Uranyl with explicit water molecules
-====================================
+Uranyl with 5 explicit water molecules
+======================================
 
 FIXME: PBE  numbers (where affected  by RISM) use lower  settings with
 L=20, N=512.
@@ -1633,3 +1633,41 @@ MM+RISM     -270.0   -216.9   -140.4   -410.3      -357.3
 QM          -270.8   -216.0   -140.0   -410.8      -356.0
 QM+RISM*     -32.5    116.7   -449.8   -482.3      -333.1
 -------------------------------------------------------------
+
+
+Uranyl with 4 explicit water molecules
+======================================
+
+There is a qualitative  difference between MM-optimized geometry which
+approximates D4H with a slightly tilted plane of equatorial waters and
+MM+RISM   optimized   geometry  which   resembles   D5H  geometry   of
+five-coordinated uranyl with one  water removed (or rather substituted
+by  the RISM water  model). This  is also  reflected in  a significant
+difference of self- and RISM energies between these two conformations.
+Remember   that  for  five-coordinated   uranyl  the   difference  was
+quantitative and small.
+
+BP (pre-optimized at L=40, N=512):
+
+Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
+---------  --------------  ---------------  --------------  --------------  --------------
+MM         -17832056.2248  -187.254538145   -154.16460289   -17832210.3894  -341.419141035
+MM+RISM    -17832040.9398  -175.358028383   -175.241703451  -17832216.1815  -350.599731834
+QM         -17832056.2869  -187.254262619   -154.148428737  -17832210.4353  -341.402691356
+------------------------------------------------------------------------------------------
+
+This is the same data where QM energies where offset by self-energy of
+4 water and uranyl:
+
+   -48006.3334282 * 4 - 17639787.4033 = -17831812.7370128 kcal (BP)
+
+BP:
+
+Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
+---------   ------   ------   ------   ----------  ----------
+MM          -243.5   -187.3   -154.2   -397.7      -341.4
+MM+RISM     -228.2   -175.4   -175.2   -403.4      -350.6
+QM          -243.5   -187.3   -154.1   -397.7      -341.4
+-------------------------------------------------------------
+
+
