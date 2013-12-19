@@ -64,8 +64,8 @@
 \paragraph_indentation default
 \quotes_language english
 \papercolumns 1
-\papersides 2
-\paperpagestyle headings
+\papersides 1
+\paperpagestyle default
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -5230,11 +5230,18 @@ hole integral
 \begin_inset Quotes erd
 \end_inset
 
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:isothermal-compressibility"
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Standard
-For simple liquids the isothermal compressibility 
+The isothermal compressibility 
 \begin_inset Formula 
 \[
 \kappa_{T}=-\frac{1}{V}\left(\frac{\partial V}{\partial p}\right)_{T}=\beta\langle(\Delta V)^{2}\rangle/V
@@ -5242,7 +5249,7 @@ For simple liquids the isothermal compressibility
 
 \end_inset
 
-is given by the integral 
+for simple liquids is given by the integral 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:rice65"
@@ -5258,7 +5265,7 @@ key "book:rice65"
 \end_inset
 
 The second term on the left hand side can be interpreted as a (negative
- of) number of particles displaced from the neighborhood of every selected
+ of the) number of particles displaced from the neighborhood of every selected
  solvent particle.
  For incompressible liquid, 
 \begin_inset Formula $\kappa_{T}=0$
@@ -5296,7 +5303,7 @@ Isothermal compressibility, as introduced above, is intrinsically related
 \end_inset
 
 , a Fourier transform of the total correlation function, which for simple
- liquids in radial coordinates fulfills the following expression:
+ liquids in radial coordinates fulfills the following equation:
 \begin_inset Formula 
 \begin{equation}
 S(k)-1=4\pi\rho\int[g(r)-1]\text{sinc}(kr)r^{2}dr.
@@ -5353,7 +5360,7 @@ key "url:water"
 .
  This corresponds
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Using 1 kcal/mol/A
@@ -5640,7 +5647,8 @@ Three-dimensional statistical solvent models for water
 \end_layout
 
 \begin_layout Quote
-(Work plan)
+Volatile section containing immediate work plan.
+ 
 \end_layout
 
 \begin_layout Subsection
@@ -5679,20 +5687,27 @@ Investigate the long range (
 \begin_inset Formula $\tilde{\omega}_{\alpha\gamma}(k)=\text{sinc}(k\ell_{\alpha\gamma})\approx1-(k\ell_{\alpha\gamma})^{2}/6$
 \end_inset
 
- and a an intuitive (or formal?) 
+ and a 
 \begin_inset Quotes eld
 \end_inset
 
-hole volume rule
+hole integral
 \begin_inset Quotes erd
 \end_inset
 
-, 
-\begin_inset Formula $\rho\tilde{h}_{\alpha\gamma}(0)=-1$
+ rule 
+\begin_inset Formula $4\pi\rho\int h_{\alpha\gamma}(r)r^{2}dr\approx-1$
 \end_inset
 
- or more intuitive 
-\begin_inset Formula $4\pi\rho\int h_{\alpha\gamma}(r)r^{2}dr=-1$
+, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:isothermal-compressibility"
+
 \end_inset
 
 .
@@ -5700,15 +5715,27 @@ hole volume rule
 \begin_inset Quotes eld
 \end_inset
 
-hole volumes
+hole integrals
 \begin_inset Quotes erd
 \end_inset
 
- are lower than expected by a few percent so that cancellation of 
+ are lower than expected for an incompressible liquid by an amount 
+\begin_inset Formula $\rho\kappa_{T}/\beta$
+\end_inset
+
+ proportional to the isothermal compressibility 
+\begin_inset Formula $\kappa_{T}$
+\end_inset
+
+ which may make the cancellation of 
 \begin_inset Formula $o(1)$
 \end_inset
 
- terms is incomplete.
+ terms in the sum 
+\begin_inset Formula $\sum_{\alpha}z_{\alpha}\tilde{\chi}_{\alpha\gamma}(k)$
+\end_inset
+
+ essential for long-range electrostatic response incomplete.
 \end_layout
 
 \begin_layout Itemize
@@ -5780,7 +5807,7 @@ reference "sec:alchemical-processes"
 
 \end_inset
 
-, but needs a formal justification/rationalization.
+, but needs a formal justification/rationalization and validation.
 \end_layout
 
 \begin_layout Itemize
