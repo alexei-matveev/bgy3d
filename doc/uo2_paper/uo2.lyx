@@ -388,8 +388,8 @@ where
 \begin_inset Formula 
 \begin{equation}
 \begin{aligned}h_{i\alpha}(r)=\begin{cases}
-\exp[d_{i\alpha}(r)]-1 & for\: d_{i\alpha}(r)\leq0\\
-d_{i\alpha}(r) & for\: d_{i\alpha}(r)>0,
+\exp[d_{i\alpha}(r)]-1 & \text{for}\: d_{i\alpha}(r)\leq0\\
+d_{i\alpha}(r) & \text{for}\: d_{i\alpha}(r)>0,
 \end{cases}\\
 d_{i\alpha}(r)=-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)
 \end{aligned}
@@ -410,7 +410,7 @@ key "Singer85"
 :
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu^{HNC}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\Delta\mu^{\text{HNC}}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
 
 \end_inset
@@ -425,7 +425,7 @@ key "Kovalenko99"
 
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu^{KH}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[\Theta(h_{i\alpha}^{uv}(r))(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\Delta\mu^{\text{KH}}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[\Theta(h_{i\alpha}^{uv}(r))(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
 
 \end_inset
@@ -443,7 +443,7 @@ key "Chandler84"
  respectively:
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu^{GF}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
+\Delta\mu^{\text{GF}}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
 
 \end_inset
@@ -463,18 +463,18 @@ We used pair-wise potential
 
 , which could be expressed as the combination of long-range electrostatic
  potential 
-\begin_inset Formula $u_{i\alpha}^{{\rm el}}(r)$
+\begin_inset Formula $u_{i\alpha}^{\text{el}}(r)$
 \end_inset
 
  and short-range Lennard-Jones (LJ) potential 
-\begin_inset Formula $u_{i\alpha}^{{\rm LJ}}(r)$
+\begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)$
 \end_inset
 
 :
 \begin_inset Formula 
 \begin{equation}
-\begin{aligned}u_{i\alpha}(r)=u_{i\alpha}^{{\rm el}}(r)+u_{i\alpha}^{{\rm LJ}}(r)\\
-u_{i\alpha}^{{\rm el}}(r)=\frac{q_{i}q_{\alpha}}{r};\, u_{i\alpha}^{{\rm LJ}}(r)=4\epsilon_{i\alpha}\left[\left(\frac{\sigma_{i\alpha}}{r}\right)^{12}-\left(\frac{\sigma_{i\alpha}}{r}\right)^{6}\right]
+\begin{aligned}u_{i\alpha}(r)=u_{i\alpha}^{\text{el}}(r)+u_{i\alpha}^{\text{LJ}}(r)\\
+u_{i\alpha}^{\text{el}}(r)=\frac{q_{i}q_{\alpha}}{r};\, u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[\left(\frac{\sigma_{i\alpha}}{r}\right)^{12}-\left(\frac{\sigma_{i\alpha}}{r}\right)^{6}\right]
 \end{aligned}
 \end{equation}
 
