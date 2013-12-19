@@ -84,14 +84,14 @@ Introduction
 \begin_layout Standard
 Understanding the thermodynamic and structural properties of uranium in
  aqueous solution is crucial for designing effective processes in the recycling
- of this radioactive element from used nuclear fuel.
- 1,2
+ of this radioactive element from used nuclear fuel 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Silva95,book:Grenthe92"
 
 \end_inset
 
+.
  For this purpose, both experimental and theoretical studies have been carried
  out to elucidate structural and energetic information of uranyl cation
  in aqueous solution.
@@ -106,7 +106,7 @@ key "Silva95,book:Grenthe92"
 Up to now, the most popular strategy in QM studies of uranyl is using the
  polarizable continuum model (PCM) to represent water solvent.
  Although PCM method has been successfully applied in studies of uranyl
- adsorption and chemical reaction at solvated mineral surface3-5
+ adsorption and chemical reaction at solvated mineral surface 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kremleva12,Kremleva10,Kremleva08"
@@ -117,7 +117,7 @@ key "Kremleva12,Kremleva10,Kremleva08"
  microscopic structure of water solvent.
  On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
  MC) based on empirical potential model could produce explicit configuration
- of water solvent around uranyl thus several studies6,7
+ of water solvent around uranyl thus several studies 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "hagberg05,Tirler13"
@@ -128,7 +128,7 @@ also attempted to combine QM and MM simulations to simultaneously include
  both the chemical behavior of uranyl solute and the effect of solvent structure.
  However, the results of such statistical sampling are only as good as the
  effective force field used to parameterize the solvent-solvent and solute-solve
-nt interactions8
+nt interactions 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Gordon00"
@@ -147,7 +147,8 @@ Given the difficulties mentioned above, new strategies which combine QM
  methods with integral equation theory of molecular liquids are regarded
  as a promising direction to study the chemical reactions and processes
  in aqueous solution with enough accuracy and affordable cost.
- One successful approach is the reference interaction site model (RISM)9
+ One successful approach is the reference interaction site model (RISM)
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chandler72"
@@ -157,22 +158,24 @@ key "Chandler72"
 which could provide detailed solvent structure with site-site radial distributio
 n functions (RDF).
  One dimensional (1D) RISM method has been applied in the studies of polar
- and quadru-polar liquids.10,11
+ and quadru-polar liquids
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Hirata81,Hirata82"
 
 \end_inset
 
+.
  And by enforcing the desired dielectric constant for all thermodynamic
- routes, RISM method could be extended as dielectric consistent RISM (DRISM)12
+ routes, RISM method could be extended as dielectric consistent RISM (DRISM)
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
 
 \end_inset
 
- to solutions containing charged ionic molecules13
+ to solutions containing charged ionic molecules 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Joung13"
@@ -182,14 +185,14 @@ key "Joung13"
 .
  In this work, we apply RISM method for the first time to study the behavior
  of uranyl in aqueous solution.
- By introducing classical14
+ By introducing classical 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
 
 \end_inset
 
- and newly developed15,16
+ and newly developed 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pomogaev13,Rai12"
@@ -334,7 +337,7 @@ and is used as input to solve solute-solvent RISM equation (1).
  Since there are two unknowns in equations (1) and (4), we need to apply
  closure relations to make the equations complete.
  One of the most popular formulas is the hypernetted closure (HNC) written
- as17
+ as 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85"
@@ -395,7 +398,7 @@ d_{i\alpha}(r)=-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)
 Within the framework of the given closure relations mentioned above, one
  could derive the closed form of excess chemical potential to evaluate the
  thermodynamic properties of solutes.
- For HNC closure, the excess chemical potential has the expression17
+ For HNC closure, the excess chemical potential has the expression 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85"
@@ -410,7 +413,7 @@ key "Singer85"
 
 \end_inset
 
-For KH closure, could be written as18
+For KH closure, could be written as 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kovalenko99"
@@ -425,7 +428,8 @@ key "Kovalenko99"
 
 \end_inset
 
-Additionally, with the assumption of Gaussian fluctuation (GF) of solvent19
+Additionally, with the assumption of Gaussian fluctuation (GF) of solvent
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chandler84"
