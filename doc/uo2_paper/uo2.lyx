@@ -7,8 +7,8 @@
 \use_default_options false
 \maintain_unincluded_children false
 \language english
-\language_package default
-\inputencoding auto
+\language_package none
+\inputencoding default
 \fontencoding global
 \font_roman default
 \font_sans default
@@ -498,7 +498,6 @@ Concluding remarks
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-btprint "btPrintAll"
 bibfiles "bibuo2"
 options "plain"
 
