@@ -128,7 +128,7 @@ key "hagberg05,Tirler13"
 
 \end_inset
 
-also attempted to combine QM and MM simulations to simultaneously include
+ also attempted to combine QM and MM simulations to simultaneously include
  both the chemical behavior of uranyl solute and the effect of solvent structure.
  However, the results of such statistical sampling are only as good as the
  effective force field used to parameterize the solvent-solvent and solute-solve
@@ -159,10 +159,10 @@ key "Chandler72"
 
 \end_inset
 
-which could provide detailed solvent structure with site-site radial distributio
-n functions (RDF).
+ which could provide detailed solvent structure with site-site radial distributi
+on functions (RDF).
  One dimensional (1D) RISM method has been applied in the studies of polar
- and quadru-polar liquids
+ and quadru-polar liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Hirata81,Hirata82"
