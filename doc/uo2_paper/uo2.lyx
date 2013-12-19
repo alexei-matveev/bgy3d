@@ -347,7 +347,7 @@ key "Singer85"
 
 \begin_inset Formula 
 \begin{equation}
-h_{i\alpha}(r)=exp[-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)]-1
+h_{i\alpha}(r)=\exp[-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)]-1
 \end{equation}
 
 \end_inset
@@ -386,7 +386,7 @@ where
 \begin_inset Formula 
 \begin{equation}
 \begin{aligned}h_{i\alpha}(r)=\begin{cases}
-exp[d_{i\alpha}(r)]-1 & for\: d_{i\alpha}(r)\leq0\\
+\exp[d_{i\alpha}(r)]-1 & for\: d_{i\alpha}(r)\leq0\\
 d_{i\alpha}(r) & for\: d_{i\alpha}(r)>0,
 \end{cases}\\
 d_{i\alpha}(r)=-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)
