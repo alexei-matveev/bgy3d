@@ -2,8 +2,9 @@
 \lyxformat 413
 \begin_document
 \begin_header
-\textclass article
-\use_default_options true
+\textclass revtex4
+\options twocolumn
+\use_default_options false
 \maintain_unincluded_children false
 \language english
 \language_package default
@@ -25,6 +26,7 @@
 \bibtex_command default
 \index_command default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -58,6 +60,22 @@
 \end_header
 
 \begin_body
+
+\begin_layout Title
+Uranyl solvation by RISM model
+\end_layout
+
+\begin_layout Author
+Bo, Li
+\end_layout
+
+\begin_layout Date
+December 2013
+\end_layout
+
+\begin_layout Abstract
+To be done
+\end_layout
 
 \begin_layout Section
 Introduction
@@ -122,7 +140,6 @@ key "Gordon00"
  Meanwhile, Statistical sampling from huge amount of solvent configurations
  also entails significant additional cost to the combination of QM and MM
  calculations.
-
 \end_layout
 
 \begin_layout Standard
@@ -190,7 +207,6 @@ key "Pomogaev13,Rai12"
  generated both with MM and QM methods in the presence of water solvent
  environment outside the first solvation shell, and geometry optimizations
  are performed to study the stability of solvation shell structures.
-
 \end_layout
 
 \begin_layout Section
@@ -200,7 +216,7 @@ Methodology
 \begin_layout Standard
 The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
  could be written as the following simple matrix form for infinite dilutions:
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 {\rm {\bf h}}^{uv}={\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast{\rm \boldsymbol{\rho}}^{v}{\rm {\bf h}}^{vv}={\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast[{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\rho}}^{v}{\rm \boldsymbol{h}}^{vv}]
 \end{equation}
@@ -245,7 +261,6 @@ donates convolution integral, bold letters
 \end_inset
 
  represent interaction sites of molecules.
-
 \begin_inset Formula ${\rm \boldsymbol{\omega}}^{u}$
 \end_inset
 
@@ -260,7 +275,7 @@ donates convolution integral, bold letters
 
  is a diagonal matrix consisting of density of each solvent specie.
  Intra-molecular correlation functions have the form of
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \omega_{i\alpha}(r)=\delta_{i\alpha}+[1-\delta_{i\alpha}]\frac{\delta(r-r_{i\alpha})}{4\pi r_{i\alpha}}
 \end{equation}
@@ -284,12 +299,11 @@ where
 
 \begin_layout Standard
 The term in square brackets of (1) refers to solvent susceptibility function
-
 \begin_inset Formula $\chi_{\alpha\gamma}^{vv}(r)$
 \end_inset
 
 :
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \chi_{\alpha\gamma}^{vv}(r)=\omega_{\alpha\gamma}^{v}(r)+\rho_{\alpha}^{v}h_{\alpha\gamma}^{vv}(r)
 \end{equation}
@@ -297,7 +311,7 @@ The term in square brackets of (1) refers to solvent susceptibility function
 \end_inset
 
 which could be obtained from pure solvent-solvent RISM equation:
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 {\rm {\bf h}}^{vv}={\rm \boldsymbol{\omega}}^{v}\ast{\rm {\bf c}}^{vv}\ast[{\rm \boldsymbol{\omega}}^{v}+{\rm \boldsymbol{\rho}}^{v}{\rm \boldsymbol{h}}^{vv}]
 \end{equation}
@@ -328,7 +342,7 @@ key "Singer85"
 \end_inset
 
 
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 h_{i\alpha}(r)=exp[-\beta u_{i\alpha}(r)+h_{i\alpha}(r)-c_{i\alpha}(r)]-1
 \end{equation}
@@ -366,7 +380,7 @@ where
  Another much more numerical stable closure expression, formulated by Kovalenko
  and Hirata18 with partially linearization of the exponent term, is called
  KH closure:
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \begin{aligned}h_{i\alpha}(r)=\begin{cases}
 exp[d_{i\alpha}(r)]-1 & for\: d_{i\alpha}(r)\leq0\\
@@ -389,7 +403,7 @@ key "Singer85"
 \end_inset
 
 :
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \Delta\mu^{HNC}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
@@ -404,7 +418,7 @@ key "Kovalenko99"
 \end_inset
 
 
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \Delta\mu^{KH}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[\Theta(h_{i\alpha}^{uv}(r))(h_{i\alpha}^{uv}(r))^{2}-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
@@ -421,7 +435,7 @@ key "Chandler84"
 , we are able to use the following expression to evaluate the excess chemical
  potential from correlation functions calculated with HNC and KH closure
  respectively:
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \Delta\mu^{GF}=\frac{2\pi}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\rho_{\alpha}^{v}\int_{0}^{\infty}[-2c_{i\alpha}^{uv}(r)-c_{i\alpha}^{uv}(r)h_{i\alpha}^{uv}(r)]r^{2}dr
 \end{equation}
@@ -433,7 +447,6 @@ We used pair-wise potential
 \end_inset
 
  to describe the distance-dependent interactions between two molecule sites
-
 \begin_inset Formula $i$
 \end_inset
 
@@ -451,7 +464,7 @@ We used pair-wise potential
 \end_inset
 
 :
-\begin_inset Formula
+\begin_inset Formula 
 \begin{equation}
 \begin{aligned}u_{i\alpha}(r)=u_{i\alpha}^{{\rm el}}(r)+u_{i\alpha}^{{\rm LJ}}(r)\\
 u_{i\alpha}^{{\rm el}}(r)=\frac{q_{i}q_{\alpha}}{r};\, u_{i\alpha}^{{\rm LJ}}(r)=4\epsilon_{i\alpha}\left[\left(\frac{\sigma_{i\alpha}}{r}\right)^{12}-\left(\frac{\sigma_{i\alpha}}{r}\right)^{6}\right]
