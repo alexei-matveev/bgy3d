@@ -162,7 +162,7 @@ key "Chandler72"
  which could provide detailed solvent structure with site-site radial distributi
 on functions (RDF).
  One dimensional (1D) RISM method has been applied in the studies of polar
- and quadru-polar liquids 
+ and quadrupolar liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Hirata81,Hirata82"
@@ -234,7 +234,7 @@ where
 \begin_inset Formula $\ast$
 \end_inset
 
- donates convolution integral, bold letters 
+ denotes convolution integral, bold letters 
 \begin_inset Formula ${\bf h}^{uv}$
 \end_inset
 
@@ -285,17 +285,17 @@ where
  Intra-molecular correlation functions have the form of
 \begin_inset Formula 
 \begin{equation}
-\omega_{i\alpha}(r)=\delta_{i\alpha}+[1-\delta_{i\alpha}]\frac{\delta(r-r_{i\alpha})}{4\pi r_{i\alpha}}
+\omega_{\alpha\gamma}(r)=\delta_{\alpha\gamma}+[1-\delta_{\alpha\gamma}]\frac{\delta(r-r_{\alpha\gamma})}{4\pi r_{\alpha\gamma}}
 \end{equation}
 
 \end_inset
 
 where 
-\begin_inset Formula $r_{i\alpha}$
+\begin_inset Formula $r_{\alpha\gamma}$
 \end_inset
 
  is the distance between two interaction sites and 
-\begin_inset Formula $\delta_{i\alpha}$
+\begin_inset Formula $\delta_{\alpha\gamma}$
 \end_inset
 
  is the Dirac 
@@ -387,8 +387,8 @@ where
  about aqueous solution, however, the uncontrolled exponential term often
  results in numerical divergence.
  Another much more numerical stable closure expression, formulated by Kovalenko
- and Hirata18 with partially linearization of the exponent term, is called
- KH closure:
+ and Hirata with partial linearization of the exponent term, is called KH
+ closure:
 \begin_inset Formula 
 \begin{equation}
 \begin{aligned}h_{i\alpha}(r)=\begin{cases}
