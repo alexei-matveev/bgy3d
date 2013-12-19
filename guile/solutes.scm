@@ -4,6 +4,15 @@
 ;;; Copyright (c) 2013 Alexei Matveev
 ;;; Copyright (c) 2013 Bo Li
 ;;;
+;;; Number density is measured in A^-3, you would need a molar mass to
+;;; convert that to/from g/l:
+;;;
+;;;      -3     30  -3
+;;;   1 A   = 10   m   = 1660.5 mol/l
+;;;
+;;; E.g. the molar mass of water  is 18.0153 g/mol, that of the HCl is
+;;; 36.46094 g/mol.
+;;;
 ;;; Simplest  species,  single  neutral   site  LJ  particle.   To  be
 ;;; comparable  to  water  one  might   set  β  =  0.261610  and  ρ  =
 ;;; 1.054796. These  numbers have been  derived from LJ  parameters of
