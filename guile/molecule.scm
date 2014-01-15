@@ -37,6 +37,7 @@
    site-sigma
    site-epsilon
    site-charge
+   update-param
    site-x
    site-y
    site-z))
@@ -195,6 +196,53 @@
 (define site-sigma third)
 (define site-epsilon fourth)
 (define site-charge fifth)
+
+;;;
+;;; update sigma, epsilon and charge with new values
+;;;
+
+(define (find-site sites site-name)
+  ;; (remove-if-not (lambda (x) (equal? (car x) site-name)) sites))
+  (let ((site (assoc site-name sites)))
+    (if (not site)
+      (error "Not in sites" site-name))))
+
+(define (update-param molecule target-site param value)
+  (let ((name (molecule-name molecule))
+	(sites (molecule-sites molecule)))
+
+    (define (update-site site)
+      (match param
+	     ("sigma"
+	      (if (equal? target-site (site-name site))
+	        (update-sigma site value)
+	        (update-sigma site (site-sigma site))))
+	     ("epsilon"
+	      (if (equal? target-site (site-name site))
+	        (update-epsilon site value)
+	        (update-epsilon site (site-epsilon site))))
+	     ("charge"
+	      (if (equal? target-site (site-name site))
+	        (update-charge site value)
+		(upate-charge site (site-charge site))))))
+
+    (find-site sites target-site)
+    (make-molecule name (map update-site sites))))
+
+(define (update-sigma site new-sigma)
+  (match site
+    ((name position old-sigma epsilon charge)
+     (make-site name position new-sigma epsilon charge))))
+
+(define (update-epsilon site new-epsilon)
+  (match site
+    ((name position sigma old-epsilon charge)
+     (make-site name position sigma new-epsilon charge))))
+
+(define (update-charge site new-charge)
+  (match site
+    ((name position sigma epsilon old-charge)
+     (make-site name position sigma epsilon new-charge))))
 
 (define (move-site site new-position)
   (match site
