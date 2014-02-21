@@ -1418,6 +1418,63 @@ QM+RISM at fixed SPC water geometry:
         0.81594 au = 2.07 D (BP, NR) or
         0.81435 au = 2.07 D (BP)
 
+FIXME(BL): when reproducing calculations for water, found that the order
+of recorded data might be wrong, following is updated order from BL. In
+the new oder the structure information is different between different
+basis sets, which is more reasonable and could be observed from the
+energetic information later. Still not quite sure about the meaning of
+"NR" here, but since the later calculations of uranyl + explicit water
+which used the legacy basis set of PG don't have this mark, guess that
+it represents the baslib of NWCHEM.
+
+QM water optimized structure:
+
+PBE, NR:
+   r(OH) = 0.9845 A
+   <(HOH) = 107.8 deg
+
+BP, NR:
+   r(OH) = 0.9848 A
+   <(HOH) = 107.8 deg
+   d = 0.96449 au (dipole)
+
+PBE:
+   r(OH) = 0.9716 A
+   <(HOH) = 104.7 deg
+
+BP:
+   r(OH) = 0.9717 A
+   <(HOH) = 104.6 deg
+
+QM+RISM water optimized structure:
+
+PBE, NR:
+   r(OH) = 1.0017 A
+   <(HOH) = 102.1 deg
+
+BP, NR:
+   r(OH) = 1.0019 A
+   <(HOH) =  102.1 deg
+   d = 0.99028 (dipole)
+
+PBE:
+   r(OH) = 0.9857 A
+   <(HOH) = 99.3 deg (!!!)
+
+BP:
+   r(OH) = 0.9857 A
+   <(HOH) = 99.2 deg (!!!)
+
+QM+RISM at fixed SPC water geometry:
+
+    r(OH) = 1.0 A
+    <(HOH) = 109.5 deg
+    d = 0.92476 au = 2.35 D (MM) or
+        0.95069 au = 2.42 D (PBE, NR) or
+        0.95545 au = 2.43 D (BP, NR) or
+        0.81040 au = 2.06 D (PBE) or
+        0.81435 au = 2.07 D (BP)
+
 We use 1 D = 0.393430307  au here.  An essential difference between MM
 and QM water is that  the latter is polarizable. Polarizability of the
 water molecule is ~1.5 A^3 (~10 au), see e.g. Water properties website
@@ -1483,6 +1540,47 @@ Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
 SPC      -48006.3334282  -4.64552006291  -48010.9789482
 QM       -48007.6598565  -4.68209355587  -48012.34195
 QM+RISM  -48007.1075688  -5.757929019    -48012.8654979
+
+
+FIXME(BL): the order of energies is also different. Note that the same
+basis set instead  yields close results in the presence of different exchange
+functionals
+
+PBE, NR:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -10766.9978487  -4.64552006291  -10771.6433687
+QM       -10767.3137638  -4.53189988869  -10771.8456637
+QM+RISM  -10766.7105468  -5.70486281751  -10772.4154096
+-------------------------------------------------------
+
+BP, NR:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -10794.2564436  -4.64552006291  -10798.9019636
+QM       -10794.536992   -4.54074621967  -10799.0777382
+QM+RISM  -10793.9303711  -5.72015159508  -10799.6505227
+-------------------------------------------------------
+
+PBE:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -47949.1616609  -4.64552006291  -47953.807181
+QM       -47950.5367575  -4.67965419154  -47955.2164117
+QM+RISM  -47949.9862399  -5.7523397448   -47955.7385796
+-------------------------------------------------------
+
+BP:
+
+Geom.    e(QM), kcal     e(RISM), kcal   e(SUM), kcal
+-------  --------------  --------------  --------------
+SPC      -48006.333428   -4.64552006291  -48010.9789481
+QM       -48007.6598564  -4.6821314432   -48012.3419879
+QM+RISM  -48007.107552   -5.75794588265  -48012.8654979
+-------------------------------------------------------
 
 Note  that using  the non-relativistic  model for  water  results into
 total QM energies by about 30.7 kcal higher. Non-relativistic energies
