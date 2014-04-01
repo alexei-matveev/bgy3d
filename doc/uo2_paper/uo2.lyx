@@ -70,7 +70,21 @@ Uranyl solvation by RISM model
 \end_layout
 
 \begin_layout Author
-Bo, Li
+Bo Li, Alexei Matveev, Sven Krüger
+\end_layout
+
+\begin_layout Affiliation
+Department Chemie and Catalysis Research Center, Technische Universität
+ München, 85747 Garching, Germany
+\end_layout
+
+\begin_layout Author
+Notker Rösch
+\end_layout
+
+\begin_layout Affiliation
+Institute of High Performance Computing, Agency for Science, Technology
+ and Research, 1 Fusionopolis Way, #16-16 Connexis, Singapore 138632, Singapore
 \end_layout
 
 \begin_layout Date
@@ -79,6 +93,10 @@ December 2013
 
 \begin_layout Abstract
 To be done
+\end_layout
+
+\begin_layout Keywords
+RISM, uranyl, solvation
 \end_layout
 
 \begin_layout Section
@@ -187,7 +205,11 @@ key "Joung13"
 \end_inset
 
 .
- In this work, we apply RISM method for the first time to study the behavior
+ 
+\end_layout
+
+\begin_layout Standard
+In this work, we apply RISM method for the first time to study the behavior
  of uranyl in aqueous solution.
  By introducing classical 
 \begin_inset CommandInset citation
@@ -550,7 +572,7 @@ key "Pettitt82,Kovalenko98,Kovalenko99"
 \begin_inset Float table
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -997,7 +1019,7 @@ PM13
 \begin_inset Float table
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1353,13 +1375,233 @@ To be done
 Results and discussion
 \end_layout
 
-\begin_layout Subsection*
-A.
- Force field evaluation for water model
+\begin_layout Subsection
+Evaluation of bare uranyl and water models
+\end_layout
+
+\begin_layout Standard
+As a first step, we compared the radial distribution functions (RDFs) and
+ number integrals (NIs) among different combinations of uranyl and water
+ force field models.
+ Figure 1 shows the RDFs and NIs between uranyl uranium (UU) and water oxygen
+ (OW) pair with both SPC/E and TIP3P water as solvent.
+ Detailed numerical analysis of the distribution curves could be found in
+ Table 3.
+ In addition, the MD results of Maginn15 were reproduced for better comparison
+ of the solvent structures.
+ RDFs of the rest site pairs are not discussed in the following section
+ and could be found in Supporting Information for interested readers.
+ Due to the limit of 1D-RISM theory, the results from 1D-RISM showed significant
+ difference when being compared with MD results (BL:FIXME).
+\end_layout
+
+\begin_layout Standard
+From the distribution curves and numerical analysis, we could easily noticed
+ distribution functions of UU-OW pair both obtained with RISM and MD calculation
+s have the highest points around 2.4 Å, from 2.42 – 2.49 Å.
+ The different choices of water model have only slight influences to the
+ location of highest peak.
+ However, the intensities of those peaks vary from different combinations
+ of uranyl and water models.
+ Given the fact that the locations of first minimum for RDFs obtained from
+ RISM calculations are still close each other (from 3.13 – 3.24 Å), the different
+ peak intensities result in the significant discrepancy of number integrals,
+ from which we could observe the coordination number of the first solvation
+ shell around uranyl.
+\end_layout
+
+\begin_layout Standard
+According to the number integral results, we could notice that for SPC/E
+ water model, the average number of water solvent around all the four uranyl
+ models vary from 5.80 – 6.25 and are much higher than the MD result and reported
+ experimental values (~ 5).
+ Yet for TIP3P water model, the coordination numbers of the first solvation
+ shell are in the much reasonable range (4.84 – 5.20).
+ Moreover, It also could be seen that among the four uranyl models, the
+ classical GW96 model overestimates the coordination number and the recently
+ developed PM13 model underestimates it, meanwhile the “TIP3P” and “SPC”
+ uranyl models which are designed to be used together with their relevant
+ water model, show only limited differences when calculated with the same
+ kind of water model.
+ 
+\end_layout
+
+\begin_layout Standard
+Table 4 list the excess chemical potentials obtained from 1D-RISM calculations
+ with HNC closure.
+ Similar to the trend in coordination numbers, values of solvation free
+ energy calculated from SPC/E water model (σH=1.0 Å ) are higher than those
+ from TIP3P water (σH=0.4 Å).
+ However, when referring to the reported experimental solvation free energy
+ range of uranyl, which is from -325.05 ± 5.74 kcal/mol to -397.94 ± 15.54 kcal/mol,
+ we found that only results of “SPC uranyl” and “TIP3P uranyl” with SPC/E
+ water solvent are close to the lower bound.
+\end_layout
+
+\begin_layout Standard
+Trials for modifying the LJ interaction parameters of hydrogen in water
+ model.
+ (BL:FIXME)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Uranyl uranium - water oxygen (UU – OW) radial distribution functions and
+ number integrals with SPC/E (a, b) and TIP3P water models (c, d)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Numerical analysis of distribution curves
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Excess chemical potential of bare uranyl with water (unit:kcal/mol)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Solvation of uranyl with explicit water molecules
+\end_layout
+
+\begin_layout Standard
+In this section, we studied the solvation of uranyl with explicit number
+ of water molecules in the first solvation shell.
+ Figure 2 shows the radial distribution functions of SPC/E and TIP3P water
+ solvent around [UO2(5H2O)]2+ with five water molecules surrounding uranyl
+ ion.
+ For comparison, RDFs of water with bare uranyl ion are also plotted to
+ demonstrate the change of solvent structure when the first solvation shell
+ is explicitly represented.
+ From the distribution plots, we are easy to notice that the peaks at around
+ 2.4 Å dramatically decreased when explicit water solvent existing in the
+ first solvation shell, while out of the first solvation shell, the behavior
+ of RDFs for all the atom pairs are nearly identical to their counterpart
+ in bare uranyl cases.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Radial distribution function of [UO2(5H2O)]2+ with SPC/E and TIP3P water:
+ a) uranyl uranium – water oxygen (UU-OW) pair, b) uranyl uranium – water
+ hydrogen (UU-HW) pair, c) uranyl oxygen – water oxygen (OU-OW) pair, d)
+ uranyl oxygen – water hydrogen (OU-HW) pair
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+RISM/QM calculations
+\end_layout
+
+\begin_layout Standard
+To be done
 \end_layout
 
 \begin_layout Section
 Concluding remarks
+\end_layout
+
+\begin_layout Standard
+To be done
 \end_layout
 
 \begin_layout Standard
