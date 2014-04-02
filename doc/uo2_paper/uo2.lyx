@@ -1690,12 +1690,42 @@ According to the number integral results, we could notice that for SPC/E
 Table 4 list the excess chemical potentials obtained from 1D-RISM calculations
  with HNC closure.
  Similar to the trend in coordination numbers, values of solvation free
- energy calculated from SPC/E water model (σH=1.0 Å ) are higher than those
- from TIP3P water (σH=0.4 Å).
+ energy calculated from SPC/E water model (
+\begin_inset Formula $\sigma_{\text{H}}=1.0$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å ) are higher than those from TIP3P water (
+\begin_inset Formula $\sigma_{\text{H}}=0.4$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å).
  However, when referring to the reported experimental solvation free energy
- range of uranyl, which is from -325.05 ± 5.74 kcal/mol to -397.94 ± 15.54 kcal/mol,
- we found that only results of “SPC uranyl” and “TIP3P uranyl” with SPC/E
- water solvent are close to the lower bound.
+ range of uranyl, which is from 
+\begin_inset Formula $-325.05\pm5.74$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol to 
+\begin_inset Formula $-397.94\pm15.54$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, we found that only results of “SPC uranyl” and “TIP3P uranyl”
+ with SPC/E water solvent are close to the lower bound.
 \end_layout
 
 \begin_layout Standard
