@@ -91,7 +91,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -1620,7 +1619,21 @@ QM calcualtions
 \begin_layout Standard
 QM calculations All-electron calculations were performed with the linear
  combination of Gaussian-type orbitals fitting-functions density functional
- method24 as implemented in the parallel code ParaGauss.25
+ method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dunlap90"
+
+\end_inset
+
+ as implemented in the parallel code ParaGauss 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ParaGaussV3.1"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -1898,7 +1911,7 @@ To be done
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "bibuo2"
-options "plain"
+options "unsrt"
 
 \end_inset
 
