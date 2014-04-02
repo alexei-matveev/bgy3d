@@ -549,9 +549,9 @@ u_{i\alpha}^{\text{el}}(r)=\frac{q_{i}q_{\alpha}}{r};\, u_{i\alpha}^{\text{LJ}}(
 The Gibbs free energy of uranyl aquo complex is expressed approximately
  as:
 \begin_inset Formula 
-\[
+\begin{equation}
 \Delta G[\mathbf{s}]\approx\Delta E[\mathbf{s}]+\Delta\mu^{\text{RISM}}[\mathbf{s}]
-\]
+\end{equation}
 
 \end_inset
 
@@ -587,45 +587,83 @@ key "Guilbaud96"
 
 \end_inset
 
- and compare the results with those using models newly developed by Maginn
- 
+ (GW) and compare the results with those using models newly developed by
+ Maginn 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rai12,Pomogaev13"
 
 \end_inset
 
-, see Table 1.
- For water solvent, we introduced atomic charges and LJ potential parameters
- from both TIP3P 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Jorgensen83"
+ (Maginn12 and Maginn13), See Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-uranyl"
 
 \end_inset
 
- and SPC/E 
+.
+ For water solvent, we introduced atomic charges and LJ potential parameters
+ from SPC/E (extended simple point charge) model 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
 
 \end_inset
 
- models.
- Because the original TIP3P and SPC/E water models do not contain the repulsive
- potential for hydrogen atoms, in this study we assigned finite-size LJ
- parameters for hydrogen atom in both water models to avoid numerical singularit
-y.
- Table 2 listed two popular modifed water models which have been widely
- applied in other RISM studies 
+.
+ Because the original SPC/E water model does not contain the repulsive potential
+ for hydrogen atoms, finite-size LJ parameters for hydrogen atom in both
+ water models are necessary in RISM calculations to avoid numerical singularity.
+ Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Pettitt82,Kovalenko98,Kovalenko99"
+key "Pettitt82"
 
 \end_inset
 
-.
- The Lorentz-Berthelot mixing rule was used to generate potential parameters
+ introduced a parameter set with 
+\begin_inset Formula $\sigma=0.4$
+\end_inset
+
+ Å and 
+\begin_inset Formula $\epsilon=0.046$
+\end_inset
+
+ kcal/mol (PR-SPC/E) in their early study; Sato and Hirata 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato99"
+
+\end_inset
+
+ adopted the parameter for hydrogen atom as 
+\begin_inset Formula $\sigma=1$
+\end_inset
+
+ Å and 
+\begin_inset Formula $\epsilon=0.05455$
+\end_inset
+
+ kcal/mol (SH-SPC/E); recently Luchko and Kovalenko 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Luchko10"
+
+\end_inset
+
+ also developed a coincident SPC/E water model (cSPC/E) by applying an embedded
+ site scheme to the parameters in SPC/E water.
+ Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-water"
+
+\end_inset
+
+ listed the details of these three popular modified water models which have
+ been widely applied in other RISM studies.
+ The Lorentz--Berthelot mixing rule was used to generate potential parameters
  for each pair of interaction sites.
 \end_layout
 
@@ -640,14 +678,21 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lennard-Jones interaction parameter for uranyl
+Lennard-Jones interaction parameter for uranyl 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:params-uranyl"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
 
 
 \begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="7">
+<lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -874,7 +919,7 @@ GW96
 \begin_inset Text
 
 \begin_layout Plain Layout
-SPC
+Maginn12
 \end_layout
 
 \end_inset
@@ -939,72 +984,7 @@ SPC
 \begin_inset Text
 
 \begin_layout Plain Layout
-TIP3P
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.3494
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0274
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.8494
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4381
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--0.25
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-PM13
+Maginn13
 \end_layout
 
 \end_inset
@@ -1064,6 +1044,136 @@ PM13
 \end_inset
 </cell>
 </row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+KL1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8509 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.25 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1181 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.625
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+KL2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8152 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.3 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1181 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ -0.75
+\end_layout
+
+\end_inset
+</cell>
+</row>
 </lyxtabular>
 
 \end_inset
@@ -1086,7 +1196,14 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lennard-Jones interaction parameter for water
+Lennard-Jones interaction parameter for water 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:params-water"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1097,7 +1214,7 @@ Lennard-Jones interaction parameter for water
 \begin_layout Plain Layout
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="7">
+<lyxtabular version="3" rows="5" columns="7">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -1259,7 +1376,72 @@ hydrogen
 \begin_inset Text
 
 \begin_layout Plain Layout
-GW96
+SH-SPC/E 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1656 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1553 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.8476
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0545 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4238
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PR-SPC/E
 \end_layout
 
 \end_inset
@@ -1295,71 +1477,6 @@ GW96
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0545
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4238
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-SPC
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1506
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.1521
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--0.8340
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 0.4
 \end_layout
 
@@ -1378,7 +1495,72 @@ SPC
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.4170
+ 0.4238
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cSPC/E 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1656 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1553 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.8476
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.1658
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.01553
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 0.4238
 \end_layout
 
 \end_inset
@@ -1398,17 +1580,17 @@ SPC
 
 \begin_layout Standard
 All the calculations were performed at the temperature of 298 K and dielectric
- constant set to 78.4, with water solvent density ρ=0.033295 
-\begin_inset Formula ${\rm \AA}^{-3}$
+ constant set to 78.4, with water solvent density 
+\begin_inset Formula $\rho=0.033295$
+\end_inset
+
+ Å
+\begin_inset Formula $^{-3}$
 \end_inset
 
 .
  The grid which was used to represent correlation functions has a uniform
- grid spacing of 0.0390625 
-\begin_inset Formula ${\rm \AA}$
-\end_inset
-
- for 4096 grid points.
+ grid spacing of 0.0390625 Å for 4096 grid points.
  Solvent susceptibility was solved from pure site-site RISM equation by
  Newton iteration method with convergence tolerance of 
 \begin_inset Formula $10^{-14}$
