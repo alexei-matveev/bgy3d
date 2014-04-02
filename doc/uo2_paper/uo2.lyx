@@ -117,6 +117,15 @@ To be done
 RISM, uranyl, solvation
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Introduction
 \end_layout
@@ -573,9 +582,8 @@ where
 Computational details
 \end_layout
 
-\begin_layout Subsection*
-A.
- RISM/MM calculations
+\begin_layout Subsection
+RISM/MM calculations
 \end_layout
 
 \begin_layout Standard
@@ -1605,13 +1613,22 @@ All the calculations were performed at the temperature of 298 K and dielectric
  
 \end_layout
 
-\begin_layout Subsection*
-B.
- RISM/QM calcualtions
+\begin_layout Subsection
+QM calcualtions
 \end_layout
 
 \begin_layout Standard
-To be done
+QM calculations All-electron calculations were performed with the linear
+ combination of Gaussian-type orbitals fitting-functions density functional
+ method24 as implemented in the parallel code ParaGauss.25
+\end_layout
+
+\begin_layout Subsection
+Geometry optimization
+\end_layout
+
+\begin_layout Standard
+TBD
 \end_layout
 
 \begin_layout Section
