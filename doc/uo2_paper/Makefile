@@ -7,7 +7,7 @@ all: uo2.pdf
 #
 # PDF2 format is produced by pdfTeX
 #
-%.pdf: %.lyx
+%.pdf: %.lyx bibuo2.bib
 	lyx --export pdf2 $(<)
 
 %.pdf: %.svg
