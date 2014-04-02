@@ -29,7 +29,6 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\float_placement h
 \paperfontsize default
 \spacing single
 \use_hyperref false
@@ -1747,6 +1746,32 @@ Influence of water model
 \end_layout
 
 \begin_layout Standard
+FIXME: see Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-water-model"
+
+\end_inset
+
+ and Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-water-model"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -1759,6 +1784,14 @@ status open
 Radial distribution function calculated with different water models in which
  different non-zero LJ parameters are assigned to hydrogen atom.
  MD results are also shown for comparison.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rdf-vs-water-model"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1786,7 +1819,14 @@ status open
 
 \begin_layout Plain Layout
 Position of the first peak (pm), coordination number of the first solvation
- shell and solvation free energy (kcal/mol)
+ shell and solvation free energy (kcal/mol) 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:observables-vs-water-model"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2038,6 +2078,32 @@ Uranyl ion without explicit water in the first solvation shell ([UO
 \end_layout
 
 \begin_layout Standard
+FIXME: see Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+ and Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -2051,7 +2117,14 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution function calculated with different uranyl models
+Radial distribution function calculated with different uranyl models 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2100,6 +2173,14 @@ Position of the first
 \end_inset
 
  calculated with different uranyl models.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2592,6 +2673,21 @@ O)
 \end_layout
 
 \begin_layout Standard
+FIXME: see Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-model"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
@@ -2627,6 +2723,13 @@ O)
 
 ]
 \begin_inset Formula $^{2+}$
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:energy-vs-model"
+
 \end_inset
 
 
@@ -2986,36 +3089,6 @@ In this section, we studied the solvation of uranyl with explicit number
  in bare uranyl cases.
 \end_layout
 
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Radial distribution function of [UO2(5H2O)]2+ with SPC/E and TIP3P water:
- a) uranyl uranium – water oxygen (UU-OW) pair, b) uranyl uranium – water
- hydrogen (UU-HW) pair, c) uranyl oxygen – water oxygen (OU-OW) pair, d)
- uranyl oxygen – water hydrogen (OU-HW) pair
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Geometry optimization of [UO
 \begin_inset Formula $_{2}$
@@ -3041,6 +3114,32 @@ O)
 \end_layout
 
 \begin_layout Standard
+FIXME: see Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:geometries"
+
+\end_inset
+
+ and Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-coordination"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -3074,7 +3173,14 @@ O)
 \begin_inset Formula $n=4-6$
 \end_inset
 
-), with and without the contribution of RISM solvent medium
+), with and without the contribution of RISM solvent medium 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:geometries"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3134,7 +3240,14 @@ O)
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of uranyl aquo complexes in RISM solvent are also shown
+ (kcal/mol) of uranyl aquo complexes in RISM solvent are also shown 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:energy-vs-coordination"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3386,6 +3499,18 @@ Results of QM [UO2(H2O)n]2+ could be put in Supporting information.
  For KL2 model, QM-RISM optimization for n=4-6 could reach convergence but
  the structures are almost identical to those from pure QM calculation.
  For the rest uranyl model, QM-RISM optimization diverged.
+ See Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:geometry-qm"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -3399,6 +3524,14 @@ status open
 
 \begin_layout Plain Layout
 Change of U-O bond length in QM calculation when [UO2]2+ is in RISM solvent
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:geometry-qm"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
