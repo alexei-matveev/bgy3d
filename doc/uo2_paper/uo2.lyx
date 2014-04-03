@@ -702,7 +702,7 @@ name "tab:params-uranyl"
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -775,7 +775,7 @@ oxygen
 </cell>
 </row>
 <row>
-<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multirow="4" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -858,7 +858,7 @@ oxygen
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -923,7 +923,7 @@ GW96
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -988,7 +988,7 @@ Maginn12
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1053,7 +1053,7 @@ Maginn13
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1118,7 +1118,7 @@ KL1
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1224,7 +1224,7 @@ name "tab:params-water"
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -1297,7 +1297,7 @@ hydrogen
 </cell>
 </row>
 <row>
-<cell multirow="4" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell multirow="4" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1380,7 +1380,7 @@ hydrogen
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1445,7 +1445,7 @@ SH-SPC/E
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1510,7 +1510,7 @@ PR-SPC/E
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1838,12 +1838,12 @@ name "tab:observables-vs-water-model"
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <row>
-<cell alignment="center" valignment="top" bottomline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" bottomline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1890,7 +1890,7 @@ water model
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1928,7 +1928,7 @@ SH-SPC/E
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -1966,7 +1966,7 @@ PR-SPC/E
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2004,7 +2004,7 @@ cSPC/E
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2192,13 +2192,13 @@ name "tab:observables-vs-uranyl-model"
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="5">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <row>
-<cell alignment="center" valignment="top" bottomline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" bottomline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2257,7 +2257,7 @@ uranyl model
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2304,7 +2304,7 @@ RISM
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2351,7 +2351,7 @@ GW
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2398,7 +2398,7 @@ Maginn12
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2445,7 +2445,7 @@ Maginn13
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2492,7 +2492,7 @@ KL1
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2539,7 +2539,7 @@ KL2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2586,7 +2586,7 @@ AIMD
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2744,12 +2744,12 @@ name "tab:energy-vs-model"
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <row>
-<cell alignment="center" valignment="top" bottomline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" bottomline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2796,7 +2796,7 @@ uranyl model
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2834,7 +2834,7 @@ RISM
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2872,7 +2872,7 @@ GW
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2910,7 +2910,7 @@ Maginn12
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2948,7 +2948,7 @@ Maginn13
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2986,7 +2986,7 @@ KL1
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3024,7 +3024,7 @@ KL2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
