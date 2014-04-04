@@ -34,7 +34,7 @@ HNC-FLAGS = \
 # in directory structure:
 #
 TOP ?= ..
-EXE ?= $(TOP)/bgy3d
+EXE ?= mpirun $(TOP)/guile/runbgy.scm
 
 solutes = \
 	water \
