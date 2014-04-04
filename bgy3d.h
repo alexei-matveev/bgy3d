@@ -33,6 +33,12 @@ typedef DM DA;
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
 #  define STENCIL_TYPE          DMDA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DMDA_BOUNDARY_PERIODIC
+#  if PETSC_VERSION >= VERSION(3, 3)
+#    define DMGetMatrix         DMCreateMatrix /* FIXME: use latter in src! */
+#  endif
+#  if PETSC_VERSION >= VERSION(3, 4)
+#    define  SNESLS             SNESNEWTONLS /* FIXME: use latter in src! */
+#  endif
 /* before PETSC 3.2 */
 #else
 #  define STENCIL_TYPE          DA_STENCIL_STAR

@@ -202,8 +202,16 @@ static inline int da_local_size (const DA da)
 static inline Vec vec_from_array (int n, real x_[n])
 {
   Vec x;
-  /* FIXME: interface changed in 3.3! */
+#if PETSC_VERSION >= VERSION(3, 3)
+  /*
+    Interface changed  in 3.3!  The  second argument, PetscInt  bs, is
+    the block size that  is apparently used for VecSetValuesBlocked().
+    FIXME: literal constant here!
+  */
+  VecCreateMPIWithArray (PETSC_COMM_WORLD, 1, n, PETSC_DECIDE, x_, &x);
+#else
   VecCreateMPIWithArray (PETSC_COMM_WORLD, n, PETSC_DECIDE, x_, &x);
+#endif
   return x;
 }
 
