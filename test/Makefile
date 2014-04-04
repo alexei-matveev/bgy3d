@@ -57,12 +57,13 @@ hnc-diffs = \
 	$(patsubst %,%.hnc3d.g1.diff,$(solutes))
 
 #
-# By default "make"  all the diffs. Unomment the  second entry to also
-# run HNC3D tests:
+# By default "make" all the  diffs. FIXME: An artificial dependency is
+# there  because  both  type   of  tests  generate  g2-files  used  by
+# g1-calculations. They cannot be run in parallel.
 #
 all: bgy-tests hnc-tests
 bgy-tests: $(bgy-diffs)
-hnc-tests: $(hnc-diffs)
+hnc-tests: $(hnc-diffs) bgy-tests
 
 #
 # Target specific variables. Four cases (g1, g2) x (BGY, HNC) at most:
