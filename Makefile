@@ -65,11 +65,15 @@ USR-FLAGS += -DHCl
 # Path to sources
 srcdir = .
 
-# Compiler and compiler options
+# Compiler and compiler options. For  some reason the Fortran needs to
+# be  told  to return  small  structs (such  as  the  SCM objects)  in
+# registers.   Otherwise you will  encounter a  segfault on  the first
+# call of  a foreign (C) function  returning a Lisp  object in Fortran
+# sources.
 CC       = gcc
 FC       = gfortran
 CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USR-FLAGS)
-FFLAGS = -g -std=f2008 -Wall -O3 $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
+FFLAGS = -g -std=f2008 -Wall -O3 -freg-struct-return $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
 LDFLAGS  = $(OMP-FLAGS)
 
 # Flags to generate position independent code (PIC) for shared objects
