@@ -25,7 +25,7 @@
 #  include "petscda.h"          /* Vec, Mat, DA, ... */
 #endif
 
-#include "petscdmmg.h"          /* KSP, ... */
+#include "petscksp.h"           /* KSP, ... */
 
 /* FIXME: PETSC 3.2 */
 #if PETSC_VERSION >= VERSION(3, 2)
