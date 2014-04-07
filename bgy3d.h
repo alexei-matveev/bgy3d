@@ -31,15 +31,15 @@
 #  define SNESNEWTONLS SNESLS
 #endif
 
-/* FIXME: PETSC 3.2 */
+#if PETSC_VERSION < VERSION(3, 3)
+#  define DMCreateMatrix DMGetMatrix /* DAGetMatrix before 3.2 */
+#endif
+
 #if PETSC_VERSION >= VERSION(3, 2)
 typedef DM DA; /* At least in 2.3.3 (Lenny) there are both DM and DA */
 #  define VecLoadIntoVector(viewer, vec) VecLoad (vec, viewer)
 #  define STENCIL_TYPE          DMDA_STENCIL_STAR
 #  define BOUNDARY_TYPE         DMDA_BOUNDARY_PERIODIC
-#  if PETSC_VERSION >= VERSION(3, 3)
-#    define DMGetMatrix         DMCreateMatrix /* FIXME: use latter in src! */
-#  endif
 /* before PETSC 3.2 */
 #else
 #  define STENCIL_TYPE          DA_STENCIL_STAR
