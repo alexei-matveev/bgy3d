@@ -81,7 +81,13 @@ ksp_create (Mat M)
       This error  occurs with  PETSC 3.2 but  not with 3.1.   See also
       comments in bgy3d-snes.c.
     */
-    MatType mtype;              /* const char *mtype */
+
+    /* MatType values happen to be (immutable) strings: */
+#if PETSC_VERSION != VERSION(3, 2)
+    MatType mtype;              /* typedef const char* MatType */
+#else
+    const MatType mtype;        /* typedef char* MatType */
+#endif
     MatGetType (M, &mtype);
 
     /*
