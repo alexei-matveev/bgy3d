@@ -177,8 +177,8 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
   }
   SNESSetFunction (snes, r, F1, ctx); /* Pass Context* as ctx */
 
-  /* line search: SNESLS, trust region: SNESTR */
-  SNESSetType (snes, SNESLS);
+  /* Line search: SNESNEWTONLS (aka SNESLS) trust region: SNESTR */
+  SNESSetType (snes, SNESNEWTONLS);
 
   if (dF)
     {
