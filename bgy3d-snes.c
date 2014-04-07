@@ -5,6 +5,7 @@
   Copyright (c) 2013 Bo Li
 */
 
+#include "petscsnes.h"          /* SNESSolve, etc. Before bgy3d.h */
 #include "bgy3d.h"
 #include "bgy3d-vec.h"          /* vec_duplicate() */
 #include "bgy3d-getopt.h"       /* bgy3d_getopt_string() */
