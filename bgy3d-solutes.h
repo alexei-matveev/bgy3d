@@ -13,9 +13,6 @@ typedef struct Site {
   real charge;               /* charge */
 } Site;
 
-/* Get solute sites and name by its name: */
-void bgy3d_solute_get (const char *name, int *n, const Site **sites);
-
 /* Fill intent(out) us[] and uc  fields with the solute field on every
    solvent site. The rest is intent(in). */
 void bgy3d_solute_field (const State *BHD,
