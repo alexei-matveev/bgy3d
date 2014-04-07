@@ -16,7 +16,3 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          Vec g[m],
                          Context **medium,   /* out */
                          Restart **restart); /* inout */
-
-Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini);
-Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini);
-

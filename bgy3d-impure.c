@@ -980,52 +980,6 @@ void bgy3d_solute_solve (const ProblemData *PD,
 }
 
 
-/* This one emulates historical solver interface: */
-Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini)
-{
-  (void) g_ini;                 /* FIXME: interface obligation */
-
-  int n;                        /* number of solute sites */
-  const Site *solute;           /* solute[n] */
-
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  /* Get the number of solvent sites and their parameters: */
-  bgy3d_solvent_get (&m, &solvent);
-
-  char name[200] = "hydrogen chloride"; /* default solute */
-
-  /* Solutes name, HCl by default: */
-  bgy3d_getopt_string ("--solute", sizeof name, name);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
-
-  /* Get the solute from the tables: */
-  bgy3d_solute_get (name, &n, &solute);
-
-  /*
-    This does  the real work. Vec  g[m] is intent(out)  in all senses,
-    dont  forget   to  destroy   them.   Here  no   additional  charge
-    distribution, so supply NULL for the function pointer:
-  */
-  Vec g[m];
-  bgy3d_solute_solve (PD, m, solvent, n, solute,
-                      NULL,     /* no electron density */
-                      g,        /* out */
-                      NULL,     /* dont need medium info */
-                      NULL);    /* not going to restart */
-
-  /* Save final distribution, use binary format: */
-  bgy3d_vec_save1 ("g%d.bin", m, g);
-
-  vec_destroy1 (m, g);
-
-  return PETSC_NULL;            /* fake, interface obligation */
-}
-
-
 /*
   In the  original code these  were the essential  differences between
   BGY3dM_solve_H2O_2site()  and BGY3dM_solve_H2O_3site().   First, the

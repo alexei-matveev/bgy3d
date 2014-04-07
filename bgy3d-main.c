@@ -32,13 +32,8 @@ int main (int argc, char **argv)
 #else
 static char helptext[] = "Solving BGY3d equation.\n";
 
-typedef Vec Solver (const ProblemData *PD, Vec g_ini);
-
 int main (int argc, char **argv)
 {
-  real mpi_start, mpi_stop;
-  Solver *solver = NULL;
-
   verbosity = 0;                /* global var */
 
   /* Petsc  or MPI  may  choose to  rewrite  the command  line, do  it
@@ -59,10 +54,6 @@ int main (int argc, char **argv)
   /* This calls bgy3d_getopt_*() a few more times: */
   ProblemData PD = bgy3d_problem_data ();
 
-  /* computation time measurement start point */
-  MPI_Barrier (PETSC_COMM_WORLD);
-  mpi_start = MPI_Wtime();
-
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD, PETSC_VIEWER_ASCII_MATLAB);
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_SELF, PETSC_VIEWER_ASCII_MATLAB);
   /*==================================*/
@@ -77,74 +68,38 @@ int main (int argc, char **argv)
      appears twice: */
   bgy3d_problem_data_print (&PD);
 
-  //PetscPrintf(PETSC_COMM_WORLD, "\tATTENTION: Factor 2 is included!!! But why???\n");
-
-  /* if(PD.id==1) */
-  /*     start_debugger(); */
-  /* sleep(5); */
-
   /*
     Read method to solve from  command line.  There seem to be several
     solvers that address a  problem of finding solvent distribution in
     external field  given the direct correlation function  of the pure
     solvent. This is a common entry  point for all of them. The actual
     algorith will be affected by --closure HNC/PY/KH and --snes-solver
-    newton/picard/jager:
+    newton/picard/jager.
+
+    FIXME:  need   to  parse   database  to  get   the  solvent/solute
+    descriptions from  their names.  Currently the  database is parsed
+    with   Guile,  so   you   may  want   to   try  WITH_GUILE   build
+    instead. Alternatively one  could use Guile for bgy3d_get_solute()
+    only. Yet another alternative is  to use easily parseable files as
+    inputs.
   */
+#error "Needs some work"
+
   if (bgy3d_getopt_test ("--hnc"))
     {
       if (bgy3d_getopt_test ("--solute"))
-        solver = HNC3d_solute_solve; /* solute/solvent by HNC */
+        {}                      /* solute/solvent by HNC */
       else
-        solver = HNC3d_solvent_solve; /* pure solvent by HNC */
+        {}                      /* pure solvent by HNC */
     }
 
   if (bgy3d_getopt_test ("--bgy"))
     {
       if (bgy3d_getopt_test ("--solute"))
-        solver =  BGY3d_solute_solve; /* solvent/solute by BGY */
+        {}                      /* solvent/solute by BGY */
       else
-        solver =  BGY3d_solvent_solve; /* pure solvent by BGY */
+        {}                      /* pure solvent by BGY */
     }
-
-  if (solver)
-    {
-      local Vec g_ini;
-      /* load initial configuration from file ??? */
-      if (bgy3d_getopt_test ("--load"))
-        {
-          g_ini = bgy3d_vec_load ("g.bin");
-          PetscPrintf (PETSC_COMM_WORLD, "g_ini loaded from file \"g.bin\".\n");
-        }
-      else
-        g_ini = NULL;
-
-      local Vec g = solver (&PD, g_ini);
-
-      /* computation time measurement end point*/
-      MPI_Barrier (PETSC_COMM_WORLD);
-      mpi_stop = MPI_Wtime();
-      PetscPrintf (PETSC_COMM_WORLD, "Total computation time: %.4f s\n",
-                   mpi_stop - mpi_start);
-
-      /* Output result */
-      if (g != NULL)
-        {
-          bgy3d_vec_save_ascii ("vec.m", g);
-
-          /* save g to binary file */
-          if (bgy3d_getopt_test ("--save"))
-            {
-              bgy3d_vec_save ("g.bin", g);
-              PetscPrintf (PETSC_COMM_WORLD, "Result written to file \"g.bin\".\n");
-            }
-
-          vec_destroy (&g);
-        }
-  }
-  else
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "Please choose one of: -BGY2site or -BGYM2site!\n");
 
   int ierr = PetscFinalize();CHKERRQ(ierr);
 
@@ -155,18 +110,3 @@ int main (int argc, char **argv)
   return 0;
 }
 #endif  /* else of ifdef WITH_GUILE */
-
-#ifdef DEBUG
-/* starts the gdb debugger for each process */
-static int start_debugger (void)
-{
-  pid_t pid;
-  char s[100];
-
-  pid = getpid();
-
-  sprintf(s, "xterm -e gdb /mount/kamino/jager/work/BGY3d/test/bgy3d %d &", pid);
-
-  return system(s);
-}
-#endif

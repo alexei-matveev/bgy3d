@@ -3,12 +3,13 @@
   Copyright (c) 2013 Alexei Matveev
 */
 
+#ifdef WITH_GUILE
 #include <libguile.h>           /* SCM, SCM_EOL */
-
 
 /* Empty association  list will be  accepted as the first  argument of
    rism_solvent() and rism_solute(): */
 #define RISM_NULL_ENV SCM_EOL
+#endif
 
 /* Implemented in Fortran. See rism.f90 */
 int rism_nrad (const ProblemData *PD);
@@ -16,6 +17,7 @@ real rism_rmax (const ProblemData *PD);
 ProblemData rism_upscale (const ProblemData *PD);
 double rism_self_energy (int n, const Site sites[n], const int spec[n]);
 
+#ifdef WITH_GUILE
 void rism_solvent (SCM env,     /* SCM alist */
                    const ProblemData *PD,
                    int m, const Site solvent[m],
@@ -29,3 +31,4 @@ void rism_solute (SCM env,      /* SCM alist */
                   int m, const Site solvent[m],
                   real x[m][m][*], /* [m][m][nrad] or NULL, in */
                   void *retval);   /* SCM* or NULL, out */
+#endif

@@ -767,27 +767,6 @@ void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du)
 }
 
 
-/* solve */
-Vec BGY3d_solvent_solve (const ProblemData *PD, Vec g_ini)
-{
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  assert(g_ini == PETSC_NULL);
-
-  /* Get the number of solvent sites and their parameters: */
-  bgy3d_solvent_get (&m, &solvent);
-
-  local Vec g[m][m];
-
-  bgy3d_solve_solvent (PD, m, solvent, g);
-
-  vec_destroy2 (m, g);
-
-  return PETSC_NULL;
-
-}
-
 void
 bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
                      Vec g[m][m]) /* out, allocated here */

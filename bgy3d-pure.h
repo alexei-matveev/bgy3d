@@ -13,6 +13,3 @@ void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
 void bgy3d_nssa_intra_log (State *BHD, Vec ga_fft, Vec wab_fft, Vec gb, Vec du);
 
 void bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m], Vec g[m][m]);
-
-Vec BGY3d_solvent_solve (const ProblemData *PD, Vec g_ini);
-Vec BGY3d_solvent_solve_h2o (const ProblemData *PD, Vec g_ini);

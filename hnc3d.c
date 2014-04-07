@@ -678,7 +678,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   */
   local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
 
-#ifndef WITH_FORTRAN
+#if !WITH_FORTRAN || !WITH_GUILE
   /* Zero as intial guess for t  is not the same as zero initial guess
      for c: */
   VecSet (T, 0.0);
@@ -918,44 +918,6 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       g[i][j] = g[j][i] = h[i][j]; /* FIXME: misnomer! */
 
   bgy3d_vec_save2 ("g%d%d.bin", m, g);
-}
-
-
-/*
-  Solving for  g of HNC  equation with non-linear solver  specified by
-  the --snes-solver flag.
-*/
-Vec HNC3d_solvent_solve (const ProblemData *PD, Vec g_ini)
-{
-  assert (g_ini == PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation.\n");
-
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  char name[200] = "LJ";        /* solvent & default solute */
-
-  /* Get solvent name or stay with the default: */
-  bgy3d_getopt_string ("--solvent", sizeof name, name);
-
-  /* Get the number of solvent sites and their parameters. Get it from
-     the solute tables: */
-  bgy3d_solute_get (name, &m, &solvent);
-
-  /* Show solvent parameters: */
-  bgy3d_sites_show ("Solvent", m, solvent);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
-
-  Vec g[m][m];
-  hnc3d_solvent_solve (PD, m, solvent, g);
-
-  vec_destroy2 (m, g);
-
-  return PETSC_NULL;
 }
 
 
@@ -1207,7 +1169,7 @@ solvent_kernel_file1 (State *HD, int m, Vec chi_fft[m][m]) /* out */
 }
 
 /* FIXME: drop these ifdefs together with Lenny! */
-#ifdef WITH_FORTRAN
+#if WITH_FORTRAN && WITH_GUILE
 /* Layed off  from solvent_kernel().  Puts χ -  1 into  chi_fft[][] as
    computed by 1d RISM solvent solver. See ./rism.f90. */
 static void
@@ -1257,7 +1219,7 @@ static void solvent_kernel (State *HD,
 {
   if (bgy3d_getopt_test ("--solvent-1d"))
     {
-#ifdef WITH_FORTRAN
+#if WITH_FORTRAN && WITH_GUILE
       solvent_kernel_rism1 (HD, m, solvent, chi_fft);
 #else
       (void) solvent;           /* not used */
@@ -1548,61 +1510,4 @@ void hnc3d_solute_solve (const ProblemData *PD,
     g[i] = h[i];                /* FIXME: misnomer! */
 
   bgy3d_vec_save1 ("g%d.bin", m, g);
-}
-
-
-/*
-  Solving for  h of HNC equation  with a default  non-linear solver as
-  specified by the --snes-solver option.  The solvent susceptibility χ
-  - 1 is fixed and appears as an input here:
-*/
-Vec HNC3d_solute_solve (const ProblemData *PD, Vec g_ini)
-{
-  assert (g_ini == PETSC_NULL);
-
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving 3d-HNC equation. Fixed c.\n");
-
-  int n;                        /* number of solute sites */
-  const Site *solute;           /* solute[n] */
-
-  int m;                        /* number of solvent sites */
-  const Site *solvent;          /* solvent[m] */
-
-  char name[200] = "LJ";        /* solvent & default solute */
-
-  /* Get solvent name or stay with the default: */
-  bgy3d_getopt_string ("--solvent", sizeof name, name);
-
-  /* Get the number of solvent sites and their parameters. Get it from
-     the solute tables: */
-  bgy3d_solute_get (name, &m, &solvent);
-
-  /* Show solvent parameters: */
-  bgy3d_sites_show ("Solvent", m, solvent);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", name);
-
-  /* Get solute name or stay with the default: */
-  bgy3d_getopt_string ("--solute", sizeof name, name);
-
-  /* Get the solute from the tables: */
-  bgy3d_solute_get (name, &n, &solute);
-
-  /* Show solute parameters: */
-  bgy3d_sites_show ("Solute", n, solute);
-
-  /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", name);
-
-  Vec g[m];
-  hnc3d_solute_solve (PD, m, solvent, n, solute,
-                      NULL,     /* dont have electron density */
-                      g,
-                      NULL,     /* dont need medium info */
-                      NULL);    /* dont need restart info */
-
-  vec_destroy1 (m, g);
-  return PETSC_NULL;
 }

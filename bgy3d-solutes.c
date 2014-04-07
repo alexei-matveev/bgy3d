@@ -25,15 +25,6 @@
 #include "bgy3d-force.h"        /* lennard_jones_coulomb_short() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_read() */
 
-/* FIXME: bgy3d-solvents.h pollutes the namespace: */
-#undef sH
-#undef eH
-#undef qH
-#undef sO
-#undef eO
-#undef qO
-
-
 /* Solute is  isomorphic to an  array of sites.  Consider  handling it
    like that in the code.   Structs with flexible array members may be
    confusing. Such struct is convenient for literal data, though: */

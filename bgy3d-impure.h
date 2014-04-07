@@ -32,5 +32,3 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          Restart **restart); /* inout, optional */
 
 void bgy3d_restart_destroy (Restart *restart);
-
-Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini);
