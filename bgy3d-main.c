@@ -107,10 +107,6 @@ int main (int argc, char **argv)
         solver =  BGY3d_solvent_solve; /* pure solvent by BGY */
     }
 
-  /* This one may only work for 3-site symmetric H2O-like solvents: */
-  if (bgy3d_getopt_test ("--BGY3Site"))
-    solver =  BGY3d_solvent_solve_h2o;
-
   if (solver)
     {
       local Vec g_ini;
