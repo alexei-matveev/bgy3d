@@ -294,31 +294,6 @@ typedef struct State
   DMMG  *dmmg;
   DA da_dmmg;
 #endif
-
-#ifdef WITH_EXTRA_SOLVERS
-  /*
-    BGY3dM 3-site stuff.  These are vector field quantities indexed by
-    two site indices. FIXME: get rid of them, see the 2-site version.
-
-    In much of the  code one refers to the two sites  by literal H and
-    O, though the actual sites may  be different.  Let us stick to the
-    convention that data  for H is stored in first- and  data for O is
-    stored  in  second  position  of  an array.   For  symmetric  pair
-    quantities  one  may chose  to  store them  in  a  2x2 array,  say
-    g2[2][2] with a constrain that g2[0][1] == g2[1][0].
-  */
-  Vec fs_g2_fft[2][2][3];       /* complex */
-  Vec fl_g2_fft[2][2][3];       /* complex */
-
-  /* Newton stuff */
-  Vec wHO_fft, wHH_fft;         /* complex */
-
-  DA da_newton, da_newtonF;
-  Vec gH, gHO, gO;
-  Vec dgH, dgHO, dgO;
-  Vec f, f2, f3, f4;
-  Vec pre;
-#endif
 } State;
 
 State* bgy3d_state_make (const ProblemData *PD);

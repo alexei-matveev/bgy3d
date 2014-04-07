@@ -34,20 +34,3 @@ void bgy3d_solute_solve (const ProblemData *PD,
 void bgy3d_restart_destroy (Restart *restart);
 
 Vec BGY3d_solute_solve (const ProblemData *PD, Vec g_ini);
-
-#ifdef WITH_EXTRA_SOLVERS
-Vec BGY3dM_solve_H2O_3site(const ProblemData *PD, Vec g_ini);
-void deprecated
-RecomputeInitialFFTs (State *BHD,
-                      int m,
-                      Vec g2[m][m],        /* real, in */
-                      Vec fs_g2_fft[m][m][3], /* complex, out */
-                      Vec fl_g2_fft[m][m][3], /* complex, out */
-                      Vec u2[m][m],     /* real, out */
-                      Vec u2_fft[m][m]); /* complex, out */
-
-void deprecated
-Compute_H2O_interS (const State *BHD,
-                    Vec fg2_fft[3], Vec g, real rho, Vec dg_help);
-#endif
-

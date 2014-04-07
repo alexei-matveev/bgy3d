@@ -7,93 +7,11 @@
 
 #include <assert.h>
 
-#ifdef WITH_EXTRA_SOLVERS
-#include <fftw_mpi.h>           /* to get FFT_DATA set */
-#include "fft_3d.h"             /* FFT_DATA */
-#endif
-
 #include "bgy3d.h"
 #include "bgy3d-vec.h"          /* vec_destroy() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-fft.h"
 #include <complex.h>            /* after fftw.h */
-
-#ifdef WITH_EXTRA_SOLVERS
-static void unpack (DA da, Vec g, complex *restrict g_fft)
-{
-  /* Get local portion of the grid */
-  int i0, j0, k0, ni, nj, nk;
-  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  PetscScalar ***g_;
-  DAVecGetArray (da, g, &g_);
-
-  /* loop over local portion of grid */
-  int ijk = 0;
-  for (int k = k0; k < k0 + nk; k++)
-    for (int j = j0; j < j0 + nj; j++)
-      for (int i = i0; i < i0 + ni; i++)
-        g_fft[ijk++] = g_[k][j][i]; /* Vec g is real */
-
-  DAVecRestoreArray (da, g, &g_);
-}
-
-/* NOTE: this  is subtle,  we are packing  complex vector into  a real
-   array. Imaginary part gets ignored: */
-static void pack (DA da, Vec g, const complex *restrict g_fft)
-{
-  /* Get local portion of the grid */
-  int i0, j0, k0, ni, nj, nk;
-  DMDAGetCorners (da, &i0, &j0, &k0, &ni, &nj, &nk);
-
-  PetscScalar ***g_;
-  DAVecGetArray (da, g, &g_);
-
-  /* loop over local portion of grid */
-  int ijk = 0;
-  for (int k = k0; k < k0 + nk; k++)
-    for (int j = j0; j < j0 + nj; j++)
-      for (int i = i0; i < i0 + ni; i++)
-        g_[k][j][i] = g_fft[ijk++]; /* drops imaginary part */
-
-  DAVecRestoreArray (da, g, &g_);
-}
-
-FFT_DATA *ComputeFFTfromVec(DA da, struct fft_plan_3d *fft_plan, Vec g,
-			    FFT_DATA *g_fft)
-{
-  int x[3], n[3];
-
-  /* Get local portion of the grid */
-  DMDAGetCorners(da, &x[0], &x[1], &x[2], &n[0], &n[1], &n[2]);
-
-  if(g_fft==NULL)
-    g_fft = (FFT_DATA*) calloc(n[0] * n[1] * n[2], sizeof(*g_fft));
-
-  /* Real Vec into complex array: */
-  unpack (da, g, (complex*) g_fft);
-
-  /* forward fft */
-  fft_3d(g_fft, g_fft, 1, fft_plan);
-
-  return g_fft;
-}
-
-
-void ComputeVecfromFFT(DA da, struct fft_plan_3d *fft_plan, Vec g,
-			    FFT_DATA *g_fft)
-{
-  assert (g_fft != NULL);
-
-  /* backward fft */
-  fft_3d(g_fft, g_fft, -1, fft_plan);
-
-  /* Pack a  complex vector with (hopefully)  vanishing imaginary part
-     into a real Vec: */
-  pack (da, g, (complex*) g_fft);
-}
-#endif
-
 
 double bgy3d_fft_test (int m, int n, int p)
 {

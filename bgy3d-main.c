@@ -20,16 +20,6 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_*() */
 #include "hnc3d.h"              /* hnc3d_solute_solve(), ... */
 
-#ifdef WITH_EXTRA_SOLVERS
-#include "bgy3d-molecule.h"     /* BGY3d_solve_DiatomicAB */
-#include "bgy3d-newton-pure.h"
-#include "bgy3d-newton-impure.h"
-#include "bgy3ddiv.h"           /* BGY3dDiv_solve, BGY3dDiv_solve2 */
-#include "bgy3d-test.h"         /* BGY3dDiv_test */
-#include "bgy3d-fourier.h"      /* BGY3dDiv_solve_Fourier */
-#include "bgy3d-simple.h"       /* BGY3d_solve */
-#endif
-
 #ifdef WITH_GUILE
 #include "bgy3d-guile.h"        /* bgy3d_guile_main */
 #endif
@@ -120,44 +110,6 @@ int main (int argc, char **argv)
   /* This one may only work for 3-site symmetric H2O-like solvents: */
   if (bgy3d_getopt_test ("--BGY3Site"))
     solver =  BGY3d_solvent_solve_h2o;
-
-#ifdef WITH_EXTRA_SOLVERS
-  if (bgy3d_getopt_test ("--simple"))
-    solver = BGY3d_solve;
-
-  if (bgy3d_getopt_test ("--DIV"))
-    solver = BGY3dDiv_solve2;
-
-  if (bgy3d_getopt_test ("--DIV2"))
-    solver = BGY3dDiv_solve;
-
-  if (bgy3d_getopt_test ("--BGY-TEST"))
-    solver = BGY3dDiv_test;
-
-  if (bgy3d_getopt_test ("--BGY-FOURIER"))
-    solver =  BGY3dDiv_solve_Fourier;
-
-  if (bgy3d_getopt_test ("--BGY-FOURIER-TEST"))
-    solver =  BGY3dDiv_solve_FourierTest;
-
-  if (bgy3d_getopt_test ("--BGY-CONVOLUTION-TEST"))
-    solver =  BGY3d_Convolution_Test;
-
-  if (bgy3d_getopt_test ("--BGY-DIATOMIC"))
-    solver =  BGY3d_solve_DiatomicAB;
-
-  if (bgy3d_getopt_test ("--BGYM3Site"))
-    solver =  BGY3dM_solve_H2O_3site;
-
-  if (bgy3d_getopt_test ("--BGY-H2O-NEWTON"))
-    solver = BGY3d_SolveNewton_H2O;
-
-  if (bgy3d_getopt_test ("--BGY-H2O-SNEWTON"))
-    solver = BGY3d_SolveNewton_H2OS;
-
-  if (bgy3d_getopt_test ("--BGY-H2O-SFNEWTON"))
-    solver = BGY3d_SolveNewton_H2OSF;
-#endif
 
   if (solver)
     {
