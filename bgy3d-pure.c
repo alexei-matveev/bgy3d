@@ -19,15 +19,6 @@
 static const real NORM_REG = 1.0e-1;
 static const real NORM_REG2 = 1.0e-2;
 
-/* FIXME: bgy3d-solvents.h pollutes the namespace: */
-#undef sH
-#undef eH
-#undef qH
-#undef sO
-#undef eO
-#undef qO
-
-
 /* g := exp[-(u0 + du)], with a sanity check: */
 static void compute_g (Vec g, Vec u0, Vec du)
 {

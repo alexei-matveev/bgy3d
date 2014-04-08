@@ -12,14 +12,6 @@
 #include <complex.h>            /* after fftw.h */
 #include "bgy3d-force.h"        /* Coulomb_short() etc. */
 
-/* FIXME: bgy3d-solvents.h pollutes the namespace: */
-#undef sH
-#undef eH
-#undef qH
-#undef sO
-#undef eO
-#undef qO
-
 
 /* Long  range  pair potential  Vec  uc_fft  is intent(out),  complex,
    centered Vec: */

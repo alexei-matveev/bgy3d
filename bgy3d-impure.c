@@ -106,15 +106,6 @@
 #include <stdbool.h>            /* bool */
 #include <complex.h>            /* after fftw.h */
 
-/* FIXME: bgy3d-solvents.h pollutes the namespace: */
-#undef sH
-#undef eH
-#undef qH
-#undef sO
-#undef eO
-#undef qO
-#undef G
-#undef r_HO
 
 /* Side effects: uses BHD->fg2_fft[3] as work arrays. */
 static void  pair (State *BHD,
