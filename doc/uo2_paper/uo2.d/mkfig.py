@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
 from numpy import loadtxt
 from pylab import *
 import matplotlib.pyplot  as plt
@@ -50,4 +51,4 @@ plt.xlabel(u"r, Å", fontsize=fontsize)
 plt.title("O-HW", fontsize=fontsize)
 
 # show()
-savefig("test.svg", transparent=True)
+savefig(sys.argv[1], transparent=True)
