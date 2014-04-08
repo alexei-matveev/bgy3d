@@ -6,11 +6,11 @@ d=./uo2.d
 #
 # There are a few figures in this document:
 #
-$d/fig1.svg: $d/mkfig.py $d/gw96_rdf.dat $d/kl1_rdf.dat $d/kl2_rdf.dat $d/pm13_rdf.dat $d/spc_rdf.dat
+$d/fig2.svg: $d/mkfig.py $d/gw96_rdf.dat $d/kl1_rdf.dat $d/kl2_rdf.dat $d/pm13_rdf.dat $d/spc_rdf.dat
 	(cd $(@D); ./mkfig.py $(@F))
 
 # LyX uses Inkscape to convert SVG -> PDF:
-figures: $d/fig1.svg
+figures: $d/fig2.svg
 
 .PHONY: figures
 
