@@ -91,7 +91,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -3553,7 +3552,7 @@ Concluding remarks
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "bibuo2"
+bibfiles "uo2"
 options "unsrt"
 
 \end_inset

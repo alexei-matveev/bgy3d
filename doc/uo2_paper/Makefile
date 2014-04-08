@@ -17,7 +17,7 @@ figures: $d/fig2.svg
 #
 # PDF2 format is produced by pdfTeX
 #
-%.pdf: %.lyx bibuo2.bib figures
+%.pdf: %.lyx %.bib figures
 	lyx --export pdf2 $(<)
 
 %.pdf: %.svg
