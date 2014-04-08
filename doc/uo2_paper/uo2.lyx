@@ -2110,10 +2110,6 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -2133,10 +2129,12 @@ name "fig:rdf-vs-uranyl-model"
 \end_layout
 
 \begin_layout Plain Layout
-FIXME: missing
-\end_layout
+\begin_inset Graphics
+	filename uo2.d/fig1.svg
+	width 100text%
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
 
