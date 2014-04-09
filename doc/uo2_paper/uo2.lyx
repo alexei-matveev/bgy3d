@@ -1531,6 +1531,10 @@ Geometry optimization
 Results and discussion
 \end_layout
 
+\begin_layout Subsection
+Test calcualtions for simple ions
+\end_layout
+
 \begin_layout Standard
 FIXME: text outdated.
  As a first step, we compared the radial distribution functions (RDFs) and
@@ -1628,7 +1632,11 @@ Trials for modifying the LJ interaction parameters of hydrogen in water
 \end_layout
 
 \begin_layout Subsection
-Influence of water model
+Application to uranyl solvation
+\end_layout
+
+\begin_layout Subsubsection
+Comparison of water models
 \end_layout
 
 \begin_layout Standard
@@ -1953,20 +1961,8 @@ MD
 
 \end_layout
 
-\begin_layout Subsection
-Comparison of different uranyl models
-\end_layout
-
 \begin_layout Subsubsection
-Uranyl ion without explicit water in the first solvation shell ([UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-)
+Comparison of uranyl models
 \end_layout
 
 \begin_layout Standard
@@ -2542,8 +2538,8 @@ Expt
 
 \end_layout
 
-\begin_layout Subsubsection
-Uranyl ion with explicit water molecules in the first solvation shell ([UO
+\begin_layout Subsection
+Geometry optimization of ([UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -2552,7 +2548,7 @@ Uranyl ion with explicit water molecules in the first solvation shell ([UO
 \end_inset
 
 O)
-\begin_inset Formula $_{5}$
+\begin_inset Formula $_{n}$
 \end_inset
 
 ]
@@ -2979,30 +2975,6 @@ In this section, we studied the solvation of uranyl with explicit number
  in bare uranyl cases.
 \end_layout
 
-\begin_layout Subsection
-Geometry optimization of [UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
- (
-\begin_inset Formula $n=4-6$
-\end_inset
-
-), with and without the contribution of RISM solvent medium
-\end_layout
-
 \begin_layout Standard
 FIXME: see Figure
 \begin_inset space ~
@@ -3378,10 +3350,6 @@ n = 6
 \end_inset
 
 
-\end_layout
-
-\begin_layout Subsection
-QM solute
 \end_layout
 
 \begin_layout Standard
