@@ -74,4 +74,4 @@ plt.xlabel(u"r, Å", fontsize=fontsize)
 plt.title("O-HW", fontsize=fontsize)
 
 # show()
-savefig("fig1.svg", transparent=True)
+savefig(sys.argv[1], transparent=True)
