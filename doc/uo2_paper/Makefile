@@ -6,8 +6,8 @@ d=./uo2.d
 #
 # There are a few figures in this document:
 #
-$d/fig2.svg: $d/mkfig.py $d/gw96_rdf.dat $d/kl1_rdf.dat $d/kl2_rdf.dat $d/pm13_rdf.dat $d/spc_rdf.dat
-	(cd $(@D); ./mkfig.py $(@F))
+$d/fig2.svg: $d/mkfig2.py $d/gw96_rdf.dat $d/kl1_rdf.dat $d/kl2_rdf.dat $d/pm13_rdf.dat $d/spc_rdf.dat
+	(cd $(@D); ./mkfig2.py $(@F))
 
 #
 # PDF2  format  is  produced  by  pdfTeX.  LyX  uses  rsvg-convert  or
