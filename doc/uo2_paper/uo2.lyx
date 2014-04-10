@@ -662,6 +662,49 @@ are all of short range and thus amenable to a representation on finite radial
 \end_layout
 
 \begin_layout Standard
+We used pair-wise potential 
+\begin_inset Formula $u_{i\alpha}=u_{i\alpha}^{\text{C}}+u_{i\alpha}^{\text{LJ}}$
+\end_inset
+
+ to describe the distance-dependent interactions between solute and solvent
+ sites, 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, defined as the sum of the Coulomb, 
+\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}/r$
+\end_inset
+
+, and Lennard-Jones (LJ), 
+\begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
+\end_inset
+
+, interactions.
+ The long-range asymptotic component of the total interaction was chosen
+ in the form of a smooth potential 
+\begin_inset Formula $u_{\text{L;}i\alpha}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
+\end_inset
+
+ with the range parameter 
+\begin_inset Formula $a=1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ common for all site pairs.
+\end_layout
+
+\begin_layout Standard
 Within the framework of the given closure relations mentioned above, one
  could derive the closed form of the excess chemical potential to evaluate
  the thermodynamic properties of solutes.
@@ -675,12 +718,23 @@ key "Singer85"
 :
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu=\frac{2\pi\rho}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\int_{0}^{\infty}\left[|h_{i\alpha}^{uv}|^{2}-2c_{i\alpha}^{uv}-c_{i\alpha}^{uv}h_{i\alpha}^{uv}\right]r^{2}dr
+\Delta\mu=\frac{2\pi\rho}{\beta}\int_{0}^{\infty}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\left[|h_{i\alpha}^{uv}|^{2}-2c_{i\alpha}^{uv}-c_{i\alpha}^{uv}h_{i\alpha}^{uv}\right]r^{2}dr
 \end{equation}
 
 \end_inset
 
-In the corresponding expression for the KH closure the 
+Though the individual terms of the integrand due to 
+\begin_inset Formula $c_{i\alpha}^{uv}$
+\end_inset
+
+ are of long range so that the integral may appear divergent, the total
+ contribution of the asymptote that is strictly proportional to the charge
+ product 
+\begin_inset Formula $q_{i}q_{a}$
+\end_inset
+
+ vanishes if the solvent (or solute) is neutral.
+ In the corresponding expression for the KH closure the 
 \begin_inset Formula $h^{2}$
 \end_inset
 
@@ -708,31 +762,6 @@ key "Chandler84"
 
 .
  
-\end_layout
-
-\begin_layout Standard
-We used pair-wise potential 
-\begin_inset Formula $u_{i\alpha}(r)=u_{i\alpha}^{\text{el}}(r)+u_{i\alpha}^{\text{LJ}}(r)$
-\end_inset
-
- to describe the distance-dependent interactions between two molecule sites
- 
-\begin_inset Formula $i$
-\end_inset
-
- and 
-\begin_inset Formula $\alpha$
-\end_inset
-
-, defined as the sum of the long-range electrostatic potential 
-\begin_inset Formula $u_{i\alpha}^{\text{el}}(r)=q_{i}q_{\alpha}/r$
-\end_inset
-
- and short-range Lennard-Jones (LJ) potential 
-\begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
