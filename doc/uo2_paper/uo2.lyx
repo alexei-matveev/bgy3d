@@ -273,19 +273,17 @@ The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
  could be written in the following matrix form for infinite dilutions:
 \begin_inset Formula 
 \begin{equation}
-{\rm {\bf h}}^{uv}={\rm \boldsymbol{\omega}}^{u}\ast{\rm {\bf c}}^{uv}\ast\boldsymbol{\chi}^{v}\label{eq:rism-uv}
+h^{uv}=\omega^{u}\ast c^{uv}\ast\chi^{v}.\label{eq:rism-uv}
 \end{equation}
 
 \end_inset
 
-where the star denotes the convolution integral and the sum over corresponding
- matrix indices.
- Here 
-\begin_inset Formula ${\bf h}^{uv}$
+Here 
+\begin_inset Formula $h^{uv}$
 \end_inset
 
  and 
-\begin_inset Formula ${\rm {\bf c}}^{uv}$
+\begin_inset Formula $c^{uv}$
 \end_inset
 
  are the (rectangular) matrices consisting of total correlation functions
@@ -306,7 +304,7 @@ where the star denotes the convolution integral and the sum over corresponding
 \begin_inset Formula $v$
 \end_inset
 
- represent the solute and solvent, respectively.
+ stay for the solute and solvent, respectively.
  The subscripts 
 \begin_inset Formula $i$
 \end_inset
@@ -315,7 +313,9 @@ where the star denotes the convolution integral and the sum over corresponding
 \begin_inset Formula $\alpha$
 \end_inset
 
- represent solute- and solvent interaction sites.
+ enumerate solute- and solvent interaction sites.
+ The star denotes the convolution integral and the sum over corresponding
+ matrix indices.
  The solvent in the Eq.
 \begin_inset space ~
 \end_inset
@@ -327,8 +327,8 @@ reference "eq:rism-uv"
 
 \end_inset
 
-) is represented by its (square) susceptibility matrix 
-\begin_inset Formula $\boldsymbol{\chi}^{v}=\boldsymbol{\omega}^{v}+\rho\mathbf{h}^{vv}$
+) is represented by its (square symmetric) susceptibility matrix 
+\begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
  obtained self-consistently from the pure solvent RISM equation:
@@ -337,7 +337,7 @@ reference "eq:rism-uv"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-{\rm {\bf h}}^{vv}={\rm \boldsymbol{\omega}}^{v}\ast{\rm {\bf c}}^{vv}\ast\boldsymbol{\chi}^{v}\label{eq:rism-vv}
+h^{vv}=\omega^{v}\ast c^{vv}\ast\chi^{v}\label{eq:rism-vv}
 \end{equation}
 
 \end_inset
@@ -348,22 +348,22 @@ at a specific solvent number density
 
 .
  Finally, 
-\begin_inset Formula $\boldsymbol{\omega}^{u}$
+\begin_inset Formula $\omega^{u}$
 \end_inset
 
  and 
-\begin_inset Formula $\boldsymbol{\omega}^{v}$
+\begin_inset Formula $\omega^{v}$
 \end_inset
 
- are the (square) matrices built of intra-molecular correlation functions
- of solute and solvent, respectively, that are best specified by their Fourier
- representations: e.g.
+ are the (square symmetric) matrices built of intra-molecular correlation
+ functions of solute and solvent, respectively, that are best specified
+ by their Fourier representations: e.g.
  
-\begin_inset Formula $\tilde{\omega}_{\alpha\gamma}^{v}(k)=j_{0}(kr_{\alpha\gamma})$
+\begin_inset Formula $\tilde{\omega}_{\alpha\gamma}^{v}(k)=j_{0}(k\ell_{\alpha\gamma})$
 \end_inset
 
  with 
-\begin_inset Formula $r_{\alpha\gamma}$
+\begin_inset Formula $\ell_{\alpha\gamma}$
 \end_inset
 
  being the distance between two interaction sites of a rigid solvent species.
@@ -371,14 +371,14 @@ at a specific solvent number density
 
 \begin_layout Standard
 Since there are two unknowns, 
-\begin_inset Formula $\mathbf{h}$
+\begin_inset Formula $h$
 \end_inset
 
  and 
-\begin_inset Formula $\mathbf{c}$
+\begin_inset Formula $c$
 \end_inset
 
-, in Eqs.
+, in either Eqs.
 \begin_inset space ~
 \end_inset
 
@@ -389,14 +389,15 @@ reference "eq:rism-uv"
 
 \end_inset
 
-) and (
+) or (
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:rism-vv"
 
 \end_inset
 
-), we need to apply closure relations to make the equations complete.
+), and no temperature dependence so far we need to apply closure relations
+ to make the equations complete.
  One of the most popular formulas is the hypernetted closure (HNC) 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -407,7 +408,7 @@ key "Singer85"
 :
 \begin_inset Formula 
 \begin{equation}
-h_{i\alpha}=\exp[-\beta u_{i\alpha}+h_{i\alpha}-c_{i\alpha}]-1,
+h_{i\alpha}=\exp[-\beta u_{i\alpha}+h_{i\alpha}-c_{i\alpha}]-1,\label{eq:closure-hnc}
 \end{equation}
 
 \end_inset
@@ -437,9 +438,9 @@ where
 \end_inset
 
 .
- HNC closure has been applied to solve RISM equation in a variety of studies
- about aqueous solution, however, the uncontrolled exponential term often
- results in numerical divergence.
+ HNC closure has been applied to solve the RISM equation in a variety of
+ studies about aqueous solution, however, the uncontrolled exponential term
+ often results in numerical divergence.
  A more numerically stable closure expression, formulated by Kovalenko and
  Hirata (KH) with partial linearization of the exponential term: 
 \begin_inset Formula $h_{i\alpha}=f(-\beta u_{i\alpha}+h_{i\alpha}-c_{i\alpha})$
@@ -458,6 +459,206 @@ where
 \end_inset
 
  otherwise.
+\end_layout
+
+\begin_layout Standard
+The resulting system of non-linear Eqs.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-uv"
+
+\end_inset
+
+) and (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:closure-hnc"
+
+\end_inset
+
+) has to be solved iteratively.
+ For numerical reasons it appears to be advantageous to operate with a single
+ unknown 
+\begin_inset Formula $t=h-c$
+\end_inset
+
+, a so-called indirect correlation function.
+ A naive search for a fix point of a simple iterative scheme 
+\begin_inset Formula $t_{n+1}=T[t_{n}]$
+\end_inset
+
+ of a non-linear iterator functional 
+\begin_inset Formula $T[t]=\omega\ast c[t]\ast\chi-c[t]$
+\end_inset
+
+, where 
+\begin_inset Formula $c[t]=f(-\beta u+t)-t$
+\end_inset
+
+ is the closure relation, Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:closure-hnc"
+
+\end_inset
+
+), reformulated for direct and indirect correlation functions may not be
+ the most economic choice.
+ Instead we choose to search for roots of the functional 
+\begin_inset Formula $F[t]=T[t]-t$
+\end_inset
+
+ using the state of the art non-linear solvers.
+ The corresponding jacobian, 
+\begin_inset Formula $J[t]=\delta F/\delta t$
+\end_inset
+
+, is only practical if implemented as a linear operator (differential) applicabl
+e to an arbitrary vector 
+\begin_inset Formula $\delta t$
+\end_inset
+
+ and is readily available given the simple closed form of 
+\begin_inset Formula $c[t]$
+\end_inset
+
+.
+ A similar approach is used to solve the RISM equations for the pure solvent,
+ Eqs.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-vv"
+
+\end_inset
+
+) and (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:closure-hnc"
+
+\end_inset
+
+).
+ The only significant difference is that solving Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-vv"
+
+\end_inset
+
+) for 
+\begin_inset Formula $h$
+\end_inset
+
+ given 
+\begin_inset Formula $c[t]$
+\end_inset
+
+ involves a linear equation system.
+ Obtaining total correlation 
+\begin_inset Formula $h$
+\end_inset
+
+ given the direct correlation 
+\begin_inset Formula $c$
+\end_inset
+
+ using either Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-uv"
+
+\end_inset
+
+) or (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-vv"
+
+\end_inset
+
+) is performed using the fast Fourier transform.
+\end_layout
+
+\begin_layout Standard
+The long-range interactions are treated using the Ng scheme 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ng74"
+
+\end_inset
+
+: the shared long-range asymptotic form of the pair potential, 
+\begin_inset Formula $u_{\text{L}}$
+\end_inset
+
+, direct- and indirect correlations, 
+\begin_inset Formula $c_{\text{L}}=-\beta u_{\text{L}}$
+\end_inset
+
+ and 
+\begin_inset Formula $t_{\text{L}}=\beta u_{\text{L}}$
+\end_inset
+
+, is chosen sufficiently smooth to be represented by a truncated Fourier
+ expansion with known coefficients to avoid problematic fast Fourier transforms
+ of these terms.
+ The new primary variable 
+\begin_inset Formula $t_{\text{S}}=t-t_{\text{L}}$
+\end_inset
+
+, a new intermediate 
+\begin_inset Formula $c_{\text{S}}[t_{\text{S}}]=f(-\beta u_{\text{S}}+t_{\text{S}})-t_{\text{S}}$
+\end_inset
+
+ with the pair potential 
+\begin_inset Formula $u_{\text{S}}=u-u_{\text{L}}$
+\end_inset
+
+ participating in the Ng iteration scheme 
+\begin_inset Formula 
+\begin{equation}
+T_{\text{S}}[t_{\text{S}}]=\left\{ \omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\ast\chi-c_{\text{L}}\right\} -c_{\text{S}}[t_{\text{S}}]
+\end{equation}
+
+\end_inset
+
+are all of short range and thus amenable to a representation on finite radial
+ grids of moderate size as well as to fast Fourier transforms.
+ Technically, addition and removal of the long-range correlation 
+\begin_inset Formula $c_{\text{L}}$
+\end_inset
+
+ in the above equation is performed using its Fourier coefficients 
+\begin_inset Formula $\tilde{c}_{\text{L}}$
+\end_inset
+
+ after the forward Fourier transform of 
+\begin_inset Formula $c_{\text{S}}$
+\end_inset
+
+ and prior to backward transform of the term in curly braces.
+ 
 \end_layout
 
 \begin_layout Standard
