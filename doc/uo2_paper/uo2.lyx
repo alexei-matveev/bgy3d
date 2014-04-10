@@ -769,7 +769,7 @@ The Gibbs free energy of uranyl aquo complex is expressed approximately
  as:
 \begin_inset Formula 
 \begin{equation}
-\Delta G[\mathbf{s}]\approx\Delta E[\mathbf{s}]+\Delta\mu^{\text{RISM}}[\mathbf{s}]
+\Delta G[\mathbf{s}]\approx\Delta E[\mathbf{s}]+\Delta\mu[\mathbf{s}]
 \end{equation}
 
 \end_inset
