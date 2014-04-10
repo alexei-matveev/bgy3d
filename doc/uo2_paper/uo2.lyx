@@ -638,14 +638,14 @@ key "Ng74"
  participating in the Ng iteration scheme 
 \begin_inset Formula 
 \begin{equation}
-T_{\text{S}}[t_{\text{S}}]=\left\{ \omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\ast\chi-c_{\text{L}}\right\} -c_{\text{S}}[t_{\text{S}}]
+T_{\text{S}}[t_{\text{S}}]=\omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\ast\chi-c_{\text{S}}[t_{\text{S}}]
 \end{equation}
 
 \end_inset
 
 are all of short range and thus amenable to a representation on finite radial
  grids of moderate size as well as to fast Fourier transforms.
- Technically, addition and removal of the long-range correlation 
+ Technically, addition of the long-range correlation 
 \begin_inset Formula $c_{\text{L}}$
 \end_inset
 
@@ -657,7 +657,7 @@ are all of short range and thus amenable to a representation on finite radial
 \begin_inset Formula $c_{\text{S}}$
 \end_inset
 
- and prior to backward transform of the term in curly braces.
+.
  
 \end_layout
 
