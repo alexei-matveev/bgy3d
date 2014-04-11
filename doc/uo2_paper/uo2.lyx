@@ -368,6 +368,15 @@ at a specific solvent number density
 \end_inset
 
  being the distance between two interaction sites of a rigid solvent species.
+ Below, we will omit the superscripts 
+\begin_inset Formula $u$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ for brevity.
 \end_layout
 
 \begin_layout Standard
@@ -397,7 +406,7 @@ reference "eq:rism-vv"
 
 \end_inset
 
-), and no temperature dependence so far we need to apply closure relations
+), and no temperature dependence so far, one needs another closure relations
  to make the equations complete.
  One of the most popular formulas is the hypernetted closure (HNC) 
 \begin_inset CommandInset citation
@@ -771,7 +780,7 @@ We used pair-wise potential
 \end_inset
 
  common for all site pairs.
- Parameters of pair interactions are derived from site parameters using
+ Parameters of pair interactions were derived from site parameters using
  the Lorentz--Berthelot rules 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -797,13 +806,13 @@ key "Singer85"
 :
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu=\frac{2\pi\rho}{\beta}\int_{0}^{\infty}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\left[|h_{i\alpha}^{uv}|^{2}-2c_{i\alpha}^{uv}-c_{i\alpha}^{uv}h_{i\alpha}^{uv}\right]r^{2}dr
+\Delta\mu=\frac{2\pi\rho}{\beta}\int_{0}^{\infty}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\left[|h_{i\alpha}|^{2}-2c_{i\alpha}-c_{i\alpha}h_{i\alpha}\right]r^{2}dr
 \end{equation}
 
 \end_inset
 
 Though the individual terms of the integrand due to 
-\begin_inset Formula $c_{i\alpha}^{uv}$
+\begin_inset Formula $c_{i\alpha}$
 \end_inset
 
  are of long range so that the integral may appear divergent, the total
@@ -817,8 +826,8 @@ Though the individual terms of the integrand due to
 \begin_inset Formula $h^{2}$
 \end_inset
 
--terms contributes only in the depletion regions with 
-\begin_inset Formula $h_{i\alpha}^{uv}<0$
+-terms contribute only in the depletion regions with 
+\begin_inset Formula $h_{i\alpha}<0$
 \end_inset
 
  
