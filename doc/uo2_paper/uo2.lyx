@@ -713,6 +713,20 @@ are all of short range and thus amenable to a representation on finite radial
 \end_inset
 
 .
+ Pure solvent equations are treated similarly, however, in this case we
+ also apply the dielectrically consistent RISM (DRISM) correction to improve
+ the shape of the solvent susceptibility 
+\begin_inset Formula $\tilde{\chi}(k)$
+\end_inset
+
+ at low wave numbers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko00"
+
+\end_inset
+
+.
  
 \end_layout
 
@@ -758,7 +772,7 @@ We used pair-wise potential
 
  common for all site pairs.
  Parameters of pair interactions are derived from site parameters using
- the Lorentz--Berthelot rules  
+ the Lorentz--Berthelot rules 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Lorentz1881,Berthelot1898"
