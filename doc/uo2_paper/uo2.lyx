@@ -910,7 +910,7 @@ reference "tab:params-uranyl"
 \end_inset
 
 .
- Recently, Kerisit and Liu
+ Recently, Kerisit and Liu 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -1461,7 +1461,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lennard-Jones interaction parameter for water: 
+Lennard-Jones interaction parameters for water: 
 \begin_inset Formula $\sigma$
 \end_inset
 
