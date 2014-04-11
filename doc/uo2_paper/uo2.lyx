@@ -517,7 +517,14 @@ reference "eq:closure-hnc"
 \begin_inset Formula $F[t]=T[t]-t$
 \end_inset
 
- using the state of the art non-linear solvers.
+ using the state of the art non-linear solvers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "petsc-user-ref"
+
+\end_inset
+
+.
  The corresponding jacobian, 
 \begin_inset Formula $J[t]=\delta F/\delta t$
 \end_inset
@@ -532,7 +539,54 @@ e to an arbitrary vector
 \end_inset
 
 .
- A similar approach is used to solve the RISM equations for the pure solvent,
+ 
+\end_layout
+
+\begin_layout Standard
+This jacobian is also used to compute the linear response of the solution
+ 
+\begin_inset Formula $t$
+\end_inset
+
+ to a perturbation of the solute geometry as one step in computing the forces.
+ A linear equation system 
+\begin_inset Formula $J[t]\delta t^{\lambda}=-\partial F/\partial\lambda$
+\end_inset
+
+ is solved by iteratively refining the response 
+\begin_inset Formula $\delta t^{\lambda}$
+\end_inset
+
+ to a displacement along the mode 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ by a standard procedure 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "petsc-user-ref"
+
+\end_inset
+
+.
+ The explicit dependence of the functional 
+\begin_inset Formula $F[t]$
+\end_inset
+
+ on the solute geometry 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ that results into the inhomogeneity on the right hand side is confined
+ to the intra-molecular correlation function 
+\begin_inset Formula $\omega$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A similar approach is used to solve the RISM equations for the pure solvent,
  Eqs.
 \begin_inset space ~
 \end_inset
@@ -703,6 +757,16 @@ We used pair-wise potential
 \end_inset
 
  common for all site pairs.
+ Parameters of pair interactions are derived from site parameters using
+ the Lorentz--Berthelot rules  
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lorentz1881,Berthelot1898"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -739,7 +803,7 @@ Though the individual terms of the integrand due to
 \begin_inset Formula $h^{2}$
 \end_inset
 
--term contributes only in the depletion regions with 
+-terms contributes only in the depletion regions with 
 \begin_inset Formula $h_{i\alpha}^{uv}<0$
 \end_inset
 
@@ -762,7 +826,8 @@ key "Chandler84"
 \end_inset
 
 .
- 
+ The linear response of the integral to a perturbation of solute geometry
+ gives contributions to effective forces.
 \end_layout
 
 \begin_layout Standard
