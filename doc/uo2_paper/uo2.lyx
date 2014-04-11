@@ -2596,6 +2596,54 @@ reference "tab:observables-vs-water-model"
 \end_layout
 
 \begin_layout Standard
+In this part, we first invetigated the performance of water solvent with
+ different non-zero interaction parameters on hydrogen site.
+ Classical MD calculation of Maginn and the co-authors'
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pomogaev13"
+
+\end_inset
+
+ work was also reproduced for comparison.
+ The radial distribution functions (RDFs) of uranium and oxygen sites on
+ uranyl ion with oxygen and hydrogen sites in water solvents are shown in
+ Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-water-model"
+
+\end_inset
+
+.
+ When comparing RISM with MD results, it is easy to notice that for uranium-wate
+r oxygen and oxygen-water hydrogen pairs, the RDFs have quite similar shape,s
+ but for uranium-water hydrogen and oxygen-water oxygen pairs, the differences
+ are significant.
+ From the RDF plots, we could also observe that different water models have
+ influences on the intensity of the peaks but the positions did not vary
+ too much.
+ As can be seen from Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-water-model"
+
+\end_inset
+
+, the posistions of peaks are close to each other for different water models
+ while significant differences come to coordination numbers (4.9 – 5.8) and
+ excess chemical potential (-308 – -293 kcal/mol)
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -2919,6 +2967,66 @@ reference "tab:observables-vs-uranyl-model"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+Int this section, performances of different uranyl models are compared with
+ given the same water solvent model (PR-SPC/E).
+ As could be seen from Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+ and Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+, coordination numbers and positions of the first peaks produced by GW and
+ Maginn's models are close to AIMD and experimental resutls, but the calculated
+ solvetion free enrgies are out of the experimental range.
+ On the other hand, Kerisit and Liu's models produced solvation free energies
+ that lie in the middle of experimental range by overestimating the solute-solve
+nt interactions, which could be proved from the hight peaks in RDF plots
+ and coordination numbers which are close to 6.
+ It should be also noted that in AIMD calculation
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nichols08"
+
+\end_inset
+
+ and Kerisit and Liu's classical MD calculation
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerisit13"
+
+\end_inset
+
+, there is small peak at 1.96
+\begin_inset space ~
+\end_inset
+
+Å for the RDF of oxygen-water hydrogen pair which corresponds to a small
+ group of water molecules forming hydrogen bond with uranyl oxygen.
+ Our RISM calculationi with KL2 uranyl model aslo showed the small peak
+ for oxygen-water hydrogen pair, but at an ealier position – 1.6
+\begin_inset space ~
+\end_inset
+
+Å.
 \end_layout
 
 \begin_layout Standard
@@ -3504,6 +3612,42 @@ reference "tab:energy-vs-model"
 \end_layout
 
 \begin_layout Standard
+As already discussed in Section 4.2.2(FIXME), only the modified uranyl model
+ produced reasonable values for solvation free energy.
+ Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-model"
+
+\end_inset
+
+ shows the intramolecular binding energy of five water ligands and solvation
+ free energy for [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{5}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+.
+ It could be seen that again only KL1 and KL2 models have close restuls
+ with PCM calculation.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
@@ -3890,7 +4034,8 @@ PCM
 \end_layout
 
 \begin_layout Standard
-In this section, we studied the solvation of uranyl with explicit number
+FIXME: text outdated.
+ In this section, we studied the solvation of uranyl with explicit number
  of water molecules in the first solvation shell.
  Figure 2 shows the radial distribution functions of SPC/E and TIP3P water
  solvent around [UO2(5H2O)]2+ with five water molecules surrounding uranyl
@@ -3932,14 +4077,94 @@ reference "tab:energy-vs-coordination"
 \end_layout
 
 \begin_layout Standard
+With uranyl model which has the reasonable binding energy between uranyl
+ ion and water ligands, we attempted to optmize the geometry of [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+ (
+\begin_inset Formula $n=4-6$
+\end_inset
+
+) both wiout and with the contribution of RISM solvent.
+ As can be seen from Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:geometries"
+
+\end_inset
+
+, RISM solvent compensated the fifth water molecule in [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{4}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+and pushed the sixth water molecule to the position of the second solvation
+ shell (453 pm) in [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{6}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+.
+ Energy values in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-coordination"
+
+\end_inset
+
+ also proved that with inclusion of RISM solvent, solvation free energy
+ of the total system keep constant when the number of water ligands in the
+ first solvation shell varied from 4 to 6.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -4283,7 +4508,8 @@ n = 6
 \end_layout
 
 \begin_layout Standard
-Results of QM [UO2(H2O)n]2+ could be put in Supporting information.
+FIXME: text outdated.
+ Results of QM [UO2(H2O)n]2+ could be put in Supporting information.
  For KL2 model, QM-RISM optimization for n=4-6 could reach convergence but
  the structures are almost identical to those from pure QM calculation.
  For the rest uranyl model, QM-RISM optimization diverged.
@@ -4299,6 +4525,32 @@ reference "tab:geometry-qm"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+However, our attempts for QM-RISM optimization of [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+ could only reached convergence when KL2 model was used.
+ Event the structures are almost identical to those from pure QM calcutions,
+ it gives us confidence that when the interactions between solute and solvent
+ are properly described, the coupling of QM-RISM calcultion for uranyl aquo
+ complex is possible.
+ For the other uranyl models, QM-RISM optimization diverged with water ligands
+ being pushed away from uranyl ion.
 \end_layout
 
 \begin_layout Standard
