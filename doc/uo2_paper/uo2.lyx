@@ -4447,7 +4447,6 @@ Concluding remarks
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "uo2"
-options "unsrt"
 
 \end_inset
 
