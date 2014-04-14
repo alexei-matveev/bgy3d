@@ -990,7 +990,6 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\align center
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -1015,6 +1014,19 @@ name "tab:params-uranyl"
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
 \end_layout
 
 \end_inset
@@ -1443,6 +1455,19 @@ KL2
 \end_inset
 
 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1489,7 +1514,19 @@ name "tab:params-water"
 \end_layout
 
 \begin_layout Plain Layout
-\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="7">
 <features tabularvalignment="middle">
@@ -1783,6 +1820,19 @@ cSPC/E
 \end_inset
 
 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1909,7 +1959,22 @@ name "tab:simple-ions"
 \end_layout
 
 \begin_layout Plain Layout
-\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
@@ -2423,6 +2488,22 @@ I
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 a) Ref.
 \begin_inset space ~
 \end_inset
@@ -2589,6 +2670,22 @@ name "tab:observables-vs-water-model"
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
 \end_layout
 
 \end_inset
@@ -2811,6 +2908,22 @@ MD
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Formula $\ast$
 \end_inset
 
@@ -2978,6 +3091,19 @@ name "tab:observables-vs-uranyl-model"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="5">
 <features tabularvalignment="middle">
@@ -3450,6 +3576,19 @@ Expt
 \end_inset
 
 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -3607,6 +3746,22 @@ name "tab:energy-vs-model"
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
 \end_layout
 
 \end_inset
@@ -3942,6 +4097,22 @@ PCM
 
 \end_layout
 
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_inset
 
 
@@ -4136,6 +4307,22 @@ name "tab:energy-vs-coordination"
 \end_inset
 
 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
 \end_layout
 
 \end_inset
@@ -4367,6 +4554,22 @@ n = 6
 </cell>
 </row>
 </lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
 
 \end_inset
 
