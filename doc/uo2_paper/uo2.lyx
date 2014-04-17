@@ -558,15 +558,15 @@ This jacobian is also used to compute the linear response of the solution
 
  to a perturbation of the solute geometry as one step in computing the forces.
  A linear equation system 
-\begin_inset Formula $J[t]\delta t^{\lambda}=-\partial F/\partial\lambda$
+\begin_inset Formula $J[t]\delta t^{s}=-\partial F/\partial s$
 \end_inset
 
  is solved by iteratively refining the response 
-\begin_inset Formula $\delta t^{\lambda}$
+\begin_inset Formula $\delta t^{s}$
 \end_inset
 
  to a displacement along the mode 
-\begin_inset Formula $\lambda$
+\begin_inset Formula $s$
 \end_inset
 
  by a standard procedure 
@@ -581,8 +581,8 @@ key "petsc-user-ref"
 \begin_inset Formula $F[t]$
 \end_inset
 
- on the solute geometry 
-\begin_inset Formula $\lambda$
+ on the solute geometric parameter 
+\begin_inset Formula $s$
 \end_inset
 
  that results into the inhomogeneity on the right hand side is confined
@@ -853,27 +853,59 @@ key "Chandler84"
 \end_layout
 
 \begin_layout Standard
-The Gibbs free energy of uranyl aquo complex is expressed approximately
- as:
+To explore the free energy surface of uranyl aqua complexes we constructed
+ a composite functional:
 \begin_inset Formula 
 \begin{equation}
-\Delta G[\mathbf{s}]\approx\Delta E[\mathbf{s}]+\Delta\mu[\mathbf{s}]
+G[n,\vec{s}]=E[n,\vec{s}]+\Delta\mu[\vec{s}],
 \end{equation}
 
 \end_inset
 
 where 
-\begin_inset Formula $\Delta E[\mathbf{s}]$
+\begin_inset Formula $E[n,\vec{s}]$
 \end_inset
 
- is the intramolecular energy between uranyl ion and explicit water molecules
- in the first solvation shell, the orientation of these water molecules
- are represented as 
-\begin_inset Formula $\mathbf{s}$
+ is the solute internal energy depending on the geometric parameters 
+\begin_inset Formula $\vec{s}$
 \end_inset
 
-, where their molecular geometry were kept fixed during the energy minimization
- to explore the solvation structure of uranyl aquo complex.
+ and, in the case of QM solute, also on the electron density distribution
+ 
+\begin_inset Formula $n$
+\end_inset
+
+, but not on the solvent site distribution functions 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ Note that in the context of current work the 
+\begin_inset Quotes eld
+\end_inset
+
+solute
+\begin_inset Quotes erd
+\end_inset
+
+ will technically include explicit water ligands.
+ Positions and orientations of these water molecules are among the geometric
+ parameters 
+\begin_inset Formula $\vec{s}$
+\end_inset
+
+; each water molecule was kept rigid during the free energy minimization.
+ The additive approximation to the free energy functional is to some extent
+ justified by a common practice of including net polarization effect into
+ the force field parameters 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Section
