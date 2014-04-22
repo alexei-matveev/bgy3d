@@ -7,7 +7,7 @@
 \usepackage{mathptmx}
 \usepackage{times}
 \end_preamble
-\options twocolumn,superscriptaddress
+\options twocolumn,showkeys
 \use_default_options false
 \maintain_unincluded_children false
 \language english
