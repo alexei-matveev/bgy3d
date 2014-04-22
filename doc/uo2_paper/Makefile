@@ -1,7 +1,7 @@
 all: uo2.pdf
 
 # Auxilary files are put there:
-d=./uo2.d
+d=uo2.d
 
 #
 # There are a few figures in this document:
@@ -21,3 +21,25 @@ $d/fig1.svg: $d/mkfig1.py $d/md-oh.dat $d/md-oo.dat $d/md-uh.dat $d/md-uo.dat $d
 
 %.pdf: %.svg
 	inkscape $(<) --export-dpi=300 --export-pdf=$(@)
+
+#
+# Convert XYZ file to PNG using Jmol.  The flag -n tells Jmol not open
+# a graphics  window. The  jmol.script says to  write the  output into
+# jmol.png --- we have to rename it here:
+#
+%.png: %.xyz
+	jmol $(<) -s $d/jmol.script -n
+	mv jmol.png $(@)
+
+bitmaps = \
+	$d/4h2o,mm+rism.png \
+	$d/4h2o,mm.png \
+	$d/5h2o,mm+rism.png \
+	$d/5h2o,mm.png \
+	$d/6h2o,mm+rism.png \
+	$d/6h2o,mm.png
+
+$(bitmaps): Makefile $d/jmol.script
+
+# Add a few default targets:
+all: $(bitmaps)
