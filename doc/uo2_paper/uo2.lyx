@@ -905,7 +905,14 @@ key "Berendsen87"
 \end_inset
 
 .
- 
+ Geometry optimization has been performed using ParaTools 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chaffey-Millar11,Nikodem13"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
