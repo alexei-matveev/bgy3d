@@ -2531,7 +2531,23 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-a) Ref.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+ Ref.
 \begin_inset space ~
 \end_inset
 
@@ -2542,7 +2558,14 @@ key "Joung13"
 
 \end_inset
 
- b) Ref.
+
+, 
+\begin_inset Formula $^{b}$
+\end_inset
+
+ 
+\lang english
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -2553,7 +2576,11 @@ key "Joung08"
 
 \end_inset
 
- c) Ref.
+, 
+\begin_inset Formula $^{c}$
+\end_inset
+
+ Ref.
 \begin_inset space ~
 \end_inset
 
@@ -2561,6 +2588,17 @@ key "Joung08"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Schmid00"
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
@@ -2688,8 +2726,23 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Position of the first peak (pm), coordination number of the first solvation
- shell and solvation free energy (kcal/mol) 
+Position of the first peak 
+\begin_inset Formula $d1_{\text{U-OW}}$
+\end_inset
+
+ (pm), coordination number 
+\begin_inset Formula $N$
+\end_inset
+
+ of the first solvation shell and solvation free energy
+\begin_inset Formula $^{a}$
+\end_inset
+
+ 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ (kcal/mol) 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:observables-vs-water-model"
@@ -2766,7 +2819,7 @@ water model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta G_{\text{sol}}^{\ast}$
+\begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
 
@@ -2951,11 +3004,35 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Formula $\ast$
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
 \end_inset
 
-) Solvation free energy of RISM calculation is estimated approximately by
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+ Solvation free energy of RISM calculation is estimated approximately by
  excess chemical potential
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3701,7 +3778,23 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-a) Ref.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+ Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3712,7 +3805,11 @@ key "Nichols08"
 
 \end_inset
 
- b) Ref.
+, 
+\begin_inset Formula $^{b}$
+\end_inset
+
+ Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3723,7 +3820,11 @@ key "Cornehl96"
 
 \end_inset
 
- c) Ref.
+, 
+\begin_inset Formula $^{c}$
+\end_inset
+
+ Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3731,6 +3832,17 @@ key "Cornehl96"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05"
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
 
 \end_inset
 
