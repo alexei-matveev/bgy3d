@@ -109,7 +109,28 @@ April 2014
 \end_layout
 
 \begin_layout Abstract
-To be done
+We apply the one-dimensional RISM model to uranyl solvation.
+ Uranyl aqua complexes with 4-6 explicit water ligands and implicit water
+ solvent modeled by RISM representing the rest of the solvent are compared.
+ Interactions of explicitly represented atoms of the aqua complexes are
+ treated either by molecular mechanics or by density functional theory to
+ build the free energy functional.
+ A comparison of solvation energies and geometries of the aqua complexes
+ for different number of explicit water ligands at a local minimum of the
+ free energy surface indicate interchangeability of explicit and implicit
+ solvent models.
+ Explicit water ligands are distributed in the equatorial plane of the uranyl
+ in 
+\begin_inset Formula $D_{5h}$
+\end_inset
+
+-like pattern.
+ In contrast, the popular polarizable continuum model predicts a 
+\begin_inset Formula $D_{4h}$
+\end_inset
+
+-like structure of the uranyl aqua complex when only four explicit water
+ ligands are supplied.
 \end_layout
 
 \begin_layout Keywords
