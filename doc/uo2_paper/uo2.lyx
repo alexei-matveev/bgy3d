@@ -905,42 +905,31 @@ key "Berendsen87"
 \end_inset
 
 .
- Geometry optimization has been performed using ParaTools 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Chaffey-Millar11,Nikodem13"
-
-\end_inset
-
-.
+ 
 \end_layout
 
 \begin_layout Section
 Computational details
 \end_layout
 
-\begin_layout Subsection
-RISM/MM calculations
-\end_layout
-
 \begin_layout Standard
 For evaluation purpose, we chose the force field parameters for uranyl ion
- from the model of Guilbaud and Wipff 
+ from the model of Guilbaud and Wipff (GW) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
 
 \end_inset
 
- (GW) and compare the results with those using models newly developed by
- Maginn 
+ and compare the results with those using models newly developed by Maginn
+ (RM12 and PM13) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rai12,Pomogaev13"
 
 \end_inset
 
- (Maginn12 and Maginn13), See Table 
+, See Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:params-uranyl"
@@ -948,16 +937,17 @@ reference "tab:params-uranyl"
 \end_inset
 
 .
- Recently, Kerisit and Liu 
+ Recently, Kerisit and Liu modified the parameters in GW model to strengthen
+ the uranyl-water interaction and their newly derived models (KL1 and KL2)
+ reported improved values for hydration free energy and water exchange rate
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
 
 \end_inset
 
- modified the parameters in GW model to strengthen the uranyl-water interaction
- and their newly derived models (KL1 and KL2) reported improved values for
- hydration free energyand water exchange rate.
+.
  For water solvent, we introduced atomic charges and LJ potential parameters
  from SPC/E (extended simple point charge) model 
 \begin_inset CommandInset citation
@@ -1016,10 +1006,8 @@ reference "tab:params-water"
 
 \end_inset
 
- listed the details of these three popular modified water models which have
- been widely applied in other RISM studies.
- The Lorentz--Berthelot mixing rule was used to generate potential parameters
- for each pair of interaction sites.
+ summarizes the details of these three popular modified water models which
+ have been widely applied in other RISM studies.
 \end_layout
 
 \begin_layout Standard
@@ -1032,7 +1020,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lennard-Jones interaction parameters for uranyl: 
+Lennard--Jones interaction parameters for uranyl: 
 \begin_inset Formula $\sigma$
 \end_inset
 
@@ -1524,7 +1512,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Lennard-Jones interaction parameters for water: 
+Lennard--Jones interaction parameters for water: 
 \begin_inset Formula $\sigma$
 \end_inset
 
@@ -1899,15 +1887,11 @@ All the calculations were performed at the temperature of 298 K and dielectric
 
 .
  The discrete sine transform (DST) was applied for Fourier transform (FT)
- when calculating convolution productions.
- With water solvent susceptibility as inputs, solvent-solute RISM equations
+ when calculating convolution integrals.
+ With water solvent susceptibility as input, solvent-solute RISM equations
  were solved iteratively to get radial distribution functions and evaluate
  excess chemical potential with different functionals.
  
-\end_layout
-
-\begin_layout Subsection
-QM calcualtions
 \end_layout
 
 \begin_layout Standard
@@ -1928,10 +1912,14 @@ key "ParaGaussV3.1"
 \end_inset
 
 .
-\end_layout
+ Geometry optimization has been performed using ParaTools 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chaffey-Millar11,Nikodem13"
 
-\begin_layout Subsection
-Geometry optimization
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
