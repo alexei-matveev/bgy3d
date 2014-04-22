@@ -1899,9 +1899,8 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \end_layout
 
 \begin_layout Standard
-QM calculations All-electron calculations were performed with the linear
- combination of Gaussian-type orbitals fitting-functions density functional
- method 
+All-electron calculations were performed with the linear combination of
+ Gaussian-type orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunlap90"
