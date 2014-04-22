@@ -1885,7 +1885,11 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \begin_inset Formula $10^{-14}$
 \end_inset
 
-.
+ for the 
+\begin_inset Formula $L_{2}$
+\end_inset
+
+-norm of the indirect correlation matrix.
  The discrete sine transform (DST) was applied for Fourier transform (FT)
  when calculating convolution integrals.
  With water solvent susceptibility as input, solvent-solute RISM equations
