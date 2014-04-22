@@ -4566,7 +4566,14 @@ name "fig:geometries"
 \end_layout
 
 \begin_layout Plain Layout
-FIXME: missing
+\begin_inset Graphics
+	filename uo2.d/fig3.png
+	lyxscale 25
+	width 100col%
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
