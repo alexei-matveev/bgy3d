@@ -1,9 +1,27 @@
-background [xFFFFFF];
+background [xFFFFFF]
+spacefill 25 %
 # Use "show orientation" in Jmol console. Follows Z-Y-Z convention for
 # Euler angles
-reset;
-# center {0.7741648 -0.5528141 0.0885452};
-center {atomno=1};
-rotate z 112.59; rotate y 39.71; rotate z -36.7;
-write image 500 500 PNG -1 "jmol.png";
+reset
+center {atomno=1}
+
+# Three lines of voodoo to get into some standard orientation using
+# U-OW and U-OW axes:
+x = quaternion({atomno=1}, {atomno=4}, {atomno=2})
+q = quaternion()
+rotate molecular quaternion @{(!q) * (!x)}
+
+# This U-OW to the left side and tilts the plane towards the viewer:
+rotate y 190.0
+rotate -x
+
+# Zoom 125% to fill the space (100% is defined by the "radius" which
+# is the distance to the camera, shift the center to the left by 10%.
+moveto /* time, axisAngle */ 1.0 {0 0 0 0} \
+       /* zoom, translation */  125.0 -10.0 0.0  \
+       /* center, rotationRadius */ {atomno=1} 5.670272 \
+       /* navigation center, translation, depth */ {atomno=1} 0.0 0.0 0.0;
+
+# 4:3 aspect ratio:
+write image 800 600 PNG -1 "jmol.png";
 exitJmol
