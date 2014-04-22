@@ -1,0 +1,9 @@
+background [xFFFFFF];
+# Use "show orientation" in Jmol console. Follows Z-Y-Z convention for
+# Euler angles
+reset;
+# center {0.7741648 -0.5528141 0.0885452};
+center {atomno=1};
+rotate z 112.59; rotate y 39.71; rotate z -36.7;
+write image 500 500 PNG -1 "jmol.png";
+exitJmol
