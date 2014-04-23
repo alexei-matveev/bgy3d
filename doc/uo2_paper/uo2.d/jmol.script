@@ -1,4 +1,5 @@
 background [xFFFFFF]
+set frank off
 spacefill 25 %
 # Use "show orientation" in Jmol console. Follows Z-Y-Z convention for
 # Euler angles
