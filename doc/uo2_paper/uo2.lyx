@@ -1894,13 +1894,25 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \begin_inset Formula $\rho=0.033295$
 \end_inset
 
- Å
+
+\begin_inset space ~
+\end_inset
+
+Å
 \begin_inset Formula $^{-3}$
 \end_inset
 
 .
  The grid which was used to represent correlation functions has a uniform
- grid spacing of 0.0390625 Å for 4096 grid points.
+ grid spacing of 0.0390625
+\begin_inset space ~
+\end_inset
+
+Å for 4096 grid points which amounts to a radial range of 160
+\begin_inset space ~
+\end_inset
+
+Å.
  Solvent susceptibility was solved from pure site-site RISM equation by
  Newton iteration method with convergence tolerance of 
 \begin_inset Formula $10^{-14}$
@@ -1975,9 +1987,22 @@ reference "tab:simple-ions"
 \end_inset
 
 .
- As can be seen, excess chemical potential results for simple ions calculated
- with our 1D-RISM code are in perfect agreement with reported values and
- comparable with MD and experimental estimates.
+ As can be seen, the values of excess chemical potential of simple ions
+ calculated with our 1D-RISM code are in perfect agreement with reported
+ values and comparable with MD and experimental estimates.
+ The most significant technical difference to Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+ is a choice of smaller radial range and slightly coarser grid spacing made
+ in this work.
 \end_layout
 
 \begin_layout Standard
@@ -2582,14 +2607,11 @@ key "Joung13"
 
 \end_inset
 
-
 , 
 \begin_inset Formula $^{b}$
 \end_inset
 
- 
-\lang english
-Ref.
+ Ref.
 \begin_inset space ~
 \end_inset
 
