@@ -234,6 +234,9 @@ contains
     logical :: flag
     ! *** end of interface **
 
+    ! This one will choke on anything  that is not #t or #f, the usual
+    ! convention that any object except  #f is "trueish" does not hold
+    ! here:
     flag = (scm_to_bool (bool) /= 0)
   end function to_bool
 
