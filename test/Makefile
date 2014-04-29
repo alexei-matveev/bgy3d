@@ -30,11 +30,14 @@ HNC-FLAGS = \
 	--closure KH
 
 #
-# In case $(EXE) is not defined, assume the executable is one level up
-# in directory structure:
+# In  case $(cmd) is  not defined,  use the  script that  emulates its
+# behaviour.  Here $(exe) is the actual executable, $(cmd) is a script
+# with  that executable  in  shebang line  accepting and  interpreting
+# command line  flags to tune  settings. Finally, $(run) is  a command
+# line prefix that can be used to interprete arbitrary Scheme files:
 #
 TOP ?= ..
-EXE ?= mpirun $(TOP)/guile/runbgy.scm
+cmd ?= mpirun $(TOP)/guile/runbgy.scm
 exe ?= $(TOP)/bgy3d
 run = $(exe) -L .. -s
 
@@ -117,7 +120,7 @@ out/%:
 # are printed in are arbitrary too:
 #
 # moments = python $(TOP)/python/moments.py
-moments = $(EXE) moments --L $(L) --N $(N)
+moments = $(cmd) moments --L $(L) --N $(N)
 
 #
 # This script is also used in QM regression tests, see ../test-qm:
@@ -133,23 +136,23 @@ make-summary = $(SHELL) ./summary.sh
 #
 # Testing HNC3d code is not as elaborate, thus the special case.
 #
-%.hnc3d.g2: $(TOP)/bgy3d
-	$(EXE) $(base-flags) | tee $(@).out
+%.hnc3d.g2: $(exe)
+	$(cmd) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g01.bin g02.bin g11.bin g12.bin g22.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.hnc3d.g1: $(TOP)/bgy3d $(solvent).hnc3d.g2
-	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
+%.hnc3d.g1: $(exe) $(solvent).hnc3d.g2
+	$(cmd) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin g2.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.g1: $(TOP)/bgy3d hydrogen_chloride.g2
-	$(EXE) $(base-flags) $(solute-flags) | tee $(@).out
+%.g1: $(exe) hydrogen_chloride.g2
+	$(cmd) $(base-flags) $(solute-flags) | tee $(@).out
 	$(moments) g0.bin g1.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
-%.g2: $(TOP)/bgy3d
-	$(EXE) $(base-flags) | tee $(@).out
+%.g2: $(exe)
+	$(cmd) $(base-flags) | tee $(@).out
 	$(moments) g00.bin g11.bin g01.bin > $(@)
 	$(make-summary) $(@).out >> $(@)
 
