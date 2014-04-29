@@ -63,5 +63,10 @@
 
 (define *energies* (map run-one *ions*))
 
-(pretty-print (map cons *names* *energies*))
+;;; FIXME: tty is polluted with all  kinds of prints, so we also write
+;;; selected data into a separate file
+(let ((out (map cons *names* *energies*)))
+  (pretty-print out)
+  (with-output-to-file "run-ions-out"
+    (lambda () (pretty-print out))))
 
