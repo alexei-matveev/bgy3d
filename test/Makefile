@@ -35,6 +35,8 @@ HNC-FLAGS = \
 #
 TOP ?= ..
 EXE ?= mpirun $(TOP)/guile/runbgy.scm
+exe ?= $(TOP)/bgy3d
+run = $(exe) -L .. -s
 
 solutes = \
 	water \
@@ -64,6 +66,10 @@ hnc-diffs = \
 all: bgy-tests hnc-tests
 bgy-tests: $(bgy-diffs)
 hnc-tests: $(hnc-diffs) bgy-tests
+rism-tests: run-ions-out.diff
+
+run-ions-out: run-ions.scm $(exe)
+	$(run) $(<) --snes-solver trial
 
 #
 # Target specific variables. Four cases (g1, g2) x (BGY, HNC) at most:
