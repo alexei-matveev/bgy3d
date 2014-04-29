@@ -1391,3 +1391,9 @@ int bgy3d_guile_main (int argc, char **argv)
   scm_boot_guile (argc, argv, inner_main, NULL);
   return 0; /* never reached */
 }
+
+/* FIXME: Prototype in bgy3d.h */
+void misc_error (const char *loc, const char *msg) /* noreturn */
+{
+  scm_misc_error (loc, msg, SCM_EOL); /* longjmp! */
+}

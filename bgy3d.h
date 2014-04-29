@@ -300,6 +300,10 @@ State* bgy3d_state_make (const ProblemData *PD);
 void bgy3d_state_destroy (State *BHD);
 void bgy3d_problem_data_print (const ProblemData *PD);
 
+/* FIXME: find a better  place, only implemented ifdef WITH_GUILE. See
+   bgy3d-guile.c */
+void misc_error (const char *loc, const char *msg); /* noreturn */
+
 
 /*******************/
 /* COMM PRIMITIVES */
