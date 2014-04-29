@@ -241,7 +241,7 @@ contains
        type (obj) :: vdict, udict
 
        if (vv) then
-          call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
+          call rism_vv (env, pd % closure, nrad, rmax, pd % beta, pd % rho, &
                solvent, gam, chi, vdict)
 
           ! Output, if requested:
@@ -294,7 +294,7 @@ contains
   end subroutine mkgrid
 
 
-  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
+  subroutine rism_vv (env, method, nrad, rmax, beta, rho, sites, gam, chi, dict)
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site, comm_rank
@@ -303,6 +303,7 @@ contains
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
     implicit none
+    type (obj), intent (in) :: env ! SCM alist
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
     real (rk), intent (in) :: rmax          ! cell size
@@ -331,7 +332,7 @@ contains
 
     ! FIXME: try  not to  proliferate use of  "environments", function
     ! behaviour is better controlled via its arguments:
-    if (.not. getopt ("dielectric", eps)) then
+    if (.not. getopt (env, "dielectric", eps)) then
        !
        ! Make sure it is not used anywhere if it was not supplied. The
        ! logic is  if eps  /= 0  then do DRISM,  otherwise ---  do the
