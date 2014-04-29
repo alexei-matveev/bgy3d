@@ -334,7 +334,15 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
 
   vec_destroy (&r);
 
+  /* FIXME: what  should we do  if there is no  convergence?  Negative
+     value indicates diverged, positive value converged: */
+  SNESConvergedReason reason;
+  SNESGetConvergedReason (snes, &reason);
   SNESDestroy (&snes);
+
+  if (reason <= 0)
+    misc_error (__func__, SNESConvergedReasons[reason]); /* longjmp! */
+  assert (reason > 0);
 }
 
 void bgy3d_snes_picard (const ProblemData *PD, void *ctx,
