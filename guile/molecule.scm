@@ -11,6 +11,7 @@
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (guile tinker)           ; tinker-table
   #:use-module (guile utils)            ; memoize
+  #:use-module (guile atoms)            ; covalent-radius, canonical-name
   #:use-module (guile compat)           ; unless
   #:export
   (make-molecule
@@ -317,7 +318,7 @@
     (format #t "# ~a\n" name)
     (for-each (lambda (site)
                 (format #t "~a ~a ~a ~a\n"
-                        (site-name site)
+                        (canonical-name (site-name site))
                         (site-x site)
                         (site-y site)
                         (site-z site)))
