@@ -139,7 +139,7 @@
     (max-iter 1500)                   ; max number of iterations
     (damp-start 1.0)                  ; scaling factor?
     (lambda 0.02)                     ; not the scheme lambda
-    (bond-length-thresh 2.0) ; lower bound for non-bonding interactions, in A.
+    (bond-length-thresh 1.0)   ; scale for covalent bond autodetection
     (closure HNC)                     ; HNC, KH or PY
     (hnc #f)                          ; FIXME: exclusive
     (bgy #f)                          ; FIXME: exclusive
@@ -632,8 +632,8 @@ computes the sum of all vector elements."
 ;;; species rigid.
 ;;;
 (define (make-pes/gp solute settings)
-  (let* ((rmax (assoc-ref settings 'bond-length-thresh))
-         (species (molecule-species solute rmax))
+  (let* ((scale (assoc-ref settings 'bond-length-thresh))
+         (species (molecule-species solute scale))
          (x0 (molecule-positions solute))
          (f (lambda (x)                 ; x -> energy
               (let ((solute' (move-molecule solute x)))
@@ -852,14 +852,14 @@ computes the sum of all vector elements."
            args))
         ;;
         ("print-species"
-         (let ((rmax (assoc-ref settings 'bond-length-thresh)))
+         (let ((scale (assoc-ref settings 'bond-length-thresh)))
           (for-each
            (lambda (name)
              (let ((mol (find-molecule name)))
                (pretty-print/serial
                 (map cons
                      (map site-name (molecule-sites mol))
-                     (molecule-species mol rmax)))))
+                     (molecule-species mol scale)))))
            args)))
         ;;
         ("self-energy"

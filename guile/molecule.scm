@@ -284,15 +284,24 @@
           (dot q y)
           (dot q z))))
 
-(define (molecule-species solute rmax)
+(define (molecule-species solute scale)
+  ;;
+  ;; Estimate the length of a typical bond between two such sites:
+  ;;
+  (define (bond-length a b)
+    (+ (covalent-radius (site-name a))
+       (covalent-radius (site-name b))))
   ;;
   ;; Comparator for  two sites. Returns true if  sites are closer than
-  ;; rmax. It will be used to compare the keys (sites) in a dictionary
-  ;; (association list). FIXME: this is NOT an equivalence relation as
-  ;; it is not transitive, is it a problem? Yes, it is!
+  ;; scaled estmate for a typical bond between two such atoms. It will
+  ;; be used to compare  the keys (sites) in a dictionary (association
+  ;; list).  FIXME: this is NOT  an equivalence relation as  it is not
+  ;; transitive, is it a problem? Yes, it is!
   ;;
   (define (close? a b)
-    (< (site-distance a b) rmax))
+    (let ((distance (site-distance a b))
+          (estimate (bond-length a b)))
+      (< distance (* scale estimate))))
   ;;
   ;; Loop over all sites, collecting a dictionary of site IDs:
   ;;
