@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2013 Alexei Matveev
+;;; Copyright (c) 2013, 2014 Alexei Matveev
 ;;; Copyright (c) 2013 Bo Li
 ;;;
 ;;; Scheme  interface  to  BGY3d  code.   Not to  pollute  the  global
