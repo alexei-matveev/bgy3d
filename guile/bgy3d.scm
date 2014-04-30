@@ -364,9 +364,11 @@ computes the sum of all vector elements."
       (cons potential restart))))
 
 ;;;
-;;; Specifications of command line  flags common for old- and new-main
-;;; for  use with getopt-long.  Most of  these happen  to be  real- or
-;;; integer numbers:
+;;; Specifications  of command  line flags  for use  with getopt-long.
+;;; Most  of these  happen to  be  real- or  integer numbers.   Though
+;;; according to getopt-long the predicate is required to return #f or
+;;; something trueish we request the predicate to return a typed value
+;;; converted from string for future use.
 ;;;
 ;;; FIXME: ./runbgy.scm invokes old-main at the moment, so that it has
 ;;; to accept  the options of  the new-main. This leads  to unhelpfull
@@ -386,10 +388,20 @@ computes the sum of all vector elements."
     (L                  (value #t)      (predicate ,string->number))
     (damp-start         (value #t)      (predicate ,string->number))
     (lambda             (value #t)      (predicate ,string->number))
-    (solvent            (value #t)      (predicate ,find-molecule)) ; a string
-    (solute             (value #t)      (predicate ,find-molecule)) ; a string
-    (closure            (value #t)      (predicate ,(lambda (x)
-                                                      (member x '("HNC" "PY" "KH")))))
+    (solvent
+     (value #t)
+     (predicate ,(lambda (name)
+                   (and (find-molecule name) name)))) ; a string
+    (solute
+     (value #t)
+     (predicate ,(lambda (name)
+                   (and (find-molecule name) name)))) ; a string
+    (closure
+     (value #t)
+     (predicate ,(lambda (x)
+                   (let ((y (string->symbol x)))
+                     (and (member y '(HNC PY KH))
+                          y)))))
     (dielectric         (value #t)      (predicate ,string->number))
     (comb-rule          (value #t)      (predicate ,string->number))
     (solvent-1d         (value #f)) ; use solvent susceptibility from 1D RISM
@@ -397,9 +409,11 @@ computes the sum of all vector elements."
     (save-guess         (value #f))
     (load-guess         (value #f))
     (derivatives        (value #f))
-    (snes-solver        (value #t)
-                        (predicate ,(lambda (x)
-                                    (member x '("jager" "newton" "picard" "trial")))))
+    (snes-solver
+     (value #t)
+     (predicate ,(lambda (x)
+                   (and (member x '("jager" " newton" "picard" "trial"))
+                        x))))
     (verbose            (single-char #\v)
                         (value #f)) ; use --verbosity num instead
     (rbc                (value #f)) ; add repulsive bridge correction
@@ -408,55 +422,44 @@ computes the sum of all vector elements."
 
 
 ;;;
-;;; Returns  new   settings  with   updated  fields  taken   from  the
-;;; getopt-long options. The values from the command line (provided as
-;;; strings) are converted to the proper type derived from the default
-;;; value of the setting.
+;;; Returns an association list where the values from the command line
+;;; (provided as strings)  are converted to the proper  type using the
+;;; predicates from option-spec above.
 ;;;
-(define (update-settings settings options)
-  ;;
-  ;; Here "old" is the default and should have the proper type (e.g. a
-  ;; number, where numbers are expected), "new" is either a string or
-  ;; boolean (for pure or missing options). FIXME: there is an ugly
-  ;; exception though --- we use old == #f to indicate no meanigful
-  ;; default for solute and solvent strings.
-  ;;
-  (define (update old new)
-    (cond
-     ((and (boolean? old) (boolean? new)) new) ; for pure options
-     ((not new) old) ; keep the default if not specified in command line
-     ((string? old) new)
-     ((number? old) (string->number new))
-     ((symbol? old) (string->symbol new))
-     ((not old) new))) ; FIXME: if the default is #f use new, whatever that is
-  ;;
-  ;; ... otherwise someting went wrong and the return value of (update
-  ;; old new) will be unspecified.
-  ;;
-  (define update-pair                   ; a function ...
-    (match-lambda
-     ((key . val)                              ; that takes a pair ...
-      (let ((str (option-ref options key #f))) ; string or #f
-        (cons key (update val str)))))) ; and returns updated pair.
-  ;;
-  ;; FIXME: this updates the  defaults, but does not add other entries
-  ;; specified in the command line. Augment the defaults.
-  ;;
-  (map update-pair settings))
+(define (options->settings options)
+  ;; Here we are "abusing" predicates from the specification of
+  ;; acceptable command line flags to convert strings to typed
+  ;; values. Note that specifications of the options use 2-lists and
+  ;; not (car . cdr) pairs for keys and values.
+  (define (make-pair op)
+    (let* ((key (car op))      ; symbol or ()
+           (val (cdr op))      ; string, #t or (), getopt-long is ugly
+           (spec (assoc-ref option-spec key))
+           (pred (assoc-ref spec 'predicate)) ; #f or 1-list
+           (pred (and pred (car pred))))      ; see option-spec syntax
+      (if pred
+          (cons key (pred val))
+          op)))
+  ;; List of kv-pairs, including positional arguments with () as a
+  ;; key:
+  (map make-pair options))
 
 
 ;;;
 ;;; Try  to  keep the  command  line parsing  at  a  single place  for
-;;; re-use. This converts at least some known options to numbers. Note
-;;; that  as  implemented,  the  function  update-settings,  does  not
-;;; introduce new key/value pairs  not present in defaults. FIXME: The
-;;; flags  present  in  option-spec  but  not  in  defaults  are  this
-;;; inaccessible (unless one uses PETSC command line accessors).
+;;; re-use. This converts the known options to numbers. Note that only
+;;; those    options   are    accepted   that    are    specified   in
+;;; option-spec. FIXME: Petsc  options use a single dash  and thus are
+;;; incompatible  with  getopt-long. You  can  still  specify them  in
+;;; ~/.petscrc, though.
 ;;;
 (define (parse-command-line argv)
   (let* ((options (getopt-long argv option-spec))
-         (settings (update-settings (input->settings *defaults*) options)))
-    (acons '() (option-ref options '() '()) settings))) ; positional args
+         (defaults (input->settings *defaults*))
+         (user-defined (options->settings options)))
+    ;; User-defined settings derived from command line include
+    ;; positional args. User-defined take precedence:
+    (overwrite (append defaults user-defined))))
 
 
 ;;;
