@@ -502,7 +502,8 @@ computes the sum of all vector elements."
         ;;
         ;; 3d HNC/BGY.  The functions bound to run-solvent and
         ;; run-solute share the interface. The code that calls them is
-        ;; the same:
+        ;; the same. FIXME: why arent we passing settings further in
+        ;; 3d case and rely on PETSC command line parsing instead?
         ;;
         ((hnc bgy)
          (if solute                     ; either #f or real solute
@@ -532,19 +533,19 @@ computes the sum of all vector elements."
              ;;
              (run-solvent solvent '())))
         ;;
-        ;; 1d-RISM, very experimental:
+        ;; 1d-RISM:
         ;;
         ((rism)
          (if solute                     ; either #f or real solute
              ;;
              ;; Solute with solvent:
              ;;
-             (let ((res (run-solute solute solvent '())))
+             (let ((res (run-solute solute solvent settings)))
                (pretty-print/serial res))
              ;;
              ;; Pure solvent:
              ;;
-             (let ((res (run-solvent solvent '())))
+             (let ((res (run-solvent solvent settings)))
                (pretty-print/serial res))))
         ;;
         ;; Fall through to the new variant:
