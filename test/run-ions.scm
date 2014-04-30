@@ -53,9 +53,6 @@
   (map find-molecule *names*))
 
 (define (run-one solute)
-  ;; (pretty-print solute)
-  ;; (pretty-print *solvent*)
-  ;; (pretty-print *settings*)
   (let* ((results (rism-solute solute *solvent* *settings* *chi*))
          (solute-properties (assoc-ref results 'solute))
          (free-energy (assoc-ref solute-properties 'XXX)))
@@ -64,7 +61,8 @@
 (define *energies* (map run-one *ions*))
 
 ;;; FIXME: tty is polluted with all  kinds of prints, so we also write
-;;; selected data into a separate file
+;;; selected data into a separate file. See ./out/run-ions-out for the
+;;; reference output.
 (let ((out (map cons *names* *energies*)))
   (pretty-print out)
   (with-output-to-file "run-ions-out"
