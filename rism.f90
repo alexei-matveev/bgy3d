@@ -330,8 +330,6 @@ contains
     real (rk) :: A          ! Cummings & Stell factor [CS81]
 
 
-    ! FIXME: try  not to  proliferate use of  "environments", function
-    ! behaviour is better controlled via its arguments:
     if (.not. getopt (env, "dielectric", eps)) then
        !
        ! Make sure it is not used anywhere if it was not supplied. The
@@ -547,6 +545,8 @@ contains
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
 
+    ! FIXME: try  not to  proliferate use of  "environments", function
+    ! behaviour is better controlled via its arguments:
     rbc = getopt ("rbc")
 
     if (rbc) then
@@ -1125,6 +1125,8 @@ contains
 
     integer :: rule
 
+    ! FIXME: try  not to  proliferate use of  "environments", function
+    ! behaviour is better controlled via its arguments:
     if (.not. getopt ("comb-rule", rule)) then
        rule = 0
     endif
