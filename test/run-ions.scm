@@ -23,7 +23,6 @@
     (damp-start . 1.0)
     (lambda . 0.02)
     (bond-length-thresh . 2.0)
-    (closure . HNC)
     (derivatives . #f)))
 
 (define *solvent*
@@ -52,18 +51,22 @@
 (define *ions*
   (map find-molecule *names*))
 
-(define (run-one solute)
-  (let* ((results (rism-solute solute *solvent* *settings* *chi*))
+(define (run-one solute closure)
+  (let* ((settings (acons 'closure closure *settings*))
+         (results (rism-solute solute *solvent* settings *chi*))
          (solute-properties (assoc-ref results 'solute))
          (free-energy (assoc-ref solute-properties 'XXX)))
     free-energy))
 
-(define *energies* (map run-one *ions*))
+(define *hnc* (map (lambda (m) (run-one m 'HNC)) *ions*))
+(define *kh* (map (lambda (m) (run-one m 'KH)) *ions*))
 
 ;;; FIXME: tty is polluted with all  kinds of prints, so we also write
 ;;; selected data into a separate file. See ./out/run-ions-out for the
 ;;; reference output.
-(let ((out (map cons *names* *energies*)))
+(let* ((hnc (map cons *names* *hnc*))
+       (kh (map cons *names* *kh*))
+       (out `((KH ,kh) (HNC ,hnc))))
   (pretty-print out)
   (with-output-to-file "run-ions-out"
     (lambda () (pretty-print out))))
