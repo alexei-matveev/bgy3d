@@ -294,11 +294,10 @@
     (+ (covalent-radius (site-name a))
        (covalent-radius (site-name b))))
   ;;
-  ;; Comparator for  two sites. Returns true if  sites are closer than
-  ;; scaled estmate for a typical bond between two such atoms. It will
-  ;; be used to compare  the keys (sites) in a dictionary (association
-  ;; list).  FIXME: this is NOT  an equivalence relation as  it is not
-  ;; transitive, is it a problem? Yes, it is!
+  ;; Comparator for two sites. Returns true if sites are closer than
+  ;; scaled estmate for a typical bond between two such atoms. It
+  ;; should not be used to compare the keys in a dictionary.  Because
+  ;; this is NOT an equivalence relation, not even transitive.
   ;;
   (define (close? a b)
     (let ((distance (site-distance a b))
