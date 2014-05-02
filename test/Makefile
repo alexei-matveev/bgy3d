@@ -39,7 +39,7 @@ HNC-FLAGS = \
 TOP ?= ..
 cmd ?= mpirun $(TOP)/guile/runbgy.scm
 exe ?= $(TOP)/bgy3d
-run = $(exe) -L .. -s
+run = $(exe) -L $(TOP) -s
 
 solutes = \
 	water \
