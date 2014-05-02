@@ -66,7 +66,7 @@ hnc-diffs = \
 # there  because  both  type   of  tests  generate  g2-files  used  by
 # g1-calculations. They cannot be run in parallel.
 #
-all: bgy-tests hnc-tests
+all: rism-tests bgy-tests hnc-tests
 bgy-tests: $(bgy-diffs)
 hnc-tests: $(hnc-diffs) bgy-tests
 rism-tests: run-ions-out.diff
