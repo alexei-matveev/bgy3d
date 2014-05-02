@@ -227,7 +227,7 @@
 	     ("charge"
 	      (if (equal? target-site (site-name site))
 	        (update-charge site value)
-		(upate-charge site (site-charge site))))))
+		(update-charge site (site-charge site))))))
 
     (find-site sites target-site)
     (make-molecule name (map update-site sites))))
