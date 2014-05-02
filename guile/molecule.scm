@@ -8,7 +8,9 @@
 (define-module (guile molecule)
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-2)            ; and-let*
+  #:use-module (srfi srfi-11)           ; let-values
   #:use-module (ice-9 match)            ; match-lambda
+  #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (guile tinker)           ; tinker-table
   #:use-module (guile utils)            ; memoize
   #:use-module (guile atoms)            ; covalent-radius, canonical-name
@@ -303,21 +305,47 @@
           (estimate (bond-length a b)))
       (< distance (* scale estimate))))
   ;;
-  ;; Loop over all sites, collecting a dictionary of site IDs:
+  ;; A  site is connected to  a species if it  is close to  any of the
+  ;; sites of that species:
   ;;
-  (let loop ((n 0)
-             (alist '())
-             (sites (molecule-sites solute)))
+  (define (connected? a species)
+    (any (lambda (b) (close? a b))
+         species))
+  ;;
+  ;; Group sites into species recursively. Each new site is connected
+  ;; to zero or more species and thus makes another, eventually
+  ;; larger, species. FIXME: recursion depth (length sites) here.
+  ;;
+  (define (classify sites)
     (if (null? sites)
-        (reverse (map cdr alist))       ; return only IDs, so far
-        (let ((site (car sites))
-              (rest (cdr sites)))
-          (let ((n' (let ((pair (assoc site alist close?)))
-                            (and pair (cdr pair)))))
-            (if n'
-                (loop n (acons site n' alist) rest)
-                (let ((n (+ 1 n)))
-                  (loop n (acons site n alist) rest))))))))
+        '()
+        (let ((a (car sites))
+              (species (classify (cdr sites))))
+          (let-values (((conn other) (partition (lambda (s) (connected? a s))
+                                                species)))
+            (cons (cons a (concatenate conn))
+                  other)))))
+  ;;
+  ;; Assign a site a numeric ID of the species or #f if not found:
+  ;;
+  (define (lookup a species)
+    (let loop ((n 0)
+               (species species))
+      (if (null? species)
+          #f                            ; not found
+          (if (memq a (car species))
+              n
+              (loop (+ 1 n) (cdr species))))))
+  ;;
+  ;; Return a list of pairs with site names and their numeric IDs:
+  ;;
+  (let* ((sites (molecule-sites solute))
+         (species (classify sites)))
+    (map (lambda (a)
+           (cons (site-name a)
+                 (lookup a species)))
+         sites)))
+
 
 
 (define (print-molecule/xyz solute)
