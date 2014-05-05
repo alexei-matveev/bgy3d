@@ -764,41 +764,41 @@ computes the sum of all vector elements."
                     (bgy3d-restart-destroy restart)
                     (map vec-destroy g1)))
                 solutes)))
-	("update-param"
-	 ;;
-	 ;; input must be in the fixed order: "solvent"/"solute" +
-	 ;; "site" + "sigma"/"epsilon"/"charge" + value.
-	 ;; FIXME: need improvement to update more than one type of
-	 ;; parameters simultaneously
-	 ;;
-	 (let ((molecule (first args))
-	       (sname (second args))
-	       (param (third args))
-	       (value (fourth args)))
-	   (match molecule
-		  ("solvent"
-		   (let* ((solvent-new
-			    (update-param solvent sname param
-					  (string->number value))))
-		     ;; these print sentences are for debug only, will be
-		     ;; abandoned in future
-		     (pretty-print solvent-new)
-		     ;; (pretty-print solvent)
-		     (pretty-print settings)
-		     (pretty-print solute)
-		     (let ((res
-			     (rism-solute solute solvent-new settings)))
-		       (pretty-print/serial res))))
-		  ("solute"
-		   (let* ((solute-new
-			    (update-param solute sname param
-					  (string->number value))))
-		     (pretty-print solvent)
-		     (pretty-print solute-new)
-		     ;; (pretty-print solute)
-		     (let ((res
-			     (rism-solute solute-new solvent settings)))
-		       (pretty-print/serial res)))))))
+        ("update-param"
+         ;;
+         ;; input must be in the fixed order: "solvent"/"solute" +
+         ;; "site" + "sigma"/"epsilon"/"charge" + value.
+         ;; FIXME: need improvement to update more than one type of
+         ;; parameters simultaneously
+         ;;
+         (let ((molecule (first args))
+               (sname (second args))
+               (param (third args))
+               (value (fourth args)))
+           (match molecule
+                  ("solvent"
+                   (let* ((solvent-new
+                            (update-param solvent sname param
+                                          (string->number value))))
+                     ;; these print sentences are for debug only, will be
+                     ;; abandoned in future
+                     (pretty-print solvent-new)
+                     ;; (pretty-print solvent)
+                     (pretty-print settings)
+                     (pretty-print solute)
+                     (let ((res
+                             (rism-solute solute solvent-new settings)))
+                       (pretty-print/serial res))))
+                  ("solute"
+                   (let* ((solute-new
+                            (update-param solute sname param
+                                          (string->number value))))
+                     (pretty-print solvent)
+                     (pretty-print solute-new)
+                     ;; (pretty-print solute)
+                     (let ((res
+                             (rism-solute solute-new solvent settings)))
+                       (pretty-print/serial res)))))))
         ("punch"
          ;;
          ;; Use g1 vectors to produce a *.pun file for visualization:
