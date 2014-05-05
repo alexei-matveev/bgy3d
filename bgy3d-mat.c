@@ -131,7 +131,7 @@ mat_mult_inv (Mat A, Vec x, Vec y)
     {
       int iter;
       KSPGetIterationNumber (ksp, &iter);
-      PetscPrintf (PETSC_COMM_WORLD, "ksp(%2d) ", iter);
+      PRINTF ("ksp(%2d) ", iter);
     }
 
   return 0;
