@@ -11,6 +11,7 @@ module options
      module procedure getenv_bool
      module procedure getenv_real
      module procedure getenv_int
+     module procedure getenv_obj
 
      module procedure getopt_test
      module procedure getopt_int
@@ -42,6 +43,23 @@ contains
   end function getenv_test
 
 
+  function getenv_obj (env, key, val) result (ok)
+    use lisp, only: obj, assoc, symbol, not, bool, cdr
+    implicit none
+    type (obj), intent (in) :: env
+    character (len=*), intent (in) :: key
+    type (obj), intent (inout) :: val
+    logical :: ok
+    ! *** end of interface ***
+
+    type (obj) :: pair
+
+    pair = assoc (symbol (key), env)
+    ok = .not. bool (not (pair))
+    if (ok) val = cdr (pair)
+  end function getenv_obj
+
+
   function getenv_bool (env, key, val) result (ok)
     use lisp, only: obj, assoc, symbol, not, bool, cdr
     implicit none
@@ -51,11 +69,10 @@ contains
     logical :: ok
     ! *** end of interface ***
 
-    type (obj) :: pair
+    type (obj) :: v
 
-    pair = assoc (symbol (key), env)
-    ok = .not. bool (not (pair))
-    if (ok) val = bool (cdr (pair))
+    ok = getenv_obj (env, key, v)
+    if (ok) val = bool (v)
   end function getenv_bool
 
 
@@ -68,11 +85,10 @@ contains
     logical :: ok
     ! *** end of interface ***
 
-    type (obj) :: pair
+    type (obj) :: v
 
-    pair = assoc (symbol (key), env)
-    ok = .not. bool (not (pair))
-    if (ok) val = flonum (cdr (pair))
+    ok = getenv_obj (env, key, v)
+    if (ok) val = flonum (v)
   end function getenv_real
 
 
@@ -85,11 +101,10 @@ contains
     logical :: ok
     ! *** end of interface ***
 
-    type (obj) :: pair
+    type (obj) :: v
 
-    pair = assoc (symbol (key), env)
-    ok = .not. bool (not (pair))
-    if (ok) val = int (cdr (pair))
+    ok = getenv_obj (env, key, v)
+    if (ok) val = int (v)
   end function getenv_int
 
   !
