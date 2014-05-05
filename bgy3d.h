@@ -317,6 +317,9 @@ int comm_size (void);
 
 void comm_allreduce (int n, real x[n]);
 
+/* Most uses of communicator in the sources are for printf(): */
+#define PRINTF(fmt, ...) PetscPrintf (PETSC_COMM_WORLD, fmt, ##__VA_ARGS__)
+
 
 /* Sum of an integer array: */
 static inline int
