@@ -591,6 +591,14 @@ computes the sum of all vector elements."
 ;;; The solvent  susceptibility χ is precomuted lazily  and forced the
 ;;; first time the PES is used (if at all).
 ;;;
+;;; The species are  defined here using the reference  geometry of the
+;;; solute as  returned by  find-molecule.  The definition  of species
+;;; will  NOT change with  the geometry  even if  bonds are  broken or
+;;; formed!
+;;;
+;;; FIXME: this procedure is ugly as hell, in part because it tries to
+;;; handle pure solvent and solute/solvent simultaneously.
+;;;
 (define (make-pes solute solvent settings)
   (let ((chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
                       (assoc-ref dct 'susceptibility)))) ; extract susceptibility
@@ -599,13 +607,23 @@ computes the sum of all vector elements."
         (g-key 'XXX-GRADIENTS))         ; alist keys
     (let* ((m (or solute solvent))      ; molecule to be "moved"
            (x0 (molecule-positions m))  ; unperturbed geometry
-           (rism (memoize               ; FIXME: leaking much?
-                  (lambda (x s)         ; (x, settings) -> alist
-                    (let* ((m' (move-molecule m x))
-                           (d (if solute
-                                  (rism-solute m' solvent s (force chi))
-                                  (rism-solvent m' s))))
-                      (assoc-ref d s-key))))) ; u or v section
+           (rism (lambda (x s)          ; (x, settings) -> alist
+                   (let* ((m' (move-molecule m x))
+                          (d (if solute
+                                 (rism-solute m' solvent s (force chi))
+                                 (rism-solvent m' s))))
+                     (assoc-ref d s-key)))) ; u or v section
+           ;; FIXME: Leaking much?  A geometry optimization may easily
+           ;; require a few hundred evaluations:
+           (rism (memoize rism))
+           ;; Define solute species once, using the reference
+           ;; geometry. Otherwise self-energy may become discontinous:
+           (scale (assoc-ref settings 'bond-length-thresh))
+           (species (and solute
+                         (molecule-species solute scale)))
+           (settings (if species
+                         (acons 'solute-species species settings)
+                         settings))
            ;; PES (f x) -> energy:
            (f (lambda (x)
                 (assoc-ref (rism x settings) e-key)))
@@ -633,7 +651,7 @@ computes the sum of all vector elements."
 ;;;
 (define (make-pes/gp solute settings)
   (let* ((scale (assoc-ref settings 'bond-length-thresh))
-         (species (molecule-species solute scale))
+         (species (molecule-species solute scale)) ; list of ints
          (x0 (molecule-positions solute))
          (f (lambda (x)                 ; x -> energy
               (let ((solute' (move-molecule solute x)))
@@ -680,7 +698,10 @@ computes the sum of all vector elements."
                 (pretty-print/serial (cons e g)))))))
         ;;
         ;; Start a server that communicates with a client via two
-        ;; named pipes for input/output:
+        ;; named pipes for input/output. This fragile construct is
+        ;; used for free energy surface exploration, such as
+        ;; minimization, where many calculations that differ only by
+        ;; geometry are performed.
         ;;
         ("server"
          (let ((finp (first args))  ; coordinates or #f read from here
