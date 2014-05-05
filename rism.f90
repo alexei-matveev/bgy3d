@@ -1497,12 +1497,15 @@ contains
        integer :: i, species(size(solute))
        type (obj) :: ilist
 
+       ! Get  species ID.   Sites belong  to the  same species  if the
+       ! distance is below a typical bond length:
        if (getopt (env, "solute-species", ilist)) then
           do i = 1, size (species)
              species(i) = int (car (ilist))
              ilist = cdr (ilist)
           enddo
        else
+          ! FIXME: here a literal constant:
           species = identify_species (solute, 2 * ANGSTROM)
        endif
 
