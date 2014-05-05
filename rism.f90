@@ -415,7 +415,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, rmax, beta, rho, sites, sites, vr, t, &
+    call post_process (env, method, rmax, beta, rho, sites, sites, vr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
     ! Chemical potential (SCF) ...
@@ -566,7 +566,7 @@ contains
     call snes_default (t_uvx, iterate_t, jacobian_t)
 
     ! Done with it, print results:
-    call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
+    call post_process (env, method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     ! Chemical potential (SCF) ...
@@ -1196,7 +1196,7 @@ contains
   end subroutine lj_repulsive
 
 
-  subroutine post_process (method, rmax, beta, rho, solvent, solute, v, t, &
+  subroutine post_process (env, method, rmax, beta, rho, solvent, solute, v, t, &
        A, eps, dict, rbc)
     !
     ! Prints some results.
@@ -1210,6 +1210,7 @@ contains
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
     implicit none
+    type (obj), intent (in) :: env ! for getenv
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: rmax         ! grid length
     real (rk), intent (in) :: beta         ! inverse temperature
