@@ -40,8 +40,7 @@ static void RecomputeInitialData (State *BHD,
                                   Vec u2[m][m], Vec u2_fft[m][m],
                                   real damp, real damp_LJ)
 {
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Recomputing initial data with damping factor %f (damp_LJ=%f)\n",
+  PRINTF ("Recomputing initial data with damping factor %f (damp_LJ=%f)\n",
                damp, damp_LJ);
 
   /* Over all pairs: */
@@ -774,8 +773,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
   /* Original code used to print solvent params: */
   bgy3d_sites_show ("Solvent", m, solvent);
 
-  PetscPrintf (PETSC_COMM_WORLD,
-               "Solving BGY3d-M %d-site equation with Fourier ansatz...\n", m);
+  PRINTF ("Solving BGY3d-M %d-site equation with Fourier ansatz...\n", m);
 
   /* allocation for local work vectors */
   local Vec f[m][m][3], f_l[m][m][3]; /* full and long range pair force */
@@ -815,8 +813,8 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
 
   /* end of allocation */
 
-  PetscPrintf (PETSC_COMM_WORLD, "Regularization of normalization: NORM_REG = %e\n", NORM_REG);
-  PetscPrintf (PETSC_COMM_WORLD, "                                 NORM_REG2 = %e\n", NORM_REG2);
+  PRINTF ("Regularization of normalization: NORM_REG = %e\n", NORM_REG);
+  PRINTF ("                                 NORM_REG2 = %e\n", NORM_REG2);
 
   /*
    * Extract BGY3d specific things from supplied input:
@@ -832,7 +830,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
   const real dN = PD->rho * volume_element (PD);
   {
     const int N3 =  PD->N[0] * PD->N[1] * PD->N[2];
-    PetscPrintf (PETSC_COMM_WORLD, "Number of solvent molecules is %f\n", N3 * dN);
+    PRINTF ("Number of solvent molecules is %f\n", N3 * dN);
   }
 
   /* Mixing parameter: */
@@ -888,7 +886,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
                             u0, c2,
                             u2, u2_fft,
                             (damp > 0.0 ? damp : 0.0), 1.0);
-      PetscPrintf (PETSC_COMM_WORLD, "New lambda= %f\n", a0);
+      PRINTF ("New lambda= %f\n", a0);
 
       /*
         Set initial guess, either here or by reading from file. At the
@@ -1119,31 +1117,29 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
         }
       /* otherwise leave "a1" and "mycount" unchanged */
 
-      PetscPrintf (PETSC_COMM_WORLD, "%03d ", iter + 1);
-      PetscPrintf (PETSC_COMM_WORLD, "a=%f ", a);
+      PRINTF ("%03d ", iter + 1);
+      PRINTF ("a=%f ", a);
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
-          PetscPrintf (PETSC_COMM_WORLD, "%s-%s=%e ",
+          PRINTF ("%s-%s=%e ",
                        solvent[i].name, solvent[j].name, du_norm[i][j]);
 
       for (int i = 0; i < m; i++)
         for (int j = 0; j <= i; j++)
-          PetscPrintf (PETSC_COMM_WORLD,
-                       "h(%s-%s)=% f ",
+          PRINTF ("h(%s-%s)=% f ",
                        solvent[i].name,
                        solvent[j].name,
                        dN * vec_hole (g[i][j]));
 
-      PetscPrintf (PETSC_COMM_WORLD, "count=%3d upwards=%1d", mycount, upwards);
-      PetscPrintf (PETSC_COMM_WORLD, "\n");
+      PRINTF ("count=%3d upwards=%1d", mycount, upwards);
+      PRINTF ("\n");
 
       /* Exit  when  any  of  du[]   does  not  change  by  more  than
          norm_tol: */
       if (maxval (m * m, (real*) du_norm) <= norm_tol)
         {
-          PetscPrintf (PETSC_COMM_WORLD,
-                       "norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+          PRINTF ("norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
                        maxval (m * m, (real*) du_norm), norm_tol, iter + 1, max_iter);
           break;
         }
