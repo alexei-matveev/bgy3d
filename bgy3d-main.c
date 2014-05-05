@@ -61,7 +61,7 @@ int main (int argc, char **argv)
   {
     int np;
     MPI_Comm_size (PETSC_COMM_WORLD, &np);
-    PetscPrintf (PETSC_COMM_WORLD, "NP= %d\n", np);
+    PRINTF ("NP= %d\n", np);
   }
 
   /* FIXME:  some solvers do  this, some  dont. Sometimes  this output
