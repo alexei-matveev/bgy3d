@@ -343,13 +343,13 @@
               n
               (loop (+ 1 n) (cdr species))))))
   ;;
-  ;; Return a list of pairs with site names and their numeric IDs:
+  ;; Return  a list of numeric  IDs. This list is  passed to C/Fortran
+  ;; code occasionally:
   ;;
   (let* ((sites (molecule-sites solute))
          (species (classify sites)))
     (map (lambda (a)
-           (cons (site-name a)
-                 (lookup a species)))
+           (lookup a species))
          sites)))
 
 
