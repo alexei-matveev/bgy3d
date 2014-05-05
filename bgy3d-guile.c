@@ -890,7 +890,7 @@ run_solvent (SV solve_solvent, SCM solvent, SCM settings)
   to_sites (solvent, &m, &solvent_sites, &solvent_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
+  PRINTF ("Solvent is %s.\n", solvent_name);
 
   local Vec g[m][m];
 
@@ -955,8 +955,8 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM settings, SCM restart)
   to_sites (solute, &n, &solute_sites, &solute_name);
 
   /* Code used to be verbose: */
-  PetscPrintf (PETSC_COMM_WORLD, "Solvent is %s.\n", solvent_name);
-  PetscPrintf (PETSC_COMM_WORLD, "Solute is %s.\n", solute_name);
+  PRINTF ("Solvent is %s.\n", solvent_name);
+  PRINTF ("Solute is %s.\n", solute_name);
 
   /* This declares and  sets a function pointer. If  the settings dont
      specify it, it should remain NULL: */
@@ -1060,7 +1060,7 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
 
   /* Code used to be verbose: */
   if (verbosity > 0)
-    PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
+    PRINTF (" # Solvent is %s.\n", solvent_name);
 
 
   /* Always use this function to derive number of radial points: */
@@ -1146,8 +1146,8 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft
   /* Code used to be verbose: */
   if (verbosity > 0)
     {
-      PetscPrintf (PETSC_COMM_WORLD, " # Solvent is %s.\n", solvent_name);
-      PetscPrintf (PETSC_COMM_WORLD, " # Solute is %s.\n", solute_name);
+      PRINTF (" # Solvent is %s.\n", solvent_name);
+      PRINTF (" # Solute is %s.\n", solute_name);
     }
 
   /* This association list will contain essential results: */
