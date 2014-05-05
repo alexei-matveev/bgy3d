@@ -22,6 +22,14 @@
 #include "lebed/lebed.h"        /* genpts() */
 #include "bgy3d-guile.h"
 
+#ifdef WITH_FFTW_THREADS
+#include <fftw3.h>              /* fftw_init_threads(), fftw_cleanup_threads */
+
+/* If non-zero,  tell FFTW  to use that  many threads. Use  stock FFTW
+   otherwise: */
+static int nthreads = WITH_FFTW_THREADS;
+#endif
+
 
 
 static char helptext[] = "BGY3d Guile.\n";
@@ -1268,6 +1276,12 @@ static void finalize (void)
 {
   PetscErrorCode err = PetscFinalize ();
   assert (!err);
+
+#ifdef WITH_FFTW_THREADS
+  /* FFTW threads: */
+  if (nthreads)
+    fftw_cleanup_threads ();
+#endif
 }
 
 
@@ -1331,6 +1345,18 @@ void bgy3d_guile_init (int argc, char **argv)
   /* MPI may  choose to rewrite the  command line, do  it early. Petsc
      does not rewrite argv.  Guile will not understand Petsc flags. */
   PetscInitialize (&argc, &argv, NULL, helptext);
+
+#ifdef WITH_FFTW_THREADS
+  if (nthreads)
+    {
+      /* FFTW threads: */
+      const int ok = fftw_init_threads ();
+      assert (ok);
+
+      /* FIXME: with MPI parallelization this should be 1, I think: */
+      fftw_plan_with_nthreads (nthreads);
+    }
+#endif
 
   /* Add  an  exit handler  that  calls  PetscFinalize(). Executed  by
      exit() according to POSIX: */
