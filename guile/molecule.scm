@@ -313,17 +313,24 @@
   ;;
   ;; Group sites into species recursively. Each new site is connected
   ;; to zero or more species and thus makes another, eventually
-  ;; larger, species. FIXME: recursion depth (length sites) here.
+  ;; larger, species.
   ;;
   (define (classify sites)
-    (if (null? sites)
-        '()
-        (let ((a (car sites))
-              (species (classify (cdr sites))))
-          (let-values (((conn other) (partition (lambda (s) (connected? a s))
-                                                species)))
-            (cons (cons a (concatenate conn))
-                  other)))))
+    (let loop ((sites sites)
+               (species '()))
+      (if (null? sites)
+          (reverse species) ; reverse is optional for a set
+          (let ((a (car sites)))
+            ;; Partition the species into ones connected to site "a"
+            ;; and other species.
+            (let-values (((conn other) (partition (lambda (s)
+                                                    (connected? a s))
+                                                  species)))
+              ;; A new species will contain the site "a" and zero or
+              ;; more sites of the connected species:
+              (loop (cdr sites)
+                    (cons (cons a (concatenate conn))
+                          other)))))))
   ;;
   ;; Assign a site a numeric ID of the species or #f if not found:
   ;;
