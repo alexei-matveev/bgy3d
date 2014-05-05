@@ -316,11 +316,9 @@ static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
    potential from vs[n] in the last column: */
 static void print_table (int n, const Site sites[n], const real vs[n])
 {
-  PetscPrintf (PETSC_COMM_WORLD,
-               "#\t site\t x        \t y        \t z        \t q        \t δv\n");
+  PRINTF ("#\t site\t x        \t y        \t z        \t q        \t δv\n");
   for (int i = 0; i < n; i ++)
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "%d\t%5s\t% f\t% f\t% f\t% f\t% f\n",
+    PRINTF ("%d\t%5s\t% f\t% f\t% f\t% f\t% f\n",
                  i + 1, sites[i].name,
                  sites[i].x[0], sites[i].x[1],  sites[i].x[2],
                  sites[i].charge, vs[i]);
@@ -345,8 +343,7 @@ static void print_info (const State *BHD,
     real d[3], d_norm;
     dipole (n, solute, d, &d_norm);
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
+    PRINTF ("|<x|ρ_n>| = |% f, % f, % f| = %f (dipole moment of solute cores)\n",
                  d[0], d[1], d[2], d_norm);
   }
 
@@ -355,18 +352,15 @@ static void print_info (const State *BHD,
     real q, d[3], Q[3][3];
     bgy3d_moments (BHD, rho_u, &q, d, Q);
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "|<x|ρ_u>| = |% f, % f, % f| = %f (dipole moment of solute charge density)\n",
+    PRINTF ("|<x|ρ_u>| = |% f, % f, % f| = %f (dipole moment of solute charge density)\n",
                  d[0], d[1], d[2], len3 (d));
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "q_u = %f (charge of solute charge density)\n",
+    PRINTF ("q_u = %f (charge of solute charge density)\n",
                  q);
 
     for (int i = 0; i < 3; i++)
       for (int j = 0; j <= i; j++)
-        PetscPrintf (PETSC_COMM_WORLD,
-                     "Q_u[%d][%d] = % f (second moments of solute charge density)\n",
+        PRINTF ("Q_u[%d][%d] = % f (second moments of solute charge density)\n",
                      i, j, Q[i][j]);
   }
 
@@ -375,18 +369,15 @@ static void print_info (const State *BHD,
     real q, d[3], Q[3][3];
     bgy3d_moments (BHD, rho_v, &q, d, Q);
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
+    PRINTF ("|<x|ρ_v>| = |% f, % f, % f| = %f (dipole moment of solvent medium)\n",
                  d[0], d[1], d[2], len3 (d));
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "q_v = %f (charge of solvent medium)\n",
+    PRINTF ("q_v = %f (charge of solvent medium)\n",
                  q);
 
     for (int i = 0; i < 3; i++)
       for (int j = 0; j <= i; j++)
-        PetscPrintf (PETSC_COMM_WORLD,
-                     "Q_v[%d][%d] = % f (second moments of solvent charge density)\n",
+        PRINTF ("Q_v[%d][%d] = % f (second moments of solvent charge density)\n",
                      i, j, Q[i][j]);
   }
 
@@ -423,8 +414,7 @@ static void print_info (const State *BHD,
     for (int i = 0; i < n; i++)
       val1 += solute[i].charge * vs[i];
 
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
+    PRINTF ("<U_v|ρ_N> = %lf (solvent electrostatic field with solute point nuclei)\n",
                  val1);
   }
 
@@ -437,16 +427,13 @@ static void print_info (const State *BHD,
     val3 = h3 * vec_dot (coul_u, rho_v);
   }
 
-  PetscPrintf (PETSC_COMM_WORLD,
-               "<U_v|ρ_u> = %lf "
+  PRINTF ("<U_v|ρ_u> = %lf "
                "(solvent electrostatic field with diffuse charge density of solute)\n",
                val2);
-  PetscPrintf (PETSC_COMM_WORLD,
-               "<ρ_v|U_u> = %lf "
+  PRINTF ("<ρ_v|U_u> = %lf "
                "(solvent charge density with long-range electrostatic field of solute)\n",
                val3);
-  PetscPrintf (PETSC_COMM_WORLD,
-               "     diff = % lf\n", val3 - val2);
+  PRINTF ("     diff = % lf\n", val3 - val2);
 }
 
 
@@ -501,7 +488,7 @@ Context* info (const State *BHD,
 /* Example usage: */
 void bgy3d_pot_test (const State *BHD, Vec vec)
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Test to potential interface\n");
+  PRINTF ("Test to potential interface\n");
 
   /* Make an iterator: */
   Context *s = bgy3d_pot_create (BHD, vec);
@@ -530,11 +517,11 @@ void bgy3d_pot_test (const State *BHD, Vec vec)
       comm_allreduce (3, m1);
 
       const real V = volume (BHD->PD);
-      PetscPrintf (PETSC_COMM_WORLD, "Moments divided by cell volume V = %lf: \n", V);
-      PetscPrintf (PETSC_COMM_WORLD, "<1 * v> = %lf\n", m0 / V);
-      PetscPrintf (PETSC_COMM_WORLD, "<x * v> = %lf\n", m1[0] / V);
-      PetscPrintf (PETSC_COMM_WORLD, "<y * v> = %lf\n", m1[1] / V);
-      PetscPrintf (PETSC_COMM_WORLD, "<z * v> = %lf\n", m1[2] / V);
+      PRINTF ("Moments divided by cell volume V = %lf: \n", V);
+      PRINTF ("<1 * v> = %lf\n", m0 / V);
+      PRINTF ("<x * v> = %lf\n", m1[0] / V);
+      PRINTF ("<y * v> = %lf\n", m1[1] / V);
+      PRINTF ("<z * v> = %lf\n", m1[2] / V);
     }
 
   bgy3d_pot_destroy (s);
