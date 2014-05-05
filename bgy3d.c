@@ -109,7 +109,7 @@ ProblemData bgy3d_problem_data (void)
     PD.closure = CLOSURE_PY;
   else
     {
-      PetscPrintf (PETSC_COMM_WORLD, "No such OZ closure: %s\n", closure);
+      PRINTF ("No such OZ closure: %s\n", closure);
       exit (1);
     }
 
@@ -177,26 +177,26 @@ void bgy3d_problem_data_print (const ProblemData *PD)
 {
   const real L3 = volume (PD);
 
-  PetscPrintf (PETSC_COMM_WORLD, "Ω = %g x %g x %g A³\n", PD->L[0], PD->L[1], PD->L[2]);
-  PetscPrintf (PETSC_COMM_WORLD, "N = %d x %d x %d\n", PD->N[0], PD->N[1], PD->N[2]);
-  PetscPrintf (PETSC_COMM_WORLD, "h = %g x %g x %g A³\n", PD->h[0], PD->h[1], PD->h[2]);
-  PetscPrintf (PETSC_COMM_WORLD, "β = %g kcal⁻¹ (%5.1f K)\n", PD->beta, 1.0 / PD->beta / KBOLTZMANN);
-  PetscPrintf (PETSC_COMM_WORLD, "ρ = %g A⁻³ (%g per cell)\n", PD->rho, PD->rho * L3);
-  PetscPrintf (PETSC_COMM_WORLD, "a = %g A (Seitz radius)\n", pow ((4 * M_PI / 3) * PD->rho, -1.0 / 3.0));
-  PetscPrintf (PETSC_COMM_WORLD, "λ = %g (mixing ratio)\n", PD->lambda);
-  PetscPrintf (PETSC_COMM_WORLD, "norm-tol = %e\n", PD->norm_tol);
-  PetscPrintf (PETSC_COMM_WORLD, "max-iter = %d\n", PD->max_iter);
+  PRINTF ("Ω = %g x %g x %g A³\n", PD->L[0], PD->L[1], PD->L[2]);
+  PRINTF ("N = %d x %d x %d\n", PD->N[0], PD->N[1], PD->N[2]);
+  PRINTF ("h = %g x %g x %g A³\n", PD->h[0], PD->h[1], PD->h[2]);
+  PRINTF ("β = %g kcal⁻¹ (%5.1f K)\n", PD->beta, 1.0 / PD->beta / KBOLTZMANN);
+  PRINTF ("ρ = %g A⁻³ (%g per cell)\n", PD->rho, PD->rho * L3);
+  PRINTF ("a = %g A (Seitz radius)\n", pow ((4 * M_PI / 3) * PD->rho, -1.0 / 3.0));
+  PRINTF ("λ = %g (mixing ratio)\n", PD->lambda);
+  PRINTF ("norm-tol = %e\n", PD->norm_tol);
+  PRINTF ("max-iter = %d\n", PD->max_iter);
 
   switch (PD->closure)
     {
     case CLOSURE_HNC:
-      PetscPrintf (PETSC_COMM_WORLD, "closure = HNC\n");
+      PRINTF ("closure = HNC\n");
       break;
     case CLOSURE_KH:
-      PetscPrintf (PETSC_COMM_WORLD, "closure = KH\n");
+      PRINTF ("closure = KH\n");
       break;
     case CLOSURE_PY:
-      PetscPrintf (PETSC_COMM_WORLD, "closure = PY\n");
+      PRINTF ("closure = PY\n");
       break;
     }
 }
@@ -211,19 +211,19 @@ real** Load_Molecule(int *N)
   fp = fopen("molecule","r");
   if(fp==NULL)
     {
-      PetscPrintf(PETSC_COMM_WORLD,"File not found.\n");
+      PRINTF ("File not found.\n");
       exit(1);
     }
 
   /* First entry in the file appears to be the number of sites: */
   if (1 != fscanf (fp, "%d", N))
     {
-      PetscPrintf (PETSC_COMM_WORLD, "Error reading file (molecule).\n");
+      PRINTF ("Error reading file (molecule).\n");
       exit (1);
     }
 
   if(verbosity>2)
-    PetscPrintf(PETSC_COMM_WORLD,"Reading molecule data:\n%d particles\n", *N);
+    PRINTF ("Reading molecule data:\n%d particles\n", *N);
 
   x_M= (real**) malloc(sizeof(*x_M)*(*N));
 
@@ -233,11 +233,11 @@ real** Load_Molecule(int *N)
       x_M[i] = (real*) malloc(sizeof(real)*3);
       if (3 != fscanf (fp, "%lf %lf %lf\n", &x_M[i][0], &x_M[i][1], &x_M[i][2]))
 	{
-	  PetscPrintf(PETSC_COMM_WORLD,"Error reading file (molecule).\n");
+	  PRINTF ("Error reading file (molecule).\n");
 	  exit(1);
 	}
       if(verbosity>2)
-	PetscPrintf(PETSC_COMM_WORLD,"%f %f %f\n", x_M[i][0],
+	PRINTF ("%f %f %f\n", x_M[i][0],
 		    x_M[i][1], x_M[i][2]);
     }
   fclose(fp);
