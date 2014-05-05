@@ -323,7 +323,7 @@ void bgy3d_solute_field (const State *BHD,
 {
   const real G = G_COULOMB_INVERSE_RANGE;
 
-  PetscPrintf (PETSC_COMM_WORLD, "Computing solute data\n");
+  PRINTF ("Computing solute data\n");
 
 
   /*
@@ -444,8 +444,7 @@ void bgy3d_solute_field (const State *BHD,
       PetscScalar sum;
       real dV = volume_element (BHD->PD);
       VecSum (uc_rho, &sum);
-      PetscPrintf (PETSC_COMM_WORLD,
-                   "integrated charge = %f (should be close to zero)\n",
+      PRINTF ("integrated charge = %f (should be close to zero)\n",
                    sum * dV);
     }
 
