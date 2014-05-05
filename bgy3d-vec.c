@@ -155,20 +155,20 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 
 void bgy3d_vec_save_ascii1 (const char *format, int m, const Vec vec[m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
+  PRINTF ("Writing files...");
   for (int i = 0; i < m; i++)
     {
       char name[20 + strlen (format)];
       snprintf (name, sizeof name, format, i);
       bgy3d_vec_save_ascii (name, vec[i]);
     }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 
 void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Writing files...");
+  PRINTF ("Writing files...");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
@@ -179,7 +179,7 @@ void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m]
 
         bgy3d_vec_save_ascii (name, vec[i][j]);
       }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 
@@ -194,7 +194,7 @@ void bgy3d_vec_save_ascii2 (const char *format, int m, /* const */ Vec vec[m][m]
 */
 void bgy3d_vec_read2 (const char *format, int m, /* const */ Vec g2[m][m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Loading binary g2 files...");
+  PRINTF ("Loading binary g2 files...");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
@@ -205,7 +205,7 @@ void bgy3d_vec_read2 (const char *format, int m, /* const */ Vec g2[m][m])
 
         bgy3d_vec_read (name, g2[i][j]);
       }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 
@@ -213,7 +213,7 @@ void bgy3d_vec_read2 (const char *format, int m, /* const */ Vec g2[m][m])
    bgy3d_vec_read2(). */
 void bgy3d_vec_save2 (const char *format, int m, /* const */ Vec g2[m][m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Writing binary g2 files...");
+  PRINTF ("Writing binary g2 files...");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
@@ -224,33 +224,33 @@ void bgy3d_vec_save2 (const char *format, int m, /* const */ Vec g2[m][m])
 
         bgy3d_vec_save (name, g2[i][j]);
       }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 /* Format is e.g. "g%d.bin" */
 void bgy3d_vec_save1 (const char *format, int m, const Vec g[m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Writing binary g1 files...");
+  PRINTF ("Writing binary g1 files...");
   for (int i = 0; i < m; i++)
     {
       char name[20];
       snprintf (name, sizeof name, format, i);
       bgy3d_vec_save (name, g[i]);
     }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 
 void bgy3d_vec_read1 (const char *format, int m, const Vec g[m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Loading binary files...");
+  PRINTF ("Loading binary files...");
   for (int i = 0; i < m; i++)
     {
       char name[20];
       snprintf (name, sizeof name, format, i);
       bgy3d_vec_read (name, g[i]);
     }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 /* Fills Vec  g2 with  3D distribution derived  from the 1D  g(r) data
@@ -271,7 +271,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
   fp = fopen(filename, "r");
   if(fp==NULL)
     {
-      PetscPrintf(PETSC_COMM_WORLD,"Could not open file %s.\n", filename);
+      PRINTF ("Could not open file %s.\n", filename);
       exit(1);
     }
   xg= (real*) malloc(sizeof(*xg));
@@ -284,7 +284,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
       g= (real*) realloc(g, (index+1)*sizeof(*g));
     }
   index--;
-  PetscPrintf(PETSC_COMM_WORLD,"Read %d lines from file %s, x=[%f,%f]\n", index+1, filename,
+  PRINTF ("Read %d lines from file %s, x=[%f,%f]\n", index+1, filename,
               xg[0], xg[index]);
   fclose(fp);
 
@@ -347,7 +347,7 @@ void bgy3d_vec_read_radial (const DA da, const ProblemData *PD, const char *file
 void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
                              const char *format, int m, /* const */ Vec g2[m][m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "Loading radial g2 files...\n");
+  PRINTF ("Loading radial g2 files...\n");
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
       {
@@ -358,7 +358,7 @@ void bgy3d_vec_read_radial2 (const DA da, const ProblemData *PD,
 
         bgy3d_vec_read_radial (da, PD, name, g2[i][j]);
       }
-  PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+  PRINTF ("done.\n");
 }
 
 
@@ -386,11 +386,11 @@ void bgy3d_vec_read_gpaw (DA da, const ProblemData *PD,
   fp = fopen (filename, "r");
   if (fp == NULL)
     {
-      PetscPrintf (PETSC_COMM_WORLD, "Can not open file %s. \n", filename);
+      PRINTF ("Can not open file %s. \n", filename);
       exit (1);
     }
 
-  PetscPrintf (PETSC_COMM_WORLD, "Reading data from %s. \n", filename);
+  PRINTF ("Reading data from %s. \n", filename);
   /* Skip the first two lines */
   for (int i = 0; i < 2; i++)
     {
@@ -440,12 +440,12 @@ void bgy3d_vec_read_gpaw (DA da, const ProblemData *PD,
   /* FIXME: will need interpolation if grid not match */
   if (GridNum[0] * GridNum[1] * GridNum[2] != ni * nj * nk)
     {
-      PetscPrintf (PETSC_COMM_WORLD, "Grid size not match!\n");
+      PRINTF ("Grid size not match!\n");
       exit (1);
     }
   else if (fabs (dx[0] - h[0]) >= 0.001 || fabs (dy[1] - h[1]) >= 0.001 || fabs (dz[2] - h[2]) >= 0.001)
     {
-      PetscPrintf (PETSC_COMM_WORLD, "Grid space not match!\n");
+      PRINTF ("Grid space not match!\n");
       exit (1);
     }
 
