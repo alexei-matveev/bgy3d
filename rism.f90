@@ -21,6 +21,9 @@ module rism
      module procedure gnuplot3
   end interface gnuplot
 
+  integer, parameter :: LORENTZ_BERTHELOT = 0 ! σ(ab) = [σ(a) + σ(b)] / 2
+  integer, parameter :: GOOD_HOPE = 1         ! σ(ab) = [σ(a) * σ(b)]^(1/2)
+
 contains
 
   function rism_nrad (pd) result (nrad) bind (c)
@@ -81,6 +84,7 @@ contains
     !
     use iso_c_binding, only: c_int, c_double
     use foreign, only: site
+    use options, only: getopt
     implicit none
     integer (c_int), intent (in), value :: n
     type (site), intent (in) :: sites(n)
@@ -88,9 +92,14 @@ contains
     real (c_double) :: e
     ! *** end of interface ***
 
+    integer :: rule
     real (rk) :: g(3, n)
 
-    call self_energy (sites, spec, e, g)
+    ! FIXME: try  not to  proliferate use of  "environments", function
+    ! behaviour is better controlled via its arguments:
+    if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
+
+    call self_energy (rule, sites, spec, e, g)
   end function rism_self_energy
 
 
@@ -324,20 +333,18 @@ contains
     real (rk) :: r(nrad), dr
     real (rk) :: k(nrad), dk
 
-    integer :: m
+    integer :: m, rule
 
     real (rk) :: eps        ! zero if not supplied in the command line
     real (rk) :: A          ! Cummings & Stell factor [CS81]
 
 
-    if (.not. getopt (env, "dielectric", eps)) then
-       !
-       ! Make sure it is not used anywhere if it was not supplied. The
-       ! logic is  if eps  /= 0  then do DRISM,  otherwise ---  do the
-       ! usual RISM with whatever dielectric constant comes out of it:
-       !
-       eps = 0.0
-    endif
+    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
+
+    ! Make sure  it is not used  anywhere if it was  not supplied. The
+    ! logic is if  eps /= 0 then do DRISM, otherwise  --- do the usual
+    ! RISM with whatever dielectric constant comes out of it:
+    if (.not. getopt (env, "dielectric", eps)) eps = 0.0
 
     ! Set  Cummings &  Stell  semi-empiric scaling  factor  A for  the
     ! long-range  site-site correlation.   This  conflicts with  DRISM
@@ -369,7 +376,7 @@ contains
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (sites, sites, r, k, vr, vk)
+    call force_field (rule, sites, sites, r, k, vr, vk)
 
     ! Rigid-bond correlations on the k-grid:
     wk = omega_fourier (sites, k)
@@ -529,18 +536,20 @@ contains
     real (rk) :: r(nrad), dr
     real (rk) :: k(nrad), dk
 
-    integer :: m, n
+    integer :: m, n, rule
     logical rbc
 
     n = size (solute)
     m = size (solvent)
+
+    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     ! Prepare grid, dr * dk = 2π/2n:
     call mkgrid (rmax, r, dr, k, dk)
 
     ! Tabulate short-range  pairwise potentials v() on  the r-grid and
     ! long-range pairwise potential vk() on the k-grid:
-    call force_field (solute, solvent, r, k, v_uvr, v_uvk)
+    call force_field (rule, solute, solvent, r, k, v_uvr, v_uvk)
 
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
@@ -548,7 +557,7 @@ contains
     rbc = getopt (env, "rbc")
 
     if (rbc) then
-       call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+       call bridge (rule, solute, solvent, beta, r, dr, k, dk, expB)
     else
        ! Not used in this case:
        expB = 1.0
@@ -815,7 +824,7 @@ contains
   end subroutine derivatives
 
 
-  subroutine guess_self_energy (solute, spec, dict)
+  subroutine guess_self_energy (rule, solute, spec, dict)
     !
     ! Adds an entry with self energy to the dictionary.
     !
@@ -823,6 +832,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use units, only: kcal, angstrom
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: solute(:) ! (n)
     type (obj), intent (inout) :: dict
     integer, intent (in) :: spec(:) ! (n)
@@ -830,7 +840,7 @@ contains
 
     real (rk) :: e, g(3, size (solute))
 
-    call self_energy (solute, spec, e, g)
+    call self_energy (rule, solute, spec, e, g)
 
     print *, "# Self energy = ", e / kcal, " kcal/mol"
 
@@ -871,14 +881,16 @@ contains
   !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
   !   http://dx.doi.org/10.1063/1.1305885
   !
-  subroutine bridge_correction (method, rmax, beta, rho, &
+  subroutine bridge_correction (env, method, rmax, beta, rho, &
        solute, solvent, v, t, dict, rbc)
     !
     ! Compute the bridge correction using TPT.
     !
     use foreign, only: site, verbosity
     use lisp, only: obj, acons, symbol, flonum
+    use options, only: getopt
     implicit none
+    type (obj), intent (in) :: env
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
     type (site), intent (in) :: solute(:)  ! (n)
@@ -889,11 +901,12 @@ contains
     logical, intent (in) :: rbc
     ! *** end of interface ***
 
-    integer :: n, m, nrad
+    integer :: n, m, nrad, rule
 
     n = size (t, 1)
     m  = size (t, 2)
     nrad = size (t, 3)
+    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     block
       real (rk) :: r(nrad), k(nrad), dr, dk
@@ -901,7 +914,7 @@ contains
 
       call mkgrid (rmax, r, dr, k, dk)
 
-      call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+      call bridge (rule, solute, solvent, beta, r, dr, k, dk, expB)
 
       ! I. Call closure (without RBC TPT correction): h = c + t
       h = closure (method, beta, v, t) + t
@@ -945,7 +958,7 @@ contains
   end subroutine bridge_correction
 
 
-  subroutine bridge (solute, solvent, beta, r, dr, k, dk, expB)
+  subroutine bridge (rule, solute, solvent, beta, r, dr, k, dk, expB)
     !
     ! Calculate repulsive bridge correction exp(B):
     !
@@ -973,6 +986,7 @@ contains
     use fft, only: fourier_rows, FT_BW, FT_FW
     use foreign, only: site
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: solute(:)     ! (n)
     type (site), intent (in) :: solvent(:)    ! (m)
     real (rk), intent (in) :: beta            ! inverse temperature
@@ -1003,7 +1017,7 @@ contains
       ! Repulsive part of LJ potential goes to f(i, j, :). First index
       ! is that of a solute site  i, second index is of a solvent site
       ! j:
-      call lj_repulsive (solute, solvent, r, f)
+      call lj_repulsive (rule, solute, solvent, r, f)
 
       !
       ! A  Mayer's function  f =  exp(-βv) -  1 due  to  the repulsive
@@ -1099,31 +1113,24 @@ contains
   end function chempot_bridge
 
 
-  subroutine pair (a, b, sigma, epsilon)
+  subroutine pair (rule, a, b, sigma, epsilon)
     !
     ! Place to implement combination rules.
     !
     use foreign, only: site
     use options, only: getopt
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: a, b
     real (rk), intent (out) :: sigma, epsilon
     ! *** end of interface ***
 
-    integer :: rule
-
-    ! FIXME: try  not to  proliferate use of  "environments", function
-    ! behaviour is better controlled via its arguments:
-    if (.not. getopt ("comb-rule", rule)) then
-       rule = 0
-    endif
-
     select case (rule)
-    case (0)
+    case (LORENTZ_BERTHELOT)
        ! Arithmetic average for sigma:
        sigma = (a % sigma + b % sigma) / 2
        epsilon = sqrt (a % epsilon * b % epsilon)
-    case (1)
+    case (GOOD_HOPE)
        ! Both are geometric averages.  The same rule as with geometric
        ! averages of 6-12 coefficients:
        sigma = sqrt (a % sigma * b % sigma)
@@ -1136,12 +1143,13 @@ contains
   end subroutine pair
 
 
-  subroutine lj_repulsive (asites, bsites, r, vr)
+  subroutine lj_repulsive (rule, asites, bsites, r, vr)
     !
     ! only calculate the repulsive part of LJ potential (r^-12 term)
     !
     use foreign, only: site
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: asites(:)       ! (n)
     type (site), intent (in) :: bsites(:)       ! (m)
     real (rk), intent (in) :: r(:)              ! (nrad)
@@ -1154,7 +1162,7 @@ contains
     do j = 1, size (bsites)
        do i = 1, size (asites)
           ! Derive parameters of pair interaction:
-          call pair (asites(i), bsites(j), sigma, epsilon)
+          call pair (rule, asites(i), bsites(j), sigma, epsilon)
 
           if (sigma /= 0.0) then
               vr (i, j, :) = epsilon * lj12 (r / sigma)
@@ -1213,7 +1221,7 @@ contains
     logical, intent (in) :: rbc
     ! *** end of interface ***
 
-    integer :: nrad, n, m
+    integer :: nrad, n, m, rule
     integer :: verb
 
     if (comm_rank () == 0) then
@@ -1221,6 +1229,8 @@ contains
     else
        verb = 0
     endif
+
+    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     ! FIXME: to make debug  output somewhat meaningfull for plain RISM
     ! (not DRISM) calculations use a real eps:
@@ -1279,7 +1289,7 @@ contains
 
        ! For the same reason recomute c and g:
        if (rbc) then
-          call bridge (solute, solvent, beta, r, dr, k, dk, expB)
+          call bridge (rule, solute, solvent, beta, r, dr, k, dk, expB)
           c = closure_rbc (method, beta, v, t, expB)
        else
           expB = 1.0
@@ -1490,7 +1500,7 @@ contains
 
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
-    call bridge_correction (method, rmax, beta, rho, solute, solvent, &
+    call bridge_correction (env, method, rmax, beta, rho, solute, solvent, &
          v, t, dict=dict, rbc=rbc)
 
     block
@@ -1516,7 +1526,7 @@ contains
        endif
 
        ! Adds an entry with self energy to the dictionary:
-       call guess_self_energy (solute, species, dict)
+       call guess_self_energy (rule, solute, species, dict)
     end block
 
   contains
@@ -1650,7 +1660,7 @@ contains
   end function omega_fourier1
 
 
-  subroutine force_field (asites, bsites, r, k, vr, vk)
+  subroutine force_field (rule, asites, bsites, r, k, vr, vk)
     !
     ! Force field  is represented by two contributions,  the first one
     ! is (hopefully) of short range and is returned in array vr on the
@@ -1660,6 +1670,7 @@ contains
     use foreign, only: site
     use units, only: EPSILON0INV, ALPHA
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: asites(:)  ! (n)
     type (site), intent (in) :: bsites(:)  ! (m)
     real (rk), intent (in) :: r(:)         ! (nrad)
@@ -1677,7 +1688,7 @@ contains
        do i = 1, size (asites)
           a = asites(i)
           ! Derive pair interaction parameters:
-          call pair (a, b, sigma, epsilon)
+          call pair (rule, a, b, sigma, epsilon)
           charge = a % charge * b % charge
 
           ! Short range on the r-grid:
@@ -1857,13 +1868,14 @@ contains
   end function identify_species
 
 
-  subroutine self_energy (sites, spec, e, g)
+  subroutine self_energy (rule, sites, spec, e, g)
     !
     ! Calculate the energy summation between each pair of residues for
     ! a given site.
     !
     use foreign, only: site
     implicit none
+    integer, intent (in) :: rule
     type (site), intent (in) :: sites(:) ! (m)
     integer, intent (in) :: spec(:)      ! (m)
     real (rk), intent (out) :: e
@@ -1906,7 +1918,7 @@ contains
       real (rk) :: epsilon, sigma, rab, coul
 
       ! Combining LJ parameters:
-      call pair (a, b, sigma, epsilon)
+      call pair (rule, a, b, sigma, epsilon)
 
       rab = norm2 (b % x - a % x)
 
@@ -1933,7 +1945,7 @@ contains
       real (rk) :: epsilon, sigma, rab
 
       ! Combining LJ parameters:
-      call pair (a, b, sigma, epsilon)
+      call pair (rule, a, b, sigma, epsilon)
 
       ab = b % x - a % x
       rab = norm2 (ab)
