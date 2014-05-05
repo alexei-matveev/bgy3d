@@ -1205,12 +1205,13 @@ contains
     use linalg, only: polyfit
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    use lisp, only: obj, acons, nil, symbol, flonum
-    use units, only: pi, EPSILON0INV, KCAL, KJOULE
+    use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
+    use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
+    use options, only: getopt
     implicit none
-    type (obj), intent (in) :: env ! for getenv
+    type (obj), intent (in) :: env ! for getopt
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: rmax         ! grid length
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -1504,6 +1505,20 @@ contains
     ! using TPT.
     call bridge_correction (method, rmax, beta, rho, solute, solvent, &
          v, t, dict=dict, rbc=rbc)
+
+    block
+       integer :: i, species(size(solute))
+       type (obj) :: ilist
+
+       if (getopt (env, "solute-species", ilist)) then
+          do i = 1, size (species)
+             species(i) = int (car (ilist))
+             ilist = cdr (ilist)
+          enddo
+       else
+          species = identify_species (solute, 2 * ANGSTROM)
+       endif
+    end block
 
     ! Adds an entry with self energy to the dictionary:
     call guess_self_energy (solute, dict)
