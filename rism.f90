@@ -817,31 +817,20 @@ contains
   end subroutine derivatives
 
 
-  subroutine guess_self_energy (solute, dict)
+  subroutine guess_self_energy (solute, spec, dict)
     !
     ! Adds an entry with self energy to the dictionary.
     !
-    use foreign, only: site, verbosity
+    use foreign, only: site
     use lisp, only: obj, acons, symbol, flonum
     use units, only: kcal, angstrom
     implicit none
     type (site), intent (in) :: solute(:) ! (n)
     type (obj), intent (inout) :: dict
+    integer, intent (in) :: spec(:) ! (n)
     ! *** end of interface ***
 
     real (rk) :: e, g(3, size (solute))
-    integer :: spec(size (solute)), i
-
-    ! Get  species  ID.  Sites  belong  to  the  same species  if  the
-    ! distance  is  below some  fixed  value.  FIXME:  here a  literal
-    ! constant:
-    spec = identify_species (solute, 2.0 * angstrom)
-
-    if (verbosity > 1) then
-       do i = 1, size (solute)
-          print *, solute(i) % name, spec(i)
-       enddo
-    endif
 
     call self_energy (solute, spec, e, g)
 
@@ -1518,10 +1507,16 @@ contains
        else
           species = identify_species (solute, 2 * ANGSTROM)
        endif
-    end block
 
-    ! Adds an entry with self energy to the dictionary:
-    call guess_self_energy (solute, dict)
+       if (verbosity > 1) then
+          do i = 1, size (solute)
+             print *, solute(i) % name, species(i)
+          enddo
+       endif
+
+       ! Adds an entry with self energy to the dictionary:
+       call guess_self_energy (solute, species, dict)
+    end block
 
   contains
 
