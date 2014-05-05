@@ -641,10 +641,9 @@ print_chempot (const State *HD, int n, int m,
     mu[i] = chempot (HD, methods[i], n, m, h, c, cl);
 
   /* Printing only: */
-  PetscPrintf (PETSC_COMM_WORLD,
-               " # Chemical potentials, default is marked with *:\n");
+  PRINTF (" # Chemical potentials, default is marked with *:\n");
   for (int i = 0; i < 3; i++)
-    PetscPrintf (PETSC_COMM_WORLD, " # mu = %f kcal (%s)%s\n", mu[i], names[i],
+    PRINTF (" # mu = %f kcal (%s)%s\n", mu[i], names[i],
                  ((methods[i] == HD->PD->closure)? "*" : ""));
 }
 
@@ -669,7 +668,7 @@ void hnc3d_solvent_solve (const ProblemData *PD,
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
-  PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
+  PRINTF ("(iterations for γ)\n");
 
   /*
     For primary variable t there  will be two exclusive ways to access
@@ -1269,7 +1268,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
 
   const real L3 = volume (PD);
 
-  PetscPrintf (PETSC_COMM_WORLD, "(iterations for γ)\n");
+  PRINTF ("(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
