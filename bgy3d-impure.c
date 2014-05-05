@@ -717,8 +717,7 @@ static void solute_solve (State *BHD,
       VecScale (uc, 1.0 / L3);
 
       /* Scale solute-solvent interactions: */
-      PetscPrintf (PETSC_COMM_WORLD,
-                   "Scaling solute-solvent interactions by %f\n", damp);
+      PRINTF ("Scaling solute-solvent interactions by %f\n", damp);
       /*
         Historically  short-range potential is  scaled by  the inverse
         temperature and the code operates  with u(x) = βv(x) insead of
@@ -899,7 +898,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);
 
-  PetscPrintf (PETSC_COMM_WORLD, "Solving BGY3dM (%d-site) equation ...\n", m);
+  PRINTF ("Solving BGY3dM (%d-site) equation ...\n", m);
 
   State *BHD = bgy3d_state_make (PD);
 
