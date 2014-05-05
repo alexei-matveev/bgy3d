@@ -212,22 +212,22 @@
 
 (define (update-param molecule target-site param value)
   (let ((name (molecule-name molecule))
-	(sites (molecule-sites molecule)))
+        (sites (molecule-sites molecule)))
 
     (define (update-site site)
       (match param
-	     ("sigma"
-	      (if (equal? target-site (site-name site))
-	        (update-sigma site value)
-	        (update-sigma site (site-sigma site))))
-	     ("epsilon"
-	      (if (equal? target-site (site-name site))
-	        (update-epsilon site value)
-	        (update-epsilon site (site-epsilon site))))
-	     ("charge"
-	      (if (equal? target-site (site-name site))
-	        (update-charge site value)
-		(update-charge site (site-charge site))))))
+             ("sigma"
+              (if (equal? target-site (site-name site))
+                (update-sigma site value)
+                (update-sigma site (site-sigma site))))
+             ("epsilon"
+              (if (equal? target-site (site-name site))
+                (update-epsilon site value)
+                (update-epsilon site (site-epsilon site))))
+             ("charge"
+              (if (equal? target-site (site-name site))
+                (update-charge site value)
+                (update-charge site (site-charge site))))))
 
     (find-site sites target-site)
     (make-molecule name (map update-site sites))))
