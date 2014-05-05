@@ -545,9 +545,7 @@ contains
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
 
-    ! FIXME: try  not to  proliferate use of  "environments", function
-    ! behaviour is better controlled via its arguments:
-    rbc = getopt ("rbc")
+    rbc = getopt (env, "rbc")
 
     if (rbc) then
        call bridge (solute, solvent, beta, r, dr, k, dk, expB)
