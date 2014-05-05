@@ -185,7 +185,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
   const PetscScalar one = 1.0;
 
   if (verbosity > 0)
-    PetscPrintf (PETSC_COMM_WORLD, "Assembling Matrix...");
+    PRINTF ("Assembling Matrix...");
 
   /* Create Matrix with appropriate non-zero structure */
   Mat M;
@@ -316,7 +316,7 @@ static Mat lap_mat_create (const DA da, const real h[3],
   MatAssemblyEnd (M, MAT_FINAL_ASSEMBLY);
 
   if (verbosity > 0)
-    PetscPrintf (PETSC_COMM_WORLD, "done.\n");
+    PRINTF ("done.\n");
 
   return M;
 }
