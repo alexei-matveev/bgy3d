@@ -83,7 +83,7 @@ ksp_create (Mat M)
     */
 
     /* MatType values happen to be (immutable) strings: */
-#if PETSC_VERSION != VERSION(3, 2)
+#if PETSC_VERSION != VERSION(3, 2) && PETSC_VERSION != VERSION(3, 1)
     MatType mtype;              /* typedef const char* MatType */
 #else
     const MatType mtype;        /* typedef char* MatType */
