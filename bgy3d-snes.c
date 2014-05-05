@@ -29,7 +29,7 @@ void bgy3d_snes_default (const ProblemData *PD, void *ctx,
     bgy3d_snes_trial (PD, ctx, F, dF, x);
   else
     {
-      PetscPrintf (PETSC_COMM_WORLD, "No such SNES solver: %s\n", solver);
+      PRINTF ("No such SNES solver: %s\n", solver);
       exit (1);
     }
 }
@@ -374,7 +374,7 @@ void bgy3d_snes_picard (const ProblemData *PD, void *ctx,
       const real norm = vec_norm (dx);
 
       if (verbosity > 0)
-        PetscPrintf (PETSC_COMM_WORLD, " # %03d: norm of difference: %e\t%f\n",
+        PRINTF (" # %03d: norm of difference: %e\t%f\n",
                      k + 1, norm, lambda);
 
       if (norm < norm_tol)
@@ -500,18 +500,17 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx,
 
       if (verbosity > 0)
         {
-          PetscPrintf (PETSC_COMM_WORLD, " # %03d: norm of difference: %e\t%f",
+          PRINTF (" # %03d: norm of difference: %e\t%f",
                        iter + 1, norm, a);
-          PetscPrintf (PETSC_COMM_WORLD, " count=%3d upwards=%1d", mycount, upwards);
-          PetscPrintf (PETSC_COMM_WORLD, "\n");
+          PRINTF (" count=%3d upwards=%1d", mycount, upwards);
+          PRINTF ("\n");
         }
 
       /* Exit when residual norm does not exceed norm_tol: */
       if (norm <= norm_tol)
         {
           if (verbosity > 0)
-            PetscPrintf (PETSC_COMM_WORLD,
-                         " # norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
+            PRINTF (" # norm %e <= %e (norm-tol) in iteration %d < %d (max-iter)\n",
                          norm, norm_tol, iter + 1, max_iter);
           break;
         }
