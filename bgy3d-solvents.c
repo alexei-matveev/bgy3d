@@ -28,11 +28,10 @@ Solvent:
 */
 void bgy3d_sites_show (const char *name, int m, const Site sites[m])
 {
-  PetscPrintf (PETSC_COMM_WORLD, "%s:\n", name);
-  PetscPrintf (PETSC_COMM_WORLD, "#\tsite\tε       \tσ       \t q\n"); /* unicode here! */
+  PRINTF ("%s:\n", name);
+  PRINTF ("#\tsite\tε       \tσ       \t q\n"); /* unicode here! */
   for (int i = 0; i < m; i++)
-    PetscPrintf (PETSC_COMM_WORLD,
-                 "%d\t%-4s\t%f\t%f\t% f\n",
+    PRINTF ("%d\t%-4s\t%f\t%f\t% f\n",
                  i + 1,
                  sites[i].name,
                  sites[i].epsilon,
