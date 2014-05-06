@@ -17,6 +17,8 @@ module foreign
 
   public :: comm_rank
   public :: comm_size
+  public :: comm_allreduce
+  public :: comm_set_parallel_x
 
   public :: verbosity           ! extern int
 
@@ -129,7 +131,14 @@ module foreign
      end function bgy3d_getopt_string
 
      !
-     ! See ./bgy3d.{h,c}:
+     ! Note the absense of communicator in signatures of communication
+     ! primitives.  The actual  communicator  is taken  from a  global
+     ! variable.  However,  this variable  is, well, a  *variable* and
+     ! can be  flipped between MPI_COMM_WORLD  and MPI_COMM_SELF using
+     ! the function  comm_set_parallel_x().  This is  VERY fragile, be
+     ! careful.
+     !
+     ! See ./bgy3d.{h,c}.
      !
      function comm_rank () result (rank) bind (c)
        import c_int
@@ -142,6 +151,20 @@ module foreign
        implicit none
        integer (c_int) :: size
      end function comm_size
+
+     subroutine comm_allreduce (n, x) bind (c)
+       import c_int, c_double
+       implicit none
+       integer (c_int), intent (in), value :: n
+       real (c_double), intent (inout) :: x(n)
+     end subroutine comm_allreduce
+
+     function comm_set_parallel_x (new) result (old) bind (c)
+       import c_bool
+       implicit none
+       logical (c_bool), intent (in), value :: new
+       logical (c_bool) :: old
+     end function comm_set_parallel_x
   end interface
 
 contains
