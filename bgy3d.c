@@ -291,3 +291,23 @@ int comm_size (void)
   return size;
 }
 
+
+/*
+  If the  flag is #f set  the parallel mode, otherwise  set the serial
+  mode of  operation for PETSC. The  current mode is  returned and may
+  have to be restored later.
+*/
+bool
+comm_set_parallel_x (bool flag)
+{
+  const MPI_Comm comm = comm_world_petsc;
+  assert (comm == PETSC_COMM_WORLD || comm == PETSC_COMM_SELF);
+
+  MPI_Barrier (PETSC_COMM_WORLD);
+  if (flag)
+    comm_world_petsc = PETSC_COMM_WORLD;
+  else
+    comm_world_petsc = PETSC_COMM_SELF;
+
+  return (comm == PETSC_COMM_WORLD);
+}

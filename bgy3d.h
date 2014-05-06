@@ -324,6 +324,13 @@ int comm_size (void);
 
 void comm_allreduce (int n, real x[n]);
 
+/*
+  If the  flag is #f set  the parallel mode, otherwise  set the serial
+  mode of  operation for PETSC. The  current mode is  returned and may
+  have to be restored later.
+*/
+bool comm_set_parallel_x (bool flag);
+
 /* Most uses of communicator in the sources are for printf(): */
 #define PRINTF(fmt, ...) PetscPrintf (comm_world_petsc, fmt, ##__VA_ARGS__)
 
