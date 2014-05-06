@@ -741,7 +741,9 @@ contains
     ! Derivatives of the chemical  potential with respect to geometric
     ! distortions of the solute.
     !
-    use foreign, only: site
+    use foreign, only: site, comm_rank, comm_size, comm_set_parallel_x,&
+         comm_allreduce
+    use iso_c_binding, only: c_bool
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: func1, krylov
     implicit none
@@ -764,7 +766,8 @@ contains
     nrad = size (t_uvr, 3)
 
     block
-      integer :: i, j
+      logical (c_bool) :: mode
+      integer :: i, j, ij, np, rank
       real (rk), parameter :: step = 1.0d0 ! does not need to be small
       real (rk) :: dx(3)
       real (rk) :: dw(n, n, nrad)
@@ -791,8 +794,33 @@ contains
 
       c = c - beta * v_uvk
 
+      ! We assume that we are  in cooperative mode at the moment.  The
+      ! rank will be  unique for all workers within  the current world
+      ! consisting of one or (hopefully) more workers:
+      np = comm_size ()
+      rank = comm_rank ()
+
+      ! Set  the uncooperative  operation mode  of the  workers.  Each
+      ! worker closes all doors  and confines himself to smaller world
+      ! of MPI_COMM_SELF.   The control flow for each  worker is about
+      ! to  depart,  see conditional  skipping  of  iterations in  the
+      ! double loop  below.  FIXME: This ugliness is  here because the
+      ! MPI communicator for use in PETSC calls is taken from a global
+      ! variable.
+      mode = .false.            ! logical (c_bool)
+      mode = comm_set_parallel_x (mode)
+
+      ij = 0
       do i = 1, n
          do j = 1, 3
+            ij = ij + 1
+
+            ! Round robin work sharing:
+            if (rank /= mod (ij - 1, np)) then
+               gradients(j, i) = 0.0 ! for use in allreduce
+               cycle
+            endif
+
             dx = 0.0
             dx(j) = step
 
@@ -813,6 +841,11 @@ contains
 
             ! Solving the  linearized problem amounts to  finding a dt
             ! such that jacobian(dt) == - df.
+            !
+            ! This will call  PETSC and here it is  important that the
+            ! current  communicator is MPI_COMM_SELF,  otherwise PETSC
+            ! will try to cooperate  with other workers, which are not
+            ! willing to.
             dt = krylov (jacobian, -df)
 
             ! Differential of chemical potential due to dt:
@@ -820,6 +853,12 @@ contains
             gradients(j, i) = dmu / step
          enddo
       enddo
+      ! Restore  cooperative  mode.   From  now  on  all  workers  may
+      ! communicate again.
+      mode = comm_set_parallel_x (mode)
+
+      ! This will be performed over the original world:
+      call comm_allreduce (size (gradients), gradients)
     end block
   end subroutine derivatives
 
