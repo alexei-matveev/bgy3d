@@ -1349,8 +1349,12 @@ void bgy3d_guile_init (int argc, char **argv)
      when assigning a void* to void (*)() in alist_getopt_funptr(): */
   assert (sizeof (void (*)()) == sizeof (void*));
 
-  /* MPI may  choose to rewrite the  command line, do  it early. Petsc
-     does not rewrite argv.  Guile will not understand Petsc flags. */
+  /*
+    PETSC  will call  MPI_Init() if  it has  not been  called already.
+    PetscFinalize() will  call MPI_Finalize() in that  case also.  MPI
+    may choose  to rewrite the command  line, do it  early. Petsc does
+    not rewrite argv.  Guile will not understand Petsc flags.
+  */
   PetscInitialize (&argc, &argv, NULL, helptext);
 
   /* Good to know, not required: */
