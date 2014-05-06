@@ -1262,6 +1262,12 @@ static SCM guile_comm_size (void)
   return scm_from_int (comm_size ());
 }
 
+static SCM
+guile_comm_set_parallel_x (SCM flag)
+{
+  return scm_from_bool (comm_set_parallel_x (scm_to_bool (flag)));
+}
+
 
 static SCM guile_test (SCM m, SCM n, SCM k)
 {
@@ -1312,6 +1318,7 @@ static void module_init (void* unused)
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
   EXPORT ("comm-rank", 0, 0, 0, guile_comm_rank);
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
+  EXPORT ("comm-set-parallel!", 1, 0, 0, guile_comm_set_parallel_x);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute", 3, 1, 0, guile_rism_solute);
   EXPORT ("rism-self-energy", 2, 0, 0, guile_rism_self_energy);
