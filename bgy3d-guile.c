@@ -294,10 +294,10 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 void bgy3d_solute_get (const char *name, int *n, Site **sites)
 {
   SCM find_molecule =
-    scm_variable_ref (scm_c_public_variable ("guile molecule",
-                                             "find-molecule"));
+    scm_variable_ref (scm_c_module_lookup (scm_c_resolve_module ("guile molecule"),
+                                           "find-molecule"));
   SCM molecule =
-    scm_call_1 (find_molecule, scm_from_utf8_string (name));
+    scm_call_1 (find_molecule, scm_from_locale_string (name));
 
   char *Name;
   to_sites (molecule, n, sites, &Name);
