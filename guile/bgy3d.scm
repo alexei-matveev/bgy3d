@@ -39,6 +39,9 @@
    f64+
    f64*
    f64scale
+   comm-size
+   comm-rank
+   comm-set-parallel!
    rism-solvent
    rism-solute
    rism-self-energy
