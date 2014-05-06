@@ -163,7 +163,7 @@ bgy3d_snes_newton (const ProblemData *PD, void *ctx,
 {
   /* Create the snes environment */
   SNES snes;
-  SNESCreate (PETSC_COMM_WORLD, &snes);
+  SNESCreate (comm_world_petsc, &snes);
 
   /* SNES needs a place to store residual: */
   local Vec r = vec_duplicate (x);

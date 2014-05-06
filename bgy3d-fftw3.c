@@ -353,8 +353,8 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 
   /* Get number of processes */
   int np, id;
-  MPI_Comm_size (PETSC_COMM_WORLD, &np);
-  MPI_Comm_rank (PETSC_COMM_WORLD, &id);
+  MPI_Comm_size (comm_world_petsc, &np);
+  MPI_Comm_rank (comm_world_petsc, &id);
 
   /* FIXME: see bgy3d_fft_init_da () and avoid code duplication: */
   {
@@ -362,7 +362,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 
     /* get local data size and allocate */
     alloc_local = fftw_mpi_local_size_3d (N[2], N[1], N[0] / 2 + 1,
-                                          PETSC_COMM_WORLD,
+                                          comm_world_petsc,
                                           &local_range,
                                           &local_start);
 
@@ -373,14 +373,14 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
     /* create plan for out-of-place forward DFT */
     fft->fw = fftw_mpi_plan_dft_r2c_3d (N[2], N[1], N[0],
                                         fft->doubl, fft->cmplx,
-                                        PETSC_COMM_WORLD,
+                                        comm_world_petsc,
                                         FFTW_ESTIMATE);
     assert (fft->fw != NULL);
 
     /* create plan for out-of-place inverse DFT */
     fft->bw = fftw_mpi_plan_dft_c2r_3d (N[2], N[1], N[0],
                                         fft->cmplx, fft->doubl,
-                                        PETSC_COMM_WORLD,
+                                        comm_world_petsc,
                                         FFTW_ESTIMATE);
     assert (fft->bw != NULL);
 
@@ -395,7 +395,8 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
        dimension from all workers: */
     {
       int local_range_ = local_range; /* cast to int */
-      int err = MPI_Allgather (&local_range_, 1, MPI_INT, l2, 1, MPI_INT, PETSC_COMM_WORLD);
+      int err = MPI_Allgather (&local_range_, 1, MPI_INT, l2, 1,
+                               MPI_INT, comm_world_petsc);
       assert (err == MPI_SUCCESS);
     }
     l0[0] = N[0];
@@ -464,7 +465,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
                 id, m0, m1, M0, M1);
       }
     /* Also puts internals (FFT struct) into the matrix: */
-    MatCreateShell (PETSC_COMM_WORLD, m0, m1, M0, M1, (void*) fft, A);
+    MatCreateShell (comm_world_petsc, m0, m1, M0, M1, (void*) fft, A);
   }
 
   /* Set matrix operations: */

@@ -100,7 +100,7 @@ void bgy3d_vec_save (const char file[], const Vec vec)
 {
   PetscViewer viewer;
 
-  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_WRITE, &viewer);
+  PetscViewerBinaryOpen (comm_world_petsc, file, FILE_MODE_WRITE, &viewer);
   VecView (vec, viewer);
   PetscViewerDestroy (&viewer);
 }
@@ -112,12 +112,12 @@ Vec bgy3d_vec_load (const char file[])
   Vec vec;                      /* new one */
   PetscViewer viewer;
 
-  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+  PetscViewerBinaryOpen (comm_world_petsc, file, FILE_MODE_READ, &viewer);
 # if PETSC_VERSION < VERSION(3, 2)
   VecLoad (viewer, VECMPI, &vec); /* creates it */
 #else
   /* FIXME: how to make it distributed? */
-  VecCreate (PETSC_COMM_WORLD, &vec);
+  VecCreate (comm_world_petsc, &vec);
   VecLoad (vec, viewer);
 #endif
   PetscViewerDestroy (&viewer);
@@ -132,7 +132,7 @@ void bgy3d_vec_read (const char file[], Vec vec)
 {
   PetscViewer viewer;
 
-  PetscViewerBinaryOpen (PETSC_COMM_WORLD, file, FILE_MODE_READ, &viewer);
+  PetscViewerBinaryOpen (comm_world_petsc, file, FILE_MODE_READ, &viewer);
   VecLoadIntoVector (viewer, vec);
   PetscViewerDestroy (&viewer);
 }
@@ -143,7 +143,7 @@ void bgy3d_vec_save_ascii (const char file[], const Vec vec)
 {
   PetscViewer viewer;
 
-  PetscViewerASCIIOpen (PETSC_COMM_WORLD, file, &viewer);
+  PetscViewerASCIIOpen (comm_world_petsc, file, &viewer);
   /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_MATLAB); */
   /* PetscViewerSetFormat (viewer, PETSC_VIEWER_DEFAULT); */
   /* PetscViewerSetFormat (viewer, PETSC_VIEWER_ASCII_VTK); */

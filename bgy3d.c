@@ -19,6 +19,10 @@
 */
 int verbosity = 0;
 
+/* This  communicator  will be  flipped  between PETSC_COMM_WORLD  and
+   PETSC_COMM_SELF occasionally: */
+MPI_Comm comm_world_petsc = MPI_COMM_NULL;
+
 
 /*
   Get  problem data  (e.g.   from command  line) using  bgy3d_getopt_*
@@ -154,7 +158,7 @@ State* bgy3d_state_make (const ProblemData *PD)
 
 void bgy3d_state_destroy (State *BHD)
 {
-  MPI_Barrier (PETSC_COMM_WORLD);
+  MPI_Barrier (comm_world_petsc);
 
 #ifdef L_BOUNDARY
   assert (BHD->dirichlet_mat != NULL);
@@ -264,25 +268,26 @@ void Molecule_free( real **x_M, int N_M)
 /* Reduce buffer by summing respective entries on all workeres: */
 void comm_allreduce (int n, real x[n])
 {
-  int err = MPI_Allreduce (MPI_IN_PLACE, x, n, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+  int err =
+    MPI_Allreduce (MPI_IN_PLACE, x, n, MPI_DOUBLE, MPI_SUM, comm_world_petsc);
   assert (!err);
 }
 
 
-/* Return MPI runk in PETSC_COMM_WORLD: */
+/* Return MPI runk in comm_world_petsc: */
 int comm_rank (void)
 {
   int rank;
-  MPI_Comm_rank (PETSC_COMM_WORLD, &rank);
+  MPI_Comm_rank (comm_world_petsc, &rank);
   return rank;
 }
 
 
-/* Return MPI size of PETSC_COMM_WORLD: */
+/* Return MPI size of comm_world_petsc: */
 int comm_size (void)
 {
   int size;
-  MPI_Comm_size (PETSC_COMM_WORLD, &size);
+  MPI_Comm_size (comm_world_petsc, &size);
   return size;
 }
 

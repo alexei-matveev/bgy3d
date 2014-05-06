@@ -343,20 +343,20 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
 
   /* Get number of processes */
   int np, id;
-  MPI_Comm_size (PETSC_COMM_WORLD, &np);
-  MPI_Comm_rank (PETSC_COMM_WORLD, &id);
+  MPI_Comm_size (comm_world_petsc, &np);
+  MPI_Comm_rank (comm_world_petsc, &id);
 
   /* FIXME: see bgy3d_fft_init_da () and avoid code duplication: */
   {
     /* create plan for forward DFT */
-    fft->fw = rfftw3d_mpi_create_plan (PETSC_COMM_WORLD,
+    fft->fw = rfftw3d_mpi_create_plan (comm_world_petsc,
                                        N[2], N[1], N[0],
                                        FFTW_FORWARD,
                                        FFTW_ESTIMATE);
     assert (fft->fw != NULL);
 
     /* create plan for inverse DFT */
-    fft->bw = rfftw3d_mpi_create_plan (PETSC_COMM_WORLD,
+    fft->bw = rfftw3d_mpi_create_plan (comm_world_petsc,
                                        N[2], N[1], N[0],
                                        FFTW_BACKWARD,
                                        FFTW_ESTIMATE);
@@ -387,7 +387,8 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
     /* Collect  the  info  about  the  local  shares  of  the  leading
        dimension from all workers: */
     {
-      int err = MPI_Allgather (&local_range, 1, MPI_INT, l2, 1, MPI_INT, PETSC_COMM_WORLD);
+      int err = MPI_Allgather (&local_range, 1, MPI_INT, l2, 1,
+                               MPI_INT, comm_world_petsc);
       assert (err == MPI_SUCCESS);
     }
     l0[0] = N[0];
@@ -456,7 +457,7 @@ void bgy3d_fft_mat_create (const int N[3], Mat *A, DA *da, DA *dc)
                 id, m0, m1, M0, M1);
       }
     /* Also puts internals (FFT struct) into the matrix: */
-    MatCreateShell (PETSC_COMM_WORLD, m0, m1, M0, M1, (void*) fft, A);
+    MatCreateShell (comm_world_petsc, m0, m1, M0, M1, (void*) fft, A);
   }
 
   /* Set matrix operations: */

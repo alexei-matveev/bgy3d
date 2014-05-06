@@ -60,7 +60,7 @@ int main (int argc, char **argv)
 
   {
     int np;
-    MPI_Comm_size (PETSC_COMM_WORLD, &np);
+    MPI_Comm_size (comm_world_petsc, &np);
     PRINTF ("NP= %d\n", np);
   }
 

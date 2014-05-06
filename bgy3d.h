@@ -309,16 +309,24 @@ void misc_error (const char *loc, const char *msg); /* noreturn */
 /* COMM PRIMITIVES */
 /*******************/
 
-/* Return MPI runk in PETSC_COMM_WORLD: */
+/*
+  Usually the  same as PETSC_COMM_WORLD which  in turn is  the same as
+  MPI_COMM_WORLD.   Occasionally flipped  to PETSC_COMM_SELF  which is
+  MPI_COMM_SELF.
+*/
+extern MPI_Comm comm_world_petsc;
+
+/* Return MPI runk in comm_world_petsc: */
 int comm_rank (void);
 
-/* Return MPI size of PETSC_COMM_WORLD: */
+/* Return MPI size of comm_world_petsc: */
 int comm_size (void);
 
 void comm_allreduce (int n, real x[n]);
 
 /* Most uses of communicator in the sources are for printf(): */
-#define PRINTF(fmt, ...) PetscPrintf (PETSC_COMM_WORLD, fmt, ##__VA_ARGS__)
+#define PRINTF(fmt, ...) PetscPrintf (comm_world_petsc, fmt, ##__VA_ARGS__)
+
 
 
 /* Sum of an integer array: */

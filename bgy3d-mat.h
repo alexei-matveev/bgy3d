@@ -51,7 +51,7 @@ mat_shell_create (int n, void *ctx, Operation mult, Destructor destroy)
   /* Create  matrix shell  with  proper dimensions  and associate  the
      context with it: */
   Mat A;
-  MatCreateShell (PETSC_COMM_WORLD,
+  MatCreateShell (comm_world_petsc,
                   n, n, PETSC_DETERMINE, PETSC_DETERMINE,
                   ctx, &A);
 

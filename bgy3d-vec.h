@@ -208,9 +208,9 @@ static inline Vec vec_from_array (int n, real x_[n])
     the block size that  is apparently used for VecSetValuesBlocked().
     FIXME: literal constant here!
   */
-  VecCreateMPIWithArray (PETSC_COMM_WORLD, 1, n, PETSC_DECIDE, x_, &x);
+  VecCreateMPIWithArray (comm_world_petsc, 1, n, PETSC_DECIDE, x_, &x);
 #else
-  VecCreateMPIWithArray (PETSC_COMM_WORLD, n, PETSC_DECIDE, x_, &x);
+  VecCreateMPIWithArray (comm_world_petsc, n, PETSC_DECIDE, x_, &x);
 #endif
   return x;
 }
@@ -755,7 +755,7 @@ static inline DA da_create (int dof,
     bgy3d.h for BOUNDARY_TYPE and STENCIL_TYPE macros.
   */
   DA da;
-  DMDACreate3d (PETSC_COMM_WORLD,
+  DMDACreate3d (comm_world_petsc,
 #if PETSC_VERSION >= VERSION(3, 2)
               BOUNDARY_TYPE, BOUNDARY_TYPE, BOUNDARY_TYPE,
 #else

@@ -1249,14 +1249,14 @@ static SCM guile_pot_destroy (SCM iter)
   return scm_from_int (0);
 }
 
-/* Return MPI runk in PETSC_COMM_WORLD: */
+/* Return MPI runk in comm_world_petsc: */
 static SCM guile_comm_rank (void)
 {
   return scm_from_int (comm_rank ());
 }
 
 
-/* Return MPI size of PETSC_COMM_WORLD: */
+/* Return MPI size of comm_world_petsc: */
 static SCM guile_comm_size (void)
 {
   return scm_from_int (comm_size ());
@@ -1345,6 +1345,17 @@ void bgy3d_guile_init (int argc, char **argv)
   /* MPI may  choose to rewrite the  command line, do  it early. Petsc
      does not rewrite argv.  Guile will not understand Petsc flags. */
   PetscInitialize (&argc, &argv, NULL, helptext);
+
+  /* Good to know, not required: */
+  assert (PETSC_COMM_WORLD == MPI_COMM_WORLD);
+  assert (PETSC_COMM_SELF == MPI_COMM_SELF);
+
+  /*
+    Declared  in  bgy3d.h,  defined  in bgy3d.c  to  be  MPI_COMM_NULL
+    initially.  Here it  is set  for  the first  time. Determines  the
+    initial parallelization mode.
+  */
+  comm_world_petsc = PETSC_COMM_WORLD;
 
 #ifdef WITH_FFTW_THREADS
   if (nthreads)

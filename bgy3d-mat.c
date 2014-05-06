@@ -41,7 +41,7 @@ ksp_create (Mat M)
   KSP ksp;
 
   /* Create ksp environment */
-  KSPCreate (PETSC_COMM_WORLD, &ksp);
+  KSPCreate (comm_world_petsc, &ksp);
 
   /* Set rtol, atol, dtol, maxits */
   {
