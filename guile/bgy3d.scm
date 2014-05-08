@@ -343,16 +343,15 @@ computes the sum of all vector elements."
 (define (make-vec-iter vec)
   (lambda (f) (vec-for-each f vec)))
 
-;;
-;; FIXME: Guile has problems with denormal numbers, replace small ones
-;; by zeros. Otherwise Guile will show #.# when printing it:
-;;
-(define (normalize x)
-  (if (> (abs x) 2.0e-308)
-      x
-      0.0))
-
+;;;
+;;; FIXME: Guile has problems with denormal numbers, replace small ones
+;;; by zeros. Otherwise Guile will show #.# when printing it:
+;;;
 (define (vec-print v)
+  (define (normalize x)
+    (if (> (abs x) 2.0e-308)
+        x
+        0.0))
   (vec-for-each
    (lambda (x) (format #t "~a\n" (normalize x)))
    v))
