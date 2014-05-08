@@ -179,6 +179,12 @@
       data)))
 
 ;;;
+;;; One could do this with data read from external sources to increase
+;;; consistency:
+;;;
+(define (normalize data)
+  (deserialize (serialize data)))
+
 ;;; Returns data  as broadcast from the  root rank. The  input data on
 ;;; reader ranks  is ignored (but  reguired as argument).   FIXME: any
 ;;; better interface?
@@ -203,6 +209,25 @@
                      (read port))))
       (close-port port)
       data')))
+
+;;;
+;;; Here rank-0 reads the fifo and broadcasts the data to everyone:
+;;;
+(define (read-fifo fifo)
+  (let ((rank (comm-rank)))
+    (comm-bcast 0 (when (zero? rank)
+                    (normalize (with-input-from-file fifo read))))))
+
+;;;
+;;; Rank-0   writes  to  fifo,   on  other   workesrs  the   input  is
+;;; ignored. Return value is unspecfied:
+;;;
+(define (write-fifo fifo data)
+  (let ((rank (comm-rank)))
+    (when (zero? rank)
+      (with-output-to-file fifo (lambda () (write data)))))
+  (if #f #f))
+
 
 
 ;;;
@@ -807,7 +832,7 @@ computes the sum of all vector elements."
                ;; client writes the geometry from the other side. Note
                ;; that only the first s-expression is read:
                ;;
-               (let ((x (with-input-from-file finp read)))
+               (let ((x (read-fifo finp)))
                  ;;
                  ;; Convention is when the input is #f, then
                  ;; terminate. Otherwise evaluate PES at this point
@@ -818,8 +843,7 @@ computes the sum of all vector elements."
                  ;;
                  (when x
                    (let-values (((e g) (fg x))) ; get energy, gradient
-                     (with-output-to-file fout
-                       (lambda () (write (cons e g))))) ; or (list e g)?
+                     (write-fifo fout (cons e g))) ; or (list e g)?
                    (loop)))))))
         ("solvent"
          ;;
