@@ -1269,6 +1269,75 @@ guile_comm_set_parallel_x (SCM flag)
 }
 
 
+/* read!  and write!  for use in make-custom-binary-input- and
+   output-port. */
+static SCM
+guile_comm_bcast_x (SCM root, SCM bv, SCM start, SCM len)
+{
+  const size_t i = scm_to_size_t (start);
+  const size_t n = scm_to_size_t (len);
+
+  assert (scm_is_bytevector (bv));
+  const size_t size = SCM_BYTEVECTOR_LENGTH (bv);
+  char *buf = (void*) SCM_BYTEVECTOR_CONTENTS (bv);
+  assert (i + n <= size);
+
+  /* Extract MPI_Comm, verifies the type: */
+  const MPI_Comm comm = comm_world_petsc; // scm_to_comm (world);
+
+  int rank, ierr;
+  ierr = MPI_Comm_rank (comm, &rank);
+  assert (MPI_SUCCESS==ierr);
+
+  // printf ("ZZZ: rank=%d, n=%zu, size=%zu\n", rank, n, size);
+
+  const int root_rank = scm_to_int (root);
+
+  /* size_t varies between 32/64 platforms, set MPI_SIZE_T here: */
+  MPI_Datatype MPI_SIZE_T;
+  if (sizeof (size_t) == sizeof (unsigned long))
+    MPI_SIZE_T = MPI_UNSIGNED_LONG;
+  else if (sizeof (size_t) == sizeof (unsigned int))
+    MPI_SIZE_T = MPI_UNSIGNED;
+  else
+    assert (0);
+
+  /*
+    Agree  the  size of  the  data that  can  be  transferred in  this
+    transaction.   There  are no  guarantees  about  the  size of  the
+    read/write buffers, so taking the minimum is the best we can do:
+  */
+  size_t nn = n;
+  ierr = MPI_Allreduce (MPI_IN_PLACE, &nn, 1, MPI_SIZE_T, MPI_MIN, comm);
+  assert (MPI_SUCCESS==ierr);
+
+  /*
+    We could have done MPI_Bcast (&nn, 1, MPI_SIZE_T, root_rank, comm)
+    instead, but we will have a  problem if the reader wants less than
+    the writer  side has to offer.   In this case the  reader does not
+    supply enough  space to  receive broadcasted data.   The assertion
+    below fires indeed. That is why we need to allreduce/min the input
+    n over  all workers. Then  the assertion holds trivially.   On the
+    other hand  the writer is  not guaranteed to  be able to  sink all
+    data in one transaction.
+
+    The write size is not  constrained from above as a (put-bytevector
+    port BV) will pass BV  through, irrespective of its size. It seems
+    there is  no buffering  on the  writer side as  of 2.0.5.  Also, a
+    simple  (write data  port) will  end calling  this  procedure many
+    times with just a few bytes.
+  */
+  assert (nn <= n);
+
+  ierr = MPI_Bcast (&buf[i], nn, MPI_CHAR, root_rank, comm);
+  assert (MPI_SUCCESS==ierr);
+
+  /* If nn  < n on the  writer side, the caller  will initiate another
+     transaction: */
+  return scm_from_size_t (nn);
+}
+
+
 static SCM guile_test (SCM m, SCM n, SCM k)
 {
   return scm_from_double (bgy3d_fft_test (scm_to_int (m),
@@ -1319,6 +1388,7 @@ static void module_init (void* unused)
   EXPORT ("comm-rank", 0, 0, 0, guile_comm_rank);
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("comm-set-parallel!", 1, 0, 0, guile_comm_set_parallel_x);
+  EXPORT ("comm-bcast!", 4, 0, 0, guile_comm_bcast_x);
   EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute", 3, 1, 0, guile_rism_solute);
   EXPORT ("rism-self-energy", 2, 0, 0, guile_rism_self_energy);
