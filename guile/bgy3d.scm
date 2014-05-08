@@ -752,7 +752,10 @@ computes the sum of all vector elements."
 ;;; Act   according   to   the   subcommand  (the   first   positional
 ;;; argument). With  cmd == "solutes" interprete each  argument as the
 ;;; name of the solute. Note that  you may need to first run a solvent
-;;; calculation with cmd == "solvent":
+;;; calculation with cmd == "solvent".
+;;;
+;;; FIXME: reprot an error  meaningfully when called without arguments
+;;; when (car args) is about to fail.
 ;;;
 (define (new-main argv)
   (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
