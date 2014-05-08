@@ -840,7 +840,7 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/kl1-prspc
-   ("U" U) ;; t3p uranyl
+   ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -865,7 +865,7 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/kl2-prspc
-   ("U" U) ;; t3p uranyl
+   ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -890,7 +890,7 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/gw96-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -915,7 +915,7 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163)))
   (uranyl/pm13-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -964,7 +964,7 @@
    ("HW"  (-1.5362  0.3956  2.9416))
    ("HW"  (-0.0620  1.0949  3.0078)))
   (uranyl/kl2-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -986,7 +986,7 @@
    ("HW"  (-1.5362  0.3956  2.9416))
    ("HW"  (-0.0620  1.0949  3.0078)))
   (uranyl/kl1-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1008,7 +1008,7 @@
    ("HW"  (-1.5362  0.3956  2.9416))
    ("HW"  (-0.0620  1.0949  3.0078)))
   (uranyl/pm13-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1052,7 +1052,7 @@
    ("HW"  (-1.5362  0.3956  2.9416))
    ("HW"  (-0.0620  1.0949  3.0078)))
   (uranyl/gw96-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1102,7 +1102,7 @@
    ("HW"  (-1.1495  -1.6887  2.4329))
    ("HW"  (0.3702  -1.2208  2.8045)))
   (uranyl/kl2-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1127,7 +1127,7 @@
    ("HW"  (-1.1495  -1.6887  2.4329))
    ("HW"  (0.3702  -1.2208  2.8045)))
   (uranyl/kl1-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1152,7 +1152,7 @@
    ("HW"  (-1.1495  -1.6887  2.4329))
    ("HW"  (0.3702  -1.2208  2.8045)))
   (uranyl/gw96-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1177,7 +1177,7 @@
    ("HW"  (-1.1495  -1.6887  2.4329))
    ("HW"  (0.3702  -1.2208  2.8045)))
   (uranyl/pm13-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1205,7 +1205,7 @@
    ("HW"  (-1.5970  -2.7673  -0.8165))
    ("HW"  (-1.5970  -2.7673  0.8165)))
   (uranyl/kl2-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1233,7 +1233,7 @@
    ("HW"  (-1.5970  -2.7673  -0.8165))
    ("HW"  (-1.5970  -2.7673  0.8165)))
   (uranyl/kl1-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1261,7 +1261,7 @@
    ("HW"  (-1.5970  -2.7673  -0.8165))
    ("HW"  (-1.5970  -2.7673  0.8165)))
   (uranyl/gw96-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1289,7 +1289,7 @@
    ("HW"  (-1.5970  -2.7673  -0.8165))
    ("HW"  (-1.5970  -2.7673  0.8165)))
   (uranyl/pm13-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1373,7 +1373,7 @@
    ("HW"  (2.8593  -0.5401  1.3322))
    ("HW"  (2.1367  -1.9767  1.6163)))
   (uranyl/kl2-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1401,7 +1401,7 @@
    ("HW"  (2.8593  -0.5401  1.3322))
    ("HW"  (2.1367  -1.9767  1.6163)))
   (uranyl/kl1-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1429,7 +1429,7 @@
    ("HW"  (2.8593  -0.5401  1.3322))
    ("HW"  (2.1367  -1.9767  1.6163)))
   (uranyl/gw96-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
@@ -1457,7 +1457,7 @@
    ("HW"  (2.8593  -0.5401  1.3322))
    ("HW"  (2.1367  -1.9767  1.6163)))
   (uranyl/pm13-prspc
-   ("U" U) ;; SPC uranyl
+   ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
