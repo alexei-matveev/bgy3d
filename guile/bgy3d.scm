@@ -136,16 +136,30 @@
 ;;; will  pass the  bytevector through  irrespective of  how  big that
 ;;; is. Obviousely, many small broadcasts are slow.
 ;;;
+;;; Note that reading lists like (1.23) does not need look-ahead --- a
+;;; closing paren is  unambigous. When reading things like  #f or 1.23
+;;; the reader  needs to know  the stream is  over.  In this  case the
+;;; reader  posts  another  request  for  data which  then  should  be
+;;; satisfied by  writer sending zero  bytes. It is important  to keep
+;;; the number of calls to bcast! the same over all workers, otherwise
+;;; they deadlock.
+;;;
 (define (make-bcast-port root)
-    (let ((rank (comm-rank))
-          (bcast! (lambda (bv i n)
-                    (comm-bcast! root bv i n))))
-      (let ((port (if (equal? rank root)
-                      (make-custom-binary-output-port "o" bcast! #f #f #f)
-                      (make-custom-binary-input-port "i" bcast! #f #f #f))))
-        ;; (setvbuf  port _IOFBF BUFFER-SIZE) will not  work on custom
-        ;; binary ports as of 2.0.5
-        port)))
+  (let* ((eof? #f)                      ; set! to #t later
+         (rank (comm-rank))
+         (bcast! (lambda (bv i n)
+                   (let ((n (comm-bcast! root bv i n)))
+                     (if (zero? n) (set! eof? #t))
+                     n))) ; must return the number of bytes read/written
+         (close (lambda ()
+                  (if (not eof?)
+                      (bcast! (make-bytevector 0) 0 0)))))
+    (let ((port (if (equal? rank root)
+                    (make-custom-binary-output-port "o" bcast! #f #f close)
+                    (make-custom-binary-input-port "i" bcast! #f #f close))))
+      ;; (setvbuf  port _IOFBF BUFFER-SIZE) will not  work on custom
+      ;; binary ports as of 2.0.5
+      port)))
 
 ;;;
 ;;; Should  we build our  own with-output-to-bytevector  instead? Data
