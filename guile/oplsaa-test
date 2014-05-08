@@ -933,6 +933,36 @@
  (HW   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
  (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
 
+(uranyl/prspc
+ (U    U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
+ (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25)
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
+(uranyl/kl1-prspc
+ (U    U     "Uranyl Ion, KL1"              238.029    2.85087589804909     0.12 3.25)
+ (OU   OU    "Uranyl Ion, KL1"              15.999     3.11814551349119     0.2 -0.625)
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
+(uranyl/kl2-prspc
+ (U    U     "Uranyl Ion, KL2"              238.029    2.81523994932347     0.3 3.50)
+ (OU   OU    "Uranyl Ion, KL2"              15.999     3.11814551349119     0.2 -0.75)
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
+(uranyl/gw96-prspc
+ (U    U     "Uranyl Ion, GW96"              238.029    2.81523994932347     0.4 2.50)
+ (OU   OU    "Uranyl Ion, GW96"              15.999     3.11814551349119     0.2 -0.25)
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
+(uranyl/pm13-prspc
+ (U    U     "Uranyl Ion, PM13"              238.029    2.95 0.126588325212573 2.5)
+ (OU   OU    "Uranyl Ion, PM13"              15.999     3.83 0.0136142161077673 -0.25)
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
 ;;;
 ;;; See comments on "UO2_5H2O,  TIP3P" in ./solutes.scm.  FIXME: OW is
 ;;; copy/pasted  from OPLSAA  table.  Better yet  find  a way  combine
