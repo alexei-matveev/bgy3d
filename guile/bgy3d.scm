@@ -16,6 +16,8 @@
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (ice-9 getopt-long)      ; getopt-long, option-ref
+  #:use-module (rnrs bytevectors)       ; make-bytevector, etc.
+  #:use-module (rnrs io ports)          ; make-custom-binary-output-port, etc.
   #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
   #:re-export                           ; from (guile bgy3d internal)
   (state-make
@@ -42,6 +44,7 @@
    comm-size
    comm-rank
    comm-set-parallel!
+   comm-bcast!
    rism-solvent
    rism-solute
    rism-self-energy
@@ -121,6 +124,72 @@
   (begin/serial
    (apply pretty-print args)
    (force-output)))
+
+;;;
+;;; On root rank  return an output port, on all  other ranks return an
+;;; input  port. Writing  to this  port  (from the  writer side)  will
+;;; broadcast  the data  to  all reader  ranks.
+;;;
+;;; Beware of buffering issues: a simple (write data port) does almost
+;;; no buffering each written number is transfered in a transaction of
+;;; just a  few bytes.  On the  other hand a  (put-bytevector port bv)
+;;; will  pass the  bytevector through  irrespective of  how  big that
+;;; is. Obviousely, many small broadcasts are slow.
+;;;
+(define (make-bcast-port root)
+    (let ((rank (comm-rank))
+          (bcast! (lambda (bv i n)
+                    (comm-bcast! root bv i n))))
+      (let ((port (if (equal? rank root)
+                      (make-custom-binary-output-port "o" bcast! #f #f #f)
+                      (make-custom-binary-input-port "i" bcast! #f #f #f))))
+        ;; (setvbuf  port _IOFBF BUFFER-SIZE) will not  work on custom
+        ;; binary ports as of 2.0.5
+        port)))
+
+;;;
+;;; Should  we build our  own with-output-to-bytevector  instead? Data
+;;; serialized like this is READ in comm-bcast on the reader side.
+;;;
+(define (serialize data)
+  (let-values (((port get-bytes) (open-bytevector-output-port)))
+    (write data port)
+    (let ((bytes (get-bytes)))
+      (close-port port)
+      bytes)))
+
+(define (deserialize bytes)
+  (let ((port (open-bytevector-input-port bytes)))
+    (let ((data (read port)))
+      (close-port port)
+      data)))
+
+;;;
+;;; Returns data  as broadcast from the  root rank. The  input data on
+;;; reader ranks  is ignored (but  reguired as argument).   FIXME: any
+;;; better interface?
+;;;
+(define (comm-bcast root data)
+  (let ((rank (comm-rank))
+        (port (make-bcast-port root)))
+    (let ((data' (if (equal? rank root)
+                     ;; Writer side. Note that a plain old (write data
+                     ;; port)  would also  work, albeit slower  --- as
+                     ;; every MPI broadcast will be just a few bytes.
+                     (let ((bytes (serialize data)))
+                       (put-bytevector port bytes)
+                       ;; FIXME: Scheme  tries to guarantee that a  write/read is a
+                       ;; no-op for simple data  structures. In this way bcast will
+                       ;; return the same on all workers or fail:
+                       (let ((data' (deserialize bytes)))
+                         (if (equal? data data')
+                             data' ; every worker goes through an extra read
+                             (error "conversion error" data data'))))
+                     ;; Reader side:
+                     (read port))))
+      (close-port port)
+      data')))
+
 
 ;;;
 ;;; Settings are handled as an  association list. The human input as a
