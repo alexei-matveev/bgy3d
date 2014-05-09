@@ -863,7 +863,7 @@ computes the sum of all vector elements."
                ;; client writes the geometry from the other side. Note
                ;; that only the first s-expression is read:
                ;;
-               (let ((x (read-fifo finp)))
+               (let ((x (read-fifo-v2 finp)))
                  ;;
                  ;; Convention is when the input is #f, then
                  ;; terminate. Otherwise evaluate PES at this point
