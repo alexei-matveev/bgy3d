@@ -16,6 +16,7 @@
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (ice-9 getopt-long)      ; getopt-long, option-ref
+  #:use-module (ice-9 threads)
   #:use-module (rnrs bytevectors)       ; make-bytevector, etc.
   #:use-module (rnrs io ports)          ; make-custom-binary-output-port, etc.
   #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
@@ -228,7 +229,37 @@
       (with-output-to-file fifo (lambda () (write data)))))
   (if #f #f))
 
-
+;;;
+;;; This is  called on  all workers. But  only rank-0 should  read the
+;;; FIFO.  The reader will block for measurable time (minutes).  Other
+;;; workers should not  be too eagerly waiting for  the result because
+;;; of agressive polling used  by MPI_Bcast().  Otherwise everyone but
+;;; rank-0 burns 100% CPU.
+;;;
+(define (read-fifo-v2 fifo)
+  (let ((flag #f)
+        (data #f)
+        (mutex (make-mutex)))
+    ;; This thread (created on  rank-0) blocks on reading a FIFO, when
+    ;; done sets two globals secured by the mutex:
+    (let ((helper (if (zero? (comm-rank))
+                      (make-thread
+                       (lambda ()
+                         (let ((value (normalize (with-input-from-file fifo read))))
+                           (with-mutex mutex
+                                       (set! data value)
+                                       (set! flag #t)))))
+                      #f)))
+      ;; Every worker checks the value of the flag on rank-0. If the
+      ;; data has not yet arrived, then sleep for some time and
+      ;; repeat. Access to flag needs to be secured by a mutex on
+      ;; rank-0. FIXME: other workers dont need a mutex, actually.
+      (let loop ()
+        (unless (comm-bcast 0 (with-mutex mutex flag))
+                (usleep 100000)         ; FIXME: literal 0.1 sec
+                (loop)))
+      (when helper (join-thread helper))
+      (comm-bcast 0 data))))
 
 ;;;
 ;;; Settings are handled as an  association list. The human input as a
