@@ -930,7 +930,14 @@ key "Berendsen87"
 \end_layout
 
 \begin_layout Section
-Computational details
+Computational details 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:computational-details"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1963,7 +1970,14 @@ Results and discussion
 \end_layout
 
 \begin_layout Subsection
-Test calcualtions for simple ions
+Test calcualtions for simple ions 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:simple-ions"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1988,8 +2002,8 @@ reference "tab:simple-ions"
 
 .
  As can be seen, the values of excess chemical potential of simple ions
- calculated with our 1D-RISM code are in perfect agreement with reported
- values and comparable with MD and experimental estimates.
+ calculated with our 1D-RISM code are in satisfatory agreement with reported
+ values and comparable to the MD and experimental estimates.
  The most significant technical difference to Ref.
 \begin_inset space ~
 \end_inset
@@ -2003,6 +2017,9 @@ key "Joung13"
 
  is a choice of smaller radial range and slightly coarser grid spacing made
  in this work.
+ Note that the RISM model underesimates the magnitude of solvation free
+ energies of cations by a few percent; the estimates for anions are slightly
+ worse than that.
 \end_layout
 
 \begin_layout Standard
@@ -2672,8 +2689,30 @@ name "sub:water-models"
 \end_layout
 
 \begin_layout Standard
-In this part, we first investigated the performance of water solvent with
- different non-zero interaction parameters on hydrogen site.
+In this section, we have picked the PM13 uranyl model, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-uranyl"
+
+\end_inset
+
+, and investigated the performance of three water models that differ only
+ by LJ parameters of hydrogen site, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-water"
+
+\end_inset
+
+.
  Classical MD calculation of Maginn and the co-authors 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2681,10 +2720,10 @@ key "Pomogaev13"
 
 \end_inset
 
- work was also reproduced for comparison.
- The radial distribution functions (RDFs) of uranium and oxygen sites on
- uranyl ion with oxygen and hydrogen sites in water solvents are shown in
- Figure
+ was also reproduced for comparison.
+ The radial distribution functions (RDFs) of oxygen and hydrogen sites of
+ water molecules, OW and HW, around uranium and oxygen sites of uranyl ion,
+ U and O, are shown in Figure
 \begin_inset space ~
 \end_inset
 
@@ -2696,13 +2735,15 @@ reference "fig:rdf-vs-water-model"
 \end_inset
 
 .
- When comparing RISM with MD results, it is easy to notice that for uranium-wate
-r oxygen and oxygen-water hydrogen pairs, the RDFs have quite similar shape,s
- but for uranium-water hydrogen and oxygen-water oxygen pairs, the differences
- are significant.
- From the RDF plots, we could also observe that different water models have
- influences on the intensity of the peaks but the positions did not vary
- too much.
+ When comparing RISM and MD results, it is noticeable that the RDFs for
+ site pairs carrying charges of opposite sign, that is for the U--OW, and
+ O--HW pairs, have quite similar shapes.
+ However, for U--HW and O--OW pairs, carrying charges of the same sign,
+ the differences between MD and RISM models are more pronounced and shared
+ by all three water models.
+ From the analysis of RDF plots, we conclude that different water models
+ have influences on the intensity of the peaks but the positions do not
+ vary much.
  As can be seen from Table
 \begin_inset space ~
 \end_inset
@@ -2714,9 +2755,50 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
-, the positions of peaks are close to each other for different water models
- while significant differences come to coordination numbers (4.9 – 5.8) and
- excess chemical potential (-308 – -293 kcal/mol)
+, the positions of peaks are within the range between 241 and 243 pm for
+ different water models while significant differences come to coordination
+ numbers ranging from 4.9 to 5.8 and excess chemical potential ranging from
+ 
+\begin_inset Formula $-$
+\end_inset
+
+308 to 
+\begin_inset Formula $-$
+\end_inset
+
+293 kcal/mol.
+ The reference MD results suggest a peak at 246 pm that integrates to coordinati
+on number 5.2 and a somewhat larger magnitude of the solvation free energy,
+ 
+\begin_inset Formula $-$
+\end_inset
+
+338 kcal/mol, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-water-model"
+
+\end_inset
+
+.
+ The observation that the RISM model underestimates the magnitude of the
+ solvation free energy for uranyl ion is not surprising, given the results
+ of Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:simple-ions"
+
+\end_inset
+
+, though for the dication the deviations are already between 9 and 13%.
 \end_layout
 
 \begin_layout Standard
