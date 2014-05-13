@@ -1239,7 +1239,10 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.25
+\begin_inset Formula $-$
+\end_inset
+
+0.25
 \end_layout
 
 \end_inset
@@ -1304,7 +1307,10 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.25
+\begin_inset Formula $-$
+\end_inset
+
+0.25
 \end_layout
 
 \end_inset
@@ -1369,7 +1375,10 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.25
+\begin_inset Formula $-$
+\end_inset
+
+0.25
 \end_layout
 
 \end_inset
@@ -1434,7 +1443,10 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.625
+\begin_inset Formula $-$
+\end_inset
+
+0.625
 \end_layout
 
 \end_inset
@@ -1499,7 +1511,11 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
- -0.75
+ 
+\begin_inset Formula $-$
+\end_inset
+
+0.75
 \end_layout
 
 \end_inset
@@ -1707,7 +1723,10 @@ SH-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.8476
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
 \end_layout
 
 \end_inset
@@ -1772,7 +1791,10 @@ PR-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.8476
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
 \end_layout
 
 \end_inset
@@ -1837,7 +1859,10 @@ cSPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.8476
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
 \end_layout
 
 \end_inset
@@ -2177,7 +2202,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--108.4
+\begin_inset Formula $-$
+\end_inset
+
+108.4
 \end_layout
 
 \end_inset
@@ -2186,7 +2214,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--108.3
+\begin_inset Formula $-$
+\end_inset
+
+108.3
 \end_layout
 
 \end_inset
@@ -2195,7 +2226,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--111.7
+\begin_inset Formula $-$
+\end_inset
+
+111.7
 \end_layout
 
 \end_inset
@@ -2204,7 +2238,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--111.4
+\begin_inset Formula $-$
+\end_inset
+
+111.4
 \end_layout
 
 \end_inset
@@ -2213,7 +2250,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--113.3
+\begin_inset Formula $-$
+\end_inset
+
+113.3
 \end_layout
 
 \end_inset
@@ -2222,7 +2262,10 @@ Li
 \begin_inset Text
 
 \begin_layout Plain Layout
--113.8
+\begin_inset Formula $-$
+\end_inset
+
+113.8
 \end_layout
 
 \end_inset
@@ -2246,7 +2289,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--84.9
+\begin_inset Formula $-$
+\end_inset
+
+84.9
 \end_layout
 
 \end_inset
@@ -2255,7 +2301,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--85.0
+\begin_inset Formula $-$
+\end_inset
+
+85.0
 \end_layout
 
 \end_inset
@@ -2264,7 +2313,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--86.3
+\begin_inset Formula $-$
+\end_inset
+
+86.3
 \end_layout
 
 \end_inset
@@ -2273,7 +2325,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--86.2
+\begin_inset Formula $-$
+\end_inset
+
+86.2
 \end_layout
 
 \end_inset
@@ -2282,7 +2337,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--88.4
+\begin_inset Formula $-$
+\end_inset
+
+88.4
 \end_layout
 
 \end_inset
@@ -2291,7 +2349,10 @@ Na
 \begin_inset Text
 
 \begin_layout Plain Layout
--88.7
+\begin_inset Formula $-$
+\end_inset
+
+88.7
 \end_layout
 
 \end_inset
@@ -2315,7 +2376,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--68.6
+\begin_inset Formula $-$
+\end_inset
+
+68.6
 \end_layout
 
 \end_inset
@@ -2324,7 +2388,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--68.6
+\begin_inset Formula $-$
+\end_inset
+
+68.6
 \end_layout
 
 \end_inset
@@ -2333,7 +2400,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--69.4
+\begin_inset Formula $-$
+\end_inset
+
+69.4
 \end_layout
 
 \end_inset
@@ -2342,7 +2412,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--69.4
+\begin_inset Formula $-$
+\end_inset
+
+69.4
 \end_layout
 
 \end_inset
@@ -2351,7 +2424,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--71.0
+\begin_inset Formula $-$
+\end_inset
+
+71.0
 \end_layout
 
 \end_inset
@@ -2360,7 +2436,10 @@ K
 \begin_inset Text
 
 \begin_layout Plain Layout
--71.2
+\begin_inset Formula $-$
+\end_inset
+
+71.2
 \end_layout
 
 \end_inset
@@ -2384,7 +2463,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--79.4
+\begin_inset Formula $-$
+\end_inset
+
+79.4
 \end_layout
 
 \end_inset
@@ -2393,7 +2475,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--78.1
+\begin_inset Formula $-$
+\end_inset
+
+78.1
 \end_layout
 
 \end_inset
@@ -2402,7 +2487,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--80.0
+\begin_inset Formula $-$
+\end_inset
+
+80.0
 \end_layout
 
 \end_inset
@@ -2411,7 +2499,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--79.5
+\begin_inset Formula $-$
+\end_inset
+
+79.5
 \end_layout
 
 \end_inset
@@ -2420,7 +2511,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--89.3
+\begin_inset Formula $-$
+\end_inset
+
+89.3
 \end_layout
 
 \end_inset
@@ -2429,7 +2523,10 @@ Cl
 \begin_inset Text
 
 \begin_layout Plain Layout
--89.1
+\begin_inset Formula $-$
+\end_inset
+
+89.1
 \end_layout
 
 \end_inset
@@ -2453,7 +2550,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--73.7
+\begin_inset Formula $-$
+\end_inset
+
+73.7
 \end_layout
 
 \end_inset
@@ -2462,7 +2562,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--72.2
+\begin_inset Formula $-$
+\end_inset
+
+72.2
 \end_layout
 
 \end_inset
@@ -2471,7 +2574,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--74.2
+\begin_inset Formula $-$
+\end_inset
+
+74.2
 \end_layout
 
 \end_inset
@@ -2480,7 +2586,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--73.7
+\begin_inset Formula $-$
+\end_inset
+
+73.7
 \end_layout
 
 \end_inset
@@ -2489,7 +2598,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--82.7
+\begin_inset Formula $-$
+\end_inset
+
+82.7
 \end_layout
 
 \end_inset
@@ -2498,7 +2610,10 @@ Br
 \begin_inset Text
 
 \begin_layout Plain Layout
--82.7
+\begin_inset Formula $-$
+\end_inset
+
+82.7
 \end_layout
 
 \end_inset
@@ -2522,7 +2637,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--64.6
+\begin_inset Formula $-$
+\end_inset
+
+64.6
 \end_layout
 
 \end_inset
@@ -2531,7 +2649,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--62.7
+\begin_inset Formula $-$
+\end_inset
+
+62.7
 \end_layout
 
 \end_inset
@@ -2540,7 +2661,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--65.0
+\begin_inset Formula $-$
+\end_inset
+
+65.0
 \end_layout
 
 \end_inset
@@ -2549,7 +2673,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--64.5
+\begin_inset Formula $-$
+\end_inset
+
+64.5
 \end_layout
 
 \end_inset
@@ -2558,7 +2685,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--74.4
+\begin_inset Formula $-$
+\end_inset
+
+74.4
 \end_layout
 
 \end_inset
@@ -2567,7 +2697,10 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
--74.3
+\begin_inset Formula $-$
+\end_inset
+
+74.3
 \end_layout
 
 \end_inset
@@ -2988,7 +3121,10 @@ SH-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
- -309
+\begin_inset Formula $-$
+\end_inset
+
+309
 \end_layout
 
 \end_inset
@@ -3026,7 +3162,10 @@ PR-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
- -293
+\begin_inset Formula $-$
+\end_inset
+
+293
 \end_layout
 
 \end_inset
@@ -3064,7 +3203,10 @@ cSPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
- -308
+\begin_inset Formula $-$
+\end_inset
+
+308
 \end_layout
 
 \end_inset
@@ -3102,7 +3244,11 @@ MD
 \begin_inset Text
 
 \begin_layout Plain Layout
- -338
+ 
+\begin_inset Formula $-$
+\end_inset
+
+338
 \end_layout
 
 \end_inset
@@ -3492,7 +3638,10 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
--296 
+\begin_inset Formula $-$
+\end_inset
+
+296 
 \end_layout
 
 \end_inset
@@ -3548,7 +3697,10 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
--305 
+\begin_inset Formula $-$
+\end_inset
+
+305 
 \end_layout
 
 \end_inset
@@ -3604,7 +3756,10 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
--293 
+\begin_inset Formula $-$
+\end_inset
+
+293 
 \end_layout
 
 \end_inset
@@ -3660,7 +3815,10 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
--375 
+\begin_inset Formula $-$
+\end_inset
+
+375 
 \end_layout
 
 \end_inset
@@ -3716,7 +3874,10 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
--380
+\begin_inset Formula $-$
+\end_inset
+
+380
 \end_layout
 
 \end_inset
@@ -3832,11 +3993,18 @@ Expt
 \begin_inset Text
 
 \begin_layout Plain Layout
--437
+\begin_inset Formula $-$
+\end_inset
+
+437
 \begin_inset Formula $\sim$
 \end_inset
 
--318
+
+\begin_inset Formula $-$
+\end_inset
+
+318
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -4253,7 +4421,10 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
--210 
+\begin_inset Formula $-$
+\end_inset
+
+210 
 \end_layout
 
 \end_inset
@@ -4262,7 +4433,10 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
--311 
+\begin_inset Formula $-$
+\end_inset
+
+311 
 \end_layout
 
 \end_inset
@@ -4300,7 +4474,10 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
--216
+\begin_inset Formula $-$
+\end_inset
+
+216
 \end_layout
 
 \end_inset
@@ -4309,7 +4486,10 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
--321 
+\begin_inset Formula $-$
+\end_inset
+
+321 
 \end_layout
 
 \end_inset
@@ -4347,7 +4527,10 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
--212
+\begin_inset Formula $-$
+\end_inset
+
+212
 \end_layout
 
 \end_inset
@@ -4356,7 +4539,10 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
--309 
+\begin_inset Formula $-$
+\end_inset
+
+309 
 \end_layout
 
 \end_inset
@@ -4394,7 +4580,10 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
--268 
+\begin_inset Formula $-$
+\end_inset
+
+268 
 \end_layout
 
 \end_inset
@@ -4403,7 +4592,10 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
--384 
+\begin_inset Formula $-$
+\end_inset
+
+384 
 \end_layout
 
 \end_inset
@@ -4441,7 +4633,10 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
--271 
+\begin_inset Formula $-$
+\end_inset
+
+271 
 \end_layout
 
 \end_inset
@@ -4450,7 +4645,10 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
--390 
+\begin_inset Formula $-$
+\end_inset
+
+390 
 \end_layout
 
 \end_inset
@@ -4488,7 +4686,10 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
--263
+\begin_inset Formula $-$
+\end_inset
+
+263
 \end_layout
 
 \end_inset
@@ -4497,7 +4698,10 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
--421 
+\begin_inset Formula $-$
+\end_inset
+
+421 
 \end_layout
 
 \end_inset
@@ -4882,7 +5086,10 @@ n = 4
 \begin_inset Text
 
 \begin_layout Plain Layout
--232 
+\begin_inset Formula $-$
+\end_inset
+
+232 
 \end_layout
 
 \end_inset
@@ -4891,7 +5098,10 @@ n = 4
 \begin_inset Text
 
 \begin_layout Plain Layout
--217 
+\begin_inset Formula $-$
+\end_inset
+
+217 
 \end_layout
 
 \end_inset
@@ -4900,7 +5110,10 @@ n = 4
 \begin_inset Text
 
 \begin_layout Plain Layout
--388
+\begin_inset Formula $-$
+\end_inset
+
+388
 \end_layout
 
 \end_inset
@@ -4920,7 +5133,10 @@ n = 5
 \begin_inset Text
 
 \begin_layout Plain Layout
--271 
+\begin_inset Formula $-$
+\end_inset
+
+271 
 \end_layout
 
 \end_inset
@@ -4929,7 +5145,10 @@ n = 5
 \begin_inset Text
 
 \begin_layout Plain Layout
--271 
+\begin_inset Formula $-$
+\end_inset
+
+271 
 \end_layout
 
 \end_inset
@@ -4938,7 +5157,10 @@ n = 5
 \begin_inset Text
 
 \begin_layout Plain Layout
--390
+\begin_inset Formula $-$
+\end_inset
+
+390
 \end_layout
 
 \end_inset
@@ -4958,7 +5180,10 @@ n = 6
 \begin_inset Text
 
 \begin_layout Plain Layout
--294 
+\begin_inset Formula $-$
+\end_inset
+
+294 
 \end_layout
 
 \end_inset
@@ -4967,7 +5192,10 @@ n = 6
 \begin_inset Text
 
 \begin_layout Plain Layout
--275 
+\begin_inset Formula $-$
+\end_inset
+
+275 
 \end_layout
 
 \end_inset
@@ -4976,7 +5204,10 @@ n = 6
 \begin_inset Text
 
 \begin_layout Plain Layout
--391
+\begin_inset Formula $-$
+\end_inset
+
+391
 \end_layout
 
 \end_inset
