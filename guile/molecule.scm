@@ -396,7 +396,7 @@
 ;;; each line
 ;;;
 (define *tinker-ff-parameter-file*
-  "guile/oplsaa-test")
+  "guile/force-fields.scm")
 
 (define (force-field-table force-field)
   (let ((contents (slurp/cached (find-file *tinker-ff-parameter-file*))))
@@ -421,7 +421,7 @@
 ;;;
 ;;;   (type symbol descr weight sigma epsilon charge atnum class ligand)
 ;;;
-;;; See e.g. ./oplsaa-test or ./tinker.scm for details.
+;;; See e.g. ./force-fields.scm or ./tinker.scm for details.
 ;;;
 (define ff-symbol second)
 (define ff-sigma fifth)
