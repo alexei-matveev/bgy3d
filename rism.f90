@@ -85,7 +85,7 @@ contains
     use iso_c_binding, only: c_int, c_double
     use foreign, only: site
     use options, only: getopt
-    use lisp, only: obj, values, cons, nil, flonum
+    use lisp, only: obj, values, list, flonum
     implicit none
     integer (c_int), intent (in), value :: n
     type (site), intent (in) :: sites(n)
@@ -101,7 +101,7 @@ contains
     if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     call self_energy (rule, sites, spec, e, g)
-    eg = values (cons (flonum (e), cons (list2 (g), nil)))
+    eg = values (list (flonum (e), list2 (g)))
   end function rism_self_energy
 
 
