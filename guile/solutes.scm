@@ -796,7 +796,7 @@
 
 ("UO2_5H2O, SPC"
  (geometry "UO2_5H2O")
-  (uranyl/spc
+  (force-field (uranyl/spc water/spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -804,7 +804,7 @@
 
 ("UO2_5H2O, PRSPC"
   (geometry "UO2_5H2O")
-  (uranyl/prspc
+  (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -812,7 +812,7 @@
 
 ("UO2_5H2O, KL1-PRSPC"
   (geometry "UO2_5H2O")
-  (uranyl/kl1-prspc
+  (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -820,7 +820,7 @@
 
 ("UO2_5H2O, KL2-PRSPC"
   (geometry "UO2_5H2O")
-  (uranyl/kl2-prspc
+  (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -828,7 +828,7 @@
 
 ("UO2_5H2O, GW96-PRSPC"
   (geometry "UO2_5H2O")
-  (uranyl/gw96-prspc
+  (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -836,7 +836,7 @@
 
 ("UO2_5H2O, PM13-PRSPC"
   (geometry "UO2_5H2O")
-  (uranyl/pm13-prspc
+  (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -844,7 +844,7 @@
 
 ("UO2_5H2O, TIP3P"
   (geometry "UO2_5H2O")
-  (uranyl/t3p
+  (force-field (uranyl/t3p water/t3p)
    ("U" U) ;; TIP3P uranyl
    ("OU" OU)
    ("HW" HW)
@@ -869,7 +869,7 @@
 
 ("UO2_4H2O, D4H, KL2-PRSPC"
  (geometry "UO2_4H2O, D4H")
-  (uranyl/kl2-prspc
+  (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -877,7 +877,7 @@
 
 ("UO2_4H2O, D4H, KL1-PRSPC"
  (geometry "UO2_4H2O, D4H")
-  (uranyl/kl1-prspc
+  (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -885,7 +885,7 @@
 
 ("UO2_4H2O, D4H, PM13-PRSPC"
  (geometry "UO2_4H2O, D4H")
-  (uranyl/pm13-prspc
+  (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -893,7 +893,7 @@
 
 ("UO2_4H2O, D4H, PRSPC"
  (geometry "UO2_4H2O, D4H")
-  (uranyl/prspc
+  (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -901,7 +901,7 @@
 
 ("UO2_4H2O, D4H, GW96-PRSPC"
  (geometry "UO2_4H2O, D4H")
-  (uranyl/gw96-prspc
+  (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -929,7 +929,7 @@
 
 ("UO2_5H2O, CS, PRSPC"
  (geometry "UO2_5H2O, CS")
-  (uranyl/prspc
+  (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -937,7 +937,7 @@
 
 ("UO2_5H2O, CS, KL2-PRSPC"
  (geometry "UO2_5H2O, CS")
-  (uranyl/kl2-prspc
+  (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -945,7 +945,7 @@
 
 ("UO2_5H2O, CS, KL1-PRSPC"
  (geometry "UO2_5H2O, CS")
-  (uranyl/kl1-prspc
+  (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -953,7 +953,7 @@
 
 ("UO2_5H2O, CS, GW96-PRSPC"
  (geometry "UO2_5H2O, CS")
-  (uranyl/gw96-prspc
+  (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -961,7 +961,7 @@
 
 ("UO2_5H2O, CS, PM13-PRSPC"
  (geometry "UO2_5H2O, CS")
-  (uranyl/pm13-prspc
+  (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -992,7 +992,7 @@
 
 ("UO2_6H2O, D6H, KL2-PRSPC"
  (geometry "UO2_6H2O, D6H")
-  (uranyl/kl2-prspc
+  (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1000,7 +1000,7 @@
 
 ("UO2_6H2O, D6H, KL1-PRSPC"
  (geometry "UO2_6H2O, D6H")
-  (uranyl/kl1-prspc
+  (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1008,7 +1008,7 @@
 
 ("UO2_6H2O, D6H, GW96-PRSPC"
  (geometry "UO2_6H2O, D6H")
-  (uranyl/gw96-prspc
+  (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1016,7 +1016,7 @@
 
 ("UO2_6H2O, D6H, PM13-PRSPC"
  (geometry "UO2_6H2O, D6H")
-  (uranyl/pm13-prspc
+  (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1024,7 +1024,7 @@
 
 ("UO2_6H2O, D6H, PRSPC"
  (geometry "UO2_6H2O, D6H")
-  (uranyl/prspc
+  (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1055,7 +1055,7 @@
 
 ("UO2_6H2O, D3D, KL2-PRSPC"
  (geometry "UO2_6H2O, D3D")
-  (uranyl/kl2-prspc
+  (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1063,7 +1063,7 @@
 
 ("UO2_6H2O, D3D, KL1-PRSPC"
  (geometry "UO2_6H2O, D3D")
-  (uranyl/kl1-prspc
+  (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1071,7 +1071,7 @@
 
 ("UO2_6H2O, D3D, GW96-PRSPC"
  (geometry "UO2_6H2O, D3D")
-  (uranyl/gw96-prspc
+  (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1079,7 +1079,7 @@
 
 ("UO2_6H2O, D3D, PM13-PRSPC"
  (geometry "UO2_6H2O, D3D")
-  (uranyl/pm13-prspc
+  (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1087,7 +1087,7 @@
 
 ("UO2_6H2O, D3D, PRSPC"
  (geometry "UO2_6H2O, D3D")
-  (uranyl/prspc
+  (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
@@ -1111,7 +1111,7 @@
   ("HC" (-0.699 -0.934 0.609))
   ("OH" (0.558 0.42 -0.278))
   ("HO" (0.716 1.404 0.137)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96) ;; "Alcohol CH3OH & RCH2OH"
   ("HC" 95) ;;"Methanol CH3-"
   ("OH" 93) ;;"Alcohol -OH"
@@ -1125,7 +1125,7 @@
   ("HC" (-0.699 -0.934 0.609))
   ("OH" (0.558 0.42 -0.278))
   ("HO" (1.06949445 -0.34100606 -0.84781418)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96)
   ("HC" 95)
   ("OH" 93)
@@ -1146,7 +1146,7 @@
   ("HC" (-2.439 -1.178 0.89))
   ("HC" (-2.439 -1.178 -0.89))
   ("HC" (-3.21 0.157 0.0)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)  ;; "Carboxylic Acid -COOH"
   ("O" 207)  ;; "Carboxylic Acid C=O"
   ("OH" 208) ;; "Carboxylic Acid -OH"
@@ -1177,7 +1177,7 @@
   ("HC" (-0.696 3.204 -0.89))
   ("HC" (-0.696 3.204 0.89))
   ("HC" (-2.236 3.19 0.0)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT3"  77) ;; "Alkane CH3-"
   ("CT2"  78) ;; "Alkane -CH2-"
   ("HC"  82))) ;; "Alkane H-C"
@@ -1202,7 +1202,7 @@
   ("HC"  (0.8133  0.0000  0.1338))
   ("OH"  (1.8631  1.7142  0.6464))
   ("HO"  (2.4856  1.2216  1.1660)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96) ;; "Alcohol CH3OH & RCH2OH"
   ("HC" 95) ;; "Methanol CH3-"
   ("OH" 93) ;; "Alcohol -OH"
@@ -1218,7 +1218,7 @@
   ("HC"  (1.9050  2.8742  0.9059))
   ("HC"  (1.4753  2.3225  2.5456))
   ("HO"  (3.7056  2.1820  2.1139)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96)    ;; "Alcohol CH3OH & RCH2OH"
   ("CT3" 77)   ;; "Alkane CH3-"
   ("OH" 93)    ;; "Alcohol -OH"
@@ -1238,7 +1238,7 @@
   ("HC"  (3.1932  2.9340  1.2381))
   ("HC"  (4.2564  1.5270  1.3793))
   ("HO"  (1.0138  1.7939  3.2691)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96)
   ("CT2" 78) ;; "Alkane -CH2-"
   ("CT3" 77)
@@ -1262,7 +1262,7 @@
   ("HC"  (3.7712  0.1403  3.0423))
   ("HC"  (4.0193  0.4827  1.3240))
   ("HO"  (0.1229  3.7075  2.0732)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96)
   ("CT2" 78)
   ("CT3" 77)
@@ -1289,7 +1289,7 @@
   ("HC"  (5.9510  1.5990  0.6041))
   ("HC"  (6.5258  1.0323  2.1788))
   ("HO"  (0.1634  0.5491  1.4297)))
- (oplsaa
+ (force-field (oplsaa)
   ("CT" 96)
   ("CT2" 78)
   ("CT3" 77)
@@ -1306,7 +1306,7 @@
   ("O"  (1.2026  0.0000  0.0000))
   ("HO"  (2.7325  0.9756  1.3421))
   ("HCO"  (0.0000  0.2800  1.6921)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)    ;; "Carboxylic Acid -COOH"
   ("O" 207)    ;; "Carboxylic Acid C=O"
   ("OH" 208)   ;; "Carboxylic Acid -OH"
@@ -1322,7 +1322,7 @@
   ("HC"  (0.3742  0.7552  0.0000))
   ("HC"  (0.9140  0.0000  1.5112))
   ("HO"  (3.8882  1.5907  0.4746)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)
   ("CT3" 77)
   ("O" 207)
@@ -1346,7 +1346,7 @@
   ("HC"  (4.7051  2.0131  0.0008))
   ("HC"  (3.8338  0.8996  -0.8157))
   ("HC"  (3.8334  0.8998  0.8171)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)
   ("CT3" 77)
   ("CT2" 78)
@@ -1371,7 +1371,7 @@
   ("HC"  (4.808148   2.038879  -0.032852))
   ("HC"  (3.819263   0.806527  -0.869903))
   ("HC"  (3.874655   0.840266   0.908270)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)
   ("CT3" 77)
   ("CT2" 78)
@@ -1396,7 +1396,7 @@
   ("HC"  (0.0000  1.4538  1.2674))
   ("HC"  (0.8647  1.8031  2.7710))
   ("HC"  (0.8690  2.9837  1.4539)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)
   ("O" 207)
   ("OH" 208)
@@ -1423,7 +1423,7 @@
   ("HC"  (4.5558  3.0450  1.0542))
   ("HC"  (4.5113  2.3890  2.6998))
   ("HO"  (7.2417  0.3008  2.1695)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 206)
   ("O" 207)
   ("OH" 208)
@@ -1442,7 +1442,7 @@
   ("C"  (0.000 0.000 0.000))
   ("HCO"  (-0.866 -0.500 0.001))
   ("HCO"  (0.866 -0.500 -0.000)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 216)     ;; "Aldehyde/Acyl Halide C=O"
   ("O" 217)     ;; "Aldehyde/Acyl Halide C=O"
   ("HCO" 218))) ;; "Aldehyde/Formamide HCO-"
@@ -1455,7 +1455,7 @@
   ("HC"  (0.1354  1.7029  0.2243))
   ("HC"  (0.5749  0.0000  0.0000))
   ("HCO"  (2.5561  0.2555  1.6109)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 216)
   ("O" 217)
   ("HCO" 218)
@@ -1473,7 +1473,7 @@
   ("HC"  (3.6982  0.5613  2.1144))
   ("HC"  (2.5307  1.7572  2.6922))
   ("HC"  (2.1168  0.0369  2.7095)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 216)
   ("O" 217)
   ("HCO" 218)
@@ -1495,7 +1495,7 @@
   ("HC"  (1.9254  2.7439  0.0000))
   ("HC"  (0.7556  1.5492  0.5728))
   ("HCO"  (3.7193  1.4109  1.5484)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 216)
   ("O" 217)
   ("HCO" 218)
@@ -1520,7 +1520,7 @@
   ("HC"  (0.8551  2.7832  0.7673))
   ("HC"  (2.1828  1.6938  0.3468))
   ("HC"  (0.5115  1.2260  0.0000)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 216)
   ("O" 217)
   ("HCO" 218)
@@ -1533,7 +1533,7 @@
   ("H"  (0.0000  0.0000  0.0000))
   ("H"  (0.8726  1.4885  0.0000))
   ("H"  (1.7452  0.0000  0.0000)))
- (oplsaa
+ (force-field (oplsaa)
   ("NT" 69)
   ;; ("H" 70)))
   ("H" 1003)))
@@ -1542,7 +1542,7 @@
  (("SH"  (0.8727  0.5134  0.0000))
   ("HS"  (0.0000  0.0513  0.0000))
   ("HS"  (1.7454  0.0000  0.0000)))
- (oplsaa
+ (force-field (oplsaa)
   ("SH" 140)
   ;; ("HS" 144)))
   ("HS" 1004)))
@@ -1551,7 +1551,7 @@
   (("CZ"  (1.0256  0.0000  0.0000))
    ("HC"  (0.0000  0.0000  0.0000))
    ("NZ"  (2.0000  0.0000  0.0000)))
-  (oplsaa
+  (force-field (oplsaa)
    ("CZ" 692)
    ("NZ" 691)
    ("HC" 788)))
@@ -1564,7 +1564,7 @@
    ("NT"  (1.9922  1.0216  0.0000))
    ("H"  (2.5030  1.8389  0.0000))
    ("H"  (2.5030  0.1022  0.0000)))
-  (oplsaa
+  (force-field (oplsaa)
    ("NT" 730)
    ("CT" 733)
    ;; ("H" 739)
@@ -1596,9 +1596,9 @@
 ;;   pp 16264-16270
 ;;   http://dx.doi.org/10.1021/jp0484579
 ;;
-("Na+, oplsaa" (("Na+" (0.0 0.0 0.0))) (oplsaa ("Na+" 346)))
+("Na+, oplsaa" (("Na+" (0.0 0.0 0.0))) (force-field (oplsaa) ("Na+" 346)))
 
-("Cl-, oplsaa" (("Cl-" (0.0 0.0 0.0))) (oplsaa ("Cl-" 341)))
+("Cl-, oplsaa" (("Cl-" (0.0 0.0 0.0))) (force-field (oplsaa) ("Cl-" 341)))
 
 ;;
 ;; Monoatomic ions cited by [CFCRS08], parameters could be found in
@@ -1606,21 +1606,21 @@
 ;; the same parameters with those ./oplsaa-test table, only less
 ;; digits, but there are more significant difference in monovalent ions
 ;;
-("Li+, JUT04" (("Li+" (0.0 0.0 0.0))) (jut04 ("Li+" Li)))
-("Na+, JUT04" (("Na+" (0.0 0.0 0.0))) (jut04 ("Na+" Na)))
-("K+, JUT04" (("K+" (0.0 0.0 0.0))) (jut04 ("K+" K)))
-("Rb+, JUT04" (("Rb+" (0.0 0.0 0.0))) (jut04 ("Rb+" Rb)))
-("Cs+, JUT04" (("Cs+" (0.0 0.0 0.0))) (jut04 ("Cs+" Cs)))
+("Li+, JUT04" (("Li+" (0.0 0.0 0.0))) (force-field (jut04) ("Li+" Li)))
+("Na+, JUT04" (("Na+" (0.0 0.0 0.0))) (force-field (jut04) ("Na+" Na)))
+("K+, JUT04" (("K+" (0.0 0.0 0.0))) (force-field (jut04) ("K+" K)))
+("Rb+, JUT04" (("Rb+" (0.0 0.0 0.0))) (force-field (jut04) ("Rb+" Rb)))
+("Cs+, JUT04" (("Cs+" (0.0 0.0 0.0))) (force-field (jut04) ("Cs+" Cs)))
 
-("Mg2+, JUT04" (("Mg2+" (0.0 0.0 0.0))) (jut04 ("Mg2+" Mg)))
-("Ca2+, JUT04" (("Ca2+" (0.0 0.0 0.0))) (jut04 ("Ca2+" Ca)))
-("Sr2+, JUT04" (("Sr2+" (0.0 0.0 0.0))) (jut04 ("Sr2+" Sr)))
-("Ba2+, JUT04" (("Ba2+" (0.0 0.0 0.0))) (jut04 ("Ba2+" Ba)))
+("Mg2+, JUT04" (("Mg2+" (0.0 0.0 0.0))) (force-field (jut04) ("Mg2+" Mg)))
+("Ca2+, JUT04" (("Ca2+" (0.0 0.0 0.0))) (force-field (jut04) ("Ca2+" Ca)))
+("Sr2+, JUT04" (("Sr2+" (0.0 0.0 0.0))) (force-field (jut04) ("Sr2+" Sr)))
+("Ba2+, JUT04" (("Ba2+" (0.0 0.0 0.0))) (force-field (jut04) ("Ba2+" Ba)))
 
-("F-, JUT04" (("F-" (0.0 0.0 0.0))) (jut04 ("F-" F)))
-("Cl-, JUT04" (("Cl-" (0.0 0.0 0.0))) (jut04 ("Cl-" Cl)))
-("Br-, JUT04" (("Br-" (0.0 0.0 0.0))) (jut04 ("Br-" Br)))
-("I-, JUT04" (("I-" (0.0 0.0 0.0))) (jut04 ("I-" I)))
+("F-, JUT04" (("F-" (0.0 0.0 0.0))) (force-field (jut04) ("F-" F)))
+("Cl-, JUT04" (("Cl-" (0.0 0.0 0.0))) (force-field (jut04) ("Cl-" Cl)))
+("Br-, JUT04" (("Br-" (0.0 0.0 0.0))) (force-field (jut04) ("Br-" Br)))
+("I-, JUT04" (("I-" (0.0 0.0 0.0))) (force-field (jut04) ("I-" I)))
 
 ;;
 ;; CFCRS08 polyatomic ions:
@@ -1650,7 +1650,7 @@
 ("hydroxyl anion, CFCRS08"
   (("OW"  (-0.0203  0.0000  0.0000))
    ("HW"  (0.9623  0.0000  0.0000)))
-  (cfcrs08
+  (force-field (cfcrs08)
    ("HW" 3)
    ("OW" 4)))
 
@@ -1659,7 +1659,7 @@
   ("C"  (0.9364  0.3495  1.1289))
   ("O2"  (1.2026  0.0000  0.0000))
   ("HC" (0.0000  0.2800  1.6921)))
- (cfcrs08
+ (force-field (cfcrs08)
    ("O2" 10)
    ("C"  9)
    ("HC" 11)))
@@ -1667,7 +1667,7 @@
 ("cyanide ion, CFCRS08"
   (("C"  (1.0256  0.0000  0.0000))
    ("N3"  (2.0000  0.0000  0.0000)))
-  (cfcrs08
+  (force-field (cfcrs08)
     ("C" 7)
     ("N3" 8)))
 
@@ -1677,7 +1677,7 @@
    ("H"  (-0.3619  1.0226  0.0267))
    ("H"  (-0.3395  -0.4804  -0.9124))
    ("H"  (-0.3832  -0.5417  0.8585)))
-  (cfcrs08
+  (force-field (cfcrs08)
     ("N3" 6)
     ("H" 5)))
 
@@ -1690,7 +1690,7 @@
   ("HC"  (0.0241  1.5696  1.5617))
   ("HC"  (0.3692  0.7573  -0.0088))
   ("HC"  (0.9032  -0.0151  1.5161)))
- (cfcrs08
+ (force-field (cfcrs08)
   ("C" 12)
   ("O2" 13)
   ("CT" 14)
@@ -1702,7 +1702,7 @@
    ("HW" (-0.0258  -0.7738  0.3312))
    ("HW" (-0.3383  0.8303  0.5747))
    ("HW" (1.0366  0.3670  -0.2158)))
-  (cfcrs08
+  (force-field (cfcrs08)
     ("OW" 2)
     ("HW" 1)))
 
@@ -1712,7 +1712,7 @@
    ("OW"  (0.8664  0.4998  0.0000))
    ("HW"  (0.0000  0.0000  0.0000))
    ("HW"  (1.7327  0.0000  0.0000)))
-  (cfcrs08
+  (force-field (cfcrs08)
     ("OW" 2)
     ("HW" 1)))
 
@@ -1722,7 +1722,7 @@
    ("OW"  (0.5910  1.0469  -0.0260))
    ("HW"  (-0.1327  1.1487  0.6157))
    ("HW"  (2.8317  0.6876  -1.4673)))
-  (cfcrs08
+  (force-field (cfcrs08)
     ("OW" 2)
     ("HW" 1)))
 
@@ -1734,7 +1734,7 @@
 ("hydroxyl anion, oplsaa"
   (("OH"  (-0.0203  0.0000  0.0000))
    ("HO"  (0.9623  0.0000  0.0000)))
-  (oplsaa
+  (force-field (oplsaa)
    ("OH" 373)
    ;; ("HO" 374)))
    ("HO" 1007)))  ;; again, use finite-size hydrogen
@@ -1744,7 +1744,7 @@
   ("C"  (0.9364  0.3495  1.1289))
   ("O"  (1.2026  0.0000  0.0000))
   ("HCO"  (0.0000  0.2800  1.6921)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 210)    ;; "Carboxylic Acid -COOH"
   ("O" 211)    ;; "Carboxylic Acid C=O"
   ("HCO" 218)));; FIXME: "Aldehyde/Formamide HCO-" is the only H in the
@@ -1758,7 +1758,7 @@
   ("HC"  (0.0241  1.5696  1.5617))
   ("HC"  (0.3692  0.7573  -0.0088))
   ("HC"  (0.9032  -0.0151  1.5161)))
- (oplsaa
+ (force-field (oplsaa)
   ("C" 210)
   ("CT" 212)
   ("O" 211)

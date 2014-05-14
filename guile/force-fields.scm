@@ -925,55 +925,43 @@
 (1007   HO    "Hydroxide Ion OH-"             1.008     0.4000     0.0460    0.3000)
 )
 ;;;
-;;; See comments on "UO2_5H2O, SPC" in ./solutes.scm:
+;;; See ./solutes.scm:
 ;;;
 (uranyl/spc
  (U    U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
- (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25)
+ (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25))
+
+(uranyl/kl1
+ (U    U     "Uranyl Ion, KL1"              238.029    2.85087589804909     0.12 3.25)
+ (OU   OU    "Uranyl Ion, KL1"              15.999     3.11814551349119     0.2 -0.625))
+
+(uranyl/kl2
+ (U    U     "Uranyl Ion, KL2"              238.029    2.81523994932347     0.3 3.50)
+ (OU   OU    "Uranyl Ion, KL2"              15.999     3.11814551349119     0.2 -0.75))
+
+(uranyl/gw96
+ (U    U     "Uranyl Ion, GW96"              238.029    2.81523994932347     0.4 2.50)
+ (OU   OU    "Uranyl Ion, GW96"              15.999     3.11814551349119     0.2 -0.25))
+
+(uranyl/pm13
+ (U    U     "Uranyl Ion, PM13"              238.029    2.95 0.126588325212573 2.5)
+ (OU   OU    "Uranyl Ion, PM13"              15.999     3.83 0.0136142161077673 -0.25))
+
+(uranyl/t3p
+ (U    U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
+ (OU   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25))
+
+(water/spc
  (HW   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
  (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
 
-(uranyl/prspc
- (U    U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
- (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25)
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
-
-(uranyl/kl1-prspc
- (U    U     "Uranyl Ion, KL1"              238.029    2.85087589804909     0.12 3.25)
- (OU   OU    "Uranyl Ion, KL1"              15.999     3.11814551349119     0.2 -0.625)
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
-
-(uranyl/kl2-prspc
- (U    U     "Uranyl Ion, KL2"              238.029    2.81523994932347     0.3 3.50)
- (OU   OU    "Uranyl Ion, KL2"              15.999     3.11814551349119     0.2 -0.75)
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
-
-(uranyl/gw96-prspc
- (U    U     "Uranyl Ion, GW96"              238.029    2.81523994932347     0.4 2.50)
- (OU   OU    "Uranyl Ion, GW96"              15.999     3.11814551349119     0.2 -0.25)
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
-
-(uranyl/pm13-prspc
- (U    U     "Uranyl Ion, PM13"              238.029    2.95 0.126588325212573 2.5)
- (OU   OU    "Uranyl Ion, PM13"              15.999     3.83 0.0136142161077673 -0.25)
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
-
-;;;
-;;; See comments on "UO2_5H2O,  TIP3P" in ./solutes.scm.  FIXME: OW is
-;;; copy/pasted  from OPLSAA  table.  Better yet  find  a way  combine
-;;; tables.
-;;;
-(uranyl/t3p
- (U    U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
- (OU   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25)
+(water/t3p
  (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
  (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
 
+(water/pr-spc
+ (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
+ (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
 
 ;;;
 ;;; Atomic ions, see coments about "Monoatomic ions" in ./solutes.scm
@@ -1013,10 +1001,4 @@
   (13  O2    "O of COO- in CH3COO-"          15.999     2.96    0.21     -0.7809)
   (14  CT    "C of CH3 in CH3COO-"           12.011     3.5     0.066    -0.4200)
   (15  HC    "H of CH3 in CH3COO-"            1.008     2.5     0.03      0.0569))
-
-;;;
-;;; This FF is  taken by default if a  solute/solvent description does
-;;; not say otherwise:
-;;;
-(empty)
 

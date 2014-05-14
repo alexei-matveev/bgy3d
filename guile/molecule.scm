@@ -198,9 +198,8 @@
 ;;; table that refers to an empty force field:
 ;;;
 (define (molecule-force-field solute)
-  (match solute
-    ((name sites table) table) ; return the third entry, if there is such
-    (_ '(empty))))             ; otherwise return an empty table
+  (or (assoc 'force-field (cdr solute))
+      '(force-field ())))               ; fake empty force field table
 
 ;;;
 ;;; Two  legal ways to  call make-site:  with and  without force-field
@@ -398,7 +397,7 @@
 (define *tinker-ff-parameter-file*
   "guile/force-fields.scm")
 
-(define (force-field-table force-field)
+(define (find-force-field force-field)
   (let ((contents (slurp/cached (find-file *tinker-ff-parameter-file*))))
     ;;
     ;; Force-field name in CAR  position is irrelevant for the rest of
@@ -434,28 +433,33 @@
 ;;;
 (define (tabulate-ff solute)
   ;;
-  ;; The car  position of the FF table (ignored at  the moment) can be
-  ;; used  to retrive  the respective force  field parametrs.   So far
-  ;; OPLSAA is always assumed.
+  ;; The structure of FF form:
   ;;
-  (let* ((ff-form (molecule-force-field solute))
-         (ff-sym (car ff-form))
-         (ff-tab (cdr ff-form))
-         ;; (whole-file (tinker-table ff-sym))
-         (whole-file (force-field-table ff-sym)))
+  ;;  (force-field (ff-sym1 ff-sym2 ...)
+  ;;    (site-name1 site-sym1) ...)
+  ;;
+  ;; The car position is ignored. The CADR position is a list of force
+  ;; field symbols  to combine. CDDR is the  translation table of site
+  ;; names  to symbols/numbers used in  FF tables. FIXME:  There is no
+  ;; checking if a site symbols is repeated in multiple rows.
+  ;;
+  (let* ((force-field-form (molecule-force-field solute))
+         (force-field-symbols (cadr force-field-form))
+         (translation-table (cddr force-field-form))
+         (rows (concatenate (map find-force-field force-field-symbols))))
     ;;
     ;; This  will derive the  atom type 77  from a name "CT3"  using a
     ;; list of entries (("CT3" 77) ...) in the FF table.
     ;;
     (define (ff-type name)
-      (second (or (assoc name ff-tab)
+      (second (or (assoc name translation-table)
                   (error "Not in the table:" name))))
     ;;
     ;; This  will return  a row from  the parameter file  matching the
     ;; given atom type:
     ;;
     (define (ff-row type)
-      (or (assoc type whole-file)
+      (or (assoc type rows)
           (error "Not in the file:" type)))
 
     ;;
@@ -492,8 +496,8 @@
     ;; FIXME: This check is so far down because of the "define"s above
     ;; that have to be put at the beginning of the scope.
     ;;
-    (unless whole-file
-      (error "Did not find force-field:" ff-sym))
+    (unless rows
+      (error "Did not find force-field:" force-field-symbols))
     ;;
     ;; Build new sites and use them to construct a new molecule:
     ;;
