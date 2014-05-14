@@ -156,13 +156,50 @@ module lisp
      end function scm_not
   end interface
 
+  interface list
+     function scm_list_1 (e1) result (list) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: e1
+       type (obj) :: list
+     end function scm_list_1
+
+     function scm_list_2 (e1, e2) result (list) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: e1, e2
+       type (obj) :: list
+     end function scm_list_2
+
+     function scm_list_3 (e1, e2, e3) result (list) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: e1, e2, e3
+       type (obj) :: list
+     end function scm_list_3
+
+     function scm_list_4 (e1, e2, e3, e4) result (list) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: e1, e2, e3, e4
+       type (obj) :: list
+     end function scm_list_4
+
+     function scm_list_5 (e1, e2, e3, e4, e5) result (list) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: e1, e2, e3, e4, e5
+       type (obj) :: list
+     end function scm_list_5
+ end interface list
+
   public :: obj                              ! type
   public :: flonum, int, symbol, string, bool ! constructors
   public :: cons, nil
   public :: car, cdr
   public :: acons, assoc, not
   public :: display, newline
-  public :: values
+  public :: values, list
 
 contains
 
