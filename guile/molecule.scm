@@ -63,7 +63,8 @@
 ;;;
 ;;; Database  contains  entries in  non-native  units  such as  kJ/mol
 ;;; represented by an s-expression  like (kJ 0.3640).  Convert them to
-;;; working units kcal & angstrom:
+;;; working  units kcal  &  angstrom. FIXME:  mutually recursive  with
+;;; find-molecule!
 ;;;
 (define (eval-units ast)
   (if (not (pair? ast))
@@ -81,6 +82,12 @@
          (eval-units num))              ; for completeness, default
         (('kJ num)
          (kj->kcal (eval-units num)))   ; (kJ 0.3640) -> 0.08694
+        (('geometry name)               ; Do not copy FF params
+         (let ((sites (molecule-sites (find-molecule name)))) ; Recursion here!
+           (map (lambda (s)
+                  (make-site (site-name s)
+                             (site-position s)))
+                sites)))
         (ast
          (map eval-units ast)))))
 
@@ -113,7 +120,8 @@
 
 
 ;;;
-;;; Find a solute/solvent in a database or die:
+;;; Find  a  solute/solvent in  a  database  or  die. FIXME:  mutually
+;;; recursive with eval-units!
 ;;;
 (define (find-molecule name)
   (and-let* ((solutes (slurp/cached (find-file "guile/solutes.scm")))
@@ -191,8 +199,17 @@
     ((name sites table) table) ; return the third entry, if there is such
     (_ '(empty))))             ; otherwise return an empty table
 
-(define (make-site name position sigma epsilon charge)
-  (list name position sigma epsilon charge))
+;;;
+;;; Two  legal ways to  call make-site:  with and  without force-field
+;;; parameters. FIXME:  This is road to  hell, a site  created by this
+;;; constructor when passed to force-field accessors may fail ...
+;;;
+(define make-site
+  (case-lambda
+   ((name position sigma epsilon charge)
+    (list name position sigma epsilon charge))
+   ((name position)
+    (list name position))))
 
 (define site-name first)
 (define site-position second)
