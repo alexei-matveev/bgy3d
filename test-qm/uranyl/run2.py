@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from __future__ import with_statement
 #
 # Tell Python interpreter where to find custom modules:
@@ -8,6 +10,14 @@ from __future__ import with_statement
 # search path:
 #
 # export LD_LIBRARY_PATH=~/darcs/bgy3d
+#
+# Note that this driver script communicates with MPI processes using a
+# named FIFO.  For that to work  the driver script must be executed on
+# the same node as the rank-0 MPI process. This is NOT guaranteed when
+# one  uses "salloc  -n8 run.py".   It  is an  aknowledged feature  of
+# "salloc" that the  driver script is executed locally  and only those
+# commands  prefixed  by  srun/mpirun  use the  allocated  nodes.  Use
+# "sbatch -n8 run.py" instead.
 #
 import os
 from ase.calculators.paragauss import ParaGauss
