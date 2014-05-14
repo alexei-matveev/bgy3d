@@ -774,7 +774,7 @@
 ;;; -214.652929634494  kcal. FIXME:  Note that  water geometry  is not
 ;;; SPC/E and not even the same for all of them.
 ;;;
-("UO2_5H2O, SPC"
+("UO2_5H2O"
   (("U"  (-0.4193  0.2123  0.1018))
    ("OU"  (1.1822  0.9792  0.1743))
    ("OU"  (-2.0068  -0.5497  -0.1304))
@@ -792,7 +792,10 @@
    ("HW"  (0.0204  2.3354  2.3698))
    ("OW"  (-0.6191  -1.1831  2.1599))
    ("HW"  (-1.3870  -1.7658  2.3269))
-   ("HW"  (-0.0073  -1.2855  2.9163)))
+   ("HW"  (-0.0073  -1.2855  2.9163))))
+
+("UO2_5H2O, SPC"
+ (geometry "UO2_5H2O")
   (uranyl/spc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
@@ -800,7 +803,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, PRSPC"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/prspc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
@@ -808,7 +811,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, KL1-PRSPC"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/kl1-prspc
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
@@ -816,7 +819,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, KL2-PRSPC"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/kl2-prspc
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
@@ -824,7 +827,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, GW96-PRSPC"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/gw96-prspc
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
@@ -832,24 +835,22 @@
    ("OW" OW)))
 
 ("UO2_5H2O, PM13-PRSPC"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/pm13-prspc
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
-;;;
-;;; Geometry is the same as in "UO2_5H2O, SPC".
-;;;
+
 ("UO2_5H2O, TIP3P"
-  (geometry "UO2_5H2O, SPC")
+  (geometry "UO2_5H2O")
   (uranyl/t3p
    ("U" U) ;; TIP3P uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_4H2O, D4H, KL2-PRSPC"
+("UO2_4H2O, D4H"
   (("U"  (-0.4146  0.2139  0.0486))
    ("OU"  (1.1864  0.9806  0.1210))
    ("OU"  (-2.0157  -0.5528  -0.0239))
@@ -864,7 +865,10 @@
    ("HW"  (0.7018  0.0418  -2.8475))
    ("OW"  (-0.7255  0.6434  2.4112))
    ("HW"  (-1.5362  0.3956  2.9416))
-   ("HW"  (-0.0620  1.0949  3.0078)))
+   ("HW"  (-0.0620  1.0949  3.0078))))
+
+("UO2_4H2O, D4H, KL2-PRSPC"
+ (geometry "UO2_4H2O, D4H")
   (uranyl/kl2-prspc
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
@@ -872,7 +876,7 @@
    ("OW" OW)))
 
 ("UO2_4H2O, D4H, KL1-PRSPC"
- (geometry "UO2_4H2O, D4H, KL2-PRSPC")
+ (geometry "UO2_4H2O, D4H")
   (uranyl/kl1-prspc
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
@@ -880,7 +884,7 @@
    ("OW" OW)))
 
 ("UO2_4H2O, D4H, PM13-PRSPC"
- (geometry "UO2_4H2O, D4H, KL2-PRSPC")
+ (geometry "UO2_4H2O, D4H")
   (uranyl/pm13-prspc
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
@@ -888,7 +892,7 @@
    ("OW" OW)))
 
 ("UO2_4H2O, D4H, PRSPC"
- (geometry "UO2_4H2O, D4H, KL2-PRSPC")
+ (geometry "UO2_4H2O, D4H")
   (uranyl/prspc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
@@ -896,14 +900,14 @@
    ("OW" OW)))
 
 ("UO2_4H2O, D4H, GW96-PRSPC"
- (geometry "UO2_4H2O, D4H, KL2-PRSPC")
+ (geometry "UO2_4H2O, D4H")
   (uranyl/gw96-prspc
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, CS, PRSPC"
+("UO2_5H2O, CS"
   (("U"  (-0.4146  0.2139  0.0486))
    ("OU"  (1.1864  0.9806  0.1210))
    ("OU"  (-2.0157  -0.5528  -0.0239))
@@ -921,7 +925,10 @@
    ("HW"  (0.0146  2.3612  2.2884))
    ("OW"  (-0.3670  -1.1429  2.1334))
    ("HW"  (-1.1495  -1.6887  2.4329))
-   ("HW"  (0.3702  -1.2208  2.8045)))
+   ("HW"  (0.3702  -1.2208  2.8045))))
+
+("UO2_5H2O, CS, PRSPC"
+ (geometry "UO2_5H2O, CS")
   (uranyl/prspc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
@@ -929,7 +936,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, CS, KL2-PRSPC"
- (geometry "UO2_5H2O, CS, PRSPC")
+ (geometry "UO2_5H2O, CS")
   (uranyl/kl2-prspc
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
@@ -937,7 +944,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, CS, KL1-PRSPC"
- (geometry "UO2_5H2O, CS, PRSPC")
+ (geometry "UO2_5H2O, CS")
   (uranyl/kl1-prspc
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
@@ -945,7 +952,7 @@
    ("OW" OW)))
 
 ("UO2_5H2O, CS, GW96-PRSPC"
- (geometry "UO2_5H2O, CS, PRSPC")
+ (geometry "UO2_5H2O, CS")
   (uranyl/gw96-prspc
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
@@ -953,14 +960,14 @@
    ("OW" OW)))
 
 ("UO2_5H2O, CS, PM13-PRSPC"
- (geometry "UO2_5H2O, CS, PRSPC")
+ (geometry "UO2_5H2O, CS")
   (uranyl/pm13-prspc
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_6H2O, D6H, KL2-PRSPC"
+("UO2_6H2O, D6H"
   (("U"  (0.0000  0.0000  0.0000))
    ("OU"  (0.0000  0.0000  1.7700))
    ("OU"  (0.0000  0.0000  -1.7700))
@@ -981,7 +988,10 @@
    ("HW"  (-1.5970  2.7673  0.8165))
    ("OW"  (-1.3082  -2.2673  -0.0000))
    ("HW"  (-1.5970  -2.7673  -0.8165))
-   ("HW"  (-1.5970  -2.7673  0.8165)))
+   ("HW"  (-1.5970  -2.7673  0.8165))))
+
+("UO2_6H2O, D6H, KL2-PRSPC"
+ (geometry "UO2_6H2O, D6H")
   (uranyl/kl2-prspc
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
@@ -989,7 +999,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D6H, KL1-PRSPC"
- (geometry "UO2_6H2O, D6H, KL2-PRSPC")
+ (geometry "UO2_6H2O, D6H")
   (uranyl/kl1-prspc
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
@@ -997,7 +1007,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D6H, GW96-PRSPC"
- (geometry "UO2_6H2O, D6H, KL2-PRSPC")
+ (geometry "UO2_6H2O, D6H")
   (uranyl/gw96-prspc
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
@@ -1005,7 +1015,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D6H, PM13-PRSPC"
- (geometry "UO2_6H2O, D6H, KL2-PRSPC")
+ (geometry "UO2_6H2O, D6H")
   (uranyl/pm13-prspc
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
@@ -1013,14 +1023,14 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D6H, PRSPC"
- (geometry "UO2_6H2O, D6H, KL2-PRSPC")
+ (geometry "UO2_6H2O, D6H")
   (uranyl/prspc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_6H2O, D3D, KL2-PRSPC"
+("UO2_6H2O, D3D"
   (("U"  (-0.1098  0.0247  0.2657))
    ("OU"  (1.2099  1.1978  0.3124))
    ("OU"  (-1.5524  -0.9973  0.1654))
@@ -1041,7 +1051,10 @@
    ("HW"  (0.0066  -0.8730  3.4189))
    ("OW"  (2.0224  -1.0724  1.2049))
    ("HW"  (2.8593  -0.5401  1.3322))
-   ("HW"  (2.1367  -1.9767  1.6163)))
+   ("HW"  (2.1367  -1.9767  1.6163))))
+
+("UO2_6H2O, D3D, KL2-PRSPC"
+ (geometry "UO2_6H2O, D3D")
   (uranyl/kl2-prspc
    ("U" U) ;; KL2 uranyl
    ("OU" OU)
@@ -1049,7 +1062,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D3D, KL1-PRSPC"
- (geometry "UO2_6H2O, D3D, KL2-PRSPC")
+ (geometry "UO2_6H2O, D3D")
   (uranyl/kl1-prspc
    ("U" U) ;; KL1 uranyl
    ("OU" OU)
@@ -1057,7 +1070,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D3D, GW96-PRSPC"
- (geometry "UO2_6H2O, D3D, KL2-PRSPC")
+ (geometry "UO2_6H2O, D3D")
   (uranyl/gw96-prspc
    ("U" U) ;; GW96 uranyl
    ("OU" OU)
@@ -1065,7 +1078,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D3D, PM13-PRSPC"
- (geometry "UO2_6H2O, D3D, KL2-PRSPC")
+ (geometry "UO2_6H2O, D3D")
   (uranyl/pm13-prspc
    ("U" U) ;; PM13 uranyl
    ("OU" OU)
@@ -1073,7 +1086,7 @@
    ("OW" OW)))
 
 ("UO2_6H2O, D3D, PRSPC"
- (geometry "UO2_6H2O, D3D, KL2-PRSPC")
+ (geometry "UO2_6H2O, D3D")
   (uranyl/prspc
    ("U" U) ;; SPC uranyl
    ("OU" OU)
