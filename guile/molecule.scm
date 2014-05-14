@@ -66,22 +66,22 @@
 ;;; working  units kcal  &  angstrom. FIXME:  mutually recursive  with
 ;;; find-molecule!
 ;;;
-(define (eval-units ast)
+(define (expand-forms ast)
   (if (not (pair? ast))
       ast
       (match ast
         (('A num)
-         (eval-units num))              ; for completeness, default
+         (expand-forms num))            ; for completeness, default
         (('r0 num)
-         (* (eval-units num)
+         (* (expand-forms num)
             (expt 2 5/6)))              ; (r0 x) -> x * 2^(5/6)
         (('^2 num)                      ; (^2 x) -> x^2
-         (let ((num (eval-units num)))
+         (let ((num (expand-forms num)))
            (* num num)))
         (('kcal num)
-         (eval-units num))              ; for completeness, default
+         (expand-forms num))              ; for completeness, default
         (('kJ num)
-         (kj->kcal (eval-units num)))   ; (kJ 0.3640) -> 0.08694
+         (kj->kcal (expand-forms num))) ; (kJ 0.3640) -> 0.08694
         (('geometry name)               ; Do not copy FF params
          (let ((sites (molecule-sites (find-molecule name)))) ; Recursion here!
            (map (lambda (s)
@@ -89,7 +89,7 @@
                              (site-position s)))
                 sites)))
         (ast
-         (map eval-units ast)))))
+         (map expand-forms ast)))))
 
 
 ;;;
@@ -121,7 +121,7 @@
 
 ;;;
 ;;; Find  a  solute/solvent in  a  database  or  die. FIXME:  mutually
-;;; recursive with eval-units!
+;;; recursive with expand-forms!
 ;;;
 (define (find-molecule name)
   (and-let* ((solutes (slurp/cached (find-file "guile/solutes.scm")))
@@ -129,7 +129,7 @@
                            (error "Not in the list:"
                                   name
                                   (map first solutes)))))
-    (tabulate-ff (eval-units molecule))))
+    (tabulate-ff (expand-forms molecule))))
 
 ;; (set! find-molecule (memoize find-molecule))
 
