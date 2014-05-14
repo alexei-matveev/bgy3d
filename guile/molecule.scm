@@ -64,7 +64,7 @@
 ;;; Database  contains  entries in  non-native  units  such as  kJ/mol
 ;;; represented by an s-expression  like (kJ 0.3640).  Convert them to
 ;;; working  units kcal  &  angstrom. FIXME:  mutually recursive  with
-;;; find-molecule!
+;;; find-entry!
 ;;;
 (define (expand-forms ast)
   (if (not (pair? ast))
@@ -83,7 +83,7 @@
         (('kJ num)
          (kj->kcal (expand-forms num))) ; (kJ 0.3640) -> 0.08694
         (('geometry name)               ; Do not copy FF params
-         (let ((sites (molecule-sites (find-molecule name)))) ; Recursion here!
+         (let ((sites (molecule-sites (find-entry name)))) ; Recursion here!
            (map (lambda (s)
                   (make-site (site-name s)
                              (site-position s)))
@@ -123,13 +123,16 @@
 ;;; Find  a  solute/solvent in  a  database  or  die. FIXME:  mutually
 ;;; recursive with expand-forms!
 ;;;
-(define (find-molecule name)
+(define (find-entry name)
   (and-let* ((solutes (slurp/cached (find-file "guile/solutes.scm")))
              (molecule (or (assoc name solutes)
                            (error "Not in the list:"
                                   name
                                   (map first solutes)))))
-    (tabulate-ff (expand-forms molecule))))
+            (expand-forms molecule)))
+
+(define (find-molecule name)
+  (tabulate-ff (find-entry name)))
 
 ;; (set! find-molecule (memoize find-molecule))
 
