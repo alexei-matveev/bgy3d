@@ -35,7 +35,7 @@ from numpy import max, abs, zeros
 # or self-energy of the solute:
 cmd = \
 """
-/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solute "UO2_5H2O, SPC"
 """
 
@@ -44,7 +44,7 @@ cmd = \
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
 """
-/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "water, SPC/E"
 --solute "UO2_5H2O, SPC"
 --norm-tol 1e-14 --dielectric 78.4
@@ -52,14 +52,14 @@ alt = \
 """
 alt1 = \
 """
-/users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "water, SPC/E"
 --solute "UO2_5H2O, SPC"
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
 """
 
-calc = ParaGauss (cmdline="salloc -n8 mpirun ~/darcs/ttfs-mac/runqm",
+calc = ParaGauss (cmdline="mpirun ~/darcs/ttfs-mac/runqm",
                   input="uranyl+water.scm")
 
 atoms = read ("uo22+,5h2o.xyz")
