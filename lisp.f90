@@ -19,6 +19,15 @@ module lisp
   type (obj), parameter :: undefined = obj (z"904")   ! for SCM_UNBNDP()
   type (obj), parameter :: eof = obj (z"a04")         ! for eof-object?
 
+  interface values
+     function scm_values (list) result (vals) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: list
+       type (obj) :: vals
+     end function scm_values
+  end interface values
+
   interface car
      function scm_car (pair) result (car) bind (c)
        import
@@ -153,6 +162,7 @@ module lisp
   public :: car, cdr
   public :: acons, assoc, not
   public :: display, newline
+  public :: values
 
 contains
 
