@@ -15,9 +15,10 @@
 int rism_nrad (const ProblemData *PD);
 real rism_rmax (const ProblemData *PD);
 ProblemData rism_upscale (const ProblemData *PD);
-double rism_self_energy (int n, const Site sites[n], const int spec[n]);
 
 #ifdef WITH_GUILE
+SCM rism_self_energy (int n, const Site sites[n], const int spec[n]);
+
 void rism_solvent (SCM env,     /* SCM alist */
                    const ProblemData *PD,
                    int m, const Site solvent[m],

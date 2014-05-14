@@ -794,13 +794,12 @@ computes the sum of all vector elements."
   (let* ((scale (assoc-ref settings 'bond-length-thresh))
          (species (molecule-species solute scale)) ; list of ints
          (x0 (molecule-positions solute))
+         (fg (lambda (x)              ; x -> (values energy gradients)
+               (let ((solute' (move-molecule solute x)))
+                 (rism-self-energy solute' species))))
          (f (lambda (x)                 ; x -> energy
-              (let ((solute' (move-molecule solute x)))
-                (rism-self-energy solute' species))))
-         (g (lambda (x)                 ; x -> gradients
-              (ddd f x)))
-         (fg (lambda (x)
-               (values (f x) (g x)))))
+              (let-values (((e g) (fg x)))
+                e))))
     (values x0 f fg)))
 
 

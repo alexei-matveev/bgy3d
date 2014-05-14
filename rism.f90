@@ -75,7 +75,7 @@ contains
   end function rism_upscale
 
 
-  function rism_self_energy (n, sites, spec) result (e) bind (c)
+  function rism_self_energy (n, sites, spec) result (eg) bind (c)
     !
     ! Calculate the energy summation between each pair of residues for
     ! a given site.
@@ -85,21 +85,23 @@ contains
     use iso_c_binding, only: c_int, c_double
     use foreign, only: site
     use options, only: getopt
+    use lisp, only: obj, values, cons, nil, flonum
     implicit none
     integer (c_int), intent (in), value :: n
     type (site), intent (in) :: sites(n)
     integer (c_int), intent (in) :: spec(n)
-    real (c_double) :: e
+    type (obj) :: eg            ! multiple values (e, g)
     ! *** end of interface ***
 
     integer :: rule
-    real (rk) :: g(3, n)
+    real (rk) :: e, g(3, n)
 
     ! FIXME: try  not to  proliferate use of  "environments", function
     ! behaviour is better controlled via its arguments:
     if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     call self_energy (rule, sites, spec, e, g)
+    eg = values (cons (flonum (e), cons (list2 (g), nil)))
   end function rism_self_energy
 
 

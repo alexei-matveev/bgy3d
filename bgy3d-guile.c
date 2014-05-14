@@ -1217,12 +1217,13 @@ guile_rism_self_energy (SCM solute, SCM species)
   /* SCM species is a list of integers: */
   to_int1 (species, n, spec);
 
-  const double e = rism_self_energy (n, solute_sites, spec);
+  /* Multiple values: */
+  SCM eg = rism_self_energy (n, solute_sites, spec);
 
   free (solute_name);
   free (solute_sites);
 
-  return scm_from_double (e);
+  return eg;
 }
 
 
