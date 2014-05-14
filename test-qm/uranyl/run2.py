@@ -166,7 +166,7 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt
 
         s, info = minimize (e, s, **kwargs)
 
-        print name + "converged =", info["converged"], "in", info["iterations"], "iterations"
+        print name + ": converged =", info["converged"], "in", info["iterations"], "iterations"
         write_xyz (name + ".xyz", trafo (s))
 
         # print info
@@ -181,25 +181,25 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt
 
     # MM self-energy:
     with g as e:
-        s, info = opt (e, s, "uranyl+water,mm", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s0 = s
 
     # MM self-energy with RISM solvation:
     with g + h as e:
-        s, info = opt (e, s, "uranyl+water,mm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = opt (e, s, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s1 = s
 
     # QM self-energy (start with MM geom):
     with f as e:
-        s, info = opt (e, s0, "uranyl+water,qm", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = opt (e, s0, "QM", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
         print "XXX: QM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s2 = s
 
     # QM self-energy with RISM solvation (diverges):
     with f + h as e:
-        s, info = opt (e, s, "uranyl+water,qm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = opt (e, s1, "QM+RISM", algo=1, maxstep=0.1, maxit=98, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s3 = s
 
