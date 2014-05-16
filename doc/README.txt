@@ -1669,13 +1669,21 @@ Uranyl  Water      E(free), kcal         dG, kcal
 ------  ---------  --------------------  --------
 RM12?   SH-SPC/E?  -357.178350614
 RM12    SH-SPC/E   -357.16467283         -334.00
+                   -357.264618975        -334.04
 RM12    PR-SPC/E   -360.224697969        -320.94
+                   -360.318011106        -320.97
 GW96    PR-SPC/E   -349.868494203        -310.58
+                   -349.966555171        -310.62
 PM13    PR-SPC/E   -348.411292773        -309.12
+                   -348.492764467        -309.15
 KL1     PR-SPC/E   -423.396190223        -384.11
+                   -423.488741528        -384.14
 KL2     PR-SPC/E   -428.8145684          -389.53
+                   -428.910899833        -389.56
 -       SH-SPC/E     -4.63252428332932
+                     -4.64552006291863
 -       PR-SPC/E     -7.85764976869856
+                     -7.86929436822944
 
 Here E(free) is the prediction for the total free energy of a specific
 conformation of the  complex in water obtained by  minimizing the free
@@ -1692,6 +1700,14 @@ that  they  (visually)  contain  the  uranyl  axis  again.   With  the
 "stronger" uranyl models KL1  and KL2 the geometry of five-coordinated
 uranyl hardly  changes upon introducing  the RISM solvent ---  so that
 optimization is completed just after very few cycles.
+
+The two sets  of numbers are obtained in  a pre-optimization with RISM
+settings  L=20 and  N=512  and subsequent  refinement  with L=160  and
+N=4096.   The refinement  happens  to  stop right  away,  so that  the
+combination  amounts to  evaluation of  energy  with finer  grid at  a
+geometry optimized with  lower grid. For the record,  the energies (of
+the aqua  complex) with the  finer grid are  about 0.1 kcal  larger by
+magnitude which cancels mostly when subtracting five water molecules.
 
 FIXME: this data is probably redundant with some coming later.
 
