@@ -6,7 +6,7 @@ from __future__ import with_statement
 #
 #   export PYTHONPATH=~/PYTHON:~/darcs/bgy3d/python
 #
-# For the  rubgy.scm script to run  one might need to  set the library
+# For the runbgy.scm  script to run one might need  to set the library
 # search path:
 #
 # export LD_LIBRARY_PATH=~/darcs/bgy3d
@@ -19,6 +19,22 @@ from __future__ import with_statement
 # commands  prefixed  by  srun/mpirun  use the  allocated  nodes.  Use
 # "sbatch -n8 run.py" instead.
 #
+# This script is not self-contained, it refers to other files that are
+# used as input:
+#
+#   uranyl,%d-waters.scm
+#
+#     PG input.
+#
+#   uo22+,%dh2o.xyz
+#
+#     Initial geometry. It does  not necessarily use the same geometry
+#     for all water molecules. The uranyl may be slightly bent.
+#
+#   spc.xyz
+#
+#     Geometry of SPC/E water.
+#
 import os
 from ase.calculators.paragauss import ParaGauss
 from ase.io import read, write
@@ -29,15 +45,23 @@ from pts.zmat import Fixed, Rigid, ManyBody
 from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
-from numpy import max, abs, zeros
+from numpy import max, abs, zeros, array
+
+# File names and command line flags depend on the number of waters:
+NW = 5
+
+def solute_name (nw):
+    return "UO2_%dH2O, KL2-PRSPC" % nw
+
+solvent_name = "water, PR-SPC/E"
 
 # With this command  line the RISM server will  return the "gas phase"
 # or self-energy of the solute:
 cmd = \
 """
 mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
---solute "UO2_5H2O, SPC"
-"""
+--solute "%s"
+""" % solute_name (NW)
 
 # With  thin command  line the  RISM  server will  return the  "excess
 # chemical  potential" of  the  solute in  solvent.  This is,  roughly
@@ -45,29 +69,32 @@ mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 alt = \
 """
 mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
---solvent "water, SPC/E"
---solute "UO2_5H2O, SPC"
+--solvent "%s"
+--solute "%s"
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 20 --N 512
-"""
+""" % (solvent_name, solute_name (NW))
+
 alt1 = \
 """
 mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
---solvent "water, SPC/E"
---solute "UO2_5H2O, SPC"
+--solvent "%s"
+--solute "%s"
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
-"""
+""" % (solvent_name, solute_name (NW))
 
 calc = ParaGauss (cmdline="mpirun ~/darcs/ttfs-mac/runqm",
-                  input="uranyl+water.scm")
+                  input=("uranyl,%d-waters.scm" % NW))
 
-atoms = read ("uo22+,5h2o.xyz")
-# atoms = read ("a50.xyz")
+atoms = read ("uo22+,%dh2o.xyz" % NW)
 
 x = atoms.get_positions ()
 
+# FIXME:  it  is assumed  here  that  all  species have  three  atoms,
+# ordered:
 xs = [x[3 * i: 3 * i + 3] for i in range (len (x) / 3)]
+assert (len (xs) == 1 + NW)
 
 def make_uranyl (x):
     """
@@ -181,48 +208,42 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt
 
     # MM self-energy:
     with g as e:
-        s, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
+        s, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s0 = s
 
     # MM self-energy with RISM solvation:
     with g + h as e:
-        s, info = opt (e, s, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+        s, info = opt (e, s, "MM+rism", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
+        print "XXX: MM+rism", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s1 = s
+
+    # MM self-energy with RISM solvation using higher grid quality:
+    with g + h1 as e:
+        s, info = opt (e, s1, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
+        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+    S1 = s
 
     # QM self-energy (start with MM geom):
     with f as e:
-        s, info = opt (e, s0, "QM", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
+        s, info = opt (e, s0, "QM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: QM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s2 = s
 
-    # QM self-energy with RISM solvation (diverges):
+    # QM self-energy  with RISM  solvation. Be carefull  with "weaker"
+    # uranyl force fields -- optimization may diverge:
     with f + h as e:
         s, info = opt (e, s1, "QM+RISM", algo=1, maxstep=0.1, maxit=98, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s3 = s
 
+    # This prints  a table of  various functionals applied  to several
+    # geometries:
     ss = [s0, s1, s2, s3]
     with f + h as e, g + h as e1:
         for s in ss:
             print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
                 "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
-
-
-    clean ()
-
-    # MM self-energy with RISM solvation:
-    with g + h1 as e:
-        s, info = opt (e, s1, "uranyl+water,mm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
-        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    S1 = s
-
-    # QM self-energy with RISM solvation (diverges):
-    # with f + h1 as e:
-    #     s, info = opt (e, s3, "uranyl+water,qm+rism", algo=1, maxstep=0.1, maxit=100, ftol=1.0e-2, xtol=1.0e-2)
-    #     print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    # S3 = s
 
     ss = [s0, S1, s2, s3]
     with h1 as h:
