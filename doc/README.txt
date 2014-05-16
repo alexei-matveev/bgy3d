@@ -1835,12 +1835,23 @@ BP:
 Geom.      e(QM), kcal     e(MM), kcal      e(RISM), kcal   e(QM+RISM)      e(MM+RISM)
 ---------  --------------  ---------------  --------------  --------------  --------------
 MM         -17880088.2301   -270.567016247  -158.236093376  -17880246.4662  -428.803109623
+           -17880088.2272   -270.568845787  -158.235583574  -17880246.4627  -428.804429361
 MM+RISM    -17880088.0302   -270.556308908  -158.257478056  -17880246.2877  -428.813786964
+           -17880088.0317   -270.558075493  -158.256492908  -17880246.2882  -428.8145684
 QM         -17880089.2684   -269.247396083  -158.138492319  -17880247.4069  -427.385888402
+           -17880089.269    -269.24928569   -158.137445747  -17880247.4064  -427.386731437
 QM+RISM    -17880089.2685   -269.241069316  -158.138629731  -17880247.4071  -427.379699047
+           -17880089.2686   -269.172957083  -158.138733156  -17880247.4073  -427.311690239
 ------------------------------------------------------------------------------------------
 
-substrating water binding energy
+The  second set  of numbers  is  a redundant  check produced  (almost)
+independently  by a  different person  with slightly  tighter geometry
+convergence criteria.  Also  the numbers on the "diagonal"  such as MM
+self energy at MM geometry and MM+RISM free energy at MM+RISM geometry
+diplicate the data from the KL2 rows of the tables comparing different
+uranyl/water model combinations.
+
+By subtracting water binding energy one gets:
 
 Geom.       e(QM)    e(MM)    e(RISM)  e(QM+RISM)  e(MM+RISM)
 ---------   ------   ------   ------   ----------  ----------
