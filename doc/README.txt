@@ -1649,19 +1649,52 @@ with the higher accuracy were only slightly affected by ~0.1 kcal.
 
 MM stucture of [UO2(H2O)5]2+:
 
-   e = -9.41131842917 eV = -217.030081986 kcal
+Uranyl  Water      E(self), kcal
+------  ---------  ---------------
+RM12?   SH-SPC/E?  -217.030081986
+RM12    SH-SPC/E   -218.48749615
+RM12    PR-SPC/E   -217.886387054
+GW96    PR-SPC/E   -211.278961223
+PM13    PR-SPC/E   -213.471989208
+KL1     PR-SPC/E   -267.952680425
+KL2     PR-SPC/E   -270.568845787
 
-This energy  is the  MM prediction for  the interacton of  uranyl with
-five rigid waters.
+This energy is the MM prediction for the interacton of uranyl with
+five rigid waters.  Notably all but KL1 and KL2 models result into
+skewed water molecules after optimization.
 
 MM+RISM structure of [UO2(H2O)5]2+:
 
-   e = -15.4887247098 eV = -357.178350614 kcal
+Uranyl  Water      E(free), kcal         dG, kcal
+------  ---------  --------------------  --------
+RM12?   SH-SPC/E?  -357.178350614
+RM12    SH-SPC/E   -357.16467283         -334.00
+RM12    PR-SPC/E   -360.224697969        -320.94
+GW96    PR-SPC/E   -349.868494203        -310.58
+PM13    PR-SPC/E   -348.411292773        -309.12
+KL1     PR-SPC/E   -423.396190223        -384.11
+KL2     PR-SPC/E   -428.8145684          -389.53
+-       SH-SPC/E     -4.63252428332932
+-       PR-SPC/E     -7.85764976869856
 
-This  is the prediction  for the  total free  energy of  this specific
-conformation  of  the  complex  in  water.   This  value  is  only  an
-approximation  to the  true solvation  energy as  it does  not include
-statistic averaging over various complex geometries.
+Here E(free) is the prediction for the total free energy of a specific
+conformation of the  complex in water obtained by  minimizing the free
+energy expression.   Further, dG is comuted by  subtracting five times
+the free energy of the water molecule in water from the free-energy of
+the aqua  complex.  This  value is only  an approximation to  the true
+solvation  energy as  it  does not  include  statistic averaging  over
+various complex geometries.
+
+For  the  "weaker" models  of  uranyl  (GW96,  RM12, PM13),  where  we
+observed  water   planes  rotated  away   from  the  uranyl   axis  in
+optimization without  RISM solvent, the  planes were oriented  back so
+that  they  (visually)  contain  the  uranyl  axis  again.   With  the
+"stronger" uranyl models KL1  and KL2 the geometry of five-coordinated
+uranyl hardly  changes upon introducing  the RISM solvent ---  so that
+optimization is completed just after very few cycles.
+
+FIXME: this data is probably redundant with some coming later.
+
 
 QM structure of [UO2(H2O)5]2+:
 
