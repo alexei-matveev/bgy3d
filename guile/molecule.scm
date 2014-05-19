@@ -10,6 +10,7 @@
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (srfi srfi-11)           ; let-values
   #:use-module (ice-9 match)            ; match-lambda
+  #:use-module (ice-9 rdelim)           ; read-line
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (guile tinker)           ; tinker-table
   #:use-module (guile utils)            ; memoize
@@ -26,6 +27,7 @@
    molecule-species
    find-molecule
    print-molecule/xyz
+   read-xyz
    kj->kcal
    kcal->kj
    kelvin->kcal
@@ -387,6 +389,35 @@
               sites)))
 
 ;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
+;; (exit 0)
+
+;;;
+;;; This reads  the current  input port and  returns a  structure that
+;;; resembles a molecule:
+;;;
+;;;  ("Comment line goes here"
+;;;    (("AtomName1" (x y z)) ...))
+;;;
+(define (read-xyz)
+  ;; Here let*  is used to force evaluation  order of expressions that
+  ;; have side-effects:
+  (let* ((natoms (read))                 ; number of atoms
+         (rest-of-line (read-line))      ; discard the rest of the line
+         (comment-line (read-line)))     ; any text
+    (let loop ((n natoms)
+               (acc '()))
+      (if (zero? n)
+          (make-molecule comment-line (reverse acc))
+          (let* ((name (symbol->string (read))) ; yes, let*
+                 (x (read))
+                 (y (read))
+                 (z (read)))
+            (loop (- n 1)
+                  (cons (make-site name (list x y z)) acc)))))))
+
+;; (let ((m (with-input-from-file "a1.xyz" read-xyz)))
+;;   (pretty-print m)
+;;   (sorted-distances m))
 ;; (exit 0)
 
 ;;;
