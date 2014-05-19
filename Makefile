@@ -54,13 +54,7 @@ WITH_FORTRAN = 1
 #
 # shared = 1
 
-USR-FLAGS = -DFFT_FFTW
-USR-FLAGS += -DL_BOUNDARY
-# USR-FLAGS += -DH2O
-# USR-FLAGS += -DCS2
-# USR-FLAGS += -DPROPANE
-# USR-FLAGS += -DN2
-USR-FLAGS += -DHCl
+USR-FLAGS = -DL_BOUNDARY
 
 # Path to sources
 srcdir = .
