@@ -25,6 +25,8 @@
    molecule-charge
    molecule-dipole
    molecule-species
+   molecule-self-energy
+   scan-self-energy
    find-molecule
    print-molecule/xyz
    read-xyz
@@ -390,6 +392,95 @@
 
 ;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
+
+(define (energy a b)
+  ;;
+  (define (lj r)
+    (let ((sr6 (expt (/ 1 r) 6)))
+      (* 4 sr6 (- sr6 1))))
+  ;;
+  (define (combine-sigmas sa sb)
+    (/ (+ sa sb) 2))
+  ;;
+  (define (combine-epsilons ea eb)
+    (sqrt (* ea eb)))
+  ;;
+  (define EPSILON0INV 331.84164)       ; FIXME: literal from units.f90
+  ;;
+  (let ((sa (site-sigma a))
+        (ea (site-epsilon a))
+        (qa (site-charge a))
+        (sb (site-sigma b))
+        (eb (site-epsilon b))
+        (qb (site-charge b)))
+    (let ((sab (combine-sigmas sa sb))
+          (eab (combine-epsilons ea eb))
+          (qab (* qa qb))
+          (rab (site-distance a b)))
+      (let ((e-coul (* EPSILON0INV (/ qab rab)))
+            (e-lj (if (zero? sab)
+                      0.0
+                      (* eab (lj (/ rab sab))))))
+        (+ e-coul e-lj)))))
+
+
+(define (molecule-self-energy m species)
+  (let ((sites (molecule-sites m)))
+    (let lp1 ((sites sites)
+              (species species)
+              (e 0.0))
+      (if (null? sites)
+          e
+          (let ((a (car sites))
+                (a-species (car species))
+                (sites (cdr sites))
+                (species (cdr species)))
+            (lp1 sites
+                 species
+                 (let lp2 ((sites sites)
+                           (species species)
+                           (e e))
+                   (if (null? sites)
+                       e
+                       (let ((b (car sites))
+                             (b-species (car species))
+                             (sites (cdr sites))
+                             (species (cdr species)))
+                         (lp2 sites
+                              species
+                              (+ e (if (equal? a-species b-species)
+                                       0.0
+                                       (energy a b)))))))))))))
+
+
+(define (interpolate x a b)
+  (let ((wb x)
+        (wa (- 1 x)))
+    (let go ((a a)
+             (b b))
+      (cond
+       ((and (null? a) (null? b))
+        '())
+       ((and (pair? a) (pair? b))
+        (cons (go (car a)
+                  (car b))
+              (go (cdr a)
+                  (cdr b))))
+       (else
+        (+ (* wa a) (* wb b)))))))
+
+
+(define (scan-self-energy mol x0 x1)
+  (let ((species (molecule-species mol 1.0))
+        (n 20))
+    (map (lambda (i)
+           (let ((mol' (move-molecule mol
+                                      (interpolate (/ i (- n 1))
+                                                   x0
+                                                   x1))))
+             (molecule-self-energy mol' species)))
+         (iota n))))
+
 
 ;;;
 ;;; This reads  the current  input port and  returns a  structure that
