@@ -150,8 +150,8 @@ ifeq ($(WITH_FORTRAN),1)
 		fft.o \
 		linalg.o \
 		options.o \
-		lisp.o \
 		foreign.o \
+		lisp.o \
 		units.o \
 		kinds.o \
 		lebed/lebed.o \
