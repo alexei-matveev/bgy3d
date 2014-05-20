@@ -4940,7 +4940,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Geometry optimization of [UO
+Geometries of selected local minima of the uranyl aqua complexes, [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -4956,11 +4956,14 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- (
-\begin_inset Formula $n=4-6$
+, 
+\begin_inset Formula $4\leq n\leq6$
 \end_inset
 
-), with and without the contribution of RISM solvent medium 
+, with and without the contribution of RISM solvent medium in left and right
+ columns, respectively.
+ U--OW distances are averages over solvation shells.
+ 
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:geometries"
