@@ -2192,20 +2192,13 @@ settings for RISM.
 
 [UO~2~(H~2~O)~6~]^2+^, D3D
 
-FIXME: second set  of numbers is an attempt to  reproduce data for D3D
-structure.  The first set of  numbers looks more like it were produced
-with five-coordinated uranyl  with one water in the  second shell, see
-section below.
-
 Obviousely there  is not  much difference between  MM and  MM+RISM D3D
 geometries and both exhibit too long a U-O distance.
 
                    e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
 -------------  --------- --------- ----------- --------- -----------
-KL2, MM        -293.6635                                                FIXME!
-               -284.1272 -143.1471   -427.2743 -380.0585         254
-KL2, MM+RISM   -275.5052 -162.8575   -438.3627 -391.2835                FIXME!
-               -282.9929 -145.3216   -428.3145 -381.0987         255
+KL2, MM        -284.1272 -143.1471   -427.2743 -380.0585         254
+KL2, MM+RISM   -282.9929 -145.3216   -428.3145 -381.0987         255
 --------------------------------------------------------------------
 
 
@@ -2221,9 +2214,14 @@ about 453 is comparable to the location of the second peak in RDFs.
 
                    e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
 -------------  --------- --------- ----------- --------- -----------
-KL2, MM        -293.6097 -139.5367 -433.1464   385.9306  244
-KL2, MM+RISM   -275.9962 -162.2471 -438.2433   391.0275  244
+KL2, MM        -293.6097 -139.5367   -433.1464 -385.9306         244
+               -293.6635
+KL2, MM+RISM   -275.9962 -162.2471   -438.2433 -391.0275         244
+               -275.5052 -162.8575   -438.3627 -391.2835
 --------------------------------------------------------------------
+
+The second set of numbers comes from an earlier calculation with lower
+convergence criteria.
 
 The  average U-O  distance was  derived using  Jmol measure  tool that
 rounds  the numbers  to pm.  See  doc/uo2_paper/uo2.d/6h2o,mm*.xyz for
