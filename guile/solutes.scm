@@ -794,7 +794,7 @@
    ("HW"  (-1.3870  -1.7658  2.3269))
    ("HW"  (-0.0073  -1.2855  2.9163))))
 
-("UO2_5H2O, SPC"
+("UO2_5H2O, SPC"                     ; RM12 uranyl with SH-SPC/E water
  (geometry "UO2_5H2O")
   (force-field (uranyl/spc water/spc)
    ("U" U) ;; SPC uranyl
@@ -802,7 +802,7 @@
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, PRSPC"
+("UO2_5H2O, PRSPC"                   ; RM12 uranyl with PR-SPC/E water
   (geometry "UO2_5H2O")
   (force-field (uranyl/spc water/pr-spc)
    ("U" U) ;; SPC uranyl
@@ -810,7 +810,7 @@
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, KL1-PRSPC"
+("UO2_5H2O, KL1-PRSPC"                ; KL1 uranyl with PR-SPC/E water
   (geometry "UO2_5H2O")
   (force-field (uranyl/kl1 water/pr-spc)
    ("U" U) ;; KL1 uranyl
@@ -818,7 +818,7 @@
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, KL2-PRSPC"
+("UO2_5H2O, KL2-PRSPC"                ; KL2 uranyl with PR-SPC/E water
   (geometry "UO2_5H2O")
   (force-field (uranyl/kl2 water/pr-spc)
    ("U" U) ;; KL2 uranyl
@@ -826,7 +826,7 @@
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, GW96-PRSPC"
+("UO2_5H2O, GW96-PRSPC"                ; GW uranyl with PR-SPC/E water
   (geometry "UO2_5H2O")
   (force-field (uranyl/gw96 water/pr-spc)
    ("U" U) ;; GW96 uranyl
@@ -834,7 +834,7 @@
    ("HW" HW)
    ("OW" OW)))
 
-("UO2_5H2O, PM13-PRSPC"
+("UO2_5H2O, PM13-PRSPC"                ; PM13 uranyl with PR-SPC/E water
   (geometry "UO2_5H2O")
   (force-field (uranyl/pm13 water/pr-spc)
    ("U" U) ;; PM13 uranyl
