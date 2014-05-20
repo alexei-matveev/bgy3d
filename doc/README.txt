@@ -2186,6 +2186,27 @@ KL2, MM        -293.6635
 KL2, MM+RISM   -275.5052 -162.8575   -438.3627 -391.2835
 --------------------------------------------------------------------
 
+[UO~2~(H~2~O)~6~]^2+^, approximate D5H with one water in second shell
+
+We also examine geometries of  uranyl coordinated with five waters and
+one  water in  the second  shell.  One  notable difference  of  MM and
+MM+RISM geometries  for this  conformation is the  underestimated U-OW
+distance of 411 pm to the water in the second solvation shell observed
+in MM  geometry.  This  is in part  due to unscreened  water-water and
+water-uranyl  interactions.  In  MM+RISM calculation  the  distance of
+about 453 is comparable to the location of the second peak in RDFs.
+
+                   e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
+-------------  --------- --------- ----------- --------- -----------
+KL2, MM        -293.6097 -139.5367 -433.1464   385.9306  244
+KL2, MM+RISM   -275.9962 -162.2471 -438.2433   391.0275  244
+--------------------------------------------------------------------
+
+The  average U-O  distance was  derived using  Jmol measure  tool that
+rounds  the numbers  to pm.  See  doc/uo2_paper/uo2.d/6h2o,mm*.xyz for
+geometries.
+
+
 [UO~2~(H~2~O)~4~]^2+^, D4H
 
                    e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
