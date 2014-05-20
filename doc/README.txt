@@ -2164,6 +2164,11 @@ KL2, MM+RISM   -270.5563 -158.2575   -428.8138 -389.5811       243.3
 
 [UO~2~(H~2~O)~6~]^2+^, D6H
 
+Putting all of  six waters into equatorial plane  is too costly. Based
+on KL2 force field the D3D structure (see next) is about 16 kcal lower
+on the MM level  or by 7 kcal on the MM+RISM  level. Also note the U-O
+distance of 262 pm which is too long.
+
                    e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
 -------------  --------- --------- ----------- --------- -----------
 GW96, MM       -211.4393 -136.7414   -348.1807 -301.1015       270.2
@@ -2175,8 +2180,15 @@ PM13, MM+RISM  -209.5950 -132.7234   -342.3184 -295.2392       267.9
 KL1, MM        -257.6793 -150.7403   -408.4196 -361.3404       260.5
 KL1, MM+RISM   -257.5691 -150.9401   -408.5092 -361.4300       262.0
 KL2, MM        -267.6857 -153.1692   -420.8549 -373.7757       261.7
+               -267.6848 -153.2783   -420.9631 -373.7473       262
 KL2, MM+RISM   -267.6498 -153.2380   -420.8878 -373.8086       262.5
+               -267.6470 -153.3475   -420.9945 -373.7787       262
 --------------------------------------------------------------------
+
+Second set of  numbers (where avaialable) is a  cross check by another
+person  using slightly  tighter  convergence criteria  and finer  grid
+settings for RISM.
+
 
 [UO~2~(H~2~O)~6~]^2+^, D3D
 
