@@ -951,17 +951,17 @@
  (U    U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
  (OU   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25))
 
-(water/spc
+(water/spc                              ; SH-SPC/E
  (HW   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
  (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
 
-(water/t3p
- (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
- (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
-
-(water/pr-spc
+(water/pr-spc                           ; PR-SPC/E
  (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
  (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+
+(water/t3p                              ; modified TIP3P
+ (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
+ (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
 
 ;;;
 ;;; Atomic ions, see coments about "Monoatomic ions" in ./solutes.scm
