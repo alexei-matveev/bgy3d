@@ -2180,11 +2180,22 @@ KL2, MM+RISM   -267.6498 -153.2380   -420.8878 -373.8086       262.5
 
 [UO~2~(H~2~O)~6~]^2+^, D3D
 
+FIXME: second set  of numbers is an attempt to  reproduce data for D3D
+structure.  The first set of  numbers looks more like it were produced
+with five-coordinated uranyl  with one water in the  second shell, see
+section below.
+
+Obviousely there  is not  much difference between  MM and  MM+RISM D3D
+geometries and both exhibit too long a U-O distance.
+
                    e(MM)   e(RISM)  e(MM+RISM)        dG  d(U-O), pm
 -------------  --------- --------- ----------- --------- -----------
-KL2, MM        -293.6635
-KL2, MM+RISM   -275.5052 -162.8575   -438.3627 -391.2835
+KL2, MM        -293.6635                                                FIXME!
+               -284.1272 -143.1471   -427.2743 -380.0585         254
+KL2, MM+RISM   -275.5052 -162.8575   -438.3627 -391.2835                FIXME!
+               -282.9929 -145.3216   -428.3145 -381.0987         255
 --------------------------------------------------------------------
+
 
 [UO~2~(H~2~O)~6~]^2+^, approximate D5H with one water in second shell
 
