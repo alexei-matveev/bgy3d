@@ -1212,7 +1212,7 @@ static SCM guile_rism_solvent (SCM solvent)
       optional output  argument. Supply NULL  if you dont  need either
       solvent indirect correlation or solvent susceptibility:
     */
-    rism_solvent (settings, &PD, m, solvent_sites, NULL, x_buf, &retval);
+    rism_solvent (&PD, m, solvent_sites, NULL, x_buf, &retval);
 
     scm_array_handle_release (&handle);
   }
@@ -1293,7 +1293,7 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
       }
 
     /* Actual solute/solvent calculation here: */
-    rism_solute (settings, &PD, n, solute_sites, m, solvent_sites,
+    rism_solute (&PD, n, solute_sites, m, solvent_sites,
                  (void*) x_buf, &retval);
 
     if (!SCM_UNBNDP (chi_fft))

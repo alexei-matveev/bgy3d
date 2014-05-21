@@ -105,7 +105,7 @@ contains
   end function rism_self_energy
 
 
-  subroutine rism_solvent (env, pd, m, solvent, t_buf, x_buf, ptr) bind (c)
+  subroutine rism_solvent (pd, m, solvent, t_buf, x_buf, ptr) bind (c)
     !
     ! When either t_buf or x_buf is not NULL it should be a pointer to
     ! a buffer  with sufficient space  to store nrad  * m *  m doubles
@@ -124,7 +124,6 @@ contains
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     use lisp, only: obj
     implicit none
-    type (obj), intent (in), value :: env  ! SCM alist
     type (problem_data), intent (in) :: pd ! no VALUE
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
@@ -153,7 +152,7 @@ contains
   end subroutine rism_solvent
 
 
-  subroutine rism_solute (env, pd, n, solute, m, solvent, x_buf, ptr) bind (c)
+  subroutine rism_solute (pd, n, solute, m, solvent, x_buf, ptr) bind (c)
     !
     ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
     ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
@@ -165,7 +164,6 @@ contains
     use foreign, only: problem_data, site, bgy3d_problem_data_print
     use lisp, only: obj
     implicit none
-    type (obj), intent (in), value :: env  ! SCM association list
     type (problem_data), intent (in) :: pd  ! no VALUE
     integer (c_int), intent (in), value :: n, m
     type (site), intent (in) :: solute(n)
