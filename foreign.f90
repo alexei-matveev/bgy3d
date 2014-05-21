@@ -13,6 +13,7 @@ module foreign
   public :: bgy3d_getopt_test
   public :: bgy3d_getopt_int
   public :: bgy3d_getopt_real
+  public :: bgy3d_getopt_scm
   public :: bgy3d_getopt_string
 
   public :: comm_rank
@@ -129,6 +130,15 @@ module foreign
        character (kind=c_char), intent (inout) :: val(n) ! 0-terminated or unchanged
        logical (c_bool) :: ok
      end function bgy3d_getopt_string
+
+     function bgy3d_getopt_scm (key, val) result (ok) bind (c)
+       use lisp, only: obj
+       import c_bool, c_char, c_double
+       implicit none
+       character (kind=c_char), intent (in) :: key(*) ! 0-terminated
+       type (obj), intent (inout) :: val
+       logical (c_bool) :: ok
+     end function bgy3d_getopt_scm
 
      !
      ! Note the absense of communicator in signatures of communication
