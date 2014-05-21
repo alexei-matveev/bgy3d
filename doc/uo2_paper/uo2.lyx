@@ -4254,23 +4254,7 @@ status open
 \end_layout
 
 \begin_layout Subsection
-Geometry optimization of ([UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-)
+Free energy minimization for uranyl aqua complexes
 \end_layout
 
 \begin_layout Standard
@@ -5029,16 +5013,28 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- (
-\begin_inset Formula $n=4-6$
+, 
+\begin_inset Formula $4\leq n\leq6$
 \end_inset
 
-) in the case of being without and with RISM solvent.
+, with and without RISM solvent.
  Solvation free energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of uranyl aquo complexes in RISM solvent are also shown 
+ (kcal/mol) of 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl (
+\begin_inset Formula $n=0$
+\end_inset
+
+) and uranyl aquo complexes in RISM solvent are also shown 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:energy-vs-coordination"
@@ -5071,12 +5067,12 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="4">
+<lyxtabular version="3" rows="6" columns="4">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="right" valignment="top" width="0">
+<column alignment="right" valignment="top" width="0">
+<column alignment="right" valignment="top" width="0">
 <row>
 <cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
@@ -5087,7 +5083,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5120,20 +5116,7 @@ with RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-[UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
+\begin_inset Formula $n$
 \end_inset
 
 
@@ -5141,7 +5124,7 @@ O)
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5153,7 +5136,7 @@ O)
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5165,7 +5148,7 @@ O)
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5183,12 +5166,53 @@ O)
 \begin_inset Text
 
 \begin_layout Plain Layout
-n = 4
+0
 \end_layout
 
 \end_inset
 </cell>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+380
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
 <cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5200,7 +5224,7 @@ n = 4
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5212,7 +5236,7 @@ n = 4
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5230,12 +5254,12 @@ n = 4
 \begin_inset Text
 
 \begin_layout Plain Layout
-n = 5
+5
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5247,7 +5271,7 @@ n = 5
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5259,7 +5283,7 @@ n = 5
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5277,12 +5301,12 @@ n = 5
 \begin_inset Text
 
 \begin_layout Plain Layout
-n = 6
+ 6
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5294,7 +5318,7 @@ n = 6
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5306,7 +5330,7 @@ n = 6
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
