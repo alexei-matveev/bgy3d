@@ -7,16 +7,12 @@ module options
   private
 
   interface getopt
-     module procedure getenv_test
-     module procedure getenv_bool
-     module procedure getenv_real
-     module procedure getenv_int
-     module procedure getenv_obj
-
      module procedure getopt_test
      module procedure getopt_int
      module procedure getopt_real
      module procedure getopt_string
+     module procedure getopt_obj
+     module procedure getopt_bool
   end interface getopt
 
   public :: getopt
@@ -24,100 +20,18 @@ module options
 contains
 
   !
-  ! These are  used to inquire settings organized  into an association
-  ! list supplied as the first argument:
-  !
-  function getenv_test (env, key) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool
-    implicit none
-    type (obj), intent (in) :: env
-    character (len=*), intent (in) :: key
-    logical :: ok
-    ! *** end of interface ***
-
-    type (obj) :: pair
-
-    ! "not not" converts any value to true or false:
-    pair = assoc (symbol (key), env)
-    ok = .not. bool (not (pair))
-  end function getenv_test
-
-
-  function getenv_obj (env, key, val) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool, cdr
-    implicit none
-    type (obj), intent (in) :: env
-    character (len=*), intent (in) :: key
-    type (obj), intent (inout) :: val
-    logical :: ok
-    ! *** end of interface ***
-
-    type (obj) :: pair
-
-    pair = assoc (symbol (key), env)
-    ok = .not. bool (not (pair))
-    if (ok) val = cdr (pair)
-  end function getenv_obj
-
-
-  function getenv_bool (env, key, val) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool, cdr
-    implicit none
-    type (obj), intent (in) :: env
-    character (len=*), intent (in) :: key
-    logical, intent (inout) :: val
-    logical :: ok
-    ! *** end of interface ***
-
-    type (obj) :: v
-
-    ok = getenv_obj (env, key, v)
-    if (ok) val = bool (v)
-  end function getenv_bool
-
-
-  function getenv_real (env, key, val) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool, cdr, flonum
-    implicit none
-    type (obj), intent (in) :: env
-    character (len=*), intent (in) :: key
-    real (rk), intent (inout) :: val
-    logical :: ok
-    ! *** end of interface ***
-
-    type (obj) :: v
-
-    ok = getenv_obj (env, key, v)
-    if (ok) val = flonum (v)
-  end function getenv_real
-
-
-  function getenv_int (env, key, val) result (ok)
-    use lisp, only: obj, assoc, symbol, not, bool, cdr, int
-    implicit none
-    type (obj), intent (in) :: env
-    character (len=*), intent (in) :: key
-    integer, intent (inout) :: val
-    logical :: ok
-    ! *** end of interface ***
-
-    type (obj) :: v
-
-    ok = getenv_obj (env, key, v)
-    if (ok) val = int (v)
-  end function getenv_int
-
-  !
-  ! These are to inquire PETSC environment:
+  ! These are to  inquire dynamic environment. It is  assumed that the
+  ! dynvar   *settings*    in   bgy3d.scm   is    set   to   something
+  ! meaningful. E.g. as specified in the command line.
   !
   function op (key) result (str)
     use iso_c_binding, only: C_NULL_CHAR
     implicit none
     character (len=*), intent (in) :: key
-    character (len = len (key) + 3) :: str
+    character (len = len (key) + 1) :: str
     ! *** end of interface ***
 
-    str = "--" // key // C_NULL_CHAR
+    str = key // C_NULL_CHAR
   end function op
 
   function getopt_test (key) result (ok)
@@ -151,6 +65,33 @@ contains
 
     ok = bgy3d_getopt_real (op (key), val)
   end function getopt_real
+
+  function getopt_obj (key, val) result (ok)
+    use foreign, only: bgy3d_getopt_scm
+    use lisp, only: obj
+    implicit none
+    character (len=*), intent (in) :: key
+    type (obj), intent (inout) :: val
+    logical :: ok
+    ! *** end of interface ***
+
+    ok = bgy3d_getopt_scm (op (key), val)
+  end function getopt_obj
+
+  function getopt_bool (key, val) result (ok)
+    use foreign, only: bgy3d_getopt_scm
+    use lisp, only: obj, bool
+    implicit none
+    character (len=*), intent (in) :: key
+    logical, intent (inout) :: val
+    logical :: ok
+    ! *** end of interface ***
+
+    type (obj) :: v
+
+    ok = getopt_obj (key, v)
+    if (ok) val = bool (v)
+  end function getopt_bool
 
   function getopt_string (key, val) result (ok)
     use foreign, only: bgy3d_getopt_string

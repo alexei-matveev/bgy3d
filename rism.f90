@@ -149,7 +149,7 @@ contains
 
     ! Fill supplied  storage with solvent susceptibility.  If NULL, it
     ! is interpreted as not present() in main() and thus ignored:
-    call main (env, pd, solvent, t=t, x=x, dict=dict)
+    call main (pd, solvent, t=t, x=x, dict=dict)
   end subroutine rism_solvent
 
 
@@ -187,11 +187,11 @@ contains
     call c_f_pointer (x_buf, x, shape = [nrad, m, m])
     call c_f_pointer (ptr, dict)
 
-    call main (env, pd, solvent, solute, x=x, dict=dict)
+    call main (pd, solvent, solute, x=x, dict=dict)
   end subroutine rism_solute
 
 
-  subroutine main (env, pd, solvent, solute, t, x, dict)
+  subroutine main (pd, solvent, solute, t, x, dict)
     !
     ! This one does not need to be interoperable.
     !
@@ -200,7 +200,6 @@ contains
     use lisp, only: obj, nil, acons, symbol
     use drism, only: epsilon_rism
     implicit none
-    type (obj), intent (in) :: env ! SCM alist
     type (problem_data), intent (in) :: pd
     type (site), intent (in) :: solvent(:)
     type (site), optional, intent (in) :: solute(:)
@@ -252,7 +251,7 @@ contains
        type (obj) :: vdict, udict
 
        if (vv) then
-          call rism_vv (env, pd % closure, nrad, rmax, pd % beta, pd % rho, &
+          call rism_vv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
                solvent, gam, chi, vdict)
 
           ! Output, if requested:
@@ -270,7 +269,7 @@ contains
        endif
 
        if (uv) then
-          call rism_uv (env, pd % closure, nrad, rmax, pd % beta, pd % rho, &
+          call rism_uv (pd % closure, nrad, rmax, pd % beta, pd % rho, &
                solvent, chi, solute, udict)
        endif
 
@@ -305,7 +304,7 @@ contains
   end subroutine mkgrid
 
 
-  subroutine rism_vv (env, method, nrad, rmax, beta, rho, sites, gam, chi, dict)
+  subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site, comm_rank
@@ -314,7 +313,6 @@ contains
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
     implicit none
-    type (obj), intent (in) :: env ! SCM alist
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
     real (rk), intent (in) :: rmax          ! cell size
@@ -341,12 +339,12 @@ contains
     real (rk) :: A          ! Cummings & Stell factor [CS81]
 
 
-    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
+    if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     ! Make sure  it is not used  anywhere if it was  not supplied. The
     ! logic is if  eps /= 0 then do DRISM, otherwise  --- do the usual
     ! RISM with whatever dielectric constant comes out of it:
-    if (.not. getopt (env, "dielectric", eps)) eps = 0.0
+    if (.not. getopt ("dielectric", eps)) eps = 0.0
 
     ! Set  Cummings &  Stell  semi-empiric scaling  factor  A for  the
     ! long-range  site-site correlation.   This  conflicts with  DRISM
@@ -424,7 +422,7 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (env, method, rmax, beta, rho, sites, sites, vr, t, &
+    call post_process (method, rmax, beta, rho, sites, sites, vr, t, &
          A=A, eps=eps, dict=dict, rbc=.false.)
 
     ! Chemical potential (SCF) ...
@@ -508,14 +506,13 @@ contains
   end subroutine rism_vv
 
 
-  subroutine rism_uv (env, method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
+  subroutine rism_uv ( method, nrad, rmax, beta, rho, solvent, chi, solute, dict)
     use snes, only: snes_default
     use foreign, only: site
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     use units, only: angstrom
     implicit none
-    type (obj), intent (in) :: env ! SCM alist
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
     real (rk), intent (in) :: rmax         ! cell size
@@ -544,7 +541,7 @@ contains
     n = size (solute)
     m = size (solvent)
 
-    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
+    if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     ! Prepare grid, dr * dk = 2π/2n:
     call mkgrid (rmax, r, dr, k, dk)
@@ -556,7 +553,7 @@ contains
     ! Rigid-bond solute-solute correlations on the k-grid:
     w_uuk = omega_fourier (solute, k)
 
-    rbc = getopt (env, "rbc")
+    rbc = getopt ("rbc")
 
     if (rbc) then
        call bridge (rule, solute, solvent, beta, r, dr, k, dk, expB)
@@ -575,7 +572,7 @@ contains
     call snes_default (t_uvx, iterate_t, jacobian_t)
 
     ! Done with it, print results:
-    call post_process (env, method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
+    call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
          A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     ! Chemical potential (SCF) ...
@@ -600,7 +597,7 @@ contains
       type (obj) :: grads
 
       ! False if unspecified:
-      if (.not. getopt (env, "derivatives", flag)) then
+      if (.not. getopt ("derivatives", flag)) then
          flag = .false.
       endif
 
@@ -922,7 +919,7 @@ contains
   !   Kovalenko and Fumio Hirata , J. Chem. Phys. 113, 2793 (2000);
   !   http://dx.doi.org/10.1063/1.1305885
   !
-  subroutine bridge_correction (env, method, rmax, beta, rho, &
+  subroutine bridge_correction (method, rmax, beta, rho, &
        solute, solvent, v, t, dict, rbc)
     !
     ! Compute the bridge correction using TPT.
@@ -931,7 +928,6 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     implicit none
-    type (obj), intent (in) :: env
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
     type (site), intent (in) :: solute(:)  ! (n)
@@ -947,7 +943,7 @@ contains
     n = size (t, 1)
     m  = size (t, 2)
     nrad = size (t, 3)
-    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
+    if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     block
       real (rk) :: r(nrad), k(nrad), dr, dk
@@ -1232,7 +1228,7 @@ contains
   end subroutine lj_repulsive
 
 
-  subroutine post_process (env, method, rmax, beta, rho, solvent, solute, v, t, &
+  subroutine post_process (method, rmax, beta, rho, solvent, solute, v, t, &
        A, eps, dict, rbc)
     !
     ! Prints some results.
@@ -1247,7 +1243,6 @@ contains
          epsilon_rism, dipole_factor, dipole_correction
     use options, only: getopt
     implicit none
-    type (obj), intent (in) :: env ! for getopt
     integer, intent (in) :: method         ! HNC, KH or PY
     real (rk), intent (in) :: rmax         ! grid length
     real (rk), intent (in) :: beta         ! inverse temperature
@@ -1271,7 +1266,7 @@ contains
        verb = 0
     endif
 
-    if (.not. getopt (env, "comb-rule", rule)) rule = LORENTZ_BERTHELOT
+    if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
     ! FIXME: to make debug  output somewhat meaningfull for plain RISM
     ! (not DRISM) calculations use a real eps:
@@ -1541,7 +1536,7 @@ contains
 
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
-    call bridge_correction (env, method, rmax, beta, rho, solute, solvent, &
+    call bridge_correction (method, rmax, beta, rho, solute, solvent, &
          v, t, dict=dict, rbc=rbc)
 
     block
@@ -1550,7 +1545,7 @@ contains
 
        ! Get  species ID.   Sites belong  to the  same species  if the
        ! distance is below a typical bond length:
-       if (getopt (env, "solute-species", ilist)) then
+       if (getopt ("solute-species", ilist)) then
           do i = 1, size (species)
              species(i) = int (car (ilist))
              ilist = cdr (ilist)
