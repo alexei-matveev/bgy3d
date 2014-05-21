@@ -12,7 +12,6 @@
 /*===============================================*/
 
 #include "bgy3d.h"
-#include "bgy3d-getopt.h"
 #include "bgy3d-solutes.h"      /* FIXME: struct Site in prototypes */
 #include "bgy3d-pure.h"         /* BGY3d_solvent_solve(), ... */
 #include "bgy3d-potential.h"    /* Context */
@@ -44,14 +43,14 @@ int main (int argc, char **argv)
   PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
 
   /*
-    Read the  command line options.  Petsc insists on keys  having the
-    leading dash, so  keep them for the moment.   Set global verbosity
-    early  enough. This is  the only  short option!   Use long-options
-    prefixed by "--" as the usual convention.
+    FIXME:  Read the  command  line options.   Petsc  insists on  keys
+    having the leading dash, so  keep them for the moment.  Set global
+    verbosity  early  enough. This  is  the  only  short option!   Use
+    long-options prefixed by "--" as the usual convention.
   */
-  bgy3d_getopt_int ("-v", &verbosity);
+  // bgy3d_getopt_int ("-v", &verbosity);
 
-  /* This calls bgy3d_getopt_*() a few more times: */
+  /* This needs to get the user input: */
   ProblemData PD = bgy3d_problem_data ();
 
   PetscViewerSetFormat(PETSC_VIEWER_STDERR_WORLD, PETSC_VIEWER_ASCII_MATLAB);
@@ -84,22 +83,6 @@ int main (int argc, char **argv)
     inputs.
   */
 #error "Needs some work"
-
-  if (bgy3d_getopt_test ("hnc"))
-    {
-      if (bgy3d_getopt_test ("solute"))
-        {}                      /* solute/solvent by HNC */
-      else
-        {}                      /* pure solvent by HNC */
-    }
-
-  if (bgy3d_getopt_test ("bgy"))
-    {
-      if (bgy3d_getopt_test ("solute"))
-        {}                      /* solvent/solute by BGY */
-      else
-        {}                      /* pure solvent by BGY */
-    }
 
   int ierr = PetscFinalize();CHKERRQ(ierr);
 
