@@ -3048,7 +3048,7 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-water model 
+Water model 
 \end_layout
 
 \end_inset
@@ -3599,7 +3599,7 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-uranyl model 
+Uranyl model 
 \end_layout
 
 \end_inset
@@ -4403,7 +4403,7 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-uranyl model 
+Uranyl model 
 \end_layout
 
 \end_inset
@@ -5009,7 +5009,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Comparison of Intra-molecular energy 
+Comparison of intra-molecular energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
