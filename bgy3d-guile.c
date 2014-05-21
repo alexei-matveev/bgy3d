@@ -611,14 +611,7 @@ guile_genpts (SCM M)
   const int m = scm_to_int (M);
   double x[m][3], w[m];
 
-  /* FIXME: install a recent Fortran and get rid of this ugliness: */
-#ifdef WITH_FORTRAN
   const int n = genpts (m, x, w);
-#else
-  const int n = 0;
-  assert (false);
-#endif
-
   assert (n <= m);
 
   /* n == m */
@@ -1034,18 +1027,6 @@ static SCM guile_restart_destroy (SCM restart)
 
 static SCM guile_rism_solvent (SCM solvent, SCM settings)
 {
-#ifndef WITH_FORTRAN
-  /*
-    The working horse rism_solvent() is implemented in Fortan, GCC 4.3
-    cannot  handle that source.   FIXME: maybe  one should  rather use
-    GCC_VERSION?
-  */
-  (void) solvent;
-  (void) settings;
-  assert (false);
-
-  return SCM_UNSPECIFIED;
-#else
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -1105,27 +1086,12 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
                       retval);
 
   return retval;
-#endif
 }
 
 
 
 static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft)
 {
-#ifndef WITH_FORTRAN
-  /*
-    The working horse rism_solute()  is implemented in Fortan, GCC 4.3
-    cannot  handle that source.   FIXME: maybe  one should  rather use
-    GCC_VERSION?
-  */
-  (void) solute;
-  (void) solvent;
-  (void) settings;
-  (void) chi_fft;
-  assert (false);
-
-  return SCM_UNSPECIFIED;
-#else
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -1198,7 +1164,6 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft
   free (solute_sites);
 
   return retval;
-#endif
 }
 
 

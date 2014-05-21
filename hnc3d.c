@@ -677,11 +677,6 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   */
   local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
 
-#if !WITH_FORTRAN || !WITH_GUILE
-  /* Zero as intial guess for t  is not the same as zero initial guess
-     for c: */
-  VecSet (T, 0.0);
-#else
   {
     /*
       Problem data for use in 1d-RISM code. If you do not upscale, the
@@ -711,7 +706,6 @@ void hnc3d_solvent_solve (const ProblemData *PD,
       vec_aliases_destroy2 (T, m, t);
     }
   }
-#endif
 
   /*
     Most of these  Vecs will be a functional of  primary variable t or
@@ -1167,8 +1161,6 @@ solvent_kernel_file1 (State *HD, int m, Vec chi_fft[m][m]) /* out */
   vec_destroy2 (m, chi);
 }
 
-/* FIXME: drop these ifdefs together with Lenny! */
-#if WITH_FORTRAN && WITH_GUILE
 /* Layed off  from solvent_kernel().  Puts χ -  1 into  chi_fft[][] as
    computed by 1d RISM solvent solver. See ./rism.f90. */
 static void
@@ -1204,7 +1196,6 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
     for (int j = 0; j <= i; j++)
       vec_ktab (HD, nrad, x_fft[i][j], dk, chi_fft[i][j]);
 }
-#endif
 
 
 /*
@@ -1217,14 +1208,7 @@ static void solvent_kernel (State *HD,
                             Vec chi_fft[m][m])            /* out */
 {
   if (bgy3d_getopt_test ("--solvent-1d"))
-    {
-#if WITH_FORTRAN && WITH_GUILE
-      solvent_kernel_rism1 (HD, m, solvent, chi_fft);
-#else
-      (void) solvent;           /* not used */
-      assert (false);
-#endif
-    }
+    solvent_kernel_rism1 (HD, m, solvent, chi_fft);
   else
     {
       if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
