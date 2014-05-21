@@ -72,7 +72,7 @@ hnc-tests: $(hnc-diffs) bgy-tests
 rism-tests: run-ions-out.diff
 
 run-ions-out: run-ions.scm $(exe)
-	$(run) $(<) --snes-solver trial
+	$(run) $(<)
 
 #
 # Target specific variables. Four cases (g1, g2) x (BGY, HNC) at most:

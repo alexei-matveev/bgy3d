@@ -1,11 +1,10 @@
 ;;;
 ;;; Copyright (c) 2014 Alexei Matveev
 ;;;
-;;; FIXME: The default  solver does not converge, but  there is no way
-;;; to choose except  from command line by means  of PETSC environment
-;;; (beware of typos in command line, there is no checking):
+;;; FIXME: The default solver does not converge, see snes-solver in
+;;; settings.
 ;;;
-;;;  ../bgy3d -L ../ -s ./run-ions.scm --snes-solver trial
+;;;  ../bgy3d -L ../ -s ./run-ions.scm
 ;;;
 (use-modules
  (guile bgy3d)              ; rism-solute
@@ -23,7 +22,8 @@
     (damp-start . 1.0)
     (lambda . 0.02)
     (bond-length-thresh . 2.0)
-    (derivatives . #f)))
+    (derivatives . #f)
+    (snes-solver . "trial")))
 
 (define *solvent*
   (find-molecule "water, cSPC/E"))
