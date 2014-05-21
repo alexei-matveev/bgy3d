@@ -861,6 +861,16 @@ static void guile_init_vec_type (void)
 }
 
 
+/* Lookup dynvar: */
+static SCM
+guile_get_settings ()
+{
+  SCM module = scm_c_resolve_module ("guile bgy3d");
+  SCM fluid = scm_variable_ref (scm_c_module_lookup (module, "*settings*"));
+  return scm_fluid_ref (fluid);
+}
+
+
 /* E.g. hnc3d_solvent_solve() or bgy3d_solvent_solve(): */
 typedef
 void (*SV) (const ProblemData *PD, int m, const Site solvent[m], Vec g[m][m]);
@@ -868,8 +878,11 @@ void (*SV) (const ProblemData *PD, int m, const Site solvent[m], Vec g[m][m]);
 /* Decode SCM input,  encode output to SCM. The  first argument is the
    actual solver that operates with C-types. */
 static SCM
-run_solvent (SV solve_solvent, SCM solvent, SCM settings)
+run_solvent (SV solve_solvent, SCM solvent)
 {
+  /* Lookup dynvar: */
+  SCM settings = guile_get_settings ();
+
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -900,16 +913,16 @@ run_solvent (SV solve_solvent, SCM solvent, SCM settings)
 
 
 static SCM
-guile_bgy3d_solvent (SCM solvent, SCM settings)
+guile_bgy3d_solvent (SCM solvent)
 {
-  return run_solvent (bgy3d_solve_solvent, solvent, settings);
+  return run_solvent (bgy3d_solve_solvent, solvent);
 }
 
 
 static SCM
-guile_hnc3d_solvent (SCM solvent, SCM settings)
+guile_hnc3d_solvent (SCM solvent)
 {
-  return run_solvent (hnc3d_solvent_solve, solvent, settings);
+  return run_solvent (hnc3d_solvent_solve, solvent);
 }
 
 
@@ -928,8 +941,11 @@ void (*SU) (const ProblemData *PD,
 /* Decode SCM input,  encode output to SCM. The  first argument is the
    actual solver that operates with C-types. */
 static SCM
-run_solute (SU solute_solve, SCM solute, SCM solvent, SCM settings, SCM restart)
+run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
 {
+  /* Lookup dynvar: */
+  SCM settings = guile_get_settings ();
+
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -1005,16 +1021,16 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM settings, SCM restart)
 
 
 static SCM
-guile_bgy3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
+guile_bgy3d_solute (SCM solute, SCM solvent, SCM restart)
 {
-  return run_solute (bgy3d_solute_solve, solute, solvent, settings, restart);
+  return run_solute (bgy3d_solute_solve, solute, solvent, restart);
 }
 
 
 static SCM
-guile_hnc3d_solute (SCM solute, SCM solvent, SCM settings, SCM restart)
+guile_hnc3d_solute (SCM solute, SCM solvent, SCM restart)
 {
-  return run_solute (hnc3d_solute_solve, solute, solvent, settings, restart);
+  return run_solute (hnc3d_solute_solve, solute, solvent, restart);
 }
 
 
@@ -1025,8 +1041,11 @@ static SCM guile_restart_destroy (SCM restart)
 }
 
 
-static SCM guile_rism_solvent (SCM solvent, SCM settings)
+static SCM guile_rism_solvent (SCM solvent)
 {
+  /* Lookup dynvar: */
+  SCM settings = guile_get_settings ();
+
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -1090,8 +1109,11 @@ static SCM guile_rism_solvent (SCM solvent, SCM settings)
 
 
 
-static SCM guile_rism_solute (SCM solute, SCM solvent, SCM settings, SCM chi_fft)
+static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
 {
+  /* Lookup dynvar: */
+  SCM settings = guile_get_settings ();
+
   /* This sets defaults, eventually modified from the command line and
      updated by the entries from the association list: */
   const ProblemData PD = problem_data (settings);
@@ -1344,10 +1366,10 @@ static void module_init (void* unused)
     usable outside of the module one needs to export them. EXPORT() is
     a macro that does both.
   */
-  EXPORT ("hnc3d-run-solvent", 2, 0, 0, guile_hnc3d_solvent);
-  EXPORT ("hnc3d-run-solute", 4, 0, 0, guile_hnc3d_solute);
-  EXPORT ("bgy3d-run-solvent", 2, 0, 0, guile_bgy3d_solvent);
-  EXPORT ("bgy3d-run-solute", 4, 0, 0, guile_bgy3d_solute);
+  EXPORT ("hnc3d-run-solvent/c", 1, 0, 0, guile_hnc3d_solvent);
+  EXPORT ("hnc3d-run-solute/c", 3, 0, 0, guile_hnc3d_solute);
+  EXPORT ("bgy3d-run-solvent/c", 1, 0, 0, guile_bgy3d_solvent);
+  EXPORT ("bgy3d-run-solute/c", 3, 0, 0, guile_bgy3d_solute);
   EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
@@ -1355,9 +1377,9 @@ static void module_init (void* unused)
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("comm-set-parallel!", 1, 0, 0, guile_comm_set_parallel_x);
   EXPORT ("comm-bcast!", 4, 0, 0, guile_comm_bcast_x);
-  EXPORT ("rism-solvent", 2, 0, 0, guile_rism_solvent);
-  EXPORT ("rism-solute", 3, 1, 0, guile_rism_solute);
-  EXPORT ("rism-self-energy", 2, 0, 0, guile_rism_self_energy);
+  EXPORT ("rism-solvent/c", 1, 0, 0, guile_rism_solvent);
+  EXPORT ("rism-solute/c", 2, 1, 0, guile_rism_solute);
+  EXPORT ("rism-self-energy/c", 2, 0, 0, guile_rism_self_energy);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */

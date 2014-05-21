@@ -46,6 +46,10 @@
    comm-rank
    comm-set-parallel!
    comm-bcast!
+   bgy3d-restart-destroy)
+  #:export
+  (bgy3d-main
+   parse-command-line
    rism-solvent
    rism-solute
    rism-self-energy
@@ -53,9 +57,6 @@
    hnc3d-run-solute
    bgy3d-run-solvent
    bgy3d-run-solute
-   bgy3d-restart-destroy)
-  #:export
-  (bgy3d-main
    vec-print
    vec-norm
    solvent/solvent
@@ -64,13 +65,13 @@
 ;;;
 ;;; The list of the procedures defined in bgy3d-guile.c includes
 ;;;
-;;;   rism-solvent
-;;;   rism-solute
+;;;   rism-solvent/c
+;;;   rism-solute/c
 ;;;   rism-self-energy
-;;;   hnc3d-run-solvent
-;;;   hnc3d-run-solute
-;;;   bgy3d-run-solvent
-;;;   bgy3d-run-solute
+;;;   hnc3d-run-solvent/c
+;;;   hnc3d-run-solute/c
+;;;   bgy3d-run-solvent/c
+;;;   bgy3d-run-solute/c
 ;;;   bgy3d-pot-interp
 ;;;   bgy3d-pot-destroy
 ;;;   bgy3d-restart-destroy
@@ -289,6 +290,35 @@
     (derivatives #f)                  ; #t or #f
     ))
 
+;;;
+;;; This  dynamically  scoped  global   will  be  used  to  communcate
+;;; variables too cumbersome to be passed as arguments. Do not abuse.
+;;;
+(define *settings* (make-fluid #f))
+
+(define (rism-solvent solvent settings)
+  (with-fluids ((*settings* settings))
+    (rism-solvent/c solvent)))
+
+(define (rism-solute solute solvent settings chi)
+  (with-fluids ((*settings* settings))
+    (rism-solute/c solute solvent chi)))
+
+(define (bgy3d-run-solvent solvent settings)
+  (with-fluids ((*settings* settings))
+    (bgy3d-run-solvent/c solvent)))
+
+(define (bgy3d-run-solute solute solvent settings restart)
+  (with-fluids ((*settings* settings))
+    (bgy3d-run-solute/c solute solvent restart)))
+
+(define (hnc3d-run-solvent solvent settings)
+  (with-fluids ((*settings* settings))
+    (hnc3d-run-solvent/c solvent)))
+
+(define (hnc3d-run-solute solute solvent settings restart)
+  (with-fluids ((*settings* settings))
+    (hnc3d-run-solute/c solute solvent restart)))
 
 ;;;
 ;;; This compacts  association list  with entries coming  later having
