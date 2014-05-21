@@ -251,7 +251,7 @@ volume_element (const ProblemData *PD)
 
 
 /* Get  problem data  (e.g.  from  command line)  using bgy3d_getopt_*
-   interface: */
+   interface. FIXME: implementation in bgy3d-guile.c! */
 ProblemData bgy3d_problem_data (void);
 
 real** Load_Molecule (int *N);

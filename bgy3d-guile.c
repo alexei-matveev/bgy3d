@@ -134,11 +134,45 @@ guile_get_settings ()
 }
 
 
+/*
+  Get  problem data  (e.g.   from command  line) using  bgy3d_getopt_*
+  interface.
+
+  FIXME:  some parameters are  still handled  by the  solvers themself
+  each having potentially its own set of the defaults.
+
+  Do not forget to set the  defaults, the command line may not contain
+  a setting for every ProblemData field!
+*/
 /* Will longjmp() on error! */
-static ProblemData problem_data (SCM alist)
+static ProblemData
+problem_data (SCM alist)
 {
-  /* This sets defaults, eventually modified from the command line: */
-  ProblemData PD = bgy3d_problem_data ();
+  ProblemData PD;
+
+  /* Inverse temperature: */
+  PD.beta = 1.6889;
+
+  /* Density: */
+  PD.rho = 0.3;
+
+  /* Mixing parameter: */
+  PD.lambda = 0.1;
+
+  /*
+    Initial  interaction scaling  factor.  The code  used to  automate
+    "blending-in"  some interaction by  iterating scaling  factor from
+    some low initial value to 1.  Default was 0.0 originally, but that
+    makes necessary to always specify --damp-start when 1.0 you do not
+    want blending.  I think 1.0 is a more reasonable default:
+  */
+  PD.damp = 1.0;
+
+  /* Number of total iterations: */
+  PD.max_iter = 100;
+
+  /* Norm tolerance for convergence test: */
+  PD.norm_tol = 1.0e-12;
 
   /* Overwrite  defaults with  the  data provided  in the  association
      list. First real (double precision) options: */
@@ -148,16 +182,23 @@ static ProblemData problem_data (SCM alist)
   alist_getopt_real (alist, "lambda", &PD.lambda);
   alist_getopt_real (alist, "damp-start", &PD.damp);
 
-  real length;
-  if (alist_getopt_real (alist, "L", &length))
-    for (int i = 0; i < 3; i++)
-      PD.L[i] = 2 * length;
+  assert (PD.lambda >= 0.0);
+  assert (PD.lambda <= 1.0);
 
-  /* Integer options: */
-  int n;
-  if (alist_getopt_int (alist, "N", &n))
-    for (int i = 0; i < 3; i++)
-      PD.N[i] = n;
+  /* (half of the) box size: */
+  real length = 12.0;
+  alist_getopt_real (alist, "L", &length);
+
+  for (int i = 0; i < 3; i++)
+    PD.L[i] = 2 * length;
+
+  /* Grid points in 1 dimension */
+  int n = 32;
+  alist_getopt_int (alist, "N", &n);
+  assert (n > 0);
+
+  for (int i = 0; i < 3; i++)
+    PD.N[i] = n;
 
   alist_getopt_int (alist, "max-iter", &PD.max_iter);
 
@@ -166,10 +207,23 @@ static ProblemData problem_data (SCM alist)
     PD.h[i] = PD.L[i] / PD.N[i];
 
   /*
-    Closure is a  symbol, in capital letters.  Only  do something if
-    closure is  specified in the association  list, otherwise assume
-    bgy3d_problem_data() has set it properly:
+    At this point N, h and L have consistent values.  FIXME: N^2 + N^2
+    + N^2 should not overflow  in 3D, this condition ensures that 3N^2
+    <  2^31.  Also  N^3  should not  ne  too large.   But  for 1D  the
+    restriction is void so do not abort if N^3 >= 2^31:
   */
+  assert (n < 26755);
+  // assert (n < 1291);
+
+  /*
+    Closure is only  used in HNC-like methods. Supply  default for the
+    case the settings do not provide it.
+
+    Closure is  a symbol,  in capital letters.   Only do  something if
+    closure is specified in the association list, otherwise assume the
+    default:
+  */
+  PD.closure = CLOSURE_HNC;
   SCM closure;
   if (alist_getopt_scm (alist, "closure", &closure))
     {
@@ -190,6 +244,14 @@ static ProblemData problem_data (SCM alist)
 
   return PD;
 }
+
+/* FIXME: declaration in bgy3d.h: */
+ProblemData
+bgy3d_problem_data (void)
+{
+  return problem_data (guile_get_settings ());
+}
+
 
 
 static void
