@@ -124,6 +124,16 @@ static bool alist_getopt_funptr (SCM alist, /* intent(in) */
 }
 
 
+/* Lookup dynvar: */
+static SCM
+guile_get_settings ()
+{
+  SCM module = scm_c_resolve_module ("guile bgy3d");
+  SCM fluid = scm_variable_ref (scm_c_module_lookup (module, "*settings*"));
+  return scm_fluid_ref (fluid);
+}
+
+
 /* Will longjmp() on error! */
 static ProblemData problem_data (SCM alist)
 {
@@ -858,16 +868,6 @@ static void guile_init_vec_type (void)
   EXPORT ("f64+", 2, 0, 0, guile_f64_add);
   EXPORT ("f64*", 2, 0, 0, guile_f64_mul);
   EXPORT ("f64scale", 2, 0, 0, guile_f64_scale);
-}
-
-
-/* Lookup dynvar: */
-static SCM
-guile_get_settings ()
-{
-  SCM module = scm_c_resolve_module ("guile bgy3d");
-  SCM fluid = scm_variable_ref (scm_c_module_lookup (module, "*settings*"));
-  return scm_fluid_ref (fluid);
 }
 
 
