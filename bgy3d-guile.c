@@ -6,7 +6,7 @@
 
 #include <libguile.h>
 #include "bgy3d.h"
-#include "bgy3d-getopt.h"       /* bgy3d_getopt_test() */
+#include "bgy3d-getopt.h"       /* Implementation here */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* bgy3d_solvent_get() */
 #include "bgy3d-pure.h"
@@ -60,6 +60,16 @@ static SCM from_pointer (const void *ptr)
 static void* to_pointer (SCM ptr)
 {
   return (void*) to_intptr (ptr);
+}
+
+
+/* True if the key is present: */
+static bool
+alist_getopt_test (SCM alist, const char *key)
+{
+  SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
+
+  return scm_is_true (kv);
 }
 
 /* Update SCM value  with the entry from an  association list or leave
@@ -131,6 +141,49 @@ guile_get_settings ()
   SCM module = scm_c_resolve_module ("guile bgy3d");
   SCM fluid = scm_variable_ref (scm_c_module_lookup (module, "*settings*"));
   return scm_fluid_ref (fluid);
+}
+
+
+bool
+bgy3d_getopt_test (const char key[])
+{
+  return alist_getopt_test (guile_get_settings (), key);
+}
+
+
+bool
+bgy3d_getopt_int (const char key[], int *val)
+{
+  return alist_getopt_int (guile_get_settings (), key, val);
+}
+
+
+bool
+bgy3d_getopt_real (const char key[], double *val)
+{
+  return alist_getopt_real (guile_get_settings (), key, val);
+}
+
+
+bool
+bgy3d_getopt_string (const char key[], int len, char val[len])
+{
+  SCM str;
+  bool ok = alist_getopt_scm (guile_get_settings (), key, &str);
+
+  if (ok)
+    {
+      /* Does not null-terminate, returns the number of bytes required
+         for the string not counting the terminating \0: */
+      int n = scm_to_locale_stringbuf (str, val, len);
+
+      if (n < len)
+        val[n] = '\0';
+      else
+        val[len - 1] = '\0'; /* FIXME: truncation here! */
+    }
+
+  return ok;
 }
 
 
@@ -1508,14 +1561,15 @@ void bgy3d_guile_init (int argc, char **argv)
   PetscPushErrorHandler (PetscAbortErrorHandler, NULL);
 
   /*
-    Set global verbosity early enough.  This is the only short option!
-    Use long-options prefixed by "--" as the usual convention.
+    FIXME: Set global verbosity early  enough.  This is the only short
+    option!   Use   long-options  prefixed   by  "--"  as   the  usual
+    convention.
   */
-  verbosity = bgy3d_getopt_test ("-v"); /* extern */
+  verbosity = 0; // bgy3d_getopt_test ("-v"); /* extern */
 
   /* Numeric value, if supplied, will overwrite the on/off "-v"
      flag: */
-  bgy3d_getopt_int ("--verbosity", &verbosity);
+  // bgy3d_getopt_int ("verbosity", &verbosity);
 
   /*
    Note that  the names that would  be defined here were  put into the

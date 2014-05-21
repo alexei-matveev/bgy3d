@@ -1207,11 +1207,11 @@ static void solvent_kernel (State *HD,
                             int m, const Site solvent[m], /* in */
                             Vec chi_fft[m][m])            /* out */
 {
-  if (bgy3d_getopt_test ("--solvent-1d"))
+  if (bgy3d_getopt_test ("solvent-1d"))
     solvent_kernel_rism1 (HD, m, solvent, chi_fft);
   else
     {
-      if (bgy3d_getopt_test ("--from-radial-g2")) /* FIXME: better name? */
+      if (bgy3d_getopt_test ("from-radial-g2")) /* FIXME: better name? */
         solvent_kernel_file1 (HD, m, chi_fft);    /* never used */
       else
         solvent_kernel_file3 (m, chi_fft); /* regular case */

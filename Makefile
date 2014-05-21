@@ -101,7 +101,6 @@ c-objs = \
 	bgy3d-impure.o \
 	bgy3d-solvents.o \
 	bgy3d-solutes.o \
-	bgy3d-getopt.o \
 	bgy3d-poisson.o \
 	bgy3d-dirichlet.o \
 	bgy3d-snes.o \

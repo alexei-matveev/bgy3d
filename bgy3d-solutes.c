@@ -434,7 +434,7 @@ void bgy3d_solute_field (const State *BHD,
   {
     char filename[260];           /* electron density file */
 
-    if (bgy3d_getopt_string ("--load-charge", sizeof filename, filename))
+    if (bgy3d_getopt_string ("load-charge", sizeof filename, filename))
       bgy3d_vec_read (filename, uc_rho);
   }
 

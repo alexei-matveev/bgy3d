@@ -893,7 +893,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
         end of the "dump" loop du[] is written to disk, so that in the
         next iteration we will read an updated version:
       */
-      if (bgy3d_getopt_test ("--load-guess"))
+      if (bgy3d_getopt_test ("load-guess"))
         bgy3d_vec_read2 ("du%d%d.bin", m, du);
       else
         for (int i = 0; i < m; i++)
@@ -976,7 +976,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
               }
 
             /* FIXME: 3-site code does not do this: */
-            if (!bgy3d_getopt_test ("--no-hacks"))
+            if (!bgy3d_getopt_test ("no-hacks"))
               VecPointwiseMult (du_new, du_new, c2[i][j]);
 
             /*
@@ -1154,7 +1154,7 @@ bgy3d_solve_solvent (const ProblemData *PD, int m, const Site solvent[m],
   }
 
   /* Save du[][] to binary files: */
-  if (bgy3d_getopt_test ("--save-guess"))
+  if (bgy3d_getopt_test ("save-guess"))
     bgy3d_vec_save2 ("du%d%d.bin", m, du);
 
   /* Save g2[][] to binary files: */

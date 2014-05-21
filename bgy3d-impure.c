@@ -763,7 +763,7 @@ static void solute_solve (State *BHD,
           local Vec u[m];       /* aliases to subsections */
           vec_aliases_create1 (U, m, u);
 
-          if (bgy3d_getopt_test ("--load-guess"))
+          if (bgy3d_getopt_test ("load-guess"))
             bgy3d_vec_read1 ("u%d.bin", m, u);
           else
             {
@@ -821,7 +821,7 @@ static void solute_solve (State *BHD,
         --load-guess  in the  next  run this  u[]  can be  used as  an
         initial guess.  See above.
       */
-      if (bgy3d_getopt_test ("--save-guess"))
+      if (bgy3d_getopt_test ("save-guess"))
         {
           local Vec u[m];       /* aliases to subsections */
           vec_aliases_create1 (U, m, u);
@@ -916,7 +916,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
     radial functions  from the  text files named  g2C, g2S,  and g2CS.
     This version uses g00.txt, g11.txt, and g01.txt instead.
   */
-  if (bgy3d_getopt_test ("--from-radial-g2"))
+  if (bgy3d_getopt_test ("from-radial-g2"))
     bgy3d_vec_read_radial2 (BHD->da, BHD->PD, "g%d%d.txt", m, g2);
   else
     bgy3d_vec_read2 ("g%d%d.bin", m, g2);

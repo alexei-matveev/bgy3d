@@ -638,7 +638,7 @@ Mat bgy3d_dirichlet_create (const DA da, const ProblemData *PD)
  */
 void bgy3d_impose_laplace_boundary (const State *BHD, Vec v, Vec x)
 {
-  if (bgy3d_getopt_test ("--no-cage"))
+  if (bgy3d_getopt_test ("no-cage"))
     return;                     /* FIXME! */
 
   /*

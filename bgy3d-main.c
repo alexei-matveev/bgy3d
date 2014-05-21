@@ -85,17 +85,17 @@ int main (int argc, char **argv)
   */
 #error "Needs some work"
 
-  if (bgy3d_getopt_test ("--hnc"))
+  if (bgy3d_getopt_test ("hnc"))
     {
-      if (bgy3d_getopt_test ("--solute"))
+      if (bgy3d_getopt_test ("solute"))
         {}                      /* solute/solvent by HNC */
       else
         {}                      /* pure solvent by HNC */
     }
 
-  if (bgy3d_getopt_test ("--bgy"))
+  if (bgy3d_getopt_test ("bgy"))
     {
-      if (bgy3d_getopt_test ("--solute"))
+      if (bgy3d_getopt_test ("solute"))
         {}                      /* solvent/solute by BGY */
       else
         {}                      /* pure solvent by BGY */
