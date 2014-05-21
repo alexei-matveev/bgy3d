@@ -39,13 +39,6 @@ SHELL = /bin/sh
 WITH_GUILE = 1
 
 #
-# Some  code  is  written  in  Fortran using  F2008  features.   Older
-# compilers   including   GFortran   4.3   on  Lenny   cannot   handle
-# that. Disable those features:
-#
-WITH_FORTRAN = 1
-
-#
 # Compile  a   shared  library  libbgy3d.so  and  link   that  to  the
 # executable.   May require  setting LD_LIBRARY_PATH  in order  to run
 # that. The following flag is used in expressions like $(if $(shared),
@@ -135,23 +128,20 @@ endif
 # the *.mod  files. FIXME:  sill fails for  parallel build as  in make
 # -j4.
 #
-ifeq ($(WITH_FORTRAN),1)
-	f-objs += \
-		rism.o \
-		drism.o \
-		snes.o \
-		bessel.o \
-		fft.o \
-		linalg.o \
-		options.o \
-		foreign.o \
-		lisp.o \
-		units.o \
-		kinds.o \
-		lebed/lebed.o \
-		lebed/Lebedev-Laikov.o
-	USR-FLAGS += -DWITH_FORTRAN
-endif
+f-objs += \
+	rism.o \
+	drism.o \
+	snes.o \
+	bessel.o \
+	fft.o \
+	linalg.o \
+	options.o \
+	foreign.o \
+	lisp.o \
+	units.o \
+	kinds.o \
+	lebed/lebed.o \
+	lebed/Lebedev-Laikov.o
 
 OBJECTS = bgy3d-main.o
 
