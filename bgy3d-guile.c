@@ -152,6 +152,13 @@ bgy3d_getopt_test (const char key[])
 
 
 bool
+bgy3d_getopt_scm (const char key[], SCM *val)
+{
+  return alist_getopt_scm (guile_get_settings (), key, val);
+}
+
+
+bool
 bgy3d_getopt_int (const char key[], int *val)
 {
   return alist_getopt_int (guile_get_settings (), key, val);
