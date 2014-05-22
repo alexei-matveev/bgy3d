@@ -28,6 +28,7 @@
    molecule-self-energy
    scan-self-energy
    find-molecule
+   find-entry
    print-molecule/xyz
    read-xyz
    kj->kcal

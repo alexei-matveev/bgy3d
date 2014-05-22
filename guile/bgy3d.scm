@@ -1050,7 +1050,7 @@ computes the sum of all vector elements."
         ("print-molecule"
          (for-each
              (lambda (name)
-               (print-molecule/xyz (find-molecule name)))
+               (print-molecule/xyz (find-entry name))) ; find-molecule needs FF to be present
            args))
         ;;
         ("print-species"
