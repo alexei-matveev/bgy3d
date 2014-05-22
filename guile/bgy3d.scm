@@ -73,7 +73,7 @@
 ;;;
 ;;;   rism-solvent/c
 ;;;   rism-solute/c
-;;;   rism-self-energy
+;;;   rism-self-energy/c
 ;;;   hnc3d-run-solvent/c
 ;;;   hnc3d-run-solute/c
 ;;;   bgy3d-run-solvent/c
@@ -301,6 +301,10 @@
 ;;; variables too cumbersome to be passed as arguments. Do not abuse.
 ;;;
 (define *settings* (make-fluid))
+
+(define (rism-self-energy molecule species settings)
+  (with-fluids ((*settings* settings))
+    (rism-self-energy/c molecule species)))
 
 (define (rism-solvent solvent settings)
   (with-fluids ((*settings* settings))
@@ -835,7 +839,7 @@ computes the sum of all vector elements."
          (x0 (molecule-positions solute))
          (fg (lambda (x)              ; x -> (values energy gradients)
                (let ((solute' (move-molecule solute x)))
-                 (rism-self-energy solute' species))))
+                 (rism-self-energy solute' species settings))))
          (f (lambda (x)                 ; x -> energy
               (let-values (((e g) (fg x)))
                 e))))
