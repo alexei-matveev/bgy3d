@@ -3,6 +3,7 @@ module foreign
   ! Copyright (c) 2013 Alexei Matveev
   !
   use iso_c_binding, only: c_int, c_double, c_char, c_bool
+  use lisp, only: obj
   implicit none
   private
 
@@ -34,6 +35,7 @@ module foreign
      real (c_double) :: sigma               ! sigma for LJ
      real (c_double) :: epsilon             ! epsilon for LJ
      real (c_double) :: charge              ! charge
+     type (obj) :: obj
   end type site
 
   ! Keep these in sync with bgy3d.h:

@@ -4,6 +4,7 @@
   Copyright (c) 2013, 2014 Alexei Matveev
   Copyright (c) 2013 Bo Li
 */
+#include <libguile.h>
 
 typedef struct Site {
   char name[5];              /* atom types. What are they used for? */
@@ -11,6 +12,7 @@ typedef struct Site {
   real sigma;                /* sigma for LJ */
   real epsilon;              /* epsilon for LJ */
   real charge;               /* charge */
+  SCM site; /* Scheme representation. FIXME: should be make it void*? */
 } Site;
 
 /* Fill intent(out) us[] and uc  fields with the solute field on every

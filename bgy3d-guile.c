@@ -391,6 +391,7 @@ static Site to_site (SCM s)
   S.sigma = scm_to_double (scm_car (ff));
   S.epsilon = scm_to_double (scm_cadr (ff));
   S.charge = scm_to_double (scm_caddr (ff));
+  S.site = s;                  /* Link to Scheme representation too */
 
   return S;
 }
