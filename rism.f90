@@ -1908,6 +1908,8 @@ contains
     ! a given site.
     !
     use foreign, only: site
+    use options, only: getopt
+    use lisp, only: obj
     implicit none
     integer, intent (in) :: rule
     type (site), intent (in) :: sites(:) ! (m)
@@ -1918,6 +1920,13 @@ contains
 
     integer :: i, j
     real (rk) :: f(3)
+    type (obj) :: ff            ! procedure
+    logical :: custom
+
+    ! True if  the dynamic  environments asks us  to use  custom force
+    ! field  shape.  In  this  case "ff"  is  also set  to a  callable
+    ! function:
+    custom = getopt ("custom-force-field", ff)
 
     ! Loop over upper triangle with i <= j <= m, not to count the same
     ! interaction twice.
@@ -1944,50 +1953,68 @@ contains
       !
       use foreign, only: site
       use units, only: EPSILON0INV
+      use lisp, only: flonum, car, funcall
       implicit none
       type (site), intent (in) :: a, b
       real (rk) :: e
       ! *** end of interface ***
 
-      real (rk) :: epsilon, sigma, rab, coul
-
-      ! Combining LJ parameters:
-      call pair (rule, a, b, sigma, epsilon)
+      real (rk) :: rab
 
       rab = norm2 (b % x - a % x)
 
-      ! coulomb_long() +  coulomb_short() happens to be just  1 / rab.
-      ! FIXME: we rely on that equality here.
-      coul = EPSILON0INV * a % charge * b % charge / rab
-
-      if (sigma /= 0.0) then
-         e = coul + epsilon * lj (rab / sigma)
+      if (custom) then
+         ! (ff site-a site-b rab) -> (f f')
+         e = flonum (car (funcall (ff, a % obj, b % obj, flonum (rab))))
       else
-         e = coul
+         block
+            real (rk) :: epsilon, sigma, coul
+
+            ! Combining LJ parameters:
+            call pair (rule, a, b, sigma, epsilon)
+
+            ! coulomb_long() +  coulomb_short() happens to be just  1 / rab.
+            ! FIXME: we rely on that equality here.
+            coul = EPSILON0INV * a % charge * b % charge / rab
+
+            if (sigma /= 0.0) then
+               e = coul + epsilon * lj (rab / sigma)
+            else
+               e = coul
+            endif
+         end block
       endif
     end function energy
 
     function force (a, b) result (df)
       use foreign, only: site
+      use lisp, only: flonum, cadr, funcall
       use units, only: EPSILON0INV
       implicit none
       type (site), intent (in) :: a, b
       real (rk) :: df(3)
       ! *** end of interface ***
 
-      real (rk) :: ab(3), fr
-      real (rk) :: epsilon, sigma, rab
-
-      ! Combining LJ parameters:
-      call pair (rule, a, b, sigma, epsilon)
+      real (rk) :: ab(3), rab, fr
 
       ab = b % x - a % x
       rab = norm2 (ab)
 
-      fr = - EPSILON0INV * a % charge * b % charge / rab**2
+      if (custom) then
+         ! (ff site-a site-b rab) -> (f f')
+         fr = flonum (cadr (funcall (ff, a % obj, b % obj, flonum (rab))))
+      else
+         block
+            real (rk) :: epsilon, sigma
 
-      if (sigma /= 0.0) then
-         fr = fr + (epsilon / sigma) * lj1 (rab / sigma, 1.0d0)
+            ! Combining LJ parameters:
+            call pair (rule, a, b, sigma, epsilon)
+            fr = - EPSILON0INV * a % charge * b % charge / rab**2
+
+            if (sigma /= 0.0) then
+               fr = fr + (epsilon / sigma) * lj1 (rab / sigma, 1.0d0)
+            endif
+         end block
       endif
 
       df = (ab / rab) * fr
