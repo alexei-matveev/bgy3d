@@ -1075,6 +1075,13 @@ computes the sum of all vector elements."
               (let ((e (f x0)))
                 (pretty-print/serial e))))
           args))
+        ("self-energy-gradients"
+         (for-each
+          (lambda (name)
+            (let-values (((x0 f fg) (make-pes/gp (find-molecule name) settings)))
+              (let-values (((e g) (fg x0)))
+                (pretty-print/serial g))))
+          args))
         ;;
         ("scan-self-energy"
          (let ((name (first args))
