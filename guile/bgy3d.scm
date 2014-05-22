@@ -294,7 +294,7 @@
 ;;; This  dynamically  scoped  global   will  be  used  to  communcate
 ;;; variables too cumbersome to be passed as arguments. Do not abuse.
 ;;;
-(define *settings* (make-fluid #f))
+(define *settings* (make-fluid))
 
 (define (rism-solvent solvent settings)
   (with-fluids ((*settings* settings))
