@@ -12,6 +12,7 @@
   #:use-module (ice-9 match)            ; match-lambda
   #:use-module (ice-9 rdelim)           ; read-line
   #:use-module (ice-9 pretty-print)     ; pretty-print
+  #:use-module (guile math)             ; erfc
   #:use-module (guile tinker)           ; tinker-table
   #:use-module (guile utils)            ; memoize
   #:use-module (guile atoms)            ; covalent-radius, canonical-name
@@ -27,6 +28,7 @@
    molecule-species
    molecule-self-energy
    default-force-field
+   default-force-field/short
    scan-self-energy
    find-molecule
    find-entry
@@ -409,6 +411,34 @@
          (e' (* -4 x (- (* 12 p12) (* 6 p6)))))
     (list e e')))
 
+
+(define EPSILON0INV 331.84164)         ; FIXME: literal from units.f90
+(define ALPHA 1.2)                     ; FIXME: literal from units.f90
+(define *short-range* (make-fluid #f))
+
+(define (coulomb/full r)
+  (let* ((e (/ EPSILON0INV r))
+         (e' (- (/ e r))))
+    (list e e')))
+
+;;;
+;;; erfc (alpha * r) / r
+;;;
+(define (coulomb/short r)
+  (let* ((e (* EPSILON0INV (/ (erfc (* ALPHA r)) r)))
+         (e' +nan.0))                   ; FIXME: will it ever be used?
+    (list e e')))
+
+;;;
+;;; Behaviour depends on a dynvar:
+;;;
+(define (coulomb r)
+  (let ((short-range (fluid-ref *short-range*)))
+    (if short-range
+        (coulomb/short r)
+        (coulomb/full r))))
+
+
 ;;;
 ;;; To avoid possible confusion: coordinates  of sites a and b are NOT
 ;;; used to compute the distance here:
@@ -420,9 +450,7 @@
   ;;
   (define (combine-epsilons ea eb)
     (sqrt (* ea eb)))
-  ;;
-  (define EPSILON0INV 331.84164)       ; FIXME: literal from units.f90
-  ;;
+
   (let ((sa (site-sigma a))
         (ea (site-epsilon a))
         (qa (site-charge a))
@@ -432,8 +460,10 @@
     (let ((sab (combine-sigmas sa sb))
           (eab (combine-epsilons ea eb))
           (qab (* qa qb)))
-      (let* ((e-coul (* EPSILON0INV (/ qab rab))) ; Coulomb
-             (e-coul' (- (/ e-coul rab)))         ; Coulomb derivative
+      ;; ee' is a 2-list, value and derivative
+      (let* ((ee' (coulomb rab))
+             (e-coul (* qab (first ee')))
+             (e-coul' (* qab (second ee')))
              (ee' (lj (/ rab sab)))     ; 2-list, value and derivative
              (e-nonb (if (zero? sab)
                          0.0
@@ -445,8 +475,15 @@
              (e' (+ e-coul' e-nonb')))
         (list e e')))))
 
+
 (define (energy a b)
-  (car (default-force-field a b (site-distance a b))))
+  (first (default-force-field a b (site-distance a b))))
+
+
+(define (default-force-field/short a b r)
+  (with-fluids ((*short-range* #t))
+    (first (default-force-field a b r))))
+
 
 (define (molecule-self-energy m species)
   (let ((sites (molecule-sites m)))
