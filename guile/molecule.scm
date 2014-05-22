@@ -26,6 +26,7 @@
    molecule-dipole
    molecule-species
    molecule-self-energy
+   default-force-field
    scan-self-energy
    find-molecule
    find-entry
@@ -403,8 +404,14 @@
 (define (default-force-field a b rab)
   ;;
   (define (lj r)
-    (let ((sr6 (expt (/ 1 r) 6)))
-      (* 4 sr6 (- sr6 1))))
+    (let ((p6 (expt (/ 1 r) 6)))
+      (* 4 p6 (- p6 1))))
+  ;;
+  (define (lj' r)
+    (let* ((x (/ 1 r))
+           (p6 (expt x 6))
+           (p12 (* p6 p6)))
+      (* -4 x (- (* 12 p12) (* 6 p6)))))
   ;;
   (define (combine-sigmas sa sb)
     (/ (+ sa sb) 2))
@@ -423,16 +430,20 @@
     (let ((sab (combine-sigmas sa sb))
           (eab (combine-epsilons ea eb))
           (qab (* qa qb)))
-      (let ((e-coul (* EPSILON0INV (/ qab rab)))
-            (e-lj (if (zero? sab)
-                      0.0
-                      (* eab (lj (/ rab sab))))))
-        (+ e-coul e-lj)))))
-
+      (let* ((e-coul (* EPSILON0INV (/ qab rab))) ; Coulomb
+             (e-coul' (- (/ e-coul rab)))         ; Coulomb derivative
+             (e-lj (if (zero? sab)
+                       0.0
+                       (* eab (lj (/ rab sab)))))
+             (e-lj' (if (zero? sab)
+                        0.0
+                        (* eab (/ (lj' (/ rab sab)) sab))))
+             (e (+ e-coul e-lj))
+             (e' (+ e-coul' e-lj')))
+        (list e e')))))
 
 (define (energy a b)
-  (default-force-field a b (site-distance a b)))
-
+  (car (default-force-field a b (site-distance a b))))
 
 (define (molecule-self-energy m species)
   (let ((sites (molecule-sites m)))
