@@ -46,6 +46,42 @@ module lisp
      end function scm_cdr
   end interface cdr
 
+  interface cddr
+     function scm_cddr (list) result (item) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: list
+       type (obj) :: item
+     end function scm_cddr
+  end interface cddr
+
+  interface cdar
+     function scm_cdar (list) result (item) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: list
+       type (obj) :: item
+     end function scm_cdar
+  end interface cdar
+
+  interface cadr
+     function scm_cadr (list) result (item) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: list
+       type (obj) :: item
+     end function scm_cadr
+  end interface cadr
+
+  interface caar
+     function scm_caar (list) result (item) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: list
+       type (obj) :: item
+     end function scm_caar
+  end interface caar
+
   interface assoc
      function scm_assoc (key, alist) result (pair) bind (c)
        import
@@ -245,6 +281,7 @@ module lisp
   public :: flonum, int, symbol, string, bool ! constructors
   public :: cons, nil
   public :: car, cdr
+  public :: cddr, cdar, cadr, caar
   public :: acons, assoc, not
   public :: display, newline
   public :: values, list
