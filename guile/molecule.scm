@@ -45,6 +45,7 @@
    site-sigma
    site-epsilon
    site-charge
+   site-distance
    update-param
    site-x
    site-y
