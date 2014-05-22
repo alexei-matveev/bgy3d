@@ -17,8 +17,8 @@
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (ice-9 getopt-long)      ; getopt-long, option-ref
   #:use-module (ice-9 threads)
-  #:use-module (rnrs bytevectors)       ; make-bytevector, etc.
-  #:use-module (rnrs io ports)          ; make-custom-binary-output-port, etc.
+  ;; #:use-module (rnrs bytevectors)       ; make-bytevector, etc.
+  ;; #:use-module (rnrs io ports)          ; make-custom-binary-output-port, etc.
   #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
   #:re-export                           ; from (guile bgy3d internal)
   (state-make
@@ -45,7 +45,7 @@
    comm-size
    comm-rank
    comm-set-parallel!
-   comm-bcast!
+   ;; comm-bcast!
    bgy3d-restart-destroy)
   #:export
   (bgy3d-main
@@ -61,6 +61,12 @@
    vec-norm
    solvent/solvent
    solute/solvent))
+
+(cond-expand
+ ((not guile-2))
+ (else
+  (use-modules (rnrs bytevectors))
+  (use-modules (rnrs io ports))))
 
 ;;;
 ;;; The list of the procedures defined in bgy3d-guile.c includes
