@@ -300,9 +300,13 @@
   (with-fluids ((*settings* settings))
     (rism-solvent/c solvent)))
 
-(define (rism-solute solute solvent settings chi)
+;;
+;; One optional  argument, chi, for solvent  susceptibility is allowed
+;; here:
+;;
+(define (rism-solute solute solvent settings . rest)
   (with-fluids ((*settings* settings))
-    (rism-solute/c solute solvent chi)))
+    (apply rism-solute/c solute solvent rest)))
 
 (define (bgy3d-run-solvent solvent settings)
   (with-fluids ((*settings* settings))
