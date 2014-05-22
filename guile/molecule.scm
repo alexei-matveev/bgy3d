@@ -397,21 +397,23 @@
 ;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
+
+;;;
+;;; Returns a 2-list with the value and derivative:
+;;;
+(define (lj r)
+  (let* ((x (/ 1 r))
+         (p6 (expt x 6))
+         (p12 (* p6 p6))
+         (e (* 4 p6 (- p6 1)))
+         (e' (* -4 x (- (* 12 p12) (* 6 p6)))))
+    (list e e')))
+
 ;;;
 ;;; To avoid possible confusion: coordinates  of sites a and b are NOT
 ;;; used to compute the distance here:
 ;;;
 (define (default-force-field a b rab)
-  ;;
-  (define (lj r)
-    (let ((p6 (expt (/ 1 r) 6)))
-      (* 4 p6 (- p6 1))))
-  ;;
-  (define (lj' r)
-    (let* ((x (/ 1 r))
-           (p6 (expt x 6))
-           (p12 (* p6 p6)))
-      (* -4 x (- (* 12 p12) (* 6 p6)))))
   ;;
   (define (combine-sigmas sa sb)
     (/ (+ sa sb) 2))
@@ -432,14 +434,15 @@
           (qab (* qa qb)))
       (let* ((e-coul (* EPSILON0INV (/ qab rab))) ; Coulomb
              (e-coul' (- (/ e-coul rab)))         ; Coulomb derivative
-             (e-lj (if (zero? sab)
-                       0.0
-                       (* eab (lj (/ rab sab)))))
-             (e-lj' (if (zero? sab)
-                        0.0
-                        (* eab (/ (lj' (/ rab sab)) sab))))
-             (e (+ e-coul e-lj))
-             (e' (+ e-coul' e-lj')))
+             (ee' (lj (/ rab sab)))     ; 2-list, value and derivative
+             (e-nonb (if (zero? sab)
+                         0.0
+                         (* eab (first ee'))))
+             (e-nonb' (if (zero? sab)
+                          0.0
+                          (* eab (/ (second ee') sab))))
+             (e (+ e-coul e-nonb))
+             (e' (+ e-coul' e-nonb')))
         (list e e')))))
 
 (define (energy a b)
