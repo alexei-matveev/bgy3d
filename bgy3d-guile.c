@@ -1379,6 +1379,7 @@ guile_comm_set_parallel_x (SCM flag)
 }
 
 
+#if SCM_MAJOR_VERSION > 1       /* Bytevectors not availbale in 1.8 */
 /* read!  and write!  for use in make-custom-binary-input- and
    output-port. */
 static SCM
@@ -1446,6 +1447,7 @@ guile_comm_bcast_x (SCM root, SCM bv, SCM start, SCM len)
      transaction: */
   return scm_from_size_t (nn);
 }
+#endif
 
 
 static SCM guile_test (SCM m, SCM n, SCM k)
@@ -1498,7 +1500,9 @@ static void module_init (void* unused)
   EXPORT ("comm-rank", 0, 0, 0, guile_comm_rank);
   EXPORT ("comm-size", 0, 0, 0, guile_comm_size);
   EXPORT ("comm-set-parallel!", 1, 0, 0, guile_comm_set_parallel_x);
+#if SCM_MAJOR_VERSION > 1
   EXPORT ("comm-bcast!", 4, 0, 0, guile_comm_bcast_x);
+#endif
   EXPORT ("rism-solvent/c", 1, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute/c", 2, 1, 0, guile_rism_solute);
   EXPORT ("rism-self-energy/c", 2, 0, 0, guile_rism_self_energy);
