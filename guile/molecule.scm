@@ -47,6 +47,7 @@
    site-charge
    site-distance
    update-param
+   interpolate
    site-x
    site-y
    site-z))
@@ -454,7 +455,10 @@
                                        0.0
                                        (energy a b)))))))))))))
 
-
+;;;
+;;; Roughly x  * a + (1  - x) *  b. Will not choke  on a == b  even if
+;;; those are not numbers.
+;;;
 (define (interpolate x a b)
   (let ((wb x)
         (wa (- 1 x)))
@@ -468,6 +472,8 @@
                   (car b))
               (go (cdr a)
                   (cdr b))))
+       ((equal? a b)      ; pass-through for strings and equal numbers
+        a)
        (else
         (+ (* wa a) (* wb b)))))))
 
