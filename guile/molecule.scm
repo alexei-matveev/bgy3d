@@ -396,7 +396,11 @@
 ;; (for-each print-molecule/xyz (slurp (find-file "guile/solutes.scm")))
 ;; (exit 0)
 
-(define (energy a b)
+;;;
+;;; To avoid possible confusion: coordinates  of sites a and b are NOT
+;;; used to compute the distance here:
+;;;
+(define (default-force-field a b rab)
   ;;
   (define (lj r)
     (let ((sr6 (expt (/ 1 r) 6)))
@@ -418,13 +422,16 @@
         (qb (site-charge b)))
     (let ((sab (combine-sigmas sa sb))
           (eab (combine-epsilons ea eb))
-          (qab (* qa qb))
-          (rab (site-distance a b)))
+          (qab (* qa qb)))
       (let ((e-coul (* EPSILON0INV (/ qab rab)))
             (e-lj (if (zero? sab)
                       0.0
                       (* eab (lj (/ rab sab))))))
         (+ e-coul e-lj)))))
+
+
+(define (energy a b)
+  (default-force-field a b (site-distance a b)))
 
 
 (define (molecule-self-energy m species)
