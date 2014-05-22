@@ -193,6 +193,54 @@ module lisp
      end function scm_list_5
  end interface list
 
+ interface funcall
+    function scm_call_0 (proc) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc
+      type (obj) :: res
+    end function scm_call_0
+
+    function scm_call_1 (proc, arg1) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc, arg1
+      type (obj) :: res
+    end function scm_call_1
+
+    function scm_call_2 (proc, arg1, arg2) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc, arg1, arg2
+      type (obj) :: res
+    end function scm_call_2
+
+    function scm_call_3 (proc, arg1, arg2, arg3) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc, arg1, arg2, arg3
+      type (obj) :: res
+    end function scm_call_3
+
+    function scm_call_4 (proc, arg1, arg2, arg3, arg4) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc, arg1, arg2, arg3, arg4
+      type (obj) :: res
+    end function scm_call_4
+
+    function scm_call_5 (proc, arg1, arg2, arg3, arg4, arg5) result (res) bind (c)
+      import
+      implicit none
+      type (obj), intent (in), value :: proc, arg1, arg2, arg3, arg4, arg5
+      type (obj) :: res
+    end function scm_call_5
+
+    !
+    ! FIXME: extend up to 9 if necessary.
+    !
+ end interface
+
   public :: obj                              ! type
   public :: flonum, int, symbol, string, bool ! constructors
   public :: cons, nil
@@ -200,6 +248,7 @@ module lisp
   public :: acons, assoc, not
   public :: display, newline
   public :: values, list
+  public :: funcall
 
 contains
 
