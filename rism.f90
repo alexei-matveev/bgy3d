@@ -1703,6 +1703,8 @@ contains
     !
     use foreign, only: site
     use units, only: EPSILON0INV, ALPHA
+    use options, only: getopt
+    use lisp, only: obj, flonum, funcall
     implicit none
     integer, intent (in) :: rule
     type (site), intent (in) :: asites(:)  ! (n)
@@ -1713,33 +1715,52 @@ contains
     real (rk), intent (out) :: vk(:, :, :) ! (n, m, nrad)
     ! *** end of inteface ***
 
-    real (rk) :: epsilon, sigma, charge
-    integer :: i, j
+    real (rk) :: epsilon, sigma, qab
+    integer :: i, j, p
     type (site) :: a, b
+    type (obj) :: ffr, ffk
+    logical :: custom_short, custom_long
+
+    custom_short = getopt ("custom-force-field/short", ffr)
+    custom_long = getopt ("custom-force-field/long", ffk)
 
     do j = 1, size (bsites)
        b = bsites(j)
        do i = 1, size (asites)
           a = asites(i)
-          ! Derive pair interaction parameters:
-          call pair (rule, a, b, sigma, epsilon)
-          charge = a % charge * b % charge
+
+          qab = a % charge * b % charge
 
           ! Short range on the r-grid:
-          if (sigma /= 0.0) then
-             vr(i, j, :) = epsilon * lj (r / sigma) + &
-                  EPSILON0INV * charge * coulomb_short (r, ALPHA)
+          if (custom_short) then
+             do p = 1, size (r)
+                vr(i, j, p) = flonum (funcall (ffr, a % obj, b % obj, flonum (r(p))))
+             enddo
           else
-             vr(i, j, :) = &
-                  EPSILON0INV * charge * coulomb_short (r, ALPHA)
+             ! Derive pair interaction parameters:
+             call pair (rule, a, b, sigma, epsilon)
+
+             if (sigma /= 0.0) then
+                vr(i, j, :) = epsilon * lj (r / sigma) + &
+                     EPSILON0INV * qab * coulomb_short (r, ALPHA)
+             else
+                vr(i, j, :) = &
+                     EPSILON0INV * qab * coulomb_short (r, ALPHA)
+             endif
           endif
 
           ! Long range on the k-grid:
-          vk(i, j, :) = &
-               EPSILON0INV * charge * coulomb_long_fourier (k, ALPHA)
+          if (custom_long) then
+             do p = 1, size (k)
+                vk(i, j, p) = &
+                     flonum (funcall (ffk, a % obj, b % obj, flonum (k(p))))
+             enddo
+          else
+             vk(i, j, :) = &
+                  EPSILON0INV * qab * coulomb_long_fourier (k, ALPHA)
+          endif
        enddo
     enddo
-
   end subroutine force_field
 
 
