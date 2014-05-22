@@ -526,9 +526,10 @@ void bgy3d_snes_jager (const ProblemData *PD, void *ctx,
   the interface  update the  corresponding interface block  in Fortran
   sources.
 
-  FIXME:  in parallel  runs with  P workers  this function  appears to
-  operate  with a  distributed Vec  of  total length  n *  P built  of
-  redundant sections of length n on each worker.
+  NOTE: when  PETSC_COMM_WORLD is  not MPI_COMM_SELF in  parallel runs
+  with  P workers  this function  operates with  a distributed  Vec of
+  total  length n  * P  built  of (eventually)  redundant sections  of
+  length n on each worker.
 */
 void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
 {
