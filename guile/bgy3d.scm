@@ -42,6 +42,7 @@
    f64+
    f64*
    f64scale
+   least-squares
    comm-size
    comm-rank
    comm-set-parallel!
@@ -102,6 +103,7 @@
 ;;;   comm-size
 ;;;   state-make
 ;;;   state-destroy
+;;;   least-squares (depends on MINPACK)
 ;;;
 ;;; and  possibly  more, depending  on  the  compilation options.  The
 ;;; definitions are  put into (guile bgy3d  internal) module, imported
