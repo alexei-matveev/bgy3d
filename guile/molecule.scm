@@ -29,6 +29,7 @@
    molecule-self-energy
    default-force-field
    default-force-field/short
+   scan-property
    scan-self-energy
    find-molecule
    find-entry
