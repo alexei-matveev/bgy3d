@@ -61,7 +61,7 @@ CC       = gcc
 FC       = gfortran
 CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USR-FLAGS)
 FFLAGS = -g -std=f2008 -Wall -O3 -freg-struct-return $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
-LDFLAGS  = $(OMP-FLAGS)
+LDFLAGS  = $(OMP-FLAGS) -lminpack
 
 # Flags to generate position independent code (PIC) for shared objects
 # happen to be the same for gcc and gfortran:
