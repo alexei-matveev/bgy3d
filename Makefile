@@ -61,7 +61,7 @@ CC       = gcc
 FC       = gfortran
 CFLAGS = -g -std=c99 -Wall -Wextra -Ofast $(PIC-FLAGS) $(USR-FLAGS)
 FFLAGS = -g -std=f2008 -Wall -O3 -freg-struct-return $(PIC-FLAGS) $(OMP-FLAGS) $(DBG-FFLAGS)
-LDFLAGS  = $(OMP-FLAGS) -lminpack
+LDFLAGS  = $(OMP-FLAGS)
 
 # Flags to generate position independent code (PIC) for shared objects
 # happen to be the same for gcc and gfortran:
@@ -82,7 +82,7 @@ INCDIRS = $(PETSC_CC_INCLUDES) -I./fft
 fftw3-libs = -lfftw3_mpi -lfftw3
 fftw2-libs = -lfftw_mpi -lfftw
 rfftw2-libs = -lrfftw_mpi -lfftw_mpi -lrfftw -lfftw
-LIBS = $(fftw3-libs) -lm $(PETSC_LIB)
+LIBS = $(fftw3-libs) -lm $(PETSC_LIB) -lminpack
 
 #--------------------------------------------------------------------------------
 # Make rules
