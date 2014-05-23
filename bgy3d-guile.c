@@ -5,6 +5,7 @@
 */
 
 #include <libguile.h>
+#include <minpack.h>            /* lmdif1_() */
 #include "bgy3d.h"
 #include "bgy3d-getopt.h"       /* Implementation here */
 #include "bgy3d-solutes.h"      /* struct Site */
@@ -1451,6 +1452,79 @@ guile_comm_bcast_x (SCM root, SCM bv, SCM start, SCM len)
 #endif
 
 
+/*
+  Find a list of  numbers x such that the sum of  squares of f(x) list
+  is minmal. Start with x = x0.
+
+  This is the signature of MIPACK procedure:
+
+    SUBROUTINE LMDIF1 (FCN, M, N, X, FVEC, TOL, INFO, IWA, WA, LWA)
+    INTEGER M, N, INFO, LWA
+    INTEGER IWA(N)
+    DOUBLE PRECISION TOL
+    DOUBLE PRECISION X(N), FVEC(M), WA(LWA)
+
+  where
+
+    SUBROUTINE FCN (M, N, X, FVEC, IFLAG)
+    INTEGER M, N, IFLAG
+    DOUBLE PRECISION X(N), FVEC(M)
+*/
+static SCM
+guile_least_squares (SCM f, SCM x0)
+{
+  int n = scm_to_int (scm_length (x0));
+  SCM f0 = scm_call_1 (f, x0);  /* FIXME: need to know the shape */
+  int m = scm_to_int (scm_length (f0));
+
+  void fcn (int *m, int *n, double x[], double fvec[], int *iflag)
+  {
+    (void) iflag;
+    SCM x1 = from_double1 (*n, x);
+    SCM f1 = scm_call_1 (f, x1);
+    to_double1 (f1, *m, fvec);
+  }
+
+  double x[n];
+  to_double1 (x0, n, x);
+
+  double fvec[m];
+  double tol = 1.0e-7;          /* FIXME: literal here! */
+  int info, iwa[n];
+  int lwa = m * n + 5 * n + m;
+  double wa[lwa];
+
+  /* The joys of calling F77 ... */
+  lmdif1_ (fcn, &m, &n, x, fvec, &tol, &info, iwa, wa, &lwa);
+
+  assert (info == 1 || info == 2 || info == 3); /* FXIME: 4 too?*/
+  /*
+    INFO = 0 Improper input parameters.
+
+    INFO = 1 Algorithm estimates that the relative error in the sum of
+             squares is at most TOL.
+
+    INFO = 2 Algorithm estimates that the relative error between X and
+             the solution is at most TOL.
+
+    INFO = 3 Conditions for INFO = 1 and INFO = 2 both hold.
+
+    INFO = 4 FVEC is orthogonal to the columns of the Jacobian to
+             machine precision.
+
+    INFO = 5 Number of calls to FCN has reached or exceeded 200*(N+1).
+
+    INFO = 6 TOL is too small.  No further reduction in the sum of
+             squares is possible.
+
+    INFO = 7 TOL is too small.  No further improvement in the
+             approximate solution X is possible.
+  */
+
+  return from_double1 (n, x);
+}
+
+
 static SCM guile_test (SCM m, SCM n, SCM k)
 {
   return scm_from_double (bgy3d_fft_test (scm_to_int (m),
@@ -1507,6 +1581,7 @@ static void module_init (void* unused)
   EXPORT ("rism-solvent/c", 1, 0, 0, guile_rism_solvent);
   EXPORT ("rism-solute/c", 2, 1, 0, guile_rism_solute);
   EXPORT ("rism-self-energy/c", 2, 0, 0, guile_rism_self_energy);
+  EXPORT ("least-squares", 2, 0, 0, guile_least_squares);
   EXPORT ("bgy3d-test", 3, 0, 0, guile_test);
 
   /* Define SMOBs: */
