@@ -439,6 +439,26 @@
         (coulomb/short r)
         (coulomb/full r))))
 
+;;;
+;;; Uses parameters in p to build a replacement for (lj r):
+;;;
+(define (make-ff p)
+  (lambda (r)
+    (match p
+     ((c6 c3)
+      (let* ((x (/ 1 r))
+             (x2 (* x x))
+             (x3 (* x2 x))
+             (x4 (* x2 x2))
+             (x6 (* x4 x2))
+             (x9 (* x6 x3))
+             (x12 (* x6 x6))
+             (e (+ (* c6 x6)
+                   (* c3 x3)))
+             (e' (* -1 x (+ (* 6 c6 x6)
+                            (* 3 c3 x3)))))
+        (list e e'))))))
+
 
 ;;;
 ;;; To avoid possible confusion: coordinates  of sites a and b are NOT
