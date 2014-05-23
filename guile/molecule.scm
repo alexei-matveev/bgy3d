@@ -535,18 +535,23 @@
        (else
         (+ (* wa a) (* wb b)))))))
 
+;;;
+;;; Here  m0 and  m1 could  be two  conformant  molecule descriptions,
+;;; e.g. with different geometries or some force field parameter.
+;;;
+(define (scan-property prop m0 m1)
+  (let ((n 100))                        ; FIXME: literal here
+   (map (lambda (i)
+          (prop (interpolate (/ i (1- n)) m0 m1)))
+        (iota n))))
+
 
 (define (scan-self-energy mol x0 x1)
-  (let ((species (molecule-species mol 1.0))
-        (n 20))
-    (map (lambda (i)
-           (let ((mol' (move-molecule mol
-                                      (interpolate (/ i (- n 1))
-                                                   x0
-                                                   x1))))
-             (molecule-self-energy mol' species)))
-         (iota n))))
-
+  (let* ((species (molecule-species mol 1.0))) ; Keep species during scan.
+    (scan-property (lambda (mol)
+                     (molecule-self-energy mol species))
+                   (move-molecule mol x0)
+                   (move-molecule mol x1))))
 
 ;;;
 ;;; This reads  the current  input port and  returns a  structure that
