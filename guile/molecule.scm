@@ -52,6 +52,7 @@
    site-distance
    update-param
    interpolate
+   *ff*
    site-x
    site-y
    site-z))
@@ -459,6 +460,8 @@
                             (* 3 c3 x3)))))
         (list e e'))))))
 
+(define *ff* (make-fluid lj))           ; FIXME: for 1.8?
+;; (define *ff* (make-fluid (make-ff '(47.8502957719869 -72.529255806734))))
 
 ;;;
 ;;; To avoid possible confusion: coordinates  of sites a and b are NOT
@@ -472,9 +475,13 @@
   (define (combine-epsilons ea eb)
     (sqrt (* ea eb)))
 
-  (let ((sa (site-sigma a))
+  (define ff (fluid-ref *ff*))
+
+  (let ((na (site-name a))
+        (sa (site-sigma a))
         (ea (site-epsilon a))
         (qa (site-charge a))
+        (nb (site-name b))
         (sb (site-sigma b))
         (eb (site-epsilon b))
         (qb (site-charge b)))
@@ -485,7 +492,10 @@
       (let* ((ee' (coulomb rab))
              (e-coul (* qab (first ee')))
              (e-coul' (* qab (second ee')))
-             (ee' (lj (/ rab sab)))     ; 2-list, value and derivative
+             (ee' (if (or (and (equal? na "U") (equal? nb "OW"))
+                          (and (equal? nb "U") (equal? na "OW")))
+                      (ff (/ rab sab))
+                      (lj (/ rab sab))))
              (e-nonb (if (zero? sab)
                          0.0
                          (* eab (first ee'))))
