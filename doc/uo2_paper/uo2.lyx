@@ -5969,41 +5969,6 @@ status open
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Change of U-O bond length in QM calculation when [UO2]2+ is in RISM solvent
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:geometry-qm"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-FIXME: missing
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 Concluding remarks
 \end_layout
