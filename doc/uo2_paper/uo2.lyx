@@ -5524,7 +5524,35 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Comparison of solvation free energy between QM+RISM and QM+PCM 
+Comparison of of intra-molecular energy 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+ (kcal/mol) and solvation free energy 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ (kcal/mol) of uranyl aqua complexes [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, 
+\begin_inset Formula $4\leq n\leq6$
+\end_inset
+
+, for QM+RISM and QM+PCM combinations 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:QM+RISM-vs-QM+PCM"
@@ -5616,23 +5644,10 @@ QM+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-[UO
-\begin_inset Formula $_{2}$
+\begin_inset Formula $n$
 \end_inset
 
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-
+ 
 \end_layout
 
 \end_inset
@@ -5641,7 +5656,7 @@ O)
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta E_{\text{binding}}$
+\begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
  
@@ -5665,7 +5680,7 @@ O)
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta E_{\text{binding}}$
+\begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
 
@@ -5691,7 +5706,11 @@ O)
 \begin_inset Text
 
 \begin_layout Plain Layout
-n=4, D4h
+4
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -5700,7 +5719,10 @@ n=4, D4h
 \begin_inset Text
 
 \begin_layout Plain Layout
--243
+\begin_inset Formula $-$
+\end_inset
+
+243
 \end_layout
 
 \end_inset
@@ -5709,7 +5731,10 @@ n=4, D4h
 \begin_inset Text
 
 \begin_layout Plain Layout
--388
+\begin_inset Formula $-$
+\end_inset
+
+388
 \end_layout
 
 \end_inset
@@ -5718,7 +5743,10 @@ n=4, D4h
 \begin_inset Text
 
 \begin_layout Plain Layout
--244
+\begin_inset Formula $-$
+\end_inset
+
+244
 \end_layout
 
 \end_inset
@@ -5727,54 +5755,10 @@ n=4, D4h
 \begin_inset Text
 
 \begin_layout Plain Layout
--414
-\end_layout
-
+\begin_inset Formula $-$
 \end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
 
-\begin_layout Plain Layout
-n=5, D5h
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--270
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--389
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--270
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
--423
+414
 \end_layout
 
 \end_inset
@@ -5785,7 +5769,11 @@ n=5, D5h
 \begin_inset Text
 
 \begin_layout Plain Layout
-n=6, D6h
+5
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -5794,7 +5782,10 @@ n=6, D6h
 \begin_inset Text
 
 \begin_layout Plain Layout
--266
+\begin_inset Formula $-$
+\end_inset
+
+270
 \end_layout
 
 \end_inset
@@ -5803,7 +5794,10 @@ n=6, D6h
 \begin_inset Text
 
 \begin_layout Plain Layout
--372
+\begin_inset Formula $-$
+\end_inset
+
+389
 \end_layout
 
 \end_inset
@@ -5812,7 +5806,10 @@ n=6, D6h
 \begin_inset Text
 
 \begin_layout Plain Layout
--266
+\begin_inset Formula $-$
+\end_inset
+
+270
 \end_layout
 
 \end_inset
@@ -5821,7 +5818,73 @@ n=6, D6h
 \begin_inset Text
 
 \begin_layout Plain Layout
--401
+\begin_inset Formula $-$
+\end_inset
+
+423
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+266
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+372
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+266
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+401
 \end_layout
 
 \end_inset
@@ -5843,6 +5906,57 @@ status open
 
 \backslash
 end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+ 
+\begin_inset Formula $D_{4\text{h}}$
+\end_inset
+
+ structure, 
+\begin_inset Formula $^{b}$
+\end_inset
+
+ 
+\begin_inset Formula $D_{5\text{h}}$
+\end_inset
+
+ structure, 
+\begin_inset Formula $^{c}$
+\end_inset
+
+ 
+\begin_inset Formula $D_{6\text{h}}$
+\end_inset
+
+ structure
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
 \end_layout
 
 \end_inset
