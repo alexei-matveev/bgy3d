@@ -5363,7 +5363,7 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Standard
-Our attempts for QM-RISM optimization of [UO
+Our attempts for QM+RISM optimization of [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5391,7 +5391,7 @@ reference "tab:QM+RISM-vs-QM+PCM"
 
 \end_inset
 
- shows the comparison of energetic results between QM-RISM and PCM calculations
+ shows the comparison of energetic results between QM+RISM and PCM calculations
  for 
 \begin_inset Quotes eld
 \end_inset
@@ -5414,7 +5414,7 @@ key "Moskaleva04"
 \end_inset
 
 .
- The solvation free energy -389 kcal/mol of uranyl obtained from QM-RISM
+ The solvation free energy -389 kcal/mol of uranyl obtained from QM+RISM
  calculation for [UO
 \begin_inset Formula $_{2}$
 \end_inset
@@ -5477,7 +5477,7 @@ key "Moskaleva04"
 
  and according to our PCM calculation in this study it is -414 kcal/mol,
  which is 11 kcal/mol higher than the five coordination case.
- However in QM-RISM hybrid calculation, RISM solvent compensates the missing
+ However in QM+RISM hybrid calculation, RISM solvent compensates the missing
  ligand besides the four explicit ones in the first solvation shell, thus
  the solvation free energy -388 kcal/mol of four coordination complex is
  almost identical with the five coordination one -389 kcal/mol.
