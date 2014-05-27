@@ -138,15 +138,6 @@ We apply the one-dimensional RISM model to uranyl solvation.
 RISM, uranyl, solvation
 \end_layout
 
-\begin_layout Standard
-\begin_inset CommandInset toc
-LatexCommand tableofcontents
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Section
 Introduction
 \end_layout
