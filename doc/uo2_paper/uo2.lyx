@@ -4434,7 +4434,7 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
-RISM
+MM+RISM
 \end_layout
 
 \end_inset
@@ -4746,7 +4746,7 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
-PCM
+QM+PCM
 \end_layout
 
 \end_inset
@@ -5078,7 +5078,7 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-w/o RISM
+MM
 \end_layout
 
 \end_inset
@@ -5087,7 +5087,7 @@ w/o RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-with RISM
+MM+RISM
 \end_layout
 
 \end_inset
