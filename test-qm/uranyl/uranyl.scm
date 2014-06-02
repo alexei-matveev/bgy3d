@@ -13,18 +13,15 @@
   (integrals-on-file #f)                ; This is faster
   (relativistic "true")                 ; This is an AE calculation
   (spin-restricted #t))                 ; UO22+ is closed shell
- (point-group "C1")
- (unique-atom-number 3)
- (unique-atom (name "U") (z 92) (n-equal-atoms 1))
- (0.0 0.0 0.0)
- (unique-atom (name "O") (z 8) (n-equal-atoms 1))
- (0.0 0.0 3.24640132737424)
- (unique-atom (name "O") (z 8) (n-equal-atoms 1))
- (0.0 0.0 -3.24640132737424)
+ (geo
+  (units angstrom)
+  ("U"  (0.0 0.0 0.0))
+  ("OU"  (0.0 0.0  1.7179211))
+  ("OU"  (0.0 0.0 -1.7179211)))
  ;;
- ;; GP min  at 1.71792111 A = 3.24640132737424 Bohr
- ;; PCM min at 1.73538978 A = 3.27941233884931 Bohr
- ;; GP+RISM at 1.7421507  A = 3.29218862964317 Bohr
+ ;; GP min  at 1.71792111 A, E = -28110.790780703865 Hartree
+ ;; PCM min at 1.73538978 A
+ ;; GP+RISM at 1.7421507  A
  ;;
  (~ "U_24.19.16.11_10.7.7.4")
  (~ "O_9.5.1_5.4.1")
