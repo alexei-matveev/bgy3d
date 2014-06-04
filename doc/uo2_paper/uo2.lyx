@@ -2060,7 +2060,7 @@ status open
 Excess chemical potential (kcal/mol) for alkali- and halide ions calculated
  with cSPC/E water in RISM.
  KH and HNC are short for closure relations used.
- MD resutls and experimental values are also shown for comparison 
+ MD results and experimental values are also shown for comparison 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simple-ions"
@@ -2930,7 +2930,7 @@ reference "sub:simple-ions"
 
 \end_inset
 
-, though for the dication the deviations are already between 9 and 13%.
+, though for the dedication the deviations are already between 9 and 13%.
 \end_layout
 
 \begin_layout Standard
@@ -3548,8 +3548,11 @@ Position of the first
 \begin_inset Formula $d2_{\text{U-OW}}$
 \end_inset
 
- (pm), coordination number N of the first solvation shell and solvation
- free energy 
+ (pm), coordination number 
+\begin_inset Formula $N$
+\end_inset
+
+ of the first solvation shell and solvation free energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
@@ -4851,7 +4854,7 @@ O)
 \begin_inset Formula $n=4-6$
 \end_inset
 
-) both wiout and with the contribution of RISM solvent.
+) both without and with the contribution of RISM solvent.
  As can be seen from Figure
 \begin_inset space ~
 \end_inset
@@ -5475,7 +5478,7 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-in missing in
+ is missing in
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04"
