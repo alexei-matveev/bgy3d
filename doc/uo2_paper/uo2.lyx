@@ -464,7 +464,14 @@ where
  studies about aqueous solution, however, the uncontrolled exponential term
  often results in numerical divergence.
  A more numerically stable closure expression, formulated by Kovalenko and
- Hirata (KH) with partial linearization of the exponential term: 
+ Hirata (KH) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+ with partial linearization of the exponential term: 
 \begin_inset Formula $h_{i\alpha}=f(-\beta u_{i\alpha}+h_{i\alpha}-c_{i\alpha})$
 \end_inset
 
