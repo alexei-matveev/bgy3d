@@ -1,0 +1,15 @@
+&coordinates /
+&INPUT_FORMAT /
+&OPERATIONS /
+&METHOD /
+&HESSE_METHOD /
+&STEP_PARAMETERS /
+&CONVERGENCE /
+&TS_PARAMETERS  /
+&FREQUENCY_PARAMETERS /
+&orientation
+  fixed_orientation = t
+  fixed_atom_1 = 1
+  fixed_atom_2 = 2
+  fixed_atom_3 = 3
+/
