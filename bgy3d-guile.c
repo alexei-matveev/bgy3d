@@ -425,7 +425,7 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
   nore needed.  FIXME: this implementation cannot be used if Guile has
   not been "booted". Not used.
 */
-void bgy3d_solute_get (const char *name, int *n, Site **sites)
+static void bgy3d_solute_get (const char *name, int *n, Site **sites)
 {
   SCM find_molecule =
     scm_variable_ref (scm_c_module_lookup (scm_c_resolve_module ("guile molecule"),

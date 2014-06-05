@@ -10,6 +10,3 @@ int bgy3d_guile_main (int argc, char **argv);
 
 /* This one defines a few scheme subroutines and returns: */
 void bgy3d_guile_init (int argc, char **argv);
-
-/* Get solute sites and name by its name: */
-void bgy3d_solute_get (const char *name, int *n, Site **sites);
