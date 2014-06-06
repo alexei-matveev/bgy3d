@@ -49,3 +49,28 @@ wat  C2V   gp/spc       -76.502960020395
    reason in one case the value is negative even though GP/GP is
    supposed to be a minimum. This is also a measure of internal energy
    difference between PCM and GP geometries of the complex.
+
+
+Using optimized PCM  geometries one could estimate the  dG by the RISM
+method. Using The following settings
+
+~~~
+runbgy.scm energy --norm-tol 1e-14 --dielectric 78.4 --rho 0.0333295 --beta 1.6889
+ --L 160 --N 4096 --solvent "water, PR-SPC/E" --solute "uranyl, 0w, pcm"
+~~~
+
+one obtains the two major contributions:
+
+ n    E(self), kcal      E(RISM), kcal      dG, kcal
+ ---  -----------------  -----------------  --------
+ 0       0.0             -376.027350192114   -376.03
+ 4    -231.098378481216  -175.547503782298   -375.17
+ 5    -271.373959858618  -158.999570912819   -391.03
+ 6    -282.556908726866  -143.250721366546   -378.59
+
+The  free solvation  energy  of  the complex  F(complex)  = E(self)  +
+E(RISM).    Using  the   free  energy   of  the   water,   F(water)  =
+-7.86929437074687 kcal,  one obtains four different  estimates for the
+uranyl solvation energy, dG = F(complex) - n * F(water).
+
+
