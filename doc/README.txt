@@ -1079,6 +1079,47 @@ NH~3               -11.679500598278  -11.685839458397    -3.97757133607131
 HCN                -15.983500809327  -15.990357517679    -4.30251592379648
 --------------------------------------------------------------------------
 
+Re-do the PCM calcualtions after more than 6 months, results with
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    (operations-solvation-effect #t))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+have some difference with the old setting:
+
+~~~~~~~~~~~~~~~~~~~~~~~
+((tasks (solvation #t))
+~~~~~~~~~~~~~~~~~~~~~~~
+
+numbers change from the third digits after decimal point, by switching the
+option "CORRECTION_TYPE" when using solvation TASK-namelist from "Scal_El_Nuc"
+(default) to "None", this difference is greatly eliminated, number variances
+happen from 9th digits. For the record, only re-write the numbers for selected
+solutes with "None" "CORRECTION_TYPE" here.
+
+Solute             Model          E~tot~, au   D~u~, eA   D~v~, eA
+-----------------  -------  ----------------  ---------  ---------
+CH~3~OH            qm/gp    -23.989683123214   0.419105
+                   qm/pcm   -23.997923566508   0.512132   0.430928
+                            (-5.171)
+HCOOH              qm/gp    -38.791144067638   0.267444
+                   qm/pcm   -38.802702728469   0.354323   0.134933
+                            (-7.253)
+CH~2~O             qm/gp    -22.770614800615   0.515252
+                   qm/pcm   -22.776365055957   0.657885   0.618933
+                            (-3.608)
+H~2~O              qm/gp    -17.154353093073   0.523958
+                   qm/pcm   -17.169222865322   0.602183   0.542686
+                            (-9.331)
+NH~3               qm/gp    -11.679500598749   0.005805
+                   qm/pcm   -11.685571526325   0.009104   0.011292
+                            (-3.810)
+HCN                qm/gp    -15.983500809598   0.600000
+                   qm/pcm   -15.990155199266   0.733953   0.638844
+                            (-4.176)
+------------------------------------------------------------------
+
+
 3D-RISM/QM for selected solutes
 ===============================
 
