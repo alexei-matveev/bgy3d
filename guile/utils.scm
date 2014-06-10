@@ -8,6 +8,8 @@
             list-derivatives
             dfridr
             fmap
+            fmap2
+            ldot
             ddd
             qtrap
             qsimp
@@ -211,6 +213,19 @@ Translated from Numerical Recipes."
    ((pair? x) (cons (fmap f (car x)) (fmap f (cdr x))))
    (else (f x))))
 
+(define (fmap2 f x y)
+  (cond
+   ((null? x) x)
+   ((pair? x) (cons (fmap2 f (car x) (car y))
+                    (fmap2 f (cdr x) (cdr y))))
+   (else (f x y))))
+
+(define (ldot x y)
+  (cond
+   ((null? x) 0.0)
+   ((number? x) (* x y))
+   ((pair? x) (+ (ldot (car x) (car y))
+                 (ldot (cdr x) (cdr y))))))
 
 ;;;
 ;;; Given a procedure (d f x) to compute derivatives of a univariate f
