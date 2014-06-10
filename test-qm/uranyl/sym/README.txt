@@ -18,6 +18,8 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
                      -28111.304172891396
            gp/pcm    -28110.790109421156     [0.43]
                                              (0.43)
+           rs/rs     -28111.394094040123    -378.58                 180
+           gp/rs     -28110.780086885854
 4    D4H   gp/gp     -28417.189498272211                            177       247
            pcm/pcm   -28417.508816589663    -200.38   -414.90       178       243
                      -28417.508816445374
@@ -49,6 +51,10 @@ wat  C2V   gp/spc       -76.502960020395
    reason in one case the value is negative even though GP/GP is
    supposed to be a minimum. This is also a measure of internal energy
    difference between PCM and GP geometries of the complex.
+
+5) The GP/RISM row abbreviated as gp/rs in the table is the SCF energy
+   at the  end of combined  QM+RISM geometry optimization.  It happens
+   not to contain the RISM term which is added afte SCF.
 
 
 Using optimized PCM  geometries one could estimate the  dG by the RISM
