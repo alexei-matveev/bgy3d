@@ -18,7 +18,10 @@
             angstrom->bohr
             eA->debye
             debye->eA
-            isqrt))
+            isqrt
+            ;; Syntax/macros:
+            begin0
+            let-env))
 
 (use-modules (ice-9 pretty-print))
 
@@ -340,4 +343,43 @@ components at point `x'."
       (let loop ((x n))
         (let ((y (quotient (+ x (quotient n x)) 2)))
           (if (< y x) (loop y) x)))))
+
+;;;
+;;; This form  evaluates all sub-expressions in order  but returns the
+;;; value(s) of the first one:
+;;;
+;;;   (begin0
+;;;     (sin 1)
+;;;     (clean-up))
+;;;
+;;;   => sin(1):
+;;;
+(define-syntax-rule (begin0 exp exp* ...)
+  (call-with-values
+      (lambda () exp)
+    (lambda vals
+      exp* ...
+      (apply values vals))))
+
+;;;
+;;; The first attempt on macros:
+;;;
+;;; (getenv "asdf")
+;;; => "999"
+;;;
+;;; (let-env (("asdf" "123"))
+;;;   (getenv "asdf"))
+;;; => "123"
+;;;
+;;; (getenv "asdf")
+;;; => "999"
+;;;
+(define-syntax-rule (let-env ((var val) ...)
+                      exp exp* ...)
+  (let ((old-env (environ)))
+    (setenv var val) ...
+    (begin0
+      (begin exp exp* ...)
+      (environ old-env))))
+
 
