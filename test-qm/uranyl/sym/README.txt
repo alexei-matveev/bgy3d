@@ -60,7 +60,15 @@ wat  C2V   gp/spc       -76.502960020395
 
 5) The GP/RISM row abbreviated as gp/rs in the table is the SCF energy
    at the  end of combined  QM+RISM geometry optimization.  It happens
-   not to contain the RISM term which is added afte SCF.
+   not to contain the RISM term which is added after SCF.
+
+Command line used for QM+RISM calculations:
+
+~~~
+mpirun -np 8 ./runqmmm --solvent "water, PR-SPC/E" --solute
+  "uranyl, 6w, pcm" --norm-tol 1e-14 --dielectric 78.4 --rho 0.0333295
+  --beta 1.6889 --L 160 --N 4096 6w,gp.scm
+~~~
 
 
 Using optimized PCM  geometries one could estimate the  dG by the RISM
