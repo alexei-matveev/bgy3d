@@ -1,8 +1,8 @@
 &coordinates /
 &INPUT_FORMAT /
 &OPERATIONS /
-&METHOD /
-&HESSE_METHOD /
+&METHOD line_search=f dynamic=f /
+&HESSE_METHOD single_step=f update_bfgs=t  /
 &STEP_PARAMETERS /
 &CONVERGENCE /
 &TS_PARAMETERS  /
