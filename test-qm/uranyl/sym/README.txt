@@ -20,11 +20,11 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
                                              (0.43)
            rs/rs     -28111.394094040123    -378.58                 180
            gp/rs     -28110.780086885854
-4    D4H   gp/gp     -28417.189498272211                            177       247
-           pcm/pcm   -28417.508816589663    -200.38   -414.90       178       243
-                     -28417.508816445374
-           gp/pcm    -28417.190504525548  [-243.40]
-                                            (-0.63)
+4    D4H   gp/gp     -28417.190831100434                            177       242
+           pcm/pcm   -28417.510911499532    -200.85   -416.23       179       237
+                     -28417.510911501795
+           gp/pcm    -28417.189028477842  [-242.47]
+                                             (1.13)
 5    D5H   gp/gp     -28493.736050294861                            177       250
            pcm/pcm   -28494.041286317046    -191.54   -426.36       179       245
                      -28494.041286400123
@@ -47,10 +47,10 @@ wat  C2V   gp/spc       -76.502960020395
 3) In square brackets, the "internal" energy dE = GP(complex/pcm) - n
    * GP(water/spc) - GP(uranyl/gp).
 
-4) In round parens, dE = GP(complex/pcm) - GP(complex/gp).  For some
-   reason in one case the value is negative even though GP/GP is
-   supposed to be a minimum. This is also a measure of internal energy
-   difference between PCM and GP geometries of the complex.
+4) In round parens, dE  = GP(complex/pcm) - GP(complex/gp).  The value
+   is always positive since GP/GP is supposed to be a minimum. This is
+   also a  measure of  internal energy difference  between PCM  and GP
+   geometries of the complex.
 
 5) The GP/RISM row abbreviated as gp/rs in the table is the SCF energy
    at the  end of combined  QM+RISM geometry optimization.  It happens
@@ -70,7 +70,7 @@ one obtains the two major contributions:
  n    E(self), kcal      E(RISM), kcal      dG, kcal
  ---  -----------------  -----------------  --------
  0       0.0             -376.027350192114   -376.03
- 4    -231.098378481216  -175.547503782298   -375.17
+ 4    -232.074402281419  -174.594711875714   -375.19
  5    -271.373959858618  -158.999570912819   -391.03
  6    -282.556908726866  -143.250721366546   -378.59
 
