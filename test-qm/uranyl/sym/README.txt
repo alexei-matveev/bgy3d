@@ -82,7 +82,7 @@ uranyl solvation energy, dG = F(complex) - n * F(water).
 After a  moment of doubts, I  verified if analytical  gradients of the
 RISM  term are  correct.  Here  is  the comparison  of analytical  and
 numerical gradients for  a breathing mode of D4H  structure. Yep, they
-are  correct. Also  not how  repulsive the  RISM  contribution becomes
+are  correct. Also note  how repulsive  the RISM  contribution becomes
 beyond ~2.25 A for U-OW distance:
 
 d, A  E(RISM), kcal     g(d), kcal/A         g(d), num, kcal/A
