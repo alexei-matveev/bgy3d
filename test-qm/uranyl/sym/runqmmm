@@ -1,0 +1,71 @@
+#!/users/alexei/darcs/ttfs-mac/guile-qm
+;;; -*- mode: scheme; -*- vim: set syntax=scheme:
+!#
+;;;
+;;; Copyright (c) 2014 Alexei Matveev
+;;;
+;;; The interpreter above needs to have QM and MM primitives. We build
+;;; PG  executable and  link/init BGY3D  library too.   FIXME:  need a
+;;; solution for load  paths --- we have (guile utils)  both in PG and
+;;; BGY3D trees. Both should better be compatible, ideally the same.
+;;;
+;;; To be executed as in e.g.
+;;;
+;;;   mpirun -np 8 ./runqmmm --solvent "water, PR-SPC/E" --solute
+;;;     "uranyl, 4w, pcm" --norm-tol 1e-14 --dielectric 78.4 --rho
+;;;     0.0333295 --beta 1.6889 --L 160 --N 4096 4w,gp.scm
+;;;
+(eval-when
+ (eval load compile)      ; extend %load-path at compile time with 2.0
+ (set! %load-path (cons* "/users/alexei/darcs/ttfs-mac"
+                         "/users/alexei/darcs/bgy3d-wheezy"
+                         %load-path)))
+
+(display %load-path)
+(newline)
+
+(use-modules ((guile paragauss)
+              #:select
+              (qm-main))
+             (ice-9 pretty-print)
+             (srfi srfi-11)             ; let-values
+             (guile bgy3d)              ; parse-command-line, ...
+             (guile molecule))          ; find-molecule
+
+;;;
+;;; FIXME: There must be a better way to specify RISM settings than in
+;;; the command line:
+;;;
+(define settings
+  (parse-command-line (command-line)))
+
+(define solute
+  (find-molecule (assoc-ref settings 'solute)))
+
+(define solvent
+  (find-molecule (assoc-ref settings 'solvent)))
+
+;;;
+;;; The function  rism-term is supposed to take  cartesian geometry as
+;;; nested  lists and  return two  (multiple) values:  energy  and the
+;;; corresponding gradient.
+;;;
+(define rism-term
+  (let-values (((x0 f fg) (make-pes solute solvent settings)))
+    (lambda (x)
+      (pretty-print (list 'FG: x))
+      (fg x))))
+
+;;;
+;;; Positional  args  will be  passed  further  to  PG qm-main  to  be
+;;; interpreted as PG inputs:
+;;;
+(define args
+  (assoc-ref settings '()))
+
+;;;
+;;; This expression is a list of energies, one per input:
+;;;
+(with-fluids ((*settings* settings)
+              (*server* rism-term))
+  (qm-main (cons "argv0" args)))
