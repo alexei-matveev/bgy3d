@@ -2987,7 +2987,7 @@ status open
 
 \begin_layout Plain Layout
 Position of the first peak 
-\begin_inset Formula $d1_{\text{U-OW}}$
+\begin_inset Formula $d_{1}(\text{U-OW})$
 \end_inset
 
  (pm), coordination number 
@@ -3055,7 +3055,7 @@ Water model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d1{}_{\text{U-OW}}$
+\begin_inset Formula $d_{1}(\text{U-OW})$
 \end_inset
 
 
@@ -3541,11 +3541,11 @@ status open
 
 \begin_layout Plain Layout
 Position of the first 
-\begin_inset Formula $d1_{\text{U-OW}}$
+\begin_inset Formula $d_{1}(\text{U-OW})$
 \end_inset
 
  and second peaks 
-\begin_inset Formula $d2_{\text{U-OW}}$
+\begin_inset Formula $d_{2}(\text{U-OW})$
 \end_inset
 
  (pm), coordination number 
@@ -3630,7 +3630,7 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d1_{\text{U-OW}}$
+\begin_inset Formula $d_{1}(\text{U-OW})$
 \end_inset
 
 
@@ -3642,7 +3642,7 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d2_{\text{U-OW}}$
+\begin_inset Formula $d_{2}(\text{U-OW})$
 \end_inset
 
 
@@ -4323,11 +4323,11 @@ Intra-molecular energy between uranyl ion and water ligands
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) and average distance 
-\begin_inset Formula $d_{\text{U-OW}}$
+ (kcal/mol) and average distance, 
+\begin_inset Formula $d(\text{U-OW})$
 \end_inset
 
- (pm) between uranium and water oxygen of [UO
+ (pm), between uranium and water oxygen of [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
