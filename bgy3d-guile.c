@@ -355,6 +355,17 @@ from_double1 (int n, double x[n])
 }
 
 
+static void
+to_double2 (SCM x, int m, int n, double y[m][n])
+{
+  for (int i = 0; i < m; i++)
+    {
+      to_double1 (scm_car (x), n, y[i]);
+      x = scm_cdr (x);
+    }
+}
+
+
 static SCM
 from_double2 (int m, int n, double x[m][n])
 {
