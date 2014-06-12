@@ -2986,15 +2986,15 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Position of the first peak 
-\begin_inset Formula $d_{1}(\text{U-OW})$
-\end_inset
-
- (pm), coordination number 
+Coordination number 
 \begin_inset Formula $N$
 \end_inset
 
- of the first solvation shell and solvation free energy
+ of the first solvation shell, position of the first peak, 
+\begin_inset Formula $d_{1}(\text{U-OW})$
+\end_inset
+
+ (pm), and solvation free energy
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -3055,7 +3055,7 @@ Water model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d_{1}(\text{U-OW})$
+\begin_inset Formula $N$
 \end_inset
 
 
@@ -3067,7 +3067,7 @@ Water model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $N$
+\begin_inset Formula $d_{1}(\text{U-OW})$
 \end_inset
 
 
@@ -3102,7 +3102,7 @@ SH-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-243 
+5.8
 \end_layout
 
 \end_inset
@@ -3111,7 +3111,7 @@ SH-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.8
+243 
 \end_layout
 
 \end_inset
@@ -3143,7 +3143,7 @@ PR-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-241 
+4.9
 \end_layout
 
 \end_inset
@@ -3152,7 +3152,7 @@ PR-SPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.9
+241 
 \end_layout
 
 \end_inset
@@ -3184,7 +3184,7 @@ cSPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-243 
+5.8
 \end_layout
 
 \end_inset
@@ -3193,7 +3193,7 @@ cSPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.8
+243 
 \end_layout
 
 \end_inset
@@ -3225,7 +3225,7 @@ MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-246
+5.2
 \end_layout
 
 \end_inset
@@ -3234,7 +3234,7 @@ MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.2
+246
 \end_layout
 
 \end_inset
@@ -3540,23 +3540,23 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Position of the first 
-\begin_inset Formula $d_{1}(\text{U-OW})$
-\end_inset
-
- and second peaks 
-\begin_inset Formula $d_{2}(\text{U-OW})$
-\end_inset
-
- (pm), coordination number 
+Coordination number 
 \begin_inset Formula $N$
 \end_inset
 
- of the first solvation shell and solvation free energy 
+ of the first solvation shell, positions of the first, 
+\begin_inset Formula $d_{1}(\text{U-OW})$
+\end_inset
+
+, and second, 
+\begin_inset Formula $d_{2}(\text{U-OW})$
+\end_inset
+
+ (pm), peaks and solvation free energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- calculated with different uranyl models.
+ (kcal/mol), calculated with different uranyl models.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3618,10 +3618,10 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta G_{\text{sol}}$
+\begin_inset Formula $N$
 \end_inset
 
- 
+
 \end_layout
 
 \end_inset
@@ -3654,10 +3654,10 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $N$
+\begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-
+ 
 \end_layout
 
 \end_inset
@@ -3742,10 +3742,7 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-296 
+ 5.2
 \end_layout
 
 \end_inset
@@ -3772,7 +3769,10 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
- 5.2
+\begin_inset Formula $-$
+\end_inset
+
+296 
 \end_layout
 
 \end_inset
@@ -3801,10 +3801,7 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-305 
+ 5.1
 \end_layout
 
 \end_inset
@@ -3831,7 +3828,10 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
- 5.1
+\begin_inset Formula $-$
+\end_inset
+
+305 
 \end_layout
 
 \end_inset
@@ -3860,10 +3860,7 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-293 
+4.9
 \end_layout
 
 \end_inset
@@ -3890,7 +3887,10 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.9
+\begin_inset Formula $-$
+\end_inset
+
+293 
 \end_layout
 
 \end_inset
@@ -3919,10 +3919,7 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-375 
+ 5.8
 \end_layout
 
 \end_inset
@@ -3949,7 +3946,10 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
- 5.8
+\begin_inset Formula $-$
+\end_inset
+
+375 
 \end_layout
 
 \end_inset
@@ -3978,10 +3978,7 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-380
+ 6.1
 \end_layout
 
 \end_inset
@@ -4008,7 +4005,10 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
- 6.1
+\begin_inset Formula $-$
+\end_inset
+
+380
 \end_layout
 
 \end_inset
@@ -4041,7 +4041,7 @@ AIMD
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+5.0
 \end_layout
 
 \end_inset
@@ -4068,7 +4068,7 @@ AIMD
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.0
+
 \end_layout
 
 \end_inset
@@ -4097,18 +4097,7 @@ Expt
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-437
-\begin_inset Formula $\sim$
-\end_inset
-
-
-\begin_inset Formula $-$
-\end_inset
-
-318
+4.61
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -4122,7 +4111,7 @@ Expt
 
 \begin_layout Plain Layout
 242
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -4135,7 +4124,7 @@ Expt
 
 \begin_layout Plain Layout
 450
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -4147,7 +4136,18 @@ Expt
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.61
+\begin_inset Formula $-$
+\end_inset
+
+437
+\begin_inset Formula $\sim$
+\end_inset
+
+
+\begin_inset Formula $-$
+\end_inset
+
+318
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -4216,7 +4216,7 @@ key "Nichols08"
 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Cornehl96"
+key "Soderholm05"
 
 \end_inset
 
@@ -4231,7 +4231,7 @@ key "Cornehl96"
 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Soderholm05"
+key "Cornehl96"
 
 \end_inset
 
@@ -4315,19 +4315,20 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Intra-molecular energy between uranyl ion and water ligands 
-\begin_inset Formula $\Delta E_{\text{intra}}$
-\end_inset
-
- (kcal/mol), solvation free energy 
-\begin_inset Formula $\Delta G_{\text{sol}}$
-\end_inset
-
- (kcal/mol) and average distance, 
+Average uranyl--water distance, 
 \begin_inset Formula $d(\text{U-OW})$
 \end_inset
 
- (pm), between uranium and water oxygen of [UO
+ (pm), intra-molecular interaction between uranyl ion and water ligands,
+ 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+ (kcal/mol), and solvation free energy, 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ (kcal/mol), for [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -4406,6 +4407,18 @@ Uranyl model
 \begin_inset Text
 
 \begin_layout Plain Layout
+\begin_inset Formula $d(\text{U-OW})$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
@@ -4422,18 +4435,6 @@ Uranyl model
 \end_inset
 
 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $d_{\text{U-OW}}$
-\end_inset
-
- 
 \end_layout
 
 \end_inset
@@ -4509,6 +4510,15 @@ GW
 \begin_inset Text
 
 \begin_layout Plain Layout
+251
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4525,15 +4535,6 @@ GW
 \end_inset
 
 311 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-251
 \end_layout
 
 \end_inset
@@ -4562,6 +4563,15 @@ RM12
 \begin_inset Text
 
 \begin_layout Plain Layout
+246
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4578,15 +4588,6 @@ RM12
 \end_inset
 
 321 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-246
 \end_layout
 
 \end_inset
@@ -4615,6 +4616,15 @@ PM13
 \begin_inset Text
 
 \begin_layout Plain Layout
+247
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4631,15 +4641,6 @@ PM13
 \end_inset
 
 309 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-247
 \end_layout
 
 \end_inset
@@ -4668,6 +4669,15 @@ KL1
 \begin_inset Text
 
 \begin_layout Plain Layout
+238
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4684,15 +4694,6 @@ KL1
 \end_inset
 
 384 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-238
 \end_layout
 
 \end_inset
@@ -4721,6 +4722,15 @@ KL2
 \begin_inset Text
 
 \begin_layout Plain Layout
+243
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4737,15 +4747,6 @@ KL2
 \end_inset
 
 390 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-243
 \end_layout
 
 \end_inset
@@ -4774,6 +4775,15 @@ QM+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
+242
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $-$
 \end_inset
 
@@ -4790,15 +4800,6 @@ QM+PCM
 \end_inset
 
 421 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-242
 \end_layout
 
 \end_inset
