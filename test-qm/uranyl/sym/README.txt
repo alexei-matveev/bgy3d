@@ -19,43 +19,48 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
            gp/pcm    -28110.790109421156     [0.43]
                                              (0.43)
            rs/rs     -28111.394094040123    -378.58   -378.58       180
-           gp/rs     -28110.780086885854
+           gp/rs     -28110.780086885854     [6.72]
+                                             (6.72)
 4    D4H   gp/gp     -28417.190831100434                            177       242
            pcm/pcm   -28417.510911499532    -200.85   -416.23       179       237
                      -28417.510911501795
            gp/pcm    -28417.189028477842  [-242.47]
                                              (1.13)
            rs/rs     -28417.471645579732    -176.22   -388.34       181       246
-           gp/rs     -28417.187306573804
+           gp/rs     -28417.187306573804  [-241.39]
+                                             (2.21)
 5    D5H   gp/gp     -28493.736226891073                            177       249
            pcm/pcm   -28494.041471559878    -191.55   -426.48       179       243
                      -28494.041471561650
            gp/pcm    -28493.734208162346  [-268.96]
                                              (1.27)
            rs/rs     -28493.989749827120    -159.09   -389.97       181       248
-           gp/rs     -28493.734510485865
+           gp/rs     -28493.734510485865  [-269.15]
+                                             (1.08)
 6    D3D   gp/gp     -28570.268746168604                            178       253
            pcm/pcm   -28570.554049949551    -179.03   -425.45       180       249
                      -28570.554049948907
            gp/pcm    -28570.265528340671  [-286.76]
                                              (2.02)
            rs/rs     -28570.495907558055    -142.55   -384.11       181       254
-           gp/rs     -28570.265198573266
+           gp/rs     -28570.265198573266  [-286.55]
+                                             (2.23)
 wat  C2V   gp/spc       -76.502960020395
            pcm/spc      -76.514210290228      -7.06
 
 
-1) dE = PCM(mol/pcm) - GP(mol/gp), except for water, where both
-   geometries are SPC.
+1) dE = AQ(mol/aq) - GP(mol/gp), except for water, where both
+   geometries are SPC. Here "aq" geometry suffix and AQ() energy
+   functional correspond either to PCM or RISM.
 
-2) dG = PCM(complex/pcm) - n * PCM(water/spc) - GP(uranyl/gp)
+2) dG = AQ(complex/aq) - n * AQ(water/spc) - GP(uranyl/gp)
 
-3) In square brackets, the "internal" energy dE = GP(complex/pcm) - n
+3) In square brackets, the "internal" energy dE = GP(complex/aq) - n
    * GP(water/spc) - GP(uranyl/gp).
 
-4) In round parens, dE  = GP(complex/pcm) - GP(complex/gp).  The value
+4) In round  parens, dE = GP(complex/aq) -  GP(complex/gp).  The value
    is always positive since GP/GP is supposed to be a minimum. This is
-   also a  measure of  internal energy difference  between PCM  and GP
+   also  a measure  of internal  energy difference  between AQ  and GP
    geometries of the complex.
 
 5) The GP/RISM row abbreviated as gp/rs in the table is the SCF energy
