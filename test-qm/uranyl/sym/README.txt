@@ -13,7 +13,7 @@ the effect of such a geometry mismatch on the energies.
 
 n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, pm
 ---  ---   -------   -------------------  ---------  --------  --------  --------
-0    D8H   gp/gp     -28110.790792414213                            172
+0    D8H   gp/gp     -28110.790792414213        [0]                 172
            pcm/pcm   -28111.304172875658    -322.15   -322.15       174
                      -28111.304172891396
            gp/pcm    -28110.790109421156     [0.43]
@@ -21,7 +21,8 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
            rs/rs     -28111.394094040123    -378.58   -378.58       180
            gp/rs     -28110.780086885854     [6.72]
                                              (6.72)
-4    D4H   gp/gp     -28417.190831100434                            177       242
+
+4    D4H   gp/gp     -28417.190831100434  [-243.60]                 177       242
            pcm/pcm   -28417.510911499532    -200.85   -416.23       179       237
                      -28417.510911501795
            gp/pcm    -28417.189028477842  [-242.47]
@@ -29,7 +30,8 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
            rs/rs     -28417.471645579732    -176.22   -388.34       181       246
            gp/rs     -28417.187306573804  [-241.39]
                                              (2.21)
-5    D5H   gp/gp     -28493.736226891073                            177       249
+
+5    D5H   gp/gp     -28493.736226891073  [-270.23]                 177       249
            pcm/pcm   -28494.041471559878    -191.55   -426.48       179       243
                      -28494.041471561650
            gp/pcm    -28493.734208162346  [-268.96]
@@ -37,7 +39,8 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
            rs/rs     -28493.989749827120    -159.09   -389.97       181       248
            gp/rs     -28493.734510485865  [-269.15]
                                              (1.08)
-6    D3D   gp/gp     -28570.268746168604                            178       253
+
+6    D3D   gp/gp     -28570.268746168604  [-288.78]                 178       253
            pcm/pcm   -28570.554049949551    -179.03   -425.45       180       249
                      -28570.554049948907
            gp/pcm    -28570.265528340671  [-286.76]
@@ -45,6 +48,7 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
            rs/rs     -28570.495907558055    -142.55   -384.11       181       254
            gp/rs     -28570.265198573266  [-286.55]
                                              (2.23)
+
 wat  C2V   gp/spc       -76.502960020395
            pcm/spc      -76.514210290228      -7.06
 
@@ -55,8 +59,9 @@ wat  C2V   gp/spc       -76.502960020395
 
 2) dG = AQ(complex/aq) - n * AQ(water/spc) - GP(uranyl/gp)
 
-3) In square brackets, the "internal" energy dE = GP(complex/aq) - n
-   * GP(water/spc) - GP(uranyl/gp).
+3) In  square brackets, the "internal"  energy dE = GP(complex)  - n *
+   GP(water/spc)  - GP(uranyl/gp), for  three different  geometries of
+   the complex, GP, PCM, and RISM.
 
 4) In round  parens, dE = GP(complex/aq) -  GP(complex/gp).  The value
    is always positive since GP/GP is supposed to be a minimum. This is
