@@ -134,14 +134,20 @@ static bool alist_getopt_funptr (SCM alist, /* intent(in) */
   return test;
 }
 
+/* Lookup a name in a module: */
+static SCM
+lookup (const char *module, const char *name)
+{
+  SCM mod = scm_c_resolve_module (module);
+  return scm_variable_ref (scm_c_module_lookup (mod, name));
+}
+
 
 /* Lookup dynvar: */
 static SCM
 guile_get_settings ()
 {
-  SCM module = scm_c_resolve_module ("guile bgy3d");
-  SCM fluid = scm_variable_ref (scm_c_module_lookup (module, "*settings*"));
-  return scm_fluid_ref (fluid);
+  return scm_fluid_ref (lookup ("guile bgy3d", "*settings*"));
 }
 
 
@@ -427,9 +433,7 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 */
 static void bgy3d_solute_get (const char *name, int *n, Site **sites)
 {
-  SCM find_molecule =
-    scm_variable_ref (scm_c_module_lookup (scm_c_resolve_module ("guile molecule"),
-                                           "find-molecule"));
+  SCM find_molecule = lookup ("guile molecule", "find-molecule");
   SCM molecule =
     scm_call_1 (find_molecule, scm_from_locale_string (name));
 
