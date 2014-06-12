@@ -6616,6 +6616,29 @@ Concluding remarks
 \end_layout
 
 \begin_layout Standard
+The atomistic nature of the RISM model offers a more consistent view of
+ the solvation effects for uranyl aqua complexes in comparison to the state
+ of the art PCM model: a combined QM+RISM model predicts essentially the
+ same uranyl bond lengths and similar solvation free energies independently
+ of the number of explicit water molecules introduced into the first solvation
+ shell.
+ The results of the PCM model of solvation appear to depend stronger on
+ the structure of the first solvation shell.
+ Exploration of the free energy surface with the MM+RISM combination suggest
+ a qualitative difference to the continuum model: e.g.
+ the structure of the first solvation shell for an under-coordinated complex
+ of uranyl with four water molecules matches that of a five-coordinated
+ complex.
+ This could be viewed as another sign of interchangeability of explicit
+ water molecules and their net statistical effect recovered with the RISM
+ approach.
+ A qualitative difference between the PCM and RISM models when the former
+ predicts the uranyl--water distances shorter in solution than in the gas
+ phase and the latter predicts only an insignificant change remains to be
+ interpreted.
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "uo2"
