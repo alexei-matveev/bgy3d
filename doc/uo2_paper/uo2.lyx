@@ -91,7 +91,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -286,14 +285,28 @@ RISM theory
 \end_layout
 
 \begin_layout Standard
-The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
- which averages the correlation functions between solute and solvent molecules
+The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hansen06"
+
+\end_inset
+
+, which averages the correlation functions between solute and solvent molecules
  over orientations by fixing the distance 
 \begin_inset Formula $r$
 \end_inset
 
  between their interaction sites, could be written in the following matrix
- form for infinite dilutions:
+ form for infinite dilutions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Hirata81,Hirata82,Hirata83"
+
+\end_inset
+
+:
 \begin_inset Formula 
 \begin{equation}
 h^{uv}=\omega^{u}\ast c^{uv}\ast\chi^{v}.\label{eq:rism-uv}
@@ -354,7 +367,14 @@ reference "eq:rism-uv"
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
- obtained self-consistently from the pure solvent RISM equation:
+ obtained self-consistently from the pure solvent RISM equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Hirata83"
+
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
@@ -397,7 +417,14 @@ at a specific solvent number density
 \begin_inset Formula $\ell_{\alpha\gamma}$
 \end_inset
 
- the distance between two interaction sites of a rigid solvent species.
+ the distance between two interaction sites of a rigid solvent species 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler72,book:Hirata03"
+
+\end_inset
+
+.
  Below, we will omit the superscripts 
 \begin_inset Formula $u$
 \end_inset
@@ -480,7 +507,14 @@ where
 .
  HNC closure has been applied to solve the RISM equation in a variety of
  studies about aqueous solution, however, the uncontrolled exponential term
- often results in numerical divergence.
+ often results in numerical divergence 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Kovalenko99"
+
+\end_inset
+
+.
  A more numerically stable closure expression, formulated by Kovalenko and
  Hirata (KH) 
 \begin_inset CommandInset citation
@@ -566,7 +600,18 @@ The excess chemical potential of solute, or the “solvation free energy”
  solute-solvent coupling during thermodynamic integration (TI).
  Within the framework of RISM theory, it could be further expressed by the
  Kirkwood formula in terms of the pair correlation functions, with an integral
- over the Kirkwood coupling parameter from 0 to 1:
+ over the Kirkwood coupling parameter 
+\begin_inset Formula $\xi$
+\end_inset
+
+ from 0 to 1 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
@@ -577,17 +622,16 @@ The excess chemical potential of solute, or the “solvation free energy”
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 where 
 \begin_inset Formula $g_{i\alpha}=h_{i\alpha}+1$
 \end_inset
 
-is the site-site distribution function.
- For HNC closure, the analytical expression of has been derived by Singer
- and Chandler 
+ is the site-site distribution function.
+ For HNC closure, the analytical expression of 
+\begin_inset Formula $\Delta\mu$
+\end_inset
+
+ has been derived by Singer and Chandler 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85"
@@ -672,12 +716,25 @@ reference "eq:closure-hnc"
 \end_inset
 
 ) has to be solved iteratively.
- For numerical reasons it appears to be advantageous to operate with a single
- unknown 
+ For numerical reasons it appears to be advantageous 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Beglov95,Luchko10"
+
+\end_inset
+
+ to operate with a single unknown 
 \begin_inset Formula $t=h-c$
 \end_inset
 
-, a so-called indirect correlation function.
+, a so-called indirect correlation function 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lee99"
+
+\end_inset
+
+.
  A naive search for a fix point of a simple iterative scheme 
 \begin_inset Formula $t_{n+1}=T[t_{n}]$
 \end_inset
@@ -842,7 +899,14 @@ reference "eq:rism-vv"
 
 \end_inset
 
-) is performed using the fast Fourier transform.
+) is performed using the fast Fourier transform 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "FFTW05"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -913,6 +977,13 @@ are all of short range and thus amenable to a representation on finite radial
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kovalenko00"
+
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cummings81"
 
 \end_inset
 
