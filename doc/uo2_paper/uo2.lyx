@@ -281,9 +281,19 @@ key "Pomogaev13,Rai12"
 Methodology
 \end_layout
 
+\begin_layout Subsection
+RISM theory
+\end_layout
+
 \begin_layout Standard
 The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation,
- could be written in the following matrix form for infinite dilutions:
+ which averages the correlation functions between solute and solvent molecules
+ over orientations by fixing the distance 
+\begin_inset Formula $r$
+\end_inset
+
+ between their interaction sites, could be written in the following matrix
+ form for infinite dilutions:
 \begin_inset Formula 
 \begin{equation}
 h^{uv}=\omega^{u}\ast c^{uv}\ast\chi^{v}.\label{eq:rism-uv}
@@ -376,10 +386,18 @@ at a specific solvent number density
 \end_inset
 
  with 
+\begin_inset Formula $j_{0}$
+\end_inset
+
+ being the zeroth-order spherical Bessel function, 
+\begin_inset Formula $k$
+\end_inset
+
+ the wave number and 
 \begin_inset Formula $\ell_{\alpha\gamma}$
 \end_inset
 
- being the distance between two interaction sites of a rigid solvent species.
+ the distance between two interaction sites of a rigid solvent species.
  Below, we will omit the superscripts 
 \begin_inset Formula $u$
 \end_inset
@@ -488,6 +506,150 @@ key "Kovalenko99"
 \end_inset
 
  otherwise.
+\end_layout
+
+\begin_layout Standard
+We used pair-wise potential 
+\begin_inset Formula $u_{i\alpha}=u_{i\alpha}^{\text{C}}+u_{i\alpha}^{\text{LJ}}$
+\end_inset
+
+ to describe the distance-dependent interactions between solute and solvent
+ sites, 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, defined as the sum of the Coulomb, 
+\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}/r$
+\end_inset
+
+, and Lennard-Jones (LJ), 
+\begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
+\end_inset
+
+, interactions.
+ The long-range asymptotic component of the total interaction was chosen
+ in the form of a smooth potential 
+\begin_inset Formula $u_{\text{L;}i\alpha}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
+\end_inset
+
+ with the range parameter 
+\begin_inset Formula $a=1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ common for all site pairs.
+ Parameters of pair interactions were derived from site parameters using
+ the Lorentz--Berthelot rules 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lorentz1881,Berthelot1898"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The excess chemical potential of solute, or the “solvation free energy”
+ at infinite dilution can be determined by gradually “switching on” the
+ solute-solvent coupling during thermodynamic integration (TI).
+ Within the framework of RISM theory, it could be further expressed by the
+ Kirkwood formula in terms of the pair correlation functions, with an integral
+ over the Kirkwood coupling parameter from 0 to 1:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Delta\mu=\frac{4\pi\rho}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\int_{0}^{1}d\xi\int_{0}^{\infty}u_{i\alpha}(r)g_{i\alpha}(r,\xi)r^{2}dr,
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $g_{i\alpha}=h_{i\alpha}+1$
+\end_inset
+
+is the site-site distribution function.
+ For HNC closure, the analytical expression of has been derived by Singer
+ and Chandler 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85"
+
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{equation}
+\Delta\mu=\frac{2\pi\rho}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\int_{0}^{\infty}\left[|h_{i\alpha}|^{2}-2c_{i\alpha}-c_{i\alpha}h_{i\alpha}\right]r^{2}dr
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Though the individual terms of the integrand due to 
+\begin_inset Formula $c_{i\alpha}$
+\end_inset
+
+ are of long range so that the integral may appear divergent, the total
+ contribution of the asymptote that is strictly proportional to the charge
+ product 
+\begin_inset Formula $q_{i}q_{a}$
+\end_inset
+
+ vanishes if the solvent (or solute) is neutral.
+ In the corresponding expression for the KH closure the 
+\begin_inset Formula $h^{2}$
+\end_inset
+
+-terms contribute only in the depletion regions with 
+\begin_inset Formula $h_{i\alpha}<0$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+, with the gaussian fluctuation (GF) assumption the 
+\begin_inset Formula $h^{2}$
+\end_inset
+
+-term is absent 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler84"
+
+\end_inset
+
+.
+ The linear response of the integral to a perturbation of solute geometry
+ gives contributions to effective forces.
+\end_layout
+
+\begin_layout Subsection
+Numerical solution of RISM equation
 \end_layout
 
 \begin_layout Standard
@@ -758,118 +920,8 @@ key "Kovalenko00"
  
 \end_layout
 
-\begin_layout Standard
-We used pair-wise potential 
-\begin_inset Formula $u_{i\alpha}=u_{i\alpha}^{\text{C}}+u_{i\alpha}^{\text{LJ}}$
-\end_inset
-
- to describe the distance-dependent interactions between solute and solvent
- sites, 
-\begin_inset Formula $i$
-\end_inset
-
- and 
-\begin_inset Formula $\alpha$
-\end_inset
-
-, defined as the sum of the Coulomb, 
-\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}/r$
-\end_inset
-
-, and Lennard-Jones (LJ), 
-\begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
-\end_inset
-
-, interactions.
- The long-range asymptotic component of the total interaction was chosen
- in the form of a smooth potential 
-\begin_inset Formula $u_{\text{L;}i\alpha}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
-\end_inset
-
- with the range parameter 
-\begin_inset Formula $a=1.2$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-Å
-\begin_inset Formula $^{-1}$
-\end_inset
-
- common for all site pairs.
- Parameters of pair interactions were derived from site parameters using
- the Lorentz--Berthelot rules 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Lorentz1881,Berthelot1898"
-
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-Within the framework of the given closure relations mentioned above, one
- could derive the closed form of the excess chemical potential to evaluate
- the thermodynamic properties of solutes.
- For HNC closure, the excess chemical potential has the expression 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Singer85"
-
-\end_inset
-
-:
-\begin_inset Formula 
-\begin{equation}
-\Delta\mu=\frac{2\pi\rho}{\beta}\int_{0}^{\infty}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\left[|h_{i\alpha}|^{2}-2c_{i\alpha}-c_{i\alpha}h_{i\alpha}\right]r^{2}dr
-\end{equation}
-
-\end_inset
-
-Though the individual terms of the integrand due to 
-\begin_inset Formula $c_{i\alpha}$
-\end_inset
-
- are of long range so that the integral may appear divergent, the total
- contribution of the asymptote that is strictly proportional to the charge
- product 
-\begin_inset Formula $q_{i}q_{a}$
-\end_inset
-
- vanishes if the solvent (or solute) is neutral.
- In the corresponding expression for the KH closure the 
-\begin_inset Formula $h^{2}$
-\end_inset
-
--terms contribute only in the depletion regions with 
-\begin_inset Formula $h_{i\alpha}<0$
-\end_inset
-
- 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Kovalenko99"
-
-\end_inset
-
-, with the gaussian fluctuation (GF) assumption the 
-\begin_inset Formula $h^{2}$
-\end_inset
-
--term is absent 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Chandler84"
-
-\end_inset
-
-.
- The linear response of the integral to a perturbation of solute geometry
- gives contributions to effective forces.
+\begin_layout Subsection
+Free energy surface
 \end_layout
 
 \begin_layout Standard
