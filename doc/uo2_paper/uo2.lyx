@@ -976,14 +976,7 @@ are all of short range and thus amenable to a representation on finite radial
  at low wave numbers 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Kovalenko00"
-
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Cummings81"
+key "Kovalenko00,Cummings81"
 
 \end_inset
 
