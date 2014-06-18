@@ -1724,3 +1724,36 @@ void misc_error (const char *loc, const char *msg) /* noreturn */
 {
   scm_misc_error (loc, msg, SCM_EOL); /* longjmp! */
 }
+
+/* Public API: */
+void
+bgy3d_molmech (int n, double x[n][3], double *e, double g[n][3])
+{
+  SCM fg = scm_fluid_ref (lookup ("guile bgy3d", "*server*"));
+
+  /* FIXME: this "if" is questionable, should we rather fail? */
+  if (scm_is_true (fg))
+    {
+      scm_display (fg, scm_current_output_port());
+      scm_newline (scm_current_output_port());
+
+      SCM eg = scm_call_1 (fg, from_double2 (n, 3, x));
+
+      scm_display (eg, scm_current_output_port());
+      scm_newline (scm_current_output_port());
+      /* assert (scm_c_nvalues (eg) == 2); */
+
+      SCM ex = scm_c_value_ref (eg, 0);
+      SCM gx = scm_c_value_ref (eg, 1);
+
+      *e = scm_to_double (ex);
+      to_double2 (gx, n, 3, g);
+    }
+  else
+    {
+      *e = 0.0;
+      for (int i = 0; i < n; i++)
+        for (int j = 0; j < 3; j++)
+          g[i][j] = 0.0;
+    }
+}
