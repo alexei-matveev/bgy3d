@@ -58,10 +58,17 @@
    hnc3d-run-solute
    bgy3d-run-solvent
    bgy3d-run-solute
+   make-pes
+   *settings*
+   *server*
    vec-print
    vec-norm
    solvent/solvent
-   solute/solvent))
+   solute/solvent
+   pretty-print/serial
+   ;; Syntax
+   begin/serial
+   ))
 
 (cond-expand
  ((not guile-2))
