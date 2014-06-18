@@ -1093,6 +1093,12 @@ computes the sum of all vector elements."
                  (x0 (molecule-positions (with-input-from-file xyz1 read-xyz)))
                  (x1 (molecule-positions (with-input-from-file xyz2 read-xyz))))
              (pretty-print/serial (scan-self-energy mol x0 x1)))))
+        ("read-xyz"
+         (for-each
+          (lambda (path)
+            (let ((mol (with-input-from-file path read-xyz)))
+              (pretty-print/serial mol)))
+          args))
         ;;
         ("find-molecule"
          (for-each
