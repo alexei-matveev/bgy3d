@@ -770,6 +770,12 @@ computes the sum of all vector elements."
            (newline))
          columns))
 
+;;;
+;;; This dynvar will hold  a univariate function of molecular geometry
+;;; that returns the energy and  the corresponding gradient for use in
+;;; foreign code.  See bgy3d_molmech() in bgy3d-guile.c for its use.
+;;;
+(define *server* (make-fluid))
 
 ;;;
 ;;; Construct a PES as a  function of solute (or solvent) geometry and
