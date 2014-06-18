@@ -138,7 +138,7 @@
 ;;;
 ;;; On root rank  return an output port, on all  other ranks return an
 ;;; input  port. Writing  to this  port  (from the  writer side)  will
-;;; broadcast  the data  to  all reader  ranks.
+;;; broadcast the data to all reader ranks.
 ;;;
 ;;; Beware of buffering issues: a simple (write data port) does almost
 ;;; no buffering each written number is transfered in a transaction of
