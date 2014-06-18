@@ -9,7 +9,7 @@
   #:use-module (guile compat)           ; define-syntax-rule for 1.8
   #:use-module (guile molecule)         ; site representation
   #:use-module (guile punch-file)       ; write-punch-file
-  #:use-module (guile utils)            ; memoize, ddd
+  #:use-module (guile utils)            ; memoize
   #:use-module (srfi srfi-1)            ; list manipulation
   #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (srfi srfi-11)           ; let-values
