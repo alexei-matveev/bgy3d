@@ -6,7 +6,8 @@
 
 #include <libguile.h>
 #include <minpack.h>            /* lmdif1_() */
-#include "bgy3d.h"
+#include "libbgy3d.h"           /* public API */
+#include "bgy3d.h"              /* private */
 #include "bgy3d-getopt.h"       /* Implementation here */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* bgy3d_solvent_get() */
@@ -1605,7 +1606,9 @@ static void module_init (void* unused)
 }
 
 
-void bgy3d_guile_init (int argc, char **argv)
+/* Public API: */
+void
+bgy3d_guile_init (int argc, char **argv)
 {
   /* The  code  above  assumes an  opaque  type  Vec  can be  cast  to
      void*: */
