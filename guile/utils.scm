@@ -16,6 +16,8 @@
             memoize
             bohr->angstrom
             angstrom->bohr
+            hartree->kcal
+            kcal->hartree
             eA->debye
             debye->eA
             isqrt
@@ -32,6 +34,12 @@
 ;;;
 (define (bohr->angstrom x) (* x 0.52917706))
 (define (angstrom->bohr x) (/ x 0.52917706))
+
+;;;
+;;; FIXME: is this the only place we define that?
+;;;
+(define (hartree->kcal x) (* x 627.49))
+(define (kcal->hartree x) (/ x 627.49))
 
 ;;;
 ;;; Custom units for dipole moment is Debye [1].
