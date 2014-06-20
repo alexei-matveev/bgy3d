@@ -3603,6 +3603,34 @@ key "Kerisit13"
 \end_layout
 
 \begin_layout Standard
+Based on the values of solvation free energies of a 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl we may roughly divide the uranyl models into two groups: those with
+ weaker uranyl--water interactions consisting of GW, RM12, and PM13 models
+ and those with stronger uranyl--water interactions consisting of KL1 and
+ KL2 models.
+ The latter two uranyl models produced the values of the solvation free
+ energy at around the middle of the experimental interval, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-water-model"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
@@ -4372,45 +4400,6 @@ status open
 
 \begin_layout Subsection
 Free energy minimization for uranyl aqua complexes
-\end_layout
-
-\begin_layout Standard
-Based on the values of solvation free energies of a 
-\begin_inset Quotes eld
-\end_inset
-
-bare
-\begin_inset Quotes erd
-\end_inset
-
- uranyl we may roughly divide the uranyl models into two groups: those with
- weaker uranyl--water interactions consisting of GW, RM12, and PM13 models
- and those with stronger uranyl--water interactions consisting of KL1 and
- KL2 models, Section
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sub:uranyl-models"
-
-\end_inset
-
-.
- The latter two uranyl models produced the values of the solvation free
- energy at around the middle of the experimental interval, Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:observables-vs-water-model"
-
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
