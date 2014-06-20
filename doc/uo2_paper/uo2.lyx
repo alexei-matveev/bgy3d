@@ -4882,8 +4882,7 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Standard
-With uranyl model which has the reasonable binding energy between uranyl
- ion and water ligands, we attempted to optimize the geometry of [UO
+For further free energy minimizations of uranyl aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -4899,11 +4898,13 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- (
-\begin_inset Formula $n=4-6$
+, 
+\begin_inset Formula $4\le n\le6$
 \end_inset
 
-) both without and with the contribution of RISM solvent.
+, we restricted ourselves to KL2 force field.
+ We performed geometry optimization of these complexes at the MM and MM+RISM
+ levels of theory without symmetry constraints.
  As can be seen from Figure
 \begin_inset space ~
 \end_inset
@@ -4915,7 +4916,8 @@ reference "fig:geometries"
 
 \end_inset
 
-, RISM solvent compensated the fifth water molecule in [UO
+, RISM solvent compensated the fifth water molecule in undercoordinated
+ uranyl aqua complex [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -4949,7 +4951,7 @@ O)
 \end_inset
 
 .
- Energy values in Table
+ Free energy values in Table
 \begin_inset space ~
 \end_inset
 
@@ -4960,9 +4962,18 @@ reference "tab:energy-vs-coordination"
 
 \end_inset
 
- also proved that with inclusion of RISM solvent, solvation free energy
- of the total system keep constant when the number of water ligands in the
- first solvation shell varied from 4 to 6.
+ also demonstrate that with inclusion of RISM solvent, the minimized conformatio
+n free energy is essentially constant when the number of water ligands in
+ the first solvation shell varies from 4 to 6 and differs by about 10 kcal
+ from the solvation energy of the 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl.
 \end_layout
 
 \begin_layout Standard
