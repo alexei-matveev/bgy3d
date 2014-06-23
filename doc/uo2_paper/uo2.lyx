@@ -6685,15 +6685,15 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Uranyl bond length 
+Uranyl bond length, 
 \begin_inset Formula $d$
 \end_inset
 
-(U - OU) (pm), uranyl-water distance 
+(U-OU) (pm), uranyl-water distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U - OW) (pm) for [UO
+(U-OW) (pm), for [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6709,11 +6709,11 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-, and raection energy 
+ and reaction energy, 
 \begin_inset Formula $\Delta_{R}E_{0}$
 \end_inset
 
- (kcal/mol) for exchange process: [UO
+ (kcal/mol), for exchange process [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6733,11 +6733,11 @@ O)
 \begin_inset Formula $_{2}$
 \end_inset
 
-O
-\begin_inset Formula $\longleftrightarrow$
+O 
+\begin_inset Formula $\leftrightarrow$
 \end_inset
 
-[UO
+ [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6753,7 +6753,7 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-, obtained from QM calucaltions with different solvation models and experiment
+, obtained from QM calculations with different solvation models and experiment
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -6810,7 +6810,7 @@ Method
 \begin_inset Formula $d$
 \end_inset
 
-(U - OU)
+(U-OU)
 \end_layout
 
 \end_inset
@@ -6822,7 +6822,7 @@ Method
 \begin_inset Formula $d$
 \end_inset
 
-(U - OW)
+(U-OW)
 \end_layout
 
 \end_inset
