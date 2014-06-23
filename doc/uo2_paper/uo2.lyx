@@ -5596,7 +5596,64 @@ status open
 \end_layout
 
 \begin_layout Standard
-Our attempts for QM+RISM optimization of [UO
+The urany--water interactions according to DFT as employed in QM, QM+PCM,
+ and QM+RISM calculations are characterized by an overall strength comparable
+ to the KL1 and KL2 force field models.
+ The typical internal energy of penta-aqua uranyl complex is about 
+\begin_inset Formula $-270$
+\end_inset
+
+ kcal, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+ cp.
+\begin_inset space ~
+\end_inset
+
+Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-model"
+
+\end_inset
+
+, though a visual inspection of the potential energy cuts seems to suggest
+ that the attractive branch of the potential is less steep with QM interactions
+ than with e.g.
+ KL2 force field.
+ Maybe in part due to this inconsistency we found some free energy minimizations
+ with QM+RISM combination and without symmetry constraints to diverge towards
+ substitution of explicit waters by the RISM medium.
+ Hence, when comparing QM, QM+PCM, and QM+RISM models we resorted to symmetric
+ conformations.
+\end_layout
+
+\begin_layout Standard
+Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+ compares results of QM, QM+PCM, and QM+RISM calculations for high-symmetry
+ uranyl aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5612,34 +5669,61 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- could only reached convergence when KL2 model was used.
- Table
+ with 
+\begin_inset Formula $n$
+\end_inset
+
+ water ligands, 
+\begin_inset Formula $4\le n\le6$
+\end_inset
+
+, as well as a 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl ion 
+\begin_inset Formula $(n=0)$
+\end_inset
+
+.
+ The binding energies of explicit water molecules in all cases are nearly
+ independent of the method used to optimize the geometry of the complex
+ as indicated by the low values of 
+\begin_inset Formula $|\Delta^{2}E_{\text{intra}}|\le2.2$
+\end_inset
+
+ kcal/mol except for a bare uranyl.
+ The binding energy varies by 
+\begin_inset Formula $-26$
+\end_inset
+
+ kcal when going from 
+\begin_inset Formula $n=4$
+\end_inset
+
+ to 
+\begin_inset Formula $n=5$
+\end_inset
+
+ and by further 
+\begin_inset Formula $-19$
+\end_inset
+
+ kcal when going to 
+\begin_inset Formula $n=6$
+\end_inset
+
+ at QM level and thus should not be used to compare stability of these conformat
+ions in solvent, cp.
+ Ref.
 \begin_inset space ~
 \end_inset
 
 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:QM+RISM-vs-QM+PCM"
-
-\end_inset
-
- shows the comparison of energetic results between QM+RISM and PCM calculations
- for 
-\begin_inset Quotes eld
-\end_inset
-
-high-symmetry
-\begin_inset Quotes erd
-\end_inset
-
- uranyl aquo complexes, with 4, 5 and 6 water ligands around uranyl ion.
- The water binding energies in both cases are nearly identical, of which
- the variation from n=4 to n=5 is equal to -27 (QM+RISM) and -26 (PCM) kcal/mol,
- and changes to 4.0 kcal/mol when n varies from 5 to 6.
- The variation of water binding energy is comparable with our early reported
- values based on LDA optimized strucures, in which the numbers are -26 and
- 5.0 kcal/mol respectively
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04"
@@ -5647,28 +5731,32 @@ key "Moskaleva04"
 \end_inset
 
 .
- The solvation free energy -389 kcal/mol of uranyl obtained from QM+RISM
- calculation for [UO
-\begin_inset Formula $_{2}$
+ The solvation free energy of the uranyl with the fixed conformation of
+ the first solvation shell as estimated using these complexes shows a quite
+ different trend.
+\end_layout
+
+\begin_layout Standard
+According to QM+PCM and QM+RISM models the five-coordinated uranyl complex
+ is the most stable conformation with 
+\begin_inset Formula $\Delta G_{\text{sol}}=-426$
 \end_inset
 
-(H
-\begin_inset Formula $_{2}$
+ kcal/mol (QM+PCM) and 
+\begin_inset Formula $\Delta G_{\text{sol}}=-390$
 \end_inset
 
-O)
-\begin_inset Formula $_{5}$
+ kcal/mol (QM+RISM).
+ The latter value is around the middle of experimental range 
+\begin_inset Formula $-437\sim-318$
 \end_inset
 
-]
-\begin_inset Formula $^{2+}$
-\end_inset
+ kcal/mol whereas the former is closer to the lower bound.
+ 
+\end_layout
 
-is in the middle of experimental range -437
-\begin_inset Formula $\sim$
-\end_inset
-
--318 kcal/mol, and is increased by 17 kcal/mol when it comes to [UO
+\begin_layout Standard
+and is increased by 17 kcal/mol when it comes to [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5701,7 +5789,7 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- is missing in
+ is missing in 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04"
