@@ -6162,7 +6162,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Uranyl bond-length, 
+Uranyl bond length, 
 \begin_inset Formula $d(\text{U-OU})$
 \end_inset
 
@@ -7094,11 +7094,11 @@ Uranyl bond length,
 \begin_inset Formula $d$
 \end_inset
 
-(U-OU) (pm), uranyl-water distance, 
+(U--OU) (pm), uranyl--water distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U-OW) (pm), for [UO
+(U--OW) (pm), for [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7115,7 +7115,7 @@ O)
 \end_inset
 
  and reaction energy, 
-\begin_inset Formula $\Delta_{R}E_{0}$
+\begin_inset Formula $\Delta G_{\text{R}}$
 \end_inset
 
  (kcal/mol), for exchange process [UO
@@ -7158,8 +7158,8 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-, obtained from QM calculations with different solvation models and experiment
- 
+ obtained by various combinations of QM and solvation models as well as
+ an experimental estimate 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:comparison-reaction-energy"
@@ -7215,7 +7215,7 @@ Method
 \begin_inset Formula $d$
 \end_inset
 
-(U-OU)
+(U--OU)
 \end_layout
 
 \end_inset
@@ -7227,7 +7227,7 @@ Method
 \begin_inset Formula $d$
 \end_inset
 
-(U-OW)
+(U--OW)
 \end_layout
 
 \end_inset
@@ -7236,7 +7236,7 @@ Method
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta_{R}E_{0}$
+\begin_inset Formula $\Delta G_{\text{R}}$
 \end_inset
 
 
@@ -7250,7 +7250,7 @@ Method
 \begin_inset Text
 
 \begin_layout Plain Layout
-BP-PCM
+BP+PCM
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -7295,7 +7295,7 @@ BP-PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-BP-RISM
+BP+RISM
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -7340,7 +7340,7 @@ BP-RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-MP2-IEFPCM
+MP2+IEFPCM
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -7401,7 +7401,7 @@ MP2-IEFPCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-PBE-COSMO
+PBE+COSMO
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -7446,7 +7446,7 @@ PBE-COSMO
 \begin_inset Text
 
 \begin_layout Plain Layout
-BLYP-CPMD
+BLYP+CPMD
 \begin_inset Formula $^{d}$
 \end_inset
 
@@ -7491,7 +7491,7 @@ BLYP-CPMD
 \begin_inset Text
 
 \begin_layout Plain Layout
-MP2-SCIPCM
+MP2+SCIPCM
 \begin_inset Formula $^{e}$
 \end_inset
 
@@ -7536,7 +7536,7 @@ MP2-SCIPCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-MP2-PCM
+MP2+PCM
 \begin_inset Formula $^{f}$
 \end_inset
 
