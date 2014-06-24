@@ -4440,7 +4440,7 @@ O)
 \begin_inset Formula $-216$
 \end_inset
 
- kcal 
+ kcal/mol 
 \begin_inset Formula $\leq\Delta E_{\text{intra}}\le$
 \end_inset
 
@@ -4453,11 +4453,11 @@ O)
 \begin_inset Formula $-268$
 \end_inset
 
- kcal (KL1) and 
+ kcal/mol (KL1) and 
 \begin_inset Formula $-271$
 \end_inset
 
- kcal (KL2).
+ kcal/mol (KL2).
  Consistently with this picture, the solvation free energy of these conformation
 s, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
@@ -4477,7 +4477,7 @@ reference "tab:energy-vs-model"
 
 .
  Notably, the free energies of conformations with five explicit water ligands
- are roughly by 10-15 kcal lower that those of the 
+ are roughly by 10-15 kcal/mol lower that those of the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4964,7 +4964,7 @@ reference "tab:energy-vs-coordination"
 
  also demonstrate that with inclusion of RISM solvent, the minimized conformatio
 n free energy is essentially constant when the number of water ligands in
- the first solvation shell varies from 4 to 6 and differs by about 10 kcal
+ the first solvation shell varies from 4 to 6 and differs by about 10 kcal/mol
  from the solvation energy of the 
 \begin_inset Quotes eld
 \end_inset
@@ -5701,7 +5701,7 @@ bare
 \begin_inset Formula $-26$
 \end_inset
 
- kcal when going from 
+ kcal/mol when going from 
 \begin_inset Formula $n=4$
 \end_inset
 
@@ -5713,7 +5713,7 @@ bare
 \begin_inset Formula $-19$
 \end_inset
 
- kcal when going to 
+ kcal/mol when going to 
 \begin_inset Formula $n=6$
 \end_inset
 
