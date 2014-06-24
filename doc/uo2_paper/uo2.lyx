@@ -5158,10 +5158,10 @@ status open
 
 \begin_layout Plain Layout
 Average uranyl--water distances of the first solvation shell, 
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
- (pm), intra-molecular energy 
+(U--OW) (pm), intra-molecular energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
@@ -5317,10 +5317,10 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
@@ -5444,10 +5444,10 @@ MM+RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
