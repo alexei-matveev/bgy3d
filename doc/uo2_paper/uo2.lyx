@@ -5808,7 +5808,69 @@ bare
 \end_inset
 
 kcal/mol except for a bare uranyl.
- The binding energy varies by 
+ Note the stronger relaxation of the bare uranyl upon immersion into the
+ RISM solvent --- the internal energy goes up by 6.7
+\begin_inset space ~
+\end_inset
+
+kcal/mol together with the elongation of the U--OU bond by about 8
+\begin_inset space ~
+\end_inset
+
+pm from 172
+\begin_inset space ~
+\end_inset
+
+pm in the gas phase to 180 pm, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+.
+ Choosing explicit structure of the first solvation shell does not affect
+ that distance much --- for all 
+\begin_inset Formula $4\le n\le6$
+\end_inset
+
+ it stays 181
+\begin_inset space ~
+\end_inset
+
+pm which is only 1
+\begin_inset space ~
+\end_inset
+
+pm longer.
+ This is different at QM+PCM level.
+ Here the initial relaxation due to the medium is much smaller, about 0.4
+\begin_inset space ~
+\end_inset
+
+kcal/mol, with the respective bond elongation of about 2
+\begin_inset space ~
+\end_inset
+
+pm.
+ Only with introduction of explicit water molecules into the first solvation
+ shell the U--OU bond reaches the values in the 179-180
+\begin_inset space ~
+\end_inset
+
+pm range.
+\end_layout
+
+\begin_layout Standard
+Neglecting the differences due to relaxation, the binding energy, 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+, varies by 
 \begin_inset Formula $-26$
 \end_inset
 
@@ -5836,8 +5898,8 @@ kcal/mol when going to
 \begin_inset Formula $n=6$
 \end_inset
 
- at QM level and thus should not be used to compare stability of these conformat
-ions in solvent, cp.
+ (here QM values) and thus should not be used to compare stability of these
+ conformations in solvent, cp.
  Ref.
 \begin_inset space ~
 \end_inset
@@ -5850,9 +5912,10 @@ key "Moskaleva04"
 \end_inset
 
 .
- The solvation free energy of the uranyl with the fixed conformation of
- the first solvation shell as estimated using these complexes shows a quite
- different trend.
+ However, the solvation free energy of the uranyl with the fixed conformation
+ of the first solvation shell as estimated using these complexes shows a
+ quite different trend.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -5883,7 +5946,72 @@ kcal/mol (QM+RISM).
 \end_inset
 
 kcal/mol whereas the former is closer to the lower bound.
- 
+ Apart from the overall difference in magnitude there is a qualitative differenc
+e between QM+PCM and QM+RISM results when it comes to relative stability
+ of the four-, five-, and six-coordinated conformations.
+ The QM+PCM model predicts the six-coordinated and four-coordinated complexes
+ to be 1
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 10
+\begin_inset space ~
+\end_inset
+
+kcal/mol less stable than the five-coordinated one, respectively (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+).
+ The relative order is opposite at the QM+RISM level: the four-coordinated
+ complex is only about 1
+\begin_inset space ~
+\end_inset
+
+kcal/mol less stable than the five-coordinated one and the six-coordinated
+ complex is higher in energy by about 6
+\begin_inset space ~
+\end_inset
+
+kcal/mol, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+.
+ Not quite surprisingly, the free solvation energies at QM+RISM and at MM+RISM
+ levels agree very well for the comparable structures, Tables
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:energy-vs-coordination"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
