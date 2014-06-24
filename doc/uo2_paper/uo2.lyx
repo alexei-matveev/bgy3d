@@ -1114,11 +1114,19 @@ key "Pettitt82"
 \begin_inset Formula $\sigma=0.4$
 \end_inset
 
- Å and 
+
+\begin_inset space ~
+\end_inset
+
+Å and 
 \begin_inset Formula $\epsilon=0.046$
 \end_inset
 
- kcal/mol (PR-SPC/E) in their early study; Sato and Hirata 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (PR-SPC/E) in their early study; Sato and Hirata 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sato99"
@@ -1129,11 +1137,19 @@ key "Sato99"
 \begin_inset Formula $\sigma=1$
 \end_inset
 
- Å and 
+
+\begin_inset space ~
+\end_inset
+
+Å and 
 \begin_inset Formula $\epsilon=0.05455$
 \end_inset
 
- kcal/mol (SH-SPC/E); recently Luchko and Kovalenko 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (SH-SPC/E); recently Luchko and Kovalenko 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Luchko10"
@@ -3003,8 +3019,11 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
-, the positions of peaks are within the range between 241 and 243 pm for
- different water models while significant differences come to coordination
+, the positions of peaks are within the range between 241 and 243
+\begin_inset space ~
+\end_inset
+
+pm for different water models while significant differences come to coordination
  numbers ranging from 4.9 to 5.8 and excess chemical potential ranging from
  
 \begin_inset Formula $-$
@@ -3014,14 +3033,25 @@ reference "tab:observables-vs-water-model"
 \begin_inset Formula $-$
 \end_inset
 
-293 kcal/mol.
- The reference MD results suggest a peak at 246 pm that integrates to coordinati
-on number 5.2 and a somewhat larger magnitude of the solvation free energy,
- 
+293
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ The reference MD results suggest a peak at 246
+\begin_inset space ~
+\end_inset
+
+pm that integrates to coordination number 5.2 and a somewhat larger magnitude
+ of the solvation free energy, 
 \begin_inset Formula $-$
 \end_inset
 
-338 kcal/mol, Table
+338
+\begin_inset space ~
+\end_inset
+
+kcal/mol, Table
 \begin_inset space ~
 \end_inset
 
@@ -3509,7 +3539,11 @@ key "Kerisit13"
 
 .
  The U--OW separation for the first RDF peak is probably somewhat too short:
- 232 and 238 pm for KL1 and KL2 RISM (Table
+ 232 and 238
+\begin_inset space ~
+\end_inset
+
+pm for KL1 and KL2 RISM (Table
 \begin_inset space ~
 \end_inset
 
@@ -3521,7 +3555,11 @@ reference "tab:observables-vs-uranyl-model"
 \end_inset
 
 ) vs.
- 236 and 240 pm for KL1 and KL2 MD 
+ 236 and 240
+\begin_inset space ~
+\end_inset
+
+pm for KL1 and KL2 MD 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3542,7 +3580,11 @@ key "Kerisit13"
 \begin_inset Formula $-$
 \end_inset
 
-377 kcal/mol for GW, KL1 and KL2 models 
+377
+\begin_inset space ~
+\end_inset
+
+kcal/mol for GW, KL1 and KL2 models 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3561,7 +3603,11 @@ key "Kerisit13"
 \begin_inset Formula $-$
 \end_inset
 
-380 kcal/mol, respectively, Table
+380
+\begin_inset space ~
+\end_inset
+
+kcal/mol, respectively, Table
 \begin_inset space ~
 \end_inset
 
@@ -4440,7 +4486,11 @@ O)
 \begin_inset Formula $-216$
 \end_inset
 
- kcal/mol 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol 
 \begin_inset Formula $\leq\Delta E_{\text{intra}}\le$
 \end_inset
 
@@ -4448,16 +4498,28 @@ O)
 \begin_inset Formula $-210$
 \end_inset
 
- kcal/mol, whereas the two stronger force fields suggest notably stronger
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, whereas the two stronger force fields suggest notably stronger
  ligand binding of 
 \begin_inset Formula $-268$
 \end_inset
 
- kcal/mol (KL1) and 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (KL1) and 
 \begin_inset Formula $-271$
 \end_inset
 
- kcal/mol (KL2).
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (KL2).
  Consistently with this picture, the solvation free energy of these conformation
 s, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
@@ -4477,7 +4539,11 @@ reference "tab:energy-vs-model"
 
 .
  Notably, the free energies of conformations with five explicit water ligands
- are roughly by 10-15 kcal/mol lower that those of the 
+ are roughly by 10-15
+\begin_inset space ~
+\end_inset
+
+kcal/mol lower that those of the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4934,7 +5000,11 @@ O)
 \end_inset
 
 and pushed the sixth water molecule to the position of the second solvation
- shell (453 pm) in [UO
+ shell (453
+\begin_inset space ~
+\end_inset
+
+pm) in [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -4964,8 +5034,11 @@ reference "tab:energy-vs-coordination"
 
  also demonstrate that with inclusion of RISM solvent, the minimized conformatio
 n free energy is essentially constant when the number of water ligands in
- the first solvation shell varies from 4 to 6 and differs by about 10 kcal/mol
- from the solvation energy of the 
+ the first solvation shell varies from 4 to 6 and differs by about 10
+\begin_inset space ~
+\end_inset
+
+kcal/mol from the solvation energy of the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5603,7 +5676,11 @@ The urany--water interactions according to DFT as employed in QM, QM+PCM,
 \begin_inset Formula $-270$
 \end_inset
 
- kcal/mol, Table
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, Table
 \begin_inset space ~
 \end_inset
 
@@ -5696,12 +5773,20 @@ bare
 \begin_inset Formula $|\Delta^{2}E_{\text{intra}}|\le2.2$
 \end_inset
 
- kcal/mol except for a bare uranyl.
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol except for a bare uranyl.
  The binding energy varies by 
 \begin_inset Formula $-26$
 \end_inset
 
- kcal/mol when going from 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol when going from 
 \begin_inset Formula $n=4$
 \end_inset
 
@@ -5713,7 +5798,11 @@ bare
 \begin_inset Formula $-19$
 \end_inset
 
- kcal/mol when going to 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol when going to 
 \begin_inset Formula $n=6$
 \end_inset
 
@@ -5742,21 +5831,37 @@ According to QM+PCM and QM+RISM models the five-coordinated uranyl complex
 \begin_inset Formula $\Delta G_{\text{sol}}=-426$
 \end_inset
 
- kcal/mol (QM+PCM) and 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (QM+PCM) and 
 \begin_inset Formula $\Delta G_{\text{sol}}=-390$
 \end_inset
 
- kcal/mol (QM+RISM).
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (QM+RISM).
  The latter value is around the middle of experimental range 
 \begin_inset Formula $-437\sim-318$
 \end_inset
 
- kcal/mol whereas the former is closer to the lower bound.
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol whereas the former is closer to the lower bound.
  
 \end_layout
 
 \begin_layout Standard
-and is increased by 17 kcal/mol when it comes to [UO
+and is increased by 17
+\begin_inset space ~
+\end_inset
+
+kcal/mol when it comes to [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5772,7 +5877,11 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-, which is comparable to the 22 kcal/mol energetic variance in PCM case.
+, which is comparable to the 22
+\begin_inset space ~
+\end_inset
+
+kcal/mol energetic variance in PCM case.
  The solvation energy of [UO
 \begin_inset Formula $_{2}$
 \end_inset
@@ -5796,12 +5905,27 @@ key "Moskaleva04"
 
 \end_inset
 
- and according to our PCM calculation in this study it is -414 kcal/mol,
- which is 11 kcal/mol higher than the five coordination case.
+ and according to our PCM calculation in this study it is -414
+\begin_inset space ~
+\end_inset
+
+kcal/mol, which is 11
+\begin_inset space ~
+\end_inset
+
+kcal/mol higher than the five coordination case.
  However in QM+RISM hybrid calculation, RISM solvent compensates the missing
  ligand besides the four explicit ones in the first solvation shell, thus
- the solvation free energy -388 kcal/mol of four coordination complex is
- almost identical with the five coordination one -389 kcal/mol.
+ the solvation free energy -388
+\begin_inset space ~
+\end_inset
+
+kcal/mol of four coordination complex is almost identical with the five
+ coordination one -389
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
  Here we need to emphasize that the limitation of 1D-RISM machinery makes
  it impossible to hinder solvent medium interacting with solute particles
  in 
