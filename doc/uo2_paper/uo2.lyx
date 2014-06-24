@@ -4569,11 +4569,11 @@ reference "tab:energy-vs-model"
 
 .
  Notably, the free energies of conformations with five explicit water ligands
- are roughly by 10-15
+ are roughly by 10--15
 \begin_inset space ~
 \end_inset
 
-kcal/mol lower that those of the 
+kcal/mol lower than those of the 
 \begin_inset Quotes eld
 \end_inset
 
