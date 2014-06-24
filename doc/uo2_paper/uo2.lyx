@@ -6163,14 +6163,14 @@ status open
 
 \begin_layout Plain Layout
 Uranyl bond length, 
-\begin_inset Formula $d(\text{U-OU})$
+\begin_inset Formula $d$
 \end_inset
 
- (pm), uranyl--water distance, 
-\begin_inset Formula $d(\text{U-OW})$
+(U--OU) (pm), uranyl--water distance, 
+\begin_inset Formula $d$
 \end_inset
 
- (pm), intra-molecular energy, 
+(U--OW) (pm), intra-molecular energy, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
@@ -6329,10 +6329,10 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OU})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OU)
 \end_layout
 
 \end_inset
@@ -6388,10 +6388,10 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
@@ -6515,10 +6515,10 @@ QM+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OU})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OU)
 \end_layout
 
 \end_inset
@@ -6574,10 +6574,10 @@ QM+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
@@ -6763,10 +6763,10 @@ QM+RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OU})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OU)
 \end_layout
 
 \end_inset
@@ -6822,10 +6822,10 @@ QM+RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d(\text{U-OW})$
+\begin_inset Formula $d$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
