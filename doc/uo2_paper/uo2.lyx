@@ -8072,7 +8072,10 @@ BP+RISM
 \begin_inset Text
 
 \begin_layout Plain Layout
--390
+\begin_inset Formula $-$
+\end_inset
+
+390
 \end_layout
 
 \end_inset
@@ -8142,7 +8145,10 @@ MP2+IEFPCM
 \begin_inset Text
 
 \begin_layout Plain Layout
--464
+\begin_inset Formula $-$
+\end_inset
+
+464
 \end_layout
 
 \end_inset
@@ -8196,7 +8202,10 @@ PBE+COSMO
 \begin_inset Text
 
 \begin_layout Plain Layout
--384
+\begin_inset Formula $-$
+\end_inset
+
+384
 \end_layout
 
 \end_inset
@@ -8304,7 +8313,10 @@ MP2+SCIPCM
 \begin_inset Text
 
 \begin_layout Plain Layout
--412
+\begin_inset Formula $-$
+\end_inset
+
+412
 \end_layout
 
 \end_inset
@@ -8362,7 +8374,10 @@ MP2+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
--411
+\begin_inset Formula $-$
+\end_inset
+
+411
 \end_layout
 
 \end_inset
