@@ -165,8 +165,9 @@ key "Silva95,book:Grenthe92"
 \begin_layout Standard
 Up to now, the most popular strategy in QM studies of uranyl is using the
  polarizable continuum model (PCM) to represent water solvent.
- Although PCM method has been successfully applied in studies of uranyl
- adsorption and chemical reaction at solvated mineral surface 
+ Although PCM method based on the conductor-like solvation model (COSMO)
+ has been successfully applied in studies of uranyl adsorption and chemical
+ reaction at solvated mineral surface 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kremleva12,Kremleva10,Kremleva08"
@@ -2107,6 +2108,14 @@ key "Dunlap90"
 \begin_inset CommandInset citation
 LatexCommand cite
 key "ParaGaussV3.1"
+
+\end_inset
+
+.
+ We used a COSMO PCM solvation model as a reference 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fuchs02"
 
 \end_inset
 
