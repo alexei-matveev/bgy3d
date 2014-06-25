@@ -91,7 +91,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -6671,8 +6670,8 @@ saturated coordinated complex
 \end_layout
 
 \begin_layout Standard
-While most experimental meansurements reported that the number of water
- ligands bound to UO
+While most experimental measurements reported that the number of water ligands
+ bound to UO
 \begin_inset Formula $_{2}^{2+}$
 \end_inset
 
@@ -6691,7 +6690,7 @@ key "Buehl11,Shamov05,Cao05,Buehl05"
 
 \end_inset
 
-, by calculating the solvetion free energy 
+, by calculating the solution free energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
@@ -6748,10 +6747,10 @@ key "Soderholm05"
 
 \end_inset
 
-, however, current computationl resutls are much more negative than that,
+, however, current computational results are much more negative than that,
  from which researchers believed that five-coordinate uranyl is the dominate
- specy in aqueous solution because it more energetic favourable than its
- four-coornate counterpart.
+ specie in aqueous solution because it more energetic favorable than its
+ four-coordinate counterpart.
  For example, using integral equation formalism polarizable continuum model
  (IEFPCM) at Møller-Plesset (MP2) level, Cao et.al 
 \begin_inset CommandInset citation
@@ -6805,7 +6804,7 @@ kcal/mol at B3LYP level with COSMO-PCM, and it changed to
 \end_inset
 
 kcal/mol at MP2 level with the same solvation model, which is more closer
- to the exprimental value.
+ to the experimental value.
  The pursuit for agreement with experimental result was also carried out
  by Gutowski et.al 
 \begin_inset CommandInset citation
@@ -6815,7 +6814,7 @@ key "Gutowski06"
 \end_inset
 
 .
- When only considering the explict first solvation shell, their calculation
+ When only considering the explicit first solvation shell, their calculation
  indicated 
 \begin_inset Formula $\Delta G_{\text{sol}}=-412$
 \end_inset
@@ -6833,7 +6832,7 @@ kcal/mol and
 \end_inset
 
 kcal/mol at MP2 level with self-consistent isodensity polarizable continuum
- modle (SCIPCM), which are comparable with our results 
+ model (SCIPCM), which are comparable with our results 
 \begin_inset Formula $\Delta G_{\text{sol}}=-426$
 \end_inset
 
@@ -6849,7 +6848,7 @@ kcal/mol and
 \begin_inset space ~
 \end_inset
 
-kcal/mol calcuated at BP level with PCM.
+kcal/mol calculated at BP level with PCM.
  Meanwhile, Bühl et.al 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -6867,10 +6866,10 @@ key "Buehl05"
 
 kcal/mol from Car-Parrinello MD (CPMD) simulation at BLYP level, which is
  quite close to our BP-PCM result and MP2-SCIPCM result of Gutowski et.al
- with only explict wate ligands in the first sovaltion shell, but still
+ with only explicit water ligands in the first solvation shell, but still
  too negative comared with experimental value.
  By taking the explicit second solvation shell into account, Gutowski et.al
- reached the improvment of reaction energy with 
+ reached the improvement of reaction energy with 
 \begin_inset Formula $\Delta G_{\text{R}}=-2.5$
 \end_inset
 
@@ -6898,8 +6897,8 @@ reference "tab:comparison-reaction-energy"
 \end_inset
 
 , it might be natural to derive from QM plus continuum solvation model and
- first pricinple MD calculations that, the five-coordinate uranyl aquo complex
- is energetic favourable in nature, while this is actually not consistent
+ first principle MD calculations that, the five-coordinate uranyl aquo complex
+ is energetic favorable in nature, while this is actually not consistent
  with experimental fact.
  As can be seen from Table
 \begin_inset space ~
@@ -6946,9 +6945,9 @@ kcal/mol and solvation free energy
 \end_inset
 
 kcal/mol around the middle of experimental range.
- This indicates that as an alternativefor traditional continuum solvation
+ This indicates that as an alternative for traditional continuum solvation
  models, RISM method may provide better accuracy when being used to study
- chemical reactions and processes which are sensible to solvation enviroment.
+ chemical reactions and processes which are sensible to solvation environment.
 \end_layout
 
 \begin_layout Standard
