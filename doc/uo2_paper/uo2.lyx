@@ -8618,6 +8618,14 @@ The atomistic nature of the RISM model offers a more consistent view of
  interpreted.
 \end_layout
 
+\begin_layout Section*
+Acknowledgments
+\end_layout
+
+\begin_layout Standard
+FIXME: IGSSE 7.03, ...
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
