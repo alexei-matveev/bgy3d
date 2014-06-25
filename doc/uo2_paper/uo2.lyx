@@ -6671,6 +6671,287 @@ saturated coordinated complex
 \end_layout
 
 \begin_layout Standard
+While most experimental meansurements reported that the number of water
+ ligands bound to UO
+\begin_inset Formula $_{2}^{2+}$
+\end_inset
+
+cation in aqueous solution could vary between about 4 to 5 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Soderholm05,Neuefeind04,Wahlgren99"
+
+\end_inset
+
+, the majority of computational chemistry studies claimed that the five-coordina
+te uranyl is dominated 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl11,Shamov05,Cao05,Buehl05"
+
+\end_inset
+
+, by calculating the solvetion free energy 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ for [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{5}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+and reaction energy 
+\begin_inset Formula $\Delta G_{\text{R}}$
+\end_inset
+
+ for the exchange process between the four- and five-coordinate uranyl with
+ different solvation models:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+[\textrm{U}\textrm{O}_{2}\textrm{(}\textrm{H}_{2}\textrm{O}\textrm{)}_{4}]^{2+}+\textrm{H}_{2}\textrm{O}\leftrightarrow[\textrm{U}\textrm{O}_{2}\textrm{(}\textrm{H}_{2}\textrm{O}\textrm{)}_{5}]^{2+}.
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A most recent High-energy X-ray scattering (HEXS) experiments determined
+ a difference in free energy between the four- and five-coordinate uranyl
+ aquo complex of 
+\begin_inset Formula $\sim-1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Soderholm05"
+
+\end_inset
+
+, however, current computationl resutls are much more negative than that,
+ from which researchers believed that five-coordinate uranyl is the dominate
+ specy in aqueous solution because it more energetic favourable than its
+ four-coornate counterpart.
+ For example, using integral equation formalism polarizable continuum model
+ (IEFPCM) at Møller-Plesset (MP2) level, Cao et.al 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cao05"
+
+\end_inset
+
+ reported 
+\begin_inset Formula $\Delta G_{\text{sol}}=-464$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol which is even beyond the lower range of experimental value, and
+ 
+\begin_inset Formula $\Delta G_{\text{R}}=-24.7$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+could be derived from the differentiation between the solvation free energies
+ of four- and five-coordinate uranyl aquo complexes, which even more negative
+ than the values in gas phase from this and other's work.
+ By combinations with different levels of theory of QM methods and continuum
+ solvation models (CPCM, COSMO), Shamov et.al 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shamov05"
+
+\end_inset
+
+ provided 
+\begin_inset Formula $\Delta G_{\text{R}}=-11.1$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol at B3LYP level with COSMO-PCM, and it changed to 
+\begin_inset Formula $\Delta G_{\text{R}}=-4.9$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol at MP2 level with the same solvation model, which is more closer
+ to the exprimental value.
+ The pursuit for agreement with experimental result was also carried out
+ by Gutowski et.al 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gutowski06"
+
+\end_inset
+
+.
+ When only considering the explict first solvation shell, their calculation
+ indicated 
+\begin_inset Formula $\Delta G_{\text{sol}}=-412$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 
+\begin_inset Formula $\Delta G_{\text{R}}=-7.8$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol at MP2 level with self-consistent isodensity polarizable continuum
+ modle (SCIPCM), which are comparable with our results 
+\begin_inset Formula $\Delta G_{\text{sol}}=-426$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 
+\begin_inset Formula $\Delta G_{\text{R}}=-10.3$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol calcuated at BP level with PCM.
+ Meanwhile, Bühl et.al 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl05"
+
+\end_inset
+
+ determined 
+\begin_inset Formula $\Delta G_{\text{R}}=-8.7$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol from Car-Parrinello MD (CPMD) simulation at BLYP level, which is
+ quite close to our BP-PCM result and MP2-SCIPCM result of Gutowski et.al
+ with only explict wate ligands in the first sovaltion shell, but still
+ too negative comared with experimental value.
+ By taking the explicit second solvation shell into account, Gutowski et.al
+ reached the improvment of reaction energy with 
+\begin_inset Formula $\Delta G_{\text{R}}=-2.5$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, while solvation free energy only varied by 1
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+\end_layout
+
+\begin_layout Standard
+As summarized in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
+, it might be natural to derive from QM plus continuum solvation model and
+ first pricinple MD calculations that, the five-coordinate uranyl aquo complex
+ is energetic favourable in nature, while this is actually not consistent
+ with experimental fact.
+ As can be seen from Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
+, the uranyl bond from our QM-RISM is a little more stretched from experimental
+ value (
+\begin_inset Formula $~$
+\end_inset
+
+2.3%) when comparing with other solvation models (
+\begin_inset Formula $~$
+\end_inset
+
+0.6%), but uranyl--water distance is even 2 pm closer to experimental one
+ than results from some solvation models and CPMD (250
+\begin_inset space ~
+\end_inset
+
+pm).
+ Most importantly, the reaction energy for exchange process from four- to
+ five-coordinate uranyl aquo complex calculated from our QM-RISM method
+ is in the best agreement with experimental result, with 
+\begin_inset Formula $\Delta G_{\text{R}}=-1.6$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol and solvation free energy 
+\begin_inset Formula $\Delta G_{\text{sol}}=-390$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol around the middle of experimental range.
+ This indicates that as an alternativefor traditional continuum solvation
+ models, RISM method may provide better accuracy when being used to study
+ chemical reactions and processes which are sensible to solvation enviroment.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
@@ -7601,10 +7882,6 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -7616,7 +7893,11 @@ Uranyl bond length,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) (pm), for [UO
+(U--OW) (pm), solvation free energy, 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ (kcal/mol) for [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7710,9 +7991,10 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="9" columns="4">
+<lyxtabular version="3" rows="9" columns="5">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
+<column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
@@ -7746,6 +8028,18 @@ Method
 \end_inset
 
 (U--OW)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -7795,6 +8089,15 @@ BP+PCM
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-426
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
@@ -7836,6 +8139,15 @@ BP+RISM
 
 \begin_layout Plain Layout
 248
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-390
 \end_layout
 
 \end_inset
@@ -7901,6 +8213,15 @@ MP2+IEFPCM
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-464
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
@@ -7942,6 +8263,15 @@ PBE+COSMO
 
 \begin_layout Plain Layout
 241
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-384
 \end_layout
 
 \end_inset
@@ -7991,6 +8321,15 @@ BLYP+CPMD
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
@@ -8032,6 +8371,15 @@ MP2+SCIPCM
 
 \begin_layout Plain Layout
 250
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-412
 \end_layout
 
 \end_inset
@@ -8085,6 +8433,15 @@ MP2+PCM
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-411
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="right" valignment="top" usebox="none">
 \begin_inset Text
 
@@ -8103,7 +8460,7 @@ MP2+PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-Expt
+HEXS
 \begin_inset Formula $^{g}$
 \end_inset
 
@@ -8126,6 +8483,15 @@ Expt
 
 \begin_layout Plain Layout
 242
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
