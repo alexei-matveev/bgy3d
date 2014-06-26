@@ -6658,12 +6658,11 @@ kcal/mol by estimating the relative weights of four- and five-coordinated
  from which researchers believed that five-coordinate uranyl is the dominating
  species in aqueous solution.
  For example, using integral equation formalism for polarizable continuum
- model (IEFPCM) at Møller--Plesset (MP2) level, Cao et
+ model (IEFPCM) at Møller--Plesset (MP2) level, Cao et al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- 
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cao05"
@@ -6691,12 +6690,11 @@ kcal/mol which is even below the range of experimental values.
 kcal/mol, which is more negative than the gas phase values from this and
  other works.
  By combining different levels of QM theory and continuum solvation models
- (CPCM, COSMO), Shamov et
+ (CPCM, COSMO), Shamov et al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- 
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Shamov05"
@@ -6722,12 +6720,11 @@ kcal/mol at B3LYP level with COSMO PCM.
 
 kcal/mol, which is closer to the experimental value.
  The pursuit for agreement with experimental result was also carried out
- by Gutowski et
+ by Gutowski et al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- 
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Gutowski06"
@@ -6770,12 +6767,11 @@ kcal/mol and
 \end_inset
 
 kcal/mol calculated at BP level with PCM.
- Meanwhile, Bühl et
+ Meanwhile, Bühl et al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- 
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl05"
@@ -6792,18 +6788,18 @@ key "Buehl05"
 
 kcal/mol from Car--Parrinello MD (CPMD) simulations at BLYP level, which
  is quite close to our BP+PCM result and MP2+SCIPCM result of Gutowski et
+ al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- with explicit water ligands in the first solvation shell, but still too
+with explicit water ligands in the first solvation shell, but still too
  negative compared to experimental value.
  By taking the explicit second solvation shell into account, Gutowski et
+ al.
 \begin_inset space \space{}
 \end_inset
 
-al.
- achieved the improvement of reaction energy with 
+achieved the improvement of reaction energy with 
 \begin_inset Formula $\Delta G_{\text{R}}=-2.5$
 \end_inset
 
