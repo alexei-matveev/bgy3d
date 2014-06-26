@@ -6594,7 +6594,7 @@ key "Soderholm05,Neuefeind04,Wahlgren99"
 
 \end_inset
 
-, the majority of computational chemistry studies find that the five-coordinate
+, the majority of computational chemistry studies find that the five-coordinated
  uranyl is dominating 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -6627,7 +6627,7 @@ and the reaction energy
 \begin_inset Formula $\Delta G_{\text{R}}$
 \end_inset
 
- for the exchange process between the four- and five-coordinate uranyl:
+ for the exchange process between the four- and five-coordinated uranyl:
 \end_layout
 
 \begin_layout Standard
@@ -6649,7 +6649,7 @@ key "Soderholm05"
 
 \end_inset
 
- determined a difference in free energies of the four- and five-coordinate
+ determined a difference in free energies of the four- and five-coordinated
  uranyl aqua complexes of about 
 \begin_inset Formula $-1.2$
 \end_inset
@@ -6661,7 +6661,7 @@ key "Soderholm05"
 kcal/mol by estimating the relative weights of four- and five-coordinated
  species from an average coordination number.
  However, current computational results offer a much more negative value,
- from which researchers believed that five-coordinate uranyl is the dominating
+ from which researchers believed that five-coordinated uranyl is the dominating
  species in aqueous solution.
  For example, using integral equation formalism for polarizable continuum
  model (IEFPCM) at Møller--Plesset (MP2) level, Cao et al.
@@ -6684,7 +6684,7 @@ key "Cao05"
 \end_inset
 
 kcal/mol which is even below the range of experimental values.
- The corresponding free energy difference between the four- and five-coordinate
+ The corresponding free energy difference between the four- and five-coordinated
  uranyl aqua complexes is 
 \begin_inset Formula $\Delta G_{\text{R}}=-24.7$
 \end_inset
