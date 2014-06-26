@@ -198,7 +198,7 @@ key "Gordon00"
 
 , and the polarizability of solvent medium has to be taken into account
  to compete with continuum models in reproducing electrostatic interactions.
- Meanwhile, Statistical sampling from huge amount of solvent configurations
+ Meanwhile, statistical sampling from huge amount of solvent configurations
  also entails significant additional cost to the combination of QM and MM
  calculations.
 \end_layout
@@ -260,7 +260,7 @@ key "Guilbaud96"
  and newly developed 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Pomogaev13,Rai12"
+key "Rai12,Pomogaev13,Kerisit13"
 
 \end_inset
 
@@ -269,12 +269,12 @@ key "Pomogaev13,Rai12"
  with 1D-RISM method which are comparable with results obtained from MD
  simulation.
  Secondly, we extend 1D-RISM and the same force field parameterization for
- simple uranyl ion to uranyl-water complexes, in which the first solvation
+ simple uranyl ion to uranyl--water complexes, in which the first solvation
  shell of water around uranyl cation is represented by explicit water molecules.
- Finally, potential energy surfaces (PES) of uranyl-water complexes are
- generated both with MM and QM methods in the presence of water solvent
- environment outside the first solvation shell, and geometry optimizations
- are performed to study the stability of solvation shell structures.
+ Finally, free energy surfaces of uranyl--water complexes are generated
+ both with MM and QM methods in the presence of water solvent environment
+ outside the first solvation shell, and geometry optimizations are performed
+ to study the stability of solvation shell structures.
 \end_layout
 
 \begin_layout Section
