@@ -6828,25 +6828,18 @@ reference "tab:comparison-reaction-energy"
 
 \end_inset
 
-, it might be natural to derive from QM plus continuum solvation model and
- first principle MD calculations that, the five-coordinate uranyl aqua complex
- is energetically favorable in nature, while this is actually not consistent
- with experimental fact.
- 
-\series bold
-
-\begin_inset Note Greyedout
-status open
-
-\begin_layout Plain Layout
-FIXME: Why do you say that? 
-\end_layout
-
-\end_inset
-
-
-\series default
-As can be seen from Table
+, it can be seen that the slight difference in free energy between four-
+ and five-coordination environment of uranyl in aqueous solution measured
+ from HEXS experiment, is overestimated by most QM plus continuum solvation
+ model and first principle MD calculations, especially when explicit water
+ ligands are present only in the first solvation shell.
+ Instead of increasing the expensive QM computation cost by using larger
+ explicit solvation shell model, the combination of RISM with QM calculation
+ for uranyl aquo complex model with explicit water ligands in the first
+ solvation shell leads to energetic results which are more closer to experimenta
+l value, while the variance of solvation structure is kept in a reasonable
+ range.
+ As can be seen from Table
 \begin_inset space ~
 \end_inset
 
