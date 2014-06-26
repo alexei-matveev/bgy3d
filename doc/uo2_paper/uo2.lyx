@@ -6813,7 +6813,7 @@ kcal/mol.
 \end_layout
 
 \begin_layout Standard
-With these findings as summarized in Table
+These findings, summarized in Table
 \begin_inset space ~
 \end_inset
 
@@ -6824,17 +6824,13 @@ reference "tab:comparison-reaction-energy"
 
 \end_inset
 
-, it can be seen that the slight difference in free energy between four-
- and five-coordination environment of uranyl in aqueous solution measured
- from HEXS experiment, is overestimated by most QM plus continuum solvation
- model and first principle MD calculations, especially when explicit water
- ligands are present only in the first solvation shell.
- Instead of increasing the expensive QM computation cost by using larger
- explicit solvation shell model, the combination of RISM with QM calculation
- for uranyl aquo complex model with explicit water ligands in the first
- solvation shell leads to energetic results which are more closer to experimenta
-l value, while the variance of solvation structure is kept in a reasonable
- range.
+, reveal that the slight free energy difference between two coordination
+ environments of uranyl in aqueous solution measured from HEXS experiment,
+ is overestimated by most available combinations of QM and continuum solvation
+ models as well as by first principle MD calculations, especially when explicit
+ water ligands are present only in the first solvation shell.
+ Without increasing the computational costs of QM calculations, the QM+RISM
+ combination leads to remarkably reasonable results for uranyl aqua complexes.
  As can be seen from Table
 \begin_inset space ~
 \end_inset
@@ -8625,8 +8621,8 @@ Acknowledgments
 \end_layout
 
 \begin_layout Standard
-BL is grateful for a fellowship surpported by the International Graduate
- School of Science and Engineering at Technische Universität München.
+BL is grateful for a fellowship by the International Graduate School of
+ Science and Engineering at Technische Universität München.
 \end_layout
 
 \begin_layout Standard
