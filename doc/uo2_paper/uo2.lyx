@@ -402,7 +402,10 @@ at a specific solvent number density
  are the (square symmetric) matrices built of intra-molecular correlation
  functions of solute and solvent, respectively, that are best specified
  by their Fourier representations: e.g.
- 
+\begin_inset space \space{}
+\end_inset
+
+
 \begin_inset Formula $\tilde{\omega}_{\alpha\gamma}^{v}(k)=j_{0}(k\ell_{\alpha\gamma})$
 \end_inset
 
@@ -6265,7 +6268,10 @@ reference "tab:energy-vs-model"
 , though a visual inspection of the potential energy cuts seems to suggest
  that the attractive branch of the potential is less steep with QM interactions
  than with e.g.
- KL2 force field.
+\begin_inset space \space{}
+\end_inset
+
+KL2 force field.
  Maybe in part due to this inconsistency we found some free energy minimizations
  with QM+RISM combination and without symmetry constraints to diverge towards
  substitution of explicit waters by the RISM medium.
@@ -8606,7 +8612,10 @@ The atomistic nature of the RISM model offers a more consistent view of
  the structure of the first solvation shell.
  Exploration of the free energy surface with the MM+RISM combination suggests
  a qualitative difference to the continuum model: e.g.
- the structure of the first solvation shell for an under-coordinated complex
+\begin_inset space \space{}
+\end_inset
+
+the structure of the first solvation shell for an under-coordinated complex
  of uranyl with four water molecules matches that of a five-coordinated
  complex.
  This could be viewed as another sign of interchangeability of explicit
