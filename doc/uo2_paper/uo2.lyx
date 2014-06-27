@@ -3576,17 +3576,18 @@ key "Soderholm05"
 \end_inset
 
  experiments, but the calculated solvation free energies are outside of
- the experimental range.
- On the other hand, Kerisit and Liu's models achieve solvation free energies
- that lie in the middle of experimental range determined with Fourier transform
- ion cyclotron resonance mass spectrometer (FTICR--MS) 
+ the experimental range determined with Fourier transform ion cyclotron
+ resonance mass spectrometer (FTICR--MS) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cornehl96"
 
 \end_inset
 
- by intentionally increasing the charge separation of uranyl species.
+.
+ On the other hand, Kerisit and Liu's models achieve solvation free energies
+ that lie in the middle of experimental range by intentionally increasing
+ the charge separation of uranyl species.
  A higher charge separation in KL1 and KL2 models amounts to an overall
  strengthening of uranyl--water interactions, which, in our case manifests
  in the higher RDF peaks and coordination numbers which are close to 6.
