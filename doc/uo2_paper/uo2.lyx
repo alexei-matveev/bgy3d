@@ -3833,7 +3833,8 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), calculated with different uranyl models.
+ (kcal/mol), calculated with different uranyl models and measured by various
+ experiments.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -4416,7 +4417,7 @@ AIMD
 \begin_inset Text
 
 \begin_layout Plain Layout
-QMCF-MD
+QMCF--MD
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -4480,7 +4481,7 @@ QMCF-MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-MM-MD
+MM--MD
 \begin_inset Formula $^{d}$
 \end_inset
 
@@ -4543,7 +4544,7 @@ MM-MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-MM-MD
+MM--MD
 \begin_inset Formula $^{e}$
 \end_inset
 
@@ -4574,7 +4575,11 @@ MM-MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-241-245
+241
+\begin_inset Formula $\sim$
+\end_inset
+
+245
 \end_layout
 
 \end_inset
@@ -4750,10 +4755,6 @@ HEXS
 
 \begin_layout Plain Layout
 4.61
-\begin_inset Formula $^{h}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -4763,10 +4764,6 @@ HEXS
 
 \begin_layout Plain Layout
 242
-\begin_inset Formula $^{h}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -4776,10 +4773,6 @@ HEXS
 
 \begin_layout Plain Layout
 450
-\begin_inset Formula $^{h}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -4799,6 +4792,10 @@ HEXS
 \begin_inset Text
 
 \begin_layout Plain Layout
+FTICR--MS
+\begin_inset Formula $^{i}$
+\end_inset
+
 
 \end_layout
 
@@ -4856,10 +4853,6 @@ HEXS
 \end_inset
 
 318
-\begin_inset Formula $^{i}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
