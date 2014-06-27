@@ -3834,8 +3834,8 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), calculated with different uranyl models and measured by various
- experiments.
+ (kcal/mol), calculated with different uranyl models in RISM, in comparison
+ to MD simulations and various experimental values.
  
 \begin_inset CommandInset label
 LatexCommand label
