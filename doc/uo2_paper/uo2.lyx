@@ -3533,11 +3533,60 @@ reference "tab:observables-vs-uranyl-model"
 \emph on
 ab-initio
 \emph default
- MD (AIMD) and experimental results, but the calculated solvation free energies
- are outside of the experimental range.
+ MD (AIMD) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl06,Nichols08"
+
+\end_inset
+
+, quantum mechanical charge field MD (QMCF-MD) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Frick09"
+
+\end_inset
+
+ and MM-MD 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Guilbaud93,Rai12"
+
+\end_inset
+
+ results, as well as values measured by X-ray scattering 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Neuefeind04"
+
+\end_inset
+
+, extended X-ray Absorption Fine Structure (EXAFS) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wahlgren99"
+
+\end_inset
+
+ and high-energy X-ray scattering (HEXS) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Soderholm05"
+
+\end_inset
+
+ experiments, but the calculated solvation free energies are outside of
+ the experimental range.
  On the other hand, Kerisit and Liu's models achieve solvation free energies
- that lie in the middle of experimental range by intentionally increasing
- the charge separation of uranyl species.
+ that lie in the middle of experimental range determined with Fourier transform
+ ion cyclotron resonance mass spectrometer (FTICR--MS) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cornehl96"
+
+\end_inset
+
+ by intentionally increasing the charge separation of uranyl species.
  A higher charge separation in KL1 and KL2 models amounts to an overall
  strengthening of uranyl--water interactions, which, in our case manifests
  in the higher RDF peaks and coordination numbers which are close to 6.
