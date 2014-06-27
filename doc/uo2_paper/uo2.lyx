@@ -7,7 +7,7 @@
 \usepackage{mathptmx}
 \usepackage{times}
 \end_preamble
-\options twocolumn,showkeys,superscriptaddress
+\options preprint,showkeys,superscriptaddress
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -3866,7 +3866,7 @@ begin{ruledtabular}
 
 
 \begin_inset Tabular
-<lyxtabular version="3" rows="16" columns="6">
+<lyxtabular version="3" rows="15" columns="6">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -3948,62 +3948,6 @@ Method
 
 \begin_layout Plain Layout
 RISM
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
