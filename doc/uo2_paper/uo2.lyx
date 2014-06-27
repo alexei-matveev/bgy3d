@@ -6388,7 +6388,7 @@ kcal/mol except for a bare uranyl.
 \begin_inset space ~
 \end_inset
 
-kcal/mol together with the elongation of the U--OU bond by about 8
+kcal/mol together with the elongation of the U--O bond by about 8
 \begin_inset space ~
 \end_inset
 
@@ -6433,7 +6433,7 @@ kcal/mol, with the respective bond elongation of about 2
 
 pm.
  Only with introduction of explicit water molecules into the first solvation
- shell the U--OU bond reaches the values in the 179-180
+ shell the U--O bond reaches the values in the 179-180
 \begin_inset space ~
 \end_inset
 
@@ -6936,7 +6936,7 @@ Uranyl bond length,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU) (pm), uranyl--water distance, 
+(U--O) (pm), uranyl--water distance, 
 \begin_inset Formula $d$
 \end_inset
 
@@ -7102,7 +7102,7 @@ QM
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU)
+(U--O)
 \end_layout
 
 \end_inset
@@ -7288,7 +7288,7 @@ QM+PCM
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU)
+(U--O)
 \end_layout
 
 \end_inset
@@ -7536,7 +7536,7 @@ QM+RISM
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU)
+(U--O)
 \end_layout
 
 \end_inset
@@ -7860,7 +7860,7 @@ Uranyl bond length,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU) (pm), uranyl--water distance, 
+(U--O) (pm), uranyl--water distance, 
 \begin_inset Formula $d$
 \end_inset
 
@@ -7986,7 +7986,7 @@ Method
 \begin_inset Formula $d$
 \end_inset
 
-(U--OU)
+(U--O)
 \end_layout
 
 \end_inset
