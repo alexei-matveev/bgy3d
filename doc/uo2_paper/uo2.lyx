@@ -3149,10 +3149,10 @@ Coordination number
 \end_inset
 
  of the first solvation shell, position of the first peak, 
-\begin_inset Formula $d_{1}(\text{U-OW})$
+\begin_inset Formula $d_{1}$
 \end_inset
 
- (pm), and solvation free energy
+(U--OW) (pm), and solvation free energy
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -3225,10 +3225,10 @@ Water model
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d_{1}(\text{U-OW})$
+\begin_inset Formula $d_{1}$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
@@ -3823,14 +3823,14 @@ Coordination number
 \end_inset
 
  of the first solvation shell, positions of the first, 
-\begin_inset Formula $d_{1}(\text{U-OW})$
+\begin_inset Formula $d_{1}$
 \end_inset
 
-, and second, 
-\begin_inset Formula $d_{2}(\text{U-OW})$
+(U--OW), and second, 
+\begin_inset Formula $d_{2}$
 \end_inset
 
- (pm), peaks and solvation free energy, 
+(U--OW) (pm), peaks and solvation free energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
@@ -3909,10 +3909,10 @@ Method
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d_{1}(\text{U-OW})$
+\begin_inset Formula $d_{1}$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
@@ -3921,10 +3921,10 @@ Method
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d_{2}(\text{U-OW})$
+\begin_inset Formula $d_{2}$
 \end_inset
 
-
+(U--OW)
 \end_layout
 
 \end_inset
