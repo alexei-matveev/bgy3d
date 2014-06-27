@@ -1187,11 +1187,11 @@ Lennard--Jones interaction parameters for uranyl:
 \begin_inset Formula $\sigma$
 \end_inset
 
- in Å, 
+ (Å), 
 \begin_inset Formula $\epsilon$
 \end_inset
 
- in kcal/mol, and charge 
+ (kcal/mol), and charge 
 \begin_inset Formula $q$
 \end_inset
 
@@ -1695,11 +1695,11 @@ Lennard--Jones interaction parameters for water:
 \begin_inset Formula $\sigma$
 \end_inset
 
- in Å, 
+ (Å), 
 \begin_inset Formula $\epsilon$
 \end_inset
 
- in kcal/mol, and charge 
+ (kcal/mol), and charge 
 \begin_inset Formula $q$
 \end_inset
 
