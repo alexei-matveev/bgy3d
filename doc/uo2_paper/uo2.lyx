@@ -2090,8 +2090,8 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \end_inset
 
 -norm of the indirect correlation matrix.
- The discrete sine transform (DST) was applied for Fourier transform (FT)
- when calculating convolution integrals.
+ The discrete sine transform was applied for Fourier transform when calculating
+ convolution integrals.
  With water solvent susceptibility as input, solvent-solute RISM equations
  were solved iteratively to get radial distribution functions and evaluate
  excess chemical potential with different functionals.
