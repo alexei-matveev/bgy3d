@@ -1,0 +1,71 @@
+
+On the limits of 1D vs 3D compatibility
+=======================================
+
+For the single site the problem is intrinsically spherically symmetric
+so that a  direct comparison of 1D vs. 3D should  be possible. "OW" is
+such a neutral solute. To see that we used the following settings:
+
+  norm-tol 1e-14
+  dielectric 78.4
+  rho 0.0333295
+  beta 1.6889
+  L 160
+  N 4096
+  solvent "water, PR-SPC/E"
+  solute "OW"
+
+and, for 3D calculation, these two flags in addition:
+
+  hnc
+  solvent-1d
+
+Here  are  a  few  numbers  to demonstrate  that  that  the  essential
+parameter is the cutoff length:
+
+L, A   N      dG(1D), kcal       dG(3D), kcal
+----   ----   ----------------   ------------
+160    4096   6.00768324914697
+80     4096   6.00783654364309
+40     4096   6.00906289307593
+20     4096   6.01887411051549
+10     4096   6.09969661686956
+10     2048   6.09969661048577
+10     1024   6.09969658093067
+10      512   6.09969646423608
+10      256   6.09969599955934       6.068568
+10      192   6.09969451688420       6.068571
+10      128   6.09950196828779       6.068582
+10       96   6.09988491646673       6.068621
+10       64   6.09676131845958       6.067047
+10       32                NaN       6.130344
+
+20     2048   6.01887410914376
+20     1024   6.01887410508628
+20      512   6.01887408954101
+20      256   6.01868196883887       6.016042
+20      192   6.01907072190224       6.016070
+20      128   6.01591380286879       6.014466
+20       96   5.96403673805385       6.014613
+
+With N = 256 (128M per double precision data on that grid) and 8 cores
+the peak memory usage appears to be close to 1.5G per core.
+
+For  a   solute  consisting   of  more  than   one  site   and,  thus,
+non-spherical, one  cannot even  expect full compatibility  between 1D
+and  3D results.  Here an  example for  a fake  uranyl modes  wtih U-O
+distance 1.8 A and zero charges.
+
+L, A   N      dG(1D), kcal       dG(3D), kcal
+----   ----   ----------------   ------------
+20     2048   11.3676590104498
+20     1024   11.3676589974131
+20      512   11.3676589497713
+20      256   11.3672341545330      10.005145
+20      192   11.3680175649519      10.004935
+20      128   11.3618981304794       9.997882
+20       96   11.2435574219683       9.997825
+20       64   11.9453058003730      10.230420
+
+For three sites of  uranyl the peak memory usage at N  = 256 raises to
+2.4G per each of 8 cores.
