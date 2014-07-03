@@ -1800,6 +1800,11 @@ or
 
    -48006.3334282 * 5 - 17639787.4033 = -17879819.0704410 kcal (BP)
 
+d(U-O) = 1.78 A
+   E(uranyl) = -28110.784571483880 * 627.509469 = -17639783.4996252 kcal
+   E(water) = -76.502964163658 * 627.509469 = -48006.3344192631
+   -48006.3344192631 * 5 -17639783.4996252 = -17879815.1717215155
+
 Thus the binding energy of five rigid QM waters in SPC geometry in the
 QM structure of [UO2(H2O)5]2+ is -310.8 kcal (PBE) or -270.8 kcal (BP)
 which is noticably more than the MM value of -217.0 kcal.
