@@ -1720,10 +1720,10 @@ with the higher accuracy were only slightly affected by ~0.1 kcal.
 
 MM stucture of [UO2(H2O)5]2+:
 
-Uranyl  Water      E(self), kcal
-------  ---------  ---------------
+Uranyl  Water      E(self), kcal   d(U-O), pm
+------  ---------  --------------  ----------
 RM12?   SH-SPC/E?  -217.030081986
-RM12    SH-SPC/E   -218.48749615
+RM12    SH-SPC/E   -218.487496150
 RM12    PR-SPC/E   -217.886387054
 GW96    PR-SPC/E   -211.278961223
 PM13    PR-SPC/E   -213.471989208
