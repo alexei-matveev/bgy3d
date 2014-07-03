@@ -1417,7 +1417,7 @@ in our TIP3P water is 0.4 \AA and it is 1.0 \AA in SPC/E model. By only
 exchanging the value of $\sigma$, we can see the changes to number
 integral.
 
-SPC/E water ($\sigma$ = 0.4 \AA):
+SPC/E water ($\sigma$ = 0.4 \AA) aka PR-SPC/E
 
                 r~max~   g(r~max~)   r~min~   g(r~min~)   ni(r~min~)
 -------------  -------  ----------  -------  ----------  -----------
