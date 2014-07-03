@@ -928,40 +928,40 @@
 ;;; See ./solutes.scm:
 ;;;
 (uranyl/spc
- (U    U     "Uranyl Ion, SPC"              238.029    3.3344     0.0268146863 2.50)
- (OU   OU    "Uranyl Ion, SPC"              15.999     2.8344     0.4290349811 -0.25))
+ (U   U "Uranyl Ion, SPC" 238.029 3.3344 0.0268146863 2.50)
+ (OU OU "Uranyl Ion, SPC" 15.999 2.8344 0.4290349811 -0.25))
 
 (uranyl/kl1
- (U    U     "Uranyl Ion, KL1"              238.029    2.85087589804909     0.12 3.25)
- (OU   OU    "Uranyl Ion, KL1"              15.999     3.11814551349119     0.2 -0.625))
+ (U   U "Uranyl Ion, KL1" 238.029 2.85087589804909 0.12 3.25)
+ (OU OU "Uranyl Ion, KL1" 15.999 3.11814551349119 0.2 -0.625))
 
 (uranyl/kl2
- (U    U     "Uranyl Ion, KL2"              238.029    2.81523994932347     0.3 3.50)
- (OU   OU    "Uranyl Ion, KL2"              15.999     3.11814551349119     0.2 -0.75))
+ (U   U "Uranyl Ion, KL2" 238.029 2.81523994932347 0.3 3.50)
+ (OU OU "Uranyl Ion, KL2" 15.999 3.11814551349119 0.2 -0.75))
 
 (uranyl/gw96
- (U    U     "Uranyl Ion, GW96"              238.029    2.81523994932347     0.4 2.50)
- (OU   OU    "Uranyl Ion, GW96"              15.999     3.11814551349119     0.2 -0.25))
+ (U   U "Uranyl Ion, GW96" 238.029 2.81523994932347 0.4 2.50)
+ (OU OU "Uranyl Ion, GW96" 15.999 3.11814551349119 0.2 -0.25))
 
 (uranyl/pm13
- (U    U     "Uranyl Ion, PM13"              238.029    2.95 0.126588325212573 2.5)
- (OU   OU    "Uranyl Ion, PM13"              15.999     3.83 0.0136142161077673 -0.25))
+ (U   U "Uranyl Ion, PM13" 238.029 2.95 0.126588325212573 2.5)
+ (OU OU "Uranyl Ion, PM13" 15.999 3.83 0.0136142161077673 -0.25))
 
 (uranyl/t3p
- (U    U     "Uranyl Ion, TIP3P"            238.029    3.3494     0.0273788349 2.50)
- (OU   OU    "Uranyl Ion, TIP3P"            15.999     2.8494     0.4380613581 -0.25))
+ (U  U  "Uranyl Ion, TIP3P" 238.029 3.3494 0.0273788349 2.50)
+ (OU OU "Uranyl Ion, TIP3P" 15.999 2.8494 0.4380613581 -0.25))
 
 (water/spc                              ; SH-SPC/E
- (HW   HW    "SPC/E Water H, finite vdw size"  1.008     1.0      0.0545  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+ (HW HW "SPC/E Water H, finite vdw size" 1.008 1.0 0.0545 0.4238)
+ (OW OW "SPC/E Water O" 15.999 3.1656 0.1553 -0.8476))
 
 (water/pr-spc                           ; PR-SPC/E
- (HW   HW    "PR-SPC/E Water H, finite vdw size"  1.008     0.4    0.046  0.4238)
- (OW   OW    "SPC/E Water O"                15.999     3.1656   0.1553 -0.8476))
+ (HW HW "PR-SPC/E Water H, finite vdw size" 1.008 0.4 0.046 0.4238)
+ (OW OW "SPC/E Water O" 15.999 3.1656 0.1553 -0.8476))
 
 (water/t3p                              ; modified TIP3P
- (HW   HW    "TIP3P Water H, finite vdw size" 1.008    0.4 0.046 0.417)
- (OW   OW    "TIP3P Water O"                15.999    3.15061     0.1521   -0.8340)) ; OPLSAA-53
+ (HW HW "TIP3P Water H, finite vdw size" 1.008 0.4 0.046 0.417)
+ (OW OW "TIP3P Water O" 15.999 3.15061 0.1521 -0.8340)) ; OPLSAA-53
 
 ;;;
 ;;; Atomic ions, see coments about "Monoatomic ions" in ./solutes.scm
