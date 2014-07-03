@@ -51,6 +51,47 @@ L, A   N      dG(1D), kcal       dG(3D), kcal
 With N = 256 (128M per double precision data on that grid) and 8 cores
 the peak memory usage appears to be close to 1.5G per core.
 
+Let us see if this is different for charged solutes. Using
+
+    snes-solver trial
+    solvent "water, cSPC/E"
+    solute "Li+, JC08, SPC/E"
+
+Here we had to occasionally use  a trial solver that does a few Picard
+iterations before switching to Newton iteration.
+
+L, A   N      dG(1D), kcal        dG(3D), kcal
+----   ----   -----------------   ------------
+160    4096   -111.674307785679
+80     4096   -111.673677664734
+40     4096   -111.673326280551
+20     4096   -111.671308690366
+10     4096   -111.656894568023
+10     2048   -111.656892129879
+10     1024   -111.656892704910
+10      512   -111.656894094943
+10      256   -111.656894730266
+10      192   -111.656893775374     -88.082545
+10      128   -111.657454704600     -88.080447
+10       96   -111.666224306524     -88.093925
+10       64   -111.829860995234     -88.134073
+
+20      192   -111.680639820654     -99.862352
+20      128   -111.844289290103     -99.902575
+20       96   -112.054372991775     -99.453082
+20       64   -112.266525895825    -100.649532
+
+40      192   -112.056415434127    -105.362253
+40      128   -112.268563449125    -106.562035
+40       96   -109.424422468509            NaN
+
+80      256   -112.268723830227    -109.519455
+80      192   -109.424868045961            NaN
+80      128   -113.115558673793            NaN
+
+There is obviousely something wrong  with the 3D version when it comes
+to charged solutes. The dependence on the range is overwhelming ...
+
 For  a   solute  consisting   of  more  than   one  site   and,  thus,
 non-spherical, one  cannot even  expect full compatibility  between 1D
 and  3D results.  Here an  example for  a fake  uranyl modes  wtih U-O
