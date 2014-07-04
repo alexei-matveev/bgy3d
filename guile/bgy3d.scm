@@ -606,7 +606,7 @@ computes the sum of all vector elements."
     (snes-solver
      (value #t)
      (predicate ,(lambda (x)
-                   (and (member x '("jager" " newton" "picard" "trial"))
+                   (and (member x '("jager" "newton" "picard" "trial"))
                         x))))
     (verbose            (single-char #\v)
                         (value #f)) ; use --verbosity num instead
