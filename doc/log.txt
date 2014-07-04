@@ -108,5 +108,17 @@ L, A   N      dG(1D), kcal       dG(3D), kcal
 20       96   11.2435574219683       9.997825
 20       64   11.9453058003730      10.230420
 
+40      192   11.2124984896263       9.976460
+40      128   11.9142288552579      10.208777
+40       96   12.0339865724795      10.438533
+
+80      256   11.9103439006384      10.205791
+80      192   12.0301060251191      10.435783
+80      128   10.0568684202806      10.649449
+80       96   7.49456030982229      12.535481
+
 For three sites of  uranyl the peak memory usage at N  = 256 raises to
-2.4G per each of 8 cores.
+2.4G for each of 8 cores.
+
+It does not  look that the 1D and  3D is ever going to  meet, but also
+there is no strong dependence on the range parameter.
