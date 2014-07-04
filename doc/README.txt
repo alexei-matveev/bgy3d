@@ -1670,6 +1670,12 @@ from the driver script.
 Bare uranyl
 ===========
 
+This section here employs a "weaker" force field for uranyl.  See also
+`test-qm/uranyl/sym/README.txt` for the  results using KL2 force field
+in combination with PR-SPC/E  water model. That combination appears to
+give  significantly longer  U-O bond  of 180  pm and  larger solvation
+energy of 379 kcal.
+
 QM uranyl optimized structure:
 
    r(UO) = 1.7179 A (PBE) or 1.7202 A (BP)
@@ -1705,7 +1711,6 @@ options used here were
 --solvent "water, SPC/E" --rho 0.0333295 --beta 1.6889 --L 160 --N 4096
 --solute "uranyl, SPC" --norm-tol 1e-14 --dielectric 78.4
 ~~~
-
 
 Uranyl with 5 explicit water molecules
 ======================================
