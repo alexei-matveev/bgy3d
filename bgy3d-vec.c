@@ -601,9 +601,22 @@ bgy3d_moments (const State *BHD, Vec v, real q[1], real d[3], real Q[3][3])
   we effectively  translate the center of  the grid to  the corner and
   vice  versa.   FIXME:  again,  since the  complex  array  descriptor
   contians different dimensions  we have to pass the  real grid shape,
-  N[3], separately. Complex Vec v is intent(inout) here:
+  N[3], separately. Complex Vec v is intent(inout) here.
+
+  Historically, the (solute) molecule  was placed around the center of
+  the grid  cube and this  was probably the  reason for the  origin of
+  coordinate  system  to be  there.   This  information  is of  course
+  preserved by  an FFT so that we  can talk about FFT  images "at grid
+  center" too.
+
+  On  the  other  hand,  some   FFT  images,  notably  those  used  as
+  convolution  kernels, are constructed  explicitly using  the KFREQ()
+  macro as  below.  Such  images by costruction  assume the  origin of
+  coordinate  system at  the  grid  corner.  FIXME:  get  rid of  this
+  confusion, it strikes again and again.
 */
-void bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
+void
+bgy3d_vec_fft_trans (const DA dc, const int N[static 3], Vec v)
 {
   int x[3], n[3], i[3];
 
