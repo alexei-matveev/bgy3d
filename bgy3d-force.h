@@ -84,18 +84,14 @@ lennard_jones_repulsive (real r, real epsilon, real sigma)
 static inline real
 coulomb_short (real r, real q2, real G)
 {
-  if (r == 0.0)
+  /* Non-negative: */
+  const real f = erfc (G * r) / r;
+
+  /* Check for large values. Remember exp(-βu) will be computed: */
+  if (f > CUTOFF2)
     return EPSILON0INV * q2 * CUTOFF2;
   else
-    {
-      real re = EPSILON0INV * q2 * erfc (G * r) / r;
-
-      /* Check for large values remember: exp(-re) will be computed: */
-      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-        return EPSILON0INV * q2 * CUTOFF2;
-      else
-        return re;
-    }
+    return EPSILON0INV * q2 * f;
 }
 
 static inline real
@@ -104,18 +100,13 @@ coulomb_short_grad (real r, real rx, real q2, real G)
   if (rx == 0)
     return 0.0;
 
-  if (r == 0.0)
+  const real f = (erfc (G * r) + 2. * G / sqrt (M_PI) * r * exp(-G * G * r * r))
+    * rx / pow (r, 3.0);
+
+  if (f > CUTOFF2)
     return -EPSILON0INV * q2 * CUTOFF2;
   else
-    {
-      real re = - EPSILON0INV * q2 * (erfc (G * r) +
-                                      2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow (r, 3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-        return -EPSILON0INV * q2 * CUTOFF2;
-      else
-        return re;
-    }
+    return -EPSILON0INV * q2 * f;
 }
 
 #undef CUTOFF
