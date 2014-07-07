@@ -137,7 +137,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-vec.h"          /* vec_create() */
-#include "bgy3d-solutes.h"      /* struct Site */
+#include "bgy3d-solutes.h"     /* struct Site, bgy3d_solute_field() */
 #include "bgy3d-force.h"        /* bgy3d_pair_potential() */
 #include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
@@ -164,7 +164,8 @@
 
     c := exp (-βv + γ) - 1 - γ
 */
-static void compute_c_HNC (real beta, Vec v, Vec t, Vec c)
+static void
+compute_c_HNC (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
   {
@@ -177,7 +178,8 @@ static void compute_c_HNC (real beta, Vec v, Vec t, Vec c)
 
 /* For x <= 0 the same as  exp(x) - 1, but does not grow exponentially
    for positive x:  */
-static real lexpm1 (real x)
+static real
+lexpm1 (real x)
 {
   if (x <= 0.0)
     return expm1 (x);
@@ -187,7 +189,8 @@ static real lexpm1 (real x)
 
 
 /* 2) Kovalenko-Hirata (KH) closure. */
-static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
+static void
+compute_c_KH (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
   {
@@ -204,7 +207,8 @@ static void compute_c_KH (real beta, Vec v, Vec t, Vec c)
 
     c := exp (-βv) [1 + γ] - 1 - γ
 */
-static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
+static void
+compute_c_PY (real beta, Vec v, Vec t, Vec c)
 {
   real pure f (real v, real t)
   {
@@ -214,7 +218,8 @@ static void compute_c_PY (real beta, Vec v, Vec t, Vec c)
 }
 
 
-static void compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
+static void
+compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 {
   switch (closure)
     {
@@ -233,7 +238,8 @@ static void compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 }
 
 
-static int delta (int i, int j)
+static int
+delta (int i, int j)
 {
   return (i == j) ? 1 : 0;
 }
@@ -253,7 +259,8 @@ static int delta (int i, int j)
   the  result by h3  in addition,  you will  compute exactly  what the
   older version of the function did:
 */
-static void compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
+static void
+compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
 {
   complex pure f (complex c)
   {
@@ -410,7 +417,8 @@ typedef struct Ctx2
 } Ctx2;
 
 
-static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
+static void
+iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 {
   const int m = ctx->m;
 
@@ -515,7 +523,8 @@ static void iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   Naturally, with  an exact  arithmetics one does  not need  to handle
   short- and long-range correlations separately in this case.
 */
-static void compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
+static void
+compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
 {
   /*
     The h² term  contributes conditionally. Eventually, only depletion
@@ -552,11 +561,12 @@ static void compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
   The shape of arrays passed here may be arbitrary, though in practice
   it is either m x m or 1 x m:
 */
-static void chempot_density (real thresh, int n, int m,
-                             Vec h[n][m],  /* in */
-                             Vec cs[n][m], /* in */
-                             Vec cl[n][m], /* in, long range */
-                             Vec mu)       /* out */
+static void
+chempot_density (real thresh, int n, int m,
+                 Vec h[n][m],   /* in */
+                 Vec cs[n][m],  /* in */
+                 Vec cl[n][m],  /* in, long range */
+                 Vec mu)        /* out */
 {
   /* increment for all solvent sites */
   local Vec dmu = vec_duplicate (mu);
@@ -584,8 +594,9 @@ static void chempot_density (real thresh, int n, int m,
   functionals. The State  struct also holds a setting  for the closure
   --- that one is  ignored to allow computing any  kind of functional.
 */
-static real chempot (const State *HD, ClosureEnum closure, int n, int m,
-                     Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
+static real
+chempot (const State *HD, ClosureEnum closure, int n, int m,
+         Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -659,9 +670,10 @@ print_chempot (const State *HD, int n, int m,
   correlation  c served  as  a  primary variable.   In  that case  the
   indirect correlation t was a functional of that.
 */
-void hnc3d_solvent_solve (const ProblemData *PD,
-                          int m, const Site solvent[m],
-                          Vec g[m][m])
+void
+hnc3d_solvent_solve (const ProblemData *PD,
+                     int m, const Site solvent[m],
+                     Vec g[m][m])
 {
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -952,9 +964,10 @@ void hnc3d_solvent_solve (const ProblemData *PD,
   is "fast"  for neutral solutes. FIXME:  this is not  true anymore if
   the solute is charged.
 */
-static void compute_t1 (int m, real rho,
-                        Vec c_fft[m][m], Vec h_fft[m], /* in */
-                        Vec t_fft[m])                  /* out */
+static void
+compute_t1 (int m, real rho,
+            Vec c_fft[m][m], Vec h_fft[m], /* in */
+            Vec t_fft[m])                  /* out */
 {
   /*
     fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
@@ -1014,7 +1027,8 @@ typedef struct Ctx1
 } Ctx1;
 
 
-static void iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
+static void
+iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
   /* alias of the right shape: */
   const int m = ctx->m;
@@ -1174,16 +1188,23 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
   */
   ProblemData pd = rism_upscale (HD->PD);
 
+  /*
+    The struct  ProblemData encodes 3D  domain, the 1D solver  has its
+    own  conventions how  to derive  the radial  grid  parameters from
+    those of the 3D domain:
+   */
   const int nrad = rism_nrad (&pd);
   const real rmax = rism_rmax (&pd);
 
   real x_fft[m][m][nrad];
 
-  /* 1d-RISM calculation.  Dont  need neither indirect correlation nor
-     the result dictionary, only need χ(k): */
+  /*
+    1D-RISM calculation.   Dont need neither  indirect correlation nor
+    the result dictionary, only need χ(k):
+  */
   rism_solvent (&pd, m, solvent, NULL, x_fft, NULL);
 
-  /* The solute/solvent code expects χ - 1: */
+  /* The solute/solvent code expects χ - 1. Offset the diagonal: */
   for (int i = 0; i < m; i++)
     for (int k = 0; k < nrad; k++)
       x_fft[i][i][k] -= 1;
@@ -1203,9 +1224,9 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
   available  methods  solver.    The  logic  dispatcher.   See  actual
   solvent_kernel_*() functions above.
 */
-static void solvent_kernel (State *HD,
-                            int m, const Site solvent[m], /* in */
-                            Vec chi_fft[m][m])            /* out */
+static void
+solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
+                Vec chi_fft[m][m])                       /* out */
 {
   if (bgy3d_getopt_test ("solvent-1d"))
     solvent_kernel_rism1 (HD, m, solvent, chi_fft);
@@ -1236,16 +1257,17 @@ static void solvent_kernel (State *HD,
   alternative has been abandoned in favor of indirect correlation t as
   a primary variable.
 */
-void hnc3d_solute_solve (const ProblemData *PD,
-                         const int m, const Site solvent[m],
-                         const int n, const Site solute[n],
-                         void (*density)(int k, const real x[k][3], real rho[k]),
-                         Vec g[m],
-                         Context **medium,  /* out */
-                         Restart **restart) /* inout, so far unchanged  */
+void
+hnc3d_solute_solve (const ProblemData *PD,
+                    const int m, const Site solvent[m],
+                    const int n, const Site solute[n],
+                    void (*density)(int k, const real x[k][3], real rho[k]),
+                    Vec g[m],
+                    Context **medium,  /* out */
+                    Restart **restart) /* inout, so far unchanged  */
 {
-  /* default not applying boundary condition in hnc code */
-  PetscBool cage = false;
+  /* Default is to not apply boundary condition in HNC code: */
+  const PetscBool cage = false;
 
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
@@ -1270,7 +1292,9 @@ void hnc3d_solute_solve (const ProblemData *PD,
     Get   solute-solvent  interaction.    Fill  v_short[i]   with  the
     short-range potential  acting on solvent site  "i". The long-range
     part, Vec uc_fft,  is represented on the k-grid  and is assumed to
-    differ only by factors proportional to the solvent site charges.
+    differ  only   by  factors   proportional  to  the   solvent  site
+    charges. Neither  one is spherically  symmetric for a solute  of a
+    general shape --- do not confuse with 1D formalizm.
 
     Note that  asymptotic Coulomb field of the  *neutral* solute would
     be formally of  the short-range.  In practice it  appears that the
@@ -1329,15 +1353,21 @@ void hnc3d_solute_solve (const ProblemData *PD,
     local Vec t_fft[m];
     vec_create1 (HD->dc, m, t_fft); /* complex */
 
-    /* This should be the only pair quantity, χ - 1: */
+    /*
+      This should be  the only pair quantity, χ -  1. FIXME: note that
+      this is  a property  of the  pure solvent and  is (in  theory) a
+      spherically  symmetric  quantity.   Spherical symmetry  is  only
+      approximate  if  χ  was  prepared   by  the  3D  code  for  pure
+      solvent. We are wasting here quite some memory!
+    */
     local Vec chi_fft[m][m];
     vec_create2 (HD->dc, m, chi_fft);        /* complex */
 
     /*
       Get the solvent-solvent  susceptibility (offset by one).  FIXME:
-      we get the solvent description as an argument, but read the file
-      to  get the rest.   There is  no guarantee  the two  sources are
-      consistent.
+      we get the solvent description  as an argument, but may read the
+      file  to get  susceptibility.   There is  no  guarantee the  two
+      sources are consistent.
     */
     solvent_kernel (HD, m, solvent, chi_fft);
 
