@@ -8,6 +8,7 @@
 /* Was ealrier  #defined in bgy3d.h.  Used only  here, #undef'ed below
    after last use: */
 #define CUTOFF 1.0e+8
+#define CUTOFF2 (CUTOFF * 1.0e-5)
 
 
 /* Computes a pair potential. See also bgy3d_force(). */
@@ -84,14 +85,14 @@ static inline real
 coulomb_short (real r, real q2, real G)
 {
   if (r == 0.0)
-    return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+    return EPSILON0INV * q2 * CUTOFF2;
   else
     {
       real re = EPSILON0INV * q2 * erfc (G * r) / r;
 
       /* Check for large values remember: exp(-re) will be computed: */
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+        return EPSILON0INV * q2 * CUTOFF2;
       else
         return re;
     }
@@ -104,14 +105,14 @@ coulomb_short_grad (real r, real rx, real q2, real G)
     return 0.0;
 
   if (r == 0.0)
-    return -EPSILON0INV * q2 * (CUTOFF*1.0e-5);
+    return -EPSILON0INV * q2 * CUTOFF2;
   else
     {
       real re = - EPSILON0INV * q2 * (erfc (G * r) +
                                       2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow (r, 3.0);
 
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+        return -EPSILON0INV * q2 * CUTOFF2;
       else
         return re;
     }
@@ -166,8 +167,8 @@ coulomb_long (real r, real q2, real G)
        real re = EPSILON0INV * q2 * erf (G * r) / r;
 
        /* Check for large values, remember: exp(-re) will be computed */
-       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+       if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+         return EPSILON0INV * q2 * CUTOFF2;
        else
          return re;
      }
@@ -183,8 +184,8 @@ coulomb_long_grad (real r, real rx, real q2, real G)
       real re = - EPSILON0INV * q2 * (erf (G * r)
                                       - 2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow(r,3.0);
 
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+        return -EPSILON0INV * q2 * CUTOFF2;
       else
         return re;
     }
@@ -194,13 +195,13 @@ static inline real deprecated
 coulomb (real r, real q2)
 {
    if (r == 0.0)
-     return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+     return EPSILON0INV * q2 * CUTOFF2;
    else
      {
        real re = EPSILON0INV * q2 /r;
 
-       if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-         return EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+       if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+         return EPSILON0INV * q2 * CUTOFF2;
        else
          return re;
      }
@@ -213,19 +214,20 @@ coulomb_grad (real r, real rx, real q2)
     return 0;
 
   if (r == 0)
-    return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+    return -EPSILON0INV * q2 * CUTOFF2;
   else
     {
       real re = - EPSILON0INV * q2 * rx / pow (r, 3.0);
 
-      if (fabs (re) > fabs (EPSILON0INV * q2 * (CUTOFF * 1.0e-5)))
-        return -EPSILON0INV * q2 * (CUTOFF * 1.0e-5);
+      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
+        return -EPSILON0INV * q2 * CUTOFF2;
       else
         return re;
     }
 }
 
 #undef CUTOFF
+#undef CUTOFF2
 
 
 /*
