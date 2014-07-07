@@ -43,10 +43,10 @@
 
   Vector "v" is the intent(out) argument.
  */
-static void field (const State *BHD,
-                   Site A, int n, const Site S[n],
-                   real (*f)(const Site *A, int n, const Site S[n]),
-                   Vec v)
+static void
+field (const State *BHD, Site A, int n, const Site S[n],
+       real (*f)(const Site *A, int n, const Site S[n]),
+       Vec v)
 {
   /*
     Compute the field  f at (x, y,  z) <-> (i, j, k)  e.g.  by summing
@@ -64,9 +64,10 @@ static void field (const State *BHD,
 
 
 /* Callback here is a function passed from QM code: */
-static void grid_map (DA da, const ProblemData *PD,
-                      void (*f)(int m, const real x[m][3], real fx[m]),
-                      Vec v)
+static void
+grid_map (DA da, const ProblemData *PD,
+          void (*f)(int m, const real x[m][3], real fx[m]),
+          Vec v)
 {
   int i0, j0, k0;
   int ni, nj, nk;
@@ -139,7 +140,8 @@ static void grid_map (DA da, const ProblemData *PD,
   solute and return a real number such as an interaction energy or the
   charge density:
 */
-static real ljc (const Site *A, int n, const Site S[n])
+static real
+ljc (const Site *A, int n, const Site S[n])
 {
   const real G = G_COULOMB_INVERSE_RANGE;
 
@@ -224,8 +226,8 @@ cores (const State *BHD,
 */
 static void
 deltas_fft (const State *BHD,
-            int m, const real q[m], /* const */ real r[m][3],
-            Vec rho_fft)            /* out, complex, corner */
+            int m, const real q[m], real r[m][3], /* in */
+            Vec rho_fft)        /* out, complex, corner */
 {
   complex f3 (const real k[3])
   {
@@ -283,6 +285,11 @@ cores_fft (const State *BHD,
   }
   vec_fft_map2 (rho_fft, mul, f_fft, rho_fft); /* aliasing! */
 
+  /*
+    FIXME: note how we constructed a temporary Vec f_fft just to scale
+    rho_fft  by  a  known  function  of  k ---  the  Vec  rho_fft  has
+    realtively simple closed form.
+  */
   vec_destroy (&f_fft);
 }
 
@@ -290,36 +297,38 @@ cores_fft (const State *BHD,
 /*
   Create initial solute field.
 
-  See Eqs.  (5.106)  and (5.08) in the thesis.   Fill us[0] and us[1],
-  for H and O in that order with short-range,
+  See Eqs.  (5.106)  and (5.08) in the Jager  thesis.  Fill us[i] with
+  short-range potential acting on site i,
 
-    us = v   + v
-          LJ    CS
+    u  = v   + v
+     S    LJ    CS
 
   and uc_fft with k-space representation of long range (or rather
   asymptotic) electrostatic potential
 
-    v  = IFFT(uc_fft)
+            -1
+    v  = FFT  (uc_fft)
      CL
 
   not scaled by the charges of the solvent sites.
 
-  Returns both, the asymptotic  electrostatic potential Vec uc and the
-  corresponding (diffuse  part of the)  charge density Vec  uc_rho. If
-  both, uc  and uc_rho, are NULL  the asymptotic Coulomb  field is not
-  computed. FIXME: Otherwise both must be non-NULL.
+  Returns both, the asymptotic  electrostatic potential Vec uc_fft and
+  the corresponding  (diffuse part of the) charge  density Vec uc_rho.
+  If both, uc_fft and uc_rho, are NULL the asymptotic Coulomb field is
+  not computed. FIXME: Otherwise both must be non-NULL.
 
   The  function pointer density()  passed to  bgy3d_solute_field(), if
   not NULL,  is used to  compute the density of  (negatively charged!)
   electrons at arbitrary point in space.
 */
-void bgy3d_solute_field (const State *BHD,
-                         int m, const Site solvent[m], /* in */
-                         int n, const Site solute[n],  /* in */
-                         Vec us[m],                    /* out */
-                         Vec uc_fft,           /* out, complex */
-                         Vec uc_rho,           /* out, optional */
-                         void (*density)(int k, const real x[k][3], real rho[k]))
+void
+bgy3d_solute_field (const State *BHD,
+                    int m, const Site solvent[m], /* in */
+                    int n, const Site solute[n],  /* in */
+                    Vec us[m],                    /* out */
+                    Vec uc_fft,                   /* out, complex */
+                    Vec uc_rho,                   /* out, optional */
+                    void (*density)(int k, const real x[k][3], real rho[k]))
 {
   const real G = G_COULOMB_INVERSE_RANGE;
 
@@ -342,12 +351,11 @@ void bgy3d_solute_field (const State *BHD,
   */
 
   /*
-   * Fill the force field interaction of H and O (or other) sites with
-   * the solute into the respective arrays.
-   *
-   * We  supply ljc()  as  a  callback function  that  is supposed  to
-   * compute the  interaction of  a charged LJ  solvent site  with the
-   * solute.
+    Fill the force field interaction  of solvent sites with the solute
+    of general shape into the respective arrays.
+
+    We supply ljc() as a callback function that is supposed to compute
+    the interaction of a charged LJ solvent site with the solute.
    */
 #ifndef QM
   const real scale_coul_short = 1.0; /* regular case */
@@ -432,14 +440,14 @@ void bgy3d_solute_field (const State *BHD,
     bgy3d_vec_read_gpaw().
   */
   {
-    char filename[260];           /* electron density file */
+    char filename[260];         /* electron density file */
 
     if (bgy3d_getopt_string ("load-charge", sizeof filename, filename))
       bgy3d_vec_read (filename, uc_rho);
   }
 
 
-  if (1)                        /* debug prints only */
+  if (true)                     /* debug prints only */
     {
       PetscScalar sum;
       real dV = volume_element (BHD->PD);
