@@ -118,6 +118,8 @@ coulomb_short_grad (real r, real rx, real q2, real G)
     }
 }
 
+#undef CUTOFF
+#undef CUTOFF2
 
 /*
   In the most general case
@@ -150,84 +152,6 @@ coulomb_long_fourier (real k, real q2, real G)
   else
     return (4 * M_PI * EPSILON0INV) * q2 * exp (-k2 / (4 * SQR (G))) / k2;
 }
-
-
-/*
-  FIXME: Functions marked as deprecated are actually unused. They also
-  should not be used as  long-range interactions are best specified on
-  the k-grid and not on the r-grid.
-*/
-static inline real deprecated
-coulomb_long (real r, real q2, real G)
-{
-   if (r == 0.0)
-     return EPSILON0INV * q2 * G * 2.0 / sqrt(M_PI);
-   else
-     {
-       real re = EPSILON0INV * q2 * erf (G * r) / r;
-
-       /* Check for large values, remember: exp(-re) will be computed */
-       if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-         return EPSILON0INV * q2 * CUTOFF2;
-       else
-         return re;
-     }
-}
-
-static inline real deprecated
-coulomb_long_grad (real r, real rx, real q2, real G)
-{
-  if (r == 0.0)
-    return 0.0;
-  else
-    {
-      real re = - EPSILON0INV * q2 * (erf (G * r)
-                                      - 2. * G / sqrt (M_PI) * r * exp(-G * G * r * r)) * rx / pow(r,3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-        return -EPSILON0INV * q2 * CUTOFF2;
-      else
-        return re;
-    }
-}
-
-static inline real deprecated
-coulomb (real r, real q2)
-{
-   if (r == 0.0)
-     return EPSILON0INV * q2 * CUTOFF2;
-   else
-     {
-       real re = EPSILON0INV * q2 /r;
-
-       if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-         return EPSILON0INV * q2 * CUTOFF2;
-       else
-         return re;
-     }
-}
-
-static inline real deprecated
-coulomb_grad (real r, real rx, real q2)
-{
-  if (rx == 0)
-    return 0;
-
-  if (r == 0)
-    return -EPSILON0INV * q2 * CUTOFF2;
-  else
-    {
-      real re = - EPSILON0INV * q2 * rx / pow (r, 3.0);
-
-      if (fabs (re) > fabs (EPSILON0INV * q2 * CUTOFF2))
-        return -EPSILON0INV * q2 * CUTOFF2;
-      else
-        return re;
-    }
-}
-
-#undef CUTOFF
-#undef CUTOFF2
 
 
 /*
