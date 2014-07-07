@@ -177,16 +177,20 @@ ljc (const Site *A, int n, const Site S[n])
   Each gaussian is evaluated as:
 
     ρ(r) = q * [G / √π]³ * exp[-G² * (r - x₀)²]
+
+  NOTE: one  might want to make  the gaussian width a  property of the
+  (solute) site, but consider  the implications first.  At some places
+  we assume that the  long-range Coulomb potential acting on (solvent)
+  sites differs only by a factor  (charge of the solvent site) to save
+  space. This  would not  be the case  if solvent sites  had different
+  widths.  One  might  of   course  treat  solute  and  solvent  sites
+  differently, but why?
 */
 static void
 cores (const State *BHD,
-       int n, const real q[n], /* const */ real r[n][3], real G,
-       Vec rho)                /* out, real, center */
+       int n, const real q[n], real r[n][3], real G, /* in */
+       Vec rho)                 /* out, real, center */
 {
-  /*
-    FIXME: make the gaussian width  a property of the (solute) site in
-    the same way as the charge of the site.
-  */
   const real prefac = pow (G / sqrt (M_PI), 3.0);
 
   real f3 (const real x[3])
