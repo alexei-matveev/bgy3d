@@ -211,88 +211,89 @@ cores (const State *BHD,
 
 
 /*
-  Tabulate ρ(k) for ρ(r) being  a superposition of δ-like functions at
-  r[i]  with weights q[i].  Centered at  the corner.  Normalization is
-  such that
+  In  the   spherically  symmetric  single  center   case  the  smooth
+  assymptotic potential is chosen as
+
+    u(r) = (1/ε₀) erf (G r) / r
+
+  The corresponding Fourier transform is
+
+    u(k) = (4π/ε₀) exp (- k² / 4G²) / k²
+
+  Note that the long-range Coulomb is regular in real space:
+
+    erf(x) / x = 2 / √π - 2x² / 3√π + O(x⁴)
+
+  So that for a typical value of G = 1.2 the long range potential at r
+  = 0  is 331.84164 * 1.2 *  1.12837916709551 ~ 449 kcal  for two unit
+  charges.  By doing a finite  size FFT of the k-grid appriximation of
+  the  above  Fourier representation  you  will  likely get  something
+  different.
+
+  For many centers we effectively  "fuse" several logical steps in one
+  procedure:
+
+  1) Tabulate  ρ(k) for  a superposition of  δ-like functions  at x[i]
+  with weights  q[i].  Centered at the corner.   Normalization is such
+  that
 
     ρ(k=0) = Σ q[i]
               i
 
-  FIXME: if this ever  becomes performance critical consider using the
-  properties of the exponential and maybe constant grid spacing.
+  The phase factor accounts for the translation.  If this ever becomes
+  performance   critical  consider   using  the   properties   of  the
+  exponential and maybe constant grid spacing.
 
-     a + b    a    b
-    e      = e  * e
+  2) Obtain ρ(k) for a  superposition of gaussians by convolution with
+  a unit gaussian proportional to
+
+    exp(-k² / 4G²)
+
+  3) "Solve" a Poisson equation by scaling with (4π/ε₀)/k².
+
+  4) Translate the whole to the grid center by flipping the phase.
+
+  Do not confuse  with a single core version  in bgy3d-force.c! FIXME:
+  maybe unify both?
 */
 static void
-deltas_fft (const State *BHD,
-            int m, const real q[m], real r[m][3], /* in */
-            Vec rho_fft)        /* out, complex, corner */
+coulomb_long_fft (const State *BHD,
+                  int n, const real q[n], real x[n][3], real G, /* in */
+                  Vec uc_fft)   /* out, complex, center */
 {
   complex f3 (const real k[3])
   {
+    const real k2 = SQR (k[0]) + SQR (k[1]) + SQR (k[2]);
+
     complex sum = 0.0;
-    for (int p = 0; p < m; p++)
-      sum += q[p] * cexp (-I * (k[0] * r[p][0] + k[1] * r[p][1] + k[2] * r[p][2]));
-    return sum;
+
+    /* FIXME: Cannot divide  by zero here, but this  is the value that
+       defines the "average" potential in the cell: */
+    if (k2 == 0.0)
+      return sum;
+
+    /*
+      This form  factor is regular for  small k with a  limit equal to
+      the total  charge of  the system and  the higher order  given by
+      multipole expansion:
+    */
+    for (int i = 0; i < n; i++)
+      sum += q[i] * cexp (-I * (k[0] * x[i][0] +
+                                k[1] * x[i][1] +
+                                k[2] * x[i][2]));
+
+    return sum * (4 * M_PI * EPSILON0INV * exp (-k2 / (4 * SQR (G))) / k2);
   }
-  vec_kmap3 (BHD, f3, rho_fft);
-}
-
-
-/*
-  Return ρ(k) for ρ(r) being  a superposition of gaussian at r[i] with
-  weights q[i].  Centered at the corner.  Normalization is such that
-
-    ρ(k=0) = Σ q[i]
-              i
-
-  Each gaussian is evaluated as:
-
-    ρ(k) = q * exp[-k² / 4G²]
-
-  The phase factor accounts for the translation.
-*/
-static void
-cores_fft (const State *BHD,
-           int n, const real q[n], /* const */ real r[n][3], real G,
-           Vec rho_fft)            /* out, complex, corner */
-{
-  /* Compute the k-representation of the position density: */
-  deltas_fft (BHD, n, q, r, rho_fft);
-
-  /* K-representation of the (gaussian) core shape f(r) goes here: */
-  local Vec f_fft = vec_duplicate (rho_fft);
+  vec_kmap3 (BHD, f3, uc_fft);
 
   /*
-    This is  the k-representation of  a gaussian unit charge  of width
-    1/G:
-                    2    2
-      f(k) = exp (-k / 4G )
-
-    We will apply it as a convolution kernel to the point-density.
-   */
-  complex f (real k)
-  {
-    return exp (- SQR (k) / (4 * SQR (G)));
-  }
-  vec_kmap (BHD, f, f_fft);
-
-  /* Pointwise multiplication of complex numbers: */
-  complex pure mul (complex x, complex y)
-  {
-    return x * y;
-  }
-  vec_fft_map2 (rho_fft, mul, f_fft, rho_fft); /* aliasing! */
-
-  /*
-    FIXME: note how we constructed a temporary Vec f_fft just to scale
-    rho_fft  by  a  known  function  of  k ---  the  Vec  rho_fft  has
-    realtively simple closed form.
+    Translate  the Coulomb long  field uc_fft  so that  the real-space
+    representation  is localized at  the grid  center like  other grid
+    representations  and not  at  the grid  corner.   This amounts  to
+    scaling the k-components by a phase factor:
   */
-  vec_destroy (&f_fft);
+  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, uc_fft);
 }
-
 
 /*
   Create initial solute field.
