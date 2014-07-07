@@ -82,8 +82,8 @@
    survive with more thatn 3-4 digits: */
 #ifndef POISSON_AS_INVERSE_LAPLACE
 /*
-  Solve  Poisson  Equation  in  Fourier space  and pass the FFT
-  electrostatic potential to its caller, one could get the real-space
+  Solve  Poisson   Equation  in  Fourier   space  and  pass   the  FFT
+  electrostatic potential to its  caller, one could get the real-space
   representation by simply call inverse FFT operation once
 
   Vec uc_fft is intent(out).
