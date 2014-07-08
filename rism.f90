@@ -1449,7 +1449,6 @@ contains
           ! necessary to get the kcal/A³ units right:
           qhq = 0.0
           x = 0.0
-          xx = 0.0
           do i = 1, size (solute)
              do j = 1, size (solvent)
                 do p = 1, nrad
