@@ -184,8 +184,6 @@ cores (const State *BHD,
        int n, const real q[n], real r[n][3], real G, /* in */
        Vec rho)                 /* out, real, center */
 {
-  const real prefac = pow (G / sqrt (M_PI), 3.0);
-
   real f3 (const real x[3])
   {
     /* Sum Gaussian contributions from all (solute) sites: */
@@ -199,9 +197,9 @@ cores (const State *BHD,
 
         /* Gaussian  distribution, note  that G  is not  a  width, but
            rather an inverse of it: */
-        sum += q[i] * exp(- G * G * r2);
+        sum += q[i] * exp(- SQR (G) * r2);
       }
-    return prefac * sum;
+    return pow (G / sqrt (M_PI), 3.0) * sum;
   }
   vec_rmap3 (BHD, f3, rho);
 }
@@ -279,6 +277,11 @@ coulomb_long_fft (const State *BHD,
                                 k[1] * x[i][1] +
                                 k[2] * x[i][2]));
 
+    /*
+      FIXME:  dont  repeat yourself,  we  have  the  formula coded  in
+      bgy3d-force.h as an inline function,  but that one is a function
+      of k not k²:
+    */
     return sum * (4 * M_PI * EPSILON0INV * exp (-k2 / (4 * SQR (G))) / k2);
   }
   vec_kmap3 (BHD, f3, uc_fft);
