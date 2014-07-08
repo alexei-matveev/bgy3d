@@ -237,12 +237,17 @@ static void dipole (int n, const Site sites[n], real d[3], real *d_norm)
   bgy3d-solvent.c  that  is also  pure  electrostatics. Returns  both,
   electrostatic potential  with a  boundary correction and  the actual
   solvent charge density.
+
+  FIXME: an inverse FFT of the ρ(k)/k² on a typical grid is not likely
+  to give very  accurate results for net charged  medium with non-zero
+  ρ(k=0). This is what we effectively do here.
 */
-static void bgy3d_solvent_field (const State *BHD, /* intent(in) */
-                                 int m, const Site solvent[m],
-                                 Vec g[m],        /* intent(in) */
-                                 Vec ve, Vec rho, /* intent(out) */
-                                 const PetscBool cage)
+static void
+bgy3d_solvent_field (const State *BHD, /* intent(in) */
+                     int m, const Site solvent[m],
+                     Vec g[m],        /* intent(in) */
+                     Vec ve, Vec rho, /* intent(out) */
+                     const PetscBool cage)
 {
   /* FIXME: this  code assumes  the same density  rho for  all solvent
      particles. */
