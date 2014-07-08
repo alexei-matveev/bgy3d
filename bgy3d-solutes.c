@@ -295,6 +295,43 @@ coulomb_long_fft (const State *BHD,
   bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, uc_fft);
 }
 
+
+/* Regularized erf (x) / x */
+static inline real
+erfx (real x)
+{
+  if (unlikely (x == 0.0))
+    return 2 / sqrt (M_PI);
+  else
+    return erf (x) / x;
+}
+
+
+static void
+coulomb_long (const State *BHD,
+              int n, const real q[n], real x[n][3], real G, /* in */
+              Vec uc)           /* out, real, center */
+{
+  real f3 (const real y[3])
+  {
+    /* Sum contributions from all (solute) sites: */
+    real sum = 0.0;
+    for (int i = 0; i < n; i++)
+      {
+        /* Distance from a grid point to this site: */
+        real r = sqrt (SQR (y[0] - x[i][0]) +
+                       SQR (y[1] - x[i][1]) +
+                       SQR (y[2] - x[i][2]));
+
+        /* erfx(x) == erf(x)/x */
+        sum += q[i] * G * erfx (G * r);
+      }
+    return EPSILON0INV * sum;
+  }
+  vec_rmap3 (BHD, f3, uc);
+}
+
+
 /*
   Create initial solute field.
 
