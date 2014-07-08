@@ -2056,11 +2056,11 @@ contains
   !
   !   erf(x) / x = 2 / √π - 2x² / 3√π + O(x⁴)
   !
-  ! So that for a typical value of a = 1.2 the long range potential at r
-  ! = 0  is 331.84164 * 1.2 *  1.12837916709551 ~ 449 kcal  for two unit
-  ! charges. By doing a finite-size FFT of the k-gitter appriximation of
-  ! the  above  Fourier representation  you  will  likely get  something
-  ! different.
+  ! So that for a typical value of a = 1.2 the long range potential at
+  ! r =  0 is 331.84164  * 1.2 *  1.12837916709551 ~ 449 kcal  for two
+  ! unit  charges.   By  doing  a   finite  size  FFT  of  the  k-grid
+  ! appriximation of the above  Fourier representation you will likely
+  ! get something different.
   !
   elemental function coulomb_long_fourier (k, alpha) result (f)
     use units, only: pi
