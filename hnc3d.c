@@ -941,12 +941,16 @@ hnc3d_solvent_solve (const ProblemData *PD,
 
 
 /*
-  In k-space compute either
+  In k-space compute the convolution star
+
+    y = A * x
+
+  which is currently applied to compute
 
     t   = (χ   - 1) * c
      vu     vv         vu
 
-  or
+  or, in earlier versions, also
 
     t   = ρ c   *  h
      vu      vv     vu
@@ -956,55 +960,47 @@ hnc3d_solvent_solve (const ProblemData *PD,
   the structure of the matrix-vector product of a (fixed) solvent pair
   quantitiy  and a  (variable) "vector"  of site  distributions around
   solute    impurity    to    give    another   "vector"    of    site
-  distributions. FIXME: the names of the local variables correspond to
-  Eq. (8)  for historical reasons ---  the variant of  Beglov and Roux
-  was  there first.   Also note  that the  order of  multiplication χc
-  assumes that χ is symmetric which is only the case if number density
-  of all solvent sites is the same.
+  distributions.
 
-  Here ρ  is a scalar overall  factor equal to solvent  density in one
-  case or just 1 in the other case (only if the convolution theorem is
-  factorless).  The caller may (and does) abuse this factor to further
-  scale the result.
+  The names of  the local variables correspond neither  to Eq. (7) nor
+  to Eq.  (8).  Since the convention is chosen so that the convolution
+  theorem is factorless there will be no overall factor.
 
-  Note that the solvent-solvent  site-site correlation c is eventually
-  long-range.  In Fourier rep that would  mean c(k) is singular at k =
-  0. Here  there are no  special precautions to treat  the assymptotic
-  interactions of the (so far neutral) solute species with the charged
-  solvent sites. Note that in 3d solute/solvent case we do not operate
-  with  site-site   distributions/potentials,  but  rather   with  the
-  "solvent site"-"compound solute" quantities. If the physics works as
-  expected the assymptotic decay  of such potentials and distributions
-  is "fast"  for neutral solutes. FIXME:  this is not  true anymore if
-  the solute is charged.
+  FIXME: (comments  outdated) Note that  the solvent-solvent site-site
+  correlation c  is eventually long-range.  In Fourier  rep that would
+  mean  c(k)  is  singular at  k  =  0.   Here  there are  no  special
+  precautions  to treat the  assymptotic interactions  of the  (so far
+  neutral) solute  species with the charged solvent  sites.  Note that
+  in  3d  solute/solvent  case   we  do  not  operate  with  site-site
+  distributions/potentials,    but    rather    with   the    "solvent
+  site"-"compound solute" quantities. If the physics works as expected
+  the assymptotic decay of such potentials and distributions is "fast"
+  for neutral solutes.  FIXME: this  is not true anymore if the solute
+  is charged.
 */
 static void
-compute_t1 (int m, real rho,
-            Vec c_fft[m][m], Vec h_fft[m], /* in */
-            Vec t_fft[m])                  /* out */
+star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
 {
   /*
-    fft(c)  *  fft(h).   Here   c  is  the  constant  (radial)  direct
-    correlation  c2  of  the  pure solvent.   The  "convolution  star"
-    corresponds to a matrix multiplication in the k-space.
+    FMA stays for "fused multiply-add".  This is an elementary step of
+    the matrix multiplication is
+
+      y  += A  * x
+       i     ij   j
   */
-  complex pure fma (complex ti, complex cij, complex hj)
+  complex pure fma (complex y, complex a, complex x)
   {
-    /* FMA stays for "fused multiply-add" */
-    return ti + cij * hj;
+    return y + a * x;
   }
 
   /* For each solvent site ... */
   for (int i = 0; i < m; i++)
     {
       /* ... sum over solvent sites: */
-      VecSet (t_fft[i], 0.0);
+      VecSet (y_fft[i], 0.0);
       for (int j = 0; j < m; j++)
-        vec_fft_map3 (t_fft[i], /* argument aliasing! */
-                      fma,
-                      t_fft[i], c_fft[i][j], h_fft[j]);
-
-      VecScale (t_fft[i], rho);
+        vec_fft_map3 (y_fft[i], /* argument aliasing! */
+                      fma, y_fft[i], a_fft[i][j], x_fft[j]);
     }
 }
 
@@ -1103,7 +1099,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
     result by L^3 in backward FFT, replace  1.0 / N3 as 1.0 ( 1.0 / N3
     = h^3 / L^3 )
   */
-  compute_t1 (m, 1.0, chi_fft, ctx->c_fft, ctx->t_fft);
+  star (m, chi_fft, ctx->c_fft, ctx->t_fft);
 
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
