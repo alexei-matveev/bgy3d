@@ -669,6 +669,12 @@ print_chempot (const State *HD, int n, int m,
   Historically  this  code supported  another  mode  where the  direct
   correlation  c served  as  a  primary variable.   In  that case  the
   indirect correlation t was a functional of that.
+
+  This 3D code operates  with essentially 1D quantities represented on
+  3D grids (modulo finite grid artifacts). It competes with the proper
+  1D variant in rism.f90. The 1D  code offers DRISM which this 3D code
+  does not support yet. See how  we generate initial guess with the 1D
+  code here.
 */
 void
 hnc3d_solvent_solve (const ProblemData *PD,
@@ -689,6 +695,7 @@ hnc3d_solvent_solve (const ProblemData *PD,
   */
   local Vec T = vec_pack_create2 (HD->da, m); /* long Vec */
 
+  /* Generate initial guess using much faster 1D code: */
   {
     /*
       Problem data for use in 1d-RISM code. If you do not upscale, the
@@ -811,12 +818,19 @@ hnc3d_solvent_solve (const ProblemData *PD,
     const real L3 = volume (PD);
 
     /*
-      FIXME: this is the only  place where one needs real-space rep of
+      NOTE: this is  the only place where one  needs real-space rep of
       the  long-range  Coulomb.   So   far  it  is  computed  by  FFT.
       Alternative is to tablulate it  on the real-space grid using the
       analytic expression. Surprisingly, for a couple of tests we made
-      (LJC,TIP3P)  the difference between  the two  approaches appears
+      (LJC, TIP3P)  the difference between the  two approaches appears
       small.
+
+      FIXME: For  the essentially 3D potentials  in the solute/solvent
+      code  we already  have  the option  to  get the  real space  rep
+      directly. Should we also do it here for consistency?
+
+      FIXME: also  all of v_long_fft[][]  differ only by  factors, see
+      how we deal with that to save space in solute/solvent code.
     */
     local Vec cl[m][m];        /* real-space long-range correlation */
     vec_create2 (HD->da, m, cl);
@@ -1278,15 +1292,14 @@ hnc3d_solute_solve (const ProblemData *PD,
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
 
-  /*
-    This will be a functional h(t) of primary variable:
-  */
-  Vec h[m];                     /* FIXME: not deallocated */
+  /* This will be  a functional h(t) of primary  variable.  FIXME: not
+     deallocated: */
+  Vec h[m];
   vec_create1 (HD->da, m, h);
 
+  /* Site-specific short-range field of the solute: */
   local Vec v_short[m];
-  vec_create1 (HD->da, m, v_short); /* short-range solute-solvent
-                                       interaction */
+  vec_create1 (HD->da, m, v_short);
 
   /*
     Get   solute-solvent  interaction.    Fill  v_short[i]   with  the
@@ -1299,9 +1312,13 @@ hnc3d_solute_solve (const ProblemData *PD,
     Note that  asymptotic Coulomb field of the  *neutral* solute would
     be formally of  the short-range.  In practice it  appears that the
     observables do not  change if we treat it as  either the short- or
-    the long range.
+    the long  range (as now).  Also  for such neutral  species it does
+    not matter much if we  obtain the real space representation of the
+    Coulomb, needed later for chemical potential, by an FFT of uc_fft.
 
-    Fourier transform of long-range Coulomb field goes here:
+    Fourier transform  of long-range Coulomb field of  the solute, and
+    the corresponging charge density  of smeared cores (used later for
+    observables) go here:
   */
   local Vec uc_fft = vec_create (HD->dc);
   local Vec uc_rho = vec_create (HD->da); /* used for observables */
