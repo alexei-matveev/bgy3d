@@ -1451,16 +1451,37 @@ hnc3d_solute_solve (const ProblemData *PD,
   /*
     Now get the real-space represenation of long-range part of Coulomb
     field, which  would be supplied to  chemical potential calculation
-    later.  The  real-space representation is not (and  should not be)
-    used during iterations.
+    later.   It is  also  used  to compute  the  observables, such  as
+    electrostatic interaction energy of  the solute and solvent charge
+    densities,  see   the  call   to  info()  below.   The  real-space
+    representation is not (and should not be) used during iterations.
+
+    When comparing the expectation values of electrostatic interaction
+    computed as <ρ(v)|U(u)> and <U(v)|ρ(u)> a much better agreement is
+    obtained if both potentials are  obtained in the same way from the
+    corresponding  charge  denisties, e.g.   by  solving the  Posisson
+    equation.
+
+    We do  not yet have a way  to properly treat the  Coulomb field of
+    the medium that carries a  net charge.  A combination of (inverse)
+    FFT and bgy3d_poisson() is not likely to give very accurate result
+    in this case due to the long range nature of the field.
    */
   local Vec uc = vec_create (HD->da);
-  MatMultTranspose (HD->fft_mat, uc_fft, uc);
+  if (true)
+    {
+      /* The field of  neutral species is actually of  short range, so
+         this worked for them: */
+      MatMultTranspose (HD->fft_mat, uc_fft, uc);
 
-  /* apply inverse volume factor after backforward FFT */
-  VecScale (uc, 1.0 / L3);
+      /* Apply inverse volume factor after inverse FFT */
+      VecScale (uc, 1.0 / L3);
+    }
+  else
+    bgy3d_solute_field (HD, m, solvent, n, solute, NULL, NULL, NULL,
+                        uc, density); /* the rest computed before */
 
-  /* Should not be needed: */
+  /* Should not be needed anymore: */
   vec_destroy (&uc_fft);
 
 
