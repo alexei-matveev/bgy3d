@@ -1259,7 +1259,9 @@ contains
     integer :: verb
 
     if (comm_rank () == 0) then
-       verb = verbosity
+       if (.not. getopt ("verbosity", verb)) then
+          verb = verbosity
+       endif
     else
        verb = 0
     endif
