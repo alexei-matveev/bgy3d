@@ -363,9 +363,10 @@ void
 bgy3d_solute_field (const State *BHD,
                     int m, const Site solvent[m], /* in */
                     int n, const Site solute[n],  /* in */
-                    Vec us[m],                    /* out */
-                    Vec uc_fft,                   /* out, complex */
+                    Vec us[m],                    /* out, optional */
+                    Vec uc_fft,                   /* out, optional */
                     Vec uc_rho,                   /* out, optional */
+                    Vec uc,                       /* out, optional */
                     void (*density)(int k, const real x[k][3], real rho[k]))
 {
   const real G = G_COULOMB_INVERSE_RANGE;
@@ -407,17 +408,14 @@ bgy3d_solute_field (const State *BHD,
     makes  a  point  charge  (Coulomb  short  +  Coulomb  long)  to  a
     distributed Gaussian (Coulomb long only).
   */
-  for (int i = 0; i < m; i++)
-    {
-      Site scaled = solvent[i];          /* dont modify the input */
-      scaled.charge *= scale_coul_short; /* modify a copy */
+  if (us)    /* Not quite sure if passing us = NULL is legal though */
+    for (int i = 0; i < m; i++)
+      {
+        Site scaled = solvent[i];          /* dont modify the input */
+        scaled.charge *= scale_coul_short; /* modify a copy */
 
-      field (BHD, scaled, n, solute, ljc, us[i]);
-    }
-
-  /* Early return if no Coulomb is requested: */
-  if (uc_fft == NULL && uc_rho == NULL)
-    return;
+        field (BHD, scaled, n, solute, ljc, us[i]);
+      }
 
   /*
     1.   Put  the  solute  charge density  (positive  cores,  negative
@@ -435,7 +433,15 @@ bgy3d_solute_field (const State *BHD,
     density will be 1.0, that is idependent of the solvent charge.
   */
 
-  /* a) Core density: */
+  /*
+    a)  Core density  is a  superposition  of Gaussians.   For such  a
+    density   the    corresponding   Coulomb   potential    is   known
+    analytically. So we  have a choice to either  treat Gaussian cores
+    as a most general smoothly  varying density and plug that into the
+    Poisson equation or use the analytic properties. Flip this flag to
+    choose:
+  */
+  const bool analytic_form = false;
   {
     real q[n];              /* solute charges */
     real x[n][3];           /* solute coordinates */
@@ -448,14 +454,42 @@ bgy3d_solute_field (const State *BHD,
           x[i][dim] = solute[i].x[dim];
       }
 
-    /* Compute the charge density of gaussian broadened cores: */
-    cores (BHD, n, q, x, G, uc_rho);
+    /*
+      Compute  the charge  density  of gaussian  broadened cores.   We
+      primarily need the potential, but charge density is also used to
+      compute some observables:
+    */
+    if (uc_rho)
+      cores (BHD, n, q, x, G, uc_rho);
+
+    /*
+      Real-space representation of  the long-range potential is needed
+      to compute the chemical potential.  One should not assume that a
+      Fourier transform  of uc_fft will  deliver something meaningfull
+      for charged species:
+    */
+    if (uc)
+      coulomb_long (BHD, n, q, x, G, uc);
+
+    if (uc_fft && analytic_form)
+      coulomb_long_fft (BHD, n, q, x, G, uc_fft);
+    /* else: obtain it from uc_rho, see below ... */
   }
+
+  /* In this case we alredy got both, density and FFT of the
+     potential: */
+  if (analytic_form)
+    {
+      /* FIXME: need to combine with the field of electrons */
+      assert (density == NULL);
+      return;
+    }
 
   /* b) Electron density.  Only if not NULL, add the charge density of
      electrons: */
   if (density)
     {
+      assert (uc_rho != NULL);
       local Vec rho_elec = vec_duplicate (uc_rho);
 
       /*
@@ -481,11 +515,14 @@ bgy3d_solute_field (const State *BHD,
     char filename[260];         /* electron density file */
 
     if (bgy3d_getopt_string ("load-charge", sizeof filename, filename))
-      bgy3d_vec_read (filename, uc_rho);
+      {
+        assert (uc_rho != NULL);
+        bgy3d_vec_read (filename, uc_rho);
+      }
   }
 
 
-  if (true)                     /* debug prints only */
+  if (uc_rho)                   /* debug prints only */
     {
       PetscScalar sum;
       real dV = volume_element (BHD->PD);
@@ -504,5 +541,9 @@ bgy3d_solute_field (const State *BHD,
 
     Note that we only get FFT coulomb potential from Poisson solver
    */
-  bgy3d_poisson (BHD, uc_fft, uc_rho, -4 * M_PI * EPSILON0INV);
+  if (uc_fft)
+    {
+      assert (uc_rho != NULL);
+      bgy3d_poisson (BHD, uc_fft, uc_rho, -4 * M_PI * EPSILON0INV);
+    }
 }

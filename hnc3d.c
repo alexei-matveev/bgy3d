@@ -1309,6 +1309,7 @@ hnc3d_solute_solve (const ProblemData *PD,
   bgy3d_solute_field (HD, m, solvent, n, solute,
                       v_short, uc_fft,    /* out */
                       uc_rho,   /* out, smeared cores */
+                      NULL,     /* dont need uc, yet */
                       density); /* in, electron density callback */
 
   /*

@@ -708,6 +708,7 @@ static void solute_solve (State *BHD,
       */
       bgy3d_solute_field (BHD, m, solvent, n, solute,
                           u0, uc_fft, uc_rho, /* out */
+                          NULL,               /* dont need uc */
                           density);       /* void (*density)(...) */
 
       /* get the real-space represenation of FFT coulomb_long */
