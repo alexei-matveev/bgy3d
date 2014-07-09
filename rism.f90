@@ -2496,7 +2496,7 @@ contains
   !
   function oz_uv_equation_c_t (c_uvk, w_uuk, x_vvk) result (t_uvk)
     !
-    ! Solute-solvent OZ: c -> t
+    ! Solute-solvent OZ: c -> t = w * c * x - c
     !
     implicit none
     real (rk), intent (in) :: c_uvk(:, :, :) ! (n, m, nrad)
