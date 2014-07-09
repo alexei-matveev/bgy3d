@@ -420,8 +420,8 @@ contains
     end block
 
     ! Done with it, print results. Here solute == solvent:
-    call post_process (method, rmax, beta, rho, sites, sites, vr, t, &
-         A=A, eps=eps, dict=dict, rbc=.false.)
+    call post_process (method, rmax, beta, rho, sites, sites, &
+         chi, vr, t, A=A, eps=eps, dict=dict, rbc=.false.)
 
     ! Chemical potential (SCF) ...
     block
@@ -570,8 +570,8 @@ contains
     call snes_default (t_uvx, iterate_t, jacobian_t)
 
     ! Done with it, print results:
-    call post_process (method, rmax, beta, rho, solvent, solute, v_uvr, t_uvx, &
-         A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
+    call post_process (method, rmax, beta, rho, solvent, solute, &
+         chi, v_uvr, t_uvx, A=1.0d0, eps=0.0d0, dict=dict, rbc=rbc)
 
     ! Chemical potential (SCF) ...
     block
@@ -1226,8 +1226,8 @@ contains
   end subroutine lj_repulsive
 
 
-  subroutine post_process (method, rmax, beta, rho, solvent, solute, v, t, &
-       A, eps, dict, rbc)
+  subroutine post_process (method, rmax, beta, rho, solvent, solute, &
+       chi, v, t, A, eps, dict, rbc)
     !
     ! Prints some results.
     !
@@ -1247,6 +1247,7 @@ contains
     real (rk), intent (in) :: rho
     type (site), intent (in) :: solvent(:) ! (m)
     type (site), intent (in) :: solute(:)  ! (n)
+    real (rk), intent (in) :: chi(:, :, :) ! (m, m, nrad), k-rep
     real (rk), intent (in) :: v(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: t(:, :, :)   ! (n, m, nrad)
     real (rk), intent (in) :: A            ! long-range scaling factor
@@ -1556,7 +1557,9 @@ contains
              col = col + n * m
              write (*, 100) "Momentum k", col + 1
              col = col + 1
-             write (*, 100) "Random staff", col + 1
+             write (*, 100) "Solvent susceptibility x(v, v)", col + 1, col + m * m
+             col = col + m * m
+             write (*, 100) "And more ...", col + 1
              do p = 1, nrad
                 write (*, *) r(p), &
                      (chg(i, p), i=1,n), &
@@ -1567,6 +1570,7 @@ contains
                      ((t(i, j, p), i=1,n), j=1,m), &
                      ((c(i, j, p), i=1,n), j=1,m), &
                      k(p), &
+                     ((chi(i, j, p), i=1,m), j=1,m), &
                      x(p), x0(p), x1(p), x2(p), xx(p)
              enddo
            end block
