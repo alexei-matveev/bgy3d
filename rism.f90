@@ -1312,7 +1312,6 @@ contains
        integer :: p, i, j
        real (rk) :: r(nrad), k(nrad), dr, dk
        real (rk) :: c(n, m, nrad)
-       real (rk) :: cl(n, m, nrad)
        real (rk) :: h(n, m, nrad)
        real (rk) :: g(n, m, nrad)
        real (rk) :: x(nrad), x0(nrad), x1(nrad), x2(nrad), xx(nrad) ! qhq in k-space
@@ -1336,10 +1335,6 @@ contains
        h = c + t
        g = 1 + h
 
-       ! Real-space rep of the  long-range correlation. Note the extra
-       ! scaling factor A:
-       cl = - (beta * A) * force_field_long (solute, solvent, r)
-
        if (verb > 0) then
           print *, "# rho =", rho, "beta =", beta, "n =", nrad
        endif
@@ -1351,7 +1346,13 @@ contains
           integer :: methods(3) = [HNC, KH, PY]
           character(len=3) :: names(size (methods)) = ["HNC", "KH ", "GF "]
           real (rk) :: mu(size (methods))
+          real (rk) :: cl(n, m, nrad)
           integer :: i
+
+          ! Real-space  rep of the  long-range correlation.   Note the
+          ! extra scaling factor  A (A = 1, usually).  Only needed for
+          ! chemical potential:
+          cl = - (beta * A) * force_field_long (solute, solvent, r)
 
           ! Initialize intent (out) argument:
           dict = nil
