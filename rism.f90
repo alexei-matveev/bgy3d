@@ -1319,6 +1319,8 @@ contains
        real (rk) :: xd(m, m, nrad)
        real (rk) :: expB(n, m, nrad)
        real (rk) :: ni(n, m, nrad) ! number integral
+       real (rk) :: chg(n, nrad) ! charge density around solute sites
+       real (rk) :: chn(n, nrad) ! charge integral for each solute site
 
        ! Dont like to pass redundant info, recompute grid from rmax:
        call mkgrid (rmax, r, dr, k, dk)
@@ -1518,20 +1520,57 @@ contains
           ni(i, j, :) = integral (g(i, j, :)) * (rho * dr**3)
        end forall
 
-       ! This prints a lot of data on tty!
-       if (verb > 1) then
-          print *, "# r(i) then g(i), ni(i), v(i), t(i), c(i), each for",  n, "x", m, "pairs"
-          do p = 1, nrad
-             write (*, *) r(p), &
-                  &     ((g(i, j, p), i=1,n), j=1,m), &
-                  &     ((ni(i, j, p), i=1,n), j=1,m), &
-                  &     ((v(i, j, p), i=1,n), j=1,m), &
-                  &     ((t(i, j, p), i=1,n), j=1,m), &
-                  &     ((c(i, j, p), i=1,n), j=1,m), &
-                  &      k(p), x(p), x0(p), x1(p), x2(p), xx(p)
+       ! Charge density and charge integral around solute sites:
+       do i = 1, n
+          chg(i, :) = 0.0
+          do j = 1, m
+             chg(i, :) = chg(i, :) + g(i, j, :) * solvent(j) % charge
           enddo
-       endif
-    end block
+          chn(i, :) = integral (chg(i, :)) * (rho * dr**3)
+       enddo
+
+
+       ! This prints a lot of data on tty in (gnuplot) column format!
+       if (verb > 1) then
+          block
+             integer :: col
+100          format ("# ", A32: 2X, I2: " - ", I2)
+             write (*, 100) "Column description and indices:"
+             col = 0
+             write (*, 100) "Distance r, A", col + 1
+             col = col + 1
+             write (*, 100) "Charge density z(u)", col + 1, col + n
+             col = col + n
+             write (*, 100) "Charge integral Z(u)", col + 1, col + n
+             col = col + n
+             write (*, 100) "RDF g(u, v)", col + 1, col + n * m
+             col = col + n * m
+             write (*, 100) "Number integrals N(u, v)", col + 1, col + n * m
+             col = col + n * m
+             write (*, 100) "Potential v(u, v)", col + 1, col + n * m
+             col = col + n * m
+             write (*, 100) "Indirect correlation t(u, v)", col + 1, col + n * m
+             col = col + n * m
+             write (*, 100) "Direct correlation c(u, v)", col + 1, col + n * m
+             col = col + n * m
+             write (*, 100) "Momentum k", col + 1
+             col = col + 1
+             write (*, 100) "Random staff", col + 1
+             do p = 1, nrad
+                write (*, *) r(p), &
+                     (chg(i, p), i=1,n), &
+                     (chn(i, p), i=1,n), &
+                     ((g(i, j, p), i=1,n), j=1,m), &
+                     ((ni(i, j, p), i=1,n), j=1,m), &
+                     ((v(i, j, p), i=1,n), j=1,m), &
+                     ((t(i, j, p), i=1,n), j=1,m), &
+                     ((c(i, j, p), i=1,n), j=1,m), &
+                     k(p), &
+                     x(p), x0(p), x1(p), x2(p), xx(p)
+             enddo
+           end block
+        endif
+      end block
 
     ! As  a part  of  post-processing, compute  the bridge  correction
     ! using TPT.
