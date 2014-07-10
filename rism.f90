@@ -634,7 +634,7 @@ contains
 
       !
       ! The  real-space representation  encodes  only the  short-range
-      ! part  of  the  direct   corrlation.  The  (fixed)  long  range
+      ! part  of  the  direct  corrlation.   The  (fixed)  long  range
       ! contribution is added here:
       !
       !   C := C  - βV
@@ -645,16 +645,16 @@ contains
       !
       ! OZ  equation,  involves   "convolutions",  take  care  of  the
       ! normalization here.   As a  functional of c  this is  a linear
-      ! relation  t =  C'(c).  FIXME:  Because of  this  linearity one
-      ! could have handled the long range term added to c above and to
+      ! relation t = T[c].  FIXME: Because of this linearity one could
+      ! have  handled the  long range  term added  to c  above  and to
       ! resulting t below differently:
       !
-      !   t := C'(c + x) + x = C'(c) + [C'(x) + x]
+      !   t := T[c + x] + x = T[c] + (T[x] + x)
       !
       ! with x  = -βv.   Here the second  term in the  square brackets
       ! derived  from  the  fixed  long-range assymptotics  of  direct
       ! correlation  is constant.   This  would be  just one  addition
-      ! after computing C'(c) instead of one before and one after.
+      ! after computing T[c] instead of one before and one after.
       !
       dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
 
