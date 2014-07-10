@@ -17,7 +17,10 @@ module units
   real (rk), parameter, public :: KCAL = 1
 
   ! ITC calorie here, see also bgy3d.h:
+  real (rk), parameter, public :: MOL = 6.02214129d23
   real (rk), parameter, public :: KJOULE = KCAL / 4.1868d0 ! only for output
+  real (rk), parameter, public :: METER = 1.0d10 * ANGSTROM
+  real (rk), parameter, public :: KPASCAL = KJOULE / METER**3
 
   !
   ! The interaction energy of two unit charges separated by 1 A is
