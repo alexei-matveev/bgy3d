@@ -1236,7 +1236,7 @@ contains
     use foreign, only: site, verbosity, comm_rank, &
          HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
-    use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM
+    use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
     use options, only: getopt
@@ -1373,6 +1373,56 @@ contains
           endif
        end block
 
+       ! Isothermal compressibility κ  is related to the dimensionless
+       ! structure factor by
+       !
+       !   κ = β S(0) / ρ
+       !
+       ! For our purposes, the  structure fuctorn is just another name
+       ! for the k-representaiton  of the solvent susceptibility.  The
+       ! expression above will have the dimension of A³/kcal in native
+       ! units.  It is customary  to measure compressibility in GPa^-1
+       ! or Bar^-1 though.   FIXME: what we call kcal  in this code is
+       ! in fact kcal/mol,  to get back to the  macroworld multiply by
+       ! the Avogardo number.
+       !
+       ! Also  note that we  will get  slightly different  numbers for
+       ! different  site  pairs.  This  is  most  probably a  numberic
+       ! problem.
+       !
+       ! For the idea about  the scale, the isothermal compressibility
+       ! of water is about 0.4599 GPa^-1, adiabatic compressibility is
+       ! ~0.4477 GPa^-1 [1]. You can  expect the values about 0.48 GPa
+       ! from  the KH closure  (3.32 -  3.36 A³/kcal)  or 0.65  - 0.66
+       ! GPa^-1 (4.54 - 4.57 A³/kcal) from the HNC closure.
+       !
+       ! [1] Water properties http://www1.lsbu.ac.uk/water/dataq.html
+       !
+       block
+          real (rk) :: s0(m, m) ! structure factor at k = 0
+          real (rk) :: k0(m, m), kmin, kmax
+          real (rk), parameter :: Bar = 100 * KPASCAL
+          real (rk), parameter :: GPa = 1000000 * KPASCAL
+
+          if (nrad > 0) then
+             ! The best we can offer so far for s(0) is s(dk/2):
+             s0 = chi(:, :, 1)
+
+             k0 = beta * s0 / rho
+             kmin = minval (k0)
+             kmax = maxval (k0)
+             write (*, *) "# Isothermal compressibility:", &
+                  kmin, "<= κ <=", kmax, "A³/kcal"
+             write (*, *) "# Isothermal compressibility:", &
+                  MOL * kmin / GPa**(-1), "<= κ <=", &
+                  MOL * kmax / GPa**(-1), "GPa^-1"
+             write (*, *) "# Isothermal compressibility:", &
+                  MOL * kmin / Bar**(-1), "<= κ <=", &
+                  MOL * kmax / Bar**(-1), "Bar^-1"
+          endif
+       end block
+
+       ! Dielectric properties:
        block
           integer :: i, j, p
           real (rk) :: qu(n), qv(m)
