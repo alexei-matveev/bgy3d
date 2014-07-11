@@ -157,10 +157,13 @@ key "Silva95,book:Grenthe92"
  Thus, both experimental and theoretical studies have been carried out to
  elucidate structural and energetic information of the uranyl(VI) cation,
  which is the most common stable oxidation state in aqueous solution 
-\color green
-[].
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Arnold09"
 
-\color inherit
+\end_inset
+
+.
  While researchers have to face the radiotoxicity of uranium in experimental
  studies, theoretical methods, including quantum mechanics (QM) and classical
  molecular mechanics (MM) simulations, provide alternative ways to study
