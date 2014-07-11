@@ -173,9 +173,12 @@ key "Arnold09"
 \begin_layout Standard
 Up to now, the most popular strategy in QM studies of solvated uranyl and
  its complexes is using the polarizable continuum model (PCM) 
-\color green
-[]
-\color inherit
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fuchs02"
+
+\end_inset
+
  to represent the water solvent.
  Although the PCM variant based on the conductor-like solvation model (COSMO)
  has been successfully applied in various studies of uranyl complexes 
