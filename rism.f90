@@ -1356,6 +1356,10 @@ contains
        endif
     end block
 
+    ! FIXME: this  body is becoming  huge. At this block  level define
+    ! only  those arrays  that are  going  to be  output to  "gnuplot"
+    ! section.   Intermediates and  other temporaries  should  go into
+    ! inner blocks.
     block
        integer :: p, i, j
        real (rk) :: r(nrad), k(nrad), dr, dk
