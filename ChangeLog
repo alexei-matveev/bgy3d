@@ -1,0 +1,7 @@
+2014-07-11  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* rism.f90 (rism_uv): Switched to optimized Ng scheme for
+	solute/solvent code by exploiting the linearity of T[c]. The
+	transformation is formally exact so that the numbers hardly
+	change. There was no need to adapt the testsuite.
+
