@@ -1462,14 +1462,16 @@ contains
              k0 = beta * s0 / rho
              kmin = minval (k0)
              kmax = maxval (k0)
-             write (*, *) "# Isothermal compressibility:", &
-                  kmin, "<= κ <=", kmax, "A³/kcal"
-             write (*, *) "# Isothermal compressibility:", &
-                  MOL * kmin / GPa**(-1), "<= κ <=", &
-                  MOL * kmax / GPa**(-1), "GPa^-1"
-             write (*, *) "# Isothermal compressibility:", &
-                  MOL * kmin / Bar**(-1), "<= κ <=", &
-                  MOL * kmax / Bar**(-1), "Bar^-1"
+             if (verb > 0) then
+                write (*, *) "# Isothermal compressibility:", &
+                     kmin, "<= κ <=", kmax, "A³/kcal"
+                write (*, *) "# Isothermal compressibility:", &
+                     MOL * kmin / GPa**(-1), "<= κ <=", &
+                     MOL * kmax / GPa**(-1), "GPa^-1"
+                write (*, *) "# Isothermal compressibility:", &
+                     MOL * kmin / Bar**(-1), "<= κ <=", &
+                     MOL * kmax / Bar**(-1), "Bar^-1"
+             endif
           endif
        end block
 
