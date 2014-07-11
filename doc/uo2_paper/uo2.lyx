@@ -164,6 +164,16 @@ key "Arnold09"
 \end_inset
 
 .
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  While researchers have to face the radiotoxicity of uranium in experimental
  studies, theoretical methods, including quantum mechanics (QM) and classical
  molecular mechanics (MM) simulations, provide alternative ways to study
@@ -176,6 +186,16 @@ Up to now, the most popular strategy in QM studies of solvated uranyl and
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Fuchs02"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
 
 \end_inset
 
@@ -298,15 +318,8 @@ key "Rai12,Pomogaev13,Kerisit13"
 
  force field parameterizations for uranyl and selecting a suitable water
  model, we first inspect water solvent structures around simple uranyl ion
- with 1D-RISM method 
-\color green
-#which are comparable with results obtained from MD simulatio
-\color inherit
-: 
-\color green
-no results in introduction#
-\color inherit
-.
+ with 1D-RISM method which are comparable with results obtained from MD
+ simulation.
  Then we extend our study with the same method to uranyl--water complexes,
  in which the first solvation shell around the uranyl cation is represented
  by explicit quantum mechanically treated water molecules.
@@ -849,9 +862,10 @@ Effective forces on the solute sites are calculated as linear response to
 \color inherit
 
 \begin_inset Formula 
-\begin{equation}
-\triangle G_{sol}=E[UO_{2}(H_{2}O)_{n}^{2+}]-E[UO_{2}^{2+}]-nE[H_{2}O]+\Delta\mu[UO_{2}(H_{2}O)_{n}^{2+}]-n\Delta\mu[H_{2}O],
-\end{equation}
+\begin{eqnarray}
+\Delta G_{\text{sol}} & = & E[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-E[\text{UO}_{2}^{2+}]-nE[\text{H}_{2}\text{O}],\nonumber \\
+ & + & \Delta\mu[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-n\Delta\mu[\text{H}_{2}\text{O}]
+\end{eqnarray}
 
 \end_inset
 
