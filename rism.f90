@@ -467,9 +467,12 @@ contains
       c = c - (beta * A) * vk
 
       !
-      ! OZ   equation,  involves  convolutions,   take  care   of  the
+      ! OZ   equation,   involves   convolutions,   dont   play   with
       ! normalization here --- this is one of a few places where it is
-      ! assumed that convolution theorem is factor-less:
+      ! assumed that convolution theorem is factor-less. Considered as
+      ! a functional of  c, this operation, t = T[c],  is not a linear
+      ! one.  It  does involve solving  a linear equation  system with
+      ! coefficients and the right hand side defined by c, though.
       !
       if (eps /= 0.0) then
          ! DRISM. This is going to break for  ρ = 0 as x(k) ~ 1/ρ², it
@@ -522,9 +525,14 @@ contains
     type (obj), intent (out) :: dict
     ! *** end of interface ***
 
+    ! If true, use  Ng scheme as is (in this case  s_uvk is not used).
+    ! Otherwise  exploit the  linearity of  t =  T[c]  functional (see
+    ! below):
+    logical, parameter :: ng = .false.
+
     ! Solute-solvent pair quantities:
     real (rk), dimension (size (solute), size (solvent), nrad) :: &
-         v_uvr, v_uvk, t_uvx, c_uvx, expB ! (n, m, nrad)
+         v_uvr, v_uvk, t_uvx, c_uvx, s_uvk, expB ! (n, m, nrad)
 
     ! Solute-solute pair quantities:
     real (rk), dimension (size (solute), size (solute), nrad) :: w_uuk ! (n, n, nrad)
@@ -560,6 +568,32 @@ contains
        expB = 1.0
     endif
 
+    !
+    ! The functional t = T[c] that relates c(k) and t(k) for any given
+    ! ω(k) and χ(k) which is implemented by
+    !
+    !   oz_uv_equation_c_t (c, w, x)
+    !
+    ! and  is  repeatedly  applied   during  iterations  is  a  linear
+    ! one. Here we precompute
+    !
+    !   s = -β (T[v] + v)
+    !
+    ! with v being the long-range Coulomb potential as an optimization
+    ! of the usual Ng scheme:
+    !
+    !   t = T[c - βv] - βv = T[c] + s
+    !
+    ! This isnt very performance critical, and is rather a test before
+    ! implementing a similar procedure  for the 3D version.  Note that
+    ! applying T[v] involves a convolution (product) of χ(k) ~ a + bk²
+    ! with  a long-range  distribution v  ~  1/k².  This  is not  very
+    ! problematic in the  current implementation where we deliberately
+    ! avoid dealing with k = 0. But it will be a problem in 3D code.
+    !
+    if (.not. ng) then
+       s_uvk = -beta * (oz_uv_equation_c_t (v_uvk, w_uuk, chi) + v_uvk)
+    endif
 
     ! Intitial guess:
     t_uvx = 0.0
@@ -640,21 +674,30 @@ contains
       !   C := C  - βV
       !         S     L
       !
-      c_uvx = c_uvx - beta * v_uvk
+      if (ng) then
+         c_uvx = c_uvx - beta * v_uvk
+      endif
 
       !
-      ! OZ  equation,  involves   "convolutions",  take  care  of  the
-      ! normalization here.   As a  functional of c  this is  a linear
-      ! relation t = T[c].  FIXME: Because of this linearity one could
-      ! have  handled the  long range  term added  to c  above  and to
-      ! resulting t below differently:
+      ! Next comes  the OZ equation which  involves convolutions where
+      ! we  assume the  convolution theorem  to be  factor-free.  Dont
+      ! play with normalization here.
       !
-      !   t := T[c + x] + x = T[c] + (T[x] + x)
+      ! As  a functional  of c  this is  a linear  relation t  = T[c].
+      ! Because of this linearity we  handle the long range term added
+      ! to c  above and to resulting  t below differently in  the ng =
+      ! false branch:
+      !
+      !   t = T[c + x] + x = T[c] + s
+      !
+      ! where
+      !
+      !   s = (T[x] + x)
       !
       ! with x  = -βv.   Here the second  term in the  square brackets
       ! derived  from  the  fixed  long-range assymptotics  of  direct
-      ! correlation  is constant.   This  would be  just one  addition
-      ! after computing T[c] instead of one before and one after.
+      ! correlation  is constant.   This  is just  one addition  after
+      ! computing T[c] instead of one before and one after.
       !
       dt = oz_uv_equation_c_t (c_uvx, w_uuk, chi)
 
@@ -669,7 +712,11 @@ contains
       !   T  := T - βV
       !    S          L
       !
-      dt = dt - beta * v_uvk
+      if (ng) then
+         dt = dt - beta * v_uvk
+      else
+         dt = dt + s_uvk
+      endif
 
       ! Inverse FT via DST:
       dt = fourier_rows (dt) * (dk**3 / FT_BW)
@@ -2389,14 +2436,14 @@ contains
   !
   !   h = c + ρ c * h
   !
-  ! to compute t =  h - c form c:
+  ! to compute t =  h - c from c:
   !
   !                -1                -1   2
   !   t =  (1 - ρc)   c - c = (1 - ρc)  ρc
   !
-  ! If you scale c by h3 beforehand  or pass rho' = rho * h3 and scale
-  ! the result  by h3 in addition,  you will compute  exactly what the
-  ! older version of the function did:
+  ! Note   that  differently   from   the  oz_uv_equation_c_t()   this
+  ! operation,  t =  T[c],  considered as  a  functional of  c is  not
+  ! linear.
   !
   function oz_vv_equation_c_t (rho, C, W) result (T)
     implicit none
