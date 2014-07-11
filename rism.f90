@@ -1425,7 +1425,7 @@ contains
        !
        !   κ = β S(0) / ρ
        !
-       ! For our purposes, the  structure fuctorn is just another name
+       ! For our  purposes, the structure factor is  just another name
        ! for the k-representaiton  of the solvent susceptibility.  The
        ! expression above will have the dimension of A³/kcal in native
        ! units.  It is customary  to measure compressibility in GPa^-1
@@ -1434,7 +1434,7 @@ contains
        ! the Avogardo number.
        !
        ! Also  note that we  will get  slightly different  numbers for
-       ! different  site  pairs.  This  is  most  probably a  numberic
+       ! different  site  pairs.   This  is most  probably  a  numeric
        ! problem.
        !
        ! For the idea about  the scale, the isothermal compressibility
