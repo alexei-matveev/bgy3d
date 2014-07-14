@@ -1639,7 +1639,7 @@ contains
        if (verb > 1) then
           block
              integer :: col
-100          format ("# ", A32: 2X, I2: " - ", I2)
+100          format ("# ", A40: 2X, I3: " - ", I3)
              write (*, 100) "Column description and indices:"
              col = 0
              write (*, 100) "Distance r, A", col + 1
