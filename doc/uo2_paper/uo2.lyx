@@ -752,9 +752,43 @@ We used the pair-wise potential
 \end_inset
 
  to account for short-range repulsion and dispersion interactions.
- The long-range asymptotic component of the total interaction was chosen
- in the form of a smooth potential 
-\begin_inset Formula $u_{\text{L;}i\alpha}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
+ 
+\change_inserted 359346927 1405314112
+To accurately treat the long-range behavior of Coulomb potential, Ewald
+ summation method 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405314189
+If these statements are acceptable, which citation do you prefer? Paper
+ or Allen and Tildesley's book
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+ was applied to seperate the potential expression into two components: 
+\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)+u_{\text{L;}i\alpha}^{\text{C}}(r)$
+\end_inset
+
+.
+ The short-range term was expressed in the complementary error function
+ 
+\begin_inset Formula $u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erfc}(ar)/r$
+\end_inset
+
+, which decays rapidly at longer distance in real space.
+ 
+\change_unchanged
+The long-range asymptotic component of the total interaction
+\change_inserted 359346927 1405313989
+, which was evaluated in its Fourier form,
+\change_unchanged
+ was chosen in the form of a smooth potential 
+\begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
 \end_inset
 
  with the range parameter 
