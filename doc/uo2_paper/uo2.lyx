@@ -1320,15 +1320,16 @@ name "sec:computational-details"
 \end_layout
 
 \begin_layout Standard
-For evaluation purpose, we chose the force field parameters for uranyl ion
- from the model of Guilbaud and Wipff (GW) 
+For evaluation purposes, we chose the force field parameters for uranyl
+ of the model of Guilbaud and Wipff (GW) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
 
 \end_inset
 
- and compare the results with those using models newly developed by Maginn
+ and compare the results to those of models newly developed by Maginn et
+ al.
  (RM12 and PM13) 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1344,19 +1345,19 @@ reference "tab:params-uranyl"
 \end_inset
 
 .
- Recently, Kerisit and Liu modified the parameters in GW model to strengthen
- the uranyl--water interaction and their newly derived models (KL1 and KL2)
- reported improved values for hydration free energy and water exchange rate
- 
+ Recently, Kerisit and Liu modified the parameters of the GW model to strengthen
+ the uranyl--water interaction.
+ For their newly derived models KL1 and KL2 they reported improved values
+ for the hydration free energy and the water exchange rate 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
 
 \end_inset
 
-.
- For water solvent, we introduced atomic charges and LJ potential parameters
- from SPC/E (extended simple point charge) model 
+of the uranyl aqua complex.
+ For the water solvent, we adopted atomic charges and LJ potential parameters
+ of the SPC/E (extended simple point charge) model 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
@@ -1364,9 +1365,12 @@ key "Berendsen87"
 \end_inset
 
 .
- Because the original SPC/E water model does not contain the repulsive potential
- for hydrogen atoms, finite-size LJ parameters for hydrogen atom in both
- water models are necessary in RISM calculations to avoid numerical singularity.
+ While the original SPC/E water model does not contain a repulsive potential
+ for hydrogen atoms, a LJ-type potential for hydrogen atoms 
+\color green
+#in both water models ???#
+\color inherit
+ are necessary in RISM calculations to avoid numerical singularities.
  Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1390,14 +1394,15 @@ key "Pettitt82"
 \begin_inset space ~
 \end_inset
 
-kcal/mol (PR-SPC/E) in their early study; Sato and Hirata 
+kcal/mol (PR-SPC/E) in their early study.
+ Sato and Hirata 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sato99"
 
 \end_inset
 
- adopted the parameter for hydrogen atom as 
+ adopted the parameters for the hydrogen atom as 
 \begin_inset Formula $\sigma=1$
 \end_inset
 
@@ -1413,14 +1418,15 @@ key "Sato99"
 \begin_inset space ~
 \end_inset
 
-kcal/mol (SH-SPC/E); recently Luchko and Kovalenko 
+kcal/mol (SH-SPC/E).
+ Recently Luchko and Kovalenko 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Luchko10"
 
 \end_inset
 
- also developed a coincident SPC/E water model (cSPC/E) by applying an embedded
+ developed the coincident SPC/E water model (cSPC/E) by applying an embedded
  site scheme to the parameters in SPC/E water.
  Table 
 \begin_inset CommandInset ref
@@ -1430,7 +1436,11 @@ reference "tab:params-water"
 \end_inset
 
  summarizes the details of these three popular modified water models which
- have been widely applied in other RISM studies.
+ have been widely applied in other RISM studies 
+\color green
+[]
+\color inherit
+.
 \end_layout
 
 \begin_layout Standard
@@ -1451,7 +1461,7 @@ Lennard--Jones interaction parameters for uranyl:
 \begin_inset Formula $\epsilon$
 \end_inset
 
- (kcal/mol), and charge 
+ (kcal/mol), and atomic charge 
 \begin_inset Formula $q$
 \end_inset
 
@@ -2316,8 +2326,9 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Standard
-All the calculations were performed at the temperature of 298 K and dielectric
- constant set to 78.4, with water solvent density 
+All our calculations were carried out at the temperature of 298 K, with
+ the dielectric constant set to 78.4 and with a corresponding water solvent
+ density of 
 \begin_inset Formula $\rho=0.033295$
 \end_inset
 
@@ -2330,18 +2341,19 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \end_inset
 
 .
- The grid which was used to represent correlation functions has a uniform
- grid spacing of 0.0390625
+ The grid which was used to represent correlation functions was chosen with
+ a uniform grid spacing of 0.0390625
 \begin_inset space ~
 \end_inset
 
-Å for 4096 grid points which amounts to a radial range of 160
+Å and 4096 grid points, which amounts to a radial range of 160
 \begin_inset space ~
 \end_inset
 
 Å.
- Solvent susceptibility was solved from pure site-site RISM equation by
- Newton iteration method with convergence tolerance of 
+ The solvent susceptibility was determined from the pure water site-site
+ RISM equation by the Newton iteration method with a convergence tolerance
+ of 
 \begin_inset Formula $10^{-14}$
 \end_inset
 
@@ -2350,16 +2362,21 @@ All the calculations were performed at the temperature of 298 K and dielectric
 \end_inset
 
 -norm of the indirect correlation matrix.
- The discrete sine transform was applied for Fourier transform when calculating
+ The discrete sine transform was applied as Fourier transform when calculating
  convolution integrals.
- With water solvent susceptibility as input, solvent-solute RISM equations
- were solved iteratively to get radial distribution functions and evaluate
- excess chemical potential with different functionals.
+ With the water solvent susceptibility as input, the solvent-solute RISM
+ equations were solved iteratively to determine radial distribution functions
+ and to evaluate the excess chemical potential with various forms of functionals
+ 
+\color green
+#where are such results to be seen?#
+\color inherit
+.
  
 \end_layout
 
 \begin_layout Standard
-All-electron calculations were performed with the linear combination of
+All-electron calculations were carried out with the linear combination of
  Gaussian-type orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2375,7 +2392,12 @@ key "ParaGaussV3.1"
 \end_inset
 
 .
- We used a COSMO PCM solvation model as a reference 
+ We used the COSMO PCM solvation model for comparison 
+\color green
+#as a reference: why reference? is more approximate# #which cavity generation
+ method, radii, etc.?#
+\color inherit
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Fuchs02"
@@ -2383,7 +2405,11 @@ key "Fuchs02"
 \end_inset
 
 .
- Geometry optimization has been performed using ParaTools 
+ Geometry optimization have been done using 
+\color green
+#which method?#
+\color inherit
+ as implemented in ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chaffey-Millar11,Nikodem13"
@@ -2410,14 +2436,15 @@ name "sub:simple-ions"
 
 \begin_layout Standard
 To evaluate our RISM implementation, we reproduced the recently reported
- results 
+ RISM results 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Joung13"
 
 \end_inset
 
- for the solvation of alkali- and halide ions, see Table
+ for the solvation of alkali and halide ions, applying the cSPC/E water
+ model, see Table
 \begin_inset space ~
 \end_inset
 
@@ -2429,9 +2456,13 @@ reference "tab:simple-ions"
 \end_inset
 
 .
- As can be seen, the values of excess chemical potential of simple ions
+ As can be seen, the values of the excess chemical potential of simple ions
  calculated with our 1D-RISM code are in satisfatory agreement with reported
- values and comparable to the MD and experimental estimates.
+ RISM values and comparable to MD 
+\color green
+(SPC/E #?#)
+\color inherit
+ and experimental results.
  The most significant technical difference to Ref.
 \begin_inset space ~
 \end_inset
@@ -2443,11 +2474,44 @@ key "Joung13"
 
 \end_inset
 
- is a choice of smaller radial range and slightly coarser grid spacing made
- in this work.
+ is the choice of a smaller radial range (160 versus 
+\color green
+XXX Å
+\color inherit
+ in Ref.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+) and a slightly coarser grid spacing (0.0390625 versus 
+\color green
+XXX
+\begin_inset space ~
+\end_inset
+
+Å
+\color inherit
+ in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+) made in this work.
+ Overall the HNC clusure relation yields slightly better results than KH
+ with respect to MD and experimental reference data.
  Note that the RISM model underesimates the magnitude of solvation free
- energies of cations by a few percent; the estimates for anions are slightly
- worse than that.
+ energies of cations by a few percent only compared to experiment; the results
+ for anions are slightly worse.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2461,10 +2525,14 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Excess chemical potential (kcal/mol) for alkali- and halide ions calculated
- with cSPC/E water in RISM.
- KH and HNC are short for closure relations used.
- MD results and experimental values are also shown for comparison 
+The solvation energy (excess chemical potential, in kcal/mol) for alkali
+ and halide ions calculated with the cSPC/E water model and the RISM approach.
+ KH and HNC closure relations have been used.
+ MD results 
+\color green
+#which force field?#
+\color inherit
+ and experimental values are also shown for comparison 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simple-ions"
@@ -3210,7 +3278,7 @@ status open
 \end_layout
 
 \begin_layout Subsection
-Application to uranyl solvation
+Application to solvated uranyl(VI)
 \end_layout
 
 \begin_layout Subsubsection
@@ -3225,7 +3293,7 @@ name "sub:water-models"
 \end_layout
 
 \begin_layout Standard
-In this section, we have picked the PM13 uranyl model, Table
+In this section, we arbitrarily picked the PM13 uranyl model, Table
 \begin_inset space ~
 \end_inset
 
@@ -3236,8 +3304,8 @@ reference "tab:params-uranyl"
 
 \end_inset
 
-, and investigated the performance of three water models that differ only
- by LJ parameters of hydrogen site, Table
+, and investigated the performance of the three water models that differ
+ only by the LJ parameters for hydrogen sites, see Table
 \begin_inset space ~
 \end_inset
 
@@ -3249,17 +3317,26 @@ reference "tab:params-water"
 \end_inset
 
 .
- Classical MD calculation of Maginn and the co-authors 
+ The classical MD calculation of Maginn et al.
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pomogaev13"
 
 \end_inset
 
- was also reproduced for comparison.
+ applying the SPC/E 
+\color green
+#?#
+\color inherit
+ water model was also reproduced for comparison 
+\color green
+#which code? identical paramters as in this reference?#
+\color inherit
+.
  The radial distribution functions (RDFs) of oxygen and hydrogen sites of
- water molecules, OW and HW, around uranium and oxygen sites of uranyl ion,
- U and O, are shown in Figure
+ water molecules, OW and HW, around uranium and oxygen sites of the uranyl
+ ion, U and O, are shown in Figure
 \begin_inset space ~
 \end_inset
 
@@ -3271,16 +3348,22 @@ reference "fig:rdf-vs-water-model"
 \end_inset
 
 .
- When comparing RISM and MD results, it is noticeable that the RDFs for
- site pairs carrying charges of opposite sign, that is for the U--OW, and
- O--HW pairs, have quite similar shapes.
- However, for U--HW and O--OW pairs, carrying charges of the same sign,
- the differences between MD and RISM models are more pronounced and shared
- by all three water models.
- From the analysis of RDF plots, we conclude that different water models
- have influences on the intensity of the peaks but the positions do not
- vary much.
- As can be seen from Table
+ When comparing our RISM and MD results, it is noticeable that the RDFs
+ for site pairs carrying charges of opposite sign, that is for U--OW, and
+ O--HW pairs, show quite similar shapes 
+\color green
+#For me O-OW looks qualitatively similar, while O-HW has a broad single
+ peak for RISM and a clear couble peak for MD.
+ Only U-HW shows qualitative differences between RISM and MD#
+\color inherit
+.
+ For U--HW and O--OW pairs, carrying charges of the same sign, the differences
+ between MD and RISM models are more pronounced and shared by all three
+ water models.
+ From the analysis of the RDF plots we conclude that various variants of
+ the SPC/E water model differ slightly in the intensity of the peaks, but
+ the positions of the peaks do not vary much.
+ As shown in Table
 \begin_inset space ~
 \end_inset
 
@@ -3291,13 +3374,23 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
-, the positions of peaks are within the range between 241 and 243
+, the positions of the first peaks of the U-OW radial distribution function
+ are between 241 and 243
 \begin_inset space ~
 \end_inset
 
-pm for different water models while significant differences come to coordination
- numbers ranging from 4.9 to 5.8 and excess chemical potential ranging from
- 
+pm for various water models, while the corresponding coordination numbers
+ vary from 4.9 to 5.8.
+ The MD reference results provide a first peak at the slightly longer distance
+ of 246
+\begin_inset space ~
+\end_inset
+
+pm that integrates to coordination number 
+\color green
+#5.2#
+\color inherit
+ The excess chemical potential calculated between 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3309,13 +3402,7 @@ pm for different water models while significant differences come to coordination
 \begin_inset space ~
 \end_inset
 
-kcal/mol.
- The reference MD results suggest a peak at 246
-\begin_inset space ~
-\end_inset
-
-pm that integrates to coordination number 5.0 and a somewhat larger magnitude
- of the solvation free energy, 
+kcal/mol is a somewhat lower than the solvation free energy of
 \begin_inset Formula $-$
 \end_inset
 
@@ -3323,7 +3410,7 @@ pm that integrates to coordination number 5.0 and a somewhat larger magnitude
 \begin_inset space ~
 \end_inset
 
-kcal/mol, Table
+kcal/mol as determinded with the MD approach (Table
 \begin_inset space ~
 \end_inset
 
@@ -3334,10 +3421,10 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
-.
- The observation that the RISM model underestimates the magnitude of the
- solvation free energy for uranyl ion is not surprising, given the results
- of Section
+).
+ The observation that the RISM model underestimates the solvation free energy
+ of the uranyl ion by 9 to 13% is not surprising, given the results for
+ simple ions of Section
 \begin_inset space ~
 \end_inset
 
@@ -3348,8 +3435,17 @@ reference "sub:simple-ions"
 
 \end_inset
 
-, though with a +2 charge of the uranyl the deviations are already between
- 9 and 13%.
+.
+ 
+\color green
+# Here in in the section before: What is the reason for the differences?
+ The RISM approach, the modified water models, the way to determine the
+ solvation energy? Even a weak comment would be useful#.
+
+\color inherit
+ 
+\color green
+#why not to include second solvation shell?#
 \end_layout
 
 \begin_layout Standard
@@ -3362,9 +3458,10 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution function calculated with different water models in which
- different non-zero LJ parameters are assigned to hydrogen atom.
- MD results are also shown for comparison.
+Radial distribution functions of solvated uranyl calculated with various
+ variants of the SPC/E water model, in which different LJ parameters are
+ assigned to hydrogen atoms.
+ MD #SPC/E?# results are also shown for comparison.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3421,7 +3518,8 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) 
+ (kcal/mol) of solvated uranyl.
+ 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:observables-vs-water-model"
@@ -3716,8 +3814,8 @@ footnotetext{
 \begin_inset Formula $^{a}$
 \end_inset
 
- Solvation free energy of RISM calculation is estimated approximately by
- excess chemical potential, 
+ The Solvation free energy in RISM calculations is estimated approximately
+ by the excess chemical potential, 
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -3732,6 +3830,10 @@ key "Pomogaev13"
 
 \end_inset
 
+ 
+\color green
+which water model?
+\color inherit
 
 \begin_inset ERT
 status open
@@ -3763,7 +3865,7 @@ name "sub:uranyl-models"
 \end_layout
 
 \begin_layout Standard
-In this section, we picked the PR-SPC/E water model, Table
+In this section, we choose the PR-SPC/E water model, Table
 \begin_inset space ~
 \end_inset
 
@@ -3774,7 +3876,8 @@ reference "tab:params-water"
 
 \end_inset
 
-, and compared performance of RISM using five different uranyl models, Table
+, to compare the performance of RISM for five the different uranyl models
+ listed in Table
 \begin_inset space ~
 \end_inset
 
@@ -3786,7 +3889,11 @@ reference "tab:params-uranyl"
 \end_inset
 
 .
- As could be seen from Figure
+ 
+\color green
+#Why did you choose PR-SPC/E? Because of the reasonable coordination number?#
+\color inherit
+ As can be seen from Figure
 \begin_inset space ~
 \end_inset
 
@@ -3808,8 +3915,8 @@ reference "tab:observables-vs-uranyl-model"
 
 \end_inset
 
-, coordination numbers and positions of the first peaks produced by GW and
- Maginn's models, RM12 and PM13, are close to 
+, coordination numbers and positions of the first peaks as determined by
+ GW and Maginn's models, RM12 and PM13, are close to 
 \emph on
 ab-initio
 \emph default
@@ -3855,9 +3962,16 @@ key "Soderholm05"
 
 \end_inset
 
- experiments, but the calculated solvation free energies are outside of
- the experimental range determined with Fourier transform ion cyclotron
- resonance mass spectrometer (FTICR--MS) 
+ experiments.
+ 
+\color green
+#Not really.
+ In this discussion onen should at least separate experiments and calculations,
+ which do between each other not agree totally.#
+\color inherit
+ The the calculated solvation free energies are slightly below the experimental
+ range determined with Fourier transform ion cyclotron resonance mass spectromet
+er (FTICR--MS) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cornehl96"
@@ -3866,13 +3980,51 @@ key "Cornehl96"
 
 .
  On the other hand, Kerisit and Liu's models achieve solvation free energies
- that lie in the middle of experimental range by intentionally increasing
- the charge separation of uranyl species.
- A higher charge separation in KL1 and KL2 models amounts to an overall
- strengthening of uranyl--water interactions, which, in our case manifests
- in the higher RDF peaks and coordination numbers which are close to 6.
+ of
+\begin_inset Formula $-$
+\end_inset
+
+375, and 
+\begin_inset Formula $-$
+\end_inset
+
+380
+\begin_inset space ~
+\end_inset
+
+kcal/mol, that lie in the middle of the experimental range by intentionally
+ increasing the charge separation in the uranyl species 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerisit13"
+
+\end_inset
+
+
+\color green
+#correct?#
+\color inherit
+.
+ A higher charge separation in KL1 and KL2 models leads to a strengthening
+ of uranyl--water interactions, which manifests shorter U-OW bonds and in
+ the higher RDF peaks (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+) as well as first shell coordination numbers (Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-uranyl"
+
+\end_inset
+
+), which are close to 6.
  The original MD simulation employing KL1 and KL2 models of uranyl predicted
- the U--OW peaks of height of about 16 with the coordination number 5 
+ the U--OW peaks with a height of about 16 and the coordination number 5
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3880,12 +4032,12 @@ key "Kerisit13"
 \end_inset
 
 .
- The U--OW separation for the first RDF peak is probably somewhat too short:
- 232 and 238
+ The U--OW distance of the first RDF peak in our RISM calculations is somewhat
+ shorter than in the MD simulation: 232 and 238
 \begin_inset space ~
 \end_inset
 
-pm for KL1 and KL2 RISM (Table
+pm for KL1 and KL2 in RISM (Table
 \begin_inset space ~
 \end_inset
 
@@ -3901,7 +4053,7 @@ reference "tab:observables-vs-uranyl-model"
 \begin_inset space ~
 \end_inset
 
-pm for KL1 and KL2 MD 
+pm for KL1 and KL2 from MD 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3909,8 +4061,21 @@ key "Kerisit13"
 \end_inset
 
 .
- Despite these apparent differences of RISM and MD the free solvation energy
- is well reproduced: MD predicts 
+ Together with the shorter U-OW distances, the coordination numbers in RISM
+ calculations increase to about 6 (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+).
+ Despite these geometric differences between RISM and MD, the free energy
+ of solvation is well reproduced: MD predicts 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3933,7 +4098,7 @@ key "Kerisit13"
 
 \end_inset
 
- whereas RISM gives 
+ whereas the RISM approach gives 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3961,14 +4126,14 @@ reference "tab:observables-vs-uranyl-model"
 \end_inset
 
 .
- It should be also noted that in AIMD calculation 
+ It should be noted that in a AIMD calculation 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Nichols08"
 
 \end_inset
 
- and Kerisit and Liu's classical MD calculation 
+ and in Kerisit and Liu's classical MD simulation 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3979,32 +4144,37 @@ key "Kerisit13"
 \begin_inset space ~
 \end_inset
 
-pm for the RDF of O--HW pair which corresponds to a water molecule forming
- the hydrogen bond with uranyl oxygen.
- Our RISM calculation with KL2 uranyl model also showed the small peak for
- oxygen-water hydrogen pair, albeit at a shorter O--HW separation of 160
+pm in the RDF of the O--HW pair corresponding to water molecules forming
+ a hydrogen bond to uranyl oxygens.
+ Our RISM calculation with KL2 uranyl model also showed this small peak,
+ albeit at a shorter O--HW separation of 160
 \begin_inset space ~
 \end_inset
 
-pm.
+pm (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+).
  
+\color green
+#This topic needs a little more: Do other AIMD, QM/MM, MD approaches not
+ show this peak? Has it been seen experimentally? Maybe give a hint to a
+ paper which discusses the possiblity of apical hydrogen bonding of uranyl.#
 \end_layout
 
 \begin_layout Standard
-Based on the values of solvation free energies of a 
-\begin_inset Quotes eld
-\end_inset
-
-bare
-\begin_inset Quotes erd
-\end_inset
-
- uranyl we may roughly divide the uranyl models into two groups: those with
- weaker uranyl--water interactions consisting of GW, RM12, and PM13 models
- and those with stronger uranyl--water interactions consisting of KL1 and
- KL2 models.
- The latter two uranyl models produced the values of the solvation free
- energy at around the middle of the experimental interval, Table
+Based on the values of the solvation free energies of a bare uranyl solvent
+ model, whoch does not include explicit aqua ligands in the definition of
+ the solute model, we roughly divide the uranyl models into two groups:
+ those with weaker uranyl--water interactions, which are the models GW,
+ RM12, and PM13, and those with stronger uranyl--water interactions: KL1
+ and KL2.
+ The latter two uranyl models yield solvation free energies at around the
+ middle of the experimental interval, Table
 \begin_inset space ~
 \end_inset
 
@@ -4016,7 +4186,36 @@ reference "tab:observables-vs-water-model"
 \end_inset
 
 .
- Note that the 
+ This potential improvement of the solvation free energy goes at the expense
+ of jigher coordination numbers, which deviate from experimental determinations
+ (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+).
+ The coordination numbers listed Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+in The reason for these two classes of models is that earlier work oriented
+ on the earlier and lower experimental finding of -318 kcal/mol.
+ 
+\color green
+# cancel:Note that the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4045,7 +4244,7 @@ reference "tab:observables-vs-uranyl-model"
 
 .
  It is just that the structure of the first solvation shell was not further
- specified by placing explicit water molecules as we do in the next section.
+ specified by placing explicit water molecules as we do in the next section.#
 \end_layout
 
 \begin_layout Standard
@@ -4058,7 +4257,9 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution function calculated with different uranyl models 
+Radial distribution functions from RISM calculations applying various force
+ field models for uranyl.
+ 
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:rdf-vs-uranyl-model"
@@ -4114,8 +4315,8 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), calculated with different uranyl models in RISM, in comparison
- to MD simulations and various experimental values.
+ (kcal/mol), calculated with various uranyl force field models in RISM,
+ in comparison to AIMD, QM/MM, and MD simulations and experimental data.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -5277,8 +5478,13 @@ Free energy minimization for uranyl aqua complexes
 \begin_layout Standard
 More insight into the structure of the first solvation shell and details
  of the uranyl--water interactions can be gained by introducing explicit
- water ligands.
- Indeed, the Table
+ water ligands into the solute model embedded in RISM.
+ In these models the uranyl geometry is 
+\color green
+fixed
+\color inherit
+ by the force field parameters while the U-OW distance is optimized.
+ Table
 \begin_inset space ~
 \end_inset
 
@@ -5289,8 +5495,13 @@ reference "tab:energy-vs-model"
 
 \end_inset
 
- showing the intra-molecular binding energy of five water ligands and solvation
- free energy for uranyl aqua complex [UO
+ lists the intra-molecular energy of the solute, 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+, which corresponds here to the binding energy of five water ligands, and
+ the solvation free energy for uranyl determined via the solvated aqua complex
+ [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5306,9 +5517,11 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- appears to confirm classification of the uranyl force fields into two groups:
- the three weaker force fields (GW, RM12, and PM13) suggest the binding
- energy of the uranyl and five water molecules in the range of 
+.
+ These energies confirm the classification of the uranyl force fields into
+ two groups: the three weaker force fields (GW, RM12, and PM13) suggest
+ a binding energy of uranyl to its five first shell aqua ligands in the
+ range of 
 \begin_inset Formula $-216$
 \end_inset
 
@@ -5328,7 +5541,7 @@ kcal/mol
 \begin_inset space ~
 \end_inset
 
-kcal/mol, whereas the two stronger force fields suggest notably stronger
+kcal/mol, whereas the two stronger force fields suggest a notably stronger
  ligand binding of 
 \begin_inset Formula $-268$
 \end_inset
@@ -5346,13 +5559,12 @@ kcal/mol (KL1) and
 \end_inset
 
 kcal/mol (KL2).
- Consistently with this picture, the solvation free energy of these conformation
-s, 
+ Consistent with this picture, the solvation free energy of these conformations,
+ 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, appears to correlate with the strength of uranyl--water interactions,
- Table
+, correlates with the strength of the uranyl--water interactions, Table
 \begin_inset space ~
 \end_inset
 
@@ -5364,20 +5576,13 @@ reference "tab:energy-vs-model"
 \end_inset
 
 .
- Notably, the free energies of conformations with five explicit water ligands
- are roughly by 10--15
+ Note that the free energies based on the model with five explicit water
+ ligands are roughly by 10--15
 \begin_inset space ~
 \end_inset
 
-kcal/mol lower than those of the 
-\begin_inset Quotes eld
-\end_inset
-
-bare
-\begin_inset Quotes erd
-\end_inset
-
- uranyl, compare the respective rows of Tables
+kcal/mol lower than those of a bare uranyl model, compare the respective
+ rows of Tables
 \begin_inset space ~
 \end_inset
 
@@ -5414,8 +5619,8 @@ Average uranyl--water distance,
 \begin_inset Formula $d(\text{U-OW})$
 \end_inset
 
- (pm), intra-molecular interaction between uranyl ion and water ligands,
- 
+ (pm), intra-molecular interaction between the uranyl ion and its explict
+ water ligands, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
