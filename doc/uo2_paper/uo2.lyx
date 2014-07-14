@@ -943,6 +943,28 @@ key "Chandler84"
  
 \color green
 #relevance and meaning here?#
+\change_inserted 359346927 1405319713
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405319932
+
+\color green
+only showed HNC results for uranyl, need an argument for this preference,
+ e.g., the differences caused by different expressions are small compared
+ to the values of excess chemical potential? 
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_unchanged
+
 \color inherit
  
 \end_layout
