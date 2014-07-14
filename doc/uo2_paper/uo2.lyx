@@ -56,12 +56,11 @@
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\tracking_changes true
+\tracking_changes false
 \output_changes false
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
-\author 359346927 "Bo Li,,," 
 \end_header
 
 \begin_body
@@ -203,10 +202,6 @@ ok?
  to represent the water solvent.
  Although the PCM variant based on the conductor-like solvation model (COSMO)
  has been successfully applied in various studies of uranyl complexes 
-\change_inserted 359346927 1405303593
-
-\color green
-
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04,Cao05,Shamov05,Gutowski06"
@@ -218,34 +213,11 @@ key "Moskaleva04,Cao05,Shamov05,Gutowski06"
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405303624
-
-\color green
-PCM citations for uranyl complexes
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_deleted 359346927 1405303560
-[]
-\color inherit
- #
-\color green
-adsorption and chemical reaction at solvated mineral surface: wrong 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Kremleva12,Kremleva10,Kremleva08"
-
-\end_inset
-
-: wrong
-\color inherit
-#
-\change_unchanged
 , it provides no insight into the thermodynamic fluctuation of the water
  solvent.
  On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
@@ -276,10 +248,6 @@ key "Gordon00"
  entails significant computational cost to the combination of QM and MM
  calculations.
  For that reason, more accurate QM dynamic simulations 
-\change_inserted 359346927 1405304575
-
-\color green
-
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
@@ -291,23 +259,11 @@ key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405304581
-
-\color green
-citations for QM-MD
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_deleted 359346927 1405304186
-[]
-\change_unchanged
-
-\color inherit
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
 \end_layout
@@ -315,10 +271,6 @@ citations for QM-MD
 \begin_layout Standard
 Given the difficulties mentioned above, new strategies which combine QM
  methods with integral equation theory of molecular liquids 
-\change_inserted 359346927 1405306123
-
-\color green
-
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,book:Hansen06"
@@ -330,21 +282,11 @@ key "book:Hirata03,book:Hansen06"
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405306321
-enough?
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_deleted 359346927 1405306043
-[]
-\change_unchanged
-
-\color inherit
  are regarded as a promising direction to study ions and complexes and their
  chemical reactions in aqueous solution with sufficient accuracy and at
  affordable cost.
@@ -366,8 +308,9 @@ key "Hirata81,Hirata82"
 
 \end_inset
 
-and by enforcing the desired dielectric constant for all thermodynamic routes,
- the RISM method has been extended (dielectric consistent RISM (DRISM) 
+ and by enforcing the desired dielectric constant for all thermodynamic
+ routes, the RISM method has been extended (dielectric consistent RISM (DRISM)
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
@@ -428,7 +371,7 @@ In the RISM approach, the solvent liquid is regarded as composed of atomic
  or rigid polyatomic species around the solute and the interactions between
  the these species are approximated by two-particle interatomic potentials
  (site-site potentials).
- The RISM equation, also known as site-site Ornstein-Zernike (OZ) equation
+ The RISM equation, also known as site-site Ornstein--Zernike (OZ) equation
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -662,10 +605,6 @@ where
 .
  the HNC closure has been applied to solve the RISM equation in a variety
  of studies of aqueous solutions 
-\change_inserted 359346927 1405308380
-
-\color green
-
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kovalenko98,Sato99"
@@ -677,23 +616,11 @@ key "Kovalenko98,Sato99"
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405308450
-
-\color green
-these two are available, could extend the citation list for more
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_deleted 359346927 1405307983
-[]
-\change_unchanged
-
-\color inherit
 .
  However, the uncontrolled exponential term often results in numerical divergenc
 e 
@@ -745,71 +672,15 @@ We used the pair-wise potential
 \begin_inset Formula $\alpha$
 \end_inset
 
-, defined as the sum of long-range the Coulomb interactions, 
+, defined as the sum of the Coulomb interaction, 
 \begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}/r$
 \end_inset
 
-, and a Lennard-Jones (LJ) type potential, 
+, and a Lennard--Jones (LJ) type potential, 
 \begin_inset Formula $u_{i\alpha}^{\text{LJ}}(r)=4\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
 \end_inset
 
  to account for short-range repulsion and dispersion interactions.
- 
-\change_inserted 359346927 1405314112
-To accurately treat the long-range behavior of Coulomb potential, Ewald
- summation method 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\change_inserted 359346927 1405314189
-If these statements are acceptable, which citation do you prefer? Paper
- or Allen and Tildesley's book
-\change_unchanged
-
-\end_layout
-
-\end_inset
-
- was applied to seperate the potential expression into two components: 
-\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)+u_{\text{L;}i\alpha}^{\text{C}}(r)$
-\end_inset
-
-.
- The short-range term was expressed in the complementary error function
- 
-\begin_inset Formula $u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erfc}(ar)/r$
-\end_inset
-
-, which decays rapidly at longer distance in real space.
- 
-\change_unchanged
-The long-range asymptotic component of the total interaction
-\change_inserted 359346927 1405313989
-, which was evaluated in its Fourier form,
-\change_unchanged
- was chosen in the form of a smooth potential 
-\begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
-\end_inset
-
- with the range parameter 
-\begin_inset Formula $a=1.2$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-Å
-\begin_inset Formula $^{-1}$
-\end_inset
-
- common for all site pairs.
- 
-\color green
-#How and where do you change to the asymptotic form?#
-\color inherit
  Parameters of pair interactions were derived from site parameters using
  the Lorentz--Berthelot rules 
 \begin_inset CommandInset citation
@@ -822,33 +693,56 @@ key "Lorentz1881,Berthelot1898"
 \end_layout
 
 \begin_layout Standard
-The “solvation free energy” at infinite dilution of a solute, 
-\change_deleted 359346927 1405314441
-approximated 
-\color green
-#?#
-\color inherit
- as
-\change_inserted 359346927 1405314471
-equivalent to 
+To accurately treat the long-range behavior of Coulomb potential it was
+ separated into two components, 
+\begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)+u_{\text{L;}i\alpha}^{\text{C}}(r)$
+\end_inset
+
+, so that the long-range asymptotic component 
+\begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
+\end_inset
+
+, a smooth potential with the range parameter 
+\begin_inset Formula $a=1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ common for all site pairs, is accurately representable by a finite Fourier
+ series.
+ 
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405314511
-for fixed solute geometry and electronic structure, they are equivalent
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
+ 
+\end_layout
 
-\change_unchanged
- the excess chemical potential for a rigid solute geometry, can be determined
- by gradually increasing the solute-solvent coupling from zero to full strength
- during thermodynamic integration (TI).
+\begin_layout Standard
+The “solvation free energy” at infinite dilution of a solute, equivalent
+ to the excess chemical potential for a rigid solute geometry, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ can be determined by gradually increasing the solute-solvent coupling from
+ zero to full strength during thermodynamic integration (TI).
  Within the framework of RISM theory, it can be expressed by the Kirkwood
  formula in terms of the pair correlation functions and an integral over
  the Kirkwood coupling parameter 
@@ -913,7 +807,7 @@ Though the individual terms of the integrand due to
 
 , vanishes if the solvent or the solute is neutral.
  In the corresponding expression for the KH closure the terms 
-\begin_inset Formula $\backsim h^{2}$
+\begin_inset Formula $\sim h^{2}$
 \end_inset
 
  contribute only in the depletion regions where 
@@ -928,58 +822,7 @@ key "Kovalenko99"
 \end_inset
 
 .
- Invoking the gaussian fluctuation (GF) assumption the term
-\begin_inset Formula $\backsim h^{2}$
-\end_inset
-
- is absent 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Chandler84"
-
-\end_inset
-
-.
  
-\color green
-#relevance and meaning here?#
-\change_inserted 359346927 1405319713
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\change_inserted 359346927 1405319932
-
-\color green
-only showed HNC results for uranyl, need an argument for this preference,
- e.g., the differences caused by different expressions are small compared
- to the values of excess chemical potential? 
-\change_unchanged
-
-\end_layout
-
-\end_inset
-
-
-\change_unchanged
-
-\color inherit
- 
-\end_layout
-
-\begin_layout Standard
-
-\color green
-#shifted to next paragraph#
-\color inherit
- The linear response of the integral to a perturbation of the solute geometry
- yields contributions to effective forces.
- 
-\color green
-# Effective forces on the solute sites are calculated as linear response
- to a perturbation of the solute geometry#
 \end_layout
 
 \begin_layout Subsection
@@ -1017,75 +860,67 @@ where
  In this case uranyl together with explicit aqua ligands of the first solvation
  shell are treated as the solute.
  
-\change_deleted 359346927 1405317936
-Positions and orientations of these aqua ligands are
-\change_unchanged
- 
-\color green
-#among: what else?#
-\color inherit
- 
-\change_deleted 359346927 1405317882
-t
-\change_inserted 359346927 1405317882
-T
-\change_unchanged
-he geometric parameters 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: what else? AM: Solvent.
+\end_layout
+
+\end_inset
+
+ The geometric parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- 
-\change_inserted 359346927 1405318050
-are composed with positions and orientations of explicit aqua ligands, 
+ are composed of positions and orientations of explicit aqua ligands and
+ uranyl bond length, 
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405318080
-maybe this statment is clearer?
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
- 
-\change_unchanged
-as these water molecules as well as the uranyl geometry were kept rigid
- during the free energy minimization.
+ all other degrees of freedom were fixed during the free energy minimization.
  
 \color green
-#which geometries for solute, solvent? should be added in section Comp.
- Et.#
-\change_inserted 359346927 1405319570
 
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
 
-\change_inserted 359346927 1405319617
-
 \color green
-BL: I will update the tables with geometry infomation, but uranyl ion bond
- is actually changed in QM-RISM
-\change_unchanged
-
+SK: which geometries for solute, solvent? should be added in section Comp.
+ Det.
+ BL: I will update the tables with geometry information, but uranyl ion
+ bond is actually changed in QM-RISM.
+ 
 \end_layout
 
 \end_inset
 
 
-\change_unchanged
+\color inherit
+ The additive form of the free energy functional, 
+\begin_inset Formula $G[n,\vec{s}]$
+\end_inset
 
-\color inherit
- The additive approximation 
-\color green
-of the excess chemical potential #?#
-\color inherit
- to the free energy functional is to some extent justified by a common practice
- of including net polarization effects into the force field parameters 
+, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ is to some extent justified by a common practice of including net polarization
+ effects into the force field parameters 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
@@ -1093,11 +928,21 @@ key "Berendsen87"
 \end_inset
 
 .
- 
+ Effective forces on the solute sites are calculated as linear response
+ to a perturbation of the solute geometry.
+ The uranyl solvation energy 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ is then calculated as
 \color green
-Effective forces on the solute sites are calculated as linear response to
- a perturbation of the solute geometry.
- The solvation free energy of uranyl is then calculated as 
+ 
 \color inherit
 
 \begin_inset Formula 
@@ -1108,11 +953,26 @@ Effective forces on the solute sites are calculated as linear response to
 
 \end_inset
 
- when n explicit aqua ligands are considered in solution.
- Compared to a treatment of the bare uranyl ion as solute, this expression
- takes into account the binding energy of the explicit aqua ligands to uranyl
- as well as solvated water molecules as part of the solvent reference.
+for 
+\begin_inset Formula $n\ge0$
+\end_inset
+
+ explicit aqua ligands.
  
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Applicable to 
+\begin_inset Formula $n=0$
+\end_inset
+
+ as well.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1181,13 +1041,7 @@ reference "eq:closure-hnc"
 
 \end_inset
 
-), 
-\strikeout on
-\color green
-reformulated for direct and indirect correlation functions
-\strikeout default
-\color inherit
- may not be the most economic choice.
+), may not be the most economic choice.
  Instead we choose to search for roots of the functional 
 \begin_inset Formula $F[t]=T[t]-t$
 \end_inset
@@ -1204,10 +1058,16 @@ key "petsc-user-ref"
 \begin_inset Formula $J[t]=\delta F/\delta t$
 \end_inset
 
-, is only practical if implemented as a linear differential operator 
-\color green
-#what else?#
-\color inherit
+, is only practical if implemented as a linear function 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  applicable to an arbitrary vector 
 \begin_inset Formula $\delta t$
 \end_inset
@@ -1237,12 +1097,6 @@ This Jacobian is also used to compute the linear response of the solution
 \end_inset
 
  to a displacement along 
-\strikeout on
-\color green
-the mode 
-\strikeout default
-\color inherit
-
 \begin_inset Formula $\vec{s}$
 \end_inset
 
@@ -1397,30 +1251,19 @@ T_{\text{S}}[t_{\text{S}}]=\omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\a
 
 are all of short range and thus amenable to a representation on a finite
  radial 
-\strikeout on
 \color green
-#not Cartesian?#
-\change_inserted 359346927 1405318853
-
-\strikeout default
 
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
 
-\change_inserted 359346927 1405319435
-
 \color green
-No, radial grid for 1D RISM
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_unchanged
 
 \color inherit
  grid of moderate size as well as to fast Fourier transforms.
@@ -1428,18 +1271,8 @@ No, radial grid for 1D RISM
 \begin_inset Formula $c_{\text{L}}$
 \end_inset
 
- in the above equation is carried out using its Fourier representation 
-\strikeout on
-\color green
-coefficients 
-\strikeout default
-
-\begin_inset Formula $\tilde{c}_{\text{L}}$
-\end_inset
-
-
-\color inherit
- after the forward Fourier transform of 
+ in the above equation is carried out using its Fourier representation after
+ the forward Fourier transform of 
 \begin_inset Formula $c_{\text{S}}$
 \end_inset
 
@@ -1450,7 +1283,8 @@ coefficients
 \begin_inset Formula $\tilde{\chi}(k)$
 \end_inset
 
- at low wave numbers 
+ at low wave numbers for use in both solvent and solute/solvent equations
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kovalenko00,Cummings81"
@@ -1461,32 +1295,16 @@ key "Kovalenko00,Cummings81"
  
 \strikeout on
 \color green
-#Not necessary for the solvent calculatiuons?#
-\change_inserted 359346927 1405319093
 
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 359346927 1405319278
-No, 
-\begin_inset Formula $\chi^{v}$
-\end_inset
-
- is expressed with 
-\begin_inset Formula $h^{vv}$
-\end_inset
-
-, see RISM theory
-\change_unchanged
-
+ok?
 \end_layout
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -6126,10 +5944,6 @@ name "fig:geometries"
 wide false
 sideways false
 status open
-
-\begin_layout Plain Layout
-
-\end_layout
 
 \begin_layout Plain Layout
 \begin_inset Caption
