@@ -79,6 +79,7 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
+
 alexei.matveev@gmail.com
 \end_layout
 
@@ -96,6 +97,7 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
+
 roesch@mytum.de
 \end_layout
 
@@ -992,15 +994,43 @@ where
 .
  In this case uranyl together with explicit aqua ligands of the first solvation
  shell are treated as the solute.
- Positions and orientations of these aqua ligands are 
+ 
+\change_deleted 359346927 1405317936
+Positions and orientations of these aqua ligands are
+\change_unchanged
+ 
 \color green
 #among: what else?#
 \color inherit
- the geometric parameters 
+ 
+\change_deleted 359346927 1405317882
+t
+\change_inserted 359346927 1405317882
+T
+\change_unchanged
+he geometric parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- as these water molecules as well as the uranyl geometry were kept rigid
+ 
+\change_inserted 359346927 1405318050
+are composed with positions and orientations of explicit aqua ligands, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405318080
+maybe this statment is clearer?
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+ 
+\change_unchanged
+as these water molecules as well as the uranyl geometry were kept rigid
  during the free energy minimization.
  
 \color green
