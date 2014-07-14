@@ -1036,6 +1036,27 @@ as these water molecules as well as the uranyl geometry were kept rigid
 \color green
 #which geometries for solute, solvent? should be added in section Comp.
  Et.#
+\change_inserted 359346927 1405319570
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405319617
+
+\color green
+BL: I will update the tables with geometry infomation, but uranyl ion bond
+ is actually changed in QM-RISM
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_unchanged
+
 \color inherit
  The additive approximation 
 \color green
