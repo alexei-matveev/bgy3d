@@ -274,8 +274,37 @@ key "Gordon00"
  entails significant computational cost to the combination of QM and MM
  calculations.
  For that reason, more accurate QM dynamic simulations 
+\change_inserted 359346927 1405304575
+
 \color green
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405304581
+
+\color green
+citations for QM-MD
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_deleted 359346927 1405304186
 []
+\change_unchanged
+
 \color inherit
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
