@@ -313,8 +313,35 @@ citations for QM-MD
 \begin_layout Standard
 Given the difficulties mentioned above, new strategies which combine QM
  methods with integral equation theory of molecular liquids 
+\change_inserted 359346927 1405306123
+
 \color green
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,book:Hansen06"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405306321
+enough?
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_deleted 359346927 1405306043
 []
+\change_unchanged
+
 \color inherit
  are regarded as a promising direction to study ions and complexes and their
  chemical reactions in aqueous solution with sufficient accuracy and at
