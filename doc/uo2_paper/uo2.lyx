@@ -56,7 +56,7 @@
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\tracking_changes false
+\tracking_changes true
 \output_changes false
 \html_math_output 0
 \html_css_as_file 0
@@ -78,7 +78,6 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
-
 alexei.matveev@gmail.com
 \end_layout
 
@@ -96,7 +95,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
