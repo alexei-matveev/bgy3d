@@ -820,12 +820,31 @@ key "Lorentz1881,Berthelot1898"
 \end_layout
 
 \begin_layout Standard
-The “solvation free energy” at infinite dilution of a solute, approximated
- 
+The “solvation free energy” at infinite dilution of a solute, 
+\change_deleted 359346927 1405314441
+approximated 
 \color green
 #?#
 \color inherit
- as the excess chemical potential for a rigid solute geometry, can be determined
+ as
+\change_inserted 359346927 1405314471
+equivalent to 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405314511
+for fixed solute geometry and electronic structure, they are equivalent
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_unchanged
+ the excess chemical potential for a rigid solute geometry, can be determined
  by gradually increasing the solute-solvent coupling from zero to full strength
  during thermodynamic integration (TI).
  Within the framework of RISM theory, it can be expressed by the Kirkwood
