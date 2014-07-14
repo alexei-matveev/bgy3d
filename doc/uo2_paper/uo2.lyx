@@ -660,8 +660,37 @@ where
 .
  the HNC closure has been applied to solve the RISM equation in a variety
  of studies of aqueous solutions 
+\change_inserted 359346927 1405308380
+
 \color green
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko98,Sato99"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405308450
+
+\color green
+these two are available, could extend the citation list for more
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_deleted 359346927 1405307983
 []
+\change_unchanged
+
 \color inherit
 .
  However, the uncontrolled exponential term often results in numerical divergenc
