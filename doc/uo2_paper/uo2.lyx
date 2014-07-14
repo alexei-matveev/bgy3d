@@ -1357,7 +1357,28 @@ are all of short range and thus amenable to a representation on a finite
 \strikeout on
 \color green
 #not Cartesian?#
+\change_inserted 359346927 1405318853
+
 \strikeout default
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405319435
+
+\color green
+No, radial grid for 1D RISM
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_unchanged
+
 \color inherit
  grid of moderate size as well as to fast Fourier transforms.
  Technically, addition of the long-range correlation 
@@ -1395,8 +1416,35 @@ key "Kovalenko00,Cummings81"
 
 .
  
+\strikeout on
 \color green
 #Not necessary for the solvent calculatiuons?#
+\change_inserted 359346927 1405319093
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\change_inserted 359346927 1405319278
+No, 
+\begin_inset Formula $\chi^{v}$
+\end_inset
+
+ is expressed with 
+\begin_inset Formula $h^{vv}$
+\end_inset
+
+, see RISM theory
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
