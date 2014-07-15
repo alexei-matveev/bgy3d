@@ -4329,7 +4329,7 @@ SK: This topic needs a little more: Do other AIMD, QM/MM, MD approaches
 
 \begin_layout Standard
 Based on the values of the solvation free energies of a bare uranyl solvent
- model, whoch does not include explicit aqua ligands in the definition of
+ model, which does not include explicit aqua ligands in the definition of
  the solute model, we roughly divide the uranyl models into two groups:
  those with weaker uranyl--water interactions, which are the models GW,
  RM12, and PM13, and those with stronger uranyl--water interactions: KL1
@@ -4348,7 +4348,7 @@ reference "tab:observables-vs-water-model"
 
 .
  This potential improvement of the solvation free energy goes at the expense
- of jigher coordination numbers, which deviate from experimental determinations
+ of higher coordination numbers, which deviate from experimental determinations
  (Table
 \begin_inset space ~
 \end_inset
@@ -5733,7 +5733,7 @@ reference "tab:energy-vs-model"
 
 .
  A contribution to of this difference should be attributed to the missing
- statistical average over various acessible arrangements of the ligands.
+ statistical average over various accessible arrangements of the ligands.
 \end_layout
 
 \begin_layout Standard
@@ -5751,7 +5751,7 @@ Average uranyl--water distance,
 \end_inset
 
 (U--OW) (pm), intra-molecular interaction between the uranyl ion and its
- explict water ligands, 
+ explicit water ligands, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
@@ -6208,7 +6208,7 @@ reference "fig:geometries"
 
 a).
  This compensation is also reflected in the average first shell U--OW distance,
- whcih is shorter in the gas phase (239
+ which is shorter in the gas phase (239
 \begin_inset space ~
 \end_inset
 
@@ -7026,7 +7026,7 @@ O)
 \begin_inset Formula $4\le n\le6$
 \end_inset
 
- explict water ligands, as well as for a bare uranyl solute model 
+ explicit water ligands, as well as for a bare uranyl solute model 
 \begin_inset Formula $(n=0)$
 \end_inset
 
@@ -7465,7 +7465,7 @@ key "Shamov05"
 \begin_inset space ~
 \end_inset
 
-kcal/mol at the density functional B3LYP level togehter with COSMO PCM.
+kcal/mol at the density functional B3LYP level together with COSMO PCM.
  At the MP2 level with the same solvation model 
 \begin_inset Formula $\Delta G_{\text{R}}=-4.9$
 \end_inset
