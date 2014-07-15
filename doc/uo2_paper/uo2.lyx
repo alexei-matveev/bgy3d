@@ -2492,10 +2492,16 @@ reference "tab:simple-ions"
 .
  As can be seen, the values of the excess chemical potential of simple ions
  calculated with our 1D-RISM code are in satisfatory agreement with reported
- RISM values and comparable to MD 
-\color green
-(SPC/E #?#)
-\color inherit
+ RISM values and comparable to MD with SPC/E water 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  and experimental results.
  The most significant technical difference to Ref.
 \begin_inset space ~
@@ -2508,11 +2514,11 @@ key "Joung13"
 
 \end_inset
 
- is the choice of a smaller radial range (160 versus 
-\color green
-XXX Å
-\color inherit
- in Ref.
+ is the choice of a smaller radial range (160 versus 819
+\begin_inset space ~
+\end_inset
+
+Å in Ref.
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2520,15 +2526,11 @@ key "Joung13"
 
 \end_inset
 
-) and a slightly coarser grid spacing (0.0390625 versus 
-\color green
-XXX
+) and a slightly coarser grid spacing (0.0390625 versus 0.025
 \begin_inset space ~
 \end_inset
 
-Å
-\color inherit
- in Ref.
+Å in Ref.
 \begin_inset space ~
 \end_inset
 
@@ -2540,6 +2542,16 @@ key "Joung13"
 \end_inset
 
 ) made in this work.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  Overall the HNC clusure relation yields slightly better results than KH
  with respect to MD and experimental reference data.
  Note that the RISM model underesimates the magnitude of solvation free
@@ -2562,10 +2574,16 @@ status open
 The solvation energy (excess chemical potential, in kcal/mol) for alkali
  and halide ions calculated with the cSPC/E water model and the RISM approach.
  KH and HNC closure relations have been used.
- MD results 
-\color green
-#which force field?#
-\color inherit
+ MD results with SPC/E water 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  and experimental values are also shown for comparison 
 \begin_inset CommandInset label
 LatexCommand label
