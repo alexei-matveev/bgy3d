@@ -3641,15 +3641,11 @@ Coordination number
 \begin_inset Formula $d_{1}$
 \end_inset
 
-(U--OW) (pm), and solvation free energy
-\begin_inset Formula $^{a}$
-\end_inset
-
- 
+(U--OW) (pm), and solvation energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of solvated uranyl.
+ (kcal/mol) of uranyl.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3865,7 +3861,7 @@ cSPC/E
 
 \begin_layout Plain Layout
 SPC/E MD
-\begin_inset Formula $^{b}$
+\begin_inset Formula $^{a}$
 \end_inset
 
 
@@ -3953,11 +3949,6 @@ footnotetext{
 
 
 \begin_inset Formula $^{a}$
-\end_inset
-
- The Solvation free energy in RISM calculations is estimated approximately
- by the excess chemical potential, 
-\begin_inset Formula $^{b}$
 \end_inset
 
  Ref.
