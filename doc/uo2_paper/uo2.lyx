@@ -1355,7 +1355,7 @@ key "Kerisit13"
 
 \end_inset
 
-of the uranyl aqua complex.
+ of the uranyl aqua complex.
  For the water solvent, we adopted atomic charges and LJ potential parameters
  of the SPC/E (extended simple point charge) model 
 \begin_inset CommandInset citation
@@ -1366,11 +1366,8 @@ key "Berendsen87"
 
 .
  While the original SPC/E water model does not contain a repulsive potential
- for hydrogen atoms, a LJ-type potential for hydrogen atoms 
-\color green
-#in both water models ???#
-\color inherit
- are necessary in RISM calculations to avoid numerical singularities.
+ for hydrogen atoms, a LJ-type potential for hydrogen atoms are necessary
+ in RISM calculations to avoid numerical singularities.
  Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1435,12 +1432,18 @@ reference "tab:params-water"
 
 \end_inset
 
- summarizes the details of these three popular modified water models which
- have been widely applied in other RISM studies 
-\color green
-[]
-\color inherit
-.
+ summarizes the details of these three popular modified water models.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2366,12 +2369,17 @@ All our calculations were carried out at the temperature of 298 K, with
  convolution integrals.
  With the water solvent susceptibility as input, the solvent-solute RISM
  equations were solved iteratively to determine radial distribution functions
- and to evaluate the excess chemical potential with various forms of functionals
+ and to evaluate the excess chemical potential.
  
-\color green
-#where are such results to be seen?#
-\color inherit
-.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  
 \end_layout
 
@@ -2393,22 +2401,48 @@ key "ParaGaussV3.1"
 
 .
  We used the COSMO PCM solvation model for comparison 
-\color green
-#as a reference: why reference? is more approximate# #which cavity generation
- method, radii, etc.?#
-\color inherit
- 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Fuchs02"
 
 \end_inset
 
+ using van der Waals radii tabulated by Bondi 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bondi64"
+
+\end_inset
+
+ and the fixed points with variable areas approach to cavity tessellation
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Su09"
+
+\end_inset
+
 .
- Geometry optimization have been done using 
-\color green
-#which method?#
-\color inherit
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ Geometry optimization have been done using quasi-Newton method 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  as implemented in ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
