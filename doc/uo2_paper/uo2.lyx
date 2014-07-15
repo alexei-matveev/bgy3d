@@ -960,8 +960,7 @@ ok?
 
 \begin_inset Formula 
 \begin{eqnarray}
-\Delta G_{\text{sol}} & = & E[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-E[\text{UO}_{2}^{2+}]-nE[\text{H}_{2}\text{O}],\nonumber \\
- & + & \Delta\mu[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-n\Delta\mu[\text{H}_{2}\text{O}]
+\Delta G_{\text{sol}} & = & G[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-nG[\text{H}_{2}\text{O}]-E[\text{UO}_{2}^{2+}]
 \end{eqnarray}
 
 \end_inset
