@@ -2491,7 +2491,7 @@ Results and discussion
 \end_layout
 
 \begin_layout Subsection
-Test calcualtions for simple ions 
+Test calculations for simple ions 
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:simple-ions"
@@ -2524,7 +2524,7 @@ reference "tab:simple-ions"
 
 .
  As can be seen, the values of the excess chemical potential of simple ions
- calculated with our 1D-RISM code are in satisfatory agreement with reported
+ calculated with our 1D-RISM code are in satisfactory agreement with reported
  RISM values and comparable to MD with SPC/E water 
 \begin_inset Note Note
 status open
@@ -2585,9 +2585,9 @@ ok?
 
 \end_inset
 
- Overall the HNC clusure relation yields slightly better results than KH
+ Overall the HNC closure relation yields slightly better results than KH
  with respect to MD and experimental reference data.
- Note that the RISM model underesimates the magnitude of solvation free
+ Note that the RISM model underestimates the magnitude of solvation free
  energies of cations by a few percent only compared to experiment; the results
  for anions are slightly worse.
  
@@ -3516,7 +3516,7 @@ kcal/mol is a somewhat lower than the solvation free energy of
 \begin_inset space ~
 \end_inset
 
-kcal/mol as determinded with the MD approach (Table
+kcal/mol as determined with the MD approach (Table
 \begin_inset space ~
 \end_inset
 
@@ -4312,7 +4312,7 @@ status open
 \begin_layout Plain Layout
 SK: This topic needs a little more: Do other AIMD, QM/MM, MD approaches
  not show this peak? Has it been seen experimentally? Maybe give a hint
- to a paper which discusses the possiblity of apical hydrogen bonding of
+ to a paper which discusses the possibility of apical hydrogen bonding of
  uranyl.
  AM: same here.
  Look at the Table 5, 5 rows of our data vs.
