@@ -201,6 +201,10 @@ include $(libbgy3d.a:.o=.d)
 %.o %.mod: %.f90
 	$(FC) $(FFLAGS) -o $(*).o -c $(<)
 
+# For lebed/Lebedev-Laikov.o only. FIXME: rename?
+%.o: %.F
+	$(FC) $(FFLAGS) -o $(*).o -c $(<)
+
 # Note capital D here, this rule has no effect:
 %.D: %.c
 	set -e; $(CC) -M $(CFLAGS) $(LDFLAGS) $(INCDIRS) $< \
