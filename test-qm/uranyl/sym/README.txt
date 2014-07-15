@@ -119,3 +119,19 @@ d, A  E(RISM), kcal     g(d), kcal/A         g(d), num, kcal/A
 3.0   -209.046655343837 -97.7056202265256   -97.7056442888162
 4.0   -313.802313300318 -76.6694172030191   -76.6694266021152
 5.0   -359.502910150843 -22.9967182245357   -22.9966927484558
+
+
+Coordination number
+===================
+
+Placing  explicit  waters into  the  first  solvation  shell does  not
+exclude the  RISM solvent from that  shell, even for 5  and 6 explicit
+waters.  Ideed here  are the  RISM coordination  numbers  (measured by
+point and clicking on the number integral graph for U-OW RDF at 3 A):
+
+n    N     n + N
+---  ----  -----
+0    6.15   6.15
+4    1.83   5.83
+5    1.21   6.21
+6    0.91   6.91
