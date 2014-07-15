@@ -857,6 +857,19 @@ where
 \end_inset
 
 .
+ This choice leaves the Kohn--Sham matrix unmodified; the interaction of
+ the electrons with solvent charge is approximated by that of fixed effective
+ atomic charges.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  In this case uranyl together with explicit aqua ligands of the first solvation
  shell are treated as the solute.
  
