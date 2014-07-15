@@ -834,13 +834,13 @@ To explore the free energy surface of uranyl aqua complexes we constructed
  a composite functional:
 \begin_inset Formula 
 \begin{equation}
-G[n,\vec{s}]=E[n,\vec{s}]+\Delta\mu[\vec{s}],
+G[n_{\text{\text{e}}},\vec{s}]=E[n_{\text{e}},\vec{s}]+\Delta\mu[\vec{s}],
 \end{equation}
 
 \end_inset
 
 where 
-\begin_inset Formula $E[n,\vec{s}]$
+\begin_inset Formula $E[n_{\text{e}},\vec{s}]$
 \end_inset
 
  is the solute internal energy depending on the geometric degrees of freedom
@@ -849,7 +849,7 @@ where
 \end_inset
 
  and, in the case of a QM solute, also on the electronic density 
-\begin_inset Formula $n$
+\begin_inset Formula $n_{\text{e}}$
 \end_inset
 
 , but not on the solvent site distribution functions 
@@ -870,7 +870,30 @@ ok?
 
 \end_inset
 
- In this case uranyl together with explicit aqua ligands of the first solvation
+ The additive form of the free energy functional, 
+\begin_inset Formula $G[n_{\text{e}},\vec{s}]$
+\end_inset
+
+, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ is to some extent justified by a common practice of including net polarization
+ effects into these force field parameters 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87"
+
+\end_inset
+
+.
+ In this work uranyl together with explicit aqua ligands of the first solvation
  shell are treated as the solute.
  
 \begin_inset Note Note
@@ -905,8 +928,6 @@ ok?
 status open
 
 \begin_layout Plain Layout
-
-\color green
 SK: which geometries for solute, solvent? should be added in section Comp.
  Det.
  BL: I will update the tables with geometry information, but uranyl ion
@@ -918,31 +939,8 @@ SK: which geometries for solute, solvent? should be added in section Comp.
 
 
 \color inherit
- The additive form of the free energy functional, 
-\begin_inset Formula $G[n,\vec{s}]$
-\end_inset
-
-, 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- is to some extent justified by a common practice of including net polarization
- effects into the force field parameters 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Berendsen87"
-
-\end_inset
-
-.
- Effective forces on the solute sites are calculated as linear response
- to a perturbation of the solute geometry.
+Effective forces on the solute sites are calculated as linear response to
+ a perturbation of the solute geometry.
  The uranyl solvation energy 
 \begin_inset Note Note
 status open
@@ -980,6 +978,29 @@ Applicable to
 \end_inset
 
  as well.
+\end_layout
+
+\end_inset
+
+ Internal energy 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+ is obtained by substituting 
+\begin_inset Formula $E$
+\end_inset
+
+ for 
+\begin_inset Formula $G$
+\end_inset
+
+ in the last equation.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
 \end_layout
 
 \end_inset
