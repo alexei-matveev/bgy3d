@@ -229,6 +229,38 @@ form_factor (const real k[3], int m, const real q[m], real x[m][3])
 
 
 /*
+  Updates  v_fft with  its  convolution with  the "instantaneous  core
+  density" of solutes. Technically, scales the k-component v(k) by the
+  form   factor   derived  from   the   weights   q  and   coordinates
+  x. Intuitively, replaces v(r) of a single unit charge at origin by a
+  weighted superposition of such potentials  from every core in x. You
+  choose which definition fits the most.
+ */
+void
+bgy3d_solute_form (const State *BHD,
+                   int m, const real q[m], real x[m][3],
+                   Vec v_fft)   /* inout */
+{
+  local Vec f_fft = vec_duplicate (v_fft);
+
+  /* Tabulate form factor: */
+  complex pure f3 (const real k[3])
+  {
+    return form_factor (k, m, q, x);
+  }
+  vec_kmap3 (BHD, f3, f_fft);
+
+  /* Pointwise-product in k-space: */
+  complex pure mul (complex a, complex b)
+  {
+    return a * b;
+  }
+  vec_fft_map2 (v_fft, mul, f_fft, v_fft); /* aliasing! */
+
+  vec_destroy (&f_fft);
+}
+
+/*
   In  the   spherically  symmetric  single  center   case  the  smooth
   assymptotic potential is chosen as
 
