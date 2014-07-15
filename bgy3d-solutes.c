@@ -206,6 +206,29 @@ cores (const State *BHD,
 
 
 /*
+  Computes the weighted "form factor"
+
+    f(k) = Σ  q  exp (-I kx )
+            i  i           i
+ */
+static inline complex
+form_factor (const real k[3], int m, const real q[m], real x[m][3])
+{
+  /*
+    This form factor is regular for  small k with a limit equal to the
+    total charge of the system and the higher order given by multipole
+    expansion:
+  */
+  complex sum = 0.0;
+  for (int i = 0; i < m; i++)
+    sum += q[i] * cexp (-I * (k[0] * x[i][0] +
+                              k[1] * x[i][1] +
+                              k[2] * x[i][2]));
+  return sum;
+}
+
+
+/*
   In  the   spherically  symmetric  single  center   case  the  smooth
   assymptotic potential is chosen as
 
