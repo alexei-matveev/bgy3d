@@ -3579,9 +3579,9 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution functions of solvated uranyl calculated with various
- variants of the SPC/E water model, in which different LJ parameters are
- assigned to hydrogen atoms.
+Radial distribution functions of solvated uranyl calculated with three modificat
+ions of the SPC/E water model, in which different LJ parameters are assigned
+ to hydrogen atoms.
  SPC/E MD 
 \begin_inset Note Note
 status open
