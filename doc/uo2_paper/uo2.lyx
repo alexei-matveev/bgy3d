@@ -3382,7 +3382,8 @@ reference "tab:params-water"
 \end_inset
 
 .
- The classical MD calculation of Maginn et al.
+ The radial distribution functions (RDFs) from the classical MD calculation
+ of Maginn et al.
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3390,18 +3391,36 @@ key "Pomogaev13"
 
 \end_inset
 
- applying the SPC/E 
-\color green
-#?#
-\color inherit
- water model was also reproduced for comparison 
-\color green
-#which code? identical paramters as in this reference?#
-\color inherit
-.
- The radial distribution functions (RDFs) of oxygen and hydrogen sites of
- water molecules, OW and HW, around uranium and oxygen sites of the uranyl
- ion, U and O, are shown in Figure
+ applying the SPC/E water 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+yes
+\end_layout
+
+\end_inset
+
+ model was reproduced for comparison using Gromacs 3 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Spoel05"
+
+\end_inset
+
+ and original parameters.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ The RDFs of oxygen and hydrogen sites of water molecules, OW and HW, around
+ uranium and oxygen sites of the uranyl ion, U and O, are shown in Figure
 \begin_inset space ~
 \end_inset
 
@@ -3415,13 +3434,18 @@ reference "fig:rdf-vs-water-model"
 .
  When comparing our RISM and MD results, it is noticeable that the RDFs
  for site pairs carrying charges of opposite sign, that is for U--OW, and
- O--HW pairs, show quite similar shapes 
-\color green
-#For me O-OW looks qualitatively similar, while O-HW has a broad single
- peak for RISM and a clear couble peak for MD.
- Only U-HW shows qualitative differences between RISM and MD#
-\color inherit
-.
+ O--HW pairs, show quite similar shapes though the double peak feature of
+ the latter is not resolved in RISM RDF.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  For U--HW and O--OW pairs, carrying charges of the same sign, the differences
  between MD and RISM models are more pronounced and shared by all three
  water models.
@@ -3451,11 +3475,8 @@ pm for various water models, while the corresponding coordination numbers
 \begin_inset space ~
 \end_inset
 
-pm that integrates to coordination number 
-\color green
-#5.2#
-\color inherit
- The excess chemical potential calculated between 
+pm that integrates to coordination number 5.2 The excess chemical potential
+ calculated between 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3501,16 +3522,31 @@ reference "sub:simple-ions"
 \end_inset
 
 .
+ The error is in part intrinsic to the RISM approximation; another part
+ is due to the difference in LJ parameters of water hydrogens.
  
-\color green
-# Here in in the section before: What is the reason for the differences?
- The RISM approach, the modified water models, the way to determine the
- solvation energy? Even a weak comment would be useful#.
+\begin_inset Note Note
+status open
 
-\color inherit
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  
-\color green
-#why not to include second solvation shell?#
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: why not to include second solvation shell? AM: not feasible for all
+ of 3 x 5 combinations of force fields.
+ Not event the first shell.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3526,7 +3562,17 @@ status open
 Radial distribution functions of solvated uranyl calculated with various
  variants of the SPC/E water model, in which different LJ parameters are
  assigned to hydrogen atoms.
- MD #SPC/E?# results are also shown for comparison.
+ SPC/E MD 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ results are also shown for comparison.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3798,8 +3844,18 @@ cSPC/E
 \begin_inset Text
 
 \begin_layout Plain Layout
-MD
+SPC/E MD
 \begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
 \end_inset
 
 
@@ -3895,10 +3951,6 @@ key "Pomogaev13"
 
 \end_inset
 
- 
-\color green
-which water model?
-\color inherit
 
 \begin_inset ERT
 status open
