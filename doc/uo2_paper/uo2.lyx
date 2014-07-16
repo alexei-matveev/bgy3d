@@ -78,7 +78,6 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
-
 alexei.matveev@gmail.com
 \end_layout
 
@@ -96,7 +95,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -7529,7 +7527,25 @@ kcal/mol
 \color green
 #There is only this single experimental number?#
 \color inherit
- by estimating the relative weights of four- and five-coordinated species
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+BL: This single value is also quoted in the review 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl11"
+
+\end_inset
+
+, and by checking the citing list in google, I didn't find any updates for
+ this value 
+\end_layout
+
+\end_inset
+
+by estimating the relative weights of four- and five-coordinated species
  from an average coordination number.
  However, current computational results offer a much more negative value,
  suggesting that five-coordinated uranyl is the dominating species in aqueous
