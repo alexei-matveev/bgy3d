@@ -7586,12 +7586,8 @@ kcal/mol, which is more negative than the gas phase values from this and
 []
 \color inherit
 .
- By combining different levels of QM theory and continuum solvation models
- (CPCM 
-\color green
-#nothing mentioned below#
-\color inherit
-, COSMO), Shamov et al.
+ By combining different levels of QM theory and continuum solvation models,
+ Shamov et al.
 \begin_inset space \space{}
 \end_inset
 
