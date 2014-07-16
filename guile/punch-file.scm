@@ -108,8 +108,16 @@
                     (records . (unquote len))
                     (elements . 1)))
           ;;
-          ;; Invoke an iterator with a callback that prints each
-          ;; value:
+          ;; Invoke  an  iterator  with a  callback  that prints  each
+          ;; value. It may be handy to use "Orbital view" for the grid
+          ;; data  where  negative  regions are  blue  by default  and
+          ;; positive  red by default. If  we dump h  = g - 1  here we
+          ;; will  have  negative  depletion  regions,  positive  peak
+          ;; regions and a zero  asymptotic value. But only if we have
+          ;; distribution functions g as inputs.
+          ;;
+          ;; FIXME: offset by one  is confusing for anything but g(r),
+          ;; think of potentials.
           ;;
           (vec (lambda (x) (format #t "~a\n" (- x 1.0))))
           (loop (cdr lens)
