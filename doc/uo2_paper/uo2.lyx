@@ -928,19 +928,16 @@ ok?
 status open
 
 \begin_layout Plain Layout
-SK: which geometries for solute, solvent? should be added in section Comp.
- Det.
- BL: Comp.
- Det.
- updated
+see comp.
+ det.
 \end_layout
 
 \end_inset
 
 
 \color inherit
-Effective forces on the solute sites are calculated as linear response to
- a perturbation of the solute geometry.
+ Effective forces on the solute sites are calculated as linear response
+ to a perturbation of the solute geometry.
  The uranyl solvation energy 
 \begin_inset Note Note
 status open
