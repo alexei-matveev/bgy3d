@@ -116,7 +116,7 @@ June 2014
 
 \begin_layout Abstract
 We apply the one-dimensional RISM model to uranyl solvation.
- Uranyl aqua complexes with 4-6 explicit water ligands and implicit water
+ Uranyl aqua complexes with 4--6 explicit water ligands and implicit water
  solvent modeled by RISM representing the rest of the solvent are compared.
  Interactions of explicitly represented atoms of the aqua complexes are
  treated either by molecular mechanics or by density functional theory to
@@ -7099,7 +7099,7 @@ reference "tab:energy-vs-model"
 \begin_inset Formula $D{}_{4\text{h}}$
 \end_inset
 
-for 
+ for 
 \begin_inset Formula $n=4$
 \end_inset
 
@@ -7179,7 +7179,7 @@ kcal/mol.
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
-corresponds to the relaxation energy of its geometry.
+ corresponds to the relaxation energy of uranyl itself.
  Its change due to solvation by 6.7
 \begin_inset space ~
 \end_inset
@@ -7460,7 +7460,7 @@ While most experimental measurements reported the number of water ligands
 \begin_inset Formula $_{2}^{2+}$
 \end_inset
 
-cation in aqueous solution could to vary between 4 to 5 
+cation in aqueous solution vary between 4 and 5 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05,Neuefeind04,Wahlgren99"
