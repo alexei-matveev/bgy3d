@@ -7860,10 +7860,31 @@ ok?
 \color inherit
 , and longer than results of PCM solvation models (see above).
  The uranyl--water distance of 248 pm is also longer than the experimental
- predictions of 241-242 pm 
-\color green
-[]
-\color inherit
+ predictions of 241
+\begin_inset Formula $\sim$
+\end_inset
+
+242
+\begin_inset space ~
+\end_inset
+
+pm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wahlgren99,Soderholm05,Neuefeind04"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  but in agreement with results of other methods, like BLYP and MP2 together
  with PCM models (Table
 \begin_inset space ~
