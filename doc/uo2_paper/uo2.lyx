@@ -930,9 +930,9 @@ status open
 \begin_layout Plain Layout
 SK: which geometries for solute, solvent? should be added in section Comp.
  Det.
- BL: I will update the tables with geometry information, but uranyl ion
- bond is actually changed in QM-RISM.
- 
+ BL: Comp.
+ Det.
+ updated
 \end_layout
 
 \end_inset
@@ -2484,6 +2484,76 @@ key "Chaffey-Millar11,Nikodem13"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+In QM calculations, U--O bonds are relaxed linearly while they are totally
+ kept rigid in MM calculations.
+ The bond distances are fixed at 176
+\begin_inset space ~
+\end_inset
+
+pm in RISM calculations for 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl ion, and in MM+RISM geometry optimization for uranyl aquo complexes
+ are stretched to 177
+\begin_inset Formula $\sim$
+\end_inset
+
+178
+\begin_inset space ~
+\end_inset
+
+pm.
+ In both MM and QM cases, the geometries of explicit water ligands in [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, 
+\begin_inset Formula $4\leq n\leq6$
+\end_inset
+
+, are kept rigid, with the O--H bond distances fixed at 100
+\begin_inset space ~
+\end_inset
+
+pm and H--O--H bond angle at 109.47
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
