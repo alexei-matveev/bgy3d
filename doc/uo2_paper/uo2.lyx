@@ -78,6 +78,7 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
+
 alexei.matveev@gmail.com
 \end_layout
 
@@ -95,6 +96,7 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
+
 roesch@mytum.de
 \end_layout
 
@@ -7547,9 +7549,19 @@ key "Buehl11"
 
 by estimating the relative weights of four- and five-coordinated species
  from an average coordination number.
- However, current computational results offer a much more negative value,
- suggesting that five-coordinated uranyl is the dominating species in aqueous
- solution.
+ However, current computational results considering explicitly the first
+ solvation shell 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ offer a much more negative value, suggesting that five-coordinated uranyl
+ is the dominating species in aqueous solution.
  For example, using the integral equation formalism polarizable continuum
  model (IEFPCM) and the Møller--Plesset (MP2) method, Cao et al.
 \begin_inset space \space{}
@@ -7647,14 +7659,8 @@ key "Gutowski06"
 
 \end_inset
 
- considered explicitly the first solvation shell 
-\color green
-#do not all approaches discussed here do that? If yes shift this half sentence
- upwards#
-\color inherit
- and applied the self-consistent isodensity polarizable continuum model
- (SCIPCM).
- They calculated 
+ applied the self-consistent isodensity polarizable continuum model (SCIPCM)
+ and calculated 
 \begin_inset Formula $\Delta G_{\text{sol}}=-412$
 \end_inset
 
@@ -7662,7 +7668,17 @@ key "Gutowski06"
 \begin_inset space ~
 \end_inset
 
-kcal/mol and 
+kcal/mol, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \begin_inset Formula $\Delta G_{\text{R}}=-7.8$
 \end_inset
 
