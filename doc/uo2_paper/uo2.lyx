@@ -7803,13 +7803,17 @@ reference "tab:comparison-reaction-energy"
 
 \end_inset
 
-, the reaction energy for the water addition to the four-coordinate uranyl
- aqua complex to form the five-coordinate species of 
+, the reaction energy for the water addition to the four-coordinated uranyl
+ aqua complex to form the five-coordinated species 
 \begin_inset Formula $\Delta G_{\text{R}}=-1.6$
 \end_inset
 
-, as calculated with the QM+RISM method, is in the best agreement with the
- experimental result of 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, as calculated with the QM+RISM method, is in the best agreement
+ with the experimental result of 
 \begin_inset Formula $\Delta G_{\text{R}}=-1.2$
 \end_inset
 
