@@ -7827,9 +7827,36 @@ kcal/mol and the solvation free energy of
 
 kcal/mol lies about in the middle of experimental range.
  The uranyl bond from our RISM calculations of 181 pm is by about 2.3% than
- the experimental values of 177-XXX pm 
+ the experimental values of 177
+\begin_inset Formula $\sim$
+\end_inset
+
+178
+\begin_inset space ~
+\end_inset
+
+pm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wahlgren99,Soderholm05,Neuefeind04"
+
+\end_inset
+
+ 
 \color green
-#more citations here#
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\color green
+ok?
+\end_layout
+
+\end_inset
+
+
 \color inherit
 , and longer than results of PCM solvation models (see above).
  The uranyl--water distance of 248 pm is also longer than the experimental
