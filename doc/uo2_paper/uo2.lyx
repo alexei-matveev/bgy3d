@@ -4340,7 +4340,11 @@ reference "tab:observables-vs-uranyl-model"
 \end_inset
 
 .
- It should be noted that in a AIMD calculation 
+ 
+\end_layout
+
+\begin_layout Standard
+It should be noted that in a AIMD calculation 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Nichols08"
@@ -4380,11 +4384,8 @@ key "Guilbaud93"
 
 \end_inset
 
-, in which the intensity of the peak became more and more stronger as site
- charge on uraium atom increased from +3 to +6.
- As they mentioned, in the case where water is apical bonded to oxygen atom
- of uranyl, the OW--HW dipoles of water molecules are more or less antiparallel
- to the O--U dipole of uranyl ion.
+, in which the intensity of the peak became stronger as site charge on uranium
+ atom increased from +3 to +6.
  Hagberg et al.
  
 \begin_inset CommandInset citation
@@ -4394,18 +4395,13 @@ key "hagberg05"
 \end_inset
 
  also claimed that in some configurations during their MD simulations, there
- exists a weak hydrogen bond to the uranyl oxygen, with bond length about
- 200
-\begin_inset Formula $\text{\textasciitilde}$
-\end_inset
-
-250
+ exists a weak hydrogen bond to the uranyl oxygen with bond length about
+ 200--250
 \begin_inset space ~
 \end_inset
 
 pm.
  In the AIMD work of Bühl et al.
- 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl06"
@@ -4418,7 +4414,8 @@ key "Buehl06"
 \end_inset
 
 pm are rarely maintained for longer than a few hundred femtoseconds, thus
- the small peak is absent in the RDF.
+ the small peak is absent in their RDF.
+ 
 \begin_inset Note Note
 status open
 
@@ -4439,11 +4436,6 @@ SK: This topic needs a little more: Do other AIMD, QM/MM, MD approaches
  not show this peak? Has it been seen experimentally? Maybe give a hint
  to a paper which discusses the possibility of apical hydrogen bonding of
  uranyl.
- AM: same here.
- Look at the Table 5, 5 rows of our data vs.
- 9 rows of reference data.
- Too much for my taste.
- I am not making this even worse.
  BL: update other statements for the hydrogen bonding.
  In 
 \begin_inset CommandInset citation
