@@ -2466,7 +2466,11 @@ ok?
 
 \end_inset
 
- Geometry optimization have been done using quasi-Newton method 
+
+\end_layout
+
+\begin_layout Standard
+Geometry optimization have been done using quasi-Newton method 
 \begin_inset Note Note
 status open
 
@@ -2484,12 +2488,10 @@ key "Chaffey-Millar11,Nikodem13"
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-In QM calculations, U--O bonds are relaxed linearly while they are totally
- kept rigid in MM calculations.
- The bond distances are fixed at 176
+ In QM calculations, U--O bonds were relaxed while constrained to have the
+ same value by symmetry.
+ In MM and MM+RISM calculations uranyl was rigid, however.
+ The U--O distances were fixed to 176
 \begin_inset space ~
 \end_inset
 
@@ -2501,8 +2503,9 @@ bare
 \begin_inset Quotes erd
 \end_inset
 
- uranyl ion, and in MM+RISM geometry optimization for uranyl aquo complexes
- are stretched to 177
+ uranyl ion.
+ In MM+RISM geometry optimization of uranyl aqua complexes the uranyl bonds
+ were stretched to 177
 \begin_inset Formula $\sim$
 \end_inset
 
@@ -2510,8 +2513,8 @@ bare
 \begin_inset space ~
 \end_inset
 
-pm.
- In both MM and QM cases, the geometries of explicit water ligands in [UO
+pm based on our previous experience with these species.
+ The SPC/E geometry of explicit water ligands in [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -2531,11 +2534,11 @@ O)
 \begin_inset Formula $4\leq n\leq6$
 \end_inset
 
-, are kept rigid, with the O--H bond distances fixed at 100
+, features the O--H distance of 100
 \begin_inset space ~
 \end_inset
 
-pm and H--O--H bond angle at 109.47
+pm and H--O--H angle of 109.47
 \begin_inset space ~
 \end_inset
 
