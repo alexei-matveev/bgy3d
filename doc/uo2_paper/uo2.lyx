@@ -7582,9 +7582,22 @@ kcal/mol, which is below the range of experimental values.
 
 kcal/mol, which is more negative than the gas phase values from this and
  other studies 
-\color green
-[]
-\color inherit
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl05,Shamov05,Gutowski06"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
 .
  By combining different levels of QM theory and continuum solvation models,
  Shamov et al.
