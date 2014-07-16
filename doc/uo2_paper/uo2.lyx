@@ -4373,6 +4373,61 @@ reference "fig:rdf-vs-uranyl-model"
 \end_inset
 
 ).
+ This small peak is observed in Guilbaud and Wipff's early work 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Guilbaud93"
+
+\end_inset
+
+, in which the intensity of the peak became more and more stronger as site
+ charge on uraium atom increased from +3 to +6.
+ As they mentioned, in the case where water is apical bonded to oxygen atom
+ of uranyl, the OW--HW dipoles of water molecules are more or less antiparallel
+ to the O--U dipole of uranyl ion.
+ Hagberg et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hagberg05"
+
+\end_inset
+
+ also claimed that in some configurations during their MD simulations, there
+ exists a weak hydrogen bond to the uranyl oxygen, with bond length about
+ 200
+\begin_inset Formula $\text{\textasciitilde}$
+\end_inset
+
+250
+\begin_inset space ~
+\end_inset
+
+pm.
+ In the AIMD work of Bühl et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl06"
+
+\end_inset
+
+, they observed that the close contacts between uranyl oxygen and water
+ with O--HW distance below 200
+\begin_inset space ~
+\end_inset
+
+pm are rarely maintained for longer than a few hundred femtoseconds, thus
+ the small peak is absent in the RDF.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  
 \color green
 
@@ -4389,7 +4444,30 @@ SK: This topic needs a little more: Do other AIMD, QM/MM, MD approaches
  9 rows of reference data.
  Too much for my taste.
  I am not making this even worse.
- Bo? You are the first author.
+ BL: update other statements for the hydrogen bonding.
+ In 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nichols08"
+
+\end_inset
+
+, they cited x-ray data 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Aaberg83"
+
+\end_inset
+
+ for 
+\begin_inset Quotes eld
+\end_inset
+
+apical second shells
+\begin_inset Quotes erd
+\end_inset
+
+, but I can't find relevant description in that paper
 \end_layout
 
 \end_inset
