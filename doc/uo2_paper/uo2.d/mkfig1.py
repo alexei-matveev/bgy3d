@@ -57,19 +57,19 @@ def sub(ax, i, do_legend=False):
     if do_legend:
         plt.legend(numpoints=1, frameon=False)
 
-sub(subplot(221), 1, do_legend=True) # U-OW
+sub (subplot(2, 2, 1), 1, do_legend=True) # U-OW
 plt.ylabel("g(r)", fontsize=fontsize)
 plt.title("U-OW", fontsize=fontsize)
 
-sub(subplot(222), 2)            # U-HW
+sub (subplot(2, 2, 2), 2)            # U-HW
 plt.title("U-HW", fontsize=fontsize)
 
-sub(subplot(223), 3)            # O-OW
+sub (subplot(2, 2, 3), 3)            # O-OW
 plt.ylabel("g(r)", fontsize=fontsize)
 plt.xlabel(u"r, Å", fontsize=fontsize)
 plt.title("O-OW", fontsize=fontsize)
 
-sub(subplot(224), 4)            # O-HW
+sub (subplot(2, 2, 4), 4)            # O-HW
 plt.xlabel(u"r, Å", fontsize=fontsize)
 plt.title("O-HW", fontsize=fontsize)
 
