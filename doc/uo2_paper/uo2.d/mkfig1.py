@@ -6,7 +6,7 @@ from numpy import loadtxt, array, shape
 from pylab import *
 import matplotlib.pyplot  as plt
 
-fontsize = 14
+fontsize = 10
 
 # Each of these  has at least 1 +  3x3 columns for r and  all 3x3 pair
 # distributions of uranyl and water sites:
@@ -41,7 +41,7 @@ src = [(md, "MD", ":", "k")] + src
 data, legends, styles, colors = zip(*src)
 
 # Better be longer for a 4 x 1 subplot grid. Dimensions in inches:
-figure(figsize=(4, 8))
+figure(figsize=(4, 4 * 1.5))
 
 def sub(ax, i, title, do_legend=False):
 
@@ -56,10 +56,11 @@ def sub(ax, i, title, do_legend=False):
     plt.xlim((1.0, 7.0))
     # y0, y1 = plt.ylim()
     plt.ylim(ymin=0.0)
-    # ax.locator_params(tight=True, nbins=4)
+    ax.locator_params (tight=True, nbins=6)
 
     if do_legend:
-        plt.legend(numpoints=1, frameon=False)
+        plt.legend (ncol=1, numpoints=1, frameon=False,
+                    fontsize=fontsize)
 
     if i < 4:
         setp (ax.get_xticklabels(), visible=False)
@@ -78,4 +79,4 @@ plt.ylabel("g(r)", fontsize=fontsize)
 plt.xlabel(u"r, Å", fontsize=fontsize)
 
 # show()
-savefig(sys.argv[1], transparent=True)
+savefig(sys.argv[1], transparent=True, bbox_inches='tight')
