@@ -1361,7 +1361,10 @@ key "Guilbaud96"
 
  and compare the results to those of models newly developed by Maginn et
  al.
- (RM12 and PM13) 
+\begin_inset space \space{}
+\end_inset
+
+(RM12 and PM13) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rai12,Pomogaev13"
@@ -3475,7 +3478,10 @@ reference "tab:params-water"
 .
  The radial distribution functions (RDFs) from the classical MD calculation
  of Maginn et al.
- 
+\begin_inset space \space{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pomogaev13"
@@ -4377,7 +4383,10 @@ key "Guilbaud93"
 , in which the intensity of the peak became stronger as site charge on uranium
  atom increased from +3 to +6.
  Hagberg et al.
- 
+\begin_inset space \space{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "hagberg05"
@@ -4392,6 +4401,10 @@ key "hagberg05"
 
 pm.
  In the AIMD work of Bühl et al.
+\begin_inset space \space{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl06"
