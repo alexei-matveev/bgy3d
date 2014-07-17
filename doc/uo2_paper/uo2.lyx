@@ -66,7 +66,7 @@
 \begin_body
 
 \begin_layout Title
-Uranyl solvation by RISM model
+Uranyl solvation by reference interaction site model
 \end_layout
 
 \begin_layout Author
@@ -115,7 +115,8 @@ June 2014
 \end_layout
 
 \begin_layout Abstract
-We apply the one-dimensional RISM model to uranyl solvation.
+We apply the one-dimensional reference interaction site model (RISM) to
+ uranyl solvation.
  Uranyl aqua complexes with 4--6 explicit water ligands and implicit water
  solvent modeled by RISM representing the rest of the solvent are compared.
  Interactions of explicitly represented atoms of the aqua complexes are
