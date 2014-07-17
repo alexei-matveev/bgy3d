@@ -3572,12 +3572,21 @@ pm for various water models, while the corresponding coordination numbers
 \begin_inset space ~
 \end_inset
 
-pm that integrates to coordination number 5.2 The excess chemical potential
- calculated between 
+pm that integrates to coordination number 5.0 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+5.2?
+\end_layout
+
+\end_inset
+
+ The excess chemical potential calculated between 
 \begin_inset Formula $-$
 \end_inset
 
-308 to 
+309 to 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3585,7 +3594,7 @@ pm that integrates to coordination number 5.2 The excess chemical potential
 \begin_inset space ~
 \end_inset
 
-kcal/mol is a somewhat lower than the solvation free energy of
+kcal/mol is somewhat higher than the solvation free energy of
 \begin_inset Formula $-$
 \end_inset
 
