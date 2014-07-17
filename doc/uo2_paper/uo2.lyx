@@ -310,8 +310,8 @@ key "Hirata81,Hirata82"
 \end_inset
 
  and by enforcing the desired dielectric constant for all thermodynamic
- routes, the RISM method has been extended (dielectric consistent RISM (DRISM)
- 
+ routes, the RISM method has been extended (dielectrically consistent RISM
+ (DRISM) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
