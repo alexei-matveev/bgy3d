@@ -33,17 +33,17 @@ $d/fig1.svg: $d/mkfig1.py $d/md-oh.dat $d/md-oo.dat $d/md-uh.dat $d/md-uo.dat $d
 
 bitmaps = \
 	$d/4h2o,mm+rism.png \
-	$d/4h2o,mm.png \
 	$d/5h2o,mm+rism.png \
-	$d/5h2o,mm.png \
 	$d/6h2o,mm+rism.png \
+	$d/4h2o,mm.png \
+	$d/5h2o,mm.png \
 	$d/6h2o,mm.png
 
 $(bitmaps): $d/jmol.script
 
 # This bitmap is overlayed with text annotation in fig3.svg:
 $d/fig3-bitmap.png: $(bitmaps)
-	montage -mode concatenate -tile 2x3 $(bitmaps) $(@)
+	montage -mode concatenate -tile 3x2 $(bitmaps) $(@)
 
 # Therefore the additional dependence:
 $d/fig3.pdf: $d/fig3-bitmap.png
