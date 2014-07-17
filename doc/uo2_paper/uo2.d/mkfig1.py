@@ -42,8 +42,9 @@ data, legends, styles, colors = zip(*src)
 
 figure()
 
-def sub(ax, i, do_legend=False):
+def sub(ax, i, title, do_legend=False):
 
+    plt.title (title, fontsize=fontsize)
     for d, legend, style, color in zip(data, legends, styles, colors):
         plt.plot(d[:, 0], d[:, i],
                  linestyle=style, label=legend, lw=2, color=color,
@@ -57,21 +58,17 @@ def sub(ax, i, do_legend=False):
     if do_legend:
         plt.legend(numpoints=1, frameon=False)
 
-sub (subplot(2, 2, 1), 1, do_legend=True) # U-OW
+sub (subplot(2, 2, 1), 1, "U-OW", do_legend=True)
 plt.ylabel("g(r)", fontsize=fontsize)
-plt.title("U-OW", fontsize=fontsize)
 
-sub (subplot(2, 2, 2), 2)            # U-HW
-plt.title("U-HW", fontsize=fontsize)
+sub (subplot(2, 2, 2), 2, "U-HW")
 
-sub (subplot(2, 2, 3), 3)            # O-OW
+sub (subplot(2, 2, 3), 3, "O-OW")
 plt.ylabel("g(r)", fontsize=fontsize)
 plt.xlabel(u"r, Å", fontsize=fontsize)
-plt.title("O-OW", fontsize=fontsize)
 
-sub (subplot(2, 2, 4), 4)            # O-HW
+sub (subplot(2, 2, 4), 4, "O-HW")
 plt.xlabel(u"r, Å", fontsize=fontsize)
-plt.title("O-HW", fontsize=fontsize)
 
 # show()
 savefig(sys.argv[1], transparent=True)
