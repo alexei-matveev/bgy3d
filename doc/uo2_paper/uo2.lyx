@@ -3650,19 +3650,8 @@ status open
 
 \begin_layout Plain Layout
 Radial distribution functions of solvated uranyl calculated with three modificat
-ions of the SPC/E water model, in which different LJ parameters are assigned
- to hydrogen atoms.
- SPC/E MD 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- results are also shown for comparison.
+ions of the SPC/E water model.
+ SPC/E MD results are shown for comparison.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3681,7 +3670,7 @@ name "fig:rdf-vs-water-model"
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename uo2.d/fig1.svg
-	width 100col%
+	width 100line%
 
 \end_inset
 
@@ -4540,7 +4529,7 @@ name "fig:rdf-vs-uranyl-model"
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename uo2.d/fig2.svg
-	width 100col%
+	width 100line%
 
 \end_inset
 
@@ -6419,7 +6408,7 @@ kcal/mol from the solvation energy of the bare uranyl solvent model.
 
 \begin_layout Standard
 \begin_inset Float figure
-wide false
+wide true
 sideways false
 status open
 
@@ -6479,7 +6468,7 @@ name "fig:geometries"
 \begin_inset Graphics
 	filename uo2.d/fig3.pdf
 	lyxscale 25
-	width 100col%
+	width 100line%
 
 \end_inset
 
