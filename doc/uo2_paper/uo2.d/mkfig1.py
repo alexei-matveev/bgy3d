@@ -40,11 +40,13 @@ src = [(md, "MD", ":", "k")] + src
 
 data, legends, styles, colors = zip(*src)
 
-figure()
+# Better be longer for a 4 x 1 subplot grid. Dimensions in inches:
+figure(figsize=(4, 8))
 
 def sub(ax, i, title, do_legend=False):
 
-    plt.title (title, fontsize=fontsize)
+    # ax.set(aspect="equal")
+    plt.title (title, loc="left", fontsize=fontsize)
     for d, legend, style, color in zip(data, legends, styles, colors):
         plt.plot(d[:, 0], d[:, i],
                  linestyle=style, label=legend, lw=2, color=color,
@@ -54,20 +56,25 @@ def sub(ax, i, title, do_legend=False):
     plt.xlim((1.0, 7.0))
     # y0, y1 = plt.ylim()
     plt.ylim(ymin=0.0)
+    # ax.locator_params(tight=True, nbins=4)
 
     if do_legend:
         plt.legend(numpoints=1, frameon=False)
 
-sub (subplot(2, 2, 1), 1, "U-OW", do_legend=True)
+    if i < 4:
+        setp (ax.get_xticklabels(), visible=False)
+
+sub (subplot(4, 1, 1), 1, "U-OW", do_legend=True)
 plt.ylabel("g(r)", fontsize=fontsize)
 
-sub (subplot(2, 2, 2), 2, "U-HW")
-
-sub (subplot(2, 2, 3), 3, "O-OW")
+sub (subplot(4, 1, 2), 2, "U-HW")
 plt.ylabel("g(r)", fontsize=fontsize)
-plt.xlabel(u"r, Å", fontsize=fontsize)
 
-sub (subplot(2, 2, 4), 4, "O-HW")
+sub (subplot(4, 1, 3), 3, "O-OW")
+plt.ylabel("g(r)", fontsize=fontsize)
+
+sub (subplot(4, 1, 4), 4, "O-HW")
+plt.ylabel("g(r)", fontsize=fontsize)
 plt.xlabel(u"r, Å", fontsize=fontsize)
 
 # show()
