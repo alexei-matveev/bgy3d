@@ -3230,9 +3230,9 @@ reference "fig:rdf-vs-water-model"
  For U--HW and O--OW pairs, carrying charges of the same sign, the differences
  between MD and RISM models are more pronounced and shared by all three
  water models.
- From the analysis of the RDF plots we conclude that various variants of
- the SPC/E water model differ slightly in the intensity of the peaks, but
- the positions of the peaks do not vary much.
+ From the analysis of the RDF plots we conclude that the three variations
+ of the SPC/E water model differ slightly in the intensity of the peaks,
+ but the positions of the peaks do not vary much.
  As shown in Table
 \begin_inset space ~
 \end_inset
@@ -7276,8 +7276,9 @@ key "Moskaleva04"
 \end_inset
 
 .
- However, the solvation free energy of uranyl for various conformation of
- the first solvation shell, as estimated using our model complexes for 
+ However, the solvation free energy of uranyl for various conformations
+ of the first solvation shell, as estimated using our model complexes for
+ 
 \begin_inset Formula $4\le n\le6$
 \end_inset
 
