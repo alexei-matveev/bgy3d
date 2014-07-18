@@ -18,7 +18,7 @@ data, legends, styles, colors = zip(*source)
 data = [loadtxt(_) for _ in data]
 
 # Better be longer for a 4 x 1 subplot grid. Dimensions in inches:
-figure(figsize=(4, 4 * 1.5))
+figure(figsize=(4, 4 * 2))
 
 def sub(ax, i, title, do_legend=False):
 
@@ -32,7 +32,7 @@ def sub(ax, i, title, do_legend=False):
     plt.xlim((1.0, 7.0))
     # y0, y1 = plt.ylim()
     plt.ylim(ymin=0.0)
-    ax.locator_params (tight=True, nbins=6)
+    ax.locator_params (tight=True, nbins=3)
 
     if do_legend:
         plt.legend (ncol=2, numpoints=1, frameon=False,
