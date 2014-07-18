@@ -4132,8 +4132,8 @@ reference "tab:observables-vs-uranyl-model"
 \begin_inset Formula $\sim$
 \end_inset
 
-5.2 as determined by GW and Maginn's models, RM12 and PM13, are slightly
- varied from 
+5.2 as determined by GW and Maginn's models, RM12 and PM13, deviate from
+ 
 \emph on
 ab-initio
 \emph default
@@ -4158,9 +4158,9 @@ key "Guilbaud93,Rai12"
 
 \end_inset
 
- results, in the latter three coordination 5 was precisely predicted, although
- experiments reported a variable range from 4 to 5, as in X-ray scattering
- 
+ results.
+ The latter three predict coordination number 5, although experiments reported
+ a variable range from 4 to 5, as in X-ray scattering 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Neuefeind04"
@@ -4217,7 +4217,7 @@ pm given by GW model falls in the range of 246
 \begin_inset space ~
 \end_inset
 
-pm interpreted by AIMD and QMCF-MD calculations 
+pm of AIMD and QMCF-MD calculations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl06,Nichols08,Frick09"
@@ -4227,8 +4227,8 @@ key "Buehl06,Nichols08,Frick09"
 .
  The variances caused by different uranyl models are not surprising since
  they were fitted in different schemes, however, in general RISM calculations
- applying these models show the water solvent structures around uranyl ion
- which are comparable with experimental and explicit solvation model simulations.
+ applying these models show the solvent structure around uranyl ion to be
+ comparable with experimental and explicit solvation model simulations.
  
 \begin_inset Note Note
 status open
@@ -9714,7 +9714,7 @@ The atomistic nature of the RISM model offers a more detailed and consistent
  
 \color black
 Without the need for statistical sampling as explicit solvation models require,
- RISM method predicts the correct water solvent structure around uranyl
+ the RISM method predicts the correct water solvent structure around uranyl
  ion which is comparable with those are determined by experiments.
  Moreover, the hybrid QM+RISM calculation indicates a slight free energy
  difference 
@@ -9729,7 +9729,7 @@ Without the need for statistical sampling as explicit solvation models require,
 
 kcal/mol)
 \color black
- between coordination 4 and 5 uranyl in aqueous solution, which is most
+ between four- and five-coordinated uranyl in aqueous solution, which is
  close to experimental result 
 \color inherit
 (
@@ -9742,6 +9742,7 @@ kcal/mol)
 
 kcal/mol) while it was overestimated by continuum solvation model and AIMD
  calculations.
+ 
 \begin_inset Note Note
 status open
 
