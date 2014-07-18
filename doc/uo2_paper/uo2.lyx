@@ -2400,11 +2400,13 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-The solvation energy (excess chemical potential, in kcal/mol) for alkali
- and halide ions calculated with the cSPC/E water model and the RISM approach.
- KH and HNC closure relations have been used.
- MD results with SPC/E water and experimental values are also shown for
- comparison 
+The solvation energy (excess chemical potential) for alkali and halide ions
+ by RISM appraoch with the cSPC/E water model.
+ MD and experimental values are also shown for comparison.
+\begin_inset Formula $^{a}$
+\end_inset
+
+ 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simple-ions"
@@ -2470,41 +2472,6 @@ KH
 
 \begin_layout Plain Layout
 KH
-\begin_inset Formula $^{a}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-HNC
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-HNC
-\begin_inset Formula $^{a}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MD
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -2517,8 +2484,43 @@ MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-Exp
+HNC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HNC
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MD
 \begin_inset Formula $^{c}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Exp
+\begin_inset Formula $^{d}$
 \end_inset
 
 
@@ -3089,7 +3091,21 @@ footnotetext{
 \begin_inset Formula $^{a}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Energies in kcal/mol.
+ KH and HNC closure relations have been used.
+ 
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3100,11 +3116,16 @@ key "Joung13"
 
 \end_inset
 
-, 
-\begin_inset Formula $^{b}$
+.
+ 
+\begin_inset Formula $^{c}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+MD with SPC/E water from Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3115,11 +3136,16 @@ key "Joung08"
 
 \end_inset
 
-, 
-\begin_inset Formula $^{c}$
+.
+ 
+\begin_inset Formula $^{d}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3130,7 +3156,7 @@ key "Schmid00"
 
 \end_inset
 
-
+.
 \begin_inset ERT
 status open
 
