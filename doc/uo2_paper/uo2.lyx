@@ -944,14 +944,14 @@ This Jacobian is also used to compute the linear response of the solution
 
  to a perturbation of the solute geometry as one step in computing the forces.
  A system of linear equations 
-\begin_inset Formula $J[t]\delta t[s_{i}]=-\partial F/\partial s_{i}$
+\begin_inset Formula $J[t]\delta t_{s}=-\partial F/\partial\vec{s}$
 \end_inset
 
  is solved by iteratively refining the response 
-\begin_inset Formula $\delta t[\vec{s}]$
+\begin_inset Formula $\delta t_{s}$
 \end_inset
 
- to a displacement along 
+ infinitesimal changes of parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
@@ -968,11 +968,11 @@ key "petsc-user-ref"
 \end_inset
 
  on the solute geometric parameters 
-\begin_inset Formula $s$
+\begin_inset Formula $\vec{s}$
 \end_inset
 
  that results into the inhomogeneity on the right hand side 
-\begin_inset Formula $-\partial F/\partial s_{i}$
+\begin_inset Formula $-\partial F/\partial\vec{s}$
 \end_inset
 
  is confined to the intra-molecular correlation function 
