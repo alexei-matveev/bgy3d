@@ -5855,16 +5855,16 @@ Average uranyl--water distance,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) (pm), intra-molecular interaction between the uranyl ion and its
- explicit water ligands, 
+(U--OW), intra-molecular interaction between the uranyl ion and its explicit
+ water ligands, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
- (kcal/mol), and solvation free energy, 
+, and solvation free energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), for [UO
+, for [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -5878,6 +5878,10 @@ O)
 
 ]
 \begin_inset Formula $^{2+}$
+\end_inset
+
+.
+\begin_inset Formula $^{a}$
 \end_inset
 
  
@@ -6202,6 +6206,42 @@ status open
 
 \backslash
 end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Distance in pm, energies in kcal/mol.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
 \end_layout
 
 \end_inset
