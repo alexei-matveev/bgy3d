@@ -6445,41 +6445,23 @@ Average uranyl--water distance of the first solvation shell,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) (pm), intra-molecular energy 
+(U--OW), intra-molecular energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
- (kcal/mol) corresponding to aqua ligand binding for uranyl aqua complexes
- [UO
-\begin_inset Formula $_{2}$
+
+\begin_inset Formula $^{a}$
 \end_inset
 
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-, 
-\begin_inset Formula $4\leq n\leq6$
-\end_inset
-
- and bare uranyl (
-\begin_inset Formula $n=0$
-\end_inset
-
-), without and with embedding into a RISM solvent.
- The solvation free energy 
+ without and with RISM solvent.
+ The uranyl solvation energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of uranyl according to the RISM model is also shown.
+, is also shown.
+\begin_inset Formula $^{b}$
+\end_inset
+
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -6554,7 +6536,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 4
-\begin_inset Formula $^{a}$
+\begin_inset Formula $^{c}$
 \end_inset
 
 
@@ -6567,7 +6549,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 5
-\begin_inset Formula $^{a}$
+\begin_inset Formula $^{c}$
 \end_inset
 
 
@@ -6580,7 +6562,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 6
-\begin_inset Formula $^{a}$
+\begin_inset Formula $^{c}$
 \end_inset
 
 
@@ -6954,7 +6936,53 @@ footnotetext{
 \begin_inset Formula $^{a}$
 \end_inset
 
- Structures in Figure
+
+\begin_inset space ~
+\end_inset
+
+Corresponds to binding energy of 
+\begin_inset Formula $4\leq n\leq6$
+\end_inset
+
+ water ligands in [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+ and is identically zero for rigid bare uranyl (
+\begin_inset Formula $n=0$
+\end_inset
+
+).
+ 
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Bond lengths in pm, energies in kcal/mol.
+ 
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Structures in Figure
 \begin_inset space ~
 \end_inset
 
