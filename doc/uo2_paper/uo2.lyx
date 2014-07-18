@@ -5213,7 +5213,7 @@ HEXS
 
 \begin_layout Plain Layout
 FTICR--MS
-\begin_inset Formula $^{X}$
+\begin_inset Formula $^{i}$
 \end_inset
 
 
@@ -5276,7 +5276,7 @@ FTICR--MS
 
 \begin_layout Plain Layout
 FTICR--MS
-\begin_inset Formula $^{Y}$
+\begin_inset Formula $^{k}$
 \end_inset
 
 
@@ -5339,7 +5339,7 @@ FTICR--MS
 
 \begin_layout Plain Layout
 FTICR--MS
-\begin_inset Formula $^{i}$
+\begin_inset Formula $^{l}$
 \end_inset
 
 
@@ -5550,8 +5550,86 @@ key "Soderholm05"
 \end_inset
 
 .
+
  
 \begin_inset Formula $^{i}$
+\end_inset
+
+
+\lang english
+ Computed from 
+\begin_inset Formula $\Delta_{\text{hyd}}H_{\text{abs}}^{\circ}=-1345\pm20$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kJ/mol and 
+\begin_inset Formula $\Delta_{\text{hyd}}S_{\text{abs}}^{\circ}=-399\pm5$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+J/(mol
+\begin_inset Formula $\cdot$
+\end_inset
+
+K) in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Marcus86"
+
+\end_inset
+
+.
+
+ 
+\begin_inset Formula $^{k}$
+\end_inset
+
+ Computed from 
+\begin_inset Formula $\Delta H_{\text{hyd}}=-1665\pm64$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kJ/mol and 
+\begin_inset Formula $\Delta S_{\text{hyd}}=-400$
+\end_inset
+
+
+\lang english
+
+\begin_inset space ~
+\end_inset
+
+J/(mol
+\begin_inset Formula $\cdot$
+\end_inset
+
+K) as in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gibson05"
+
+\end_inset
+
+.
+ 
+\begin_inset Formula $^{l}$
 \end_inset
 
  Computed from 
@@ -5596,83 +5674,8 @@ key "Moskaleva04"
 
 \end_inset
 
-, 
-\begin_inset Formula $^{X}$
-\end_inset
-
-
+,
 \lang english
- Computed from 
-\begin_inset Formula $\Delta_{\text{hyd}}H_{\text{abs}}^{\circ}=-1345\pm20$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kJ/mol and 
-\begin_inset Formula $\Delta_{\text{hyd}}S_{\text{abs}}^{\circ}=-399\pm5$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-J/(mol
-\begin_inset Formula $\cdot$
-\end_inset
-
-K) in Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Marcus86"
-
-\end_inset
-
-.
-
- 
-\begin_inset Formula $^{Y}$
-\end_inset
-
- Computed from 
-\begin_inset Formula $\Delta H_{\text{hyd}}=-1665\pm64$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kJ/mol and 
-\begin_inset Formula $\Delta S_{\text{hyd}}=-400$
-\end_inset
-
-
-\lang english
-
-\begin_inset space ~
-\end_inset
-
-J/(mol
-\begin_inset Formula $\cdot$
-\end_inset
-
-K) as in Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Gibson05"
-
-\end_inset
-
-.
  
 \begin_inset ERT
 status open
