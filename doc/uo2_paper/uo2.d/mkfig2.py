@@ -33,6 +33,7 @@ def sub(ax, i, title, do_legend=False):
     # y0, y1 = plt.ylim()
     plt.ylim(ymin=0.0)
     ax.locator_params (tight=True, nbins=3)
+    ax.xaxis.set_ticks (range(1, 8))
 
     if do_legend:
         plt.legend (ncol=2, numpoints=1, frameon=False,
