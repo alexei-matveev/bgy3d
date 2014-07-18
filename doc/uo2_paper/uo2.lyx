@@ -5691,8 +5691,9 @@ Free energy minimization for uranyl aqua complexes
 More insight into the structure of the first solvation shell and details
  of the uranyl--water interactions can be gained by introducing explicit
  water ligands into the solute model embedded in RISM.
- In these models the uranyl geometry is fixed while the positions and orientatio
-ns of the water lingands are optimized.
+ In these models the uranyl geometry is either fixed (MM, MM+RISM) or not
+ (QM, QM+RISM, see below) while the positions and orientations of the water
+ lingands are optimized.
  Table
 \begin_inset space ~
 \end_inset
