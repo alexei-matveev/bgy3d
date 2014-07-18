@@ -9005,18 +9005,6 @@ MP2+IEFPCM
 
 \begin_layout Plain Layout
 244
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-
 \begin_inset Formula $\sim$
 \end_inset
 
@@ -9503,10 +9491,7 @@ key "Soderholm05"
 
 \end_inset
 
-
 .
-\lang english
-
 \begin_inset ERT
 status open
 
