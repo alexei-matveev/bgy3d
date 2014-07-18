@@ -165,16 +165,6 @@ key "Arnold09"
 \end_inset
 
 .
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  While researchers have to face the radiotoxicity of uranium in experimental
  studies, theoretical methods, including quantum mechanics (QM) and classical
  molecular mechanics (MM) simulations, provide alternative ways to study
@@ -190,32 +180,12 @@ key "Fuchs02"
 
 \end_inset
 
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  to represent the water solvent.
  Although the PCM variant based on the conductor-like solvation model (COSMO)
  has been successfully applied in various studies of uranyl complexes 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04,Cao05,Shamov05,Gutowski06"
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
 
 \end_inset
 
@@ -255,16 +225,6 @@ key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
 
 \end_inset
 
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
 \end_layout
@@ -275,16 +235,6 @@ Given the difficulties mentioned above, new strategies which combine QM
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,book:Hansen06"
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
 
 \end_inset
 
@@ -612,16 +562,6 @@ key "Kovalenko98,Sato99"
 
 \end_inset
 
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
 .
  However, the uncontrolled exponential term often results in numerical divergenc
 e 
@@ -718,32 +658,13 @@ To accurately treat the long-range behavior of Coulomb potential it was
  common for all site pairs, is accurately representable by a finite Fourier
  series.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- 
 \end_layout
 
 \begin_layout Standard
 The “solvation free energy” at infinite dilution of a solute, equivalent
- to the excess chemical potential for a rigid solute geometry, 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- can be determined by gradually increasing the solute-solvent coupling from
- zero to full strength during thermodynamic integration (TI).
+ to the excess chemical potential for a rigid solute geometry, can be determined
+ by gradually increasing the solute-solvent coupling from zero to full strength
+ during thermodynamic integration (TI).
  Within the framework of RISM theory, it can be expressed by the Kirkwood
  formula in terms of the pair correlation functions and an integral over
  the Kirkwood coupling parameter 
@@ -861,31 +782,11 @@ where
  This choice leaves the Kohn--Sham matrix unmodified; the interaction of
  the electrons with solvent charge is approximated by that of fixed effective
  atomic charges.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  The additive form of the free energy functional, 
 \begin_inset Formula $G[n_{\text{e}},\vec{s}]$
 \end_inset
 
-, 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- is to some extent justified by a common practice of including net polarization
+, is to some extent justified by a common practice of including net polarization
  effects into these force field parameters 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -896,60 +797,16 @@ key "Berendsen87"
 .
  In this work uranyl together with explicit aqua ligands of the first solvation
  shell are treated as the solute.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: what else? AM: Solvent.
-\end_layout
-
-\end_inset
-
  The geometric parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
  are composed of positions and orientations of explicit aqua ligands and
- uranyl bond length, 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- all other degrees of freedom were fixed during the free energy minimization.
- 
-\color green
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-see comp.
- det.
-\end_layout
-
-\end_inset
-
-
-\color inherit
+ uranyl bond length, all other degrees of freedom were fixed during the
+ free energy minimization.
  Effective forces on the solute sites are calculated as linear response
  to a perturbation of the solute geometry.
- The uranyl solvation energy 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- is then calculated as
+ The uranyl solvation energy is then calculated as
 \color green
  
 \color inherit
@@ -966,20 +823,6 @@ for
 \end_inset
 
  explicit aqua ligands.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Applicable to 
-\begin_inset Formula $n=0$
-\end_inset
-
- as well.
-\end_layout
-
-\end_inset
-
  Internal energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
@@ -994,16 +837,6 @@ Applicable to
 
  in the last equation.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -1089,17 +922,8 @@ key "petsc-user-ref"
 \begin_inset Formula $J[t]=\delta F/\delta t$
 \end_inset
 
-, is only practical if implemented as a linear function 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- applicable to an arbitrary vector 
+, is only practical if implemented as a linear function applicable to an
+ arbitrary vector 
 \begin_inset Formula $\delta t$
 \end_inset
 
@@ -1281,23 +1105,7 @@ T_{\text{S}}[t_{\text{S}}]=\omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\a
 \end_inset
 
 are all of short range and thus amenable to a representation on a finite
- radial 
-\color green
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color green
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
- grid of moderate size as well as to fast Fourier transforms.
+ radial grid of moderate size as well as to fast Fourier transforms.
  Technically, addition of the long-range correlation 
 \begin_inset Formula $c_{\text{L}}$
 \end_inset
@@ -1324,19 +1132,6 @@ key "Kovalenko00,Cummings81"
 
 .
  
-\strikeout on
-\color green
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -1468,16 +1263,6 @@ reference "tab:params-water"
 
  summarizes the details of these three popular modified water models.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -2405,16 +2190,6 @@ All our calculations were carried out at the temperature of 298 K, with
  equations were solved iteratively to determine radial distribution functions
  and to evaluate the excess chemical potential.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- 
 \end_layout
 
 \begin_layout Standard
@@ -2458,30 +2233,11 @@ key "Su09"
 
 .
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
-Geometry optimization have been done using quasi-Newton method 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- as implemented in ParaTools 
+Geometry optimization have been done using quasi-Newton method as implemented
+ in ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chaffey-Millar11,Nikodem13"
@@ -2548,16 +2304,6 @@ pm and H--O--H angle of 109.47
 \end_inset
 
 .
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -2599,17 +2345,7 @@ reference "tab:simple-ions"
 .
  As can be seen, the values of the excess chemical potential of simple ions
  calculated with our 1D-RISM code are in satisfactory agreement with reported
- RISM values and comparable to MD with SPC/E water 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- and experimental results.
+ RISM values and comparable to MD with SPC/E water and experimental results.
  The most significant technical difference to Ref.
 \begin_inset space ~
 \end_inset
@@ -2649,16 +2385,6 @@ key "Joung13"
 \end_inset
 
 ) made in this work.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  Overall the HNC closure relation yields slightly better results than KH
  with respect to MD and experimental reference data.
  Note that the RISM model underestimates the magnitude of solvation free
@@ -2681,17 +2407,8 @@ status open
 The solvation energy (excess chemical potential, in kcal/mol) for alkali
  and halide ions calculated with the cSPC/E water model and the RISM approach.
  KH and HNC closure relations have been used.
- MD results with SPC/E water 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- and experimental values are also shown for comparison 
+ MD results with SPC/E water and experimental values are also shown for
+ comparison 
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:simple-ions"
@@ -3488,17 +3205,8 @@ key "Pomogaev13"
 
 \end_inset
 
- applying the SPC/E water 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-yes
-\end_layout
-
-\end_inset
-
- model was reproduced for comparison using Gromacs 3 
+ applying the SPC/E water model was reproduced for comparison using Gromacs
+ 3 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Spoel05"
@@ -3506,16 +3214,6 @@ key "Spoel05"
 \end_inset
 
  and original parameters.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  The RDFs of oxygen and hydrogen sites of water molecules, OW and HW, around
  uranium and oxygen sites of the uranyl ion, U and O, are shown in Figure
 \begin_inset space ~
@@ -3533,16 +3231,6 @@ reference "fig:rdf-vs-water-model"
  for site pairs carrying charges of opposite sign, that is for U--OW, and
  O--HW pairs, show quite similar shapes though the double peak feature of
  the latter is not resolved in RISM RDF.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  For U--HW and O--OW pairs, carrying charges of the same sign, the differences
  between MD and RISM models are more pronounced and shared by all three
  water models.
@@ -3631,28 +3319,6 @@ reference "sub:simple-ions"
  The error is in part intrinsic to the RISM approximation; another part
  is due to the difference in LJ parameters of water hydrogens.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: why not to include second solvation shell? AM: not feasible for all
- of 3 x 5 combinations of force fields.
- Not event the first shell.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -3940,16 +3606,6 @@ SPC/E MD
 \end_inset
 
 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -4092,21 +3748,7 @@ reference "tab:params-uranyl"
 \end_inset
 
 .
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: Why did you choose PR-SPC/E? Because of the reasonable coordination
- number? AM: cSPC/E is here only because of ions.
- PR-SPC/E was there before SH-SPC/E, I think.
- There is no clear preference for one or another, we should not pretend
- we had it.
-\end_layout
-
-\end_inset
-
-As can be seen from Figure
+ As can be seen from Figure
 \begin_inset space ~
 \end_inset
 
@@ -4466,55 +4108,6 @@ key "Buehl06"
 pm are rarely maintained for longer than a few hundred femtoseconds, thus
  the small peak is absent in their RDF.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- 
-\color green
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: This topic needs a little more: Do other AIMD, QM/MM, MD approaches
- not show this peak? Has it been seen experimentally? Maybe give a hint
- to a paper which discusses the possibility of apical hydrogen bonding of
- uranyl.
- BL: update other statements for the hydrogen bonding.
- In 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Nichols08"
-
-\end_inset
-
-, they cited x-ray data 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Aaberg83"
-
-\end_inset
-
- for 
-\begin_inset Quotes eld
-\end_inset
-
-apical second shells
-\begin_inset Quotes erd
-\end_inset
-
-, but I can't find relevant description in that paper
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -6477,17 +6070,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Geometries of selected 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-there are many
-\end_layout
-
-\end_inset
-
- local minima of the uranyl aqua complexes [UO
+Geometries of selected local minima of the uranyl aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7517,17 +7100,8 @@ key "Soderholm05,Neuefeind04,Wahlgren99"
 
 \end_inset
 
-, the computational chemistry studies examined by us 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- find the five-coordinated uranyl to be dominating 
+, the computational chemistry studies examined by us find the five-coordinated
+ uranyl to be dominating 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl11,Shamov05,Cao05,Buehl05"
@@ -7576,15 +7150,11 @@ key "Soderholm05"
 \end_inset
 
 kcal/mol 
-\color green
-#There is only this single experimental number?#
-\color inherit
- 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
-BL: This single value is also quoted in the review 
+This single value is also quoted in the review 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl11"
@@ -7597,21 +7167,11 @@ key "Buehl11"
 
 \end_inset
 
-by estimating the relative weights of four- and five-coordinated species
+ by estimating the relative weights of four- and five-coordinated species
  from an average coordination number.
  However, current computational results considering explicitly the first
- solvation shell 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- offer a much more negative value, suggesting that five-coordinated uranyl
- is the dominating species in aqueous solution.
+ solvation shell offer a much more negative value, suggesting that five-coordina
+ted uranyl is the dominating species in aqueous solution.
  For example, using the integral equation formalism polarizable continuum
  model (IEFPCM) and the Møller--Plesset (MP2) method, Cao et al.
 \begin_inset space \space{}
@@ -7647,16 +7207,6 @@ kcal/mol, which is more negative than the gas phase values from this and
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl05,Shamov05,Gutowski06"
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
 
 \end_inset
 
@@ -7719,16 +7269,6 @@ key "Gutowski06"
 \end_inset
 
 kcal/mol, 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \begin_inset Formula $\Delta G_{\text{R}}=-7.8$
 \end_inset
 
@@ -7827,19 +7367,9 @@ reference "tab:comparison-reaction-energy"
 
 , reveal that the slight free energy difference between coordination 4 and
  5 of uranyl in aqueous solution, as determined from the HEXS experiment,
- is overestimated by examined here combinations 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- of QM and continuum solvation models as well as by first principle MD calculati
-ons, especially when explicit water ligands are present only in the first
- solvation shell.
+ is overestimated by examined here combinations of QM and continuum solvation
+ models as well as by first principle MD calculations, especially when explicit
+ water ligands are present only in the first solvation shell.
  Without increasing the computational costs significantly beyond those of
  QM calculations, the QM+RISM approach leads to favorable results.
  As shown in Table
@@ -7896,22 +7426,6 @@ key "Wahlgren99,Soderholm05,Neuefeind04"
 
 \end_inset
 
- 
-\color green
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color green
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
 , and longer than results of PCM solvation models (see above).
  The uranyl--water distance of 248 pm is also longer than the experimental
  predictions of 241
@@ -7926,16 +7440,6 @@ pm
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Wahlgren99,Soderholm05,Neuefeind04"
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
 
 \end_inset
 
