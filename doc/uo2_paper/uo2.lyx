@@ -7784,47 +7784,26 @@ Uranyl bond length,
 \begin_inset Formula $d$
 \end_inset
 
-(U--O) (pm), uranyl--water distance, 
+(U--O), uranyl--water distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) (pm), intra-molecular energy, 
+(U--OW), intra-molecular energy, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
- (kcal/mol), its changes due to the solvent environment, 
+, its changes due to the solvent environment, 
 \begin_inset Formula $\Delta^{2}E_{\text{intra}}$
 \end_inset
 
- (kcal/mol), and the uranyl solvation free energy, 
+, and the uranyl solvation energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), as calculated for uranyl aqua model complexes [UO
-\begin_inset Formula $_{2}$
+.
+\begin_inset Formula $^{a}$
 \end_inset
 
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-, 
-\begin_inset Formula $4\leq n\leq6$
-\end_inset
-
- and a bare uranyl solute model (
-\begin_inset Formula $n=0$
-\end_inset
-
-), with QM, QM+PCM and QM+RISM approaches.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -7899,19 +7878,6 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 4
-\begin_inset Formula $^{a}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -7924,8 +7890,21 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+5
 \begin_inset Formula $^{c}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
+\begin_inset Formula $^{d}$
 \end_inset
 
 
@@ -8652,31 +8631,64 @@ footnotetext{
 
 \end_inset
 
-
+ 
 \begin_inset Formula $^{a}$
+\end_inset
+
+ Bond lengths in pm, energies in kcal/mol.
+ Symmetric uranyl aqua complexes [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, 
+\begin_inset Formula $4\leq n\leq6$
+\end_inset
+
+ and a bare uranyl (
+\begin_inset Formula $n=0$
+\end_inset
+
+) are treated by QM while interactions with the PR-SPC/E water solvent are
+ treated by KL2 force field.
+ 
+\begin_inset Formula $^{b}$
 \end_inset
 
  
 \begin_inset Formula $D_{4\text{h}}$
 \end_inset
 
- structure, 
-\begin_inset Formula $^{b}$
+ structure.
+ 
+\begin_inset Formula $^{c}$
 \end_inset
 
  
 \begin_inset Formula $D_{5\text{h}}$
 \end_inset
 
- structure, 
-\begin_inset Formula $^{c}$
+ structure.
+ 
+\begin_inset Formula $^{d}$
 \end_inset
 
  
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
- structure
+ structure.
 \begin_inset ERT
 status open
 
