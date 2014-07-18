@@ -78,7 +78,6 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
-
 alexei.matveev@gmail.com
 \end_layout
 
@@ -96,7 +95,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -9661,9 +9659,46 @@ The atomistic nature of the RISM model offers a more detailed and consistent
  predicts uranyl--water distances shorter in solution than in the gas phase
  and the latter yields only an insignificant change remains to be interpreted.
  
-\color green
-#Comparison of overall results to experiment and other high level simulations,
- overall quality#.
+\color black
+Without the need for statistical sampling as explicit solvation models require,
+ RISM method predicts the correct water solvent structure around uranyl
+ ion which is comparable with those are determined by experiments.
+ Moreover, the hybrid QM+RISM calculation indicates a slight free energy
+ difference 
+\color inherit
+(
+\begin_inset Formula $-1.6$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol)
+\color black
+ between coordination 4 and 5 uranyl in aqueous solution, which is most
+ close to experimental result 
+\color inherit
+(
+\begin_inset Formula $-1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol) while it was overestimated by continuum solvation model and AIMD
+ calculations.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
