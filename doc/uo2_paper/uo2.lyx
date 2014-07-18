@@ -4310,8 +4310,7 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol), calculated with various uranyl force field models in RISM,
- in comparison to AIMD, QM/MM, and MD simulations and experimental data.
+ (kcal/mol).
  
 \begin_inset CommandInset label
 LatexCommand label
