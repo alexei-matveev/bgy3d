@@ -5550,13 +5550,10 @@ key "Soderholm05"
 \end_inset
 
 .
-
  
 \begin_inset Formula $^{i}$
 \end_inset
 
-
-\lang english
  Computed from 
 \begin_inset Formula $\Delta_{\text{hyd}}H_{\text{abs}}^{\circ}=-1345\pm20$
 \end_inset
@@ -5589,7 +5586,6 @@ key "Marcus86"
 \end_inset
 
 .
-
  
 \begin_inset Formula $^{k}$
 \end_inset
@@ -5606,8 +5602,6 @@ kJ/mol and
 \begin_inset Formula $\Delta S_{\text{hyd}}=-400$
 \end_inset
 
-
-\lang english
 
 \begin_inset space ~
 \end_inset
@@ -5633,7 +5627,6 @@ key "Gibson05"
 \end_inset
 
  Computed from 
-
 \begin_inset Formula $\Delta H_{\text{f}}^{\circ}=371\pm60$
 \end_inset
 
@@ -5641,15 +5634,12 @@ key "Gibson05"
 \begin_inset space ~
 \end_inset
 
-kcal/mol for gas-phase uranyl
-\lang english
- 
+kcal/mol for gas-phase uranyl 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cornehl96"
 
 \end_inset
-
 
  using 
 \begin_inset Formula $\Delta_{\text{h}}S^{\circ}=-78.6$
@@ -5674,9 +5664,7 @@ key "Moskaleva04"
 
 \end_inset
 
-,
-\lang english
- 
+, 
 \begin_inset ERT
 status open
 
