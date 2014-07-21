@@ -118,22 +118,31 @@ June 2014
 We apply the one-dimensional reference interaction site model (RISM) to
  uranyl solvation.
  Uranyl aqua complexes with 4--6 explicit water ligands and implicit water
- solvent modeled by RISM representing the rest of the solvent are compared.
+ solvent modeled by RISM representing the further solvent environment are
+ compared.
  Interactions of explicitly represented atoms of the aqua complexes are
  treated either by molecular mechanics or by density functional theory to
  build the free energy functional.
  A comparison of solvation energies and geometries of the aqua complexes
- for different number of explicit water ligands at a local minimum of the
+ for different numbers of explicit water ligands at a local minimum of the
  free energy surface indicate interchangeability of explicit and implicit
- solvent models: e.g.
+ solvent models.
+ 
+\color green
+#cancel, no detailed results in abstract: e.g.
 \begin_inset space \space{}
 \end_inset
 
 a missing explicit water in the first solvation shell is substituted by
- the implicit solvent leaving the geometry of the complex intact otherwise.
+ the implicit solvent leaving the geometry of the complex intact otherwise.#
+\color inherit
+ Consequently the solvation energy is rather independent of the uranyl aqua
+ complex used as solute model, in contrast to results of a polarizable continuum
+ model of solvation.
  A comparison of conformation free energies of a uranyl with four and five
  explicit water molecules in the first solvation shell reveals only a minor
- preference for the latter.
+ preference for the latter, in agreement with experiment.
+ Other computational approaches tend to overestimate this energy.
 \end_layout
 
 \begin_layout Keywords
@@ -145,9 +154,10 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Understanding the thermodynamic and structural properties of uranium compounds
- in aqueous solution is crucial for designing effective processes in geological
- radioactive waste disposal and recycling from used nuclear fuel 
+Understanding the structural and thermodynamic properties of uranium compounds
+ in aqueous solution is crucial for safety considerations and designing
+ of effective processes in radioactive waste disposal and recycling from
+ used nuclear fuel 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Silva95,book:Grenthe92"
@@ -164,6 +174,14 @@ key "Arnold09"
 
 \end_inset
 
+
+\color green
+#this review is about UO
+\begin_inset Formula $_{2}^{+}$
+\end_inset
+
+#
+\color inherit
 .
  While researchers have to face the radiotoxicity of uranium in experimental
  studies, theoretical methods, including quantum mechanics (QM) and classical
@@ -189,11 +207,16 @@ key "Moskaleva04,Cao05,Shamov05,Gutowski06"
 
 \end_inset
 
-, it provides no insight into the thermodynamic fluctuation of the water
- solvent.
+, it provides no insight into the structure and statistical fluctuations
+ of the water solvent.
  On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
  MC) based on empirical model potentials yield explicit configurations of
- the water solvent around uranyl for large numbers of solvent molecules.
+ the water solvent around uranyl for large numbers of solvent molecules
+ 
+\color green
+[]
+\color inherit
+.
  Several studies 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -218,20 +241,24 @@ key "Gordon00"
  Also, the statistical sampling of large numbers of solvent configurations
  entails significant computational cost to the combination of QM and MM
  calculations.
- For that reason, more accurate QM dynamic simulations 
+ For that same reason, more accurate QM dynamic simulations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
 
 \end_inset
 
+ 
+\color green
+#some of citations are QM/MM instead of QM?#
+\color inherit
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
 \end_layout
 
 \begin_layout Standard
-Given the difficulties mentioned above, new strategies which combine QM
- methods with integral equation theory of molecular liquids 
+Given the difficulties mentioned above, strategies which combine QM methods
+ with integral equation theory of molecular liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,book:Hansen06"
@@ -251,8 +278,11 @@ key "Chandler72"
 
  which provides solvation energies and also averaged solvent structures
  via site-site radial distribution functions (RDF).
- The one-dimensional (1D) RISM method has been applied to polar and quadrupolar
- liquids 
+ The one-dimensional (1D) RISM method has been applied to solutes in 
+\color green
+#?, which type of solutes?#
+\color inherit
+ polar and quadrupolar liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Hirata81,Hirata82"
@@ -280,8 +310,8 @@ key "Joung13"
 \end_layout
 
 \begin_layout Standard
-In this work, we apply the RISM approach for the first time to study of
- uranyl(VI) in aqueous solution.
+In this work, we apply the RISM approach for the first time to study uranyl(VI)
+ in aqueous solution.
  By using classical 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -296,13 +326,13 @@ key "Rai12,Pomogaev13,Kerisit13"
 
 \end_inset
 
- force field parameterizations for uranyl and selecting a suitable water
- model, we first inspect water solvent structures around simple uranyl ion
- with 1D-RISM method which are comparable with results obtained from MD
- simulation.
- Then we extend our study with the same method to uranyl--water complexes,
- in which the first solvation shell around the uranyl cation is represented
- by explicit quantum mechanically treated water molecules.
+ empirical force field parameterizations for uranyl and using a suitable
+ water model, we first inspect water solvent structures around the bare
+ uranyl ion with the 1D-RISM method and compare the results with an MD simulatio
+n.
+ Then we extend our study with the same method to uranyl--water complexes
+ as solute models, in which the first solvation shell around the uranyl
+ cation is represented by explicitly treated water molecules.
  Finally, free energy surfaces of uranyl--water complexes are generated,
  both with MM and QM methods in the presence of a RISM water solvent environment
  outside the first solvation shell, and geometry optimizations are carried
@@ -320,8 +350,8 @@ RISM theory
 \begin_layout Standard
 In the RISM approach, the solvent liquid is regarded as composed of atomic
  or rigid polyatomic species around the solute and the interactions between
- the these species are approximated by two-particle interatomic potentials
- (site-site potentials).
+ the these species as well as with the solute are approximated by two-particle
+ interatomic potentials (site-site potentials).
  The RISM equation, also known as site-site Ornstein--Zernike (OZ) equation
  
 \begin_inset CommandInset citation
@@ -385,7 +415,7 @@ Here
 \begin_inset Formula $\alpha$
 \end_inset
 
- enumerate solute- and solvent interaction sites, respectively.
+ enumerate solute and solvent interaction sites, respectively.
  The star denotes the convolution integral and the sum over corresponding
  matrix indices.
  The solvent in the Eq.
@@ -502,7 +532,7 @@ reference "eq:rism-vv"
 
 \end_inset
 
-), one needs a closure relations to make the equations solvable.
+), one needs a closure relation to make the equations solvable.
  Such a relation between 
 \begin_inset Formula $h$
 \end_inset
@@ -562,6 +592,10 @@ key "Kovalenko98,Sato99"
 
 \end_inset
 
+
+\color green
+#not much, book, review available?#
+\color inherit
 .
  However, the uncontrolled exponential term often results in numerical divergenc
 e 
@@ -592,7 +626,7 @@ key "Kovalenko99"
 \begin_inset Formula $x\le0$
 \end_inset
 
- as in HNC closure relation and 
+ as in the HNC closure relation and 
 \begin_inset Formula $f(x)=x$
 \end_inset
 
@@ -634,11 +668,15 @@ key "Lorentz1881,Berthelot1898"
 \end_layout
 
 \begin_layout Standard
-To accurately treat the long-range behavior of Coulomb potential it was
- separated into two components, 
+To accurately treat the long-range behavior of the Coulomb potential it
+ was separated into two components, 
 \begin_inset Formula $u_{i\alpha}^{\text{C}}(r)=u_{\text{\text{S;}}i\alpha}^{\text{C}}(r)+u_{\text{L;}i\alpha}^{\text{C}}(r)$
 \end_inset
 
+ 
+\color green
+[]
+\color inherit
 , so that the long-range asymptotic component 
 \begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
 \end_inset
@@ -661,10 +699,13 @@ To accurately treat the long-range behavior of Coulomb potential it was
 \end_layout
 
 \begin_layout Standard
-The “solvation free energy” at infinite dilution of a solute, equivalent
- to the excess chemical potential for a rigid solute geometry, can be determined
- by gradually increasing the solute-solvent coupling from zero to full strength
- during thermodynamic integration (TI).
+The solvation free energy at infinite dilution of a solute, approximated
+ by the excess chemical potential for a rigid solute geometry 
+\color green
+[]
+\color inherit
+, can be determined by gradually increasing the solute-solvent coupling
+ from zero to full strength during thermodynamic integration (TI).
  Within the framework of RISM theory, it can be expressed by the Kirkwood
  formula in terms of the pair correlation functions and an integral over
  the Kirkwood coupling parameter 
@@ -787,7 +828,7 @@ where
 \end_inset
 
 , is to some extent justified by a common practice of including net polarization
- effects into these force field parameters 
+ effects into the force field parameters 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
@@ -795,15 +836,15 @@ key "Berendsen87"
 \end_inset
 
 .
- In this work uranyl together with explicit aqua ligands of the first solvation
- shell are treated as the solute.
+ In this work uranyl alone or together with explicit aqua ligands of the
+ first solvation shell are treated as the solute.
  The geometric parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- are composed of positions and orientations of explicit aqua ligands and
- uranyl bond length, all other degrees of freedom were fixed during the
- free energy minimization.
+ thus are the uranyl bond length and positions and orientations of explicit
+ aqua ligands All other degrees of freedom were fixed during the free energy
+ minimization.
  Effective forces on the solute sites are calculated as linear response
  to a perturbation of the solute geometry.
  The uranyl solvation energy is then calculated as
@@ -823,11 +864,11 @@ for
 \end_inset
 
  explicit aqua ligands.
- Internal energy 
+ The internal energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
- is obtained by substituting 
+ of the solute model complex is obtained by substituting 
 \begin_inset Formula $E$
 \end_inset
 
@@ -863,7 +904,7 @@ reference "eq:closure-hnc"
 \end_inset
 
 ) has to be solved iteratively.
- For numerical reasons it appears to be advantageous 
+ For numerical reasons it is advantageous 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Beglov95,Luchko10"
@@ -922,8 +963,11 @@ key "petsc-user-ref"
 \begin_inset Formula $J[t]=\delta F/\delta t$
 \end_inset
 
-, is only practical if implemented as a linear function applicable to an
- arbitrary vector 
+, is only practical if implemented as a linear function 
+\color green
+#approximation? or what is the alternative?#
+\color inherit
+ applicable to an arbitrary vector 
 \begin_inset Formula $\delta t$
 \end_inset
 
@@ -971,11 +1015,11 @@ key "petsc-user-ref"
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- that results into the inhomogeneity on the right hand side 
+ which results in the inhomogeneity on the right hand side 
 \begin_inset Formula $-\partial F/\partial\vec{s}$
 \end_inset
 
- is confined to the intra-molecular correlation function 
+, is confined to the intra-molecular correlation function 
 \begin_inset Formula $\omega^{u}$
 \end_inset
 
@@ -1073,7 +1117,7 @@ key "Ng74"
 \begin_inset Formula $u_{\text{L}}$
 \end_inset
 
-, the direct- and the indirect correlation functions, 
+, which determines the direct- and the indirect correlation functions, 
 \begin_inset Formula $c_{\text{L}}=-\beta u_{\text{L}}$
 \end_inset
 
@@ -1081,9 +1125,9 @@ key "Ng74"
 \begin_inset Formula $t_{\text{L}}=\beta u_{\text{L}}$
 \end_inset
 
-, is chosen sufficiently smooth to be represented by a truncated Fourier
- expansion with known coefficients to avoid numerically problematic fast
- Fourier transforms of these terms.
+at long distances, is chosen sufficiently smooth to be represented by a
+ truncated Fourier expansion with known coefficients to avoid numerically
+ problematic fast Fourier transforms of these terms.
  The new primary variable 
 \begin_inset Formula $t_{\text{S}}=t-t_{\text{L}}$
 \end_inset
@@ -1166,7 +1210,7 @@ key "Rai12,Pomogaev13"
 
 \end_inset
 
-, See Table 
+, see Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:params-uranyl"
@@ -1195,7 +1239,7 @@ key "Berendsen87"
 
 .
  While the original SPC/E water model does not contain a repulsive potential
- for hydrogen atoms, a LJ-type potential for hydrogen atoms are necessary
+ for hydrogen atoms, a LJ-type potential for hydrogen atoms is necessary
  in RISM calculations to avoid numerical singularities.
  Pettitt and Rosky 
 \begin_inset CommandInset citation
@@ -1791,7 +1835,7 @@ Lennard--Jones interaction parameters for water:
 \begin_inset Formula $\epsilon$
 \end_inset
 
- (kcal/mol), and charge 
+ (kcal/mol), and atomic charge 
 \begin_inset Formula $q$
 \end_inset
 
@@ -2193,8 +2237,8 @@ All our calculations were carried out at the temperature of 298 K, with
 \end_layout
 
 \begin_layout Standard
-All-electron calculations were carried out with the linear combination of
- Gaussian-type orbitals fitting-functions density functional method 
+All-electron QM calculations were carried out with the linear combination
+ of Gaussian-type orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunlap90"
@@ -2245,22 +2289,14 @@ key "Chaffey-Millar11,Nikodem13"
 \end_inset
 
 .
- In QM calculations, U--O bonds were relaxed while constrained to have the
- same value by symmetry.
+ In QM calculations, the U--O bonds were relaxed but constrained to have
+ the same value by symmetry.
  In MM and MM+RISM calculations uranyl was rigid, however.
  The U--O distances were fixed to 176
 \begin_inset space ~
 \end_inset
 
-pm in RISM calculations for 
-\begin_inset Quotes eld
-\end_inset
-
-bare
-\begin_inset Quotes erd
-\end_inset
-
- uranyl ion.
+pm in RISM calculations for the bare uranyl ion.
  In MM+RISM geometry optimization of uranyl aqua complexes the uranyl bonds
  were stretched to 177
 \begin_inset Formula $\sim$
@@ -2270,7 +2306,11 @@ bare
 \begin_inset space ~
 \end_inset
 
-pm based on our previous experience with these species.
+pm based on our previous experience 
+\color green
+#which value accurately?, which experience? sounds arbitrarily#
+\color inherit
+ with these species.
  The SPC/E geometry of explicit water ligands in [UO
 \begin_inset Formula $_{2}$
 \end_inset
@@ -2291,11 +2331,11 @@ O)
 \begin_inset Formula $4\leq n\leq6$
 \end_inset
 
-, features the O--H distance of 100
+, features an O--H distance of 100
 \begin_inset space ~
 \end_inset
 
-pm and H--O--H angle of 109.47
+pm and an H--O--H angle of 109.47
 \begin_inset Formula $^{\circ}$
 \end_inset
 
@@ -2319,7 +2359,7 @@ name "sub:simple-ions"
 
 \begin_layout Standard
 To evaluate our RISM implementation, we reproduced the recently reported
- RISM results 
+ 1D-RISM results 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Joung13"
@@ -2365,6 +2405,10 @@ key "Joung13"
 
 \end_inset
 
+ 
+\color green
+#long range terms still necessary?#
+\color inherit
 ) and a slightly coarser grid spacing (0.0390625 versus 0.025
 \begin_inset space ~
 \end_inset
@@ -3167,7 +3211,10 @@ status open
 
 \end_inset
 
-
+ 
+\color green
+#We have no cSPC/E MD simulation? so either RISM or the modified water models
+ may be the reason for the deviations#
 \end_layout
 
 \end_inset
@@ -3227,7 +3274,7 @@ key "Pomogaev13"
 
 \end_inset
 
- applying the SPC/E water model was reproduced for comparison using Gromacs
+ applying the SPC/E water model were reproduced for comparison using Gromacs
  3 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3235,7 +3282,7 @@ key "Spoel05"
 
 \end_inset
 
- and original parameters.
+ and the original parameters.
  The RDFs of oxygen and hydrogen sites of water molecules, OW and HW, around
  uranium and oxygen sites of the uranyl ion, U and O, are shown in Figure
 \begin_inset space ~
@@ -3252,7 +3299,7 @@ reference "fig:rdf-vs-water-model"
  When comparing our RISM and MD results, it is noticeable that the RDFs
  for site pairs carrying charges of opposite sign, that is for U--OW, and
  O--HW pairs, show quite similar shapes though the double peak feature of
- the latter is not resolved in RISM RDF.
+ the latter is not resolved in the RISM RDF.
  For U--HW and O--OW pairs, carrying charges of the same sign, the differences
  between MD and RISM models are more pronounced and shared by all three
  water models.
@@ -3270,7 +3317,7 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
-, the positions of the first peaks of the U--OW radial distribution function
+, the positions of the first peak of the U--OW radial distribution function
  are between 241 and 243
 \begin_inset space ~
 \end_inset
@@ -3338,8 +3385,9 @@ reference "sub:simple-ions"
 \end_inset
 
 .
- The error is in part intrinsic to the RISM approximation; another part
- is due to the difference in LJ parameters of water hydrogens.
+ This deviation is in part intrinsic to the RISM approximation; another
+ part is due to the presence of LJ parameters of water hydrogens in our
+ RISM calculations.
  
 \end_layout
 
@@ -3408,7 +3456,7 @@ Coordination number
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of uranyl.
+ (kcal/mol) of uranyl for the PM13 force field model and various water models.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3824,7 +3872,7 @@ key "Guilbaud93,Rai12"
 
  results.
  The latter three predict coordination number 5, although experiments reported
- a variable range from 4 to 5, as in X-ray scattering 
+ yield a range from 4 to 5 in X-ray scattering 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Neuefeind04"
@@ -3845,9 +3893,9 @@ key "Soderholm05"
 
 \end_inset
 
- experiments.
- The positions of the first peaks interpreted by RM12 and RM13 vary from
- 241
+ studies.
+ The positions of the first U-OW peak calculated with RM12 and RM13 varies
+ from 241
 \begin_inset Formula $\sim$
 \end_inset
 
@@ -3855,7 +3903,7 @@ key "Soderholm05"
 \begin_inset space ~
 \end_inset
 
-pm, which are close to MM-MD 
+pm, which is close to MM-MD 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud93,Rai12"
@@ -3889,10 +3937,11 @@ key "Buehl06,Nichols08,Frick09"
 \end_inset
 
 .
- The variances caused by different uranyl models are not surprising since
- they were fitted in different schemes, however, in general RISM calculations
- applying these models show the solvent structure around uranyl ion to be
- comparable with experimental and explicit solvation model simulations.
+ The variations between different uranyl models are not surprising as they
+ were fitted in different schemes.
+ However, in general, RISM calculations applying these models show a solvent
+ structure around uranyl ion comparable with experimental and explicit solvation
+ simulations.
  
 \begin_inset Note Note
 status open
@@ -3903,11 +3952,13 @@ ok?
 
 \end_inset
 
-
+ 
+\color green
+#corrected#
 \end_layout
 
 \begin_layout Standard
-The the calculated solvation free energies are slightly below the experimental
+The calculated solvation free energies are slightly below the experimental
  range determined with Fourier transform ion cyclotron resonance mass spectromet
 er (FTICR--MS) 
 \begin_inset CommandInset citation
@@ -3922,7 +3973,7 @@ key "Cornehl96"
 \begin_inset Formula $-$
 \end_inset
 
-375, and 
+375 and 
 \begin_inset Formula $-$
 \end_inset
 
@@ -3930,8 +3981,9 @@ key "Cornehl96"
 \begin_inset space ~
 \end_inset
 
-kcal/mol, that lie in the middle of the experimental range by intentionally
- increasing the charge separation in the uranyl species 
+kcal/mol, respectively, that lie in the middle of the experimental range
+ due to intentionally increasing the charge separation in the uranyl species
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -3940,8 +3992,8 @@ key "Kerisit13"
 
 .
  A higher charge separation in KL1 and KL2 models leads to a strengthening
- of uranyl--water interactions, which manifests shorter U--OW bonds and
- in the higher RDF peaks (Figure 
+ of uranyl--water interactions, which manifests in shorter U--OW bonds and
+ in higher RDF peaks (Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:rdf-vs-uranyl-model"
@@ -3957,8 +4009,8 @@ reference "tab:params-uranyl"
 
 ), which are close to 6.
  The original MD simulation employing KL1 and KL2 models of uranyl predicted
- the U--OW peaks with a height of about 16 and the coordination number 5
- 
+ the first U--OW peaks with a height of about 16 and a coordination of number
+ 5 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -4058,7 +4110,11 @@ key "Nichols08"
 
 \end_inset
 
- and in Kerisit and Liu's classical MD simulation 
+ and in Kerisit and Liu's classical 
+\color green
+KL1 and KL2 #?#
+\color inherit
+ MD simulations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -4071,7 +4127,7 @@ key "Kerisit13"
 
 pm in the RDF of the O--HW pair corresponding to water molecules forming
  a hydrogen bond to uranyl oxygens.
- Our RISM calculation with KL2 uranyl model also showed this small peak,
+ Our RISM calculation with the KL2 uranyl model also showed this small peak,
  albeit at a shorter O--HW separation of 160
 \begin_inset space ~
 \end_inset
@@ -4084,14 +4140,16 @@ reference "fig:rdf-vs-uranyl-model"
 \end_inset
 
 ).
- This small peak is observed in Guilbaud and Wipff's early work 
+ This small peak was observed already in Guilbaud and Wipff's early work
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud93"
 
 \end_inset
 
-, in which the intensity of the peak became stronger as site charge on uranium
+.
+ The intensity of this peak became stronger when the site charge on uranium
  atom increased from +3 to +6.
  Hagberg et al.
 \begin_inset space \space{}
@@ -4105,13 +4163,13 @@ key "hagberg05"
 \end_inset
 
  also claimed that in some configurations during their MD simulations, there
- exists a weak hydrogen bond to the uranyl oxygen with bond length about
- 200--250
+ exists a weak hydrogen bond to the uranyl oxygen with a bond length of
+ about 200--250
 \begin_inset space ~
 \end_inset
 
 pm.
- Another proof comes from the AIMD work of Bühl et al.
+ In AIMD simulations
 \begin_inset space \space{}
 \end_inset
 
@@ -4122,13 +4180,13 @@ key "Buehl06"
 
 \end_inset
 
-, in which they observed that the close contacts between uranyl oxygen and
- water with O--HW distance below 200
+, it was observed that close contacts between uranyl oxygen and water with
+ O--HW distances below 200
 \begin_inset space ~
 \end_inset
 
-pm are rarely maintained for longer than a few hundred femtoseconds, thus
- the small peak is absent in their RDF.
+pm are rarely maintained for longer than a few hundred femtoseconds.
+ Thus, a corresponding peak is absent in the AIMD RDF.
  
 \end_layout
 
@@ -4153,8 +4211,8 @@ reference "tab:observables-vs-water-model"
 
 .
  This potential improvement of the solvation free energy goes at the expense
- of higher coordination numbers, which deviate from experimental determinations
- (Table
+ of higher coordination numbers, which exceed the results of experimental
+ determinations (Table
 \begin_inset space ~
 \end_inset
 
@@ -4187,7 +4245,7 @@ key "Marcus86"
 \end_inset
 
 .
- The largest uncertainty of the uranyl solvation energy, 
+ The largest uncertainty of the uranyl solvation energy reported, 
 \begin_inset Formula $-437\le\Delta G_{\text{sol}}\le-318$
 \end_inset
 
@@ -4199,6 +4257,13 @@ kcal/mol,
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04"
+
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cornehl96"
 
 \end_inset
 
@@ -5701,7 +5766,9 @@ status open
 
 \end_inset
 
-
+ 
+\color green
+#please use consistently kcal/mol#
 \end_layout
 
 \end_inset
@@ -5717,7 +5784,7 @@ Free energy minimization for uranyl aqua complexes
 More insight into the structure of the first solvation shell and details
  of the uranyl--water interactions can be gained by introducing explicit
  water ligands into the solute model embedded in RISM.
- In these models the uranyl geometry is either fixed (MM, MM+RISM) or not
+ In these models the uranyl geometry is either fixed (MM, MM+RISM) or relaxed
  (QM, QM+RISM, see below) while the positions and orientations of the water
  lingands are optimized.
  Table
@@ -5795,12 +5862,8 @@ kcal/mol (KL1) and
 \end_inset
 
 kcal/mol (KL2).
- Consistent with this picture, the solvation free energy of these conformations,
- 
-\begin_inset Formula $\Delta G_{\text{sol}}$
-\end_inset
-
-, correlates with the strength of the uranyl--water interactions, Table
+ Consistent with this picture, the solvation free energies correlate with
+ the strength of the uranyl--water interactions, Table
 \begin_inset space ~
 \end_inset
 
@@ -6323,7 +6386,7 @@ reference "fig:geometries"
 \end_inset
 
 pm.
- The RISM solvent compensated the fifth water molecule in undercoordinated
+ The RISM solvent compensated the fifth water molecule in the undercoordinated
  uranyl aqua complex [UO
 \begin_inset Formula $_{2}$
 \end_inset
@@ -6424,13 +6487,13 @@ reference "tab:energy-vs-coordination"
 \end_inset
 
  show that embedding into the RISM solvent yields a solvation free energy
- that is essentially constant and thus independent of the number of explicit
+ that is essentially constant and independent of the number of explicit
  water ligands.
- Again, it differs by about 10
+ Again, it is lower by about 10
 \begin_inset space ~
 \end_inset
 
-kcal/mol from the solvation energy of the bare uranyl solvent model.
+kcal/mol than the solvation energy of the bare uranyl solvent model.
 \end_layout
 
 \begin_layout Standard
@@ -7082,8 +7145,9 @@ status open
 The uranyl--water interactions according to DFT as employed in QM, QM+PCM,
  and QM+RISM calculations are of an overall strength comparable to the KL1
  and KL2 force field models.
- The typical internal energy corresponding the the binding of the five ligands
- of the penta-aqua uranyl complex is about 
+ The typical internal energy corresponding to the binding of the five ligands
+ of the penta-aqua uranyl complex, including uranyl relaxation, is about
+ 
 \begin_inset Formula $-270$
 \end_inset
 
@@ -7169,7 +7233,7 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_inset
 
  compares results of QM, QM+PCM, and QM+RISM calculations for high-symmetry
- uranyl aqua model complexes [UO
+ uranyl model aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7208,7 +7272,7 @@ O)
 \begin_inset space ~
 \end_inset
 
-kcal/mol.
+kcal/mol relative to bare uranyl.
  For the bare uranyl model 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
@@ -7218,8 +7282,8 @@ kcal/mol.
 \begin_inset space ~
 \end_inset
 
-kcal/mol is larger than for the other complexes.
- This relaxation manifests in an elongation of the U--O bond by about 8
+kcal/mol in the RISM approach is larger than for the other complexes.
+ This relaxation manifests in an elongation of the U--O bond by 8
 \begin_inset space ~
 \end_inset
 
@@ -7244,7 +7308,8 @@ reference "tab:QM+RISM-vs-QM+PCM"
 
 .
  Modeling the first solvation shell explicitly does not affected this distance
- much --- for all 
+ much.
+ In QM+RISM calculations for 
 \begin_inset Formula $4\le n\le6$
 \end_inset
 
@@ -7282,8 +7347,8 @@ Another qualitative difference between QM+PCM and QM+RISM results is the
 \begin_inset space ~
 \end_inset
 
-pm by QM+PCM approach in comparison to the gas phase QM results.
- This solvent effect is not confirmed by QM+RISM results.
+pm by the QM+PCM approach in comparison to the gas phase QM results.
+ This solvent effect is not confirmed by QM+RISM calculations.
  Here the changes of 
 \begin_inset Formula $d$
 \end_inset
