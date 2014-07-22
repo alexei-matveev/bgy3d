@@ -7508,6 +7508,33 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_layout
 
 \begin_layout Standard
+
+\color green
+While most experimental measurements reported the number of water ligands
+ bound to UO
+\begin_inset Formula $_{2}^{2+}$
+\end_inset
+
+cation in aqueous solution vary between 4 and 5 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Soderholm05,Neuefeind04,Wahlgren99"
+
+\end_inset
+
+, the computational chemistry studies examined by us find the five-coordinated
+ uranyl to be dominating 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl11,Shamov05,Cao05,Buehl05"
+
+\end_inset
+
+.
+ # Paragraph oved from below#
+\end_layout
+
+\begin_layout Standard
 Neglecting the small differences due to relaxation, the binding energy,
  
 \begin_inset Formula $\Delta E_{\text{intra}}$
@@ -7669,12 +7696,46 @@ reference "tab:energy-vs-coordination"
 
 .
  
-\color magenta
-#variation of U--OW with n#
+\color green
+While most quantities in QM+RISM calculations are rather independent of
+ the number of aqua ligands, the U-OW distances of the explict aqua ligands
+ increase with increasing n from 246 pm for n = 4 to 254 pm for n = 6.
+ (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+).
+ These larger values of d(U-OW) compared to QM+PCM calculations, which also
+ overestimate the experimental results of 241-242 pm (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+) are due to the effectively higher coordination of uranyl in the QM+RISM
+ model.
+ Besides the explicit aqua ligands, also RISM water contributes to first
+ shell coordination of uranyl, leading to effective coordination numbers
+ of x, y, z, for n = 4-6.
+ 
 \end_layout
 
 \begin_layout Standard
-While most experimental measurements reported the number of water ligands
+
+\color green
+#While most experimental measurements reported the number of water ligands
  bound to UO
 \begin_inset Formula $_{2}^{2+}$
 \end_inset
@@ -7695,12 +7756,12 @@ key "Buehl11,Shamov05,Cao05,Buehl05"
 \end_inset
 
 .
- 
+ # Paragraph oved to above, cancel here#
 \end_layout
 
 \begin_layout Standard
-A useful quantity to inspect the preferred coordination number is the reaction
- energy 
+Another useful quantity to inspect the preferred coordination number is
+ the reaction energy 
 \begin_inset Formula $\Delta G_{\text{R}}$
 \end_inset
 
@@ -7719,7 +7780,17 @@ A useful quantity to inspect the preferred coordination number is the reaction
 \end_layout
 
 \begin_layout Standard
-The most recent High-Energy X-ray Scattering (HEXS) experiments 
+
+\color green
+#
+\strikeout on
+\color inherit
+The most recent
+\strikeout default
+\color green
+# or are their any others?#
+\color inherit
+ High-Energy X-ray Scattering (HEXS) experiments 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05"
@@ -7878,7 +7949,7 @@ kcal/mol and
 \begin_inset space ~
 \end_inset
 
-kcal/mol calculated at BP level with PCM.
+kcal/mol as calculated at the BP level with PCM.
  Bühl et al.
 \begin_inset space \space{}
 \end_inset
@@ -7917,7 +7988,7 @@ key "Gutowski06"
 \begin_inset space \space{}
 \end_inset
 
-achieved the improvement of reaction energy with 
+achieved an improved reaction energy of 
 \begin_inset Formula $\Delta G_{\text{R}}=-2.5$
 \end_inset
 
@@ -7953,24 +8024,13 @@ reference "tab:comparison-reaction-energy"
 
 , reveal that the slight free energy difference between coordination 4 and
  5 of uranyl in aqueous solution, as determined from the HEXS experiment,
- is overestimated by examined here combinations of QM and continuum solvation
+ is commonly overestimated by combinations of QM and continuum solvation
  models as well as by first principle MD calculations, especially when explicit
  water ligands are present only in the first solvation shell.
  Without increasing the computational costs significantly beyond those of
- QM calculations, the QM+RISM approach leads to favorable results.
- As shown in Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:comparison-reaction-energy"
-
-\end_inset
-
-, the reaction energy for the water addition to the four-coordinated uranyl
- aqua complex to form the five-coordinated species 
+ QM calculations, the QM+RISM approach leads to a favorable result.
+ The reaction energy for water addition to the four-coordinated uranyl aqua
+ complex to form the five-coordinated species 
 \begin_inset Formula $\Delta G_{\text{R}}=-1.6$
 \end_inset
 
@@ -7995,13 +8055,16 @@ kcal/mol and the solvation free energy of
 \begin_inset space ~
 \end_inset
 
-kcal/mol lies about in the middle of experimental range.
- The uranyl bond from our RISM calculations of 181 pm is by about 2.3% than
- the experimental values of 177
-\begin_inset Formula $\sim$
+kcal/mol lies about in the middle of experimental range (Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
 \end_inset
 
-178
+).
+ The uranyl bond from our RISM calculations of 181 pm is by 2.3% larger than
+ the experimental values of 177-178
 \begin_inset space ~
 \end_inset
 
@@ -8014,11 +8077,7 @@ key "Wahlgren99,Soderholm05,Neuefeind04"
 
 , and longer than results of PCM solvation models (see above).
  The uranyl--water distance of 248 pm is also longer than the experimental
- predictions of 241
-\begin_inset Formula $\sim$
-\end_inset
-
-242
+ predictions of 241-242
 \begin_inset space ~
 \end_inset
 
@@ -8042,10 +8101,10 @@ reference "tab:comparison-reaction-energy"
 \end_inset
 
 ).
- These results indicate, that as an alternative for traditional continuum
- solvation models, the RISM approach may provide a more favorable accuracy
- when used to study chemical reactions and processes which are sensitive
- to the solvent environment.
+ These results indicate, that as an alternative to traditional continuum
+ solvation models, the RISM approach may provide a favorable accuracy when
+ used to study chemical reactions and processes which are sensitive to the
+ solvent environment.
 \end_layout
 
 \begin_layout Standard
@@ -9810,16 +9869,16 @@ The atomistic nature of the RISM model offers a more detailed and consistent
  their net statistical effect as modeled with the RISM approach.
  The qualitative difference between the PCM and RISM models that the former
  predicts uranyl--water distances shorter in solution than in the gas phase
- and the latter yields only an insignificant change remains to be interpreted.
+ and the latter yields only a small change remains to be interpreted.
  
 \color black
-Without the need for statistical sampling as explicit solvation models require,
- the RISM method predicts the correct water solvent structure around uranyl
- ion which is comparable with those are determined by experiments.
- Moreover, the hybrid QM+RISM calculation indicates a slight free energy
- difference 
+Without the need for statistical sampling as required for explicit solvation
+ models, the RISM method predicts the correct water solvent structure the
+ around uranyl ion in good agreement with experimental results.
+ Moreover, the hybrid QM+RISM calculation provides a small free energy differenc
+e 
 \color inherit
-(
+of
 \begin_inset Formula $-1.6$
 \end_inset
 
@@ -9827,12 +9886,12 @@ Without the need for statistical sampling as explicit solvation models require,
 \begin_inset space ~
 \end_inset
 
-kcal/mol)
+kcal/mol
 \color black
  between four- and five-coordinated uranyl in aqueous solution, which is
- close to experimental result 
+ close to the experimental value 
 \color inherit
-(
+of
 \begin_inset Formula $-1.2$
 \end_inset
 
@@ -9840,19 +9899,7 @@ kcal/mol)
 \begin_inset space ~
 \end_inset
 
-kcal/mol) while it was overestimated by continuum solvation model and AIMD
- calculations.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
+kcal/mol, but overestimated by continuum solvation model and AIMD calculations.
 \end_layout
 
 \begin_layout Section*
