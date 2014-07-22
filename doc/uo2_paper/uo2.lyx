@@ -235,19 +235,40 @@ key "Moskaleva04,Cao05,Shamov05,Gutowski06"
  On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
  MC) based on empirical model potentials yield explicit configurations of
  the water solvent around uranyl for large numbers of solvent molecules
- 
-\color green
-[]
-\color inherit
-.
- Several studies 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "hagberg05,Tirler13"
+key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Tiwari14,Spoel05"
 
 \end_inset
 
- also attempted to combine QM and MM simulations to simultaneously treat
+.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ Several studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hagberg05,Frick09,Tirler13"
+
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+also attempted to combine QM and MM simulations to simultaneously treat
  both, the chemical behavior of the uranyl solute and the explicit solvent
  structure.
  However, the results of such a statistical sampling are only as good as
@@ -267,13 +288,25 @@ key "Gordon00"
  For that same reason, more accurate QM dynamic simulations 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Buehl05,Buehl06,Frick09,Buehl11,Tirler13"
+key "Buehl05,Buehl06,Buehl11,Nichols08"
 
 \end_inset
 
  
 \color green
-#some of citations are QM/MM instead of QM?#
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\color green
+ok?
+\end_layout
+
+\end_inset
+
+
 \color inherit
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
@@ -301,18 +334,47 @@ key "Chandler72"
 
  which provides solvation energies and also averaged solvent structures
  via site-site radial distribution functions (RDF).
- The one-dimensional (1D) RISM method has been applied to solutes in 
-\color green
-#?, which type of solutes?#
-\color inherit
- polar and quadrupolar liquids 
+ The one-dimensional (1D) RISM method has been applied from simple atomic
+ solutes 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Hirata81,Hirata82"
+key "Hirata81,Kinoshita97"
 
 \end_inset
 
- and by enforcing the desired dielectric constant for all thermodynamic
+, solvated polymers in polar and quadrupolar liquids 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hirata82"
+
+\end_inset
+
+, rare gases and alkanes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko00"
+
+\end_inset
+
+, and various polar and hydrophobic solutes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Chuev07,Ratkova10"
+
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok? 
+\end_layout
+
+\end_inset
+
+ And by enforcing the desired dielectric constant for all thermodynamic
  routes, the RISM method has been extended (dielectrically consistent RISM
  (DRISM) 
 \begin_inset CommandInset citation
@@ -324,12 +386,22 @@ key "Perkyns92"
 ) to electrolyte solutions containing ionic species 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Joung13"
+key "Perkyns94,Chiodo07,Chuev08,Joung13"
 
 \end_inset
 
 .
  
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -611,13 +683,26 @@ where
  of studies of aqueous solutions 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Kovalenko98,Sato99"
+key "Perkyns94,Kinoshita97,Kovalenko98,Sato99,book:Hirata03,Chuev07,Chuev08,Ratkova10,Joung13"
 
 \end_inset
 
 
 \color green
-#not much, book, review available?#
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\color green
+SK: #not much, book, review available?# BL: There are endless papers for
+ this
+\end_layout
+
+\end_inset
+
+
 \color inherit
 .
  However, the uncontrolled exponential term often results in numerical divergenc
@@ -698,7 +783,14 @@ To accurately treat the long-range behavior of the Coulomb potential it
 
  
 \color green
-[]
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,book:Hansen06"
+
+\end_inset
+
+
 \color inherit
 , so that the long-range asymptotic component 
 \begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
@@ -724,9 +816,22 @@ To accurately treat the long-range behavior of the Coulomb potential it
 \begin_layout Standard
 The solvation free energy at infinite dilution of a solute, approximated
  by the excess chemical potential for a rigid solute geometry 
-\color green
-[]
-\color inherit
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,book:Hansen06"
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
 , can be determined by gradually increasing the solute-solvent coupling
  from zero to full strength during thermodynamic integration (TI).
  Within the framework of RISM theory, it can be expressed by the Kirkwood
