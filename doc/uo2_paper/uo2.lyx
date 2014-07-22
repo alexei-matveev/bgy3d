@@ -7508,14 +7508,12 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_layout
 
 \begin_layout Standard
-
-\color green
-While most experimental measurements reported the number of water ligands
+While most experimental measurements reported that the number of water ligands
  bound to UO
 \begin_inset Formula $_{2}^{2+}$
 \end_inset
 
-cation in aqueous solution vary between 4 and 5 
+ cation in aqueous solution varies between 4 and 5 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05,Neuefeind04,Wahlgren99"
@@ -7531,7 +7529,7 @@ key "Buehl11,Shamov05,Cao05,Buehl05"
 \end_inset
 
 .
- # Paragraph oved from below#
+ 
 \end_layout
 
 \begin_layout Standard
@@ -7695,11 +7693,28 @@ reference "tab:energy-vs-coordination"
 \end_inset
 
 .
- 
-\color green
-While most quantities in QM+RISM calculations are rather independent of
- the number of aqua ligands, the U-OW distances of the explict aqua ligands
- increase with increasing n from 246 pm for n = 4 to 254 pm for n = 6.
+ While most quantities in QM+RISM calculations are rather independent of
+ the number of aqua ligands, the U--OW distances to the explicit aqua ligands
+ increase with increasing 
+\begin_inset Formula $n$
+\end_inset
+
+ from 246
+\begin_inset space ~
+\end_inset
+
+pm for 
+\begin_inset Formula $n=4$
+\end_inset
+
+ to 254
+\begin_inset space ~
+\end_inset
+
+pm for 
+\begin_inset Formula $n=6$
+\end_inset
+
  (Table
 \begin_inset space ~
 \end_inset
@@ -7712,8 +7727,16 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_inset
 
 ).
- These larger values of d(U-OW) compared to QM+PCM calculations, which also
- overestimate the experimental results of 241-242 pm (Table
+ These larger values of 
+\begin_inset Formula $d$
+\end_inset
+
+(U--OW) compared to QM+PCM calculations, which also overestimate the experimenta
+l results of 241--242
+\begin_inset space ~
+\end_inset
+
+pm (Table
 \begin_inset space ~
 \end_inset
 
@@ -7724,39 +7747,16 @@ reference "tab:observables-vs-uranyl-model"
 
 \end_inset
 
-) are due to the effectively higher coordination of uranyl in the QM+RISM
+), are due to the effectively higher coordination of uranyl in the QM+RISM
  model.
  Besides the explicit aqua ligands, also RISM water contributes to first
  shell coordination of uranyl, leading to effective coordination numbers
- of x, y, z, for n = 4-6.
+ of 5.8, 6.2, and 6.9, for 
+\begin_inset Formula $4\le n\le6$
+\end_inset
+
+, respectively.
  
-\end_layout
-
-\begin_layout Standard
-
-\color green
-#While most experimental measurements reported the number of water ligands
- bound to UO
-\begin_inset Formula $_{2}^{2+}$
-\end_inset
-
-cation in aqueous solution vary between 4 and 5 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Soderholm05,Neuefeind04,Wahlgren99"
-
-\end_inset
-
-, the computational chemistry studies examined by us find the five-coordinated
- uranyl to be dominating 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Buehl11,Shamov05,Cao05,Buehl05"
-
-\end_inset
-
-.
- # Paragraph oved to above, cancel here#
 \end_layout
 
 \begin_layout Standard
@@ -7780,17 +7780,7 @@ Another useful quantity to inspect the preferred coordination number is
 \end_layout
 
 \begin_layout Standard
-
-\color green
-#
-\strikeout on
-\color inherit
-The most recent
-\strikeout default
-\color green
-# or are their any others?#
-\color inherit
- High-Energy X-ray Scattering (HEXS) experiments 
+High-Energy X-ray Scattering (HEXS) experiments 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05"
@@ -7806,26 +7796,8 @@ key "Soderholm05"
 \begin_inset space ~
 \end_inset
 
-kcal/mol 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-This single value is also quoted in the review 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Buehl11"
-
-\end_inset
-
-, and by checking the citing list in google, I didn't find any updates for
- this value 
-\end_layout
-
-\end_inset
-
- by estimating the relative weights of four- and five-coordinated species
- from an average coordination number.
+kcal/mol by estimating the relative weights of four- and five-coordinated
+ species from an average coordination number.
  However, current computational results considering explicitly the first
  solvation shell offer a much more negative value, suggesting that five-coordina
 ted uranyl is the dominating species in aqueous solution.
@@ -8064,7 +8036,7 @@ reference "tab:comparison-reaction-energy"
 
 ).
  The uranyl bond from our RISM calculations of 181 pm is by 2.3% larger than
- the experimental values of 177-178
+ the experimental values of 177--178
 \begin_inset space ~
 \end_inset
 
@@ -8077,7 +8049,7 @@ key "Wahlgren99,Soderholm05,Neuefeind04"
 
 , and longer than results of PCM solvation models (see above).
  The uranyl--water distance of 248 pm is also longer than the experimental
- predictions of 241-242
+ predictions of 241--242
 \begin_inset space ~
 \end_inset
 
