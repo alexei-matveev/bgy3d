@@ -127,15 +127,6 @@ We apply the one-dimensional reference interaction site model (RISM) to
  for different numbers of explicit water ligands at a local minimum of the
  free energy surface indicate interchangeability of explicit and implicit
  solvent models.
- 
-\color green
-#cancel, no detailed results in abstract: e.g.
-\begin_inset space \space{}
-\end_inset
-
-a missing explicit water in the first solvation shell is substituted by
- the implicit solvent leaving the geometry of the complex intact otherwise.#
-\color inherit
  Consequently the solvation energy is rather independent of the uranyl aqua
  complex used as solute model, in contrast to results of a polarizable continuum
  model of solvation.
@@ -170,19 +161,51 @@ key "Silva95,book:Grenthe92"
  which is the most common stable oxidation state in aqueous solution 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Arnold09"
+key "book:Katz86,Arnold09"
 
 \end_inset
 
 
 \color green
-#this review is about UO
+ 
+\color inherit
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: this review is about UO
 \begin_inset Formula $_{2}^{+}$
 \end_inset
 
-#
-\color inherit
 .
+ AM: Yes, I know.
+ This is the quote from the abstract to supports directly the claim about
+ the most common oxydation state: 
+\begin_inset Quotes eld
+\end_inset
+
+The uranyl dication, [UO2]2+, is the most prevalent and most thermodynamically
+ stable form of uranium and is a soluble and problematic environmental contamina
+nt.
+ [...] In contrast, the pentavalent uranyl cation [UO2]+ is unstable in an
+ aqueous environment with respect to disproportionation into tetravalent
+ uranium species and [UO2]2+.
+ 
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I added another one used by Schlosser to quote possible oxidation states
+ in his diss.
+ Why dont you suggest anything? Is this a quiz?
+\end_layout
+
+\end_inset
+
  While researchers have to face the radiotoxicity of uranium in experimental
  studies, theoretical methods, including quantum mechanics (QM) and classical
  molecular mechanics (MM) simulations, provide alternative ways to study
@@ -584,7 +607,7 @@ where
 \end_inset
 
 .
- the HNC closure has been applied to solve the RISM equation in a variety
+ The HNC closure has been applied to solve the RISM equation in a variety
  of studies of aqueous solutions 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -964,14 +987,33 @@ key "petsc-user-ref"
 \end_inset
 
 , is only practical if implemented as a linear function 
-\color green
-#approximation? or what is the alternative?#
-\color inherit
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: approximation? or what is the alternative? AM: Alternatives are impractical,
+ see http://en.wikipedia.org/wiki/Matrix-free_methods 
+\end_layout
+
+\end_inset
+
  applicable to an arbitrary vector 
 \begin_inset Formula $\delta t$
 \end_inset
 
 .
+ Computing and storing all of the Jacobian matrix elements is prohibitively
+ expensive.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
  The Jacobian is readily available given the simple closed form of 
 \begin_inset Formula $c[t]$
 \end_inset
@@ -2306,10 +2348,23 @@ pm in RISM calculations for the bare uranyl ion.
 \begin_inset space ~
 \end_inset
 
-pm based on our previous experience 
-\color green
-#which value accurately?, which experience? sounds arbitrarily#
-\color inherit
+pm based on our previous experience with QM calculations 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: which value accurately?, which experience? sounds arbitrarily.
+ AM: Calculation with different n = 0, 4, 5, 6 used different distances.
+ Experience with PCM calculations (mentioned now).
+ Li Bo took some geometries from Ion, some where PCM, some where gas phase
+ with explicit waters.
+ It sounds arbitrary because it is arbitrary.
+ We discussed that over e-mail not long ago.
+ Does it make results invalid?
+\end_layout
+
+\end_inset
+
  with these species.
  The SPC/E geometry of explicit water ligands in [UO
 \begin_inset Formula $_{2}$
@@ -2405,11 +2460,18 @@ key "Joung13"
 
 \end_inset
 
- 
-\color green
-#long range terms still necessary?#
-\color inherit
-) and a slightly coarser grid spacing (0.0390625 versus 0.025
+)
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ SK: long range terms still necessary? AM: yes.
+ Coulomb interaction at this distance is 332 kcal * A /160 A ~ 2 kcal
+\end_layout
+
+\end_inset
+
+ and a slightly coarser grid spacing (0.0390625 versus 0.025
 \begin_inset space ~
 \end_inset
 
@@ -2430,7 +2492,19 @@ key "Joung13"
  Note that the RISM model underestimates the magnitude of solvation free
  energies of cations by a few percent only compared to experiment; the results
  for anions are slightly worse.
+ The difference is in part intrinsic to the RISM approximation and part
+ is due to the difference in LJ parameters of water hydrogens.
  
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3212,9 +3286,21 @@ status open
 \end_inset
 
  
-\color green
-#We have no cSPC/E MD simulation? so either RISM or the modified water models
- may be the reason for the deviations#
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: We have no cSPC/E MD simulation? so either RISM or the modified water
+ models may be the reason for the deviations.
+ AM: yes we do not.
+ RDFs were produced with SPC/E too.
+ Yes we say so in the next section.
+ Added the same clause above as well.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3329,16 +3415,7 @@ pm for various water models, while the corresponding coordination numbers
 \begin_inset space ~
 \end_inset
 
-pm that integrates to coordination number 5.0 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-5.2?
-\end_layout
-
-\end_inset
-
+pm that integrates to coordination number 5.0.
  The excess chemical potential calculated between 
 \begin_inset Formula $-$
 \end_inset
@@ -3386,9 +3463,19 @@ reference "sub:simple-ions"
 
 .
  This deviation is in part intrinsic to the RISM approximation; another
- part is due to the presence of LJ parameters of water hydrogens in our
+ part is due to the non-zero LJ parameters of water hydrogens used in our
  RISM calculations.
  
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3894,7 +3981,7 @@ key "Soderholm05"
 \end_inset
 
  studies.
- The positions of the first U-OW peak calculated with RM12 and RM13 varies
+ The positions of the first U--OW peak calculated with RM12 and RM13 varies
  from 241
 \begin_inset Formula $\sim$
 \end_inset
@@ -3943,18 +4030,6 @@ key "Buehl06,Nichols08,Frick09"
  structure around uranyl ion comparable with experimental and explicit solvation
  simulations.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- 
-\color green
-#corrected#
 \end_layout
 
 \begin_layout Standard
@@ -4110,11 +4185,7 @@ key "Nichols08"
 
 \end_inset
 
- and in Kerisit and Liu's classical 
-\color green
-KL1 and KL2 #?#
-\color inherit
- MD simulations 
+ and in Kerisit and Liu's classical KL1 and KL2 MD simulations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -4245,7 +4316,18 @@ key "Marcus86"
 \end_inset
 
 .
- The largest uncertainty of the uranyl solvation energy reported, 
+ The largest uncertainty of the experimental estimates for the uranyl solvation
+ energy, 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ 
 \begin_inset Formula $-437\le\Delta G_{\text{sol}}\le-318$
 \end_inset
 
@@ -5767,8 +5849,35 @@ status open
 \end_inset
 
  
-\color green
-#please use consistently kcal/mol#
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+SK: please use consistently kcal/mol.
+ AM: This is intentional.
+ We use a slightly unusual definition of a kcal throughout, the ITC kcal
+ of 4.1868 kJ (hardwired in the code).
+ Most people use thermochemical kcal of 4.184 kJ.
+ On the other hand, some papers directly cite kcals (not feasible to find
+ out which, likely thermochemical).
+ Also it was difficult to attribute the values copied over publications
+ AND converted to the values in the original literature during my literature
+ research.
+ So I intentionally keep the quoted data as they were published in the original
+ literature, including the units and notation.
+ For 
+\begin_inset Formula $\Delta S$
+\end_inset
+
+ conventional units are anyway different either cal or J (not kcal or kJ),
+ otherwise the value is too low.
+ As is, it makes it easier to trace back, I think.
+ No change.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -6489,7 +6598,17 @@ reference "tab:energy-vs-coordination"
  show that embedding into the RISM solvent yields a solvation free energy
  that is essentially constant and independent of the number of explicit
  water ligands.
- Again, it is lower by about 10
+ Again, it is more negative 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ by about 10
 \begin_inset space ~
 \end_inset
 
