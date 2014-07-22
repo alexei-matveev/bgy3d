@@ -4431,13 +4431,6 @@ key "Moskaleva04"
 
 \end_inset
 
- 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Cornehl96"
-
-\end_inset
-
  as well as of the other 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
