@@ -107,14 +107,15 @@ typedef DM DA; /* At least in 2.3.3 (Lenny) there are both DM and DA */
 
   Note that  the file  bgy3d-solvents.h quotes 1.6889  instead.  There
   are  several definitions of  calorie in  use.  One  is based  on the
-  "International Table calorie" which is 4.1868 J, another is based on
-  the  "theormochemical calorie"  which is  4.184 J  exactly  [1].  It
-  appears  that at  least  in some  cases  the former,  "International
-  Table" definition was assumed in this code.
+  International  Steam Table  calorie which  is 4.1868  J,  another is
+  based on the "theormochemical calorie" which is 4.184 J exactly [1].
+  It appears  that at  least in some  cases the  former, International
+  Steam Table definition was assumed in this code.
 
   [1] http://physics.nist.gov/Pubs/SP811/appenB8.html
 
-  Boltzmann constant assuming the IT-calorie definition:
+  Boltzmann  constant assuming the  International Steam  Table calorie
+  definition:
 */
 #define KBOLTZMANN (8.3144621/4186.8) /* kcal/mol/K */
 
@@ -138,7 +139,8 @@ typedef DM DA; /* At least in 2.3.3 (Lenny) there are both DM and DA */
 
     => 331.84164
 
-  Again, the code appears to use the IT-calorie to define 1 / ε₀:
+  Again, the code appears to use the International Steam Table calorie
+  to define 1 / ε₀:
 */
 #define EPSILON0INV 331.84164 //331.84164
 

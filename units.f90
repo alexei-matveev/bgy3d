@@ -16,7 +16,7 @@ module units
   real (rk), parameter, public :: ANGSTROM = 1
   real (rk), parameter, public :: KCAL = 1
 
-  ! ITC calorie here, see also bgy3d.h:
+  ! International Steam Table calorie here, see also bgy3d.h:
   real (rk), parameter, public :: MOL = 6.02214129d23
   real (rk), parameter, public :: KJOULE = KCAL / 4.1868d0 ! only for output
   real (rk), parameter, public :: METER = 1.0d10 * ANGSTROM
@@ -42,10 +42,10 @@ module units
   !
   !   => 331.84164
   !
-  ! Again, the code appears to use the IT-calorie to define 1/ε₀. Keep
-  ! this in sync with bgy3d.h.   Fun fact: some historical works, e.g.
-  ! J. Aaqvist, J.  Phys.  Chem.   94, 8021 (1990), even use the exact
-  ! 332 for electrostatics:
+  ! Again,  the code  appears  to use  the  International Steam  Table
+  ! calorie to define 1/ε₀. Keep this in sync with bgy3d.h.  Fun fact:
+  ! some historical  works, e.g.  J.   Aaqvist, J.  Phys.   Chem.  94,
+  ! 8021 (1990), even use the exact 332 for electrostatics:
   !
   real (rk), parameter, public :: EPSILON0INV = 331.84164d0 * KCAL * ANGSTROM
 
