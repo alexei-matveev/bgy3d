@@ -5855,8 +5855,8 @@ status open
 \begin_layout Plain Layout
 SK: please use consistently kcal/mol.
  AM: This is intentional.
- We use a slightly unusual definition of a kcal throughout, the ITC kcal
- of 4.1868 kJ (hardwired in the code).
+ We use a slightly unusual definition of a kcal throughout, the International
+ Steam Table kcal of 4.1868 kJ (hardwired in the code).
  Most people use thermochemical kcal of 4.184 kJ.
  On the other hand, some papers directly cite kcals (not feasible to find
  out which, likely thermochemical).
