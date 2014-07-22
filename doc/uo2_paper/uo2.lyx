@@ -181,7 +181,7 @@ SK: this review is about UO
 .
  AM: Yes, I know.
  This is the quote from the abstract to supports directly the claim about
- the most common oxydation state: 
+ the most common oxidation state: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -293,21 +293,15 @@ key "Buehl05,Buehl06,Buehl11,Nichols08"
 \end_inset
 
  
-\color green
-
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-\color green
 ok?
 \end_layout
 
 \end_inset
 
-
-\color inherit
  are restricted to a comparably small number of solvent molecules due to
  their very high computational demand.
 \end_layout
@@ -688,22 +682,16 @@ key "Perkyns94,Kinoshita97,Kovalenko98,Sato99,book:Hirata03,Chuev07,Chuev08,Ratk
 \end_inset
 
 
-\color green
-
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-\color green
 SK: #not much, book, review available?# BL: There are endless papers for
  this
 \end_layout
 
 \end_inset
 
-
-\color inherit
 .
  However, the uncontrolled exponential term often results in numerical divergenc
 e 
@@ -782,16 +770,12 @@ To accurately treat the long-range behavior of the Coulomb potential it
 \end_inset
 
  
-\color green
-
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,book:Hansen06"
 
 \end_inset
 
-
-\color inherit
 , so that the long-range asymptotic component 
 \begin_inset Formula $u_{\text{L;}i\alpha}^{\text{C}}(r)=q_{i}q_{\alpha}\mathrm{erf}(ar)/r$
 \end_inset
