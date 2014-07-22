@@ -334,7 +334,7 @@ key "Chandler72"
 
  which provides solvation energies and also averaged solvent structures
  via site-site radial distribution functions (RDF).
- The one-dimensional (1D) RISM method has been applied from simple atomic
+ The one-dimensional (1D) RISM method has been applied to simple atomic
  solutes 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -342,7 +342,7 @@ key "Hirata81,Kinoshita97"
 
 \end_inset
 
-, solvated polymers in polar and quadrupolar liquids 
+, polymers in polar and quadrupolar liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Hirata82"
