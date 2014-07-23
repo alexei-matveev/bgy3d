@@ -166,6 +166,7 @@ clean:
 	rm -f $(generated-depfiles)
 	rm -f *.a *.so *.o *.mod *.bin *.info
 	rm -f bgy3d
+	$(MAKE) -C test clean
 
 distclean:
 	rm -f *.o *.so *.d
