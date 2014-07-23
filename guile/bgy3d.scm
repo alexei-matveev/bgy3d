@@ -590,6 +590,10 @@ computes the sum of all vector elements."
      (value #t)
      (predicate ,(lambda (name)
                    (and (find-molecule name) name)))) ; a string
+    (geometry
+     (value #t)
+     (predicate ,(lambda (path)
+                   (with-input-from-file path read-xyz))))
     (closure
      (value #t)
      (predicate ,(lambda (x)
@@ -887,16 +891,22 @@ computes the sum of all vector elements."
          (let-values (((x f fg) (if solvent
                                     (make-pes solute solvent settings)
                                     (make-pes/gp solute settings))))
-           (match cmd
-             ("energy"
-              (let ((e (f x)))
-                (pretty-print/serial e)))
-             ("gradients"
-              (let-values (((e g) (fg x)))
-                (pretty-print/serial g)))
-             ("taylor"
-              (let-values (((e g) (fg x)))
-                (pretty-print/serial (cons e g)))))))
+           ;; If the geometry option is set to some molecule
+           ;; description, take its geometry instead:
+           (let ((x (let ((mol (assoc-ref settings 'geometry)))
+                      (if mol
+                          (molecule-positions mol)
+                          x))))
+            (match cmd
+              ("energy"
+               (let ((e (f x)))
+                 (pretty-print/serial e)))
+              ("gradients"
+               (let-values (((e g) (fg x)))
+                 (pretty-print/serial g)))
+              ("taylor"
+               (let-values (((e g) (fg x)))
+                 (pretty-print/serial (cons e g))))))))
         ;;
         ;; Start a server that communicates with a client via two
         ;; named pipes for input/output. This fragile construct is
