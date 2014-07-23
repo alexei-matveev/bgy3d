@@ -15,7 +15,8 @@
 
 /* Long  range  pair potential  Vec  uc_fft  is intent(out),  complex,
    centered Vec: */
-static void coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
+void
+bgy3d_coulomb_long_fft (const State *BHD, real G, Vec uc_fft)
 {
   /*
     Tabulate  spherically  symmetric   function  around  grid  corner.
@@ -95,7 +96,7 @@ static void ComputeFFTfromCoulomb (State *BHD,
   const real G = G_COULOMB_INVERSE_RANGE;
 
   /* Potential of a unit charge located at the grid center: */
-  coulomb_long_fft (BHD, G, uc_fft);
+  bgy3d_coulomb_long_fft (BHD, G, uc_fft);
 
   VecScale (uc_fft, factor);
 
@@ -140,7 +141,7 @@ void bgy3d_pair_potential (const State *BHD,
   vec_rmap (BHD, f, v_short);
 
   /* Long-range part of the potential is best represented by FFT: */
-  coulomb_long_fft (BHD, G, v_long_fft);
+  bgy3d_coulomb_long_fft (BHD, G, v_long_fft);
   VecScale (v_long_fft, q2);
 }
 

@@ -10,6 +10,9 @@
 #define CUTOFF 1.0e+8
 #define CUTOFF2 (CUTOFF * 1.0e-5)
 
+/* Long  range  pair potential  Vec  uc_fft  is intent(out),  complex,
+   centered Vec: */
+void bgy3d_coulomb_long_fft (const State *BHD, real G, Vec uc_fft);
 
 /* Computes a pair potential. See also bgy3d_force(). */
 void bgy3d_pair_potential (const State *BHD,
