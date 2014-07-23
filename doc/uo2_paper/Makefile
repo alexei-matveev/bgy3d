@@ -23,7 +23,7 @@ $d/fig1.svg: $d/mkfig1.py $d/md-oh.dat $d/md-oo.dat $d/md-uh.dat $d/md-uo.dat $d
 	inkscape $(<) --export-dpi=300 --export-pdf=$(@)
 
 # Figure 3 will be huge with 300 DPI:
-$d/fig3.png: DPI=100
+$d/fig3.png: DPI=300
 $d/fig1.png $d/fig2.png: DPI=300
 
 %.png: %.svg
