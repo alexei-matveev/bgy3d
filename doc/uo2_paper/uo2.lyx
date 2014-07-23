@@ -346,7 +346,7 @@ key "Hirata82"
 , rare gases and alkanes 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Kovalenko00"
+key "Kovalenko00a"
 
 \end_inset
 
@@ -1301,7 +1301,7 @@ are all of short range and thus amenable to a representation on a finite
  
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Kovalenko00,Cummings81"
+key "Kovalenko00b,Cummings81"
 
 \end_inset
 
