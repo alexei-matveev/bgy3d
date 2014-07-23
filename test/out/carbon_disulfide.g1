@@ -1,37 +1,36 @@
 ;;; Moments from g0.bin
-(115.569201312708
- (-1.58764942394518
-  -1.80960944786743
-  -1.80960952178942)
- ((562.368792672329
-   -0.190778614223175
-   -0.19077870014462)
-  (-0.190778614223175
-   206.509209351436
-   0.00405720679108608)
-  (-0.19077870014462
-   0.00405720679108608
-   206.50920816847)))
+(115.569003875235
+ (-1.58781376882177
+  -1.80963083833434
+  -1.80963095300367)
+ ((562.365344424975
+   -0.190775437800278
+   -0.190775668698662)
+  (-0.190775437800278
+   206.504782228608
+   0.00405678285509465)
+  (-0.190775668698662
+   0.00405678285509465
+   206.504784222111)))
 ;;; Moments from g1.bin
-(92.0631591017017
- (-1.69249480661085
-  -2.1377953649411
-  -2.13779536197605)
- ((-242.965309324476
-   -0.204784991571699
-   -0.204785118601701)
-  (-0.204784991571699
-   -482.014422023011
-   0.00460761396921456)
-  (-0.204785118601701
-   0.00460761396921456
-   -482.014422278619)))
-integrated charge = -0.000000 (should be close to zero)
-q_v = -0.084622 (charge of solvent medium)
+(92.0634988665761
+ (-1.69266671616369
+  -2.13782119451069
+  -2.13782098538665)
+ ((-242.94655643459
+   -0.204785087282428
+   -0.204785031277002)
+  (-0.204785087282428
+   -482.005374359909
+   0.00460708705679109)
+  (-0.204785031277002
+   0.00460708705679109
+   -482.00537652118)))
+q_v = -0.084620 (charge of solvent medium)
 q_u = -0.000000 (charge of solute charge density)
 |<x|ρ_n>| = | 0.000000,  0.000000,  0.000000| = 0.000000 (dipole moment of solute cores)
-|<x|ρ_u>| = | 0.000000,  0.000000, -0.000000| = 0.000000 (dipole moment of solute charge density)
+|<x|ρ_u>| = | 0.000000,  0.000000,  0.000000| = 0.000000 (dipole moment of solute charge density)
 |<x|ρ_v>| = |-0.000377, -0.001181, -0.001181| = 0.001713 (dipole moment of solvent medium)
-<U_v|ρ_N> = -0.372030 (solvent electrostatic field with solute point nuclei)
-<U_v|ρ_u> = -0.370350 (solvent electrostatic field with diffuse charge density of solute)
-<ρ_v|U_u> = -0.370258 (solvent charge density with long-range electrostatic field of solute)
+<U_v|ρ_N> = -0.372173 (solvent electrostatic field with solute point nuclei)
+<U_v|ρ_u> = -0.370386 (solvent electrostatic field with diffuse charge density of solute)
+<ρ_v|U_u> = -0.370345 (solvent charge density with long-range electrostatic field of solute)
