@@ -475,7 +475,7 @@ bgy3d_solute_field (const State *BHD,
     Poisson equation or use the analytic properties. Flip this flag to
     choose:
   */
-  const bool analytic_form = false;
+  const bool analytic_form = true;
   {
     real q[n];              /* solute charges */
     real x[n][3];           /* solute coordinates */
