@@ -1663,21 +1663,23 @@ contains
           end block
        end block
 
-
        ! Compute number integral
        forall (i = 1:n, j = 1:m)
           ni(i, j, :) = integral (g(i, j, :)) * (rho * dr**3)
        end forall
 
-       ! Charge density and charge integral around solute sites:
-       do i = 1, n
-          chg(i, :) = 0.0
-          do j = 1, m
-             chg(i, :) = chg(i, :) + g(i, j, :) * solvent(j) % charge
-          enddo
-          chn(i, :) = integral (chg(i, :)) * (rho * dr**3)
-       enddo
-
+       block
+         real (rk) :: q(m)
+         q = solvent % charge
+         ! Charge density and charge integral around solute sites:
+         do i = 1, n
+            chg(i, :) = 0.0
+            do j = 1, m
+               chg(i, :) = chg(i, :) + g(i, j, :) * q(j)
+            enddo
+            chn(i, :) = integral (chg(i, :)) * (rho * dr**3)
+         enddo
+       end block
 
        ! This prints a lot of data on tty in (gnuplot) column format!
        if (verb > 1) then
