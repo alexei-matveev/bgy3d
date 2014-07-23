@@ -283,9 +283,9 @@ bgy3d_solute_form (const State *BHD,
   For many centers we effectively  "fuse" several logical steps in one
   procedure:
 
-  1) Tabulate  ρ(k) for  a superposition of  δ-like functions  at x[i]
-  with weights  q[i].  Centered at the corner.   Normalization is such
-  that
+  1) Tabulate electric form factor  ρ(k) for a superposition of δ-like
+  functions  at  x[i] with  weights  q[i].   Centered  at the  corner.
+  Normalization is such that
 
     ρ(k=0) = Σ q[i]
               i
@@ -301,52 +301,32 @@ bgy3d_solute_form (const State *BHD,
 
   3) "Solve" a Poisson equation by scaling with (4π/ε₀)/k².
 
-  4) Translate the whole to the grid center by flipping the phase.
+  4) Translate  the whole  to the grid  center by flipping  the phase.
+  Translation    and   convolutions   (both    effectively   pointwise
+  multiplications in k-space) are commutative, by the way.
 
-  Do not confuse  with a single core version  in bgy3d-force.c! FIXME:
-  maybe unify both?
+  We re-use the single core version from bgy3d-force.c here:
 */
 static void
 coulomb_long_fft (const State *BHD,
                   int n, const real q[n], real x[n][3], real G, /* in */
                   Vec uc_fft)   /* out, complex, center */
 {
-  complex f3 (const real k[3])
-  {
-    const real k2 = SQR (k[0]) + SQR (k[1]) + SQR (k[2]);
-
-    /* FIXME: Cannot divide  by zero here, but this  is the value that
-       defines the "average" potential in the cell: */
-    complex sum;
-    if (unlikely (k2 == 0.0))
-      sum = 0.0;
-    else
-      {
-        /*
-          This form factor  is regular for small k  with a limit equal
-          to the total charge of the system and the higher order given
-          by multipole expansion:
-        */
-        const complex form = form_factor (k, n, q, x);
-
-        /*
-          FIXME: dont  repeat yourself, we  have the formula  coded in
-          bgy3d-force.h  as an  inline  function, but  that  one is  a
-          function of k not k²:
-        */
-        sum = form * (4 * M_PI * EPSILON0INV * exp (-k2 / (4 * SQR (G))) / k2);
-      }
-    return sum;
-  }
-  vec_kmap3 (BHD, f3, uc_fft);
+  /*
+    This is a long-range Coulomb shape around the grid center.  FIXME:
+    Cannot divide by zero here  to compute something that is inversely
+    proportional  to  k², but  this  is  the  value that  defines  the
+    "average" potential in the cell:
+  */
+  bgy3d_coulomb_long_fft (BHD, G, uc_fft);
 
   /*
-    Translate  the Coulomb long  field uc_fft  so that  the real-space
-    representation  is localized at  the grid  center like  other grid
-    representations  and not  at  the grid  corner.   This amounts  to
-    scaling the k-components by a phase factor:
+    Convolution with the charge-weighted  form factor. The form factor
+    at k=0 is zero for neutral  species, so that in this case a finite
+    shift  in uc(k=0)  would not  matter.  FIXME:  1/k² is  not finite
+    though, hopefully we get a meaningful dipole field here:
   */
-  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, uc_fft);
+  bgy3d_solute_form (BHD, n, q, x, uc_fft);
 }
 
 
