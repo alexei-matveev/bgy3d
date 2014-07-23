@@ -67,7 +67,10 @@
 (let* ((hnc (map cons *names* *hnc*))
        (kh (map cons *names* *kh*))
        (out `((KH ,kh) (HNC ,hnc))))
-  (pretty-print out)
-  (with-output-to-file "run-ions-out"
-    (lambda () (pretty-print out))))
+  (pretty-print/serial out)
+  ;;
+  ;; One should not be writing to the same file on multiple workers:
+  (begin/serial
+   (with-output-to-file "run-ions-out"
+     (lambda () (pretty-print out)))))
 
