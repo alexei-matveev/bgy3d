@@ -237,8 +237,7 @@ contains
     !
     ! This one does not need to be interoperable.
     !
-    use foreign, only: problem_data, site, bgy3d_problem_data_print, &
-         verbosity, comm_rank
+    use foreign, only: problem_data, site, bgy3d_problem_data_print
     use lisp, only: obj, nil, acons, symbol
     use drism, only: epsilon_rism
     implicit none
@@ -262,7 +261,7 @@ contains
     rmax = rism_rmax (pd)
     nrad = rism_nrad (pd)
 
-    if (verbosity > 0 .and. comm_rank() == 0) then
+    if (verbosity() > 0) then
        print *, "# L =", rmax, "(for 1d)"
        print *, "# N =", nrad, "(for 1d)"
 
@@ -349,7 +348,7 @@ contains
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
-    use foreign, only: site, comm_rank
+    use foreign, only: site
     use options, only: getopt
     use lisp, only: obj, acons, symbol, flonum
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
@@ -401,7 +400,7 @@ contains
           ! FIXME: this factor  is infinite when y ->  0 (e.g. zero
           ! dipole) while keeping the target ε - 1 finite:
           A = dipole_factor (e=eps, y=y)
-          if (comm_rank () == 0) then
+          if (verbosity() > 0) then
              print *, "# Scaling the long-range asymptotics by A=", A, "for e=", eps
           endif
        end block
@@ -969,7 +968,9 @@ contains
 
     call self_energy (rule, solute, spec, e, g)
 
-    print *, "# Self energy = ", e / kcal, " kcal/mol"
+    if (verbosity() > 0) then
+       print *, "# Self energy = ", e / kcal, " kcal/mol"
+    endif
 
     dict = acons (symbol ("SELF-ENERGY"), flonum (e), dict)
     dict = acons (symbol ("SELF-ENERGY-GRADIENTS"), list2 (g), dict)
@@ -1013,7 +1014,7 @@ contains
     !
     ! Compute the bridge correction using TPT.
     !
-    use foreign, only: site, verbosity
+    use foreign, only: site
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     implicit none
@@ -1047,7 +1048,7 @@ contains
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
 
-      if (verbosity > -1) then
+      if (verbosity() > 0) then
          print *, "# TPT bridge correction =", e, "rbc =", rbc
          ! Add a warning when distribution is perturbed by RBC
          if (rbc) then
@@ -1065,7 +1066,7 @@ contains
 
       e = chempot_bridge (beta, rho, h, expB, r, dr)
 
-      if (verbosity > -1) then
+      if (verbosity() > 0) then
          print *, "# SCF bridge correction =", e, "rbc =", rbc
          ! Add a warning when iterations were performed without RBC
          if (.not. rbc) then
@@ -1324,8 +1325,7 @@ contains
     !
     use fft, only: fourier_rows, FT_FW, integral
     use linalg, only: polyfit
-    use foreign, only: site, verbosity, comm_rank, &
-         HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
     use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
@@ -1350,13 +1350,8 @@ contains
     integer :: nrad, n, m, rule
     integer :: verb
 
-    if (comm_rank () == 0) then
-       if (.not. getopt ("verbosity", verb)) then
-          verb = verbosity
-       endif
-    else
-       verb = 0
-    endif
+    ! Normally, only rank-0 will eventually have this non-zero:
+    verb = verbosity()
 
     if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
@@ -1747,7 +1742,7 @@ contains
           species = identify_species (solute, 2 * ANGSTROM)
        endif
 
-       if (verbosity > 1) then
+       if (verbosity() > 1) then
           do i = 1, size (solute)
              print *, solute(i) % name, species(i)
           enddo
@@ -3174,5 +3169,22 @@ contains
        lst = cons (list1 (array(:, i)), lst)
     end do
   end function list2
+
+  function verbosity() result (v)
+    use options, only: getopt
+    use foreign, only: comm_rank, global_verbosity => verbosity
+    implicit none
+    integer :: v
+    ! *** end of interface ***
+
+    ! Other ranks should be mostly silent:
+    if (comm_rank () == 0) then
+       if (.not. getopt ("verbosity", v)) then
+          v = global_verbosity
+       endif
+    else
+       v = 0
+    endif
+  end function verbosity
 
 end module rism
