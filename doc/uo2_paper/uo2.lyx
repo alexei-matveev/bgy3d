@@ -78,7 +78,6 @@ Alexei Matveev
 \end_layout
 
 \begin_layout Author Email
-
 alexei.matveev@gmail.com
 \end_layout
 
@@ -96,7 +95,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -237,7 +235,7 @@ key "Moskaleva04,Cao05,Shamov05,Gutowski06"
  the water solvent around uranyl for large numbers of solvent molecules
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Tiwari14,Spoel05"
+key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Tiwari14"
 
 \end_inset
 
@@ -2411,7 +2409,7 @@ key "Su09"
 \end_layout
 
 \begin_layout Standard
-Geometry optimization have been done using quasi-Newton method as implemented
+Geometry optimizations have been done using quasi-Newton method as implemented
  in ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3981,7 +3979,7 @@ reference "tab:params-water"
 
 \end_inset
 
-, to compare the performance of RISM for five the different uranyl models
+, to compare the performance of RISM for the five different uranyl models
  listed in Table
 \begin_inset space ~
 \end_inset
@@ -4070,7 +4068,7 @@ key "Soderholm05"
 \end_inset
 
  studies.
- The positions of the first U--OW peak calculated with RM12 and RM13 varies
+ The positions of the first U--OW peak calculated with RM12 and RM13 vary
  from 241
 \begin_inset Formula $\sim$
 \end_inset
@@ -4079,7 +4077,7 @@ key "Soderholm05"
 \begin_inset space ~
 \end_inset
 
-pm, which is close to MM-MD 
+pm, which are close to MM-MD 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud93,Rai12"
@@ -9927,8 +9925,8 @@ The atomistic nature of the RISM model offers a more detailed and consistent
  
 \color black
 Without the need for statistical sampling as required for explicit solvation
- models, the RISM method predicts the correct water solvent structure the
- around uranyl ion in good agreement with experimental results.
+ models, the RISM method predicts the correct water solvent structure around
+ the uranyl ion in good agreement with experimental results.
  Moreover, the hybrid QM+RISM calculation provides a small free energy differenc
 e 
 \color inherit
