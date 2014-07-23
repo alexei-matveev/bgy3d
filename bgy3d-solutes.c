@@ -315,29 +315,28 @@ coulomb_long_fft (const State *BHD,
   {
     const real k2 = SQR (k[0]) + SQR (k[1]) + SQR (k[2]);
 
-    complex sum = 0.0;
-
     /* FIXME: Cannot divide  by zero here, but this  is the value that
        defines the "average" potential in the cell: */
-    if (k2 == 0.0)
-      return sum;
+    complex sum;
+    if (unlikely (k2 == 0.0))
+      sum = 0.0;
+    else
+      {
+        /*
+          This form factor  is regular for small k  with a limit equal
+          to the total charge of the system and the higher order given
+          by multipole expansion:
+        */
+        const complex form = form_factor (k, n, q, x);
 
-    /*
-      This form  factor is regular for  small k with a  limit equal to
-      the total  charge of  the system and  the higher order  given by
-      multipole expansion:
-    */
-    for (int i = 0; i < n; i++)
-      sum += q[i] * cexp (-I * (k[0] * x[i][0] +
-                                k[1] * x[i][1] +
-                                k[2] * x[i][2]));
-
-    /*
-      FIXME:  dont  repeat yourself,  we  have  the  formula coded  in
-      bgy3d-force.h as an inline function,  but that one is a function
-      of k not k²:
-    */
-    return sum * (4 * M_PI * EPSILON0INV * exp (-k2 / (4 * SQR (G))) / k2);
+        /*
+          FIXME: dont  repeat yourself, we  have the formula  coded in
+          bgy3d-force.h  as an  inline  function, but  that  one is  a
+          function of k not k²:
+        */
+        sum = form * (4 * M_PI * EPSILON0INV * exp (-k2 / (4 * SQR (G))) / k2);
+      }
+    return sum;
   }
   vec_kmap3 (BHD, f3, uc_fft);
 
