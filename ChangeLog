@@ -1,3 +1,13 @@
+2014-07-23  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* bgy3d-solutes.c (bgy3d_solute_field): set analytic_form = true
+	to compute the k-space representation of the long-range potential
+	directly as opposed to the way via the FFT transform of the
+	tabulated smeared core density. This change slightly affects the
+	numbers of the testsuite. The reference outputs have been
+	updated. Also the branch that adds the contribution of the
+	electronic density is incomplete and will abort when used.
+
 2014-07-11  Alexei Matveev  <alexei.matveev@gmail.com>
 
 	* rism.f90 (rism_uv): Switched to optimized Ng scheme for
