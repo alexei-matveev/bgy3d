@@ -163,6 +163,7 @@ test-all:
 	$(MAKE) -C ./test
 
 clean:
+	rm -f $(generated-depfiles)
 	rm -f *.a *.so *.o *.mod *.bin *.info
 	rm -f bgy3d
 
@@ -171,8 +172,13 @@ distclean:
 	rm -f bgy3d
 .PHONY: distclean
 
-include $(OBJECTS:.o=.d)
-include $(libbgy3d.a:.o=.d)
+# Even if you issue "make clean" the uncoditional include will lead to
+# attempts  to rebuild  the C/Fortran  dependencies, that  is  why the
+# conditional:
+generated-depfiles = $(OBJECTS:.o=.d) $(libbgy3d.a:.o=.d)
+ifneq ($(MAKECMDGOALS),clean)
+	include $(generated-depfiles)
+endif
 
 # This do-it-all rule  is specific to gcc version  >= 3.0, and updates
 # the object file  and the dependency file at the  same time.  The -MP
