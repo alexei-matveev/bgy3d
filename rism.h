@@ -21,3 +21,11 @@ void rism_solute (const ProblemData *PD,
                   int m, const Site solvent[m],
                   real x[m][m][*], /* [m][m][nrad] or NULL, in */
                   void *retval);   /* SCM* or NULL, out */
+
+/*
+  subroutine rism_solute_renorm &
+    (m, solvent, rmax, nrad, x_kvv, alpha, s_kv) bind (c)
+*/
+void rism_solute_renorm (int m, const Site solvent[m],
+                         real rmax, int nrad, real x_fft[m][m][nrad], real G,
+                         real s_fft[m][nrad]); /* out */

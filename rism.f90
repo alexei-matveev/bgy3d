@@ -14,6 +14,7 @@ module rism
   public :: rism_nrad
   public :: rism_rmax
   public :: rism_upscale
+  public :: rism_solute_renorm
   ! *** END OF INTERFACE ***
 
   interface gnuplot
@@ -188,6 +189,49 @@ contains
     call main (pd, solvent, solute, x=x, dict=dict)
   end subroutine rism_solute
 
+  subroutine rism_solute_renorm (m, solvent, rmax, nrad, x_kvv, alpha, s_kv) bind (c)
+    !
+    ! Needs to be consistent with ./rism.h
+    !
+    use foreign, only: problem_data, site
+    use iso_c_binding, only: c_int
+    use units, only: EPSILON0INV
+    implicit none
+    integer (c_int), intent (in), value :: m
+    type (site), intent (in) :: solvent(m)
+    real (rk), intent (in), value :: rmax
+    integer (c_int), intent (in), value :: nrad
+    real (rk), intent (in) :: x_kvv(nrad, m, m) ! C-layout
+    real (rk), intent (in), value :: alpha
+    real (rk), intent (out) :: s_kv(nrad, m) ! C-layout
+    ! *** end of interface ***
+
+    real (rk) :: q(m)
+    real (rk) :: v(nrad)
+    real (rk) :: r(nrad), dr, k(nrad), dk
+    integer :: i, j
+
+    ! A copy of charges:
+    q = solvent % charge
+
+    ! Reconstruct the grid (need k-values):
+    call mkgrid (rmax, r, dr, k, dk)
+
+    ! Now  tabulate  the Coulomb  field  of  a  unit Gaussian  on  the
+    ! k-grid. One  would need to  Here the Fortran parameter  for 1/ε₀
+    ! must have the same value as a C #define:
+    v = EPSILON0INV * coulomb_long_fourier (k, alpha)
+
+    ! Convolution  with   the  charge-weighted  potential  s   =  χ  *
+    ! (qv). Note that  χ ~ a + bk²  and v ~ 1/k². Fortunately  k is >=
+    ! dk/2 in 1D code:
+    do i = 1, m
+       s_kv(:, i) = 0.0
+       do j = 1, m
+          s_kv(:, i) = s_kv(:, i) + x_kvv(:, i, j) * q(j) * v(:)
+       enddo
+    enddo
+  end subroutine rism_solute_renorm
 
   subroutine main (pd, solvent, solute, t, x, dict)
     !
