@@ -150,6 +150,13 @@
 #include "hnc3d.h"
 
 
+/* Apply NG scheme as is: */
+static const bool ng = true;
+
+/* Only in this  case the inverse FFT of  the long-range Coulomb gives
+   something reasonable: */
+static const bool neutral_solutes = true;
+
 /*
   There  are several  closure  relations, all  must  satisfy the  same
   interface. Vec c is intent(out) the rest is input.
@@ -1034,6 +1041,7 @@ typedef struct Ctx1
   Vec *c;                       /* [m], real, work */
   Vec *c_fft, *t_fft;           /* [m], complex, work */
   Vec *chi_fft;                 /* [m][m], complex, fixed */
+  Vec *tau_fft;                 /* [m], complex, fixed */
 } Ctx1;
 
 
@@ -1081,7 +1089,8 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
         The long-range asymptotics is  of electrostatic origin so that
         site-specific potentials are proportional to the site charges:
       */
-      VecAXPY (ctx->c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
+      if (ng)
+        VecAXPY (ctx->c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
     }
 
   /*
@@ -1114,7 +1123,10 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
           T := T - βV
            S         L
       */
-      VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
+      if (ng)
+        VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
+      else
+        VecAXPY (ctx->t_fft[i], 1.0, ctx->tau_fft[i]);
 
       MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
@@ -1189,7 +1201,8 @@ solvent_kernel_file1 (State *HD, int m, Vec chi_fft[m][m]) /* out */
    computed by 1d RISM solvent solver. See ./rism.f90. */
 static void
 solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
-                      Vec chi_fft[m][m]) /* out */
+                      Vec chi_fft[m][m], /* out, corner */
+                      Vec tau_fft[m])    /* out, center, optional */
 {
   /*
     Problem data for use in 1d-RISM  code.  If you do not upscale, the
@@ -1214,13 +1227,53 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
   */
   rism_solvent (&pd, m, solvent, NULL, x_fft, NULL);
 
+  /*
+    The code  that tabulates  the k-rep on  3D grid  makes assumptions
+    about the 1D grid:  the lowest k is dk/2 where dr *  dk = π / nrad
+    and dr = rmax / nrad:
+  */
+  const real dk = M_PI / rmax;
+
+  /*
+    Ask the 1D code to compute T[v] + v = χ * v for a Coulomb field of
+    a Gaussian charge distribution of finite width.  The input Coulomb
+    field is  fully specified by  the Gaussian width and  solvent site
+    charges.   We assume  the  1/ε₀  factor will  be  included in  the
+    result. The output is non-trivially site-specific.
+  */
+  if (tau_fft)
+    {
+      real tau_fft_[m][nrad];   /* 1D version */
+
+      rism_solute_renorm (m, solvent, rmax, nrad, x_fft, G_COULOMB_INVERSE_RANGE,
+                          tau_fft_);
+
+      for (int i = 0; i < m; i++)
+        vec_ktab (HD, nrad, tau_fft_[i], dk, tau_fft[i]);
+
+      /* Translate distribution to the grid center: */
+      for (int i = 0; i < m; i++)
+        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, tau_fft[i]);
+
+      /* Finally, τ = -β χ * v */
+      for (int i = 0; i < m; i++)
+        VecScale (tau_fft[i], -HD->PD->beta);
+    }
+  /*
+    By now in each of m  3D tables tau_fft[i] we have an approximation
+    for  some radial  function  that corresponds  to  a unit  gaussian
+    solute charge at  the origin.  A molecular solute  will consist of
+    many charges of different magnitude and at different locations. It
+    is,  however, not  the  task  of the  procedure  that returns  the
+    solvent kernel to account for that.  Let the caller superimpose as
+    many   terms   as   there    are   solute   sites   instead.   See
+    bgy3d_solute_form() for how to do that.
+  */
+
   /* The solute/solvent code expects χ - 1. Offset the diagonal: */
   for (int i = 0; i < m; i++)
     for (int k = 0; k < nrad; k++)
       x_fft[i][i][k] -= 1;
-
-  /* dr * dk = π / nrad where dr = rmax / nrad */
-  const real dk = M_PI / rmax;
 
   /* FIXME: assuming symmetric χ - 1 with aliasing: */
   for (int i = 0; i < m; i++)
@@ -1236,12 +1289,16 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
 */
 static void
 solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
-                Vec chi_fft[m][m])                       /* out */
+                Vec chi_fft[m][m],                       /* out */
+                Vec tau_fft[m])                          /* out */
 {
   if (bgy3d_getopt_test ("solvent-1d"))
-    solvent_kernel_rism1 (HD, m, solvent, chi_fft);
+    solvent_kernel_rism1 (HD, m, solvent, chi_fft, tau_fft);
   else
     {
+      /* FIXME:   Optimized  NG  scheme   not  implemented   in  these
+         branches: */
+      assert (!tau_fft);
       if (bgy3d_getopt_test ("from-radial-g2")) /* FIXME: better name? */
         solvent_kernel_file1 (HD, m, chi_fft);    /* never used */
       else
@@ -1372,18 +1429,54 @@ hnc3d_solute_solve (const ProblemData *PD,
       this is  a property  of the  pure solvent and  is (in  theory) a
       spherically  symmetric  quantity.   Spherical symmetry  is  only
       approximate  if  χ  was  prepared   by  the  3D  code  for  pure
-      solvent. We are wasting here quite some memory!
+      solvent. Also this is a complex Vec holding real data (modulo 3D
+      artifacts). We are wasting here quite some memory!
     */
     local Vec chi_fft[m][m];
     vec_create2 (HD->dc, m, chi_fft);        /* complex */
 
+    /* This one will hold χ *  uc later. Only used for an optimized Ng
+       scheme (ng == false): */
+    local Vec tau_fft[m];       /* complex */
+    if (!ng)
+      vec_create1 (HD->dc, m, tau_fft);
+    else
+      for (int i = 0; i < m; i++)
+        tau_fft[i] = NULL;  /* because local should be null on exit */
+
     /*
-      Get the solvent-solvent  susceptibility (offset by one).  FIXME:
-      we get the solvent description  as an argument, but may read the
-      file  to get  susceptibility.   There is  no  guarantee the  two
-      sources are consistent.
+      Get  the solvent-solvent  susceptibility  (offset by  one) as  a
+      matrix of  complex Vecs.  FIXME: we get  the solvent description
+      as an  argument, but  may read the  file to  get susceptibility.
+      There is no guarantee the two sources are consistent.
     */
-    solvent_kernel (HD, m, solvent, chi_fft);
+    solvent_kernel (HD, m, solvent, chi_fft, (ng? NULL : tau_fft));
+
+    /*
+      Now chi_fft[][] contains χ - 1 and tau_fft[] contains the result
+      of  application χ  * uc  for a  single center  uc.   The solvent
+      kernel knows nothing about geometry  of the solute and it should
+      stay  like  that.  To  get  a superposition  of  the  long-range
+      potentials  of all solute  centers weighted  by their  charge we
+      apply the convolution with the form factor here:
+    */
+    if (!ng)
+      {
+        real q[m], x[m][3];
+
+        /* The   charges  we   have  copied   before  were   those  of
+           solvent. Here we need those of solute. And positions: */
+        for (int i = 0; i < m; i++)
+          {
+            q[i] = solute[i].charge;
+
+            FOR_DIM
+              x[i][dim] = solute[i].x[dim];
+          }
+
+        for (int i = 0; i < m; i++)
+          bgy3d_solute_form (HD, m, q, x, tau_fft[i]);
+      }
 
     /*
       Find T  such that dt  as returned by  iterate_t1 (HD, T,  dT) is
@@ -1403,6 +1496,7 @@ hnc3d_solute_solve (const ProblemData *PD,
           .chi_fft = (void*) chi_fft, /* [m][m], pair quantitity, in */
           .c_fft = c_fft,             /* [m], work for c(t) */
           .t_fft = t_fft,             /* [m], work for t(c(t))) */
+          .tau_fft = tau_fft,         /* [m], complex, in */
         };
 
       /* FIXME: no Jacobian yet! */
@@ -1410,6 +1504,8 @@ hnc3d_solute_solve (const ProblemData *PD,
     }
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
+    if (!ng)
+      vec_destroy1 (m, tau_fft);
 
     /* This should have been the only pair quantity: */
     vec_destroy2 (m, chi_fft);
@@ -1481,7 +1577,7 @@ hnc3d_solute_solve (const ProblemData *PD,
     in this case due to the long range nature of the field.
    */
   local Vec uc = vec_create (HD->da);
-  if (true)
+  if (neutral_solutes)          /* was always assumed */
     {
       /* The field of  neutral species is actually of  short range, so
          this worked for them: */
