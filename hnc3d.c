@@ -151,7 +151,7 @@
 
 
 /* Apply NG scheme as is: */
-static const bool ng = true;
+static const bool ng_as_is = true;
 
 /* Only  in  the  case of  neutral  solutes  the  inverse FFT  of  the
    long-range Coulomb gives something reasonable: */
@@ -1089,7 +1089,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
         The long-range asymptotics is  of electrostatic origin so that
         site-specific potentials are proportional to the site charges:
       */
-      if (ng)
+      if (ng_as_is)
         VecAXPY (ctx->c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
     }
 
@@ -1123,7 +1123,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
           T := T - βV
            S         L
       */
-      if (ng)
+      if (ng_as_is)
         VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
       else
         VecAXPY (ctx->t_fft[i], 1.0, ctx->tau_fft[i]);
@@ -1438,7 +1438,7 @@ hnc3d_solute_solve (const ProblemData *PD,
     /* This one will hold χ *  uc later. Only used for an optimized Ng
        scheme (ng == false): */
     local Vec tau_fft[m];       /* complex */
-    if (!ng)
+    if (!ng_as_is)
       vec_create1 (HD->dc, m, tau_fft);
     else
       for (int i = 0; i < m; i++)
@@ -1450,7 +1450,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       as an  argument, but  may read the  file to  get susceptibility.
       There is no guarantee the two sources are consistent.
     */
-    solvent_kernel (HD, m, solvent, chi_fft, (ng? NULL : tau_fft));
+    solvent_kernel (HD, m, solvent, chi_fft, (ng_as_is? NULL : tau_fft));
 
     /*
       Now chi_fft[][] contains χ - 1 and tau_fft[] contains the result
@@ -1460,7 +1460,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       potentials  of all solute  centers weighted  by their  charge we
       apply the convolution with the form factor here:
     */
-    if (!ng)
+    if (!ng_as_is)
       {
         real q[m], x[m][3];
 
@@ -1504,7 +1504,7 @@ hnc3d_solute_solve (const ProblemData *PD,
     }
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
-    if (!ng)
+    if (!ng_as_is)
       vec_destroy1 (m, tau_fft);
 
     /* This should have been the only pair quantity: */
