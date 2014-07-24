@@ -1,0 +1,29 @@
+FIXME: need some  minimal documentation --- I myself  forget the basic
+usage after a couple of weeks.
+
+Example usage:
+
+a) Compute  solvation energry by  1D-RISM specifying the names  of the
+solvent  and  solute  molecules  to  be  picked  from  the  hard-wired
+database:
+
+  ./guile/runbgy.scm energy \
+    --norm-tol 1e-14 --dielectric 78.4 \
+    --rho 0.0333295 --beta 1.6889 \
+    --L 160 --N 4096 \
+    --solvent "water, PR-SPC/E" --solute "water, PR-SPC/E"
+
+This should give a number close to -7.869294 kcal.
+
+b) Compute solvation energy by 3D-RISM for solute and solvent from the
+database using the solvent susceptibility from a 1D-RISM calculation:
+
+  mpiexec -n 8 ./guile/runbgy.scm energy \
+    --norm-tol 1e-14 --dielectric 78.4 \
+    --rho 0.0333295 --beta 1.6889 \
+    --L 10 --N 96 \
+    --solvent "water, PR-SPC/E" --solute "water, PR-SPC/E" \
+    --hnc --solvent-1d
+
+This should  give you a number  close to -6.277434 kcal  (look for the
+"mu =" lines in the output).
