@@ -47,7 +47,7 @@ q_u = -0.000000 (charge of solute charge density)
 |<x|ρ_v>| = |-0.257924,  0.508195, -0.458965| = 0.731735 (dipole moment of solvent medium)
 <U_v|ρ_N> = -15.958919 (solvent electrostatic field with solute point nuclei)
 <U_v|ρ_u> = -15.559058 (solvent electrostatic field with diffuse charge density of solute)
-<ρ_v|U_u> = -15.559058 (solvent charge density with long-range electrostatic field of solute)
- # mu = 21.226110 kcal (HNC)
- # mu = 17.450740 kcal (KH)*
- # mu = 9.809147 kcal (GF)
+<ρ_v|U_u> = -15.646650 (solvent charge density with long-range electrostatic field of solute)
+ # mu = 21.182314 kcal (HNC)
+ # mu = 17.406944 kcal (KH)*
+ # mu = 9.765351 kcal (GF)
