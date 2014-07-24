@@ -1,3 +1,24 @@
+2014-07-24  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* hnc3d.c (hnc3d_solute_solve): set neutral_solutes = false to
+	compute the real-space representation of the long-range potential
+	directly as opposed to the inverse FFT of its k-rep. The latter
+	procedure cannot be expected to give meaningful results for
+	charged solutes. This real-space representation is primarily used
+	to integrate the chemical potential. The reference results do
+	change and had to be updated. The chemical potential of the water
+	changed by about -0.02 kcal, for butanoic acid by about -0.04
+	kcal.
+
+	Another use of the real-space representation of the long-range
+	potential is to compute the expectation value <ρ_v|U_u> which is
+	the interaction of the solvent density and solute potential. For
+	water the change of this observable was about -0.04 kcal, for
+	butanoic acid about -0.09 kcal. Also, since the complimentary
+	observable <U_v|ρ_u> still uses the FFT to compute the field of
+	the solvent volume charge, the agreement of the two is no more
+	exact.
+
 2014-07-23  Alexei Matveev  <alexei.matveev@gmail.com>
 
 	* bgy3d-solutes.c (bgy3d_solute_field): set analytic_form = true
