@@ -1,5 +1,21 @@
 2014-07-24  Alexei Matveev  <alexei.matveev@gmail.com>
 
+	* hnc3d.c (solvent_kernel): inquire --solvent-3d.  This changes
+	the defaults for 3D RISM.  Without specifying --solvent-3d the 3D
+	solute/solvent code will atomatically invoke 1D RISM to prepare
+	the solvent kernel. Historically one had to specify --solvent-1d
+	to achieve that.
+
+	* guile/bgy3d.scm (option-spec): --solvent-1d is gone,
+	--solvent-3d added.
+
+	* test/Makefile (HNC-FLAGS): The testsuite still does a full 3D
+	RISM pure solvent calculation followed by solute/solvent
+	calculation that read the solvent susceptibility from the file.
+	The flag --solvent-3d was added to match the reference output.
+
+2014-07-24  Alexei Matveev  <alexei.matveev@gmail.com>
+
 	* hnc3d.c (hnc3d_solute_solve): set neutral_solutes = false to
 	compute the real-space representation of the long-range potential
 	directly as opposed to the inverse FFT of its k-rep. The latter
