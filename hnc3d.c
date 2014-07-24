@@ -1126,7 +1126,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
       if (ng_as_is)
         VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
       else
-        VecAXPY (ctx->t_fft[i], 1.0, ctx->tau_fft[i]);
+        VecAXPY (ctx->t_fft[i], -beta * EPSILON0INV, ctx->tau_fft[i]);
 
       MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], dt[i]);
 
@@ -1238,8 +1238,8 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
     Ask the 1D code to compute T[v] + v = χ * v for a Coulomb field of
     a Gaussian charge distribution of finite width.  The input Coulomb
     field is  fully specified by  the Gaussian width and  solvent site
-    charges.   We assume  the  1/ε₀  factor will  be  included in  the
-    result. The output is non-trivially site-specific.
+    charges.   Note  that the  1/ε₀  factor  is  NOT included  in  the
+    dimensionless result. The output is non-trivially site-specific.
   */
   if (tau_fft)
     {
@@ -1254,10 +1254,6 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
       /* Translate distribution to the grid center: */
       for (int i = 0; i < m; i++)
         bgy3d_vec_fft_trans (HD->dc, HD->PD->N, tau_fft[i]);
-
-      /* Finally, τ = -β χ * v */
-      for (int i = 0; i < m; i++)
-        VecScale (tau_fft[i], -HD->PD->beta);
     }
   /*
     By now in each of m  3D tables tau_fft[i] we have an approximation
@@ -1268,6 +1264,9 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
     solvent kernel to account for that.  Let the caller superimpose as
     many   terms   as   there    are   solute   sites   instead.   See
     bgy3d_solute_form() for how to do that.
+
+    NOTE: When adding the resulting renormalization term do not forget
+    to scale the dimensionless addition by -β/ε₀, see iterate_t1().
   */
 
   /* The solute/solvent code expects χ - 1. Offset the diagonal: */
@@ -1474,6 +1473,14 @@ hnc3d_solute_solve (const ProblemData *PD,
               x[i][dim] = solute[i].x[dim];
           }
 
+        /*
+          The convolution  with the electric form  factor adds another
+          charge dimension to the result.   Do not forget to scale the
+          term  by  -β/ε₀, when  adding  to  the  renormalized t,  see
+          iterate_t1(). FIXME: or should we rather make tau_fft[] have
+          the dimension  of the potential  to be measuted in  kcal? In
+          this case one would need to scale by 1/ε₀ right away.
+        */
         for (int i = 0; i < m; i++)
           bgy3d_solute_form (HD, m, q, x, tau_fft[i]);
       }
