@@ -23,7 +23,7 @@ database using the solvent susceptibility from a 1D-RISM calculation:
     --rho 0.0333295 --beta 1.6889 \
     --L 10 --N 96 \
     --solvent "water, PR-SPC/E" --solute "water, PR-SPC/E" \
-    --hnc --solvent-1d
+    --hnc
 
 This should  give you a number  close to -6.297170 kcal  (look for the
 "mu =" lines in the output).

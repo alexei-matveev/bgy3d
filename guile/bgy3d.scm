@@ -602,7 +602,7 @@ computes the sum of all vector elements."
                           y)))))
     (dielectric         (value #t)      (predicate ,string->number))
     (comb-rule          (value #t)      (predicate ,string->number))
-    (solvent-1d         (value #f)) ; use solvent susceptibility from 1D RISM
+    (solvent-3d         (value #f)) ; take χ from file computed by 3D RISM
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
     (load-guess         (value #f))

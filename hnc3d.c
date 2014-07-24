@@ -1292,9 +1292,7 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
                 Vec chi_fft[m][m],                       /* out */
                 Vec tau_fft[m])                          /* out */
 {
-  if (bgy3d_getopt_test ("solvent-1d"))
-    solvent_kernel_rism1 (HD, m, solvent, chi_fft, tau_fft);
-  else
+  if (bgy3d_getopt_test ("solvent-3d"))
     {
       /* FIXME:   Optimized  NG  scheme   not  implemented   in  these
          branches: */
@@ -1304,6 +1302,8 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
       else
         solvent_kernel_file3 (m, chi_fft); /* regular case */
     }
+  else
+    solvent_kernel_rism1 (HD, m, solvent, chi_fft, tau_fft);
 }
 
 

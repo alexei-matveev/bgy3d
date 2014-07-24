@@ -27,7 +27,8 @@ HNC-FLAGS = \
 	--rho 0.033427745 \
 	--norm-tol 1e-12 \
 	--solvent "$(solvent)" \
-	--closure KH
+	--closure KH \
+	--solvent-3d
 
 #
 # In  case $(cmd) is  not defined,  use the  script that  emulates its
