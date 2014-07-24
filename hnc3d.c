@@ -153,9 +153,9 @@
 /* Apply NG scheme as is: */
 static const bool ng = true;
 
-/* Only in this  case the inverse FFT of  the long-range Coulomb gives
-   something reasonable: */
-static const bool neutral_solutes = true;
+/* Only  in  the  case of  neutral  solutes  the  inverse FFT  of  the
+   long-range Coulomb gives something reasonable: */
+static const bool neutral_solutes = false;
 
 /*
   There  are several  closure  relations, all  must  satisfy the  same
