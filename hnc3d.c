@@ -1306,9 +1306,6 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
     }
   else
     {
-      /* Apply NG scheme as is: */
-      const bool ng_as_is = true;
-
       /*
         Here we can offer  renormalization of the indirect correlation
         function t.   Other branches do  not, so it would  be somewhat
@@ -1316,7 +1313,7 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
         array  of allocated Vecs.   Instead we  create and  return one
         only in this case:
       */
-      if (ng_as_is)
+      if (bgy3d_getopt_test ("no-renorm"))
         *tau_fft = NULL;
       else
         {

@@ -603,6 +603,7 @@ computes the sum of all vector elements."
     (dielectric         (value #t)      (predicate ,string->number))
     (comb-rule          (value #t)      (predicate ,string->number))
     (solvent-3d         (value #f)) ; take χ from file computed by 3D RISM
+    (no-renorm          (value #f)) ; dont do lon-range renormalization
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
     (load-guess         (value #f))

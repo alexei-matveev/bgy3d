@@ -3,7 +3,7 @@ usage after a couple of weeks.
 
 Example usage:
 
-a) Compute  solvation energry by  1D-RISM specifying the names  of the
+a) Compute  solvation energy  by 1D-RISM specifying  the names  of the
 solvent  and  solute  molecules  to  be  picked  from  the  hard-wired
 database:
 
@@ -25,5 +25,7 @@ database using the solvent susceptibility from a 1D-RISM calculation:
     --solvent "water, PR-SPC/E" --solute "water, PR-SPC/E" \
     --hnc
 
-This should  give you a number  close to -6.297170 kcal  (look for the
-"mu =" lines in the output).
+This should  give you a number  close to -6.349052 kcal  (look for the
+"mu  ="  lines in  the  output). If  you  supply  --no-renorm flag  in
+addition you should get -6.297170 kcal as in earlier versions.
+
