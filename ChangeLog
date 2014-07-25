@@ -1,3 +1,23 @@
+2014-07-25  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* hnc3d.c (solvent_kernel): Inquire --no-renorm flag. This changes
+	the default behaviour of 3D RISM calculations. The solvent kernel
+	derived from 1D RISM will now also return the effect of applying
+	the solvent susceptibility to a potential of a gaussian
+	charge. This will be later used to renormalize the indirect
+	correlation for many-atomic solutes. The old behaviour is restored
+	by supplying --no-renorm flag. The default operation mode is not
+	represented in testsuite so the reference outputs did not
+	change.
+
+	* README (database): The effect of --no-renorm flag for water is
+	about 0.05 kcal. For charged solutes you will get garbage with
+	this flag.
+
+	* guile/bgy3d.scm (option-spec): accept --no-renorm in command
+	line.
+
+
 2014-07-24  Alexei Matveev  <alexei.matveev@gmail.com>
 
 	* hnc3d.c (solvent_kernel): inquire --solvent-3d.  This changes
