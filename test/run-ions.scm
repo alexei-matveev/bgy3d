@@ -14,7 +14,7 @@
 (define *settings*
   '((L . 160.0)
     (N . 4096)
-    (rho . 0.033295)
+    (rho . 0.0333295)
     (beta . 1.6889)
     (dielectric . 78.4)
     (norm-tol . 1.0e-14)
