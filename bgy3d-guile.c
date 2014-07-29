@@ -1154,9 +1154,15 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
   SCM medium = from_pointer (medium_);
 
   /*
-    Return multiple values. Caller, dont forget to destroy them!
+    Return  a dictionary  of results.  Caller is  supposed  to destroy
+    them!
   */
-  return scm_values (scm_list_3 (gs, medium, restart));
+  SCM dict = SCM_EOL;
+  dict = scm_acons (scm_from_locale_symbol ("GUV"), gs, dict);
+  dict = scm_acons (scm_from_locale_symbol ("POTENTIAL"), medium, dict);
+  dict = scm_acons (scm_from_locale_symbol ("RESTART"), restart, dict);
+
+  return dict;
 }
 
 

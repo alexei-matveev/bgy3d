@@ -560,23 +560,24 @@ computes the sum of all vector elements."
     ;; garbage-collected. As of now it expects the solvent description
     ;; such as g??.bin or x??-fft.bin to exist as files:
     ;;
-    (let-values (((g1 potential restart)
-                  (run-solute solute solvent settings restart)))
+    (let ((alist (run-solute solute solvent settings restart)))
       ;;
       ;; Save g1-files to disk:
       ;;
-      (map vec-save (g1-file-names g1) g1)
-      ;;
-      ;; Dont forget to destroy them after use:
-      ;;
-      (map vec-destroy g1)
+      (let ((g1 (assoc-ref alist 'GUV)))
+        (map vec-save (g1-file-names g1) g1)
+        ;;
+        ;; Dont forget to destroy them after use:
+        ;;
+        (map vec-destroy g1))
       ;;
       ;; Return (a) the (iterator over) potential (the caller must
       ;; bgy3d-pot-destroy it) and (b) the restart info that, when
       ;; passed to this function next time, could help saving a few
       ;; BGY iterations:
       ;;
-      (cons potential restart))))
+      (cons (assoc-ref alist 'POTENTIAL)
+            (assoc-ref alist 'RESTART)))))
 
 ;;;
 ;;; Specifications  of command  line flags  for use  with getopt-long.
@@ -731,25 +732,27 @@ computes the sum of all vector elements."
          (if solute                     ; either #f or real solute
              ;;
              ;; Solute with solvent. Supply NULL as the restart
-             ;; parameter --- we cannot offer anything here:
+             ;; parameter --- we cannot offer anything here. Dont
+             ;; forget to destroy the objects returned:
              ;;
-             (let-values (((g1 potential restart)
-                           (run-solute solute solvent settings NULL)))
+             (let ((alist (run-solute solute solvent settings NULL)))
                ;;
                ;; Evaluate and print potential at positions of solute
                ;; sites and the corresponding total energy:
                ;;
-               (maybe-print-potentials solute potential)
+               (let ((potential (assoc-ref alist 'POTENTIAL)))
+                 (maybe-print-potentials solute potential)
+                 (bgy3d-pot-destroy potential))
                ;;
                ;; Write g?.bin files:
                ;;
-               (map vec-save (g1-file-names g1) g1)
+               (let ((g1 (assoc-ref alist 'GUV)))
+                 (map vec-save (g1-file-names g1) g1)
+                 (map vec-destroy g1))
                ;;
-               ;; Then destroy the objects returned:
+               ;; Ignores NULL:
                ;;
-               (bgy3d-restart-destroy restart) ; ignores NULL
-               (bgy3d-pot-destroy potential)
-               (map vec-destroy g1))
+               (bgy3d-restart-destroy (assoc-ref alist 'RESTART)))
              ;;
              ;; Pure solvent:
              ;;
