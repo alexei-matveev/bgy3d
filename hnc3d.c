@@ -1482,11 +1482,13 @@ hnc3d_solute_solve (const ProblemData *PD,
     */
     if (tau_fft)
       {
-        real q[m], x[m][3];
+        /* Once again,  n is  the number of  solute sites  form factor
+           will get n charges and n positions: */
+        real q[n], x[n][3];
 
         /* The   charges  we   have  copied   before  were   those  of
            solvent. Here we need those of solute. And positions: */
-        for (int i = 0; i < m; i++)
+        for (int i = 0; i < n; i++)
           {
             q[i] = solute[i].charge;
 
@@ -1501,9 +1503,13 @@ hnc3d_solute_solve (const ProblemData *PD,
           iterate_t1(). FIXME: or should we rather make tau_fft[] have
           the dimension  of the potential  to be measuted in  kcal? In
           this case one would need to scale by 1/ε₀ right away.
+
+          Again,  m is the  number of  solvent sites  and this  is the
+          number of different renormalization functions tau_fft[m].
         */
-        for (int i = 0; i < m; i++)
-          bgy3d_solute_form (HD, m, q, x, tau_fft[i]);
+        for (int i = 0; i < m; i++) /* m: over solvent sites ... */
+          bgy3d_solute_form (HD, n, q, x, tau_fft[i]);
+        /* n, q[n], x[n][3]: solute charges and positions */
       }
 
     /*
