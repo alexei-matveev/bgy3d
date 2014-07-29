@@ -2608,7 +2608,7 @@ status open
 
 \begin_layout Plain Layout
 The solvation energy (excess chemical potential) for alkali and halide ions
- by RISM appraoch with the cSPC/E water model.
+ by RISM approach with the cSPC/E water model.
  MD and experimental values are also shown for comparison.
 \begin_inset Formula $^{a}$
 \end_inset
@@ -2757,7 +2757,7 @@ Li
 \begin_inset Formula $-$
 \end_inset
 
-108.4
+108.5
 \end_layout
 
 \end_inset
@@ -2844,7 +2844,7 @@ Na
 \begin_inset Formula $-$
 \end_inset
 
-84.9
+85.0
 \end_layout
 
 \end_inset
@@ -2931,7 +2931,7 @@ K
 \begin_inset Formula $-$
 \end_inset
 
-68.6
+68.5
 \end_layout
 
 \end_inset
@@ -3018,7 +3018,7 @@ Cl
 \begin_inset Formula $-$
 \end_inset
 
-79.4
+78.5
 \end_layout
 
 \end_inset
@@ -3105,7 +3105,7 @@ Br
 \begin_inset Formula $-$
 \end_inset
 
-73.7
+72.6
 \end_layout
 
 \end_inset
@@ -3192,7 +3192,7 @@ I
 \begin_inset Formula $-$
 \end_inset
 
-64.6
+63.1
 \end_layout
 
 \end_inset
