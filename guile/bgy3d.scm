@@ -61,6 +61,8 @@
    bgy3d-run-solvent
    bgy3d-run-solute
    make-pes
+   env-ref
+   env-set
    *settings*
    *server*
    vec-print
@@ -360,6 +362,21 @@
               (tail (cdr alist)))
           (loop (assoc-set! merged (car head) (cdr head))
                 tail)))))
+;;;
+;;; You  may choose  to use  env-ref, env-set  to  manipulate settings
+;;; consistently.
+;;;
+(define (env-ref settings key)
+  (assoc-ref settings key))
+
+;;;
+;;; Almost as acons/alist-cons but makes deletes the previous setting,
+;;; if present.   Note that alist-delete does not  modify the original
+;;; but the result may share the tail with the input.
+;;;
+(define (env-set key val settings)
+  (let ((settings' (alist-delete key settings)))
+    (alist-cons key val settings')))
 
 
 ;;;
@@ -482,9 +499,9 @@ computes the sum of all vector elements."
 ;;;
 (define (solvent/solvent input)
   (let* ((settings      (input->settings (append *defaults* input)))
-         (solvent-name  (assoc-ref settings 'solvent)) ; string or #f
+         (solvent-name  (env-ref settings 'solvent)) ; string or #f
          (solvent       (find-molecule solvent-name))  ; fails for #f
-         (closure       (assoc-ref settings 'closure)) ; symbol or #f
+         (closure       (env-ref settings 'closure)) ; symbol or #f
          (run-solvent   (if closure
                             hnc3d-run-solvent
                             bgy3d-run-solvent))
@@ -512,13 +529,13 @@ computes the sum of all vector elements."
 ;;;
 (define (solute/solvent input sites funptr restart)
   (let* ((settings      (input->settings (append *defaults* input)))
-         (solvent-name  (assoc-ref settings 'solvent)) ; string or #f
-         (solute-name   (assoc-ref settings 'solute))  ; string or #f
+         (solvent-name  (env-ref settings 'solvent)) ; string or #f
+         (solute-name   (env-ref settings 'solute))  ; string or #f
          (solvent       (find-molecule solvent-name))
          (solute        (make-molecule solute-name
                                        (update-sites solute-name
                                                      sites)))
-         (closure       (assoc-ref settings 'closure)) ; symbol or #f
+         (closure       (env-ref settings 'closure)) ; symbol or #f
          (run-solute    (if closure
                             hnc3d-run-solute
                             bgy3d-run-solute)))
@@ -526,9 +543,9 @@ computes the sum of all vector elements."
     ;; Extend settings by an  entry with the funciton pointer that can
     ;; be used to compute additional solute charge density:
     ;;
-    (set! settings (acons 'qm-density   ; key
-                          funptr        ; value
-                          settings))    ; alist
+    (set! settings (env-set 'qm-density ; key
+                            funptr      ; value
+                            settings))  ; alist
     ;; Print on master only:
     (pretty-print/serial (list 'SETTINGS: settings))
     (pretty-print/serial (list 'SOLVENT: solvent))
@@ -692,18 +709,18 @@ computes the sum of all vector elements."
 ;;;
 (define (old-main argv)
   (let* ((settings (parse-command-line argv))
-         (solvent (and-let* ((name (assoc-ref settings 'solvent)))
+         (solvent (and-let* ((name (env-ref settings 'solvent)))
                     (find-molecule name))) ; Maybe solvent
-         (solute (and-let* ((name (assoc-ref settings 'solute)))
+         (solute (and-let* ((name (env-ref settings 'solute)))
                    (find-molecule name)))) ; Maybe solute
     (pretty-print/serial (list 'solvent: solvent))
     (pretty-print/serial (list 'solute: solute))
     (let-values
         (((method run-solvent run-solute) ; three method-dependent values:
           (cond
-           ((assoc-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
-           ((assoc-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
-           ((assoc-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
+           ((env-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
+           ((env-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
+           ((env-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
       (case method
         ;;
         ;; 3d HNC/BGY.  The functions bound to run-solvent and
@@ -826,11 +843,11 @@ computes the sum of all vector elements."
            (rism (memoize rism))
            ;; Define solute species once, using the reference
            ;; geometry. Otherwise self-energy may become discontinous:
-           (scale (assoc-ref settings 'bond-length-thresh))
+           (scale (env-ref settings 'bond-length-thresh))
            (species (and solute
                          (molecule-species solute scale)))
            (settings (if species
-                         (acons 'solute-species species settings)
+                         (env-set 'solute-species species settings)
                          settings))
            ;; PES (f x) -> energy:
            (f (lambda (x)
@@ -838,9 +855,9 @@ computes the sum of all vector elements."
            ;; Make sure to request evaluation of gradients for (g x)
            ;; but not for (f x). Using two different settings impedes
            ;; memoization:
-           (settings (if (assoc-ref settings 'derivatives)
+           (settings (if (env-ref settings 'derivatives)
                          settings       ; for the sake of memoization
-                         (acons 'derivatives #t settings)))
+                         (env-set 'derivatives #t settings)))
            ;; PES tuple (fg x) -> energy, gradients:
            (fg (lambda (x)
                  (let ((dict (rism x settings)))
@@ -858,7 +875,7 @@ computes the sum of all vector elements."
 ;;; species rigid.
 ;;;
 (define (make-pes/gp solute settings)
-  (let* ((scale (assoc-ref settings 'bond-length-thresh))
+  (let* ((scale (env-ref settings 'bond-length-thresh))
          (species (molecule-species solute scale)) ; list of ints
          (x0 (molecule-positions solute))
          (fg (lambda (x)              ; x -> (values energy gradients)
@@ -881,14 +898,14 @@ computes the sum of all vector elements."
 ;;;
 (define (new-main argv)
   (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
-         (args (assoc-ref settings '())) ; positional arguments
+         (args (env-ref settings '())) ; positional arguments
          (cmd (car args))                ; first the command ...
          (args (cdr args)))              ; ... then the real args
-    (let ((solvent (and-let* ((name (assoc-ref settings 'solvent)))
+    (let ((solvent (and-let* ((name (env-ref settings 'solvent)))
                      (find-molecule name))) ; Maybe solvent
-          (solute (and-let* ((name (assoc-ref settings 'solute)))
+          (solute (and-let* ((name (env-ref settings 'solute)))
                     (find-molecule name))) ; Maybe solute
-          (save-binary (assoc-ref settings 'save-binary)))
+          (save-binary (env-ref settings 'save-binary)))
       ;;
       (match cmd
         ;;
@@ -898,7 +915,7 @@ computes the sum of all vector elements."
                                     (make-pes/gp solute settings))))
            ;; If the geometry option is set to some molecule
            ;; description, take its geometry instead:
-           (let ((x (let ((mol (assoc-ref settings 'geometry)))
+           (let ((x (let ((mol (env-ref settings 'geometry)))
                       (if mol
                           (molecule-positions mol)
                           x))))
@@ -1057,8 +1074,8 @@ computes the sum of all vector elements."
                 (args (drop args 3))
                 (angular-order 110)     ; FIXME: literals here ...
                 (rmin 0.75)             ; cannot be zero for log-mesh
-                (rmax (assoc-ref settings 'L)) ; a choice ...
-                (npts (assoc-ref settings 'N)) ; another choice ...
+                (rmax (env-ref settings 'L)) ; a choice ...
+                (npts (env-ref settings 'N)) ; another choice ...
                 (mesh (mesh/log rmin rmax npts))
                 (domain (state-make settings))
                 (rdfs (map (lambda (path)
@@ -1090,7 +1107,7 @@ computes the sum of all vector elements."
            args))
         ;;
         ("print-species"
-         (let ((scale (assoc-ref settings 'bond-length-thresh)))
+         (let ((scale (env-ref settings 'bond-length-thresh)))
           (for-each
            (lambda (name)
              (let ((mol (find-molecule name)))
