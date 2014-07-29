@@ -47,7 +47,9 @@
    comm-rank
    comm-set-parallel!
    ;; comm-bcast!
-   bgy3d-restart-destroy)
+   bgy3d-restart-destroy
+   bgy3d-pot-destroy
+   )
   #:export
   (bgy3d-main
    parse-command-line
@@ -68,6 +70,8 @@
    pretty-print/serial
    ;; Syntax
    begin/serial
+   ;; Constants:
+   NULL
    ))
 
 (cond-expand
