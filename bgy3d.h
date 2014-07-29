@@ -335,6 +335,7 @@ bool comm_set_parallel_x (bool flag);
 
 /* Most uses of communicator in the sources are for printf(): */
 #define PRINTF(fmt, ...) PetscPrintf (comm_world_petsc, fmt, ##__VA_ARGS__)
+#define DPRINT(fmt, ...) // PetscPrintf (comm_world_petsc, fmt, ##__VA_ARGS__)
 
 
 
