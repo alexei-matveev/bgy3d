@@ -7,7 +7,7 @@
 
 #include "bgy3d.h"
 #include "bgy3d-solutes.h"      /* Site */
-#include "bgy3d-solvents.h"     /* FIXME: many #defines */
+#include "bgy3d-solvents.h"
 
 void bgy3d_sites_dist_mat (int m, const Site sites[m], real r[m][m])
 {
