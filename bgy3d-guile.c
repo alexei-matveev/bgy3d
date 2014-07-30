@@ -37,31 +37,28 @@ static int nthreads = WITH_FFTW_THREADS;
 static char helptext[] = "BGY3d Guile.\n";
 
 /*
-  We  need  to  apply  either scm_from_uint32()  or  scm_from_uint64()
-  depending on the size of intptr_t.   This would be a good use of C11
-  type  generic macros.   Here we  make use  of the  macro  defined by
-  libguile.h for the size of intptr_t:
+  C-pointers are handled  on the Scheme side as  "pointer objects" not
+  just  plain integers.  These  two convert  between two  worlds.  The
+  const qualifier might  be misleading, as we cannot  be sure what the
+  caller does with the result:
 */
-#if SCM_SIZEOF_INTPTR_T == 8
-# define from_intptr scm_from_uint64
-# define to_intptr scm_to_uint64
-#elif SCM_SIZEOF_INTPTR_T == 4
-# define from_intptr scm_from_uint32
-# define to_intptr scm_to_uint32
-#else
-# error "unknown pointer size!"
-#endif
-
-/* The  const qualifier  might be  misleading  with all  the casts  to
-   integers and back: */
-static SCM from_pointer (const void *ptr)
+static SCM
+from_pointer (const void *ptr)
 {
-  return from_intptr ((intptr_t) ptr);
+  return scm_from_pointer ((void *) ptr, NULL);
 }
 
-static void* to_pointer (SCM ptr)
+
+/* You cannot pass 0 here, use %null-pointer instead: */
+static void*
+to_pointer (SCM ptr)
 {
-  return (void*) to_intptr (ptr);
+  /* FIXME: is scm_to_pointer() available yet? */
+  if (!SCM_POINTER_P (ptr))
+    scm_misc_error              /* longjmp! */
+      (__func__, "not a pointer object ~A", scm_list_1 (ptr));
+
+  return SCM_POINTER_VALUE (ptr);
 }
 
 

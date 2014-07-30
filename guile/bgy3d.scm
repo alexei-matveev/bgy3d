@@ -17,6 +17,7 @@
   #:use-module (ice-9 pretty-print)     ; pretty-print
   #:use-module (ice-9 getopt-long)      ; getopt-long, option-ref
   #:use-module (ice-9 threads)
+  #:use-module (system foreign)         ; %null-pointer
   ;; #:use-module (rnrs bytevectors)       ; make-bytevector, etc.
   ;; #:use-module (rnrs io ports)          ; make-custom-binary-output-port, etc.
   #:use-module (guile bgy3d internal)   ; see bgy3d-guile.c
@@ -49,6 +50,8 @@
    ;; comm-bcast!
    bgy3d-restart-destroy
    bgy3d-pot-destroy
+   ;; from (system foreign):
+   %null-pointer
    )
   #:export
   (bgy3d-main
@@ -72,8 +75,6 @@
    pretty-print/serial
    ;; Syntax
    begin/serial
-   ;; Constants:
-   NULL
    ))
 
 (cond-expand
@@ -125,12 +126,6 @@
 ;;; symbols. However, this caused annoying warnings with Guile 2 which
 ;;; complains about "possibly undefined symbols" at compile time.
 ;;;
-
-;;;
-;;; So far C-pointers  are represented by integers in  Scheme. In case
-;;; this is ever going to change use this as the null pointer literal:
-;;;
-(define NULL 0)
 
 ;;;
 ;;; This  form can  be  used for  code  to be  evaluated  only on  one
@@ -735,7 +730,7 @@ computes the sum of all vector elements."
              ;; parameter --- we cannot offer anything here. Dont
              ;; forget to destroy the objects returned:
              ;;
-             (let ((alist (run-solute solute solvent settings NULL)))
+             (let ((alist (run-solute solute solvent settings %null-pointer)))
                ;;
                ;; Evaluate and print potential at positions of solute
                ;; sites and the corresponding total energy:
@@ -983,7 +978,7 @@ computes the sum of all vector elements."
          (let ((solutes (map find-molecule args)))
            (map (lambda (solute)
                   (let-values (((g1 ve restart)
-                                (bgy3d-run-solute solute solvent settings NULL)))
+                                (bgy3d-run-solute solute solvent settings %null-pointer)))
                     ;;
                     ;; Save distributions if requested from command
                     ;; line. FIXME: the file names do not relate to
