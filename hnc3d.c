@@ -1350,6 +1350,7 @@ hnc3d_solute_solve (const ProblemData *PD,
                     const int m, const Site solvent[m],
                     const int n, const Site solute[n],
                     void (*density)(int k, const real x[k][3], real rho[k]),
+                    real *mu,   /* out, chemical potential */
                     Vec g[m],
                     Context **medium,  /* out */
                     Restart **restart) /* inout, so far unchanged  */
@@ -1657,8 +1658,15 @@ hnc3d_solute_solve (const ProblemData *PD,
     /*
       In  3d  models  the  solute  is  effectively  a  single  (albeit
       non-spherical) site. Treat the arrays  h[m], c[m] and cl[m] as 1
-      x m arrays here:
+      x m arrays here.
+
+      First   and  foremost   compute  the   self-consistent  chemical
+      potential to be returned to the caller:
     */
+    *mu = chempot (HD, HD->PD->closure, 1, m, (void *) h, (void *) c, (void *) cl);
+
+    /* This computes,  prints and  discards chemical potential  by all
+       available functionals */
     print_chempot (HD, 1, m, (void*) h, (void*) c, (void*) cl);
 
     vec_destroy1 (m, cl);

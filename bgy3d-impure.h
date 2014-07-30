@@ -27,8 +27,9 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          int m, const Site solvent[m],
                          int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         Vec g[m],          /* out */
-                         Context **medium,  /* out, optional */
+                         real *mu,           /* out */
+                         Vec g[m],           /* out */
+                         Context **medium,   /* out, optional */
                          Restart **restart); /* inout, optional */
 
 void bgy3d_restart_destroy (Restart *restart);

@@ -1072,7 +1072,8 @@ void (*SU) (const ProblemData *PD,
             const int m, const Site solvent[m],
             const int n, const Site solute[n],
             void (*density)(int k, const real x[k][3], real rho[k]),
-            Vec g[m],
+            real *mu,           /* out, chemical potential */
+            Vec g[m],           /* out */
             Context **medium,   /* out */
             Restart **restart); /* inout */
 
@@ -1135,8 +1136,10 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
     in disguise). This is NULL in the first call of a series:
   */
   Restart *restart_ = to_pointer (restart); /* maybe NULL */
+  real mu;                      /* excess chemical potential */
 
   solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
+                &mu,            /* out */
                 g,              /* out */
                 &medium_,       /* out */
                 &restart_);     /* inout */
@@ -1158,6 +1161,7 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
     them!
   */
   SCM dict = SCM_EOL;
+  dict = scm_acons (scm_from_locale_symbol ("XXX"), scm_from_double (mu), dict);
   dict = scm_acons (scm_from_locale_symbol ("GUV"), gs, dict);
   dict = scm_acons (scm_from_locale_symbol ("POTENTIAL"), medium, dict);
   dict = scm_acons (scm_from_locale_symbol ("RESTART"), restart, dict);

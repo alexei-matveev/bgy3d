@@ -13,6 +13,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          const int m, const Site solvent[m],
                          const int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         Vec g[m],
+                         real *mu, /* out, chemical potential */
+                         Vec g[m], /* out */
                          Context **medium,   /* out */
                          Restart **restart); /* inout */
