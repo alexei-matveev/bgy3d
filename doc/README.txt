@@ -1150,7 +1150,8 @@ H~2~O     qm/gp     -17.154353092917    0.522399   0.486483   0.523955  -15.23  
 	            (3.203)
 ------------------------------------------------------------------------------------------------------
 
-* Dipole moment outputed from PG
+* Dipole moment outputed from PG. By plotting D~u~ from PCM and 3D-RISM/QM (selected PG output), they
+are perfect linear correlated (correlation factor r ~ 0.999703)
 
 1D-RISM for ions
 ----------------
