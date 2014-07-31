@@ -154,91 +154,22 @@
    long-range Coulomb gives something reasonable: */
 static const bool neutral_solutes = false;
 
-/*
-  There  are several  closure  relations, all  must  satisfy the  same
-  interface. Vec c is intent(out) the rest is input.
-
-  typedef void (*Closure)(real beta, Vec v, Vec t, Vec c);
-
-  1)  Hypernetted  Chain  (HNC)  closure relation  to  compute  direct
-  correlation function c in real space.  See OZ equation below for the
-  second relation between two  unknowns.  The indirect correlation γ =
-  h - c is denoted by latin  "t" in other sources. We will use that to
-  avoid greek identifiers and confusion with distribution functions:
-
-    c := exp (-βv + γ) - 1 - γ
-*/
-static void
-compute_c_HNC (real beta, Vec v, Vec t, Vec c)
-{
-  real pure f (real v, real t)
-  {
-    /* exp (-beta * v + t) - 1.0 - t */
-    return expm1 (-beta * v + t) - t;
-  }
-  vec_map2 (c, f, v, t);
-}
-
-
-/* For x <= 0 the same as  exp(x) - 1, but does not grow exponentially
-   for positive x:  */
-static real
-lexpm1 (real x)
-{
-  if (x <= 0.0)
-    return expm1 (x);
-  else
-    return x;
-}
-
-
-/* 2) Kovalenko-Hirata (KH) closure. */
-static void
-compute_c_KH (real beta, Vec v, Vec t, Vec c)
-{
-  real pure f (real v, real t)
-  {
-    /* Note that lexpm1() /= expm1(): */
-    return lexpm1 (-beta * v + t) - t;
-  }
-  vec_map2 (c, f, v, t);
-}
-
-
-/*
-  3) Percus-Yevick (PY) closure  relation between direct- and indirect
-  correlation c and γ:
-
-    c := exp (-βv) [1 + γ] - 1 - γ
-*/
-static void
-compute_c_PY (real beta, Vec v, Vec t, Vec c)
-{
-  real pure f (real v, real t)
-  {
-    return exp (-beta * v) * (1 + t) - 1 - t;
-  }
-  vec_map2 (c, f, v, t);
-}
-
 
 static void
 compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 {
-  switch (closure)
-    {
-    case CLOSURE_HNC:
-      compute_c_HNC (beta, v, t, c);
-      break;
-    case CLOSURE_KH:
-      compute_c_KH (beta, v, t, c);
-      break;
-    case CLOSURE_PY:
-      compute_c_PY (beta, v, t, c);
-      break;
-    }
-  /* No  default,  let the  compiler  warn if  we  do  not handle  all
-     cases. */
+  /* No aliasing, we call Fortran here: */
+  assert (c != t);
+  assert (c != v);
+
+  /* Callback for vec_app2(): */
+  void f (int n, real c[n], real v[n], real t[n])
+  {
+    /* See Fortran implementation  in closures.f90.  NOTE: no aliasing
+       here, please! */
+    rism_closure (closure, beta, n, v, t, c);
+  }
+  vec_app2 (c, f, v, t);
 }
 
 
