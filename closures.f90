@@ -15,6 +15,25 @@ module closures
 
 contains
 
+  subroutine rism_closure (method, beta, n, v, t, c) bind (c)
+    !
+    ! This one is for using from the C-side. Note that Fortran forbids
+    ! aliasing between the output c and the input v and t.
+    !
+    ! Should be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int, c_double
+    implicit none
+    integer (c_int), intent (in), value :: method, n
+    real (c_double), intent (in), value :: beta
+    real (c_double), intent (in) :: v(n), t(n)
+    real (c_double), intent (out) :: c(n)
+    ! *** end of interface ***
+
+    c = closure (method, beta, v, t)
+  end subroutine rism_closure
+
+
   elemental function closure (method, beta, v, t) result (c)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     implicit none

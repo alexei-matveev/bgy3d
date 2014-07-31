@@ -29,3 +29,14 @@ void rism_solute (const ProblemData *PD,
 void rism_solute_renorm (int m, const Site solvent[m],
                          real rmax, int nrad, real x_fft[m][m][nrad], real G,
                          real s_fft[m][nrad]); /* out */
+
+
+/*
+  Implemented in Fortran. See ./closures.f90:
+
+  subroutine rism_closure (method, beta, n, v, t, c) bind (c)
+*/
+void rism_closure (int method, real beta,
+                   int n, const real v[n], const real t[n], /* in */
+                   real c[n]);                              /* out */
+
