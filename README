@@ -27,5 +27,6 @@ database using the solvent susceptibility from a 1D-RISM calculation:
 
 This should  give you a number  close to -6.349052 kcal  (look for the
 "mu  ="  lines in  the  output). If  you  supply  --no-renorm flag  in
-addition you should get -6.297170 kcal as in earlier versions.
+addition you  should get  -6.297170 kcal as  in earlier  versions. For
+solutes without charged sites there should be no visible difference.
 
