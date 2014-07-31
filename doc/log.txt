@@ -57,6 +57,15 @@ Let us see if this is different for charged solutes. Using
     solvent "water, cSPC/E"
     solute "Li+, JC08, SPC/E"
 
+I  better  give  the command  line  as  is,  tracing back  details  is
+cumbersome.   The  range  parameter   L,  number   of  point   N  were
+varied. Again for a 1D calculation omit --hnc flag:
+
+    mpiexec ./guile/runbgy.scm energy --norm-tol 1e-14 --dielectric
+    78.4 --rho 0.0333295 --beta 1.6889 --solvent "water, cSPC/E"
+    --solute "Li+, JC08, SPC/E" --L 10 --N 96 --snes-solver=trial
+    --hnc
+
 Here we had to occasionally use  a trial solver that does a few Picard
 iterations before switching to Newton iteration.
 
@@ -99,13 +108,19 @@ possible to get better numbers, see the second column with 3D results.
 For  a   solute  consisting   of  more  than   one  site   and,  thus,
 non-spherical, one  cannot even  expect full compatibility  between 1D
 and  3D results.  Here an  example for  a fake  uranyl modes  wtih U-O
-distance 1.8 A and zero charges.
+distance 1.8 A and zero charges. Here the command line was
+
+   mpiexec ./guile/runbgy.scm energy --norm-tol 1e-14 --dielectric
+   78.4 --rho 0.0333295 --beta 1.6889 --solvent "water, PR-SPC/E"
+   --solute "uranyl, x" --L 20 --N 96 --snes-solver=trial --hnc
 
 L, A   N      dG(1D), kcal       dG(3D), kcal
 ----   ----   ----------------   ------------
-20     2048   11.3676590104498
-20     1024   11.3676589974131
-20      512   11.3676589497713
+10     192    11.6214730856332      10.175691
+10     128    11.6210457461348      10.175719
+10      96    11.6218161988671      10.175549
+10      64    11.6157482574612      10.168613
+
 20      256   11.3672341545330      10.005145
 20      192   11.3680175649519      10.004935
 20      128   11.3618981304794       9.997882
@@ -116,10 +131,16 @@ L, A   N      dG(1D), kcal       dG(3D), kcal
 40      128   11.9142288552579      10.208777
 40       96   12.0339865724795      10.438533
 
+80     2048   11.332694012603
+80     1024   11.3322693926304
+80      512   11.326933826289
 80      256   11.9103439006384      10.205791
 80      192   12.0301060251191      10.435783
 80      128   10.0568684202806      10.649449
 80       96   7.49456030982229      12.535481
+
+160    4096   11.3322083986941
+160    2048   11.3317837782173
 
 For three sites of  uranyl the peak memory usage at N  = 256 raises to
 2.4G for each of 8 cores.
