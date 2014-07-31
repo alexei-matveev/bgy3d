@@ -327,9 +327,16 @@ static inline real vec_min (Vec x)
 }
 
 
-/* ys  = map  (f, xs).  Should also  work with  aliased  arguments for
-   in-place transform: */
-static inline void vec_map1 (Vec ys, real (*f)(real x), Vec xs)
+/*
+  The  following vec_map1(), vec_map2(),  vec_map3() should  be better
+  inlined as they use a scalar function f().
+
+    ys = map (f, xs)
+
+  Should also work with aliased arguments for in-place transform.
+*/
+static inline void
+vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 {
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
@@ -346,7 +353,8 @@ static inline void vec_map1 (Vec ys, real (*f)(real x), Vec xs)
 
 /* zs = map (f, xs, ys).   Should also work with aliased arguments for
    in-place transform: */
-static inline void vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
+static inline void
+vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 {
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
@@ -364,11 +372,36 @@ static inline void vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
   vec_restore_array (zs, &zs_);
 }
 
+
+/* This one  uses arrays and does not  need to be inlined.  But I hate
+   prefixing it: */
+static inline void
+vec_app2 (Vec zs,
+          void (*f)(int n, real z[n], real x[n], real y[n]),
+          Vec xs, Vec ys)
+{
+  const int n = vec_local_size (xs);
+  assert (vec_local_size (ys) == n);
+  assert (vec_local_size (zs) == n);
+
+  local real *xs_ = vec_get_array (xs);
+  local real *ys_ = vec_get_array (ys);
+  local real *zs_ = vec_get_array (zs);
+
+  /* vec_map2() has a loop at this place: */
+  f (n, zs_, xs_, ys_);
+
+  vec_restore_array (xs, &xs_);
+  vec_restore_array (ys, &ys_);
+  vec_restore_array (zs, &zs_);
+}
+
+
 /* ws = map (f, xs, ys, zs).   Should also work with aliased arguments for
    in-place transform: */
-static inline void vec_map3 (Vec ws,
-                             real (*f)(real x, real y, real z),
-                             Vec xs, Vec ys, Vec zs)
+static inline void
+vec_map3 (Vec ws, real (*f)(real x, real y, real z),
+          Vec xs, Vec ys, Vec zs)
 {
   const int n = vec_local_size (xs);
   assert (vec_local_size (ys) == n);
