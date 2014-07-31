@@ -74,8 +74,8 @@ contains
 
   !
   ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
-  ! correlation function c  in real space.  See OZ  equation below for
-  ! the   second  relation   between  two   unknowns.    The  indirect
+  ! correlation function c in real space.  The OZ equation (elsewhere)
+  ! is  the second relation  between the  two unknowns.   The indirect
   ! correlation t = h - c is denoted by greek "γ" in other sources. We
   ! will avoid greek identifiers utill better times.
   !
