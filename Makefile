@@ -129,6 +129,7 @@ endif
 #
 f-objs += \
 	rism.o \
+	closures.o \
 	drism.o \
 	snes.o \
 	bessel.o \
