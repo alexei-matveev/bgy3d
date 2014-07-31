@@ -114,6 +114,9 @@ distance 1.8 A and zero charges. Here the command line was
    78.4 --rho 0.0333295 --beta 1.6889 --solvent "water, PR-SPC/E"
    --solute "uranyl, x" --L 20 --N 96 --snes-solver=trial --hnc
 
+For these  tests the fake  "uranyl, x" was  derived by taking  the KL2
+force-field and zeroing charges.
+
 L, A   N      dG(1D), kcal       dG(3D), kcal
 ----   ----   ----------------   ------------
 10     192    11.6214730856332      10.175691
@@ -147,3 +150,34 @@ For three sites of  uranyl the peak memory usage at N  = 256 raises to
 
 It does not  look that the 1D and  3D is ever going to  meet, but also
 there is no strong dependence on the range parameter.
+
+Now we examine a charged multi-center solute using these settings:
+
+    mpiexec ./guile/runbgy.scm energy --norm-tol 1e-14 --dielectric
+    78.4 --rho 0.0333295 --beta 1.6889 --solvent "water, PR-SPC/E"
+    --solute "uranyl, x" --L 10 --N 256 --closure KH --hnc
+
+Here  uranyl  features the  KL2  force field.   It  comes  so that  3D
+calculations with HNC closure diverge. So we must resort to KH closure
+for comparison.  In some  cases (L=20, N=192)  --snes-solver=trial was
+necessary to converge pure solvent caclulation (hm?).
+
+L, A   N      dG(HNC1), kcal     dG(KH1), kcal      dG(KH3), kcal
+----   ----   ----------------   -----------------  ---------------
+160    4096   -385.895546856833  -377.442988380499
+80     4096   -385.893517940861  -377.43716942195
+40     4096   -385.889656785476  -377.433565543879
+20     4096   -385.858581065254  -377.402217987547
+10     4096   -385.607912726306  -377.146867603444
+10     2048   -385.607922377965  -377.146875278902
+10     1024   -385.607932678112  -377.146902506188
+10      512   -385.607923647988  -377.146981989027
+10      256   -385.607878316400  -377.152288425085      -364.534976
+10      192   -385.607973413526  -377.143341441911      -364.540602
+10      128   -385.603993858334  -377.121662963133      -364.586531
+10       96   -385.657962323768  -376.970149213989      -364.558598
+10       64   -385.278204771422  -377.282903228711      -364.729180
+
+20      256   -385.854652621695  -377.376994017093      -364.519306
+20      192   -385.908571179339  -377.22553864209       -364.491111
+20      128   -385.529099349837  -377.537794240463      -362.570391
