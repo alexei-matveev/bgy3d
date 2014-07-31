@@ -372,6 +372,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
+    use closures, only: closure
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -504,6 +505,7 @@ contains
       ! Closure over  host variables: r, k,  dr, dk, v,  c, beta, rho,
       ! ... Implements procedure(func1).
       !
+      use closures, only: closure
       implicit none
       real (rk), intent (in) :: t(:, :, :) ! (m, m, nrad)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
@@ -714,6 +716,7 @@ contains
       ! ... Implements procedure (func1).
       !
       use fft, only: fourier_rows, FT_FW, FT_BW
+      use closures, only: closure, closure_rbc
       implicit none
       real (rk), intent (in) :: t(:, :, :) ! (n, m, nrad)
       real (rk) :: dt(size (t, 1), size (t, 2), size (t, 3))
@@ -793,6 +796,7 @@ contains
       ! ... Implements procedure (func2).
       !
       use fft, only: fourier_rows, FT_FW, FT_BW
+      use closures, only: closure1
       implicit none
       real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
       real (rk), intent (in) :: dt(:, :, :) ! (n, m, nrad)
@@ -852,6 +856,7 @@ contains
     use iso_c_binding, only: c_bool
     use fft, only: fourier_rows, FT_FW, FT_BW
     use snes, only: func1, krylov
+    use closures, only: closure, closure1
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -1036,6 +1041,7 @@ contains
     use foreign, only: site
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
+    use closures, only: closure, closure_rbc
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -1131,6 +1137,7 @@ contains
     !
     use fft, only: fourier_rows, FT_BW, FT_FW
     use foreign, only: site
+    use closures, only: expm1
     implicit none
     integer, intent (in) :: rule
     type (site), intent (in) :: solute(:)     ! (n)
@@ -1349,6 +1356,7 @@ contains
     use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
+    use closures, only: closure, closure_rbc
     use options, only: getopt
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
@@ -2317,186 +2325,6 @@ contains
   end function coulomb_short
 
 
-  elemental function closure (method, beta, v, t) result (c)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    implicit none
-    integer, intent (in) :: method
-    real (rk), intent (in) :: beta, v, t
-    real (rk) :: c
-    ! *** end of interface ***
-
-    select case (method)
-    case (HNC)
-       c = closure_hnc (beta, v, t)
-    case (KH)
-       c = closure_kh (beta, v, t)
-    case (PY)
-       c = closure_py (beta, v, t)
-    case default
-       c = huge (c)            ! FIXME: cannot abort in pure functions
-    end select
-  end function closure
-
-
-  elemental function closure1 (method, beta, v, t, dt) result (dc)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    implicit none
-    integer, intent (in) :: method
-    real (rk), intent (in) :: beta, v, t, dt
-    real (rk) :: dc
-    ! *** end of interface ***
-
-    ! FIXME: the other two are not yet implemented:
-    select case (method)
-    case (HNC)
-       dc = closure_hnc1 (beta, v, t, dt)
-    case (KH)
-       dc = closure_kh1 (beta, v, t, dt)
-    ! case (PY)
-    !    dc = closure_py1 (beta, v, t, dt)
-    case default
-       dc = huge (dc)          ! FIXME: cannot abort in pure functions
-    end select
-  end function closure1
-
-
-  elemental function expm1 (x) result (f)
-    !
-    ! Elemental version of libc expm1().
-    !
-    use foreign, only: c_expm1 => expm1
-    implicit none
-    real (rk), intent (in) :: x
-    real (rk) :: f
-    ! *** end of interface ***
-
-    f = c_expm1 (x)
-  end function expm1
-
-
-  !
-  ! 1)  Hypernetted Chain  (HNC)  closure relation  to compute  direct
-  ! correlation function c  in real space.  See OZ  equation below for
-  ! the   second  relation   between  two   unknowns.    The  indirect
-  ! correlation t = h - c is denoted by greek "γ" in other sources. We
-  ! will avoid greek identifiers utill better times.
-  !
-  !   c = exp (-βv + t) - 1 - t
-  !
-  elemental function closure_hnc (beta, v, t) result (c)
-    implicit none
-    real (rk), intent (in) :: beta, v, t
-    real (rk) :: c
-    ! *** end of interface ***
-
-    ! c = exp (-beta * v + t) - 1 - t
-    c = expm1 (-beta * v + t) - t
-  end function closure_hnc
-
-
-  elemental function closure_hnc1 (beta, v, t, dt) result (dc)
-    implicit none
-    real (rk), intent (in) :: beta, v, t, dt
-    real (rk) :: dc
-    ! *** end of interface ***
-
-    ! dc = [exp (-beta * v + t) - 1] dt
-    dc = expm1 (-beta * v + t) * dt
-  end function closure_hnc1
-
-  !
-  ! 2)  Kovalenko-Hirata (KH)  closure.   Same as  HNC in  "depletion"
-  ! regions but avoids exponential grows:
-  !
-  !        / exp (-βv + t) - 1 - t, if -βv + t <= 0
-  !   c = <
-  !        \ -βv, otherwise
-  !
-  elemental function closure_kh (beta, v, t) result (c)
-    implicit none
-    real (rk), intent (in) :: beta, v, t
-    real (rk) :: c
-    ! *** end of interface ***
-
-    real (rk) :: x
-
-    x = -beta * v + t
-
-    ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
-    ! positive x:
-    if (x <= 0.0) then
-       c = expm1 (x) - t
-    else
-       c = -beta * v
-    endif
-  end function closure_kh
-
-
-  elemental function closure_kh1 (beta, v, t, dt) result (dc)
-    implicit none
-    real (rk), intent (in) :: beta, v, t, dt
-    real (rk) :: dc
-    ! *** end of interface ***
-
-    real (rk) :: x
-
-    x = -beta * v + t
-
-    ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
-    ! positive x:
-    if (x <= 0.0) then
-       ! dc = [exp (-beta * v + t) - 1] dt
-       dc = expm1 (x) * dt
-    else
-       dc = 0.0
-    endif
-  end function closure_kh1
-
-
-  ! 3)  Percus-Yevick  (PY)   closure  relation  between  direct-  and
-  ! indirect correlation c and t:
-  !
-  !   c := exp (-βv) [1 + t] - 1 - t
-  elemental function closure_py (beta, v, t) result (c)
-    implicit none
-    real (rk), intent (in) :: beta, v, t
-    real (rk) :: c
-    ! *** end of interface ***
-
-    c = exp (-beta * v) * (1 + t) - 1 - t
-  end function closure_py
-
-  elemental function closure_rbc (method, beta, v, t, expB) result (c)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
-    implicit none
-    integer, intent (in) :: method
-    real (rk), intent (in) :: beta, v, t, expB
-    real (rk) :: c
-    ! *** end of interface ***
-
-    select case (method)
-    ! RBC only with HNC now
-    case (HNC)
-       c = closure_hnc_rbc (beta, v, t, expB)
-    case default
-       c = huge (c)            ! FIXME: cannot abort in pure functions
-    end select
-  end function closure_rbc
-
-  !
-  ! HNC closure with repulsive bridge correction:
-  !
-  !    c := exp (-βv + t + B) - 1 - t
-  !
-  elemental function closure_hnc_rbc (beta, v, t, expB) result (c)
-    implicit none
-    real (rk), intent (in) :: beta, v, t, expB
-    real (rk) :: c
-    ! *** end of interface ***
-
-    c = exp (-beta * v + t) * expB - 1 - t
-  end function closure_hnc_rbc
-
   !
   ! Use the k-representation of Ornstein-Zernike (OZ) equation
   !
@@ -2979,6 +2807,7 @@ contains
     ! method. Note  that the  same method is  used to derive  c(t) and
     ! h(t) and to define the functional μ[h, c].
     !
+    use closures, only: closure
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rmax, beta, rho
@@ -3022,6 +2851,7 @@ contains
     !
     ! Differential of chempot0()
     !
+    use closures, only: closure, closure1
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
     real (rk), intent (in) :: rmax, beta, rho
