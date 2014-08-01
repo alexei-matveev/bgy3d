@@ -11,6 +11,9 @@ module closures
   public :: expm1
   public :: closure, closure1
   public :: closure_rbc
+
+  ! bind (c), used from C only
+  public :: rism_closure
   ! *** END OF INTERFACE ***
 
 contains
