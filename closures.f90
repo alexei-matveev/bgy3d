@@ -100,7 +100,7 @@ contains
   !
   !   c = exp (-βv + t) - 1 - t
   !
-  elemental function closure_hnc (beta, v, t) result (c)
+  pure function closure_hnc (beta, v, t) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
@@ -111,7 +111,7 @@ contains
   end function closure_hnc
 
 
-  elemental function closure_hnc1 (beta, v, t, dt) result (dc)
+  pure function closure_hnc1 (beta, v, t, dt) result (dc)
     implicit none
     real (rk), intent (in) :: beta, v, t, dt
     real (rk) :: dc
@@ -121,6 +121,7 @@ contains
     dc = expm1 (-beta * v + t) * dt
   end function closure_hnc1
 
+
   !
   ! 2)  Kovalenko-Hirata (KH)  closure.   Same as  HNC in  "depletion"
   ! regions but avoids exponential grows:
@@ -129,7 +130,7 @@ contains
   !   c = <
   !        \ -βv, otherwise
   !
-  elemental function closure_kh (beta, v, t) result (c)
+  pure function closure_kh (beta, v, t) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
@@ -149,7 +150,7 @@ contains
   end function closure_kh
 
 
-  elemental function closure_kh1 (beta, v, t, dt) result (dc)
+  pure function closure_kh1 (beta, v, t, dt) result (dc)
     implicit none
     real (rk), intent (in) :: beta, v, t, dt
     real (rk) :: dc
@@ -174,7 +175,7 @@ contains
   ! indirect correlation c and t:
   !
   !   c := exp (-βv) [1 + t] - 1 - t
-  elemental function closure_py (beta, v, t) result (c)
+  pure function closure_py (beta, v, t) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
@@ -206,7 +207,7 @@ contains
   !
   !    c := exp (-βv + t + B) - 1 - t
   !
-  elemental function closure_hnc_rbc (beta, v, t, expB) result (c)
+  pure function closure_hnc_rbc (beta, v, t, expB) result (c)
     implicit none
     real (rk), intent (in) :: beta, v, t, expB
     real (rk) :: c
