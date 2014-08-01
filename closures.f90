@@ -1,5 +1,8 @@
 module closures
   !
+  ! FIXME:  public  functions expect  the  inverse  temperature β  but
+  ! internally we operate with potential in units of temperature, βv.
+  !
   ! Copyright (c) 2013, 2014 Alexei Matveev
   ! Copyright (c) 2013 Bo Li
   !
@@ -47,11 +50,11 @@ contains
 
     select case (method)
     case (HNC)
-       c = closure_hnc (beta, v, t)
+       c = closure_hnc (beta * v, t)
     case (KH)
-       c = closure_kh (beta, v, t)
+       c = closure_kh (beta * v, t)
     case (PY)
-       c = closure_py (beta, v, t)
+       c = closure_py (beta * v, t)
     case default
        c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
@@ -69,11 +72,11 @@ contains
     ! FIXME: the other two are not yet implemented:
     select case (method)
     case (HNC)
-       dc = closure_hnc1 (beta, v, t, dt)
+       dc = closure_hnc1 (beta * v, t, dt)
     case (KH)
-       dc = closure_kh1 (beta, v, t, dt)
+       dc = closure_kh1 (beta * v, t, dt)
     ! case (PY)
-    !    dc = closure_py1 (beta, v, t, dt)
+    !    dc = closure_py1 (beta * v, t, dt)
     case default
        dc = huge (dc)          ! FIXME: cannot abort in pure functions
     end select
@@ -103,25 +106,25 @@ contains
   !
   !   c = exp (-βv + t) - 1 - t
   !
-  pure function closure_hnc (beta, v, t) result (c)
+  pure function closure_hnc (v, t) result (c)
     implicit none
-    real (rk), intent (in) :: beta, v, t
+    real (rk), intent (in) :: v, t
     real (rk) :: c
     ! *** end of interface ***
 
     ! c = exp (-beta * v + t) - 1 - t
-    c = expm1 (-beta * v + t) - t
+    c = expm1 (-v + t) - t
   end function closure_hnc
 
 
-  pure function closure_hnc1 (beta, v, t, dt) result (dc)
+  pure function closure_hnc1 (v, t, dt) result (dc)
     implicit none
-    real (rk), intent (in) :: beta, v, t, dt
+    real (rk), intent (in) :: v, t, dt
     real (rk) :: dc
     ! *** end of interface ***
 
     ! dc = [exp (-beta * v + t) - 1] dt
-    dc = expm1 (-beta * v + t) * dt
+    dc = expm1 (-v + t) * dt
   end function closure_hnc1
 
 
@@ -133,35 +136,35 @@ contains
   !   c = <
   !        \ -βv, otherwise
   !
-  pure function closure_kh (beta, v, t) result (c)
+  pure function closure_kh (v, t) result (c)
     implicit none
-    real (rk), intent (in) :: beta, v, t
+    real (rk), intent (in) :: v, t
     real (rk) :: c
     ! *** end of interface ***
 
     real (rk) :: x
 
-    x = -beta * v + t
+    x = -v + t
 
     ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
     ! positive x:
     if (x <= 0.0) then
        c = expm1 (x) - t
     else
-       c = -beta * v
+       c = -v
     endif
   end function closure_kh
 
 
-  pure function closure_kh1 (beta, v, t, dt) result (dc)
+  pure function closure_kh1 (v, t, dt) result (dc)
     implicit none
-    real (rk), intent (in) :: beta, v, t, dt
+    real (rk), intent (in) :: v, t, dt
     real (rk) :: dc
     ! *** end of interface ***
 
     real (rk) :: x
 
-    x = -beta * v + t
+    x = -v + t
 
     ! For x  <= 0 use  exp(x) - 1,  but do not grow  exponentially for
     ! positive x:
@@ -178,13 +181,13 @@ contains
   ! indirect correlation c and t:
   !
   !   c := exp (-βv) [1 + t] - 1 - t
-  pure function closure_py (beta, v, t) result (c)
+  pure function closure_py (v, t) result (c)
     implicit none
-    real (rk), intent (in) :: beta, v, t
+    real (rk), intent (in) :: v, t
     real (rk) :: c
     ! *** end of interface ***
 
-    c = exp (-beta * v) * (1 + t) - 1 - t
+    c = exp (-v) * (1 + t) - 1 - t
   end function closure_py
 
 
@@ -199,7 +202,7 @@ contains
     select case (method)
     ! RBC only with HNC now
     case (HNC)
-       c = closure_hnc_rbc (beta, v, t, expB)
+       c = closure_hnc_rbc (beta * v, t, expB)
     case default
        c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
@@ -210,13 +213,13 @@ contains
   !
   !    c := exp (-βv + t + B) - 1 - t
   !
-  pure function closure_hnc_rbc (beta, v, t, expB) result (c)
+  pure function closure_hnc_rbc (v, t, expB) result (c)
     implicit none
-    real (rk), intent (in) :: beta, v, t, expB
+    real (rk), intent (in) :: v, t, expB
     real (rk) :: c
     ! *** end of interface ***
 
-    c = exp (-beta * v + t) * expB - 1 - t
+    c = exp (-v + t) * expB - 1 - t
   end function closure_hnc_rbc
 
 end module closures
