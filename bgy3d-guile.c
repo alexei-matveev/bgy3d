@@ -434,26 +434,6 @@ static void to_sites (SCM molecule, int *n, Site **sites, char **name)
 }
 
 
-/*
-  Get solute  sites by solute name.   Functions that do  the real work
-  operate on  array of sites.   The user has  to free (sites)  when no
-  nore needed.  FIXME: this implementation cannot be used if Guile has
-  not been "booted". Not used.
-*/
-static void bgy3d_solute_get (const char *name, int *n, Site **sites)
-{
-  SCM find_molecule = lookup ("guile molecule", "find-molecule");
-  SCM molecule =
-    scm_call_1 (find_molecule, scm_from_locale_string (name));
-
-  char *Name;
-  to_sites (molecule, n, sites, &Name);
-
-  assert (strcmp (name, Name) == 0);
-  free (Name);
-}
-
-
 /* The following  code declares a  State SMOB primarily to  make array
    descriptors, FFT, and laplace matrices available to Scheme: */
 static scm_t_bits guile_state_tag;
