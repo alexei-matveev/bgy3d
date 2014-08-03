@@ -111,9 +111,10 @@ contains
     ! When either t_buf or x_buf is not NULL it should be a pointer to
     ! a buffer  with sufficient space  to store nrad  * m *  m doubles
     ! where nrad = maxval (pd % n). If this is the case for t_buf then
-    ! the real space represented  of indirect correlation t is written
-    ! there.  If x_buf is not  NULL then the Fourier representation of
-    ! the solvent susceptibility (not offset by one) is written there.
+    ! the  real  space representation  of  indirect  correlation t  is
+    ! written  there.    If  x_buf  is  not  NULL   then  the  Fourier
+    ! representation of the solvent susceptibility (not offset by one)
+    ! is written there.
     !
     ! A  NULL  C-pointer  will   be  cast  by  c_f_pointer()  into  an
     ! unassociated   Fortran  pointer   which  is   isomorphic   to  a
