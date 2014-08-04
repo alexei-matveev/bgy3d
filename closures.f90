@@ -399,6 +399,45 @@ contains
   ! for modified TIP3P water with σ(H)  = 0.4 A, and ε(H) = 0.046 kcal
   ! is -6.35 kcal.
   !
+  ! Kast and Kloss [2] generalized the expression for any closure that
+  ! can be expressed in the form
+  !
+  !   h = f(x)
+  !
+  ! with x = -βv + t.   The quantity x is called renormalized indirect
+  ! correlation  t* in  Ref.   [2].   For this  type  of closures  the
+  ! expression for chemical potential is
+  !
+  !          HNC                 x(r)
+  !   βμ = βμ   + 4πρ ∫ {h(r) - ∫    [1 + f(y)] dy} r²dr
+  !                              0
+  !
+  ! cp.  Eq.   (12) in Ref.  [2].   Note how in HNC  case the definite
+  ! integral of  1 + f(y) =  exp(y) gives exp(x) -  1 = h  so that the
+  ! addition is void. The closures PSE series are of the required form
+  !
+  !   h = f (x)
+  !        n
+  !
+  ! Indeed,  these closures  employ  a power  series approximation  to
+  ! exp(x)  -  1  for  positive  x  but  otherwise  are  the  same  as
+  ! HNC. Therefore  in the depletion regions  where x(r) <  0 (that is
+  ! where h(r) < 0) the integrand of the additional term vanishes just
+  ! as in HNC case. Elsewhere the integrand of the additional term is
+  !
+  !          n+1
+  !         x
+  !    - ρ ------
+  !        (n+1)!
+  !
+  ! cp. Eq. (16)  in Ref. [2]. Note that 4πr²dr  is the volume element
+  ! and is not  part of the integrand here. In the  case of KH closure
+  ! (n = 1) the integrand in these regions  with x > 0 (that is h > 0)
+  ! can  be  written as  -ρh²/2,  because  by  virtue of  the  closure
+  ! relation  h  = x  in  these  regions.   This additional  integrand
+  ! cancels  the  h²-term in  the  HNC  expression  everywhere but  in
+  ! depletion regions.
+  !
   ! FIXME: what do we do for charged systems?
   !
   ! [1] "Comparative Study on Solvation Free Energy Expressions in
@@ -407,6 +446,11 @@ contains
   !     Chem.  B, 2005, 109 (36), pp 17290–17295,
   !     http://dx.doi.org/10.1021/jp053259i
   !
+  ! [2] "Closed-form expressions of the chemical potential for
+  !     integral equation closures with certain bridge functions",
+  !     Kast, Stefan M. and Kloss, Thomas, J. Chem. Phys., 2008, 129,
+  !     236101, http://dx.doi.org/10.1063/1.3041709
+
   function threshold (method) result (thresh)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
