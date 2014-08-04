@@ -120,10 +120,10 @@ contains
     !   f(x) = Σ       ----  = ----  Σ      ---- x
     !           k = 1   k!      n!    k = 1  k!
     !
-    ! otherwise. The  alternative expression has  the advantage that
-    ! we can start with the coefficient of the highest power without
-    ! having to  compute it first.  Will silently  accept negative n
-    ! and behaves as for n = 0.
+    ! otherwise. The alternative expression  has the advantage that we
+    ! can  start with  the coefficient  of the  highest  power without
+    ! having to compute it first.  Will silently accept negative n and
+    ! for finite input x will return zero just as as for n = 0.
     !
     implicit none
     integer, intent (in) :: n
@@ -318,8 +318,8 @@ contains
 
     x = -v + t
 
-    ! For x  <= 0 use  [exp(x) - 1] * dt,  but do not grow  exponentially for
-    ! positive x:
+    ! For x <= 0 use [exp(x) -  1] * dt, but do not grow exponentially
+    ! for positive x. For n <= 1 and x >= 0 this will return zero:
     dc = pse (n - 1, x) * dt
   end function closure_pse1
 
