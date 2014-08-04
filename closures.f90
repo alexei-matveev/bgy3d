@@ -69,14 +69,17 @@ contains
 
 
   elemental function closure1 (method, beta, v, t, dt) result (dc)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: beta, v, t, dt
     real (rk) :: dc
     ! *** end of interface ***
 
-    ! FIXME: the other two are not yet implemented:
+    integer :: n                ! PSE order
+
+    ! FIXME: some are not yet implemented:
     select case (method)
     case (HNC)
        dc = closure_hnc1 (beta * v, t, dt)
@@ -84,6 +87,9 @@ contains
        dc = closure_kh1 (beta * v, t, dt)
     ! case (PY)
     !    dc = closure_py1 (beta * v, t, dt)
+    case (PSE0:PSE7)
+       n = method - PSE0
+       dc = closure_pse1 (n, beta * v, t, dt)
     case default
        dc = huge (dc)          ! FIXME: cannot abort in pure functions
     end select
@@ -293,37 +299,58 @@ contains
     ! positive x. E.g. for n = 1, and x >= 0 f(x) = x, so that c = x -
     ! t = -v.  FIXME: should we rather  code c = -v + [f(x) - x] where
     ! the term in brackets is o(x²) for small x?
-    c = f (x) - t
+    c = pse (n, x) - t
 
-  contains
-
-    pure function f (x) result (y)
-      !
-      ! This  combination  of  an  exponential  and  power  series  is
-      ! employed by PSE-n and KH closures:
-      !
-      !   f(x) = exp(x) - 1  if x < 0
-      !
-      ! and
-      !                    k
-      !           n       x
-      !   f(x) = Σ       ----
-      !           k = 1   k!
-      !
-      ! otherwise.  Will silently accept negative n and behaves as for
-      ! n = 0.
-      !
-      implicit none
-      real (rk), intent (in) :: x
-      real (rk) :: y
-      ! *** end of interface ***
-
-      if (x < 0.0) then
-         y = expm1 (x)
-      else
-         y = exps1 (n, x)       ! n is host associated
-      endif
-    end function f
   end function closure_pse
+
+
+  pure function closure_pse1 (n, v, t, dt) result (dc)
+    !
+    ! Suffix 1 here indicated the differential, not the order.
+    !
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: v, t, dt
+    real (rk) :: dc
+    ! *** end of interface ***
+
+    real (rk) :: x
+
+    x = -v + t
+
+    ! For x  <= 0 use  [exp(x) - 1] * dt,  but do not grow  exponentially for
+    ! positive x:
+    dc = pse (n - 1, x) * dt
+  end function closure_pse1
+
+
+  pure function pse (n, x) result (y)
+    !
+    ! This combination of an  exponential and power series is employed
+    ! by PSE-n and KH closures:
+    !
+    !   f(x) = exp(x) - 1  if x < 0
+    !
+    ! and
+    !                    k
+    !           n       x
+    !   f(x) = Σ       ----
+    !           k = 1   k!
+    !
+    ! otherwise.  Will silently accept negative n and behaves as for n
+    ! = 0.
+    !
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: x
+    real (rk) :: y
+    ! *** end of interface ***
+
+    if (x < 0.0) then
+       y = expm1 (x)
+    else
+       y = exps1 (n, x)
+    endif
+  end function pse
 
 end module closures
