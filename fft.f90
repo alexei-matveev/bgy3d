@@ -37,6 +37,7 @@ module fft
   !
   !   dr * dk = 2π / 2n
   !
+  public :: mkgrid
   public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
 ! public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: integrate           ! f(1:n) -> scalar
@@ -95,6 +96,27 @@ module fft
   end interface
 
 contains
+
+  subroutine mkgrid (rmax, r, dr, k, dk)
+    use units, only: pi
+    implicit none
+    real (rk), intent (in) :: rmax
+    real (rk), intent (out) :: r(:), dr, k(:), dk ! (nrad)
+    ! *** end of interface ***
+
+    integer :: i, nrad
+
+    nrad = size (r)
+
+    ! dr * dk = 2π/2n:
+    dr = rmax / nrad
+    dk = pi / rmax
+    forall (i = 1:nrad)
+       r(i) = (2 * i - 1) * dr / 2
+       k(i) = (2 * i - 1) * dk / 2
+    end forall
+  end subroutine mkgrid
+
 
   function fourier_rows (f) result (g)
     implicit none

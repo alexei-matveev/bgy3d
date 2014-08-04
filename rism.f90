@@ -215,6 +215,7 @@ contains
     !
     use foreign, only: problem_data, site
     use iso_c_binding, only: c_int
+    use fft, only: mkgrid
     implicit none
     integer (c_int), intent (in), value :: m
     type (site), intent (in) :: solvent(m)
@@ -344,29 +345,8 @@ contains
   end subroutine main
 
 
-  subroutine mkgrid (rmax, r, dr, k, dk)
-    use units, only: pi
-    implicit none
-    real (rk), intent (in) :: rmax
-    real (rk), intent (out) :: r(:), dr, k(:), dk ! (nrad)
-    ! *** end of interface ***
-
-    integer :: i, nrad
-
-    nrad = size (r)
-
-    ! dr * dk = 2π/2n:
-    dr = rmax / nrad
-    dk = pi / rmax
-    forall (i = 1:nrad)
-       r(i) = (2 * i - 1) * dr / 2
-       k(i) = (2 * i - 1) * dk / 2
-    end forall
-  end subroutine mkgrid
-
-
   subroutine rism_vv (method, nrad, rmax, beta, rho, sites, gam, chi, dict)
-    use fft, only: fourier_rows, FT_FW, FT_BW
+    use fft, only: mkgrid, fourier_rows, FT_FW, FT_BW
     use snes, only: snes_default
     use foreign, only: site
     use options, only: getopt
@@ -578,6 +558,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     use units, only: angstrom
+    use fft, only: mkgrid
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -855,7 +836,7 @@ contains
     use foreign, only: site, comm_rank, comm_size, comm_set_parallel_x,&
          comm_allreduce
     use iso_c_binding, only: c_bool
-    use fft, only: fourier_rows, FT_FW, FT_BW
+    use fft, only: mkgrid, fourier_rows, FT_FW, FT_BW
     use snes, only: func1, krylov
     use closures, only: closure, closure1
     implicit none
@@ -1043,6 +1024,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use options, only: getopt
     use closures, only: closure, closure_rbc
+    use fft, only: mkgrid
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -1350,7 +1332,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: fourier_rows, FT_FW, integral
+    use fft, only: mkgrid, fourier_rows, FT_FW, integral
     use linalg, only: polyfit
     use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
@@ -2657,6 +2639,7 @@ contains
     ! method. Note  that the  same method is  used to derive  c(t) and
     ! h(t) and to define the functional μ[h, c].
     !
+    use fft, only: mkgrid
     use closures, only: closure
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
@@ -2701,6 +2684,7 @@ contains
     !
     ! Differential of chempot0()
     !
+    use fft, only: mkgrid
     use closures, only: closure, closure1
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
