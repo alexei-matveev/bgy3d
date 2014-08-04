@@ -353,7 +353,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
-    use closures, only: closure, chempot0
+    use closures, only: closure, chempot
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -475,7 +475,7 @@ contains
       vl = force_field_long (sites, sites, r)
 
       ! Chemical potential as a functional of converged t:
-      mu = chempot0 (method, rmax, beta, rho, vr, vl, t)
+      mu = chempot (method, rmax, beta, rho, vr, vl, t)
       dict = acons (symbol ("XXX"), flonum (mu), dict)
     end block
 
@@ -559,7 +559,7 @@ contains
     use options, only: getopt
     use units, only: angstrom
     use fft, only: mkgrid
-    use closures, only: chempot0
+    use closures, only: chempot
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -662,7 +662,7 @@ contains
       v_uvl = force_field_long (solute, solvent, r)
 
       ! Chemical potential as a functional of converged t:
-      mu = chempot0 (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
+      mu = chempot (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
       dict = acons (symbol ("XXX"), flonum (mu), dict)
     end block
 
@@ -839,7 +839,7 @@ contains
     use iso_c_binding, only: c_bool
     use fft, only: mkgrid, fourier_rows, FT_FW, FT_BW
     use snes, only: func1, krylov
-    use closures, only: closure, closure1, chempot01
+    use closures, only: closure, closure1, chempot1
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -878,7 +878,7 @@ contains
       ! Chemical  potential as a  functional of  converged t  could be
       ! computed like this:
       !
-      !   mu = chempot0 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr)
+      !   mu = chempot (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr)
       !
       ! Use closure to compute  convered c(k) including the long-range
       ! assymptotics:
@@ -943,7 +943,7 @@ contains
             dt = krylov (jacobian, -df)
 
             ! Differential of chemical potential due to dt:
-            dmu = chempot01 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr, dt)
+            dmu = chempot1 (method, rmax, beta, rho, v_uvr, vl_uvr, t_uvr, dt)
             gradients(j, i) = dmu / step
          enddo
       enddo

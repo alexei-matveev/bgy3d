@@ -15,7 +15,7 @@ module closures
   public :: closure, closure1
   public :: closure_rbc
   public :: chempot_form, chempot_form1
-  public :: chempot0, chempot01
+  public :: chempot, chempot1
 
   ! bind (c), used from C only
   public :: rism_closure
@@ -597,7 +597,7 @@ contains
   end function chempot_form1
 
 
-  function chempot0 (method, rmax, beta, rho, v, vl, t) result (mu)
+  function chempot (method, rmax, beta, rho, v, vl, t) result (mu)
     !
     ! Computes  the  chemical  potential,  μ(t)  using  the  specified
     ! method. Note  that the  same method is  used to derive  c(t) and
@@ -640,12 +640,12 @@ contains
       ! pre-computed h and c:
       mu = chempot_form (method, rho, h, c, cl) * (dr**3 / beta)
     end block
-  end function chempot0
+  end function chempot
 
 
-  function chempot01 (method, rmax, beta, rho, v, vl, t, dt) result (dmu)
+  function chempot1 (method, rmax, beta, rho, v, vl, t, dt) result (dmu)
     !
-    ! Differential of chempot0()
+    ! Differential of chempot()
     !
     use fft, only: mkgrid
     implicit none
@@ -687,6 +687,6 @@ contains
       ! pre-computed h and c:
       dmu = chempot_form1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
     end block
-  end function chempot01
+  end function chempot1
 
 end module closures
