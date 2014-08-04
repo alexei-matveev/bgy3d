@@ -14,6 +14,7 @@ module closures
   public :: expm1
   public :: closure, closure1
   public :: closure_rbc
+  public :: chempot_density, chempot_density1
 
   ! bind (c), used from C only
   public :: rism_closure
@@ -352,5 +353,158 @@ contains
        y = exps1 (n, x)
     endif
   end function pse
+
+  !
+  ! Chemical Potential (ChemPot).
+  !
+  ! The next function, chempot_density(), returns the β-scaled density
+  ! of  the chemical  potential, βμ(r).   To get  the  excess chemical
+  ! potential integrate it over the volume and divide by β, cf.:
+  !
+  !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+  !
+  ! The first h²-term  in the definition of the  chemical potential is
+  ! of  short  range  and   should  not  present  any  difficulty  for
+  ! integration.
+  !
+  ! Assuming that  the long-range component of  the direct correlation
+  ! c₁₂(r)  of two  sites,  1 and  2,  is proportional  to the  charge
+  ! product q₁  and q₂ as  in -βq₁q₂v(r) one  may deduce that  ρ₁c₁₁ +
+  ! ρ₂c₂₁ vanishes  identically for  *neutral* systems.  In  this case
+  ! the Coulomb tails  of the direct correlation in  the second c-term
+  ! do  not contribute  to the  chemical  potential.  This  is a  good
+  ! thing, because otherwise an integral 4π∫r²dr/r would diverge.
+  !
+  ! The third  hc-term is  of the  short range due  to h.  However the
+  ! long-range  Coulomb-type  correction  to the  direct  correlation,
+  ! since weighted by a pair  specific total correlation h₁₂, does not
+  ! vanish in such a sum.
+  !
+  ! To get an  idea about the order of magnitude  of such a long-range
+  ! correction: for SPC/E water with σ(H)  = 1.0 A, ε(H) = 0.0545 kcal
+  ! [1], and  using the short-range correlation  with range separation
+  ! parameter α  = 1.2  A^-1 gives the  excess chemical potential  μ =
+  ! 6.86 kcal (wrong because  positive!).  By including the long range
+  ! correlation into the hc-term one obtains -4.19 kcal instead.  Here
+  ! N = 4096, L = 80 A, ρ = 0.033427745 A^-3, β = 1.6889 kcal^-1. (You
+  ! may  need  to  use   --snes-solver  "trial"  to  get  SPC/E  water
+  ! converge).
+  !
+  ! Note that, contrary to what  is being suggested in the literature,
+  ! these   numbers  depend   strongly   on  the   LJ  parameters   of
+  ! hydrogens. With σ(H)  = 0.8 A and ε(H) =  0.046 kcal [Leipzig] one
+  ! gets μ =  -4.97 kcal and with  σ(H) = 1.1656 A and  ε(H) = 0.01553
+  ! kcal [Amber] one gets μ =  -3.66 kcal.  At least one source quotes
+  ! yet a  different number -3.41 kcal [1].   The corresponding result
+  ! for modified TIP3P water with σ(H)  = 0.4 A, and ε(H) = 0.046 kcal
+  ! is -6.35 kcal.
+  !
+  ! FIXME: what do we do for charged systems?
+  !
+  ! [1] "Comparative Study on Solvation Free Energy Expressions in
+  !     Reference Interaction Site Model Integral Equation Theory",
+  !     Kazuto Sato, Hiroshi Chuman, and Seiichiro Ten-no, J.  Phys.
+  !     Chem.  B, 2005, 109 (36), pp 17290–17295,
+  !     http://dx.doi.org/10.1021/jp053259i
+  !
+  function threshold (method) result (thresh)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
+    implicit none
+    integer, intent (in) :: method ! HNC, KH, or anything else
+    real (rk) :: thresh
+    ! *** end of interface ***
+
+    select case (method)
+    case (KH)
+       ! The h² term contributes only in the depletion regions (KH):
+       thresh = 0.0
+    case (HNC)
+       ! The h² term contributes unconditionally (HNC):
+       thresh = - huge (thresh)
+    case default
+       ! There is no h² term otherwise (GF):
+       thresh = huge (thresh)
+    end select
+  end function threshold
+
+
+  function chempot_density (method, rho, h, c, cl) result (mu)
+    !
+    ! Returns the β-scaled density of the chemical potential, βμ(r).
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rho
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: mu(size (h, 3))
+    ! *** end of interface ***
+
+    integer :: i, j, p
+    real (rk) :: thresh, acc
+
+    ! The   h²  term   contributes  conditionally.   Eventually,  only
+    ! depletion  regions  (h  <  0)  contribute  (KH).   Threshold  is
+    ! supposed  to  be  0.0   for  KH  functional  (depletion  regions
+    ! contribute),  anywhere between 1  and +∞  for GF  functional (no
+    ! such   term)   and    -∞   for   HNC   functional   (contributes
+    ! unconditionally):
+    thresh = threshold (method)
+    do p = 1, size (h, 3)       ! nrad
+       acc = 0.0
+       do j = 1, size (h, 2)    ! m
+          do i = 1, size (h, 1) ! n
+             associate (h => h(i, j, p), c => c(i, j, p), cl => cl(i, j, p))
+               if (-h > thresh) then
+                  acc = acc + h**2 / 2
+               endif
+               acc = acc - c - h * (c + cl) / 2
+             end associate
+          enddo
+       enddo
+
+       mu(p) = rho * acc
+    enddo
+  end function chempot_density
+
+
+  function chempot_density1 (method, rho, h, dh, c, dc, cl) result (dmu)
+    !
+    ! Differential of chempot_density().
+    !
+    implicit none
+    integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: rho
+    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dc(:, :, :) ! (n, m, nrad)
+    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
+    real (rk) :: dmu(size (h, 3))
+    ! *** end of interface ***
+
+    integer :: i, j, p
+    real (rk) :: thresh, acc
+
+    thresh = threshold (method)
+    do p = 1, size (h, 3)       ! nrad
+       acc = 0.0
+       do j = 1, size (h, 2)    ! m
+          do i = 1, size (h, 1) ! n
+             associate (h => h(i, j, p), dh => dh(i, j, p), c => c(i, j, p), &
+                  dc => dc(i, j, p), cl => cl(i, j, p))
+               if (-h > thresh) then
+                  acc = acc + h * dh
+               endif
+               acc = acc - dc - dh * (c + cl) / 2 - h * dc / 2
+             end associate
+          enddo
+       enddo
+
+       dmu(p) = rho * acc
+    enddo
+  end function chempot_density1
+
 
 end module closures
