@@ -41,20 +41,27 @@ contains
 
 
   elemental function closure (method, beta, v, t) result (c)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: beta, v, t
     real (rk) :: c
     ! *** end of interface ***
 
+    integer :: n                ! PSE order
+
     select case (method)
     case (HNC)
        c = closure_hnc (beta * v, t)
     case (KH)
        c = closure_kh (beta * v, t)
+       ! c = closure_pse (1, beta * v, t)
     case (PY)
        c = closure_py (beta * v, t)
+    case (PSE0:PSE7)
+       n = method - PSE0
+       c = closure_pse (n, beta * v, t)
     case default
        c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
@@ -95,6 +102,54 @@ contains
 
     f = c_expm1 (x)
   end function expm1
+
+
+  pure function exps1 (n, x) result (y)
+    !
+    ! Truncated  exponential  series,  an  expansion for  exp(x)  -  1
+    ! employed by PSE-n and KH closures:
+    !
+    !                    k
+    !           n       x       x     n      n!   k-1
+    !   f(x) = Σ       ----  = ----  Σ      ---- x
+    !           k = 1   k!      n!    k = 1  k!
+    !
+    ! otherwise. The  alternative expression has  the advantage that
+    ! we can start with the coefficient of the highest power without
+    ! having to  compute it first.  Will silently  accept negative n
+    ! and behaves as for n = 0.
+    !
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: x
+    real (rk) :: y
+    ! *** end of interface ***
+
+    ! FIXME: specialize for  n = 0, 1, 2  where y = 0, x,  x + x**2/2,
+    ! maybe?
+    real (rk) :: c
+    integer :: k
+
+    ! Horner scheme:
+    c = 1.0            ! n!/n!, leading coefficient
+    y = 0.0
+    do k = n, 1, -1    ! iterate n times
+       y =  x * y + c
+       c = c * k       ! n!/(k-1)!
+       !
+       ! At this point in each round:
+       !
+       ! 1) y = 1
+       ! 2) y == x + n, i.e. two terms
+       ! 3) y == x(x + n) + n(n-1), i.e. three terms
+       !
+       ! ...
+       !         n-1      n-2
+       ! n) y = x    +  nx    +  ...  +  n!, all n terms
+    enddo
+    ! Here c = n!:
+    y = (x / c) * y
+  end function exps1
 
 
   !
@@ -221,5 +276,54 @@ contains
 
     c = exp (-v + t) * expB - 1 - t
   end function closure_hnc_rbc
+
+
+  pure function closure_pse (n, v, t) result (c)
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: v, t ! v in temperature units
+    real (rk) :: c
+    ! *** end of interface ***
+
+    real (rk) :: x
+
+    x = -v + t
+
+    ! For x < 0 f(x) = exp(x) - 1, but does not grow exponentially for
+    ! positive x. E.g. for n = 1, and x >= 0 f(x) = x, so that c = x -
+    ! t = -v.  FIXME: should we rather  code c = -v + [f(x) - x] where
+    ! the term in brackets is o(x²) for small x?
+    c = f (x) - t
+
+  contains
+
+    pure function f (x) result (y)
+      !
+      ! This  combination  of  an  exponential  and  power  series  is
+      ! employed by PSE-n and KH closures:
+      !
+      !   f(x) = exp(x) - 1  if x < 0
+      !
+      ! and
+      !                    k
+      !           n       x
+      !   f(x) = Σ       ----
+      !           k = 1   k!
+      !
+      ! otherwise.  Will silently accept negative n and behaves as for
+      ! n = 0.
+      !
+      implicit none
+      real (rk), intent (in) :: x
+      real (rk) :: y
+      ! *** end of interface ***
+
+      if (x < 0.0) then
+         y = expm1 (x)
+      else
+         y = exps1 (n, x)       ! n is host associated
+      endif
+    end function f
+  end function closure_pse
 
 end module closures
