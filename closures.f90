@@ -14,7 +14,7 @@ module closures
   public :: expm1
   public :: closure, closure1
   public :: closure_rbc
-  public :: chempot, chempot1
+  public :: chempot_form, chempot_form1
   public :: chempot0, chempot01
 
   ! bind (c), used from C only
@@ -552,7 +552,7 @@ contains
   end function chempot_density1
 
 
-  function chempot (method, rho, h, c, cl) result (mu)
+  function chempot_form (method, rho, h, c, cl) result (mu)
     !
     ! Computes  the chemical  potential, βμ,  by integration  over the
     ! volume:
@@ -574,12 +574,12 @@ contains
     ! Inegrate chemical  potential density.  Multiply that  by dr³ and
     ! divide by β to get the real number:
     mu = integrate (chempot_density (method, rho, h, c, cl))
-  end function chempot
+  end function chempot_form
 
 
-  function chempot1 (method, rho, h, dh, c, dc, cl) result (dmu)
+  function chempot_form1 (method, rho, h, dh, c, dc, cl) result (dmu)
     !
-    ! Differential of chempot()
+    ! Differential of chempot_form()
     !
     use fft, only: integrate
     implicit none
@@ -594,7 +594,7 @@ contains
     ! *** end of interface ***
 
     dmu = integrate (chempot_density1 (method, rho, h, dh, c, dc, cl))
-  end function chempot1
+  end function chempot_form1
 
 
   function chempot0 (method, rmax, beta, rho, v, vl, t) result (mu)
@@ -638,7 +638,7 @@ contains
 
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      mu = chempot (method, rho, h, c, cl) * (dr**3 / beta)
+      mu = chempot_form (method, rho, h, c, cl) * (dr**3 / beta)
     end block
   end function chempot0
 
@@ -685,7 +685,7 @@ contains
 
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      dmu = chempot1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
+      dmu = chempot_form1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
     end block
   end function chempot01
 

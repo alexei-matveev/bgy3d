@@ -1340,7 +1340,7 @@ contains
     use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
-    use closures, only: closure, closure_rbc, chempot
+    use closures, only: closure, closure_rbc, chempot_form
     use options, only: getopt
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
@@ -1459,7 +1459,7 @@ contains
           ! Initialize intent (out) argument:
           dict = nil
           do i = 1, size (methods)
-             mu(i) = chempot (methods(i), rho, h, c, cl) * (dr**3 / beta)
+             mu(i) = chempot_form (methods(i), rho, h, c, cl) * (dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
              dict = acons (symbol (trim (names(i))), flonum (mu(i)), dict)
