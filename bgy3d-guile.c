@@ -295,6 +295,14 @@ problem_data (SCM alist)
       const SCM hnc = scm_from_locale_symbol ("HNC");
       const SCM kh = scm_from_locale_symbol ("KH");
       const SCM py = scm_from_locale_symbol ("PY");
+      const SCM pse0 = scm_from_locale_symbol ("PSE0");
+      const SCM pse1 = scm_from_locale_symbol ("PSE1");
+      const SCM pse2 = scm_from_locale_symbol ("PSE2");
+      const SCM pse3 = scm_from_locale_symbol ("PSE3");
+      const SCM pse4 = scm_from_locale_symbol ("PSE4");
+      const SCM pse5 = scm_from_locale_symbol ("PSE5");
+      const SCM pse6 = scm_from_locale_symbol ("PSE6");
+      const SCM pse7 = scm_from_locale_symbol ("PSE7");
 
       if (scm_is_true (scm_equal_p (closure, hnc)))
         PD.closure = CLOSURE_HNC;
@@ -302,6 +310,22 @@ problem_data (SCM alist)
         PD.closure = CLOSURE_KH;
       else if (scm_is_true (scm_equal_p (closure, py)))
         PD.closure = CLOSURE_PY;
+      else if (scm_is_true (scm_equal_p (closure, pse0)))
+        PD.closure = CLOSURE_PSE0;
+      else if (scm_is_true (scm_equal_p (closure, pse1)))
+        PD.closure = CLOSURE_PSE1;
+      else if (scm_is_true (scm_equal_p (closure, pse2)))
+        PD.closure = CLOSURE_PSE2;
+      else if (scm_is_true (scm_equal_p (closure, pse3)))
+        PD.closure = CLOSURE_PSE3;
+      else if (scm_is_true (scm_equal_p (closure, pse4)))
+        PD.closure = CLOSURE_PSE4;
+      else if (scm_is_true (scm_equal_p (closure, pse5)))
+        PD.closure = CLOSURE_PSE5;
+      else if (scm_is_true (scm_equal_p (closure, pse6)))
+        PD.closure = CLOSURE_PSE6;
+      else if (scm_is_true (scm_equal_p (closure, pse7)))
+        PD.closure = CLOSURE_PSE7;
       else
         scm_misc_error          /* longjmp! */
           (__func__, "no such closure ~A", scm_list_1 (closure));

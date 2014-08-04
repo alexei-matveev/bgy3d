@@ -105,6 +105,16 @@ void bgy3d_problem_data_print (const ProblemData *PD)
     case CLOSURE_PY:
       PRINTF ("closure = PY\n");
       break;
+    case CLOSURE_PSE0:
+    case CLOSURE_PSE1:
+    case CLOSURE_PSE2:
+    case CLOSURE_PSE3:
+    case CLOSURE_PSE4:
+    case CLOSURE_PSE5:
+    case CLOSURE_PSE6:
+    case CLOSURE_PSE7:
+      PRINTF ("closure = PSE%d\n", PD->closure - CLOSURE_PSE0);
+      break;
     }
 }
 

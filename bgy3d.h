@@ -206,8 +206,21 @@ extern int verbosity;
 */
 typedef double real;
 
-/* There are a few closures available for HNC-like methods: */
-typedef enum {CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY} ClosureEnum;
+/* There are a few closures available for HNC-like methods. Keep these
+   in sync with foreign.f90! */
+typedef enum {
+  CLOSURE_HNC,
+  CLOSURE_KH,
+  CLOSURE_PY,
+  /* FIXME: more scalable solution? */
+  CLOSURE_PSE0,
+  CLOSURE_PSE1,
+  CLOSURE_PSE2,
+  CLOSURE_PSE3,
+  CLOSURE_PSE4,
+  CLOSURE_PSE5,
+  CLOSURE_PSE6,
+  CLOSURE_PSE7} ClosureEnum;
 
 
 /* Keep  this  in  sync   with  the  foreign  type  (problem_data)  in

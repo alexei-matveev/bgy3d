@@ -41,8 +41,20 @@ module foreign
   ! Keep these in sync with bgy3d.h:
   enum, bind (c)
      enumerator :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
+     ! FIXME: more scalable solution?
+     enumerator :: CLOSURE_PSE0
+     enumerator :: CLOSURE_PSE1
+     enumerator :: CLOSURE_PSE2
+     enumerator :: CLOSURE_PSE3
+     enumerator :: CLOSURE_PSE4
+     enumerator :: CLOSURE_PSE5
+     enumerator :: CLOSURE_PSE6
+     enumerator :: CLOSURE_PSE7
   end enum
-  public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY
+
+  public :: CLOSURE_HNC, CLOSURE_KH, CLOSURE_PY, CLOSURE_PSE0, &
+       CLOSURE_PSE1, CLOSURE_PSE2, CLOSURE_PSE3, CLOSURE_PSE4, &
+       CLOSURE_PSE5, CLOSURE_PSE6, CLOSURE_PSE7
 
   type, public, bind (c) :: problem_data
      !
