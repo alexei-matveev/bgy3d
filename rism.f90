@@ -353,7 +353,7 @@ contains
     use lisp, only: obj, acons, symbol, flonum
     use drism, only: dipole_density, dipole_factor, dipole_correction, &
          epsilon_rism
-    use closures, only: closure
+    use closures, only: closure, chempot0
     implicit none
     integer, intent (in) :: method          ! HNC, KH, or PY
     integer, intent (in) :: nrad            ! grid size
@@ -559,6 +559,7 @@ contains
     use options, only: getopt
     use units, only: angstrom
     use fft, only: mkgrid
+    use closures, only: chempot0
     implicit none
     integer, intent (in) :: method         ! HNC, KH, or PY
     integer, intent (in) :: nrad           ! grid size
@@ -838,7 +839,7 @@ contains
     use iso_c_binding, only: c_bool
     use fft, only: mkgrid, fourier_rows, FT_FW, FT_BW
     use snes, only: func1, krylov
-    use closures, only: closure, closure1
+    use closures, only: closure, closure1, chempot01
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: rmax, beta, rho
@@ -1339,7 +1340,7 @@ contains
     use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
          epsilon_rism, dipole_factor, dipole_correction
-    use closures, only: closure, closure_rbc
+    use closures, only: closure, closure_rbc, chempot
     use options, only: getopt
     implicit none
     integer, intent (in) :: method         ! HNC, KH or PY
@@ -2584,148 +2585,6 @@ contains
       enddo
     end function poly
   end subroutine print_info
-
-
-  function chempot (method, rho, h, c, cl) result (mu)
-    !
-    ! Computes  the chemical  potential, βμ,  by integration  over the
-    ! volume:
-    !
-    !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
-    !
-    ! Here dr == 1, scale the result by dr³ if that is not the case.
-    !
-    use fft, only: integrate
-    use closures, only: chempot_density
-    implicit none
-    integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
-    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
-    real (rk) :: mu
-    ! *** end of interface ***
-
-    ! Inegrate chemical  potential density.  Multiply that  by dr³ and
-    ! divide by β to get the real number:
-    mu = integrate (chempot_density (method, rho, h, c, cl))
-  end function chempot
-
-
-  function chempot1 (method, rho, h, dh, c, dc, cl) result (dmu)
-    !
-    ! Differential of chempot()
-    !
-    use fft, only: integrate
-    use closures, only: chempot_density1
-    implicit none
-    integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
-    real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
-    real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: dc(:, :, :) ! (n, m, nrad)
-    real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
-    real (rk) :: dmu
-    ! *** end of interface ***
-
-    dmu = integrate (chempot_density1 (method, rho, h, dh, c, dc, cl))
-  end function chempot1
-
-
-  function chempot0 (method, rmax, beta, rho, v, vl, t) result (mu)
-    !
-    ! Computes  the  chemical  potential,  μ(t)  using  the  specified
-    ! method. Note  that the  same method is  used to derive  c(t) and
-    ! h(t) and to define the functional μ[h, c].
-    !
-    use fft, only: mkgrid
-    use closures, only: closure
-    implicit none
-    integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rmax, beta, rho
-    real (rk), intent (in) :: v(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: vl(:, :, :) ! (n, m, nrad)
-    real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
-    real (rk) :: mu
-    ! *** end of interface ***
-
-    integer :: n, m, nrad
-
-    n = size (t, 1)
-    m = size (t, 2)
-    nrad = size (t, 3)
-
-    block
-      real (rk) :: r(nrad), k(nrad), dr, dk
-      real (rk) :: c(n, m, nrad)
-      real (rk) :: h(n, m, nrad)
-      real (rk) :: cl(n, m, nrad)
-
-      call mkgrid (rmax, r, dr, k, dk)
-
-      ! Real-space rep of the short range correlation:
-      c = closure (method, beta, v, t)
-
-      ! Real-space rep of the long range correlation:
-      cl = - beta * vl
-
-      ! Total correlation h = g - 1:
-      h = c + t
-
-      ! This   evaluates  method-specific   functional   μ[h,  c]   from
-      ! pre-computed h and c:
-      mu = chempot (method, rho, h, c, cl) * (dr**3 / beta)
-    end block
-  end function chempot0
-
-
-  function chempot01 (method, rmax, beta, rho, v, vl, t, dt) result (dmu)
-    !
-    ! Differential of chempot0()
-    !
-    use fft, only: mkgrid
-    use closures, only: closure, closure1
-    implicit none
-    integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rmax, beta, rho
-    real (rk), intent (in) :: v(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: vl(:, :, :) ! (n, m, nrad)
-    real (rk), intent (in) :: t(:, :, :)  ! (n, m, nrad)
-    real (rk), intent (in) :: dt(:, :, :) ! (n, m, nrad)
-    real (rk) :: dmu
-    ! *** end of interface ***
-
-    integer :: n, m, nrad
-
-    n = size (t, 1)
-    m = size (t, 2)
-    nrad = size (t, 3)
-
-    block
-      real (rk) :: r(nrad), k(nrad), dr, dk
-      real (rk) :: c(n, m, nrad), dc(n, m, nrad)
-      real (rk) :: h(n, m, nrad), dh(n, m, nrad)
-      real (rk) :: cl(n, m, nrad)
-
-      call mkgrid (rmax, r, dr, k, dk)
-
-      ! Real-space rep of the short range correlation:
-      c = closure (method, beta, v, t)
-      dc = closure1 (method, beta, v, t, dt)
-
-      ! Real-space rep of the long range correlation:
-      cl = - beta * vl
-
-      ! Total correlation h = g - 1:
-      h = c + t
-      dh = dc + dt
-
-      ! This   evaluates  method-specific   functional   μ[h,  c]   from
-      ! pre-computed h and c:
-      dmu = chempot1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
-    end block
-  end function chempot01
 
 
   subroutine show_sites (name, sites)
