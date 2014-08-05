@@ -1063,7 +1063,10 @@ computes the sum of all vector elements."
                               (moments (vec-moments domain h)))
                          (begin/serial
                            (format #t ";;; Moments from ~A\n" path)
-                           (pretty-print moments))
+                           ;; FIXME: this staff is used for regression
+                           ;; testing only, so print only a few
+                           ;; digits:
+                           (pretty-print (numbers->strings 4 moments)))
                          (vec-destroy h)))
                      args)
            (state-destroy domain)))
