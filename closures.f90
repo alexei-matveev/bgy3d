@@ -473,35 +473,6 @@ contains
   !     Kast, Stefan M. and Kloss, Thomas, J. Chem. Phys., 2008, 129,
   !     236101, http://dx.doi.org/10.1063/1.3041709
 
-  pure function threshold (method) result (thresh)
-    !
-    ! The  h²   term  contributes  conditionally.    Eventually,  only
-    ! depletion  regions  (h  <  0)  contribute  (KH).   Threshold  is
-    ! supposed  to  be  0.0   for  KH  functional  (depletion  regions
-    ! contribute),  anywhere between 1  and +∞  for GF  functional (no
-    ! such   term)   and    -∞   for   HNC   functional   (contributes
-    ! unconditionally):
-    !
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
-    implicit none
-    integer, intent (in) :: method ! HNC, KH, or anything else
-    real (rk) :: thresh
-    ! *** end of interface ***
-
-    select case (method)
-    case (KH)
-       ! The h² term contributes only in the depletion regions (KH):
-       thresh = 0.0
-    case (HNC)
-       ! The h² term contributes unconditionally (HNC):
-       thresh = - huge (thresh)
-    case default
-       ! There is no h² term otherwise (GF):
-       thresh = huge (thresh)
-    end select
-  end function threshold
-
-
   pure recursive function factorial (n) result (y)
     !
     ! Used  for coefficients in  expresisons involving  PSE-n closures
@@ -538,6 +509,88 @@ contains
   end function factorial
 
 
+  pure function form (method, x, h, c, cl) result (mu)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: x, h, c, cl
+    real (rk) :: mu
+    ! *** end of interface ***
+
+    select case (method)
+    case (HNC)
+       mu = - c - h * (c + cl) / 2 + h**2 / 2
+    case (KH)
+       if (h < 0) then
+          mu = - c - h * (c + cl) / 2 + h**2 / 2
+       else
+          mu = - c - h * (c + cl) / 2
+       endif
+    case (PY)
+       mu = - c - h * (c + cl) / 2
+    case (PSE0:PSE7)
+       if (h < 0) then
+          mu = - c - h * (c + cl) / 2 + h**2 / 2
+       else
+          block
+             integer :: m, mx
+
+             m = order (method) + 1 ! n + 1
+             mx = factorial (m)     ! (n + 1)!
+
+             ! Note that  the h**2  and x**(n+1) terms  cancel exactly
+             ! for n = 1 and h = x:
+             mu = - c - h * (c + cl) / 2 + (h**2 / 2 - x**m / mx)
+          end block
+       endif
+    case default
+       mu = huge (mu)          ! FIXME: cannot abort in pure functions
+    end select
+  end function form
+
+
+  pure function form1 (method, x, dx, h, dh, c, dc, cl) result (dm)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
+    implicit none
+    integer, intent (in) :: method
+    real (rk), intent (in) :: x, dx, h, dh, c, dc, cl
+    real (rk) :: dm
+    ! *** end of interface ***
+
+    select case (method)
+    case (HNC)
+       dm = - dc - dh * (c + cl) / 2 - h * dc / 2 + h * dh
+    case (KH)
+       if (h < 0) then
+          dm = - dc - dh * (c + cl) / 2 - h * dc / 2 + h * dh
+       else
+          dm = - dc - dh * (c + cl) / 2 - h * dc / 2
+       endif
+    case (PY)
+       dm = - dc - dh * (c + cl) / 2 - h * dc / 2
+    case (PSE0:PSE7)
+       if (h < 0) then
+          dm = - dc - dh * (c + cl) / 2 - h * dc / 2 + h * dh
+       else
+          block
+             integer :: n, nx
+
+             n = order (method) ! n
+             nx = factorial (n) ! n!
+
+             ! Note that the dh**2  and dx**(n+1) terms cancel exactly
+             ! for n = 1 and h = x:
+             dm = - dc - dh * (c + cl) / 2 - h * dc / 2 + (h * dh - x**n * dx / nx)
+          end block
+       endif
+    case default
+       dm = huge (dm)          ! FIXME: cannot abort in pure functions
+    end select
+  end function form1
+
+
   function chempot_density (method, x, h, c, cl) result (mu)
     !
     ! Returns the scaled density of the chemical potential, βμ(r)/ρ.
@@ -552,28 +605,16 @@ contains
     ! *** end of interface ***
 
     integer :: i, j, p
-    real (rk) :: thresh, acc
+    real (rk) :: acc
 
-    ! The   h²  term   contributes  conditionally.   Eventually,  only
-    ! depletion  regions  (h  <  0)  contribute  (KH).   Threshold  is
-    ! supposed  to  be  0.0   for  KH  functional  (depletion  regions
-    ! contribute),  anywhere between 1  and +∞  for GF  functional (no
-    ! such   term)   and    -∞   for   HNC   functional   (contributes
-    ! unconditionally):
-    thresh = threshold (method)
     do p = 1, size (h, 3)       ! nrad
        acc = 0.0
        do j = 1, size (h, 2)    ! m
           do i = 1, size (h, 1) ! n
-             associate (h => h(i, j, p), c => c(i, j, p), cl => cl(i, j, p))
-               if (-h > thresh) then
-                  acc = acc + h**2 / 2
-               endif
-               acc = acc - c - h * (c + cl) / 2
-             end associate
+             acc = acc + &
+                  form (method, x(i, j, p), h(i, j, p), c(i, j, p), cl(i, j, p))
           enddo
        enddo
-
        mu(p) = acc
     enddo
   end function chempot_density
@@ -596,20 +637,18 @@ contains
     ! *** end of interface ***
 
     integer :: i, j, p
-    real (rk) :: thresh, acc
+    real (rk) :: acc
 
-    thresh = threshold (method)
     do p = 1, size (h, 3)       ! nrad
        acc = 0.0
        do j = 1, size (h, 2)    ! m
           do i = 1, size (h, 1) ! n
-             associate (h => h(i, j, p), dh => dh(i, j, p), c => c(i, j, p), &
-                  dc => dc(i, j, p), cl => cl(i, j, p))
-               if (-h > thresh) then
-                  acc = acc + h * dh
-               endif
-               acc = acc - dc - dh * (c + cl) / 2 - h * dc / 2
-             end associate
+             acc = acc + &
+                  form1 (method, &
+                  x(i, j, p), dx(i, j, p), &
+                  h(i, j, p), dh(i, j, p), &
+                  c(i, j, p), dc(i, j, p), &
+                  cl(i, j, p))
           enddo
        enddo
 
