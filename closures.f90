@@ -494,6 +494,42 @@ contains
   end function threshold
 
 
+  pure recursive function factorial (n) result (y)
+    !
+    ! Used  for coefficients in  expresisons involving  PSE-n closures
+    ! with  0  <=  n <=  7.   FIXME:  should  we  hardwire them  on  a
+    ! case-by-case basis?
+    !
+    implicit none
+    integer, intent (in) :: n
+    integer :: y
+    ! *** end interface ***
+
+    select case (n)
+    case (0)
+       y = 1
+    case (1)
+       y = 1
+    case (2)
+       y = 1 * 2
+    case (3)
+       y = 1 * 2 * 3
+    case (4)
+       y = 1 * 2 * 3 * 4
+    case (5)
+       y = 1 * 2 * 3 * 4 * 5
+    case (6)
+       y = 1 * 2 * 3 * 4 * 5 * 6
+    case (7)
+       y = 1 * 2 * 3 * 4 * 5 * 6 * 7
+    case (8)
+       y = 1 * 2 * 3 * 4 * 5 * 6 * 7 * 8
+    case default
+       y = n * factorial (n - 1)
+    end select
+  end function factorial
+
+
   function chempot_density (method, x, h, c, cl) result (mu)
     !
     ! Returns the scaled density of the chemical potential, βμ(r)/ρ.
