@@ -9,7 +9,9 @@
 (use-modules
  (guile bgy3d)          ; rism-solute, hnc3d-run-solute, %null-pointer
  (guile molecule)       ; find-molecule
- (ice-9 pretty-print))
+ (guile utils)          ; fmap
+ (ice-9 pretty-print)
+ (ice-9 format))
 
 (define *settings*
   '((L . 160.0)
@@ -42,6 +44,9 @@
 (define *ions*
   (map find-molecule *names*))
 
+(define *closures*
+  (list 'KH 'PSE1 'PSE2 'PSE3 'PSE7 'HNC))
+
 ;;; Solvent susceptibility  for both closures.  Two  pure solvent runs
 ;;; here.  Previous version  used  the same  (HNC) susceptibility  for
 ;;; doing KH and  HNC ions in water calculations.  The KH numbers were
@@ -52,7 +57,7 @@
                                     (env-set 'closure closure *settings*))))
            (cons closure
                  (assoc-ref alist 'susceptibility))))
-       (list 'HNC 'KH)))
+       *closures*))
 
 ;;;
 ;;; Call sequence for 1D RISM:
@@ -81,23 +86,42 @@
       ;; Return free energy:
       (assoc-ref alist 'XXX))))
 
-(define *hnc-1d* (map (lambda (m) (run-1d m 'HNC)) *ions*))
-(define *kh-1d* (map (lambda (m) (run-1d m 'KH)) *ions*))
-(define *hnc-3d* (map (lambda (m) (run-3d m 'HNC)) *ions*))
-(define *kh-3d* (map (lambda (m) (run-3d m 'KH)) *ions*))
+(define *res-1d*
+  (map (lambda (clo)
+         (cons clo
+               (map (lambda (n m)
+                      (list n (run-1d m clo)))
+                    *names*
+                    *ions*)))
+       *closures*))
+
+(define *res-3d*
+  (map (lambda (clo)
+         (cons clo
+               (map (lambda (n m)
+                      (list n (run-3d m clo)))
+                    *names*
+                    *ions*)))
+       '(KH HNC)))
+
+;;;
+;;; Convert all  real numbers into  strings with some fixed  number of
+;;; digits after comma:
+;;;
+(define (numbers->strings decimals nested)
+  (fmap (lambda (x)
+          (if (and (number? x) (inexact? x))
+              (format #f "~v$" decimals x)
+              x))
+        nested))
+
 
 ;;; FIXME: tty is polluted with all  kinds of prints, so we also write
 ;;; selected data into a separate file. See ./out/run-ions-out for the
 ;;; reference output.
-(let* ((hnc-1d (map cons *names* *hnc-1d*))
-       (kh-1d (map cons *names* *kh-1d*))
-       (hnc-3d (map cons *names* *hnc-3d*))
-       (kh-3d (map cons *names* *kh-3d*))
-       (out `((KH-1D ,kh-1d)
-              (KH-3D ,kh-3d)
-              (HNC-1D ,hnc-1d)
-              (HNC-3D ,hnc-3d)
-              )))
+(let* ((out (list (cons 'RISM-1D: *res-1d*)
+                  (cons 'RISM-3D: *res-3d*)))
+       (out (numbers->strings 4 out)))
   (pretty-print/serial out)
   ;;
   ;; One should not be writing to the same file on multiple workers:
