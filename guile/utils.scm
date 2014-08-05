@@ -21,11 +21,13 @@
             eA->debye
             debye->eA
             isqrt
+            numbers->strings
             ;; Syntax/macros:
             begin0
             let-env))
 
-(use-modules (ice-9 pretty-print))
+(use-modules (ice-9 pretty-print)
+             (ice-9 format))
 
 
 ;;;
@@ -391,3 +393,13 @@ components at point `x'."
       (environ old-env))))
 
 
+;;;
+;;; Convert all  real numbers into  strings with some fixed  number of
+;;; digits after comma:
+;;;
+(define (numbers->strings decimals nested)
+  (fmap (lambda (x)
+          (if (and (number? x) (inexact? x))
+              (format #f "~v$" decimals x)
+              x))
+        nested))

@@ -9,9 +9,9 @@
 (use-modules
  (guile bgy3d)          ; rism-solute, hnc3d-run-solute, %null-pointer
  (guile molecule)       ; find-molecule
- (guile utils)          ; fmap
- (ice-9 pretty-print)
- (ice-9 format))
+ (guile utils)          ; numbers->strings
+ (ice-9 pretty-print))
+
 
 (define *settings*
   '((L . 160.0)
@@ -103,18 +103,6 @@
                     *names*
                     *ions*)))
        '(KH HNC)))
-
-;;;
-;;; Convert all  real numbers into  strings with some fixed  number of
-;;; digits after comma:
-;;;
-(define (numbers->strings decimals nested)
-  (fmap (lambda (x)
-          (if (and (number? x) (inexact? x))
-              (format #f "~v$" decimals x)
-              x))
-        nested))
-
 
 ;;; FIXME: tty is polluted with all  kinds of prints, so we also write
 ;;; selected data into a separate file. See ./out/run-ions-out for the
