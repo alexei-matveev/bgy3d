@@ -51,19 +51,15 @@ contains
     real (rk) :: c
     ! *** end of interface ***
 
-    integer :: n                ! PSE order
-
     select case (method)
     case (HNC)
        c = closure_hnc (beta * v, t)
     case (KH)
        c = closure_kh (beta * v, t)
-       ! c = closure_pse (1, beta * v, t)
     case (PY)
        c = closure_py (beta * v, t)
     case (PSE0:PSE7)
-       n = method - PSE0
-       c = closure_pse (n, beta * v, t)
+       c = closure_pse (order (method), beta * v, t)
     case default
        c = huge (c)            ! FIXME: cannot abort in pure functions
     end select
@@ -79,8 +75,6 @@ contains
     real (rk) :: dc
     ! *** end of interface ***
 
-    integer :: n                ! PSE order
-
     ! FIXME: some are not yet implemented:
     select case (method)
     case (HNC)
@@ -90,12 +84,32 @@ contains
     ! case (PY)
     !    dc = closure_py1 (beta * v, t, dt)
     case (PSE0:PSE7)
-       n = method - PSE0
-       dc = closure_pse1 (n, beta * v, t, dt)
+       dc = closure_pse1 (order (method), beta * v, t, dt)
     case default
        dc = huge (dc)          ! FIXME: cannot abort in pure functions
     end select
   end function closure1
+
+
+  pure function order (method) result (n)
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
+    implicit none
+    integer, intent (in) :: method
+    integer :: n
+    ! *** end of interface ***
+
+    select case (method)
+    case (HNC)
+       n = huge (n)             ! infinite order
+    case (KH)
+       n = 1
+    case (PSE0:PSE7)
+       n = method - PSE0
+    case default
+       n = -1                   ! FIXME: what should it be?
+    end select
+  end function order
 
 
   elemental function expm1 (x) result (f)
