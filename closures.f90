@@ -439,7 +439,14 @@ contains
   ! cancels  the  h²-term in  the  HNC  expression  everywhere but  in
   ! depletion regions.
   !
-  ! FIXME: what do we do for charged systems?
+  ! For higher  order PSE-n closures  it is impractical to  derive the
+  ! value of  the additional  term from the  usual suspects, h  and c,
+  ! participating  in   the  HNC  and  KH   expressions  for  chemical
+  ! potential.   So that  the  most general  expression  will have  to
+  ! include the renormalized indirect correlation x = -βv + t as well.
+  !
+  ! FIXME: the code assumes that  the long range direct correlation is
+  ! strictly proportional to the product of the site charges!
   !
   ! [1] "Comparative Study on Solvation Free Energy Expressions in
   !     Reference Interaction Site Model Integral Equation Theory",
@@ -473,12 +480,13 @@ contains
   end function threshold
 
 
-  function chempot_density (method, h, c, cl) result (mu)
+  function chempot_density (method, x, h, c, cl) result (mu)
     !
     ! Returns the scaled density of the chemical potential, βμ(r)/ρ.
     !
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: x(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
@@ -513,12 +521,14 @@ contains
   end function chempot_density
 
 
-  function chempot_density1 (method, h, dh, c, dc, cl) result (dmu)
+  function chempot_density1 (method, x, dx, h, dh, c, dc, cl) result (dmu)
     !
     ! Differential of chempot_density().
     !
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: x(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dx(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
@@ -550,7 +560,7 @@ contains
   end function chempot_density1
 
 
-  function chempot_form (method, h, c, cl) result (mu)
+  function chempot_form (method, x, h, c, cl) result (mu)
     !
     ! Computes the  chemical potential, βμ/ρ, by  integration over the
     ! volume:
@@ -562,6 +572,7 @@ contains
     use fft, only: integrate
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: x(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
@@ -570,17 +581,19 @@ contains
 
     ! Inegrate chemical potential  density.  Multiply that by (ρ/β)dr³
     ! and to get the real number:
-    mu = integrate (chempot_density (method, h, c, cl))
+    mu = integrate (chempot_density (method, x, h, c, cl))
   end function chempot_form
 
 
-  function chempot_form1 (method, h, dh, c, dc, cl) result (dmu)
+  function chempot_form1 (method, x, dx, h, dh, c, dc, cl) result (dmu)
     !
     ! Differential of chempot_form()
     !
     use fft, only: integrate
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
+    real (rk), intent (in) :: x(:, :, :)  ! (n, m, nrad)
+    real (rk), intent (in) :: dx(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
@@ -589,7 +602,7 @@ contains
     real (rk) :: dmu
     ! *** end of interface ***
 
-    dmu = integrate (chempot_density1 (method, h, dh, c, dc, cl))
+    dmu = integrate (chempot_density1 (method, x, dx, h, dh, c, dc, cl))
   end function chempot_form1
 
 
@@ -617,10 +630,12 @@ contains
 
     block
       real (rk) :: r(nrad), k(nrad), dr, dk
-      real (rk) :: c(n, m, nrad)
+      real (rk) :: x(n, m, nrad)
       real (rk) :: h(n, m, nrad)
+      real (rk) :: c(n, m, nrad)
       real (rk) :: cl(n, m, nrad)
 
+      ! FIXME: only dr is really necessary for integration:
       call mkgrid (rmax, r, dr, k, dk)
 
       ! Real-space rep of the short range correlation:
@@ -632,9 +647,12 @@ contains
       ! Total correlation h = g - 1:
       h = c + t
 
+      ! Renormalized indirect correlation:
+      x = - beta * v + t
+
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      mu = chempot_form (method, h, c, cl) * (rho * dr**3 / beta)
+      mu = chempot_form (method, x, h, c, cl) * (rho * dr**3 / beta)
     end block
   end function chempot
 
@@ -662,10 +680,12 @@ contains
 
     block
       real (rk) :: r(nrad), k(nrad), dr, dk
-      real (rk) :: c(n, m, nrad), dc(n, m, nrad)
+      real (rk) :: x(n, m, nrad), dx(n, m, nrad)
       real (rk) :: h(n, m, nrad), dh(n, m, nrad)
+      real (rk) :: c(n, m, nrad), dc(n, m, nrad)
       real (rk) :: cl(n, m, nrad)
 
+      ! FIXME: only dr is really necessary for integration:
       call mkgrid (rmax, r, dr, k, dk)
 
       ! Real-space rep of the short range correlation:
@@ -679,9 +699,13 @@ contains
       h = c + t
       dh = dc + dt
 
+      ! Renormalized indirect correlation:
+      x = - beta * v + t
+      dx = dt
+
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      dmu = chempot_form1 (method, h, dh, c, dc, cl) * (rho * dr**3 / beta)
+      dmu = chempot_form1 (method, x, dx, h, dh, c, dc, cl) * (rho * dr**3 / beta)
     end block
   end function chempot1
 

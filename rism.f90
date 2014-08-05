@@ -1448,8 +1448,12 @@ contains
           integer :: methods(3) = [HNC, KH, PY]
           character(len=3) :: names(size (methods)) = ["HNC", "KH ", "GF "]
           real (rk) :: mu(size (methods))
+          real (rk) :: x(n, m, nrad)
           real (rk) :: cl(n, m, nrad)
           integer :: i
+
+          ! Renormalized indirect correlation:
+          x = -beta * v + t
 
           ! Real-space  rep of the  long-range correlation.   Note the
           ! extra scaling factor  A (A = 1, usually).  Only needed for
@@ -1459,7 +1463,7 @@ contains
           ! Initialize intent (out) argument:
           dict = nil
           do i = 1, size (methods)
-             mu(i) = chempot_form (methods(i), h, c, cl) * (rho * dr**3 / beta)
+             mu(i) = chempot_form (methods(i), x, h, c, cl) * (rho * dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
              dict = acons (symbol (trim (names(i))), flonum (mu(i)), dict)
