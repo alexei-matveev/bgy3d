@@ -473,7 +473,15 @@ contains
   !     Kast, Stefan M. and Kloss, Thomas, J. Chem. Phys., 2008, 129,
   !     236101, http://dx.doi.org/10.1063/1.3041709
 
-  function threshold (method) result (thresh)
+  pure function threshold (method) result (thresh)
+    !
+    ! The  h²   term  contributes  conditionally.    Eventually,  only
+    ! depletion  regions  (h  <  0)  contribute  (KH).   Threshold  is
+    ! supposed  to  be  0.0   for  KH  functional  (depletion  regions
+    ! contribute),  anywhere between 1  and +∞  for GF  functional (no
+    ! such   term)   and    -∞   for   HNC   functional   (contributes
+    ! unconditionally):
+    !
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH
     implicit none
     integer, intent (in) :: method ! HNC, KH, or anything else
