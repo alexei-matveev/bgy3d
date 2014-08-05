@@ -358,11 +358,11 @@ contains
   !
   ! Chemical Potential (ChemPot).
   !
-  ! The next function, chempot_density(), returns the β-scaled density
-  ! of  the chemical  potential, βμ(r).   To get  the  excess chemical
-  ! potential integrate it over the volume and divide by β, cf.:
+  ! The next  function, chempot_density(), returns  the scaled density
+  ! of the  chemical potential, βμ(r)/ρ.   To get the  excess chemical
+  ! potential integrate it over the volume and multiply by ρ/β, cf.:
   !
-  !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+  !   βμ/ρ = 4π ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
   !
   ! The first h²-term  in the definition of the  chemical potential is
   ! of  short  range  and   should  not  present  any  difficulty  for
@@ -473,13 +473,12 @@ contains
   end function threshold
 
 
-  function chempot_density (method, rho, h, c, cl) result (mu)
+  function chempot_density (method, h, c, cl) result (mu)
     !
-    ! Returns the β-scaled density of the chemical potential, βμ(r).
+    ! Returns the scaled density of the chemical potential, βμ(r)/ρ.
     !
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
@@ -509,18 +508,17 @@ contains
           enddo
        enddo
 
-       mu(p) = rho * acc
+       mu(p) = acc
     enddo
   end function chempot_density
 
 
-  function chempot_density1 (method, rho, h, dh, c, dc, cl) result (dmu)
+  function chempot_density1 (method, h, dh, c, dc, cl) result (dmu)
     !
     ! Differential of chempot_density().
     !
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
@@ -547,44 +545,42 @@ contains
           enddo
        enddo
 
-       dmu(p) = rho * acc
+       dmu(p) = acc
     enddo
   end function chempot_density1
 
 
-  function chempot_form (method, rho, h, c, cl) result (mu)
+  function chempot_form (method, h, c, cl) result (mu)
     !
-    ! Computes  the chemical  potential, βμ,  by integration  over the
+    ! Computes the  chemical potential, βμ/ρ, by  integration over the
     ! volume:
     !
-    !   βμ = 4πρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
+    !   βμ/ρ = 4π ∫ [½h²(r) - c(r) - ½h(r)c(r)] r²dr
     !
     ! Here dr == 1, scale the result by dr³ if that is not the case.
     !
     use fft, only: integrate
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: cl(:, :, :) ! (n, m, nrad)
     real (rk) :: mu
     ! *** end of interface ***
 
-    ! Inegrate chemical  potential density.  Multiply that  by dr³ and
-    ! divide by β to get the real number:
-    mu = integrate (chempot_density (method, rho, h, c, cl))
+    ! Inegrate chemical potential  density.  Multiply that by (ρ/β)dr³
+    ! and to get the real number:
+    mu = integrate (chempot_density (method, h, c, cl))
   end function chempot_form
 
 
-  function chempot_form1 (method, rho, h, dh, c, dc, cl) result (dmu)
+  function chempot_form1 (method, h, dh, c, dc, cl) result (dmu)
     !
     ! Differential of chempot_form()
     !
     use fft, only: integrate
     implicit none
     integer, intent (in) :: method        ! HNC, KH, or anything else
-    real (rk), intent (in) :: rho
     real (rk), intent (in) :: h(:, :, :)  ! (n, m, nrad)
     real (rk), intent (in) :: dh(:, :, :) ! (n, m, nrad)
     real (rk), intent (in) :: c(:, :, :)  ! (n, m, nrad)
@@ -593,7 +589,7 @@ contains
     real (rk) :: dmu
     ! *** end of interface ***
 
-    dmu = integrate (chempot_density1 (method, rho, h, dh, c, dc, cl))
+    dmu = integrate (chempot_density1 (method, h, dh, c, dc, cl))
   end function chempot_form1
 
 
@@ -638,7 +634,7 @@ contains
 
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      mu = chempot_form (method, rho, h, c, cl) * (dr**3 / beta)
+      mu = chempot_form (method, h, c, cl) * (rho * dr**3 / beta)
     end block
   end function chempot
 
@@ -685,7 +681,7 @@ contains
 
       ! This   evaluates  method-specific   functional   μ[h,  c]   from
       ! pre-computed h and c:
-      dmu = chempot_form1 (method, rho, h, dh, c, dc, cl) * (dr**3 / beta)
+      dmu = chempot_form1 (method, h, dh, c, dc, cl) * (rho * dr**3 / beta)
     end block
   end function chempot1
 

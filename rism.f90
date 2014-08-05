@@ -1459,7 +1459,7 @@ contains
           ! Initialize intent (out) argument:
           dict = nil
           do i = 1, size (methods)
-             mu(i) = chempot_form (methods(i), rho, h, c, cl) * (dr**3 / beta)
+             mu(i) = chempot_form (methods(i), h, c, cl) * (rho * dr**3 / beta)
 
              ! Cons a key/value pair onto the list:
              dict = acons (symbol (trim (names(i))), flonum (mu(i)), dict)
