@@ -1040,7 +1040,7 @@ computes the sum of all vector elements."
          ;; Use g1 vectors to produce a *.pun file for visualization:
          ;;
          (if (not solute)
-             (error "You need to specify --solute \"name\" for the geometry section of the punch file!"))
+             (error "Specify --solute \"name\" for punch file!"))
          (let ((g1 (map vec-load args)))
             (write-punch-file solute
                               (map vec-length g1)
