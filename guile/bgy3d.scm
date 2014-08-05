@@ -607,7 +607,7 @@ computes the sum of all vector elements."
      (value #t)
      (predicate ,(lambda (name)
                    (and (find-molecule name) name)))) ; a string
-    (geometry
+    (solute-geometry
      (value #t)
      (predicate ,(lambda (path)
                    (with-input-from-file path read-xyz))))
@@ -707,8 +707,7 @@ computes the sum of all vector elements."
   (let* ((settings (parse-command-line argv))
          (solvent (and-let* ((name (env-ref settings 'solvent)))
                     (find-molecule name))) ; Maybe solvent
-         (solute (and-let* ((name (env-ref settings 'solute)))
-                   (find-molecule name)))) ; Maybe solute
+         (solute (find-solute settings)))  ; Maybe solute
     (pretty-print/serial (list 'solvent: solvent))
     (pretty-print/serial (list 'solute: solute))
     (let-values
@@ -886,6 +885,19 @@ computes the sum of all vector elements."
 
 
 ;;;
+;;; Derive the solute description  from the settings.  If the geometry
+;;; option  is set  to some  molecule description,  take  its geometry
+;;; instead:
+;;;
+(define (find-solute settings)
+  (let ((name (env-ref settings 'solute)))
+    (and name
+         (let ((solute (find-molecule name))
+               (geometry (env-ref settings 'solute-geometry)))
+           (or (and geometry (move-molecule solute
+                                            (molecule-positions geometry)))
+               solute)))))
+;;;
 ;;; Act   according   to   the   subcommand  (the   first   positional
 ;;; argument). With  cmd == "solutes" interprete each  argument as the
 ;;; name of the solute. Note that  you may need to first run a solvent
@@ -901,8 +913,7 @@ computes the sum of all vector elements."
          (args (cdr args)))              ; ... then the real args
     (let ((solvent (and-let* ((name (env-ref settings 'solvent)))
                      (find-molecule name))) ; Maybe solvent
-          (solute (and-let* ((name (env-ref settings 'solute)))
-                    (find-molecule name))) ; Maybe solute
+          (solute (find-solute settings))   ; Maybe solute
           (save-binary (env-ref settings 'save-binary)))
       ;;
       (match cmd
@@ -911,22 +922,16 @@ computes the sum of all vector elements."
          (let-values (((x f fg) (if solvent
                                     (make-pes solute solvent settings)
                                     (make-pes/gp solute settings))))
-           ;; If the geometry option is set to some molecule
-           ;; description, take its geometry instead:
-           (let ((x (let ((mol (env-ref settings 'geometry)))
-                      (if mol
-                          (molecule-positions mol)
-                          x))))
-            (match cmd
-              ("energy"
-               (let ((e (f x)))
-                 (pretty-print/serial e)))
-              ("gradients"
-               (let-values (((e g) (fg x)))
-                 (pretty-print/serial g)))
-              ("taylor"
-               (let-values (((e g) (fg x)))
-                 (pretty-print/serial (cons e g))))))))
+           (match cmd
+             ("energy"
+              (let ((e (f x)))
+                (pretty-print/serial e)))
+             ("gradients"
+              (let-values (((e g) (fg x)))
+                (pretty-print/serial g)))
+             ("taylor"
+              (let-values (((e g) (fg x)))
+                (pretty-print/serial (cons e g)))))))
         ;;
         ;; Start a server that communicates with a client via two
         ;; named pipes for input/output. This fragile construct is
