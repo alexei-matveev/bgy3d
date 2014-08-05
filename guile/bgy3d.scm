@@ -890,12 +890,13 @@ computes the sum of all vector elements."
 ;;; instead:
 ;;;
 (define (find-solute settings)
-  (let ((name (env-ref settings 'solute)))
+  (let ((name (env-ref settings 'solute))
+        (geometry (env-ref settings 'solute-geometry)))
     (and name
-         (let ((solute (find-molecule name))
-               (geometry (env-ref settings 'solute-geometry)))
-           (or (and geometry (move-molecule solute
-                                            (molecule-positions geometry)))
+         (let ((solute (find-molecule name)))
+           (or (and geometry
+                    (move-molecule solute
+                                   (molecule-positions geometry)))
                solute)))))
 ;;;
 ;;; Act   according   to   the   subcommand  (the   first   positional
