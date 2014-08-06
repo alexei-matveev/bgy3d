@@ -1641,7 +1641,7 @@ contains
              integer :: i, n, npts(3) = [3, 5, 15]
 
              do n = 0, 2
-                c(n) = moment (n, qhq, dr)
+                c(n) = moment (rmax, n, qhq)
              enddo
 
              if (verb > 0) then
@@ -1786,28 +1786,25 @@ contains
       end associate
     end function epsln
 
-
-    pure function moment (n, f, dr) result (m)
-      use fft, only: integrate
-      implicit none
-      integer, intent (in) :: n
-      real (rk), intent (in) :: f(:) ! f(r) on the r-grid
-      real (rk), intent (in) :: dr   ! grid spacing
-      real (rk) :: m
-      ! *** end of interface ***
-
-      integer :: i
-      real (rk) :: r(size (f))
-
-      ! Recompute r(:) from dr:
-      forall (i = 1:size (f))
-         r(i) = (2 * i - 1) * dr / 2
-      end forall
-
-      m = integrate (r**n * f) * dr**3
-    end function moment
-
   end subroutine post_process
+
+
+  pure function moment (rmax, n, f) result (m)
+    use fft, only: mkgrid, integrate
+    implicit none
+    integer, intent (in) :: n
+    real (rk), intent (in) :: rmax ! grid extent
+    real (rk), intent (in) :: f(:) ! f(r) on the r-grid
+    real (rk) :: m
+    ! *** end of interface ***
+
+    real (rk) :: r(size (f)), k(size (f)), dr, dk
+
+    ! Derive r, dr from rmax:
+    call mkgrid (rmax, r, dr, k, dk)
+
+    m = integrate (r**n * f) * dr**3
+  end function moment
 
 
   function omega_fourier (sites, k) result (w)
