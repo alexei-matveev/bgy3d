@@ -1361,6 +1361,9 @@ contains
     integer :: nrad, n, m, rule
     integer :: verb
 
+    ! Initialize intent (out) argument:
+    dict = nil
+
     ! Normally, only rank-0 will eventually have this non-zero:
     verb = verbosity()
 
@@ -1460,8 +1463,6 @@ contains
           ! chemical potential:
           cl = - (beta * A) * force_field_long (solute, solvent, r)
 
-          ! Initialize intent (out) argument:
-          dict = nil
           do i = 1, size (methods)
              mu(i) = chempot_form (methods(i), x, h, c, cl) * (rho * dr**3 / beta)
 
@@ -1526,6 +1527,12 @@ contains
                      MOL * kmin / Bar**(-1), "<= κ <=", &
                      MOL * kmax / Bar**(-1), "Bar^-1"
              endif
+
+             ! Cons key/value pairs onto the list:
+             dict = acons (symbol ("compressibility"), &
+                  flonum ((kmax + kmin) / 2), dict)
+             dict = acons (symbol ("compressibility-error"), &
+                  flonum ((kmax - kmin) / 2), dict)
           endif
        end block
 
