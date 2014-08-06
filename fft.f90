@@ -98,7 +98,6 @@ module fft
 contains
 
   pure subroutine mkgrid (rmax, r, dr, k, dk)
-    use units, only: pi
     implicit none
     real (rk), intent (in) :: rmax
     real (rk), intent (out) :: r(:), dr, k(:), dk ! (nrad)
