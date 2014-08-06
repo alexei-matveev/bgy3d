@@ -27,8 +27,7 @@
    molecule-dipole
    molecule-species
    molecule-self-energy
-   default-force-field
-   default-force-field/short
+   make-force-field
    scan-property
    scan-self-energy
    find-molecule
@@ -460,60 +459,52 @@
                             (* 3 c3 x3)))))
         (list e e'))))))
 
-(define *ff* (make-fluid lj))           ; FIXME: for 1.8?
-;; (define *ff* (make-fluid (make-ff '(47.8502957719869 -72.529255806734))))
-
 ;;;
 ;;; To avoid possible confusion: coordinates  of sites a and b are NOT
 ;;; used to compute the distance here:
 ;;;
-(define (default-force-field a b rab)
-  ;;
+(define (make-force-field a b)
+
   (define (combine-sigmas sa sb)
     (/ (+ sa sb) 2))
-  ;;
+
   (define (combine-epsilons ea eb)
     (sqrt (* ea eb)))
 
-  (define ff (fluid-ref *ff*))
-
-  (let ((na (site-name a))
-        (sa (site-sigma a))
+  (let ((sa (site-sigma a))
         (ea (site-epsilon a))
         (qa (site-charge a))
-        (nb (site-name b))
         (sb (site-sigma b))
         (eb (site-epsilon b))
         (qb (site-charge b)))
     (let ((sab (combine-sigmas sa sb))
           (eab (combine-epsilons ea eb))
           (qab (* qa qb)))
-      ;; ee' is a 2-list, value and derivative
-      (let* ((ee' (coulomb rab))
-             (e-coul (* qab (first ee')))
-             (e-coul' (* qab (second ee')))
-             (ee' (if (or (and (equal? na "U") (equal? nb "OW"))
-                          (and (equal? nb "U") (equal? na "OW")))
-                      (ff (/ rab sab))
-                      (lj (/ rab sab))))
-             (e-nonb (if (zero? sab)
-                         0.0
-                         (* eab (first ee'))))
-             (e-nonb' (if (zero? sab)
-                          0.0
-                          (* eab (/ (second ee') sab))))
-             (e (+ e-coul e-nonb))
-             (e' (+ e-coul' e-nonb')))
-        (list e e')))))
+      ;;
+      ;; This lambda is the result of make-force-field:
+      ;;
+      (lambda (rab)
+        ;; ee' is a 2-list, value and derivative
+        (let* ((ee' (coulomb rab))
+               (e-coul (* qab (first ee')))
+               (e-coul' (* qab (second ee')))
+               (ee' (lj (/ rab sab)))
+               (e-nonb (if (zero? sab)
+                           0.0
+                           (* eab (first ee'))))
+               (e-nonb' (if (zero? sab)
+                            0.0
+                            (* eab (/ (second ee') sab))))
+               (e (+ e-coul e-nonb))
+               (e' (+ e-coul' e-nonb')))
+          ;; FIXME: this lambda returns the energy, though it also
+          ;; computes the force:
+          e)))))
 
 
 (define (energy a b)
-  (first (default-force-field a b (site-distance a b))))
-
-
-(define (default-force-field/short a b r)
-  (with-fluids ((*short-range* #t))
-    (first (default-force-field a b r))))
+  (let ((f (make-force-field a b)))
+    (f (site-distance a b))))
 
 
 (define (molecule-self-energy m species)

@@ -1912,7 +1912,7 @@ contains
     use foreign, only: site
     use units, only: EPSILON0INV, ALPHA
     use options, only: getopt
-    use lisp, only: obj, flonum, funcall
+    use lisp, only: obj, flonum, funcall, is_true, false
     implicit none
     integer, intent (in) :: rule
     type (site), intent (in) :: asites(:)  ! (n)
@@ -1926,23 +1926,30 @@ contains
     real (rk) :: epsilon, sigma, qab
     integer :: i, j, p
     type (site) :: a, b
-    type (obj) :: ffr, ffk
+    type (obj) :: makeffs, makeffl, fab
     logical :: custom_short, custom_long
 
-    custom_short = getopt ("custom-force-field/short", ffr)
-    custom_long = getopt ("custom-force-field/long", ffk)
+    custom_short = getopt ("force-field-short", makeffs)
+    custom_long = getopt ("force-field-long", makeffl)
 
     do j = 1, size (bsites)
        b = bsites(j)
        do i = 1, size (asites)
           a = asites(i)
 
+          ! Check is there is a custom force field for this pair:
+          if (custom_short) then
+             fab = funcall (makeffs, a % obj, b % obj)
+          else
+             fab = false
+          endif
+
           qab = a % charge * b % charge
 
           ! Short range on the r-grid:
-          if (custom_short) then
+          if (is_true (fab)) then
              do p = 1, size (r)
-                vr(i, j, p) = flonum (funcall (ffr, a % obj, b % obj, flonum (r(p))))
+                vr(i, j, p) = flonum (funcall (fab, flonum (r(p))))
              enddo
           else
              ! Derive pair interaction parameters:
@@ -1957,11 +1964,17 @@ contains
              endif
           endif
 
-          ! Long range on the k-grid:
+          ! Check is there is a custom force field for this pair:
           if (custom_long) then
+             fab = funcall (makeffl, a % obj, b % obj)
+          else
+             fab = false
+          endif
+
+          ! Long range on the k-grid:
+          if (is_true (fab)) then
              do p = 1, size (k)
-                vk(i, j, p) = &
-                     flonum (funcall (ffk, a % obj, b % obj, flonum (k(p))))
+                vk(i, j, p) = flonum (funcall (fab, flonum (k(p))))
              enddo
           else
              vk(i, j, :) = &
