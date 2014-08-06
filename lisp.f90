@@ -279,6 +279,7 @@ module lisp
 
   public :: obj                              ! type
   public :: flonum, int, symbol, string, bool ! constructors
+  public :: is_true, true, false
   public :: cons, nil
   public :: car, cdr
   public :: cddr, cdar, cadr, caar
@@ -372,6 +373,16 @@ contains
     ! here:
     flag = (scm_to_bool (bool) /= 0)
   end function to_bool
+
+
+  function is_true (x) result (y)
+    implicit none
+    type (obj), intent (in) :: x
+    logical :: y
+    ! *** end of interface **
+
+    y = .not. bool (not (x))
+  end function is_true
 
 
   function acons (key, val, old) result (new)
