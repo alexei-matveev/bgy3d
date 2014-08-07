@@ -1333,7 +1333,7 @@ contains
     !
     ! Prints some results.
     !
-    use fft, only: mkgrid, fourier_rows, FT_FW, integral
+    use fft, only: mkgrid, fourier_rows, FT_FW, integral, integrate
     use linalg, only: polyfit
     use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
     use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
@@ -1518,6 +1518,8 @@ contains
              kmin = minval (k0)
              kmax = maxval (k0)
              if (verb > 0) then
+                write (*, *) "# Hole (KB) vv-integrals:", &
+                     minval (s0) - 1, "<= s(k=0) - 1 <=", maxval (s0) - 1
                 write (*, *) "# Isothermal compressibility:", &
                      kmin, "<= κ <=", kmax, "A³/kcal"
                 write (*, *) "# Isothermal compressibility:", &
@@ -1535,6 +1537,58 @@ contains
                   flonum ((kmax - kmin) / 2), dict)
           endif
        end block
+
+       ! FIXME:  Isothermal compressibility  derived  from the  direct
+       ! correlation appears to have  better precision, when one looks
+       ! at agreement  between different site  pairs. Unfortunately at
+       ! this place  the direct correlation is  that of solute-solvent
+       ! pairs. So  only in the case  of solute and  solvent being the
+       ! same a derivation would make  sense. It will have a different
+       ! meaning if solute is not the same as solvent.
+       !
+       !   1 + 4πρ∫h(r)r²dr = ρκ/β
+       !
+       ! At the moment we  only compute the "excess coordination", the
+       ! integral on the left hand  side of the equation. Probably the
+       ! full  version  of this  code  needs  to  be called  from  the
+       ! vv-solver.
+       !
+       block
+          integer :: i, j
+          real (rk) :: r(nrad), k(nrad), dr, dk
+          real (rk) :: h0(n, m), k0(n, m)
+          real (rk) :: hmin, hmax
+          real (rk) :: kmin, kmax
+
+          ! FIXME: only need dr for integration:
+          call mkgrid (rmax, r, dr, k, dk)
+
+          ! 4πρ∫h(r)r²dr = ...
+          do j = 1, m
+             do i = 1, n
+                h0(i, j) = integrate (h(i, j, :)) * (rho * dr**3)
+             enddo
+          enddo
+          hmin = minval (h0)
+          hmax = maxval (h0)
+
+          ! κ = ...
+          k0 = beta * (1 + h0) / rho
+          kmin = minval (k0)
+          kmax = maxval (k0)
+
+          if (verb > -1) then
+             write (*, *) "# Hole (KB) uv-integrals:", &
+                  hmin, "<= 4πρ∫h(r)r²dr <=", hmax
+          endif
+
+          ! Cons key/value pairs onto the list:
+          dict = acons (symbol ("excess-coordination"), &
+               flonum ((hmax + hmin) / 2), dict)
+          dict = acons (symbol ("excess-coordination-error"), &
+               flonum ((hmax - hmin) / 2), dict)
+       end block
+
 
        ! Dielectric properties:
        block
