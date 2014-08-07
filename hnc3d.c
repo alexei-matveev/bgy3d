@@ -456,10 +456,12 @@ iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
 
   and either  solute charges Q or  the solvent charges q  sum to zero.
   Naturally, with  an exact  arithmetics one does  not need  to handle
-  short- and long-range correlations separately in this case.
+  short-  and long-range  correlations  separately in  this case.  For
+  PSE-n closures  the "renormalized indirect  correlation" x = βv  + t
+  appears in the expression of the chemical potential too.
 */
 static void
-compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
+compute_mu (real thresh, Vec x, Vec h, Vec cs, Vec cl, Vec mu)
 {
   /*
     The h² term  contributes conditionally. Eventually, only depletion
@@ -468,12 +470,15 @@ compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
     1  and  +∞  for GF  functional  (no  such  term)  and -∞  for  HNC
     functional (contributes unconditionally):
   */
-  real pure f (real h, real cs, real cl)
+  void f (int n, real mu[n], real x[n], real h[n], real cs[n], real cl[n])
   {
-    const real h2 = (-h > thresh ? h * h : 0.0);
-    return h2 / 2 - cs - h * (cs + cl) / 2;
+    for (int i = 0; i < n; i++)
+      {
+        real h2 = (-h[i] > thresh ? h[i] * h[i] : 0.0);
+        mu[i] = h2 / 2 - cs[i] - h[i] * (cs[i] + cl[i]) / 2;
+      }
   }
-  vec_map3 (mu, f, h, cs, cl);
+  vec_app5 (f, mu, x, h, cs, cl);
 }
 
 
@@ -485,8 +490,10 @@ compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
     βμ = ρ ∫ [½h²(r) - c(r) - ½h(r)c(r)] d³r
 
   Here  we  pass  h(r)  and  c(r)  and long-range  part  of  c(r)  for
-  solute-solvent pair.  The solute  might be the  same as  solvent, of
-  course.
+  solute-solvent pair.   The solute might  be the same as  solvent, of
+  course.   PSE-n closures  need another  quantity,  the "renormalized
+  indirect correlation" x  = -βv + t (referred to  at other plasces as
+  t* sometimes).
 
   Volume integral in cartesian grid is actually:
 
@@ -498,6 +505,7 @@ compute_mu (real thresh, Vec h, Vec cs, Vec cl, Vec mu)
 */
 static void
 chempot_density (real thresh, int n, int m,
+                 Vec x[n][m],   /* in */
                  Vec h[n][m],   /* in */
                  Vec cs[n][m],  /* in */
                  Vec cl[n][m],  /* in, long range */
@@ -512,7 +520,7 @@ chempot_density (real thresh, int n, int m,
   for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++)
       {
-        compute_mu (thresh, h[i][j], cs[i][j], cl[i][j], dmu);
+        compute_mu (thresh, x[i][j], h[i][j], cs[i][j], cl[i][j], dmu);
 
         VecAXPY (mu, 1.0, dmu);
       }
@@ -523,7 +531,7 @@ chempot_density (real thresh, int n, int m,
 
 /*
   Interface to get chemical potential of solvent-solvent pair from Vec
-  h,  c, and cl,  return the  value of  chemical potential.
+  x = βv + t, h, c, and cl, return the value of chemical potential.
 
   The   argument   "closure"   choses   between   HNC,   KH   and   GF
   functionals. The State  struct also holds a setting  for the closure
@@ -531,7 +539,7 @@ chempot_density (real thresh, int n, int m,
 */
 static real
 chempot (const State *HD, ClosureEnum closure, int n, int m,
-         Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
+         Vec x[n][m], Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
@@ -559,7 +567,7 @@ chempot (const State *HD, ClosureEnum closure, int n, int m,
   local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
-  chempot_density (thresh, n, m, h, c, cl, mu_dens);
+  chempot_density (thresh, n, m, x, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
@@ -574,7 +582,7 @@ chempot (const State *HD, ClosureEnum closure, int n, int m,
    star. */
 static void
 print_chempot (const State *HD, int n, int m,
-               Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
+               Vec x[n][m], Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   /* FIXME:  as  implemented, for  method  ==  PY  the default  energy
      functional is GF: */
@@ -584,7 +592,7 @@ print_chempot (const State *HD, int n, int m,
 
   /* Silent computing: */
   for (int i = 0; i < 3; i++)
-    mu[i] = chempot (HD, methods[i], n, m, h, c, cl);
+    mu[i] = chempot (HD, methods[i], n, m, x, h, c, cl);
 
   /* Printing only: */
   PRINTF (" # Chemical potentials, default is marked with *:\n");
@@ -728,24 +736,18 @@ hnc3d_solvent_solve (const ProblemData *PD,
     the final t. If not, recompute it with compute_c() again.
   */
 
+  /* Now  that T  has  converged  we will  post-process  it using  the
+     aliases t[][]: */
+  local Vec t[m][m];
+  vec_aliases_create2 (T, m, t); /* aliases to subsections */
+
   Vec h[m][m];                  /* FIXME: not deallocated! */
   vec_create2 (HD->da, m, h);
 
-  /* Compute h[][]: */
-  {
-    /* Now  that T  has  converged  we will  post-process  it using  the
-       aliases t[][]: */
-    local Vec t[m][m];
-    vec_aliases_create2 (T, m, t); /* aliases to subsections */
-
-    /* h = c + t: */
-    for (int i = 0; i < m; i++)
-      for (int j = 0; j <= i; j++)
-        VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
-
-    vec_aliases_destroy2 (T, m, t);
-  }
-  vec_pack_destroy2 (&T);
+  /* Compute h = c + t: */
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j <= i; j++)
+      VecWAXPY (h[i][j], 1.0, c[i][j], t[i][j]);
 
   /* Chemical potential */
   {
@@ -770,6 +772,11 @@ hnc3d_solvent_solve (const ProblemData *PD,
     local Vec cl[m][m];        /* real-space long-range correlation */
     vec_create2 (HD->da, m, cl);
 
+    /* Renormalized  indirect  correlation x  =  -βv  +  t appears  in
+       expression for chemical potentials with PSE-n closures :*/
+    local Vec x[m][m];
+    vec_create2 (HD->da, m, x);
+
     for (int i = 0; i < m; i++)
       for (int j = 0; j <= i; j++)
         {
@@ -784,16 +791,22 @@ hnc3d_solvent_solve (const ProblemData *PD,
                L      L
           */
           VecScale (cl[i][j], -beta/L3);
+
+          /* Renormalized indirect correlation: x = -βv + t:  */
+          VecWAXPY (x[i][j], -beta, v_short[i][j], t[i][j]);
         }
 
     /* The function chempot() operates  on rectangular arrays, we pass
        an m x m square ones: */
-    print_chempot (HD, m, m, h, c, cl);
+    print_chempot (HD, m, m, x, h, c, cl);
 
     vec_destroy2 (m, cl);
+    vec_destroy2 (m, x);
   }
 
   /* No more used: */
+  vec_aliases_destroy2 (T, m, t);
+  vec_pack_destroy2 (&T);
   vec_destroy2 (m, c);
   vec_destroy2 (m, v_short);
   vec_destroy2 (m, v_long_fft);
@@ -1484,48 +1497,23 @@ hnc3d_solute_solve (const ProblemData *PD,
   /*
     Now that the solution T has  converged, use it to compute the rest
     of the  quantities.  (Re)evaluate  c(t) and h(t)  without assuming
-    that e.g. Vec h already  has any meaningful value.  We need direct
-    correlation c to compute chemical potential:
+    that e.g. Vec h already has any meaningful value.  We need h and c
+    to to compute chemical potential:
   */
+  local Vec t[m];
+  vec_aliases_create1 (T, m, t); /* aliases to subsections */
+
   local Vec c[m];
   vec_create1 (HD->da, m, c);
 
-  {
-    local Vec t[m];
-    vec_aliases_create1 (T, m, t); /* aliases to subsections */
+  /* Closure  relation, c  = c(t),  used to  compute h  and  later the
+     chemical potential: */
+  for (int i = 0; i < m; i++)
+    compute_c (PD->closure, PD->beta, v_short[i], t[i], c[i]);
 
-    /* Closure relation, c = c(t): */
-    for (int i = 0; i < m; i++)
-      compute_c (PD->closure, PD->beta, v_short[i], t[i], c[i]);
-
-    /* h = c + t */
-    for (int i = 0; i < m; i++)
-      VecWAXPY (h[i], 1.0, c[i], t[i]);
-
-    vec_aliases_destroy1 (T, m, t);
-  }
-  vec_destroy1 (m, v_short);
-
-
-  /* Do not destroy  the long Vec T, return it as  restart info if the
-     caller requested that: */
-  if (restart)
-    {
-      /*
-        This is probably QM code  calling, eventually this will not be
-        the last  call during  SCF.  Pass  the long Vec  T to  help us
-        restart iterations  in the next  SCF round.  At this  point we
-        give up ownersip of the long  Vec T to the caller.  The caller
-        will  eventually have  to dispose  of it  by means  of calling
-        bgy3d_restart_destroy(),  unless  it is  passed  back to  this
-        function.
-      */
-      *restart = (void*) T;
-      T = NULL;                 /* because declared local */
-    }
-  else
-    vec_pack_destroy1 (&T);     /* not vec_destroy()! */
-
+  /* h = c + t, used for chempot and output: */
+  for (int i = 0; i < m; i++)
+    VecWAXPY (h[i], 1.0, c[i], t[i]);
 
   /*
     Now get the real-space represenation of long-range part of Coulomb
@@ -1567,10 +1555,11 @@ hnc3d_solute_solve (const ProblemData *PD,
   /* Excess chemical potential: */
   {
     /*
-       FIXME: At the moment we can only supply the long-range part for
-       chemical potential calculation obtained  by FFT over the finite
-       size unit cell.  This is possibly inaccurate for the long-range
-       potential of charged systems.
+       We used  to supply the  long-range part for  chemical potential
+       calculation  obtained by FFT  over the  finite size  unit cell.
+       This  is possibly  inaccurate for  the long-range  potential of
+       charged systems.  Check the value of const bool neutral_solutes
+       that controls that.
 
        FIXME:  Though  the chemical  potential  code  does assume  the
        asymptotics of  the direct  correlations to be  proportional to
@@ -1580,10 +1569,17 @@ hnc3d_solute_solve (const ProblemData *PD,
     local Vec cl[m];
     vec_create1 (HD->da, m, cl);
 
+    /* Renormalized indirect correlation: x = -βv + t: */
+    local Vec x[m];
+    vec_create1 (HD->da, m, x);
+
     for (int i = 0; i < m; i++)
       {
         VecSet (cl[i], 0.0);
         VecAXPY (cl[i], -PD->beta * charge[i], uc);
+
+        /* Renormalized indirect correlation: x = -βv + t: */
+        VecWAXPY (x[i], -PD->beta, v_short[i], t[i]);
       }
 
     /*
@@ -1594,16 +1590,41 @@ hnc3d_solute_solve (const ProblemData *PD,
       First   and  foremost   compute  the   self-consistent  chemical
       potential to be returned to the caller:
     */
-    *mu = chempot (HD, HD->PD->closure, 1, m, (void *) h, (void *) c, (void *) cl);
+    *mu = chempot (HD, HD->PD->closure, 1, m,
+                   (void*) x, (void*) h, (void*) c, (void*) cl);
 
     /* This computes,  prints and  discards chemical potential  by all
        available functionals */
-    print_chempot (HD, 1, m, (void*) h, (void*) c, (void*) cl);
+    print_chempot (HD, 1, m, (void*) x, (void*) h, (void*) c, (void*) cl);
 
     vec_destroy1 (m, cl);
+    vec_destroy1 (m, x);
   }
-  /* No more used: */
+  /* Last used for x = -βv + t and in chempot code above. */
+  vec_destroy1 (m, v_short);
   vec_destroy1 (m, c);
+  vec_aliases_destroy1 (T, m, t);
+
+
+  /* Do not destroy  the long Vec T, return it as  restart info if the
+     caller requested that: */
+  if (restart)
+    {
+      /*
+        This is probably QM code  calling, eventually this will not be
+        the last  call during  SCF.  Pass  the long Vec  T to  help us
+        restart iterations  in the next  SCF round.  At this  point we
+        give up ownersip of the long  Vec T to the caller.  The caller
+        will  eventually have  to dispose  of it  by means  of calling
+        bgy3d_restart_destroy(),  unless  it is  passed  back to  this
+        function.
+      */
+      *restart = (void*) T;
+      T = NULL;                 /* because declared local */
+    }
+  else
+    vec_pack_destroy1 (&T);     /* not vec_destroy()! */
+
 
   /* g := h + 1 */
   for (int i = 0; i < m; i++)
