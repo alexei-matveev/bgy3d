@@ -75,7 +75,7 @@
 ;;;
 (define (run-3d solute closure)
   ;; 3D cannot handle large dimensions. FIXME: literals here:
-  (let ((settings (env-set 'N 96 (env-set 'L 10.0 (env-set 'closure closure *settings*)))))
+  (let ((settings (env-set 'N 64 (env-set 'L 10.0 (env-set 'closure closure *settings*)))))
     (let ((alist (hnc3d-run-solute solute
                                    *solvent*
                                    settings
