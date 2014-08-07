@@ -553,8 +553,22 @@ chempot (const State *HD, ClosureEnum method, int n, int m,
 }
 
 
-/* Prints chemical  potentials on  tty. The default  is marked  with a
-   star. */
+/*
+  Prints chemical  potentials on  tty.  The default  is marked  with a
+  star.
+
+  FIXME: the idea  to evaluate all functionals from  the same input is
+  not as good as may seem on  the first sight. Note that there is more
+  than one  way to do that. Currently  one evaluates h and  c from the
+  solution t according  to the native (SCF) closure  and uses the form
+  of the chemical potential functional expressed via those x, h, and c
+  that corresponds  to another closure. A different  result would have
+  been obtained if one evaluated h and c using that second closure. It
+  is  not clear  which  of the  multiple  ways is  more consistent  or
+  otherwise preferred.  Basically the  question boils down to what one
+  should consider  final output  of the SCF  procedure to be  used for
+  post-SCF application of the functionals.
+*/
 static void
 print_chempot (const State *HD, int n, int m,
                Vec x[n][m], Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
