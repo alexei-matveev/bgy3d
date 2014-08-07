@@ -102,7 +102,7 @@
                       (list n (run-3d m clo)))
                     *names*
                     *ions*)))
-       '(KH HNC)))
+       *closures*))
 
 ;;; FIXME: tty is polluted with all  kinds of prints, so we also write
 ;;; selected data into a separate file. See ./out/run-ions-out for the
