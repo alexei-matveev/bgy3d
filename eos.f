@@ -10,6 +10,13 @@ c
 c     ALJ(T,rho)...Helmholtz free energy (including the ideal term)
 c     PLJ(T,rho)...Pressure
 c     ULJ(T,rho)...Internal energy
+C
+C     A few values for confidence, cp. Fig. 3 of the original paper:
+C
+C       ULJ (1.3, 0.2) = -1.5371511277252803
+C       ULJ (1.3, 0.4) = -2.806016725002251
+C       PLJ (1.3, 0.2) = 0.12147936813082304
+C       PLJ (1.3, 0.4) = 0.11253334774845616
 c===================================================================
       module eos
       use iso_c_binding, only: rk => c_double
