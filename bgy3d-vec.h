@@ -373,9 +373,9 @@ vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 }
 
 
-/* ws = map (f, xs, ys, zs).   Should also work with aliased arguments for
-   in-place transform: */
-static inline void
+/* ws = map (f, xs, ys,  zs).  Should also work with aliased arguments
+   for in-place transform. Consider using vec_app4() instead. */
+deprecated static inline void
 vec_map3 (Vec ws, real (*f)(real x, real y, real z),
           Vec xs, Vec ys, Vec zs)
 {
