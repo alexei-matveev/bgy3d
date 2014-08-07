@@ -13,7 +13,7 @@ c     ULJ(T,rho)...Internal energy
 c===================================================================
       module eos
       private
-      public :: alj
+      public :: alj, plj, ulj
       contains
       DOUBLE PRECISION FUNCTION ALJ(T,rho)
 C     Helmholtz free energy (including the ideal term)
