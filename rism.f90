@@ -1335,7 +1335,8 @@ contains
     !
     use fft, only: mkgrid, fourier_rows, FT_FW, integral, integrate
     use linalg, only: polyfit
-    use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+         comm_rank
     use lisp, only: obj, acons, nil, symbol, int, flonum, car, cdr
     use units, only: pi, EPSILON0INV, KCAL, KJOULE, ANGSTROM, KPASCAL, MOL
     use drism, only: dipole, center, dipole_axes, local_coords, dipole_density, &
@@ -1505,8 +1506,8 @@ contains
        ! [1] Water properties http://www1.lsbu.ac.uk/water/dataq.html
        !
        block
-          real (rk) :: s0(m, m) ! structure factor at k = 0
-          real (rk) :: k0(m, m), kmin, kmax
+          real (rk) :: s0(m, m), smin, smax, savg, serr ! structure factor at k = 0
+          real (rk) :: k0(m, m), kmin, kmax, kavg, kerr
           real (rk), parameter :: Bar = 100 * KPASCAL
           real (rk), parameter :: GPa = 1000000 * KPASCAL
 
@@ -1514,27 +1515,32 @@ contains
              ! The best we can offer so far for s(0) is s(dk/2):
              s0 = chi(:, :, 1)
 
+             smin = minval (s0)
+             smax = maxval (s0)
+             savg = (smax + smin) / 2
+             serr = (smax - smin) / 2
+
              k0 = beta * s0 / rho
+
              kmin = minval (k0)
              kmax = maxval (k0)
-             if (verb > 0) then
-                write (*, *) "# Hole (KB) vv-integrals:", &
-                     minval (s0) - 1, "<= s(k=0) - 1 <=", maxval (s0) - 1
-                write (*, *) "# Isothermal compressibility:", &
-                     kmin, "<= κ <=", kmax, "A³/kcal"
-                write (*, *) "# Isothermal compressibility:", &
-                     MOL * kmin / GPa**(-1), "<= κ <=", &
-                     MOL * kmax / GPa**(-1), "GPa^-1"
-                write (*, *) "# Isothermal compressibility:", &
-                     MOL * kmin / Bar**(-1), "<= κ <=", &
-                     MOL * kmax / Bar**(-1), "Bar^-1"
+             kavg = (kmax + kmin) / 2
+             kerr = (kmax - kmin) / 2
+
+             if (comm_rank() == 0) then
+                write (*, *) "# Hole (KB) vv-integrals: s(k=0) - 1 =", &
+                     savg - 1, "±", serr
+                write (*, *) "# Isothermal compressibility: κ =", &
+                     kavg, "±", kerr, "A³/kcal"
+                write (*, *) "#                               =", &
+                     kavg * (MOL / GPa**(-1)), "±", kerr * (MOL / GPa**(-1)), "GPa^-1"
+                write (*, *) "#                               =", &
+                     kavg * (MOL / Bar**(-1)), "±", kerr * (MOL / Bar**(-1)), "Bar^-1"
              endif
 
              ! Cons key/value pairs onto the list:
-             dict = acons (symbol ("compressibility"), &
-                  flonum ((kmax + kmin) / 2), dict)
-             dict = acons (symbol ("compressibility-error"), &
-                  flonum ((kmax - kmin) / 2), dict)
+             dict = acons (symbol ("compressibility"), flonum (kavg), dict)
+             dict = acons (symbol ("compressibility-error"), flonum (kerr), dict)
           endif
        end block
 
@@ -1557,7 +1563,7 @@ contains
           integer :: i, j
           real (rk) :: r(nrad), k(nrad), dr, dk
           real (rk) :: h0(n, m), k0(n, m)
-          real (rk) :: hmin, hmax
+          real (rk) :: hmin, hmax, havg, herr
           real (rk) :: kmin, kmax
 
           ! FIXME: only need dr for integration:
@@ -1571,22 +1577,22 @@ contains
           enddo
           hmin = minval (h0)
           hmax = maxval (h0)
+          havg = (hmax + hmin) / 2
+          herr = (hmax - hmin) / 2
 
           ! κ = ...
           k0 = beta * (1 + h0) / rho
           kmin = minval (k0)
           kmax = maxval (k0)
 
-          if (verb > -1) then
-             write (*, *) "# Hole (KB) uv-integrals:", &
-                  hmin, "<= 4πρ∫h(r)r²dr <=", hmax
+          if (comm_rank() == 0) then
+             write (*, *) "# Hole (KB) uv-integrals: 4πρ∫h(r)r²dr =", &
+                  havg, "±", herr
           endif
 
           ! Cons key/value pairs onto the list:
-          dict = acons (symbol ("excess-coordination"), &
-               flonum ((hmax + hmin) / 2), dict)
-          dict = acons (symbol ("excess-coordination-error"), &
-               flonum ((hmax - hmin) / 2), dict)
+          dict = acons (symbol ("excess-coordination"), flonum (havg), dict)
+          dict = acons (symbol ("excess-coordination-error"), flonum (herr), dict)
        end block
 
 
