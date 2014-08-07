@@ -58,13 +58,9 @@ contains
     real (c_double), intent (out) :: mu(n)
     ! *** end of interface ***
 
-    integer :: p
-
     ! Pure function  form encodes the  form of the  chemical potential
-    ! integrand. FIXME: should be make it elemental like closure()?
-    do p = 1, n
-       mu(p) = form (method, x(p), h(p), c(p), cl(p))
-    enddo
+    ! integrand.
+    mu = form (method, x, h, c, cl)
   end subroutine rism_chempot_density
 
 
@@ -535,7 +531,7 @@ contains
   end function factorial
 
 
-  pure function form (method, x, h, c, cl) result (mu)
+  elemental function form (method, x, h, c, cl) result (mu)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
          PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
