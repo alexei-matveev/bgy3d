@@ -1162,7 +1162,7 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
     them!
   */
   SCM dict = SCM_EOL;
-  dict = scm_acons (scm_from_locale_symbol ("XXX"), scm_from_double (mu), dict);
+  dict = scm_acons (scm_from_locale_symbol ("free-energy"), scm_from_double (mu), dict);
   dict = scm_acons (scm_from_locale_symbol ("GUV"), gs, dict);
   dict = scm_acons (scm_from_locale_symbol ("POTENTIAL"), medium, dict);
   dict = scm_acons (scm_from_locale_symbol ("RESTART"), restart, dict);

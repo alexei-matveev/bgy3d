@@ -823,18 +823,14 @@ computes the sum of all vector elements."
 ;;;
 (define (make-pes solute solvent settings)
   (let ((chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
-                      (assoc-ref dct 'susceptibility)))) ; extract susceptibility
-        (s-key (if solute 'solute 'solvent))
-        (e-key 'XXX)
-        (g-key 'XXX-GRADIENTS))         ; alist keys
+                      (assoc-ref dct 'susceptibility))))) ; extract susceptibility
     (let* ((m (or solute solvent))      ; molecule to be "moved"
            (x0 (molecule-positions m))  ; unperturbed geometry
            (rism (lambda (x s)          ; (x, settings) -> alist
-                   (let* ((m' (move-molecule m x))
-                          (d (if solute
-                                 (rism-solute m' solvent s (force chi))
-                                 (rism-solvent m' s))))
-                     (assoc-ref d s-key)))) ; u or v section
+                   (let ((m' (move-molecule m x)))
+                     (if solute
+                         (rism-solute m' solvent s (force chi))
+                         (rism-solvent m' s)))))
            ;; FIXME: Leaking much?  A geometry optimization may easily
            ;; require a few hundred evaluations:
            (rism (memoize rism))
@@ -848,7 +844,7 @@ computes the sum of all vector elements."
                          settings))
            ;; PES (f x) -> energy:
            (f (lambda (x)
-                (assoc-ref (rism x settings) e-key)))
+                (assoc-ref (rism x settings) 'free-energy)))
            ;; Make sure to request evaluation of gradients for (g x)
            ;; but not for (f x). Using two different settings impedes
            ;; memoization:
@@ -858,8 +854,8 @@ computes the sum of all vector elements."
            ;; PES tuple (fg x) -> energy, gradients:
            (fg (lambda (x)
                  (let ((dict (rism x settings)))
-                   (values (assoc-ref dict e-key)
-                           (assoc-ref dict g-key))))))
+                   (values (assoc-ref dict 'free-energy)
+                           (assoc-ref dict 'free-energy-gradient))))))
       ;;
       ;; Return initial geometry, PES function f, and its Taylor
       ;; expansion fg as multiple values:
@@ -1022,8 +1018,7 @@ computes the sum of all vector elements."
                      ;; (pretty-print solvent)
                      (pretty-print settings)
                      (pretty-print solute)
-                     (let ((res
-                             (rism-solute solute solvent-new settings)))
+                     (let ((res (rism-solute solute solvent-new settings)))
                        (pretty-print/serial res))))
                   ("solute"
                    (let* ((solute-new
@@ -1032,8 +1027,7 @@ computes the sum of all vector elements."
                      (pretty-print solvent)
                      (pretty-print solute-new)
                      ;; (pretty-print solute)
-                     (let ((res
-                             (rism-solute solute-new solvent settings)))
+                     (let ((res (rism-solute solute-new solvent settings)))
                        (pretty-print/serial res)))))))
         ("punch"
          ;;

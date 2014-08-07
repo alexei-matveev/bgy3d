@@ -65,9 +65,8 @@
 (define (run-1d solute closure)
   (let* ((settings (env-set 'closure closure *settings*))
          (chi (assoc-ref *chi* closure))
-         (results (rism-solute solute *solvent* settings chi))
-         (solute-properties (assoc-ref results 'solute))
-         (free-energy (assoc-ref solute-properties 'XXX)))
+         (alist (rism-solute solute *solvent* settings chi))
+         (free-energy (assoc-ref alist 'free-energy)))
     free-energy))
 
 ;;;
@@ -84,7 +83,7 @@
       (bgy3d-pot-destroy (assoc-ref alist 'POTENTIAL))
       (bgy3d-restart-destroy (assoc-ref alist 'RESTART))
       ;; Return free energy:
-      (assoc-ref alist 'XXX))))
+      (assoc-ref alist 'free-energy))))
 
 (define *res-1d*
   (map (lambda (clo)

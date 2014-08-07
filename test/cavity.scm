@@ -49,11 +49,8 @@
   (find-molecule "OW"))
 
 ;;; Precompute solvent susceptibility. Pure solvent run here:
-(define *alist* (rism-solvent *solvent* *settings*))
-
-(define chi (assoc-ref *alist* 'susceptibility))
-(define *properties* (assoc-ref *alist* 'solvent))
-(pretty-print *properties*)
+(define *properties* (rism-solvent *solvent* *settings*))
+(define chi (assoc-ref *properties* 'susceptibility))
 (define kappa (assoc-ref *properties* 'compressibility))
 (define kappa-error (assoc-ref *properties* 'compressibility-error))
 (define beta (assoc-ref *settings* 'beta))
@@ -91,21 +88,20 @@
 ;;;
 ;;; Call sequence for 1D RISM:
 ;;;
-(set! *settings* (env-set 'verbosity 2 *settings*))
+;;; (set! *settings* (env-set 'verbosity 2 *settings*))
 (define (run-1d sigma)
   (let* ((solute (make-solute sigma))
          (alist (rism-solute solute *solvent* *settings* chi))
-         (properties (assoc-ref alist 'solute))
-         (free-energy (assoc-ref properties 'XXX))
-         (excess-coordination (assoc-ref properties 'excess-coordination)))
+         (free-energy (assoc-ref alist 'free-energy))
+         (excess-coordination (assoc-ref alist 'excess-coordination)))
     (pretty-print alist)
     (list sigma
           free-energy
           excess-coordination
           (+ free-energy (* A (- excess-coordination))))))
 
-(run-1d 3.16)
-(exit 1)
+;; (run-1d 3.16)
+;; (exit 1)
 
 
 (define *grid*

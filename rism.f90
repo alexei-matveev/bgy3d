@@ -336,9 +336,17 @@ contains
        endif
 
        if (present (dict)) then
-          dict = acons (symbol ("solvent"), vdict, nil)
           if (uv) then
-             dict = acons (symbol ("solute"), udict, dict)
+             ! In solute/solvent  calculations the returned dictionary
+             ! will  contain solute  data and  a solvent  section with
+             ! another  dictionary of solvent  results. Note  that the
+             ! latter might be empty if the vv-code was not invoked:
+             dict = udict
+             dict = acons (symbol ("solvent"), vdict, dict)
+          else
+             ! FIXME: there is no solute data, should we still include
+             ! an entry for symmetry?
+             dict = vdict
           endif
        endif
     end block
@@ -476,7 +484,7 @@ contains
 
       ! Chemical potential as a functional of converged t:
       mu = chempot (method, rmax, beta, rho, vr, vl, t)
-      dict = acons (symbol ("XXX"), flonum (mu), dict)
+      dict = acons (symbol ("free-energy"), flonum (mu), dict)
     end block
 
   contains
@@ -663,7 +671,7 @@ contains
 
       ! Chemical potential as a functional of converged t:
       mu = chempot (method, rmax, beta, rho, v_uvr, v_uvl, t_uvx)
-      dict = acons (symbol ("XXX"), flonum (mu), dict)
+      dict = acons (symbol ("free-energy"), flonum (mu), dict)
     end block
 
     ! Derivatives  with respect to  all 3n  displacements of  n solute
@@ -687,7 +695,7 @@ contains
          grads = list2 (gradients)
          ! call display (grads)
          ! call newline ()
-         dict = acons (symbol ("XXX-GRADIENTS"), grads, dict)
+         dict = acons (symbol ("free-energy-gradient"), grads, dict)
       endif
     end block
 
