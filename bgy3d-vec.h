@@ -426,6 +426,32 @@ vec_app3 (void (*f)(int n, real x0[n], real x1[n], real x2[n]),
 }
 
 
+static inline void
+vec_app5 (void (*f)(int n, real x0[n], real x1[n], real x2[n], real x3[n], real x4[n]),
+          Vec x0, Vec x1, Vec x2, Vec x3, Vec x4)
+{
+  const int n = vec_local_size (x0);
+  assert (vec_local_size (x1) == n);
+  assert (vec_local_size (x2) == n);
+  assert (vec_local_size (x3) == n);
+  assert (vec_local_size (x4) == n);
+
+  local real *x0_ = vec_get_array (x0);
+  local real *x1_ = vec_get_array (x1);
+  local real *x2_ = vec_get_array (x2);
+  local real *x3_ = vec_get_array (x3);
+  local real *x4_ = vec_get_array (x4);
+
+  f (n, x0_, x1_, x2_, x3_, x4_);
+
+  vec_restore_array (x0, &x0_);
+  vec_restore_array (x1, &x1_);
+  vec_restore_array (x2, &x2_);
+  vec_restore_array (x3, &x3_);
+  vec_restore_array (x4, &x4_);
+}
+
+
 /* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
    in-place transform: */
 static inline void vec_fft_map1 (Vec y, /* out */
