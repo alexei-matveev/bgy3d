@@ -26,7 +26,7 @@ c
      +  +DALJ(T,rho)
       RETURN
       END
-C     /* Helmholtz free energy (without ideal term) */
+C     Helmholtz free energy (without ideal term)
       DOUBLE PRECISION FUNCTION ALJres(T,rho)
       implicit double precision (a-h,o-z)
       data pi /3.141592654d0/
@@ -36,7 +36,7 @@ C     /* Helmholtz free energy (without ideal term) */
      + +DALJ(T,rho)
       RETURN
       END
-C     /* pressure */
+C     Pressure
       DOUBLE PRECISION FUNCTION PLJ(T,rho)
       implicit double precision (a-h,o-z)
       data pi /3.141592654d0/
@@ -108,7 +108,7 @@ C     /* internal energy */
      +  + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
       RETURN
       END
-C     /* hBH diameter */
+C     hBH diameter
       DOUBLE PRECISION FUNCTION dLJ(T)
       implicit double precision (a-h,o-z)
       DOUBLE PRECISION IST
