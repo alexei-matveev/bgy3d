@@ -373,30 +373,6 @@ vec_map2 (Vec zs, real (*f)(real x, real y), Vec xs, Vec ys)
 }
 
 
-/* This one  uses arrays and does not  need to be inlined.  But I hate
-   prefixing it: */
-static inline void
-vec_app2 (Vec zs,
-          void (*f)(int n, real z[n], real x[n], real y[n]),
-          Vec xs, Vec ys)
-{
-  const int n = vec_local_size (xs);
-  assert (vec_local_size (ys) == n);
-  assert (vec_local_size (zs) == n);
-
-  local real *xs_ = vec_get_array (xs);
-  local real *ys_ = vec_get_array (ys);
-  local real *zs_ = vec_get_array (zs);
-
-  /* vec_map2() has a loop at this place: */
-  f (n, zs_, xs_, ys_);
-
-  vec_restore_array (xs, &xs_);
-  vec_restore_array (ys, &ys_);
-  vec_restore_array (zs, &zs_);
-}
-
-
 /* ws = map (f, xs, ys, zs).   Should also work with aliased arguments for
    in-place transform: */
 static inline void
@@ -420,6 +396,33 @@ vec_map3 (Vec ws, real (*f)(real x, real y, real z),
   vec_restore_array (ys, &ys_);
   vec_restore_array (zs, &zs_);
   vec_restore_array (ws, &ws_);
+}
+
+
+/*
+  These vec_app?() functions use arrays  and do not need to be inlined
+  solely  for performance reasons.   But I  hate prefixing  them. This
+  code does not dictate what is in- and what is output. In fact all of
+  them may  be modified.  But should  they?  One convention  is to use
+  the first argument as output, the rest for input:
+*/
+static inline void
+vec_app3 (void (*f)(int n, real x0[n], real x1[n], real x2[n]),
+          Vec x0, Vec x1, Vec x2)
+{
+  const int n = vec_local_size (x0);
+  assert (vec_local_size (x1) == n);
+  assert (vec_local_size (x2) == n);
+
+  local real *x0_ = vec_get_array (x0);
+  local real *x1_ = vec_get_array (x1);
+  local real *x2_ = vec_get_array (x2);
+
+  f (n, x0_, x1_, x2_);
+
+  vec_restore_array (x0, &x0_);
+  vec_restore_array (x1, &x1_);
+  vec_restore_array (x2, &x2_);
 }
 
 
