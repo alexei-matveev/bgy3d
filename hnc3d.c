@@ -459,26 +459,19 @@ iterate_t2 (Ctx2 *ctx, Vec T, Vec dT)
   short-  and long-range  correlations  separately in  this case.  For
   PSE-n closures  the "renormalized indirect  correlation" x = βv  + t
   appears in the expression of the chemical potential too.
+
+  The  h² term contributes  conditionally. Eventually,  only depletion
+  regions (h  < 0) contribute  (KH). See Fortran sources  for details.
 */
 static void
-compute_mu (real thresh, Vec x, Vec h, Vec cs, Vec cl, Vec mu)
+compute_mu (ClosureEnum method, Vec x, Vec h, Vec cs, Vec cl, /* in */
+            Vec mu)             /* out */
 {
-  /*
-    The h² term  contributes conditionally. Eventually, only depletion
-    regions (h < 0) contribute  (KH).  Threshold is supposed to be 0.0
-    for KH functional (depletion regions contribute), anywhere between
-    1  and  +∞  for GF  functional  (no  such  term)  and -∞  for  HNC
-    functional (contributes unconditionally):
-  */
-  void f (int n, real mu[n], real x[n], real h[n], real cs[n], real cl[n])
+  void f (int n, real x[n], real h[n], real cs[n], real cl[n], real mu[n])
   {
-    for (int i = 0; i < n; i++)
-      {
-        real h2 = (-h[i] > thresh ? h[i] * h[i] : 0.0);
-        mu[i] = h2 / 2 - cs[i] - h[i] * (cs[i] + cl[i]) / 2;
-      }
+    rism_chempot_density (method, n, x, h, cs, cl, mu);
   }
-  vec_app5 (f, mu, x, h, cs, cl);
+  vec_app5 (f, x, h, cs, cl, mu);
 }
 
 
@@ -504,7 +497,7 @@ compute_mu (real thresh, Vec x, Vec h, Vec cs, Vec cl, Vec mu)
   it is either m x m or 1 x m:
 */
 static void
-chempot_density (real thresh, int n, int m,
+chempot_density (ClosureEnum method, int n, int m,
                  Vec x[n][m],   /* in */
                  Vec h[n][m],   /* in */
                  Vec cs[n][m],  /* in */
@@ -520,7 +513,7 @@ chempot_density (real thresh, int n, int m,
   for (int i = 0; i < n; i++)
     for (int j = 0; j < m; j++)
       {
-        compute_mu (thresh, x[i][j], h[i][j], cs[i][j], cl[i][j], dmu);
+        compute_mu (method, x[i][j], h[i][j], cs[i][j], cl[i][j], dmu);
 
         VecAXPY (mu, 1.0, dmu);
       }
@@ -538,36 +531,18 @@ chempot_density (real thresh, int n, int m,
   --- that one is  ignored to allow computing any  kind of functional.
 */
 static real
-chempot (const State *HD, ClosureEnum closure, int n, int m,
+chempot (const State *HD, ClosureEnum method, int n, int m,
          Vec x[n][m], Vec h[n][m], Vec c[n][m], Vec cl[n][m]) /* in */
 {
   const ProblemData *PD = HD->PD;
   const real beta = PD->beta;
   const real h3 = volume_element (PD);
 
-  real thresh;
-  switch (closure)              /* not PD->closure! */
-    {
-    case CLOSURE_KH:
-      /* The  h²  term  contributes  only  in  the  depletion  regions
-         (KH): */
-      thresh = 0.0;
-      break;
-    case CLOSURE_HNC:
-      /* The h² term contributes unconditionally (HNC): */
-      thresh = - DBL_MAX;
-      break;
-    default:
-      /* There is no h² term otherwise (GF): */
-      thresh = DBL_MAX;
-      break;
-    }
-
   /* Vector for chemical potential density */
   local Vec mu_dens = vec_create (HD->da);
 
   /* Get β-scaled chemical potential density */
-  chempot_density (thresh, n, m, x, h, c, cl, mu_dens);
+  chempot_density (method, n, m, x, h, c, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
