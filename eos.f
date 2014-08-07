@@ -12,13 +12,18 @@ c     PLJ(T,rho)...Pressure
 c     ULJ(T,rho)...Internal energy
 c===================================================================
       module eos
+      use iso_c_binding, only: rk => c_double
       private
       public :: alj, plj, ulj
       contains
-      DOUBLE PRECISION FUNCTION ALJ(T,rho)
+      real (rk) FUNCTION ALJ (T, rho) bind (c, name="rism_alj")
 C     Helmholtz free energy (including the ideal term)
 c
-      implicit double precision (a-h,o-z)
+      use iso_c_binding
+      implicit real (rk) (a-h,o-z)
+      real (rk), intent (in), value :: T, rho
+      ! *** end of interface ***
+
       data pi /3.141592654d0/
       eta = PI/6.*rho * (dC(T))**3
       ALJ =  (dlog(rho)+betaAHS(eta)
@@ -37,8 +42,11 @@ C     Helmholtz free energy (without ideal term)
       RETURN
       END
 C     Pressure
-      DOUBLE PRECISION FUNCTION PLJ(T,rho)
-      implicit double precision (a-h,o-z)
+      real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
+      implicit real (rk) (a-h,o-z)
+      real (rk), intent (in), value :: T, rho
+      ! *** end of interface ***
+
       data pi /3.141592654d0/
       eta=PI/6. *rho*(dC(T))**3
       sum=((2.01546797*2+rho*(
@@ -66,9 +74,12 @@ C     Pressure
      +  +sum )*rho
        RETURN
        END
-C     /* internal energy */
-      DOUBLE PRECISION FUNCTION ULJ( T, rho)
-      implicit double precision (a-h,o-z)
+C     Internal energy
+      real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
+      implicit real (rk) (a-h,o-z)
+      real (rk), intent (in), value:: T, rho
+      ! *** end of interface ***
+
        data pi /3.141592654d0/
       dBHdT=dCdT(T)
       dB2BHdT=BCdT(T)
