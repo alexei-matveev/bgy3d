@@ -40,3 +40,13 @@ void rism_closure (int method, real beta,
                    int n, const real v[n], const real t[n], /* in */
                    real c[n]);                              /* out */
 
+/*
+  Implemented in Fortran. See ./closures.f90:
+
+  subroutine rism_chempot_density (method, n, x, h, c, cl, mu) bind (c)
+*/
+void rism_chempot_density (int method, int n,
+                           const real x[n], const real h[n],  /* in */
+                           const real c[n], const real cl[n], /* in */
+                           real mu[n]); /* out */
+

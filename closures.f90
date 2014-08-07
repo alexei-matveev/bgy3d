@@ -17,8 +17,10 @@ module closures
   public :: chempot_form, chempot_form1
   public :: chempot, chempot1
 
-  ! bind (c), used from C only
+  ! These are bind (c), used from C only, therefore public. Interfaces
+  ! in rism.h.
   public :: rism_closure
+  public :: rism_chempot_density
   ! *** END OF INTERFACE ***
 
 contains
@@ -40,6 +42,30 @@ contains
 
     c = closure (method, beta, v, t)
   end subroutine rism_closure
+
+
+  subroutine rism_chempot_density (method, n, x, h, c, cl, mu) bind (c)
+    !
+    ! This one is for using from the C-side. Note that Fortran forbids
+    ! aliasing between the output mu and the input x, h, c, cl.
+    !
+    ! Should be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int, c_double
+    implicit none
+    integer (c_int), intent (in), value :: method, n
+    real (c_double), intent (in) :: x(n), h(n), c(n), cl(n)
+    real (c_double), intent (out) :: mu(n)
+    ! *** end of interface ***
+
+    integer :: p
+
+    ! Pure function  form encodes the  form of the  chemical potential
+    ! integrand. FIXME: should be make it elemental like closure()?
+    do p = 1, n
+       mu(p) = form (method, x(p), h(p), c(p), cl(p))
+    enddo
+  end subroutine rism_chempot_density
 
 
   elemental function closure (method, beta, v, t) result (c)
