@@ -30,3 +30,7 @@ This should  give you a number  close to -6.349052 kcal  (look for the
 addition you  should get  -6.297170 kcal as  in earlier  versions. For
 solutes without charged sites there should be no visible difference.
 
+c) Compute self-interaction energy of an MM solute:
+
+  ./guile/runbgy.scm self-energy "uranyl, 5w, pcm"
+
