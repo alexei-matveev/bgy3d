@@ -44,6 +44,25 @@ contains
   end subroutine rism_closure
 
 
+  subroutine rism_closure1 (method, beta, n, v, t, dt, dc) bind (c)
+    !
+    ! This one is for using from the C-side. Note that Fortran forbids
+    ! aliasing between the output c and the input v and t.
+    !
+    ! Should be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int, c_double
+    implicit none
+    integer (c_int), intent (in), value :: method, n
+    real (c_double), intent (in), value :: beta
+    real (c_double), intent (in) :: v(n), t(n), dt(n)
+    real (c_double), intent (out) :: dc(n)
+    ! *** end of interface ***
+
+    dc = closure1 (method, beta, v, t, dt)
+  end subroutine rism_closure1
+
+
   subroutine rism_chempot_density (method, n, x, h, c, cl, mu) bind (c)
     !
     ! This one is for using from the C-side. Note that Fortran forbids

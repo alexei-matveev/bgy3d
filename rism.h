@@ -40,6 +40,11 @@ void rism_closure (int method, real beta,
                    int n, const real v[n], const real t[n], /* in */
                    real c[n]);                              /* out */
 
+void rism_closure1 (int method, real beta,
+                    int n, const real v[n], const real t[n], /* in */
+                    const real dt[n],                        /* in */
+                    real dc[n]);                             /* out */
+
 /*
   Implemented in Fortran. See ./closures.f90:
 
