@@ -22,7 +22,11 @@ module eos
   use iso_c_binding, only: rk => c_double
   private
   public :: alj, plj, ulj
+
+  real (rk), parameter :: pi = 4 * atan (1.0_rk)
+
 contains
+
   real (rk) FUNCTION ALJ (T, rho) bind (c, name="rism_alj")
     ! Helmholtz free energy (including the ideal term)
     !
@@ -31,7 +35,6 @@ contains
     real (rk), intent (in), value :: T, rho
     ! *** end of interface ***
 
-    data pi /3.141592654d0/
     eta = PI/6.*rho * (dC(T))**3
     ALJ =  (dlog(rho)+betaAHS(eta) &
          &  +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
@@ -41,7 +44,6 @@ contains
   ! Helmholtz free energy (without ideal term)
   DOUBLE PRECISION FUNCTION ALJres(T,rho)
     implicit double precision (a-h,o-z)
-    data pi /3.141592654d0/
     eta = PI/6. *rho*(dC(T))**3
     ALJres = (betaAHS(eta) &
          & +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
@@ -54,7 +56,6 @@ contains
     real (rk), intent (in), value :: T, rho
     ! *** end of interface ***
 
-    data pi /3.141592654d0/
     eta=PI/6. *rho*(dC(T))**3
     sum=((2.01546797*2+rho*( &
          & (-28.17881636)*3+rho*( &
@@ -87,7 +88,6 @@ contains
     real (rk), intent (in), value:: T, rho
     ! *** end of interface ***
 
-    data pi /3.141592654d0/
     dBHdT=dCdT(T)
     dB2BHdT=BCdT(T)
     d=dC(T)
