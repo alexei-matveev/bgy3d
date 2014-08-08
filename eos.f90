@@ -28,7 +28,7 @@ module eos
 
 contains
 
-  real (rk) FUNCTION ALJ (T, rho) bind (c, name="rism_alj")
+  real (rk) function ALJ (T, rho) bind (c, name="rism_alj")
     !
     ! Helmholtz free energy (including the ideal term)
     !
@@ -42,9 +42,9 @@ contains
     ALJ =  (log (rho) + betaAHS (eta) &
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
-  END FUNCTION ALJ
+  end function ALJ
 
-  REAL (RK) FUNCTION ALJres (T, rho)
+  real (rk) function ALJres (T, rho)
     !
     ! Helmholtz free energy (without ideal term)
     !
@@ -58,9 +58,9 @@ contains
     ALJres = (betaAHS(eta) &
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
-  END FUNCTION ALJres
+  end function ALJres
 
-  real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
+  real (rk) function PLJ (T, rho) bind (c, name="rism_plj")
     !
     ! Pressure
     !
@@ -94,9 +94,9 @@ contains
          + BC(T)/exp(gammaBH(T)*rho**2) &
          *rho*(1-2*gammaBH(T)*rho**2))*T &
          +sum )*rho
-  END FUNCTION PLJ
+  end function PLJ
 
-  real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
+  real (rk) function ULJ (T, rho) bind (c, name="rism_ulj")
     !
     ! Internal energy
     !
@@ -131,39 +131,39 @@ contains
          (-25.62099890)*3))))/T)/T) *rho*rho
     ULJ = 3*(zHS(eta)-1)*dBHdT/d &
          +rho*dB2BHdT/exp(gammaBH(T)*rho**2) +sum
-  END FUNCTION ULJ
+  end function ULJ
 
-  REAL (RK) FUNCTION zHS (eta)
+  real (rk) function zHS (eta)
     implicit none
     real (rk), intent (in) :: eta
     ! *** end of interface ***
 
     zHS = (1+eta*(1+eta*(1-eta/1.5*(1+eta)))) / (1-eta)**3
-  END FUNCTION zHS
+  end function zHS
 
-  REAL (RK) FUNCTION betaAHS (eta)
+  real (rk) function betaAHS (eta)
     implicit none
     real (rk), intent (in) :: eta
     ! *** end of interface ***
 
     betaAHS = log (1 - eta) / 0.6 &
          + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
-  END FUNCTION betaAHS
+  end function betaAHS
 
-  REAL (RK) FUNCTION dLJ (T)
+  real (rk) function dLJ (T)
     ! hBH diameter
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
 
-    REAL (RK) IST
+    real (rk) IST
     isT = 1 / sqrt (T)
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
          *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
          + 0.127841935018828 * log (isT)
-  END FUNCTION dLJ
+  end function dLJ
 
-  REAL (RK) FUNCTION dC (T)
+  real (rk) function dC (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -173,9 +173,9 @@ contains
     sT = sqrt (T)
     dC = -0.063920968 * log (T) + 0.011117524 / T &
          -0.076383859/sT+1.080142248+0.000693129*sT
-  END FUNCTION dC
+  end function dC
 
-  REAL (RK) FUNCTION dCdT (T)
+  real (rk) function dCdT (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -185,9 +185,9 @@ contains
     sT = sqrt (T)
     dCdT =   0.063920968*T+0.011117524+(-0.5*0.076383859 &
          -0.5*0.000693129*T)*sT
-  END FUNCTION dCdT
+  end function dCdT
 
-  REAL (RK) FUNCTION BC (T)
+  real (rk) function BC (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -198,9 +198,9 @@ contains
     BC = (((((-0.58544978*isT+0.43102052)*isT &
          +.87361369)*isT-4.13749995)*isT+2.90616279)*isT &
          -7.02181962)/T+0.02459877
-  END FUNCTION BC
+  end function BC
 
-  REAL (RK) FUNCTION BCdT (T)
+  real (rk) function BCdT (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -211,17 +211,17 @@ contains
     BCdT = ((((-0.58544978*3.5*isT+0.43102052*3)*isT &
          +0.87361369*2.5)*isT-4.13749995*2)*isT &
          +2.90616279*1.5)*isT-7.02181962
-  END FUNCTION BCdT
+  end function BCdT
 
-  REAL (RK) FUNCTION gammaBH (T)
+  real (rk) function gammaBH (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
 
     gammaBH=1.92907278
-  END FUNCTION gammaBH
+  end function gammaBH
 
-  REAL (RK) FUNCTION DALJ (T, rho)
+  real (rk) function DALJ (T, rho)
     implicit none
     real (rk), intent (in) :: T, rho
     ! *** end of interface ***
@@ -236,6 +236,6 @@ contains
          +(-13.37031968+rho*(65.38059570+ &
          rho*((-115.09233113)+rho*(88.91973082 &
          +rho* (-25.62099890)))))/T)/T) *rho*rho
-  END FUNCTION DALJ
+  end function DALJ
 end module eos
 
