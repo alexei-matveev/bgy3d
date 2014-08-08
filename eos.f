@@ -1,31 +1,31 @@
-c===================================================================
-C     Package supplying the thermodynamic properties of the
-C     LENNARD-JONES fluid
-c
-C     "The Lennard-Jones fluid: an accurate analytic and
-C     theoretically-based equation of state", Fluid Phase Equilibria 100
-C     pp. 1-34 (1994)] Jirí Kolafa, Ivo Nezbeda
-C     http://dx.doi.org/10.1016/0378-3812(94)80001-4
-c
-c     ALJ(T,rho)...Helmholtz free energy (including the ideal term)
-c     PLJ(T,rho)...Pressure
-c     ULJ(T,rho)...Internal energy
-C
-C     A few values for confidence, cp. Fig. 3 of the original paper:
-C
-C       ULJ (1.3, 0.2) = -1.5371511277252803
-C       ULJ (1.3, 0.4) = -2.806016725002251
-C       PLJ (1.3, 0.2) = 0.12147936813082304
-C       PLJ (1.3, 0.4) = 0.11253334774845616
-c===================================================================
+!===================================================================
+!     Package supplying the thermodynamic properties of the
+!     LENNARD-JONES fluid
+!
+!     "The Lennard-Jones fluid: an accurate analytic and
+!     theoretically-based equation of state", Fluid Phase Equilibria 100
+!     pp. 1-34 (1994)] Jirí Kolafa, Ivo Nezbeda
+!     http://dx.doi.org/10.1016/0378-3812(94)80001-4
+!
+!     ALJ(T,rho)...Helmholtz free energy (including the ideal term)
+!     PLJ(T,rho)...Pressure
+!     ULJ(T,rho)...Internal energy
+!
+!     A few values for confidence, cp. Fig. 3 of the original paper:
+!
+!       ULJ (1.3, 0.2) = -1.5371511277252803
+!       ULJ (1.3, 0.4) = -2.806016725002251
+!       PLJ (1.3, 0.2) = 0.12147936813082304
+!       PLJ (1.3, 0.4) = 0.11253334774845616
+!===================================================================
       module eos
       use iso_c_binding, only: rk => c_double
       private
       public :: alj, plj, ulj
       contains
       real (rk) FUNCTION ALJ (T, rho) bind (c, name="rism_alj")
-C     Helmholtz free energy (including the ideal term)
-c
+!     Helmholtz free energy (including the ideal term)
+!
       use iso_c_binding
       implicit real (rk) (a-h,o-z)
       real (rk), intent (in), value :: T, rho
@@ -38,7 +38,7 @@ c
      &  +DALJ(T,rho)
       RETURN
       END
-C     Helmholtz free energy (without ideal term)
+!     Helmholtz free energy (without ideal term)
       DOUBLE PRECISION FUNCTION ALJres(T,rho)
       implicit double precision (a-h,o-z)
       data pi /3.141592654d0/
@@ -48,7 +48,7 @@ C     Helmholtz free energy (without ideal term)
      & +DALJ(T,rho)
       RETURN
       END
-C     Pressure
+!     Pressure
       real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
       implicit real (rk) (a-h,o-z)
       real (rk), intent (in), value :: T, rho
@@ -81,7 +81,7 @@ C     Pressure
      &  +sum )*rho
        RETURN
        END
-C     Internal energy
+!     Internal energy
       real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
       implicit real (rk) (a-h,o-z)
       real (rk), intent (in), value:: T, rho
@@ -126,7 +126,7 @@ C     Internal energy
      &  + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
       RETURN
       END
-C     hBH diameter
+!     hBH diameter
       DOUBLE PRECISION FUNCTION dLJ(T)
       implicit double precision (a-h,o-z)
       DOUBLE PRECISION IST
