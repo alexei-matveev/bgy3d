@@ -62,6 +62,7 @@
 ;;;
 (format #t "beta = ~A kcal^-1\n" beta)
 (format #t "rho = ~A A^-3\n" rho)
+(format #t "mu = ~A kcal\n" (assoc-ref *properties* 'free-energy))
 (format #t "kappa = ~A A^3/kcal, error = ~A A^3/kcal (1)\n" kappa kappa-error)
 
 (define excess-coordination (assoc-ref *properties* 'excess-coordination))
