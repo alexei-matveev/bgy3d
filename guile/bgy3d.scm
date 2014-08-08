@@ -738,6 +738,12 @@ computes the sum of all vector elements."
                  (maybe-print-potentials solute potential)
                  (bgy3d-pot-destroy potential))
                ;;
+               ;; Output excess chemical potential to tty:
+               ;;
+               (let ((free-energy (assoc-ref alist 'free-energy))
+                     (closure (env-ref settings 'closure)))
+                 (pretty-print/serial (list closure free-energy)))
+               ;;
                ;; Write g?.bin files:
                ;;
                (let ((g1 (assoc-ref alist 'GUV)))
