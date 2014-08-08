@@ -65,7 +65,7 @@ contains
          +75.62340289*3+rho*( &
          (-120.70586598)*4+rho*( &
          +93.92740328*5+rho* &
-         (-27.37737354)*6))))/dsqrt(T) &
+         (-27.37737354) * 6)))) / sqrt (T) &
          + ((29.34470520*2+rho*( &
          (-112.35356937)*3+rho*( &
          +170.64908980*4+rho*( &
@@ -100,7 +100,7 @@ contains
          75.62340289*1.5+rho*( &
          (-120.70586598)*1.5+rho*( &
          93.92740328*1.5+rho* &
-         (-27.37737354)*1.5))))/dsqrt(T) &
+         (-27.37737354) * 1.5)))) / sqrt (T) &
          + ((29.34470520*2+rho*( &
          -112.35356937*2+rho*( &
          170.64908980*2+rho*( &
@@ -130,7 +130,7 @@ contains
   DOUBLE PRECISION FUNCTION dLJ(T)
     implicit double precision (a-h,o-z)
     DOUBLE PRECISION IST
-    isT=1/dsqrt(T)
+    isT = 1 / sqrt (T)
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
          *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
          + 0.127841935018828 * log (isT)
@@ -138,14 +138,14 @@ contains
   END FUNCTION dLJ
   DOUBLE PRECISION FUNCTION dC(T)
     implicit double precision (a-h,o-z)
-    sT=dsqrt(T)
+    sT = sqrt (T)
     dC = -0.063920968 * log (T) + 0.011117524 / T &
          -0.076383859/sT+1.080142248+0.000693129*sT
     RETURN
   END FUNCTION dC
   DOUBLE PRECISION FUNCTION dCdT( T)
     implicit double precision (a-h,o-z)
-    sT=dsqrt(T)
+    sT = sqrt (T)
     dCdT =   0.063920968*T+0.011117524+(-0.5*0.076383859 &
          -0.5*0.000693129*T)*sT
     RETURN
@@ -153,7 +153,7 @@ contains
   DOUBLE PRECISION FUNCTION BC( T)
     implicit double precision (a-h,o-z)
     DOUBLE PRECISION isT
-    isT=1/dsqrt(T)
+    isT = 1 / sqrt (T)
     BC = (((((-0.58544978*isT+0.43102052)*isT &
          +.87361369)*isT-4.13749995)*isT+2.90616279)*isT &
          -7.02181962)/T+0.02459877
@@ -162,7 +162,7 @@ contains
   DOUBLE PRECISION FUNCTION BCdT( T)
     implicit double precision (a-h,o-z)
     DOUBLE PRECISION iST
-    isT=1/dsqrt(T)
+    isT = 1 / sqrt (T)
     BCdT = ((((-0.58544978*3.5*isT+0.43102052*3)*isT &
          +0.87361369*2.5)*isT-4.13749995*2)*isT &
          +2.90616279*1.5)*isT-7.02181962
@@ -178,7 +178,7 @@ contains
     DALJ = ((+2.01546797+rho*(-28.17881636 &
          +rho*(+28.28313847+rho*(-10.42402873)))) &
          +(-19.58371655+rho*(75.62340289+rho*((-120.70586598) &
-         +rho*(93.92740328+rho*(-27.37737354)))))/dsqrt(T) &
+         + rho * (93.92740328 + rho * (-27.37737354))))) / sqrt (T) &
          + ( (29.34470520+rho*((-112.35356937) &
          +rho*(+170.64908980+rho*((-123.06669187) &
          +rho*34.42288969)))) &
