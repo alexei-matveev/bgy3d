@@ -20,6 +20,7 @@
 !
 module eos
   use iso_c_binding, only: rk => c_double
+  implicit none
   private
   public :: alj, plj, ulj
 
@@ -28,12 +29,14 @@ module eos
 contains
 
   real (rk) FUNCTION ALJ (T, rho) bind (c, name="rism_alj")
+    !
     ! Helmholtz free energy (including the ideal term)
     !
-    use iso_c_binding
-    implicit real (rk) (a-h,o-z)
+    implicit none
     real (rk), intent (in), value :: T, rho
     ! *** end of interface ***
+
+    real (rk) :: eta
 
     eta = PI/6.*rho * (dC(T))**3
     ALJ =  (log (rho) + betaAHS (eta) &
@@ -43,7 +46,12 @@ contains
   END FUNCTION ALJ
   ! Helmholtz free energy (without ideal term)
   DOUBLE PRECISION FUNCTION ALJres(T,rho)
-    implicit double precision (a-h,o-z)
+    implicit none
+    real (rk), intent (in) :: T, rho
+    ! *** end of interface ***
+
+    real (rk) :: eta
+
     eta = PI/6. *rho*(dC(T))**3
     ALJres = (betaAHS(eta) &
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
@@ -52,9 +60,11 @@ contains
   END FUNCTION ALJres
   ! Pressure
   real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
-    implicit real (rk) (a-h,o-z)
+    implicit none
     real (rk), intent (in), value :: T, rho
     ! *** end of interface ***
+
+    real (rk) :: eta, sum
 
     eta=PI/6. *rho*(dC(T))**3
     sum=((2.01546797*2+rho*( &
@@ -84,9 +94,11 @@ contains
   END FUNCTION PLJ
   ! Internal energy
   real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
-    implicit real (rk) (a-h,o-z)
+    implicit none
     real (rk), intent (in), value:: T, rho
     ! *** end of interface ***
+
+    real (rk) :: eta, sum, dBHdT, dB2BHdT, d
 
     dBHdT=dCdT(T)
     dB2BHdT=BCdT(T)
@@ -115,20 +127,29 @@ contains
          +rho*dB2BHdT/exp(gammaBH(T)*rho**2) +sum
     RETURN
   END FUNCTION ULJ
-  DOUBLE PRECISION FUNCTION zHS(eta)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION zHS (eta)
+    implicit none
+    real (rk), intent (in) :: eta
+    ! *** end of interface ***
+
     zHS = (1+eta*(1+eta*(1-eta/1.5*(1+eta)))) / (1-eta)**3
     RETURN
   END FUNCTION zHS
-  DOUBLE PRECISION FUNCTION betaAHS( eta )
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION betaAHS (eta)
+    implicit none
+    real (rk), intent (in) :: eta
+    ! *** end of interface ***
+
     betaAHS = log (1 - eta) / 0.6 &
          + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
     RETURN
   END FUNCTION betaAHS
   ! hBH diameter
-  DOUBLE PRECISION FUNCTION dLJ(T)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION dLJ (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
     DOUBLE PRECISION IST
     isT = 1 / sqrt (T)
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
@@ -136,45 +157,69 @@ contains
          + 0.127841935018828 * log (isT)
     RETURN
   END FUNCTION dLJ
-  DOUBLE PRECISION FUNCTION dC(T)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION dC (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
+    real (rk) :: sT
+
     sT = sqrt (T)
     dC = -0.063920968 * log (T) + 0.011117524 / T &
          -0.076383859/sT+1.080142248+0.000693129*sT
     RETURN
   END FUNCTION dC
-  DOUBLE PRECISION FUNCTION dCdT( T)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION dCdT (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
+    real (rk) :: sT
+
     sT = sqrt (T)
     dCdT =   0.063920968*T+0.011117524+(-0.5*0.076383859 &
          -0.5*0.000693129*T)*sT
     RETURN
   END FUNCTION dCdT
-  DOUBLE PRECISION FUNCTION BC( T)
-    implicit double precision (a-h,o-z)
-    DOUBLE PRECISION isT
+  DOUBLE PRECISION FUNCTION BC (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
+    real (rk) :: isT
+
     isT = 1 / sqrt (T)
     BC = (((((-0.58544978*isT+0.43102052)*isT &
          +.87361369)*isT-4.13749995)*isT+2.90616279)*isT &
          -7.02181962)/T+0.02459877
     RETURN
   END FUNCTION BC
-  DOUBLE PRECISION FUNCTION BCdT( T)
-    implicit double precision (a-h,o-z)
-    DOUBLE PRECISION iST
+  DOUBLE PRECISION FUNCTION BCdT (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
+    real (rk) :: isT
+
     isT = 1 / sqrt (T)
     BCdT = ((((-0.58544978*3.5*isT+0.43102052*3)*isT &
          +0.87361369*2.5)*isT-4.13749995*2)*isT &
          +2.90616279*1.5)*isT-7.02181962
     RETURN
   END FUNCTION BCdT
-  DOUBLE PRECISION FUNCTION gammaBH(X)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION gammaBH (T)
+    implicit none
+    real (rk), intent (in) :: T
+    ! *** end of interface ***
+
     gammaBH=1.92907278
     RETURN
   END FUNCTION gammaBH
-  DOUBLE PRECISION FUNCTION DALJ(T,rho)
-    implicit double precision (a-h,o-z)
+  DOUBLE PRECISION FUNCTION DALJ (T, rho)
+    implicit none
+    real (rk), intent (in) :: T, rho
+    ! *** end of interface ***
+
     DALJ = ((+2.01546797+rho*(-28.17881636 &
          +rho*(+28.28313847+rho*(-10.42402873)))) &
          +(-19.58371655+rho*(75.62340289+rho*((-120.70586598) &
