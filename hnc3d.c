@@ -163,13 +163,13 @@ compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
   assert (c != v);
 
   /* Callback for vec_app3(): */
-  void f (int n, real c[n], real v[n], real t[n])
+  void f (int n, real v[n], real t[n], real c[n])
   {
     /* See Fortran implementation  in closures.f90.  NOTE: no aliasing
        here, please! */
     rism_closure (closure, beta, n, v, t, c);
   }
-  vec_app3 (f, c, v, t);
+  vec_app3 (f, v, t, c);
 }
 
 
