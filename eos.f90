@@ -36,7 +36,7 @@ contains
     ! *** end of interface ***
 
     eta = PI/6.*rho * (dC(T))**3
-    ALJ =  (dlog(rho)+betaAHS(eta) &
+    ALJ =  (log (rho) + betaAHS (eta) &
          &  +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          &  +DALJ(T,rho)
     RETURN
@@ -122,7 +122,7 @@ contains
   END FUNCTION zHS
   DOUBLE PRECISION FUNCTION betaAHS( eta )
     implicit double precision (a-h,o-z)
-    betaAHS = dlog(1-eta)/0.6 &
+    betaAHS = log (1 - eta) / 0.6 &
          &  + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
     RETURN
   END FUNCTION betaAHS
@@ -133,13 +133,13 @@ contains
     isT=1/dsqrt(T)
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
          & *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
-         & +0.127841935018828*dlog(isT)
+         & + 0.127841935018828 * log (isT)
     RETURN
   END FUNCTION dLJ
   DOUBLE PRECISION FUNCTION dC(T)
     implicit double precision (a-h,o-z)
     sT=dsqrt(T)
-    dC = -0.063920968*dlog(T)+0.011117524/T &
+    dC = -0.063920968 * log (T) + 0.011117524 / T &
          &     -0.076383859/sT+1.080142248+0.000693129*sT
     RETURN
   END FUNCTION dC
