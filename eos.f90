@@ -44,7 +44,7 @@ contains
          +DALJ(T,rho)
   END FUNCTION ALJ
 
-  DOUBLE PRECISION FUNCTION ALJres (T, rho)
+  REAL (RK) FUNCTION ALJres (T, rho)
     !
     ! Helmholtz free energy (without ideal term)
     !
@@ -133,7 +133,7 @@ contains
          +rho*dB2BHdT/exp(gammaBH(T)*rho**2) +sum
   END FUNCTION ULJ
 
-  DOUBLE PRECISION FUNCTION zHS (eta)
+  REAL (RK) FUNCTION zHS (eta)
     implicit none
     real (rk), intent (in) :: eta
     ! *** end of interface ***
@@ -141,7 +141,7 @@ contains
     zHS = (1+eta*(1+eta*(1-eta/1.5*(1+eta)))) / (1-eta)**3
   END FUNCTION zHS
 
-  DOUBLE PRECISION FUNCTION betaAHS (eta)
+  REAL (RK) FUNCTION betaAHS (eta)
     implicit none
     real (rk), intent (in) :: eta
     ! *** end of interface ***
@@ -150,20 +150,20 @@ contains
          + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
   END FUNCTION betaAHS
 
-  DOUBLE PRECISION FUNCTION dLJ (T)
+  REAL (RK) FUNCTION dLJ (T)
     ! hBH diameter
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
 
-    DOUBLE PRECISION IST
+    REAL (RK) IST
     isT = 1 / sqrt (T)
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
          *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
          + 0.127841935018828 * log (isT)
   END FUNCTION dLJ
 
-  DOUBLE PRECISION FUNCTION dC (T)
+  REAL (RK) FUNCTION dC (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -175,7 +175,7 @@ contains
          -0.076383859/sT+1.080142248+0.000693129*sT
   END FUNCTION dC
 
-  DOUBLE PRECISION FUNCTION dCdT (T)
+  REAL (RK) FUNCTION dCdT (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -187,7 +187,7 @@ contains
          -0.5*0.000693129*T)*sT
   END FUNCTION dCdT
 
-  DOUBLE PRECISION FUNCTION BC (T)
+  REAL (RK) FUNCTION BC (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -200,7 +200,7 @@ contains
          -7.02181962)/T+0.02459877
   END FUNCTION BC
 
-  DOUBLE PRECISION FUNCTION BCdT (T)
+  REAL (RK) FUNCTION BCdT (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -213,7 +213,7 @@ contains
          +2.90616279*1.5)*isT-7.02181962
   END FUNCTION BCdT
 
-  DOUBLE PRECISION FUNCTION gammaBH (T)
+  REAL (RK) FUNCTION gammaBH (T)
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -221,7 +221,7 @@ contains
     gammaBH=1.92907278
   END FUNCTION gammaBH
 
-  DOUBLE PRECISION FUNCTION DALJ (T, rho)
+  REAL (RK) FUNCTION DALJ (T, rho)
     implicit none
     real (rk), intent (in) :: T, rho
     ! *** end of interface ***
