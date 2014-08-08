@@ -1,6 +1,6 @@
 !
-! Package supplying the thermodynamic properties of the
-! LENNARD-JONES fluid
+! Package supplying the  thermodynamic properties of the Lennard-Jones
+! fluid (Credit to http://www.sklogwiki.org).
 !
 ! "The Lennard-Jones fluid: an accurate analytic and
 ! theoretically-based equation of state", Fluid Phase Equilibria 100
