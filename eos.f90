@@ -43,8 +43,11 @@ contains
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
   END FUNCTION ALJ
-  ! Helmholtz free energy (without ideal term)
-  DOUBLE PRECISION FUNCTION ALJres(T,rho)
+
+  DOUBLE PRECISION FUNCTION ALJres (T, rho)
+    !
+    ! Helmholtz free energy (without ideal term)
+    !
     implicit none
     real (rk), intent (in) :: T, rho
     ! *** end of interface ***
@@ -56,8 +59,11 @@ contains
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
   END FUNCTION ALJres
-  ! Pressure
+
   real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
+    !
+    ! Pressure
+    !
     implicit none
     real (rk), intent (in), value :: T, rho
     ! *** end of interface ***
@@ -89,8 +95,11 @@ contains
          *rho*(1-2*gammaBH(T)*rho**2))*T &
          +sum )*rho
   END FUNCTION PLJ
-  ! Internal energy
+
   real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
+    !
+    ! Internal energy
+    !
     implicit none
     real (rk), intent (in), value:: T, rho
     ! *** end of interface ***
@@ -123,6 +132,7 @@ contains
     ULJ = 3*(zHS(eta)-1)*dBHdT/d &
          +rho*dB2BHdT/exp(gammaBH(T)*rho**2) +sum
   END FUNCTION ULJ
+
   DOUBLE PRECISION FUNCTION zHS (eta)
     implicit none
     real (rk), intent (in) :: eta
@@ -130,6 +140,7 @@ contains
 
     zHS = (1+eta*(1+eta*(1-eta/1.5*(1+eta)))) / (1-eta)**3
   END FUNCTION zHS
+
   DOUBLE PRECISION FUNCTION betaAHS (eta)
     implicit none
     real (rk), intent (in) :: eta
@@ -138,8 +149,9 @@ contains
     betaAHS = log (1 - eta) / 0.6 &
          + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
   END FUNCTION betaAHS
-  ! hBH diameter
+
   DOUBLE PRECISION FUNCTION dLJ (T)
+    ! hBH diameter
     implicit none
     real (rk), intent (in) :: T
     ! *** end of interface ***
@@ -150,6 +162,7 @@ contains
          *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
          + 0.127841935018828 * log (isT)
   END FUNCTION dLJ
+
   DOUBLE PRECISION FUNCTION dC (T)
     implicit none
     real (rk), intent (in) :: T
@@ -161,6 +174,7 @@ contains
     dC = -0.063920968 * log (T) + 0.011117524 / T &
          -0.076383859/sT+1.080142248+0.000693129*sT
   END FUNCTION dC
+
   DOUBLE PRECISION FUNCTION dCdT (T)
     implicit none
     real (rk), intent (in) :: T
@@ -172,6 +186,7 @@ contains
     dCdT =   0.063920968*T+0.011117524+(-0.5*0.076383859 &
          -0.5*0.000693129*T)*sT
   END FUNCTION dCdT
+
   DOUBLE PRECISION FUNCTION BC (T)
     implicit none
     real (rk), intent (in) :: T
@@ -184,6 +199,7 @@ contains
          +.87361369)*isT-4.13749995)*isT+2.90616279)*isT &
          -7.02181962)/T+0.02459877
   END FUNCTION BC
+
   DOUBLE PRECISION FUNCTION BCdT (T)
     implicit none
     real (rk), intent (in) :: T
@@ -196,6 +212,7 @@ contains
          +0.87361369*2.5)*isT-4.13749995*2)*isT &
          +2.90616279*1.5)*isT-7.02181962
   END FUNCTION BCdT
+
   DOUBLE PRECISION FUNCTION gammaBH (T)
     implicit none
     real (rk), intent (in) :: T
@@ -203,6 +220,7 @@ contains
 
     gammaBH=1.92907278
   END FUNCTION gammaBH
+
   DOUBLE PRECISION FUNCTION DALJ (T, rho)
     implicit none
     real (rk), intent (in) :: T, rho
