@@ -38,10 +38,10 @@ contains
 
     real (rk) :: eta
 
-    eta = PI/6.*rho * (dC(T))**3
+    eta = PI / 6. * rho * (dC (T))**3
     ALJ =  (log (rho) + betaAHS (eta) &
-         +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
-         +DALJ(T,rho)
+         + rho * BC (T) / exp (gammaBH (T) * rho**2)) * T &
+         + DALJ (T, rho)
   end function ALJ
 
   real (rk) function ALJres (T, rho)
@@ -54,10 +54,10 @@ contains
 
     real (rk) :: eta
 
-    eta = PI/6. *rho*(dC(T))**3
-    ALJres = (betaAHS(eta) &
-         +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
-         +DALJ(T,rho)
+    eta = PI / 6. * rho * (dC (T))**3
+    ALJres = (betaAHS (eta) &
+         + rho * BC (T) / exp (gammaBH (T) * rho**2)) * T &
+         + DALJ (T, rho)
   end function ALJres
 
   real (rk) function PLJ (T, rho) bind (c, name="rism_plj")
