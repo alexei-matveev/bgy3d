@@ -173,6 +173,17 @@ compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 }
 
 
+static void
+compute_c1 (ClosureEnum closure, real beta, Vec v, Vec t, Vec dt, Vec dc)
+{
+  void f (int n, real v[n], real t[n], real dt[n], real dc[n])
+  {
+    rism_closure1 (closure, beta, n, v, t, dt, dc);
+  }
+  vec_app4 (f, v, t, dt, dc);
+}
+
+
 static int
 delta (int i, int j)
 {
@@ -975,6 +986,7 @@ typedef struct Ctx1
 } Ctx1;
 
 
+/* Must have the interface of VecFunc1, see bgy3d-snes.h: */
 static void
 iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
@@ -983,7 +995,6 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
   Vec (*chi_fft)[m] = (void*) ctx->chi_fft; /* [m][m], complex, in */
 
   const ProblemData *PD = ctx->HD->PD;
-  // const real rho = PD->rho;
   const real beta = PD->beta;
   const real h3 = volume_element (PD);
   const real L3 = volume (PD);
@@ -1078,6 +1089,60 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
            out    in
   */
   VecAXPY (dT, -1.0, T);
+}
+
+
+/* Must have the interface of VecFunc2, see bgy3d-snes.h: */
+static void
+jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
+{
+  /* See iterate_t1() above! */
+  const int m = ctx->m;
+  Vec (*chi_fft)[m] = (void*) ctx->chi_fft; /* [m][m], complex, in */
+
+  const ProblemData *PD = ctx->HD->PD;
+  const real beta = PD->beta;
+  const real h3 = volume_element (PD);
+  const real L3 = volume (PD);
+
+  /* Establish aliases to the subsections of the long Vecs: */
+  local Vec t[m], dt[m], jdt[m];
+  vec_aliases_create1 (T, m, t);
+  vec_aliases_create1 (dT, m, dt);
+  vec_aliases_create1 (JdT, m, jdt);
+
+  for (int i = 0; i < m; i++)
+    {
+      /* Re-use ctx->c[] work array for dc(r): */
+      compute_c1 (PD->closure, beta, ctx->v_short[i], t[i], dt[i], ctx->c[i]);
+
+      /* Re-use ctx->c_fft[] work array for dc(k): */
+      MatMult (ctx->HD->fft_mat, ctx->c[i], ctx->c_fft[i]);
+
+      VecScale (ctx->c_fft[i], h3);
+    }
+
+  /* Re-use ctx->t_fft[] work array for (χ - 1) * dc: */
+  star (m, chi_fft, ctx->c_fft, ctx->t_fft);
+
+  /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
+  for (int i = 0; i < m; i++)
+    {
+      /* Put J * dT = (χ - 1) * dc into the Vec provided by the solver: */
+      MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], jdt[i]);
+
+      /* Scaling by inverse volume factor in backward FFT */
+      VecScale (jdt[i], 1.0 / L3);
+    }
+
+  vec_aliases_destroy1 (T, m, t);
+  vec_aliases_destroy1 (dT, m, dt);
+  vec_aliases_destroy1 (JdT, m, jdt);
+
+  /*
+    J * δt := δF = δ(T[t] - t) = δT - δt = (χ - 1) * δc - δt
+  */
+  VecAXPY (JdT, -1.0, dT);
 }
 
 
@@ -1467,8 +1532,7 @@ hnc3d_solute_solve (const ProblemData *PD,
           .tau_fft = tau_fft,         /* [m] or NULL, complex, in */
         };
 
-      /* FIXME: no Jacobian yet! */
-      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, NULL, T);
+      bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
     }
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
