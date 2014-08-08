@@ -42,7 +42,6 @@ contains
     ALJ =  (log (rho) + betaAHS (eta) &
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
-    RETURN
   END FUNCTION ALJ
   ! Helmholtz free energy (without ideal term)
   DOUBLE PRECISION FUNCTION ALJres(T,rho)
@@ -56,7 +55,6 @@ contains
     ALJres = (betaAHS(eta) &
          +rho*BC(T)/exp(gammaBH(T)*rho**2))*T &
          +DALJ(T,rho)
-    RETURN
   END FUNCTION ALJres
   ! Pressure
   real (rk) FUNCTION PLJ (T, rho) bind (c, name="rism_plj")
@@ -90,7 +88,6 @@ contains
          + BC(T)/exp(gammaBH(T)*rho**2) &
          *rho*(1-2*gammaBH(T)*rho**2))*T &
          +sum )*rho
-    RETURN
   END FUNCTION PLJ
   ! Internal energy
   real (rk) FUNCTION ULJ (T, rho) bind (c, name="rism_ulj")
@@ -125,7 +122,6 @@ contains
          (-25.62099890)*3))))/T)/T) *rho*rho
     ULJ = 3*(zHS(eta)-1)*dBHdT/d &
          +rho*dB2BHdT/exp(gammaBH(T)*rho**2) +sum
-    RETURN
   END FUNCTION ULJ
   DOUBLE PRECISION FUNCTION zHS (eta)
     implicit none
@@ -133,7 +129,6 @@ contains
     ! *** end of interface ***
 
     zHS = (1+eta*(1+eta*(1-eta/1.5*(1+eta)))) / (1-eta)**3
-    RETURN
   END FUNCTION zHS
   DOUBLE PRECISION FUNCTION betaAHS (eta)
     implicit none
@@ -142,7 +137,6 @@ contains
 
     betaAHS = log (1 - eta) / 0.6 &
          + eta*( (4.0/6*eta-33.0/6)*eta+34.0/6 ) /(1.-eta)**2
-    RETURN
   END FUNCTION betaAHS
   ! hBH diameter
   DOUBLE PRECISION FUNCTION dLJ (T)
@@ -155,7 +149,6 @@ contains
     dLJ = ((( 0.011117524191338 *isT-0.076383859168060) &
          *isT)*isT+0.000693129033539)/isT+1.080142247540047 &
          + 0.127841935018828 * log (isT)
-    RETURN
   END FUNCTION dLJ
   DOUBLE PRECISION FUNCTION dC (T)
     implicit none
@@ -167,7 +160,6 @@ contains
     sT = sqrt (T)
     dC = -0.063920968 * log (T) + 0.011117524 / T &
          -0.076383859/sT+1.080142248+0.000693129*sT
-    RETURN
   END FUNCTION dC
   DOUBLE PRECISION FUNCTION dCdT (T)
     implicit none
@@ -179,7 +171,6 @@ contains
     sT = sqrt (T)
     dCdT =   0.063920968*T+0.011117524+(-0.5*0.076383859 &
          -0.5*0.000693129*T)*sT
-    RETURN
   END FUNCTION dCdT
   DOUBLE PRECISION FUNCTION BC (T)
     implicit none
@@ -192,7 +183,6 @@ contains
     BC = (((((-0.58544978*isT+0.43102052)*isT &
          +.87361369)*isT-4.13749995)*isT+2.90616279)*isT &
          -7.02181962)/T+0.02459877
-    RETURN
   END FUNCTION BC
   DOUBLE PRECISION FUNCTION BCdT (T)
     implicit none
@@ -205,7 +195,6 @@ contains
     BCdT = ((((-0.58544978*3.5*isT+0.43102052*3)*isT &
          +0.87361369*2.5)*isT-4.13749995*2)*isT &
          +2.90616279*1.5)*isT-7.02181962
-    RETURN
   END FUNCTION BCdT
   DOUBLE PRECISION FUNCTION gammaBH (T)
     implicit none
@@ -213,7 +202,6 @@ contains
     ! *** end of interface ***
 
     gammaBH=1.92907278
-    RETURN
   END FUNCTION gammaBH
   DOUBLE PRECISION FUNCTION DALJ (T, rho)
     implicit none
@@ -230,7 +218,6 @@ contains
          +(-13.37031968+rho*(65.38059570+ &
          rho*((-115.09233113)+rho*(88.91973082 &
          +rho* (-25.62099890)))))/T)/T) *rho*rho
-    RETURN
   END FUNCTION DALJ
 end module eos
 
