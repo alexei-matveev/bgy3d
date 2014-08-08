@@ -108,7 +108,7 @@ contains
 
 
   elemental function closure1 (method, beta, v, t, dt) result (dc)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, &
          PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
     integer, intent (in) :: method
@@ -133,7 +133,7 @@ contains
 
 
   pure function order (method) result (n)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
+    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, &
          PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
     integer, intent (in) :: method
@@ -310,7 +310,7 @@ contains
 
 
   elemental function closure_rbc (method, beta, v, t, expB) result (c)
-    use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY
+    use foreign, only: HNC => CLOSURE_HNC
     implicit none
     integer, intent (in) :: method
     real (rk), intent (in) :: beta, v, t, expB
