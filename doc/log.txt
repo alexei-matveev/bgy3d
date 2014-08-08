@@ -181,3 +181,32 @@ L, A   N      dG(HNC1), kcal     dG(KH1), kcal      dG(KH3), kcal
 20      256   -385.854652621695  -377.376994017093      -364.519306
 20      192   -385.908571179339  -377.22553864209       -364.491111
 20      128   -385.529099349837  -377.537794240463      -362.570391
+
+Let  us see  how far  we can  go towards  HNC in  3D case  using PSE-n
+closure series. In 1D case one will eventually have to choose the SNES
+solver to get convergence. Nothing  helps for 3D beyond PSE2. For some
+reason   with  Newton   solver  the   pre-evaluation  of   1D  solvent
+susceptibility  in  some  3D   runs  fails  making  it  impossible  to
+preceed. It converges with trial solver though, but then the actual 3D
+diverge. Maybe we need to allow use of solvent susceptibility provided
+by the user in 3D runs too.
+
+L, A    N     Closure   dG(1D), kcal       dG(3D), kcal
+----   ----   -------   -----------------  -----------------
+10       96    KH       -376.970151900645  -364.558910464923
+               PSE1     -376.970151908616  -364.558820030685
+               PSE2     -383.553327261615  -380.223757751007
+               PSE3     -385.057691932658                NaN
+               HNC      -385.657961752139                NaN
+
+10     128     KH       -377.121277491907  -364.586057139761
+               PSE1     -377.122176069745  -364.586177842915
+               PSE2     -383.510430411146  -380.044450851092
+               PSE3     -384.955316501714                NaN
+               HNC      -385.603986849337                NaN
+
+20     196     KH       -377.128218053386  -364.517727576504
+               PSE1     -377.128215305107  -364.512650416452
+               PSE2     -383.489937109086  -380.100828665493
+               PSE3     -384.960418586015                NaN
+               HNC      -385.607893836981                NaN
