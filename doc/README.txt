@@ -1213,7 +1213,10 @@ HCN                qm/gp    -15.983500809598   0.600000
 
 More energy details about selected "small" neutral solutes for combiantion of
 3D-RISM/QM, the meaning of each columns are the same as in "MM and QM solutes
-in KH-water" section.
+in KH-water" section. dG is "solvation free energy", calculated as:
+dG = E~reorg~ + $\Delta\mu$, E~reorg~ is the number in bracket, equal to the
+energy difference between "gp" and "aq" QM solute.
+
 
 Solute    Model            E~el~, au    D~u~, eA   D~v~, eA  D~u~*, eA   E~c~    E~c~   dG,KH   dG,GF
 -------   --------  ----------------   ---------  --------- ----------  ------  ------  ------ -------
