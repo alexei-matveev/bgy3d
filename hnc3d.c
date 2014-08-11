@@ -1327,6 +1327,55 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
 
 
 /*
+  XXX: hm,  I am  getting very big  (in absolute terms)  mean energies
+  here, around -25.8 kcal for PR-SPC/E water. Most of it, around -28.5
+  kcal  is  the  (long-range)  electrostatic energy.   The  literature
+  operates  with energies  of about  -41  kJ instead  [1]. The  formal
+  definition of the internal energy is rather U = ∂(βA) / ∂β, and I am
+  not  even sure  if  the *excess*  chemical  potential μ  == A  here.
+  Numerical  experiment shows that  such a  derivative might  be quite
+  different, in  this case about  -13 kcal or  -55 kJ. Anyway,  we are
+  mostly  testing integration  of  singular terms  in preparation  for
+  forces here.
+
+  [1] http://www1.lsbu.ac.uk/water/models.html
+*/
+static real
+energy (State *HD, int m, const Site solvent[m],
+        Vec h[m],               /* in */
+        Vec v_short[m],         /* in */
+        Vec uc)                 /* in */
+{
+  /* Solvent charge density (divided by ρ): */
+  local Vec nv = vec_duplicate (uc);
+  local Vec g = vec_duplicate (uc);
+  const real dN = HD->PD->rho * volume_element (HD->PD);
+
+  real e = 0.0;
+  VecSet (nv, 0.0);
+  for (int i = 0; i < m; i++)
+    {
+      /* FIXME:  Assuming  neutral  solvent  here.  The  factor  ρ  is
+         included in dN. */
+      VecAXPY (nv, solvent[i].charge, h[i]);
+
+      /* Short-range  contribution,  potential  v  is  singular,  g  ~
+         exp(-βv) is negligibly small. See how it works together: */
+      VecCopy (h[i], g);
+      VecShift (g, 1.0);
+      e += vec_dot (g, v_short[i]) * dN;
+    }
+  /* Long-range Coulomb term: */
+  e += vec_dot (nv, uc) * dN;
+
+  vec_destroy (&nv);
+  vec_destroy (&g);
+
+  return e;
+}
+
+
+/*
   Solving  HNC3d equations.   Solvent  susceptibility χ  -  1 of  pure
   solvent  appears  as a  fixed  input  here.  A primary  variable  is
   indirect correlation t related to h by one of the closure relations.
