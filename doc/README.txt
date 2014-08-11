@@ -1033,10 +1033,10 @@ C~3~H~6~O            12.525    6.934     7.868     2.214
 C~4~H~8~O            16.640    9.941    12.032     5.270
 C~5~H~10~O           21.194   13.287    16.307     8.339
 Others
-NH~3                  1.001   -1.300    -0.348    -2.672     0.706
-HCN                   3.346    0.551    -0.883    -3.725     2.475
-H~2~O                -5.720   -7.753   -11.664   -13.782     3.203
-----------------------------------------------------------------------------
+NH~3                  1.001   -1.300    -0.348    -2.672
+HCN                   3.346    0.551    -0.883    -3.725
+H~2~O                -5.720   -7.753   -11.664   -13.782
+--------------------------------------------------------
 
 
 The calculation of solvation free energy for QM solutes perturbed by
@@ -1068,6 +1068,62 @@ NH~3              -11.678376301039  -11.679500598278       0.705513901882
 HCN               -15.979556250946  -15.983500809327       2.475271376683
 H~2~O             -17.149248187695  -17.154353092917       3.203406961235
 --------------------------------------------------------------------------
+
+To correct the error in solvation free energy which is proportional with
+partial molar volume (PMV) of solute, here we tried to apply the
+correction term:
+$$
+\Delta G_{corr} = \Delta G + a * \rho V
+$$
+
+while for gas phase solute, $\Delta G = \Delta\mu$, for solvated solute,
+$\Delta G = E_{reorg} + \Delta\mu$. a = -3.3 kcal/mol, which is an
+approximation of values from Palmer et al.^1^ and Sergiievskyi et
+al.^2^.
+
+Solute              $\rho$V   KH-gp-c  (GF)-gp-c  KH-aq-c  (GF)-aq-c
+-----------------  --------  -------- ---------- -------- ----------
+Alcohols
+CH~3~OH                1.90    -3.606     -7.141   -5.568     -9.173
+C~2~H~5~OH             2.77    -3.024     -6.785   -4.071     -8.905
+C~3~H~7~OH             3.60     0.065     -5.833   -1.734     -7.697
+C~4~H~9~OH             4.42     1.131     -5.856   -0.762     -7.816
+C~5~H~11~OH            5.25     2.779     -5.451    0.845     -7.452
+Carboxylate acids
+HCOOH
+CH~3~COOH
+C~2~H~5~COOH
+C~3~H~7~COOH
+C~4~H~9~COOH
+Aldehydes
+CH~2~O                 1.73    -0.736     -3.881   -2.369     -5.553
+C~2~H~4~O              2.59    -0.145     -4.566   -2.115     -6.597
+C~3~H~6~O              3.41     1.272     -4.319   -0.615     -6.269
+C~4~H~8~O              4.24     2.648     -4.051    0.782     -5.980
+C~5~H~10~O             5.07     4.463     -3.444    2.510     -5.458
+Others
+NH~3
+HCN
+H~2~O
+--------------------------------------------------------------------
+
+a). $\rho$V is from the tabulated values in supporting material of
+Palmer et al.^1^, in which only alcohols and aldehydes are available for
+our case. FIXME: for coarse evaluation purpose only, should use
+calculated values in our case.
+
+[1] Palmer, D. S.; Frolov, A. I.; Ratkova, E. L.; Fedorov, M. V. Journal
+    of Physics: Condensed Matter 2010, 22, 492101.
+    http://stacks.iop.org/0953-8984/22/i=49/a=492101
+[2] Sergiievskyi, V. P.; Jeanmairet, G.; Leyesque, M.; Borgis, D. J.
+    Phys. Chem. Lett. 2014, 5, 1935-1942.
+    http://pubs.acs.org/doi/abs/10.1021/jz500428s
+
+
+
+
+
+
 
 
 PCM results for comparison
