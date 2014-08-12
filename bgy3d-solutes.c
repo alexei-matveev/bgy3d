@@ -15,8 +15,172 @@
 #include "bgy3d-poisson.h"      /* bgy3d_poisson() */
 #include "bgy3d-solutes.h"      /* struct Site */
 #include "bgy3d-solvents.h"     /* G_COULOMB_INVERSE_RANGE */
-#include "bgy3d-force.h"        /* lennard_jones_coulomb_short() */
+#include "bgy3d-force.h"        /* bgy3d_coulomb_long_fft() */
 #include "bgy3d-vec.h"          /* bgy3d_vec_read() */
+
+
+/* Singular as 4/r¹² */
+static inline pure real
+lj0 (real r)
+{
+  const real p6 = 1 / pow (r, 6);
+  return 4 * p6 * (p6 - 1);
+}
+
+
+/* Singular as -48/r¹³ */
+static inline pure real
+lj1 (real r)
+{
+  const real p6 = 1 / pow (r, 6);
+  return 4 * p6 * (6 - 12 * p6) / r;
+}
+
+
+#define RMIN 0.02               /* 2% of sigma */
+/*
+  Regularized at R,  the same as lj0(r) for r >=  R.  For lower values
+  of the distance  r we reperesent potential by  a cap, an upside-down
+  parabola  a + b  * (R²  - r²).   To glue  the two  cases we  need to
+  satisfy these at r = R:
+
+    a + b(r² - R²) = f(r)
+    2br = f'(r)
+*/
+static inline pure real
+ljcap0 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return lj0 (r);
+  else
+    {
+      // printf ("ljcap0: r = %f\n", r);
+      const real b = lj1 (R) / (2 * R);
+      const real a = lj0 (R);
+      return a + b * (r - R) * (r + R);
+    }
+}
+
+
+/* Regularized at R */
+static inline pure real
+ljcap1 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return lj1 (r);
+  else
+    {
+      // printf ("ljcap1: r = %f\n", r);
+      const real b = lj1 (R) / (2 * R);
+      return  2 * b * r;
+    }
+}
+#undef RMIN
+
+
+/* Singlular as 1/r */
+static inline pure real
+cs0 (real r)
+{
+  return erfc (r) / r;
+}
+
+
+/* Singlular as -1/r²: */
+static inline pure real
+cs1 (real r)
+{
+  const real r2 = pow (r, 2);
+  return - (erfc (r) + (2 / sqrt (M_PI)) * r * exp (-r2)) / r2;
+}
+
+
+#define RMIN 0.02               /* 2% of G^-1 */
+/*
+  Regularized at R,  the same as cs0(r) for r >=  R.  For lower values
+  of the distance  r we reperesent potential by  a cap, an upside-down
+  parabola  a + b  * (R²  - r²).   To glue  the two  cases we  need to
+  satisfy these at r = R:
+
+    a + b(r² - R²) = f(r)
+    2br = f'(r)
+*/
+static inline pure real
+cscap0 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return cs0 (r);
+  else
+    {
+      // printf ("cscap0: r = %f\n", r);
+      const real b = cs1 (R) / (2 * R);
+      const real a = cs0 (R);
+      return a + b * (r - R) * (r + R);
+    }
+}
+#undef RMIN
+
+
+/*
+  Smooth long-range erf(r)/r, finite:
+
+    taylor ((√π/2) * erf(r)/r, r, 0, 8) =
+
+            2    4    6    8
+           r    r    r    r
+       1 - -- + -- - -- + --- + . . .
+           3    10   42   216
+
+*/
+static inline pure real
+cl0 (real r)
+{
+  if (likely (r >= 0.02))       /* 0.02^8/216 ~ 1.2e-16 */
+    return erf (r) / r;
+  else
+    {
+      // printf ("cl0: r = %f\n", r);
+      const real r2 = pow (r, 2);
+      return (2 / sqrt (M_PI)) *
+        (1. + r2 * (-1./3. + r2 * (1./10. + r2 * (-1./42.))));
+    }
+}
+
+
+/*
+  Derivative of erf(r)/r is also finite and smooth, even if it may not
+  look so:
+
+       -r²
+    2 e         erf(r)
+   --------  -  ------
+    √π r          r²
+
+
+  Taylor ((-3√π/4r) * derivative (erf(r)/r, r), r, 0, 8) =
+               2      4    6    8
+            3 r    3 r    r    r
+        1 - ---- + ---- - -- + -- + . . .
+             5      14    18   88
+
+*/
+static inline pure real
+cl1 (real r)
+{
+  const real r2 = pow (r, 2);
+  if (likely (r >= 0.02))       /* 0.02^8/88 ~ 2.9e-16 */
+    return ((2 / sqrt (M_PI)) * r * exp (-r2) - erf (r)) / r2;
+  else
+    {
+      assert (false);
+      return - (4 / (3 * sqrt (M_PI))) * r *
+        (1. + r2 * (-3./5. + r2 * (3./14. + r2 * (-1./18.))));
+    }
+}
+
 
 
 /*
@@ -146,17 +310,17 @@ ljc (const Site *A, int n, const Site S[n])
       const Site *B = &S[i];    /* shorter alias */
 
       /* Interaction parameters for a pair of LJ sites: */
-      real e2 = sqrt (A->epsilon * B->epsilon);
-      real s2 = 0.5 * (A->sigma + B->sigma);
-      real q2 = A->charge * B->charge;
+      real eab = sqrt (A->epsilon * B->epsilon);
+      real sab = 0.5 * (A->sigma + B->sigma);
+      real qab = A->charge * B->charge * EPSILON0INV;
 
       /* Distance from a grid point to this site: */
-      real r_s = sqrt (SQR(A->x[0] - B->x[0]) +
+      real rab = sqrt (SQR(A->x[0] - B->x[0]) +
                        SQR(A->x[1] - B->x[1]) +
                        SQR(A->x[2] - B->x[2]));
 
       /* Lennard-Jones + Coulomb, short range part: */
-      field += lennard_jones_coulomb_short (r_s, s2, e2, G, q2);
+      field += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
     }
 
   return field;
@@ -330,17 +494,6 @@ coulomb_long_fft (const State *BHD,
 }
 
 
-/* Regularized erf (x) / x */
-static inline real
-erfx (real x)
-{
-  if (unlikely (x == 0.0))
-    return 2 / sqrt (M_PI);
-  else
-    return erf (x) / x;
-}
-
-
 static void
 coulomb_long (const State *BHD,
               int n, const real q[n], real x[n][3], real G, /* in */
@@ -357,8 +510,8 @@ coulomb_long (const State *BHD,
                        SQR (y[1] - x[i][1]) +
                        SQR (y[2] - x[i][2]));
 
-        /* erfx(x) == erf(x)/x */
-        sum += q[i] * G * erfx (G * r);
+        /* cl0(r) == erf(r)/r */
+        sum += q[i] * G * cl0 (G * r);
       }
     return EPSILON0INV * sum;
   }
