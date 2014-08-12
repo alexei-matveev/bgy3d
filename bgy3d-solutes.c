@@ -41,7 +41,7 @@ lj1 (real r)
 /*
   Regularized at R,  the same as lj0(r) for r >=  R.  For lower values
   of the distance  r we reperesent potential by  a cap, an upside-down
-  parabola  a + b  * (R²  - r²).   To glue  the two  cases we  need to
+  parabola  a + b  * (r²  - R²).   To glue  the two  cases we  need to
   satisfy these at r = R:
 
     a + b(r² - R²) = f(r)
@@ -101,7 +101,7 @@ cs1 (real r)
 /*
   Regularized at R,  the same as cs0(r) for r >=  R.  For lower values
   of the distance  r we reperesent potential by  a cap, an upside-down
-  parabola  a + b  * (R²  - r²).   To glue  the two  cases we  need to
+  parabola  a + b  * (r²  - R²).   To glue  the two  cases we  need to
   satisfy these at r = R:
 
     a + b(r² - R²) = f(r)
