@@ -237,5 +237,50 @@ contains
          rho*((-115.09233113)+rho*(88.91973082 &
          +rho* (-25.62099890)))))/T)/T) *rho*rho
   end function DALJ
+
+
+  function eos_alj (T, rho) result (A) bind (c)
+    use lisp, only: obj, flonum
+    implicit none
+    type (obj), intent (in), value :: T, rho
+    type (obj) :: A
+    ! *** end of interface ***
+
+    A = flonum (alj (flonum (T), flonum (rho)))
+  end function eos_alj
+
+
+  function eos_alj_res (T, rho) result (A) bind (c)
+    use lisp, only: obj, flonum
+    implicit none
+    type (obj), intent (in), value :: T, rho
+    type (obj) :: A
+    ! *** end of interface ***
+
+    A = flonum (aljres (flonum (T), flonum (rho)))
+  end function eos_alj_res
+
+
+  function eos_plj (T, rho) result (P) bind (c)
+    use lisp, only: obj, flonum
+    implicit none
+    type (obj), intent (in), value :: T, rho
+    type (obj) :: P
+    ! *** end of interface ***
+
+    P = flonum (plj (flonum (T), flonum (rho)))
+  end function eos_plj
+
+
+  function eos_ulj (T, rho) result (U) bind (c)
+    use lisp, only: obj, flonum
+    implicit none
+    type (obj), intent (in), value :: T, rho
+    type (obj) :: U
+    ! *** end of interface ***
+
+    U = flonum (ulj (flonum (T), flonum (rho)))
+  end function eos_ulj
+
 end module eos
 
