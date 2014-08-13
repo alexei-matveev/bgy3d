@@ -1375,6 +1375,76 @@ energy (State *HD, int m, const Site solvent[m],
 }
 
 
+static real
+energy1 (State *HD,
+         int m, const Site solvent[m],
+         int n, const Site solute[n],
+         Vec h[m],               /* in */
+         real dx[n][3])          /* in */
+{
+  local Vec dv[m];
+  vec_create1 (HD->da, m, dv);
+
+  /* Compute differential dv of the solute field: */
+  bgy3d_solute_field1 (HD, m, solvent, n, solute, dx, dv);
+
+  local Vec g = vec_create (HD->da);
+  const real dN = HD->PD->rho * volume_element (HD->PD);
+
+  real de = 0.0;
+  for (int i = 0; i < m; i++)
+    {
+      /* Differential  dv  is singular,  g  ~  exp(-βv) is  negligibly
+         small. See how it works together: */
+      VecCopy (h[i], g);
+      VecShift (g, 1.0);
+      /* PRINTF ("XXX: min(dv) = %f max(dv) = %f\n", vec_min (dv[i]), vec_max (dv[i])); */
+      /* PRINTF ("XXX: min(g) = %f max(g) = %f\n", vec_min (g), vec_max (g)); */
+
+      de += vec_dot (g, dv[i]) * dN;
+      /* PRINTF ("XXX: pass\n"); */
+    }
+
+  vec_destroy1 (m, dv);
+  vec_destroy (&g);
+
+  return de;
+}
+
+
+static void
+forces (State *HD,
+        int m, const Site solvent[m],
+        int n, const Site solute[n],
+        Vec h[m],               /* in */
+        real f[n][3])           /* out */
+{
+  real dx[n][3];
+
+  void set_dx (int k)
+  {
+    int k1 = 0;
+    for (int i = 0; i < n; i++)
+      FOR_DIM
+        {
+          dx[i][dim] = (k == k1? 1.0: 0.0);
+          k1++;
+        }
+    assert (k1 == n * 3);
+  }
+
+  int k = 0;
+  for (int i = 0; i < n; i++)
+    FOR_DIM
+      {
+        set_dx (k);
+        f[i][dim] = - energy1 (HD, m, solvent, n, solute, h, dx);
+        k++;
+      }
+  assert (k == n * 3);
+}
+
+
 /*
   Solving  HNC3d equations.   Solvent  susceptibility χ  -  1 of  pure
   solvent  appears  as a  fixed  input  here.  A primary  variable  is
@@ -1702,6 +1772,25 @@ hnc3d_solute_solve (const ProblemData *PD,
     vec_destroy1 (m, cl);
     vec_destroy1 (m, x);
   }
+
+  /* Derivatives of the chemical potential: */
+  if (true)
+    {
+      PRINTF ("# XXX: call energy 5 ...\n");
+      const real e = energy (HD, m, solvent, h, v_short, uc);
+      PRINTF ("# XXX: energy = %f\n", e);
+
+      real f[n][3], fsum[3] = {0.0, 0.0, 0.0};
+      forces (HD, m, solvent, n, solute, h, f);
+      for (int i = 0; i < n; i++)
+        {
+          FOR_DIM
+            fsum[dim] += f[i][dim];
+          PRINTF ("# XXX: f(%d) = (%f %f %f)\n", i, f[i][0], f[i][1], f[i][2]);
+        }
+      PRINTF ("# XXX: f(s) = (%f %f %f)\n", fsum[0], fsum[1], fsum[2]);
+    }
+
   /* Last used for x = -βv + t and in chempot code above. */
   vec_destroy1 (m, v_short);
   vec_destroy1 (m, c);
