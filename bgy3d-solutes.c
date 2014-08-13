@@ -193,6 +193,34 @@ cscap1 (real r)
       return  2 * b * r;
     }
 }
+
+
+/*
+  Capped Coulomb as a sum of capped short and finite long range terms.
+  The fast  path avoids separate  computation of short  and long-range
+  terms.  Also this  seems to be more correct that  capping f(r) = 1/r
+  indipendently of its singular short range part.
+*/
+static inline pure real
+ccap0 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return 1.0 / r;
+  else
+    return cscap0 (r) + cl0 (r);
+}
+
+
+static inline pure real
+ccap1 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return -1.0 / (r * r);
+  else
+    return cscap1 (r) + cl1 (r);
+}
 #undef RMIN
 
 
