@@ -80,64 +80,6 @@ ljcap1 (real r)
 #undef RMIN
 
 
-/* Singlular as 1/r */
-static inline pure real
-cs0 (real r)
-{
-  return erfc (r) / r;
-}
-
-
-/* Singlular as -1/r²: */
-static inline pure real
-cs1 (real r)
-{
-  const real r2 = pow (r, 2);
-  return - (erfc (r) + (2 / sqrt (M_PI)) * r * exp (-r2)) / r2;
-}
-
-
-#define RMIN 0.02               /* 2% of G^-1 */
-/*
-  Regularized at R,  the same as cs0(r) for r >=  R.  For lower values
-  of the distance  r we reperesent potential by  a cap, an upside-down
-  parabola  a + b  * (r²  - R²).   To glue  the two  cases we  need to
-  satisfy these at r = R:
-
-    a + b(r² - R²) = f(r)
-    2br = f'(r)
-*/
-static inline pure real
-cscap0 (real r)
-{
-  const real R = RMIN;
-  if (likely (r >= R))
-    return cs0 (r);
-  else
-    {
-      // printf ("cscap0: r = %f\n", r);
-      const real b = cs1 (R) / (2 * R);
-      const real a = cs0 (R);
-      return a + b * (r - R) * (r + R);
-    }
-}
-
-static inline pure real
-cscap1 (real r)
-{
-  const real R = RMIN;
-  if (likely (r >= R))
-    return cs1 (r);
-  else
-    {
-      // printf ("cscap1: r = %f\n", r);
-      const real b = cs1 (R) / (2 * R);
-      return  2 * b * r;
-    }
-}
-#undef RMIN
-
-
 /*
   Smooth long-range erf(r)/r, finite:
 
@@ -195,6 +137,63 @@ cl1 (real r)
     }
 }
 
+
+/* Singlular as 1/r */
+static inline pure real
+cs0 (real r)
+{
+  return erfc (r) / r;
+}
+
+
+/* Singlular as -1/r²: */
+static inline pure real
+cs1 (real r)
+{
+  const real r2 = pow (r, 2);
+  return - (erfc (r) + (2 / sqrt (M_PI)) * r * exp (-r2)) / r2;
+}
+
+
+#define RMIN 0.02               /* 2% of G^-1 */
+/*
+  Regularized at R,  the same as cs0(r) for r >=  R.  For lower values
+  of the distance  r we reperesent potential by  a cap, an upside-down
+  parabola  a + b  * (r²  - R²).   To glue  the two  cases we  need to
+  satisfy these at r = R:
+
+    a + b(r² - R²) = f(r)
+    2br = f'(r)
+*/
+static inline pure real
+cscap0 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return cs0 (r);
+  else
+    {
+      printf ("cscap0: r = %f\n", r);
+      const real b = cs1 (R) / (2 * R);
+      const real a = cs0 (R);
+      return a + b * (r - R) * (r + R);
+    }
+}
+
+static inline pure real
+cscap1 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return cs1 (r);
+  else
+    {
+      printf ("cscap1: r = %f\n", r);
+      const real b = cs1 (R) / (2 * R);
+      return  2 * b * r;
+    }
+}
+#undef RMIN
 
 
 /*
