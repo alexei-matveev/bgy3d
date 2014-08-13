@@ -121,6 +121,20 @@ cscap0 (real r)
       return a + b * (r - R) * (r + R);
     }
 }
+
+static inline pure real
+cscap1 (real r)
+{
+  const real R = RMIN;
+  if (likely (r >= R))
+    return cs1 (r);
+  else
+    {
+      // printf ("cscap1: r = %f\n", r);
+      const real b = cs1 (R) / (2 * R);
+      return  2 * b * r;
+    }
+}
 #undef RMIN
 
 
@@ -154,10 +168,10 @@ cl0 (real r)
   Derivative of erf(r)/r is also finite and smooth, even if it may not
   look so:
 
-       -r²
-    2 e         erf(r)
-   --------  -  ------
-    √π r          r²
+            -r²
+    (2/√π) re  - erf(r)
+   ----------------------
+             r²
 
 
   Taylor ((-3√π/4r) * derivative (erf(r)/r, r), r, 0, 8) =
@@ -175,7 +189,7 @@ cl1 (real r)
     return ((2 / sqrt (M_PI)) * r * exp (-r2) - erf (r)) / r2;
   else
     {
-      assert (false);
+      // printf ("cl1: r = %f\n", r);
       return - (4 / (3 * sqrt (M_PI))) * r *
         (1. + r2 * (-3./5. + r2 * (3./14. + r2 * (-1./18.))));
     }
