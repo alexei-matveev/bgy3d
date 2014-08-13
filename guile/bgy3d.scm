@@ -38,6 +38,10 @@
    vec-moments
    vec-shift!
    vec-scale!
+   eos-alj
+   eos-alj-res
+   eos-plj
+   eos-ulj
    genpts
    f64dst
    f64+
@@ -70,6 +74,7 @@
    *server*
    vec-print
    vec-norm
+   eos-mulj
    solvent/solvent
    solute/solvent
    pretty-print/serial
@@ -126,6 +131,14 @@
 ;;; symbols. However, this caused annoying warnings with Guile 2 which
 ;;; complains about "possibly undefined symbols" at compile time.
 ;;;
+
+;;;
+;;; μ = A + P/ρ - T
+;;;
+(define (eos-mulj T rho)
+  (let ((A (eos-alj T rho))
+        (P (eos-plj T rho)))
+    (+ A (/ P rho) (- T))))
 
 ;;;
 ;;; This  form can  be  used for  code  to be  evaluated  only on  one
