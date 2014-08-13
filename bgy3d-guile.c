@@ -21,6 +21,7 @@
 #include "rism-dst.h"           /* rism_dst() */
 #include "rism-rdf.h"           /* rism_rdf() */
 #include "rism.h"               /* rism_solvent() */
+#include "eos.h"                /* eos_alj(), etc. */
 #include "lebed/lebed.h"        /* genpts() */
 #include "bgy3d-guile.h"
 
@@ -1009,6 +1010,10 @@ static void guile_init_vec_type (void)
   EXPORT ("f64+", 2, 0, 0, guile_f64_add);
   EXPORT ("f64*", 2, 0, 0, guile_f64_mul);
   EXPORT ("f64scale", 2, 0, 0, guile_f64_scale);
+  EXPORT ("eos-alj", 2, 0, 0, eos_alj);
+  EXPORT ("eos-alj-res", 2, 0, 0, eos_alj_res);
+  EXPORT ("eos-plj", 2, 0, 0, eos_plj);
+  EXPORT ("eos-ulj", 2, 0, 0, eos_ulj);
 }
 
 
