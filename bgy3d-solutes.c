@@ -173,7 +173,7 @@ cscap0 (real r)
     return cs0 (r);
   else
     {
-      printf ("cscap0: r = %f\n", r);
+      // printf ("cscap0: r = %f\n", r);
       const real b = cs1 (R) / (2 * R);
       const real a = cs0 (R);
       return a + b * (r - R) * (r + R);
@@ -188,7 +188,7 @@ cscap1 (real r)
     return cs1 (r);
   else
     {
-      printf ("cscap1: r = %f\n", r);
+      // printf ("cscap1: r = %f\n", r);
       const real b = cs1 (R) / (2 * R);
       return  2 * b * r;
     }
