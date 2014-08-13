@@ -65,7 +65,7 @@ module snes
   end interface
 
   !
-  ! This is a concrete function, implemented in C:
+  ! This are concrete functions, implemented in C:
   !
   interface
      subroutine rism_snes (ctx, f, df, n, x) bind (c)
