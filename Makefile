@@ -137,6 +137,7 @@ f-objs += \
 	linalg.o \
 	options.o \
 	foreign.o \
+	eos.o \
 	lisp.o \
 	units.o \
 	kinds.o \
