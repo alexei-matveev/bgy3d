@@ -2106,9 +2106,9 @@ contains
   end function lj
 
 
-  elemental function lj1 (r, dr) result (df)
+  elemental function lj1 (r) result (df)
     implicit none
-    real (rk), intent (in) :: r, dr
+    real (rk), intent (in) :: r
     real (rk) :: df
     ! *** end of interfce ***
 
@@ -2116,7 +2116,7 @@ contains
 
     sr6 = 1 / r**6
 
-    df = 4 * sr6 * (6 - 12 * sr6) * dr / r
+    df = 4 * sr6 * (6 - 12 * sr6) / r
   end function lj1
 
 
@@ -2322,7 +2322,7 @@ contains
             fr = - EPSILON0INV * a % charge * b % charge / rab**2
 
             if (sigma /= 0.0) then
-               fr = fr + (epsilon / sigma) * lj1 (rab / sigma, 1.0d0)
+               fr = fr + (epsilon / sigma) * lj1 (rab / sigma)
             endif
          end block
       endif
