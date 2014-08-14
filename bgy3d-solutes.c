@@ -46,6 +46,25 @@ lj1 (real r)
 
     a + b(r² - R²) = f(r)
     2br = f'(r)
+
+  The capped function at r = 0 will aquire the value of
+
+    a - bR² = f(R) - R f'(R) / 2
+
+  (note that  b and  f'(R) are likey  negative for  singular functions
+  that go to positive infinity as r -> 0).
+
+  What was really surprising at first, is that setting R = 0.2 or even
+  0.5 (for both  LJ and Coulomb, from the initial  value of 0.02) went
+  unnoticed through the testsuite.   Well, lj0(1/5) = 976500000, which
+  is pretty close to 10^9. The  scale ε of a pair interaction needs to
+  be  very low  in order  to be  still comparable  or below  a typical
+  temperature after multiplying by 10^9.
+
+  The  Coulomb  capping (see  below)  is  probably  more critical  for
+  precision.  Capping  the Coulomb  at R =  1/5 starts to  distort the
+  potential when  it reaches the values about  ~ 5 * 332  kcal for two
+  unit charges. Which is still a high number, but not as much.
 */
 static inline pure real
 ljcap0 (real r)
@@ -90,6 +109,8 @@ ljcap1 (real r)
        1 - -- + -- - -- + --- + . . .
            3    10   42   216
 
+  Do not  confuse the threshold of  the Taylor series  and the capping
+  parameter used for other functions!
 */
 static inline pure real
 cl0 (real r)
@@ -122,6 +143,8 @@ cl0 (real r)
         1 - ---- + ---- - -- + -- + . . .
              5      14    18   88
 
+  Do not  confuse the threshold of  the Taylor series  and the capping
+  parameter used for other functions!
 */
 static inline pure real
 cl1 (real r)
@@ -164,6 +187,13 @@ cs1 (real r)
 
     a + b(r² - R²) = f(r)
     2br = f'(r)
+
+  The capping threshold is measured  in G^-1, the range parameter that
+  defines separation  of the Coulomb  into singular short-  and finite
+  long range parts. This parameter is common for all site pairs and it
+  should better  stay like  this --- at  several places we  employ the
+  fact that  the long-range  interaction all have  the same  shape and
+  only differ by factors given by products of site changes.
 */
 static inline pure real
 cscap0 (real r)
