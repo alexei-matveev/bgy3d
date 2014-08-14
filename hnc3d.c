@@ -1062,7 +1062,13 @@ typedef struct Ctx1
 } Ctx1;
 
 
-/* Must have the interface of VecFunc1, see bgy3d-snes.h: */
+/*
+  Implements the objective function for non-linear solver:
+
+    dt = (χ - 1) * c(t) - t
+
+  Must have the interface of VecFunc1, see bgy3d-snes.h.
+*/
 static void
 iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
 {
