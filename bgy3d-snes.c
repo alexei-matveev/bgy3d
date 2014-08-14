@@ -577,8 +577,8 @@ void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n])
 
 
 /* For solving linear equation F x = b iteratively. */
-static void
-krylov (void *ctx, VecFunc1 F, Vec b, Vec x)
+void
+bgy3d_krylov (void *ctx, VecFunc1 F, Vec b, Vec x)
 {
   local Mat A = mcreate (vec_local_size (b), ctx, F);
 
@@ -622,7 +622,7 @@ rism_krylov (void *ctx, ArrFunc1 f, int n, real b_[n], real x_[n])
   }
 
   /* Petsc does the real work: */
-  krylov (ctx, F, b, x);
+  bgy3d_krylov (ctx, F, b, x);
 
   /* Should not free() */
   vec_destroy (&x);

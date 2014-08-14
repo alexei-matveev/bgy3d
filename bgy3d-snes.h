@@ -37,6 +37,9 @@ typedef void (*VecFunc2) (void *ctx, Vec x, Vec dx, Vec r /* out */);
 */
 void rism_snes (void *ctx, ArrFunc1 f, ArrFunc2 df, int n, real x_[n]);
 
+/* For solving linear equation F(x) = b iteratively. */
+void bgy3d_krylov (void *ctx, VecFunc1 F, Vec b, Vec x);
+
 /* Solves for f(x) = b  iteratively. Has to be consistent with Fortran
    declarations in snes.f90: */
 void rism_krylov (void *ctx, ArrFunc1 f, int n, real b_[n], real x_[n]);
