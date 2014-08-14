@@ -475,6 +475,46 @@ vec_app5 (void (*f)(int n, real x0[n], real x1[n], real x2[n], real x3[n], real 
 }
 
 
+/* FIXME: get rid of chem. pot. form as a functional of many arguments
+   x, h, c, cl, ... And you wont need this monster: */
+static inline void
+vec_app8 (void (*f)(int n,
+                    real x0[n], real x1[n], real x2[n], real x3[n],
+                    real x4[n], real x5[n], real x6[n], real x7[n]),
+          Vec x0, Vec x1, Vec x2, Vec x3,
+          Vec x4, Vec x5, Vec x6, Vec x7)
+{
+  const int n = vec_local_size (x0);
+  assert (vec_local_size (x1) == n);
+  assert (vec_local_size (x2) == n);
+  assert (vec_local_size (x3) == n);
+  assert (vec_local_size (x4) == n);
+  assert (vec_local_size (x5) == n);
+  assert (vec_local_size (x6) == n);
+  assert (vec_local_size (x7) == n);
+
+  local real *x0_ = vec_get_array (x0);
+  local real *x1_ = vec_get_array (x1);
+  local real *x2_ = vec_get_array (x2);
+  local real *x3_ = vec_get_array (x3);
+  local real *x4_ = vec_get_array (x4);
+  local real *x5_ = vec_get_array (x5);
+  local real *x6_ = vec_get_array (x6);
+  local real *x7_ = vec_get_array (x7);
+
+  f (n, x0_, x1_, x2_, x3_, x4_, x5_, x6_, x7_);
+
+  vec_restore_array (x0, &x0_);
+  vec_restore_array (x1, &x1_);
+  vec_restore_array (x2, &x2_);
+  vec_restore_array (x3, &x3_);
+  vec_restore_array (x4, &x4_);
+  vec_restore_array (x5, &x5_);
+  vec_restore_array (x6, &x6_);
+  vec_restore_array (x7, &x7_);
+}
+
+
 /* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
    in-place transform: */
 static inline void vec_fft_map1 (Vec y, /* out */
