@@ -21,6 +21,7 @@ module closures
   ! in rism.h.
   public :: rism_closure
   public :: rism_chempot_density
+  public :: rism_chempot_density1
   ! *** END OF INTERFACE ***
 
 contains
@@ -77,10 +78,30 @@ contains
     real (c_double), intent (out) :: mu(n)
     ! *** end of interface ***
 
-    ! Pure function  form encodes the  form of the  chemical potential
-    ! integrand.
+    ! Elemental  function  form() encodes  the  form  of the  chemical
+    ! potential integrand.
     mu = form (method, x, h, c, cl)
   end subroutine rism_chempot_density
+
+
+  subroutine rism_chempot_density1 (method, n, x, dx, h, dh, c, dc, cl, dm) bind (c)
+    !
+    ! This one is for using from the C-side. Note that Fortran forbids
+    ! aliasing between the output dm and the input.
+    !
+    ! Should be consistent with ./rism.h
+    !
+    use iso_c_binding, only: c_int, c_double
+    implicit none
+    integer (c_int), intent (in), value :: method, n
+    real (c_double), intent (in) :: x(n), dx(n), h(n), dh(n), c(n), dc(n), cl(n)
+    real (c_double), intent (out) :: dm(n)
+    ! *** end of interface ***
+
+    ! Elemental  function  form1()  encodes  the differential  of  the
+    ! chemical potential integrand.
+    dm = form1 (method, x, dx, h, dh, c, dc, cl)
+  end subroutine rism_chempot_density1
 
 
   elemental function closure (method, beta, v, t) result (c)
@@ -591,7 +612,7 @@ contains
   end function form
 
 
-  pure function form1 (method, x, dx, h, dh, c, dc, cl) result (dm)
+  elemental function form1 (method, x, dx, h, dh, c, dc, cl) result (dm)
     use foreign, only: HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
          PSE0 => CLOSURE_PSE0, PSE7 => CLOSURE_PSE7
     implicit none
