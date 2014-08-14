@@ -1494,6 +1494,30 @@ energy1 (State *HD,
 }
 
 
+/* Set [i, j] element of an array  to 1, the rest to zero. Do you miss
+   Fortran? */
+static void
+set_x (int m, int n, real x[m][n], int ix, int jx)
+{
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < n; j++)
+      x[i][j] = (((i == ix) && (j == jx)) ? 1.0 : 0.0);
+}
+
+
+static void
+show_x (int m, int n, real x[m][n])
+{
+  PRINTF ("XXX: dx=\n");
+  for (int i = 0; i < m; i++)
+    {
+      for (int j = 0; j < n; j++)
+        PRINTF ("%f ", x[i][j]);
+      PRINTF ("\n");
+    }
+}
+
+
 static void
 forces (State *HD,
         int m, const Site solvent[m],
@@ -1503,27 +1527,13 @@ forces (State *HD,
 {
   real dx[n][3];
 
-  void set_dx (int k)
-  {
-    int k1 = 0;
-    for (int i = 0; i < n; i++)
-      FOR_DIM
-        {
-          dx[i][dim] = (k == k1? 1.0: 0.0);
-          k1++;
-        }
-    assert (k1 == n * 3);
-  }
-
-  int k = 0;
   for (int i = 0; i < n; i++)
     FOR_DIM
       {
-        set_dx (k);
+        /* Choose a mode vector: */
+        set_x (n, 3, dx, i, dim);
         f[i][dim] = - energy1 (HD, m, solvent, n, solute, h, dx);
-        k++;
       }
-  assert (k == n * 3);
 }
 
 
