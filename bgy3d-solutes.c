@@ -232,8 +232,9 @@ ccap1 (real r)
   Vec v is the intent(out) argument.
 */
 static void
-field0 (const State *BHD, const Site *a, int n, const Site solute[n],
-        Vec v)                  /* out */
+field0 (const State *BHD, const Site *a,
+        int n, const Site solute[n], /* in */
+        Vec v)                       /* out */
 {
   const real G = G_COULOMB_INVERSE_RANGE;
   /*
@@ -244,28 +245,95 @@ field0 (const State *BHD, const Site *a, int n, const Site solute[n],
   real f3 (const real x[3])
   {
     /* Sum force field contribution from all solute sites: */
-    real sum = 0.0;
+    real e = 0.0;
 
     for (int i = 0; i < n; i++)
       {
         const Site *b = &solute[i]; /* shorter alias */
 
         /* Interaction parameters for a pair of LJ sites: */
-        real eab = sqrt (a->epsilon * b->epsilon);
-        real sab = 0.5 * (a->sigma + b->sigma);
-        real qab = a->charge * b->charge * EPSILON0INV;
+        const real eab = sqrt (a->epsilon * b->epsilon);
+        const real sab = 0.5 * (a->sigma + b->sigma);
+        const real qab = a->charge * b->charge * EPSILON0INV;
 
         /* Distance from a grid point to this site: */
-        real rab = sqrt (SQR (x[0] - b->x[0]) +
-                         SQR (x[1] - b->x[1]) +
-                         SQR (x[2] - b->x[2]));
+        const real rab = sqrt (SQR (x[0] - b->x[0]) +
+                               SQR (x[1] - b->x[1]) +
+                               SQR (x[2] - b->x[2]));
 
         /* Lennard-Jones + Coulomb, short range part: */
-        sum += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
+        e += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
       }
-    return sum;
+    return e;
   }
   vec_rmap3 (BHD, f3, v);
+}
+
+
+/* Differential of solute field with respect to solute coordinates. */
+static void
+field1 (const State *BHD, const Site *a,
+        int n, const Site solute[n],  /* in */
+        real dx[n][3],                /* in */
+        Vec dv)                       /* out */
+{
+  const real G = G_COULOMB_INVERSE_RANGE;
+  /* Differential  of  potential energy  of  Site  a  at x[3]  in  the
+     presense of n-site solute: */
+  real f3 (const real x[3])
+    {
+      /* Differential of the interaction energy: */
+      real de = 0.0;
+
+      /* Sum contribution from all solute sites. FIXME: dx[i][] may be
+         zero for most of the sites! */
+      for (int i = 0; i < n; i++)
+        {
+          const Site *b = &solute[i]; /* shorter alias */
+
+          /* Interaction parameters for a pair of LJ sites: */
+          const real eab = sqrt (a->epsilon * b->epsilon);
+          const real sab = 0.5 * (a->sigma + b->sigma);
+          const real qab = a->charge * b->charge * EPSILON0INV;
+
+          /* Distance vector  from site  b to site  a at a  given grid
+             point: */
+          real ab[3];
+          FOR_DIM
+            ab[dim] = x[dim] - b->x[dim];
+
+          /* Distance itself: */
+          const real rab = sqrt (SQR (ab[0]) +
+                                 SQR (ab[1]) +
+                                 SQR (ab[2]));
+
+          /* Differential of rab, there is no sensible limit for rab
+             -> 0 */
+          real drab;
+          if (likely (rab > 0.0))
+            drab = (ab[0] * dx[i][0] +
+                    ab[1] * dx[i][1] +
+                    ab[2] * dx[i][2]) / rab;
+          else
+            drab = 0.0;
+
+          /*
+            Radial derivative of capped  Coulomb interaction qa * qb /
+            rab.  Note  that for  the capped Coulomb  ccap0(G *  r) /=
+            G^-1 *  ccap0(r) for very small  r. That is why  we do not
+            simplify this further:
+          */
+          real vr = - qab * G * ccap1 (G * rab);
+
+          /* Radial derivative of eab * lj(r / sab): */
+          if (likely (sab != 0.0))
+            vr = vr + (eab / sab) * ljcap1 (rab / sab);
+
+          de += vr * drab;
+        }
+      return de;
+    }
+  vec_rmap3 (BHD, f3, dv);
 }
 
 
@@ -742,73 +810,6 @@ bgy3d_solute_field (const State *BHD,
       assert (uc_rho != NULL);
       bgy3d_poisson (BHD, uc_fft, uc_rho, -4 * M_PI * EPSILON0INV);
     }
-}
-
-
-/* Differential of solute field with respect to solute coordinates. */
-static void
-field1 (const State *BHD, const Site *a,
-        int n, const Site solute[n],  /* in */
-        real dx[n][3],                /* in */
-        Vec dv)                       /* out */
-{
-  const real G = G_COULOMB_INVERSE_RANGE;
-  /* Differential  of  potential energy  of  Site  a  at x[3]  in  the
-     presense of n-site solute: */
-  real f3 (const real x[3])
-    {
-      /* Differential of the interaction energy: */
-      real de = 0.0;
-
-      /* Sum contribution from all solute sites. FIXME: dx[i][] may be
-         zero for most of the sites! */
-      for (int i = 0; i < n; i++)
-        {
-          const Site *b = &solute[i]; /* shorter alias */
-
-          /* Interaction parameters for a pair of LJ sites: */
-          const real eab = sqrt (a->epsilon * b->epsilon);
-          const real sab = 0.5 * (a->sigma + b->sigma);
-          const real qab = a->charge * b->charge * EPSILON0INV;
-
-          /* Distance vector  from site  b to site  a at a  given grid
-             point: */
-          real ab[3];
-          FOR_DIM
-            ab[dim] = x[dim] - b->x[dim];
-
-          /* Distance itself: */
-          const real rab = sqrt (SQR (ab[0]) +
-                                 SQR (ab[1]) +
-                                 SQR (ab[2]));
-
-          /* Differential of rab, there is no sensible limit for rab
-             -> 0 */
-          real drab;
-          if (likely (rab > 0.0))
-            drab = (ab[0] * dx[i][0] +
-                    ab[1] * dx[i][1] +
-                    ab[2] * dx[i][2]) / rab;
-          else
-            drab = 0.0;
-
-          /*
-            Radial derivative of capped  Coulomb interaction qa * qb /
-            rab.  Note  that for  the capped Coulomb  ccap0(G *  r) /=
-            G^-1 *  ccap0(r) for very small  r. That is why  we do not
-            simplify this further:
-          */
-          real vr = - qab * G * ccap1 (G * rab);
-
-          /* Radial derivative of eab * lj(r / sab): */
-          if (likely (sab != 0.0))
-            vr = vr + (eab / sab) * ljcap1 (rab / sab);
-
-          de += vr * drab;
-        }
-      return de;
-    }
-  vec_rmap3 (BHD, f3, dv);
 }
 
 
