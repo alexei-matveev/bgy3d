@@ -1223,6 +1223,64 @@ jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
 }
 
 
+/* XXX: */
+static void
+response_t1 (Ctx1 *ctx, Vec T, Vec dV, Vec dT)
+{
+  PRINTF ("XXX: |dV| = %f\n", vec_norm (dV));
+  PRINTF ("XXX: |T0| = %f\n", vec_norm (T));
+
+  const ProblemData *PD = ctx->HD->PD;
+  const real beta = PD->beta;
+
+  /* RHS for the linear equation system: */
+  local Vec B = vec_duplicate (T);
+
+  /*
+    Compute δF  = ∂F/∂v * δv,  the immediate change  of the non-linear
+    functional y  = F(x)  due to the  change in the  external (solute)
+    filed δv.  In  our case, F(t) = (χ  - 1) * c(t) - t,  and only the
+    direct correlation  depends explicitly on the  external field. For
+    closures that depend on x = -βv + t one could re-use the code that
+    computes the  differential of c(x) with  respect to t  (see how we
+    use closure1() for the Jacobian) or even the Jacobian code itself.
+    FIXME: this does not apply to PY closure.
+
+    Abuse Jacobian  of the non-linear  system ode to compute  the RHS.
+    First compute  b = [(χ  - 1) *  δc/δt - 1]  δv by supplying  δv in
+    place of δt:
+  */
+  jacobian_t1 (ctx, T, dV, B);  /* or jacobian_t0(ctx, dV, B)) */
+
+  /* Now b = [(χ - 1) * δc/δt] δv by adding δv again:*/
+  VecAXPY (B, 1.0, dV);
+
+  /*
+    Now b  = - [(χ  - 1)  * δc/δv] δv.  FIXME: only for  some closures
+    δc/δv =  -β δc/δt. Effectively we  have computed b  = - (J +  1) *
+    (-βδv) here:
+  */
+  VecScale (B, +beta);
+
+  PRINTF ("XXX: |B| = %f\n", vec_norm (B));
+  /*
+    Now solve the equation J δt =  b or with some reformulation J δx =
+    βδv.  This is the linear operation, y  = J x, as a closure of more
+    general J(T) over converged T:
+  */
+  void jacobian_t0 (Ctx1 *ctx, Vec X, Vec Y)
+  {
+    jacobian_t1 (ctx, T, X, Y);
+  }
+  /* Initial value may matter for iterative solvers: */
+  VecSet (dT, 0.0);
+  bgy3d_krylov (ctx, (VecFunc1) jacobian_t0, B, dT);
+  PRINTF ("XXX: |dT| = %f\n", vec_norm (dT));
+
+  vec_destroy (&B);
+}
+
+
 /*************************************************************/
 /* A FEW FUNCTIONS TO MAKE SOLVENT SUSCEPTIBILITY AVAIALBLE. */
 /*************************************************************/
@@ -1737,6 +1795,122 @@ hnc3d_solute_solve (const ProblemData *PD,
         };
 
       bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
+
+      /* XXX: Derivatives by linear response: */
+      if (false)
+        {
+          local Vec dV = vec_duplicate (T);
+          local Vec dT = vec_duplicate (T);
+
+          /*
+            FIXME: we need a lot of staff to compute chem. potential,
+            here:  t, c,  h.  Why not  making  it a  functional of  t
+            only?
+          */
+          local Vec c[m];
+          vec_create1 (HD->da, m, c);
+
+          local Vec h[m];       /* eclipse global */
+          vec_create1 (HD->da, m, h);
+
+          local Vec x[m];
+          vec_create1 (HD->da, m, x);
+          {
+            local Vec t[m];
+            vec_aliases_create1 (T, m, t);
+
+            for (int i = 0; i < m; i++)
+              compute_c (PD->closure, PD->beta, v_short[i], t[i], c[i]);
+
+            for (int i = 0; i < m; i++)
+              VecWAXPY (h[i], 1.0, c[i], t[i]);
+
+            for (int i = 0; i < m; i++)
+              VecWAXPY (x[i], -PD->beta, v_short[i], t[i]);
+
+            vec_aliases_destroy1 (T, m, t);
+          }
+
+          local Vec uc = vec_create (HD->da);
+          bgy3d_solute_field (HD, m, solvent, n, solute, NULL, NULL, NULL,
+                              uc, density); /* the rest computed before */
+
+          local Vec cl[m];
+          vec_create1 (HD->da, m, cl);
+
+          for (int i = 0; i < m; i++)
+            {
+              VecSet (cl[i], 0.0);
+              VecAXPY (cl[i], -PD->beta * charge[i], uc);
+            }
+
+          local Vec dx[m], dh[m], dc[m];
+          vec_create1 (HD->da, m, dx);
+          vec_create1 (HD->da, m, dh);
+          vec_create1 (HD->da, m, dc);
+
+          /* Mode vector: */
+          real dR[n][3];
+
+          for (int i = 0; i < n; i++)
+            FOR_DIM
+              {
+                PRINTF ("XXX: doing i,j = %d,%d\n", i, dim);
+                /* Choose a mode vector: */
+                set_x (n, 3, dR, i, dim);
+
+                /* Compute differential dV of the solute field: */
+                {
+                  local Vec dv[m];
+                  vec_aliases_create1 (dV, m, dv);
+
+                  show_x (n, 3, dR);
+                  bgy3d_solute_field1 (HD, m, solvent, n, solute, dR, dv);
+                  vec_aliases_destroy1 (dV, m, dv);
+                }
+
+                response_t1 (&ctx, T, dV, dT);
+                PRINTF ("XXX: done\n");
+
+                {
+                  local Vec t[m], dt[m], dv[m];
+                  vec_aliases_create1 (T, m, t);
+                  vec_aliases_create1 (dT, m, dt);
+                  vec_aliases_create1 (dV, m, dv);
+
+                  for (int i = 0; i < m; i++)
+                    {
+                      VecWAXPY (dx[i], -PD->beta, dv[i], dt[i]);
+                      compute_c1 (PD->closure, PD->beta, v_short[i], t[i], dx[i], dc[i]);
+                      VecWAXPY (dh[i], 1.0, dc[i], dt[i]);
+                    }
+
+                  real mu1 = chempot1 (HD, PD->closure,
+                                       1, m,
+                                       (void*) x, (void*) dx,
+                                       (void*) h, (void*) dh,
+                                       (void*) c, (void*) dc,
+                                       (void*) cl);
+
+                  PRINTF ("XXX: mu1 = %f\n", mu1);
+
+                  vec_aliases_destroy1 (T, m, t);
+                  vec_aliases_destroy1 (dT, m, dt);
+                  vec_aliases_destroy1 (dV, m, dv);
+                }
+              }
+
+          vec_destroy (&dV);
+          vec_destroy (&dT);
+          vec_destroy1 (m, x);
+          vec_destroy1 (m, dx);
+          vec_destroy1 (m, h);
+          vec_destroy1 (m, dh);
+          vec_destroy1 (m, c);
+          vec_destroy1 (m, dc);
+          vec_destroy1 (m, cl);
+          vec_destroy (&uc);
+        }
     }
 
     /* Should not be needed anymore: */
