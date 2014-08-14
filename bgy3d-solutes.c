@@ -225,38 +225,46 @@ ccap1 (real r)
 
 
 /*
-  Calculate a  real field  "f" for the  solvent site  characterized by
-  (sigma, epsilon,  charge) in the presence  of the solute  S at every
-  point (x, y, z) of the local grid.
-
-  This  function expects  a callback  f() obeying  specific interface.
-  The function f(x, y,  z, eps, sig, chg, S) can be  ljc() or rho() as
-  two examples.
-
-  Site  A  is  intent(in) but  has  to  be  passed by  value  (copying
-  involved) at  the moment.  We  are modifying coordinates of  a local
-  copy  and pass  a reference  to that  copy further  to  the callback
-  function *f.  The coordinates of  a site as passed to this functions
-  are ignored.
-
-  Vector "v" is the intent(out) argument.
- */
+  Calculate a real field acting  on the the solvent site characterized
+  by (sigma, epsilon,  charge) in the presence of  the solute at every
+  point (x, y, z) of the local  grid.  Solvent Site *a is an input but
+  the coordinates of  a site as passed to  this functions are ignored.
+  Vec v is the intent(out) argument.
+*/
 static void
-field (const State *BHD, Site A, int n, const Site S[n],
-       real (*f)(const Site *A, int n, const Site S[n]),
-       Vec v)
+field0 (const State *BHD, const Site *a, int n, const Site solute[n],
+        Vec v)                  /* out */
 {
+  const real G = G_COULOMB_INVERSE_RANGE;
   /*
-    Compute the field  f at (x, y,  z) <-> (i, j, k)  e.g.  by summing
-    (LJ) contributions from all solute sites at that grid point:
+    Compute the field  at all grid points  (x, y, z) <-> (i,  j, k) by
+    summing LJ  and short range Coulomb contributions  from all solute
+    sites at each grid point.
   */
-  real f3 (const real r[3])
+  real f3 (const real x[3])
   {
-    FOR_DIM
-      A.x[dim] = r[dim];        /* Modifying the input! */
-    return f (&A, n, S);
-  }
+    /* Sum force field contribution from all solute sites: */
+    real sum = 0.0;
 
+    for (int i = 0; i < n; i++)
+      {
+        const Site *b = &solute[i]; /* shorter alias */
+
+        /* Interaction parameters for a pair of LJ sites: */
+        real eab = sqrt (a->epsilon * b->epsilon);
+        real sab = 0.5 * (a->sigma + b->sigma);
+        real qab = a->charge * b->charge * EPSILON0INV;
+
+        /* Distance from a grid point to this site: */
+        real rab = sqrt (SQR (x[0] - b->x[0]) +
+                         SQR (x[1] - b->x[1]) +
+                         SQR (x[2] - b->x[2]));
+
+        /* Lennard-Jones + Coulomb, short range part: */
+        sum += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
+      }
+    return sum;
+  }
   vec_rmap3 (BHD, f3, v);
 }
 
@@ -325,46 +333,6 @@ grid_map (DA da, const ProblemData *PD,
   /* Remember to free! */
   free (fx);
   free (x);
-}
-
-
-/*
-  Interaction of a charged LJ  site (sigma, epsilon, charge) at (x, y,
-  z) with the solute S.
-
-  This function obeys the callback interface assumed in field(). It is
-  supposed  to get  (1) parameters  of the  solvent site  such  as its
-  location and  force field parameters,  and (2) a description  of the
-  solute and return a real number such as an interaction energy or the
-  charge density:
-*/
-static real
-ljc (const Site *A, int n, const Site S[n])
-{
-  const real G = G_COULOMB_INVERSE_RANGE;
-
-  /* Sum force field contribution from all solute sites: */
-  real field = 0.0;
-
-  for (int i = 0; i < n; i++)
-    {
-      const Site *B = &S[i];    /* shorter alias */
-
-      /* Interaction parameters for a pair of LJ sites: */
-      real eab = sqrt (A->epsilon * B->epsilon);
-      real sab = 0.5 * (A->sigma + B->sigma);
-      real qab = A->charge * B->charge * EPSILON0INV;
-
-      /* Distance from a grid point to this site: */
-      real rab = sqrt (SQR(A->x[0] - B->x[0]) +
-                       SQR(A->x[1] - B->x[1]) +
-                       SQR(A->x[2] - B->x[2]));
-
-      /* Lennard-Jones + Coulomb, short range part: */
-      field += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
-    }
-
-  return field;
 }
 
 
@@ -639,10 +607,10 @@ bgy3d_solute_field (const State *BHD,
   if (us)    /* Not quite sure if passing us = NULL is legal though */
     for (int i = 0; i < m; i++)
       {
-        Site scaled = solvent[i];          /* dont modify the input */
-        scaled.charge *= scale_coul_short; /* modify a copy */
+        Site a = solvent[i];          /* dont modify the input */
+        a.charge *= scale_coul_short; /* modify a copy */
 
-        field (BHD, scaled, n, solute, ljc, us[i]);
+        field0 (BHD, &a, n, solute, us[i]);
       }
 
   /*
