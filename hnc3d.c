@@ -486,6 +486,26 @@ compute_mu (ClosureEnum method, Vec x, Vec h, Vec cs, Vec cl, /* in */
 }
 
 
+static void
+compute_mu1 (ClosureEnum method,
+             Vec x, Vec dx,
+             Vec h, Vec dh,
+             Vec c, Vec dc,
+             Vec cl,            /* in */
+             Vec dm)            /* out */
+{
+  void f (int n,
+          real x[n], real dx[n],
+          real h[n], real dh[n],
+          real c[n], real dc[n],
+          real cl[n], real dm[n])
+  {
+    rism_chempot_density1 (method, n, x, dx, h, dh, c, dc, cl, dm);
+  }
+  vec_app8 (f, x, dx, h, dh, c, dc, cl, dm);
+}
+
+
 /*
   Returns the  β-scaled density of the chemical  potential, βμ(r).  To
   get the excess  chemical potential integrate it over  the volume and
@@ -533,6 +553,36 @@ chempot_density (ClosureEnum method, int n, int m,
 }
 
 
+static void
+chempot_density1 (ClosureEnum method, int n, int m,
+                  Vec x[n][m], Vec dx[n][m], /* in */
+                  Vec h[n][m], Vec dh[n][m], /* in */
+                  Vec c[n][m], Vec dc[n][m], /* in */
+                  Vec cl[n][m],              /* in, long range */
+                  Vec dm)                    /* out */
+{
+  /* Increment for all solvent sites */
+  local Vec dm1 = vec_duplicate (dm);
+
+  /* Clear accumulator: */
+  VecSet (dm, 0.0);
+
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < m; j++)
+      {
+        compute_mu1 (method,
+                     x[i][j], dx[i][j],
+                     h[i][j], dh[i][j],
+                     c[i][j], dc[i][j],
+                     cl[i][j], dm1);
+
+        VecAXPY (dm, 1.0, dm1);
+      }
+
+  vec_destroy (&dm1);
+}
+
+
 /*
   Interface to get chemical potential of solvent-solvent pair from Vec
   x = βv + t, h, c, and cl, return the value of chemical potential.
@@ -554,6 +604,32 @@ chempot (const State *HD, ClosureEnum method, int n, int m,
 
   /* Get β-scaled chemical potential density */
   chempot_density (method, n, m, x, h, c, cl, mu_dens);
+
+  /* Volume integral scaled by a factor: */
+  const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
+
+  vec_destroy (&mu_dens);
+
+  return mu;
+}
+
+
+static real
+chempot1 (const State *HD, ClosureEnum method, int n, int m,
+          Vec x[n][m], Vec dx[n][m],
+          Vec h[n][m], Vec dh[n][m],
+          Vec c[n][m], Vec dc[n][m],
+          Vec cl[n][m]) /* in */
+{
+  const ProblemData *PD = HD->PD;
+  const real beta = PD->beta;
+  const real h3 = volume_element (PD);
+
+  /* Vector for chemical potential density */
+  local Vec mu_dens = vec_create (HD->da);
+
+  /* Get β-scaled chemical potential density */
+  chempot_density1 (method, n, m, x, dx, h, dh, c, dc, cl, mu_dens);
 
   /* Volume integral scaled by a factor: */
   const real mu = PD->rho * vec_sum (mu_dens) * h3 / beta;
