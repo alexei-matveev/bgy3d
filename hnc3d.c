@@ -150,11 +150,6 @@
 #include "hnc3d.h"
 
 
-/* Only  in  the  case of  neutral  solutes  the  inverse FFT  of  the
-   long-range Coulomb gives something reasonable: */
-static const bool neutral_solutes = false;
-
-
 static void
 compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 {
@@ -1570,8 +1565,6 @@ hnc3d_solute_solve (const ProblemData *PD,
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
-  const real L3 = volume (PD);
-
   PRINTF ("(iterations for γ)\n");
 
   State *HD = bgy3d_state_make (PD); /* FIXME: rm unused fields */
@@ -1745,6 +1738,9 @@ hnc3d_solute_solve (const ProblemData *PD,
 
       bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
     }
+
+    /* Should not be needed anymore: */
+    vec_destroy (&uc_fft);
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
     if (tau_fft)
@@ -1799,22 +1795,8 @@ hnc3d_solute_solve (const ProblemData *PD,
     in this case due to the long range nature of the field.
    */
   local Vec uc = vec_create (HD->da);
-  if (neutral_solutes)          /* was always assumed */
-    {
-      /* The field of  neutral species is actually of  short range, so
-         this worked for them: */
-      MatMultTranspose (HD->fft_mat, uc_fft, uc);
-
-      /* Apply inverse volume factor after inverse FFT */
-      VecScale (uc, 1.0 / L3);
-    }
-  else
-    bgy3d_solute_field (HD, m, solvent, n, solute, NULL, NULL, NULL,
-                        uc, density); /* the rest computed before */
-
-  /* Should not be needed anymore: */
-  vec_destroy (&uc_fft);
-
+  bgy3d_solute_field (HD, m, solvent, n, solute, NULL, NULL, NULL,
+                      uc, density); /* the rest computed before */
 
   /* Excess chemical potential: */
   {
@@ -1822,8 +1804,7 @@ hnc3d_solute_solve (const ProblemData *PD,
        We used  to supply the  long-range part for  chemical potential
        calculation  obtained by FFT  over the  finite size  unit cell.
        This  is possibly  inaccurate for  the long-range  potential of
-       charged systems.  Check the value of const bool neutral_solutes
-       that controls that.
+       charged systems.  Consult the older version of this code.
 
        FIXME:  Though  the chemical  potential  code  does assume  the
        asymptotics of  the direct  correlations to be  proportional to
