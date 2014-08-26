@@ -1619,6 +1619,9 @@ static void module_init (void* unused)
   /* Define SMOBs: */
   guile_init_state_type ();
   guile_init_vec_type ();
+
+  /* Export force-field primitive shapes used in C: */
+  bgy3d_force_field_init ();
 }
 
 

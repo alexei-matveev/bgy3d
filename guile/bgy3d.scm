@@ -38,10 +38,23 @@
    vec-moments
    vec-shift!
    vec-scale!
+   ;; See eos.f90:
    eos-alj
    eos-alj-res
    eos-plj
    eos-ulj
+   ;; See bgy3d-solutes.c:
+   lj0
+   lj1
+   ljcap0
+   ljcap1
+   cl0
+   cl1
+   cs0
+   cs1
+   ccap0
+   ccap1
+   ;; See bgy3d-guile.c and ./lebed:
    genpts
    f64dst
    f64+

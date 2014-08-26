@@ -254,6 +254,53 @@ ccap1 (real r)
 #undef RMIN
 
 
+/* Make functions  used as force field primitives  available to Scheme
+   code: */
+#ifdef SCM_MAJOR_VERSION
+/* Visit all double -> double functions: */
+#define VALL                                    \
+  V(lj0)                                        \
+  V(lj1)                                        \
+  V(ljcap0)                                     \
+  V(ljcap1)                                     \
+  V(cl0)                                        \
+  V(cl1)                                        \
+  V(cs0)                                        \
+  V(cs1)                                        \
+  V(cscap0)                                     \
+  V(cscap1)                                     \
+  V(ccap0)                                      \
+  V(ccap1)
+
+/* Define an SCM -> SCM wrapper while visiting a function: */
+#define V(f)                                    \
+  static SCM guile_##f (SCM r)                  \
+  {                                             \
+    return scm_from_double (f (scm_to_double (r)));   \
+  }
+/* Define wrappers: */
+VALL
+#undef V
+
+/* FIXME: copy of the same macro from bgy3d-guile.c: */
+#define EXPORT(name, req, opt, rst, func)               \
+  (scm_c_define_gsubr (name, req, opt, rst, func),      \
+   scm_c_export (name, NULL))
+
+
+/* Called from module_init() in bgy3d-guile.c: */
+void
+bgy3d_force_field_init ()
+{
+  /* Export SCM -> SCM wrappers to scheme: */
+# define V(f) EXPORT (#f, 1, 0, 0, guile_##f);
+  VALL
+#undef V
+}
+#undef VALL
+#endif
+
+
 /*
   Calculate a real field acting  on the the solvent site characterized
   by (sigma, epsilon,  charge) in the presence of  the solute at every
