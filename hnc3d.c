@@ -151,6 +151,18 @@
 
 
 static void
+mayer (real beta, Vec v, Vec f)
+{
+  void em1 (int n, real v[n], real f[n])
+  {
+    for (int i = 0; i < n; i++)
+      f[i] = expm1 (-beta * v[i]);
+  }
+  vec_app2 (em1, v, f);
+}
+
+
+static void
 compute_c (ClosureEnum closure, real beta, Vec v, Vec t, Vec c)
 {
   /* No aliasing, we call Fortran here: */
