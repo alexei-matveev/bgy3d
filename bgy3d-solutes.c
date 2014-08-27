@@ -388,9 +388,9 @@ field1 (const State *BHD, const Site *a,
              -> 0 */
           real drab;
           if (likely (rab > 0.0))
-            drab = (ab[0] * dx[i][0] +
-                    ab[1] * dx[i][1] +
-                    ab[2] * dx[i][2]) / rab;
+            drab = - (ab[0] * dx[i][0] +
+                      ab[1] * dx[i][1] +
+                      ab[2] * dx[i][2]) / rab;
           else
             drab = 0.0;
 
