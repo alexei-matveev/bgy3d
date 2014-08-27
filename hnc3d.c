@@ -1239,11 +1239,11 @@ jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
 static void
 response_t1 (Ctx1 *ctx, Vec T, Vec dV, Vec dT)
 {
-  PRINTF ("XXX: |dV| = %f\n", vec_norm (dV));
-  PRINTF ("XXX: |T0| = %f\n", vec_norm (T));
-
   const ProblemData *PD = ctx->HD->PD;
   const real beta = PD->beta;
+  PRINTF ("XXX: |dV| = %f\n", vec_norm (dV));
+  PRINTF ("XXX: |T0| = %f\n", vec_norm (T));
+  PRINTF ("XXX: <T0> = %f\n", vec_sum (T) * volume_element (PD));
 
   /* RHS for the linear equation system: */
   local Vec B = vec_duplicate (T);
@@ -1288,6 +1288,7 @@ response_t1 (Ctx1 *ctx, Vec T, Vec dV, Vec dT)
   VecSet (dT, 0.0);
   bgy3d_krylov (ctx, (VecFunc1) jacobian_t0, B, dT);
   PRINTF ("XXX: |dT| = %f\n", vec_norm (dT));
+  PRINTF ("XXX: <dT> = %f\n", vec_sum (dT) * volume_element (PD));
 
   vec_destroy (&B);
 }
@@ -1895,8 +1896,36 @@ hnc3d_solute_solve (const ProblemData *PD,
                       VecWAXPY (dx[i], -PD->beta, dv[i], dt[i]);
                       compute_c1 (PD->closure, PD->beta, v_short[i], t[i], dx[i], dc[i]);
                       VecWAXPY (dh[i], 1.0, dc[i], dt[i]);
+                      {
+                        const real dV = volume_element (PD);
+                        const real dN = dV * PD->rho;
+                        PRINTF ("XXX: |dx[%d]| = %f\n", i, vec_norm (dx[i]));
+                        PRINTF ("XXX: |dh[%d]| = %f\n", i, vec_norm (dh[i]));
+                        PRINTF ("XXX: |dc[%d]| = %f\n", i, vec_norm (dc[i]));
+                        PRINTF ("XXX: <dh[%d]> = %f\n", i, vec_sum (dh[i]) * dN);
+                        PRINTF ("XXX: <h[%d]> = %f\n", i, vec_sum (h[i]) * dN);
+                        PRINTF ("XXX: <dv[%d]> = %f\n", i, vec_sum (dv[i]) * dV);
+                        PRINTF ("XXX: <v[%d]> = %f\n", i, vec_sum (v_short[i]) * dV);
+                        PRINTF ("XXX: <dv²[%d]> = %f\n", i, 2 * vec_dot (v_short[i], dv[i]) * dV);
+                        PRINTF ("XXX: <v²[%d]> = %f\n", i, vec_dot (v_short[i], v_short[i]) * dV);
+                        PRINTF ("XXX: <dt[%d]> = %f\n", i, vec_sum (dt[i]) * dV);
+                        PRINTF ("XXX: <t[%d]> = %f\n", i, vec_sum (t[i]) * dV);
+                        local Vec f = vec_duplicate (v_short[i]);
+                        mayer (PD->beta, v_short[i], f);
+                        PRINTF ("XXX: <f[%d]> = %f\n", i, vec_sum (f) * dN);
+                        VecShift (f, 1.0);
+                        PRINTF ("XXX: <df[%d]> = %f\n", i, vec_dot (f, dv[i]) * (-PD->beta * dN));
+                        vec_destroy (&f);
+                      }
                     }
 
+
+                  real mu0 = chempot (HD, PD->closure,
+                                      1, m,
+                                      (void*) x,
+                                      (void*) h,
+                                      (void*) c,
+                                      (void*) cl);
                   real mu1 = chempot1 (HD, PD->closure,
                                        1, m,
                                        (void*) x, (void*) dx,
@@ -1904,6 +1933,7 @@ hnc3d_solute_solve (const ProblemData *PD,
                                        (void*) c, (void*) dc,
                                        (void*) cl);
 
+                  PRINTF ("XXX: mu0 = %f\n", mu0);
                   PRINTF ("XXX: mu1 = %f\n", mu1);
 
                   vec_aliases_destroy1 (T, m, t);
