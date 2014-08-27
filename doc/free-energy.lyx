@@ -5836,5 +5836,316 @@ A procedure to partition the electrostatic field of a QM solute
 Charged solutes by 3D-RISM, implementation and verification.
 \end_layout
 
+\begin_layout Section
+Linear response in 3D RISM
+\end_layout
+
+\begin_layout Subsection
+Jacobian of the non-linear system
+\end_layout
+
+\begin_layout Standard
+Non-linear equations that are solved for 3D RISM for a special case of the
+ closure relation 
+\begin_inset Formula $h=f(-\beta v+t)$
+\end_inset
+
+ can be cast into the following form
+\begin_inset Formula 
+\begin{eqnarray*}
+t & = & (\chi-1)\ast c\\
+c & = & f(-\beta v+t)-t
+\end{eqnarray*}
+
+\end_inset
+
+By substituting the direct correlation 
+\begin_inset Formula $c$
+\end_inset
+
+ from the latter equation into the former we formally leave only one unknown
+ 
+\begin_inset Formula $t$
+\end_inset
+
+ of the non-linear equation
+\begin_inset Formula 
+\[
+t=T[t]
+\]
+
+\end_inset
+
+where the fix point iterator functional reads
+\begin_inset Formula 
+\[
+T[t]=(\chi-1)\ast c(t)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $c(t)=f(-\beta v+t)-t$
+\end_inset
+
+ as before.
+ To arrive at the non-linear equation in a conventional form 
+\begin_inset Formula $F[t]=0$
+\end_inset
+
+ we define 
+\begin_inset Formula 
+\begin{eqnarray*}
+F[t] & = & T[t]-t\\
+ & = & (\chi-1)\ast(f(-\beta v+t)-t)-t?
+\end{eqnarray*}
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+To facilitate solution of the non-linear equations and approach the linear
+ response properties of these non-linear equation it is advantageous to
+ provide the Jacobian as a (matrix free) linear operator 
+\begin_inset Formula $J=\delta F/\delta t$
+\end_inset
+
+ defined by its action on an arbitrary vector 
+\begin_inset Formula $\delta t$
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{eqnarray*}
+J\ast\delta t=\delta F & = & (\chi-1)\ast\delta c-\delta t\\
+ & = & \left[(\chi-1)\ast\left(\frac{\partial f}{\partial t}-1\right)-1\right]\ast\delta t
+\end{eqnarray*}
+
+\end_inset
+
+The first row involving the response 
+\begin_inset Formula $\delta c$
+\end_inset
+
+ as an intermediate is a more intuitive and straightforward way to compute
+ the operator result 
+\begin_inset Formula $J\ast\delta t$
+\end_inset
+
+.
+ The form in the second row has uncertain value.
+ Note that the Jacobian 
+\begin_inset Formula $J^{\prime}=\delta T/\delta t$
+\end_inset
+
+ of the fix point operator 
+\begin_inset Formula $T[t]$
+\end_inset
+
+ is related to that of the non-linear system by
+\begin_inset Formula 
+\[
+J=J^{\prime}-1
+\]
+
+\end_inset
+
+ and both may share the bulk of the code to compute 
+\begin_inset Formula $J\ast\delta t=(\chi-1)\ast\delta c-\delta t$
+\end_inset
+
+ and 
+\begin_inset Formula $J^{\prime}\ast\delta t=(\chi-1)\ast\delta c$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Response to perturbation of the potential
+\end_layout
+
+\begin_layout Standard
+Consider an infinitesimal perturbation of the external (solute) potential
+ 
+\begin_inset Formula $\delta v$
+\end_inset
+
+.
+ What is the corresponding linear response of the indirect correlation 
+\begin_inset Formula $\delta t$
+\end_inset
+
+ according to the non-linear RISM equations? When you start with 
+\begin_inset Formula $F_{v}[t]=0$
+\end_inset
+
+ where 
+\begin_inset Formula $t$
+\end_inset
+
+ is the converged solution of the unperturbed equations and substitute 
+\begin_inset Formula $v$
+\end_inset
+
+ by 
+\begin_inset Formula $v+\delta v$
+\end_inset
+
+ the equation is no-more fulfilled.
+ To the first order 
+\begin_inset Formula $F_{v+\delta v}[t]\approx-b\neq0$
+\end_inset
+
+ with 
+\begin_inset Formula $b=-(\partial F_{v}/\partial v)\ast\delta v$
+\end_inset
+
+ where we take the partial (variational) derivative wrt 
+\begin_inset Formula $v$
+\end_inset
+
+ with the fixed unperturbed 
+\begin_inset Formula $t.$
+\end_inset
+
+ To satisfy equations again we must perturb the solution 
+\begin_inset Formula $t$
+\end_inset
+
+ by 
+\begin_inset Formula $\delta t$
+\end_inset
+
+ too to satisfy this
+\begin_inset Formula 
+\[
+F_{v+\delta v}[t+\delta t]\approx J\ast\delta t-b=0
+\]
+
+\end_inset
+
+In the Taylor expansion we again used the definition of the unperturbed
+ solution 
+\begin_inset Formula $F_{v}[t]=0$
+\end_inset
+
+.
+ Thus the linear response 
+\begin_inset Formula $\delta t$
+\end_inset
+
+ is the solution of the linear equation with the Jacobian matrix 
+\begin_inset Formula $J$
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+J\ast\delta t=b
+\]
+
+\end_inset
+
+ and the right hand side defined as the negative response of the non-linear
+ functional 
+\begin_inset Formula $F_{v}[t]$
+\end_inset
+
+ to the infinitesimal perturbation 
+\begin_inset Formula $\delta v$
+\end_inset
+
+ in the assumption of a fixed 
+\begin_inset Formula $t$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+What is the most intuitive way to compute 
+\begin_inset Formula $b$
+\end_inset
+
+?
+\begin_inset Formula 
+\begin{eqnarray*}
+-b & = & (\partial F_{v}/\partial v)\ast\delta v\\
+ & = & (\chi-1)\ast(\partial c/\partial v)\ast\delta v
+\end{eqnarray*}
+
+\end_inset
+
+In order to compute the intermediate 
+\begin_inset Formula $(\partial c/\partial v)\ast\delta v$
+\end_inset
+
+ for 
+\begin_inset Formula $c(t)=f(-\beta v+t)-t$
+\end_inset
+
+ one could compare 
+\begin_inset Formula $\delta c/\delta t=f^{\prime}-1$
+\end_inset
+
+ and 
+\begin_inset Formula $\partial c/\partial v=-\beta f^{\prime}=-\beta(\delta c/\delta t+1)$
+\end_inset
+
+ and use the code that computes 
+\begin_inset Formula $(\delta c/\delta t)\ast\delta t=(f^{\prime}-1)\ast\delta t$
+\end_inset
+
+ for use as an intermediate in Jacobian:
+\begin_inset Formula 
+\begin{eqnarray*}
+(\partial c/\partial v)\ast\delta v & = & -\beta(\delta c/\delta t+1)\ast\delta v\\
+ & = & -\beta\left[(\delta c/\delta t)\ast\delta v+\delta v\right]
+\end{eqnarray*}
+
+\end_inset
+
+The first term in the last expression has exactly the form of the direct
+ correlation response and the second term is trivial.
+ Thus
+\begin_inset Formula 
+\begin{eqnarray*}
+-b & = & -\beta(\chi-1)\ast\left[(\delta c/\delta t)\ast\delta v+\delta v\right]\\
+ & = & -\beta J^{\prime}\ast\delta v-\beta(\chi-1)\ast\delta v\\
+ & = & -\beta(J+\chi)\ast\delta v
+\end{eqnarray*}
+
+\end_inset
+
+ With this expression for the rhs 
+\begin_inset Formula $b$
+\end_inset
+
+ the linear response equation reads
+\begin_inset Formula 
+\[
+J\ast\delta t=\beta(J+\chi)\ast\delta v
+\]
+
+\end_inset
+
+ or, alternatively, as
+\begin_inset Formula 
+\[
+J\ast\delta x=\beta\chi\ast\delta v
+\]
+
+\end_inset
+
+ with the new unknown 
+\begin_inset Formula $\delta x=\delta t-\beta\delta v$
+\end_inset
+
+.
+\end_layout
+
 \end_body
 \end_document
