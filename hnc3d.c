@@ -1057,6 +1057,7 @@ star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
 */
 typedef struct Ctx1
 {
+  bool flag;                    /* false, but see jacobian_t1() */
   State *HD;
   int m;
   real *charge;                 /* [m], fixed */
@@ -1205,6 +1206,17 @@ jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
       /* Re-use ctx->c[] work array for dc(r): */
       compute_c1 (PD->closure, beta, ctx->v_short[i], t[i], dt[i], ctx->c[i]);
 
+      /*
+        The call above computes the response of  c = f(-βv + t) - t to
+        an infinitesimal change δt. If the  flag is set we add δt back
+        here. This ugly  hack is used to compute  the closure response
+        to δv since the expression h  = f(-βv + t) is almost symmetric
+        for -βv <-> t. FIXME: not all closures have the form h = f(-βv
+        + t), see, e.g. the PY closure.
+      */
+      if (ctx->flag)
+        VecAXPY (ctx->c[i], 1.0, dt[i]);
+
       /* Re-use ctx->c_fft[] work array for dc(k): */
       MatMult (ctx->HD->fft_mat, ctx->c[i], ctx->c_fft[i]);
 
@@ -1217,7 +1229,8 @@ jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
   /* t = fft^-1 (fft(c) * fft(h)). Here t is 3d t1. */
   for (int i = 0; i < m; i++)
     {
-      /* Put J * dT = (χ - 1) * dc into the Vec provided by the solver: */
+      /* Put J'  * dT  = (χ -  1) *  dc into the  Vec provided  by the
+         solver: */
       MatMultTranspose (ctx->HD->fft_mat, ctx->t_fft[i], jdt[i]);
 
       /* Scaling by inverse volume factor in backward FFT */
@@ -1229,9 +1242,20 @@ jacobian_t1 (Ctx1 *ctx, Vec T, Vec dT, Vec JdT)
   vec_aliases_destroy1 (JdT, m, jdt);
 
   /*
-    J * δt := δF = δ(T[t] - t) = δT - δt = (χ - 1) * δc - δt
+    Finally
+
+      J * δt := δF = δ(T[t] - t) = δT - δt = (χ - 1) * δc - δt
+
+    However if the flag was set we compute
+
+      J' * δt = (χ - 1) *  δc
+
+    instead. Note that the flag  also affects δc.  FIXME: this flag ==
+    true is  only abused to compute  the linear response of  F[t] to a
+    change of external (solute) potential δv.
   */
-  VecAXPY (JdT, -1.0, dT);
+  if (!ctx->flag)
+    VecAXPY (JdT, -1.0, dT);
 }
 
 
@@ -1251,26 +1275,26 @@ response_t1 (Ctx1 *ctx, Vec T, Vec dV, Vec dT)
   /*
     Compute δF  = ∂F/∂v * δv,  the immediate change  of the non-linear
     functional y  = F(x)  due to the  change in the  external (solute)
-    filed δv.  In  our case, F(t) = (χ  - 1) * c(t) - t,  and only the
-    direct correlation  depends explicitly on the  external field. For
-    closures that depend on x = -βv + t one could re-use the code that
-    computes the  differential of c(x) with  respect to t  (see how we
-    use closure1() for the Jacobian) or even the Jacobian code itself.
-    FIXME: this does not apply to PY closure.
+    field δv.  In  our case, F(t) = (χ  - 1) * c(t) - t,  and only the
+    closure  expression  c(t)   for  the  direct  correlation  depends
+    explicitly on the external field.  For closures that depend on x =
+    -βv + t  one could re-use the code  that computes the differential
+    of  c(x) with  respect to  t (see  how we  use closure1()  for the
+    Jacobian) or even the Jacobian  code itself.  FIXME: this does not
+    apply to PY closure.
 
-    Abuse Jacobian  of the non-linear  system ode to compute  the RHS.
-    First compute  b = [(χ  - 1) *  δc/δt - 1]  δv by supplying  δv in
-    place of δt:
+    Abuse  Jacobian of  the fix  point  iterator to  compute the  RHS.
+    First compute b = [(χ - 1) * δc/δt] δv by supplying δv in place of
+    δt and setting the flag temporarily:
   */
+  assert (!ctx->flag);   /* we restore it to false, unconditionally */
+  ctx->flag = true;
   jacobian_t1 (ctx, T, dV, B);  /* or jacobian_t0(ctx, dV, B)) */
-
-  /* Now b = [(χ - 1) * δc/δt] δv by adding δv again:*/
-  VecAXPY (B, 1.0, dV);
+  ctx->flag = false;
 
   /*
-    Now b  = - [(χ  - 1)  * δc/δv] δv.  FIXME: only for  some closures
-    δc/δv =  -β δc/δt. Effectively we  have computed b  = - (J +  1) *
-    (-βδv) here:
+    Now b = [(χ - 1) * δh/δt] δv.  FIXME: only for some closures δh/δv
+    = -β δh/δt.
   */
   VecScale (B, +beta);
 
@@ -1795,6 +1819,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       /* Work area for iterate_t1(): */
       Ctx1 ctx =
         {
+          .flag = false,        /* always */
           .HD = HD,
           .m = m,
           .charge = charge,           /* [m], in */
