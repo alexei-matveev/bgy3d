@@ -52,6 +52,8 @@
    cl1
    cs0
    cs1
+   cscap0
+   cscap1
    ccap0
    ccap1
    ;; See bgy3d-guile.c and ./lebed:

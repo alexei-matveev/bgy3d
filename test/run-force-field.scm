@@ -38,6 +38,7 @@
         (list "ljcap" ljcap0 ljcap1)
         (list "cl" cl0 cl1)
         (list "cs" cs0 cs1)
+        (list "cscap" cscap0 cscap1)
         (list "ccap" ccap0 ccap1)))
 
 (for-each
