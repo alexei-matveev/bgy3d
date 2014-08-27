@@ -49,22 +49,31 @@ lj1 (real r)
 
   The capped function at r = 0 will aquire the value of
 
-    a - bR² = f(R) - R f'(R) / 2
+    f(0) = a - bR² = f(R) - R f'(R) / 2
 
-  (note that  b and  f'(R) are likey  negative for  singular functions
-  that go to positive infinity as r -> 0).
+  Note that b and f'(R) are likey negative for singular functions that
+  go  to positive infinity  as r  -> 0.   E.g.  for  f(r) =  1/r^n the
+  variant regularized at R will have f(0) = (1 + n/2)/R^n, that is 1.5
+  times as  high at the  cutoff radius  for Coulomb with  n = 1  and 7
+  times as  high for the repulsive term  of the LJ potential  with n =
+  12.
 
   What was really surprising at first, is that setting R = 0.2 or even
   0.5 (for both  LJ and Coulomb, from the initial  value of 0.02) went
   unnoticed through the testsuite.   Well, lj0(1/5) = 976500000, which
   is pretty close to 10^9. The  scale ε of a pair interaction needs to
   be  very low  in order  to be  still comparable  or below  a typical
-  temperature after multiplying by 10^9.
+  temperature  after  multiplying  by  10^9.   Surprisingly  even  for
+  lj0(1/2) = 16128 >  10^4 one needs quite a low value  of βε = ε/T in
+  order  for the  overal  scale to  become  ~1. Note  that the  capped
+  function still  grows even  for r  < R, e.g.   for R  = 1/2  one has
+  ljcap0(0) = 113664 > 10^5.
 
   The  Coulomb  capping (see  below)  is  probably  more critical  for
   precision.  Capping  the Coulomb  at R =  1/5 starts to  distort the
   potential when  it reaches the values about  ~ 5 * 332  kcal for two
-  unit charges. Which is still a high number, but not as much.
+  unit charges; for R = 1/2 ---  at 2 * 332 kcal.  Both are still very
+  high numbers, compared to the room temperature.
 */
 static inline pure real
 ljcap0 (real r)
