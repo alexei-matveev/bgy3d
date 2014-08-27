@@ -1894,7 +1894,10 @@ hnc3d_solute_solve (const ProblemData *PD,
                   for (int i = 0; i < m; i++)
                     {
                       VecWAXPY (dx[i], -PD->beta, dv[i], dt[i]);
+                      /* Closure equation h = f(-βv + t), is
+                         implemented as c = f(-βv + t) - t */
                       compute_c1 (PD->closure, PD->beta, v_short[i], t[i], dx[i], dc[i]);
+                      VecAXPY (dc[i], -PD->beta, dv[i]);
                       VecWAXPY (dh[i], 1.0, dc[i], dt[i]);
                       {
                         const real dV = volume_element (PD);
