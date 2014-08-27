@@ -403,9 +403,25 @@ vec_map3 (Vec ws, real (*f)(real x, real y, real z),
   These vec_app?() functions use arrays  and do not need to be inlined
   solely  for performance reasons.   But I  hate prefixing  them. This
   code does not dictate what is in- and what is output. In fact all of
-  them may  be modified.  But should  they?  One convention  is to use
-  the first argument as output, the rest for input:
+  them may be modified.  But should they?
 */
+static inline void
+vec_app2 (void (*f)(int n, real x0[n], real x1[n]),
+          Vec x0, Vec x1)
+{
+  const int n = vec_local_size (x0);
+  assert (vec_local_size (x1) == n);
+
+  local real *x0_ = vec_get_array (x0);
+  local real *x1_ = vec_get_array (x1);
+
+  f (n, x0_, x1_);
+
+  vec_restore_array (x0, &x0_);
+  vec_restore_array (x1, &x1_);
+}
+
+
 static inline void
 vec_app3 (void (*f)(int n, real x0[n], real x1[n], real x2[n]),
           Vec x0, Vec x1, Vec x2)
