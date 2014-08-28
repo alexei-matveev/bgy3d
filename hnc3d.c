@@ -137,7 +137,7 @@
 #include "bgy3d-getopt.h"
 #include "bgy3d-fftw.h"         /* bgy3d_fft_mat_create() */
 #include "bgy3d-vec.h"          /* vec_create() */
-#include "bgy3d-solutes.h"     /* struct Site, bgy3d_solute_field() */
+#include "bgy3d-solutes.h"      /* Site, bgy3d_solute_field() */
 #include "bgy3d-force.h"        /* bgy3d_pair_potential() */
 #include "bgy3d-pure.h"         /* bgy3d_omega_fft_create() */
 #include "bgy3d-snes.h"         /* bgy3d_snes_default() */
@@ -1037,7 +1037,7 @@ star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
 
 
 /*
-  HNC3d   iteration   for  a   fixed   direct   correlation  of   pure
+  3D  RISM   iteration  for  a   fixed  direct  correlation   of  pure
   solvent. There were two cases at some point:
 
   a) Iteration with the indirect correlation t as a primary variable
@@ -1628,8 +1628,8 @@ forces (State *HD,
 
 
 /*
-  Solving  HNC3d equations.   Solvent  susceptibility χ  -  1 of  pure
-  solvent  appears  as a  fixed  input  here.  A primary  variable  is
+  Solving 3D  RIMS equations.   Solvent susceptibility χ  - 1  of pure
+  solvent  appears as  a  fixed  input here.   A  primary variable  is
   indirect correlation t related to h by one of the closure relations.
 
   Historically  another   branch  of   the  code  treated   the  total
