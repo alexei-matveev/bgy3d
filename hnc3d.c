@@ -146,6 +146,7 @@
 #include "bgy3d-potential.h"    /* info() */
 #include "bgy3d-impure.h"       /* Restart */
 #include "bgy3d-solvents.h"     /* bgy3d_sites_show() */
+#include "bgy3d-guile.h"        /* from_double2() */
 #include <math.h>               /* expm1() */
 #include "hnc3d.h"
 
@@ -1892,8 +1893,8 @@ hnc3d_solute_solve (const ProblemData *PD,
           vec_create1 (HD->da, m, dh);
           vec_create1 (HD->da, m, dc);
 
-          /* Mode vector: */
-          real dR[n][3];
+          /* Mode vector, and final cartesian gradient: */
+          real dR[n][3], dE[n][3];
 
           for (int i = 0; i < n; i++)
             FOR_DIM
@@ -1965,6 +1966,7 @@ hnc3d_solute_solve (const ProblemData *PD,
                                        (void*) h, (void*) dh,
                                        (void*) c, (void*) dc,
                                        (void*) cl);
+                  dE[i][dim] = mu1;
 
                   PRINTF ("XXX: mu0 = %f\n", mu0);
                   PRINTF ("XXX: mu1 = %f\n", mu1);
@@ -1985,6 +1987,10 @@ hnc3d_solute_solve (const ProblemData *PD,
           vec_destroy1 (m, dc);
           vec_destroy1 (m, cl);
           vec_destroy (&uc);
+
+          /* Cons gradients onto the dictionary of results: */
+          *dict = scm_acons (scm_from_locale_symbol ("free-energy-response"),
+                             from_double2 (n, 3, dE), *dict);
         }
     }
 
@@ -2115,6 +2121,10 @@ hnc3d_solute_solve (const ProblemData *PD,
           PRINTF ("# XXX: grad(%d) = (%f %f %f)\n", i, de[i][0], de[i][1], de[i][2]);
         }
       PRINTF ("# XXX: grad(s) = (%f %f %f)\n", desum[0], desum[1], desum[2]);
+
+      /* Cons gradients onto the dictionary of results: */
+      *dict = scm_acons (scm_from_locale_symbol ("free-energy-gradient"),
+                         from_double2 (n, 3, de), *dict);
     }
 
   /* Last used for x = -βv + t and in chempot code above. */
