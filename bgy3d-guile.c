@@ -75,7 +75,8 @@ alist_getopt_test (SCM alist, const char *key)
 /* Update SCM value  with the entry from an  association list or leave
    it  unchanged if  there is  no corresponding  entry.  Alist  is not
    modified. */
-static bool alist_getopt_scm (SCM alist, const char *key, SCM *val)
+static bool
+alist_getopt_scm (SCM alist, const char *key, SCM *val)
 {
   SCM kv = scm_assoc (scm_from_locale_symbol (key), alist);
 
@@ -87,10 +88,27 @@ static bool alist_getopt_scm (SCM alist, const char *key, SCM *val)
   return test;
 }
 
+/* Update a bool  with the entry from an association  list or leave it
+   unchanged  if  there  is  no  corresponding entry.   Alist  is  not
+   modified. */
+static bool
+alist_getopt_bool (SCM alist, const char *key, bool *val)
+{
+  SCM scm;
+  bool test = alist_getopt_scm (alist, key, &scm);
+
+  if (test)
+    *val = scm_to_bool (scm);
+
+  return test;
+}
+
+
 /* Update an integer with the  entry from an association list or leave
    it  unchanged if  there is  no  corresponding entry.  Alist is  not
    modified. */
-static bool alist_getopt_int (SCM alist, const char *key, int *val)
+static bool
+alist_getopt_int (SCM alist, const char *key, int *val)
 {
   SCM scm;
   bool test = alist_getopt_scm (alist, key, &scm);
@@ -105,7 +123,8 @@ static bool alist_getopt_int (SCM alist, const char *key, int *val)
 /* Update a  real number  with the entry  from an association  list or
    leave it unchanged if there is no corresponding entry. Alist is not
    modified. */
-static bool alist_getopt_real (SCM alist, const char *key, double *val)
+static bool
+alist_getopt_real (SCM alist, const char *key, double *val)
 {
   SCM scm;
   bool test = alist_getopt_scm (alist, key, &scm);
@@ -118,7 +137,8 @@ static bool alist_getopt_real (SCM alist, const char *key, double *val)
 
 /* Update a function  pointer with the entry from  an association list
    or leave it unchanged if there is no corresponding entry: */
-static bool alist_getopt_funptr (SCM alist, /* intent(in) */
+static bool
+alist_getopt_funptr (SCM alist, /* intent(in) */
                                  const char *key,
                                  void (**val)(void))
 {
@@ -154,6 +174,13 @@ bool
 bgy3d_getopt_test (const char key[])
 {
   return alist_getopt_test (guile_get_settings (), key);
+}
+
+
+bool
+bgy3d_getopt_bool (const char key[], bool *val)
+{
+  return alist_getopt_bool (guile_get_settings (), key, val);
 }
 
 
