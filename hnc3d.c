@@ -1988,6 +1988,20 @@ hnc3d_solute_solve (const ProblemData *PD,
           vec_destroy1 (m, cl);
           vec_destroy (&uc);
 
+          if (true)             /* debug prints */
+            {
+              real dEsum[3] = {0.0, 0.0, 0.0};
+              for (int i = 0; i < n; i++)
+                {
+                  FOR_DIM
+                    dEsum[dim] += dE[i][dim];
+                  PRINTF ("# XXX: resp(%d) = (%f %f %f)\n",
+                          i, dE[i][0], dE[i][1], dE[i][2]);
+                }
+              PRINTF ("# XXX: resp(s) = (%f %f %f)\n",
+                      dEsum[0], dEsum[1], dEsum[2]);
+            }
+
           /* Cons gradients onto the dictionary of results: */
           *dict = scm_acons (scm_from_locale_symbol ("free-energy-response"),
                              from_double2 (n, 3, dE), *dict);
