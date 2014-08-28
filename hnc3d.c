@@ -1657,6 +1657,11 @@ hnc3d_solute_solve (const ProblemData *PD,
   /* Default is to not apply boundary condition in HNC code: */
   const PetscBool cage = false;
 
+  bool derivatives = false;
+
+  /* Update if specified by user, or leave as is: */
+  bgy3d_getopt_bool ("derivatives", &derivatives);
+
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
@@ -1835,7 +1840,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
 
       /* XXX: Derivatives by linear response: */
-      if (false)
+      if (derivatives)
         {
           local Vec dV = vec_duplicate (T);
           local Vec dT = vec_duplicate (T);
@@ -2091,7 +2096,7 @@ hnc3d_solute_solve (const ProblemData *PD,
   }
 
   /* Derivatives of the chemical potential: */
-  if (true)
+  if (derivatives)
     {
       PRINTF ("# XXX: call energy 5 ...\n");
       const real e = energy (HD, m, solvent, h, v_short, uc);
