@@ -16,7 +16,7 @@
     (rho . 0.0333295)
     (beta . 1.6889)
     (norm-tol . 1.0e-14)
-    (derivatives . #f)
+    (derivatives . #t)
     (closure . HNC)
     (verbosity . 0)))
 
@@ -41,7 +41,9 @@
     (bgy3d-pot-destroy (assoc-ref alist 'POTENTIAL))
     (bgy3d-restart-destroy (assoc-ref alist 'RESTART))
     ;; Return free energy:
-    (assoc-ref alist 'free-energy)))
+    (let ((e (assoc-ref alist 'free-energy))
+          (g (assoc-ref alist 'free-energy-gradient)))
+      (list e g))))
 
 (define (pes-3d d/2)
   (do-3d (make-solute d/2)))
@@ -51,7 +53,7 @@
 
 ;;; Excess  chemical potential for  the solvent  in solvent  and united
 ;;; atom limit:
-(if #t
+(if #f
     (let ((ow (do-3d *solvent*))
           (ua (do-3d (find-molecule "OW2-UA")))
           (e0 (pes-3d 0.0))
@@ -76,7 +78,8 @@
      (for-each
       (lambda (row)
         (match row
-               ((d/2 e)
-                (format #t "~A ~A\n" d/2 e))))
+          ((d/2 (e ((_ _ ga)
+                    (_ _ gb))))
+                (format #t "~A ~A ~A ~A\n" d/2 e ga gb))))
       *results*))))
 
