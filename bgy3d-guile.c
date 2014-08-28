@@ -371,7 +371,7 @@ bgy3d_problem_data (void)
 
 
 
-static void
+static inline void
 to_int1 (SCM x, int n, int y[n])
 {
   for (int i = 0; i < n; i++)
@@ -382,7 +382,7 @@ to_int1 (SCM x, int n, int y[n])
 }
 
 
-static void
+static inline void
 to_double1 (SCM x, int n, double y[n])
 {
   for (int i = 0; i < n; i++)
@@ -393,7 +393,7 @@ to_double1 (SCM x, int n, double y[n])
 }
 
 
-static SCM
+static inline SCM
 from_double1 (int n, double x[n])
 {
   SCM y = SCM_EOL;
@@ -405,7 +405,7 @@ from_double1 (int n, double x[n])
 }
 
 
-static void
+static inline void
 to_double2 (SCM x, int m, int n, double y[m][n])
 {
   for (int i = 0; i < m; i++)
@@ -416,7 +416,7 @@ to_double2 (SCM x, int m, int n, double y[m][n])
 }
 
 
-static SCM
+static inline SCM
 from_double2 (int m, int n, double x[m][n])
 {
   SCM y = SCM_EOL;
