@@ -343,7 +343,13 @@
 ;;; 0.033427745 is ~1.05. For  reference, the Wigner-Seitz radius rs =
 ;;; 1.92575678516970 A for this density.
 ;;;
-("OW" (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
+("OW"
+ (("OW" (0.0 0.0 0.0) 3.16 0.1549 0.0)))
+("OW2"
+ (("OW" (0.0 0.0  2.0) 3.16 0.1549 0.0)
+  ("OW" (0.0 0.0 -2.0) 3.16 0.1549 0.0)))
+("OW2-UA"
+ (("UA" (0.0 0.0 0.0) 3.16 0.6196 0.0))) ; united atom 4x epsilon
 
 ;;
 ;; Transferable  Potentials  for  Phase Equilibria.   1.   United-Atom
