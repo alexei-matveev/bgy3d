@@ -1609,11 +1609,11 @@ show_x (int m, int n, real x[m][n])
 
 
 static void
-forces (State *HD,
-        int m, const Site solvent[m],
-        int n, const Site solute[n],
-        Vec h[m],               /* in */
-        real f[n][3])           /* out */
+gradients (State *HD,
+           int m, const Site solvent[m],
+           int n, const Site solute[n],
+           Vec h[m],            /* in */
+           real de[n][3])       /* out */
 {
   real dx[n][3];
 
@@ -1622,7 +1622,7 @@ forces (State *HD,
       {
         /* Choose a mode vector: */
         set_x (n, 3, dx, i, dim);
-        f[i][dim] = - energy1 (HD, m, solvent, n, solute, h, dx);
+        de[i][dim] = energy1 (HD, m, solvent, n, solute, h, dx);
       }
 }
 
@@ -2106,15 +2106,15 @@ hnc3d_solute_solve (const ProblemData *PD,
       const real e = energy (HD, m, solvent, h, v_short, uc);
       PRINTF ("# XXX: energy = %f\n", e);
 
-      real f[n][3], fsum[3] = {0.0, 0.0, 0.0};
-      forces (HD, m, solvent, n, solute, h, f);
+      real de[n][3], desum[3] = {0.0, 0.0, 0.0};
+      gradients (HD, m, solvent, n, solute, h, de);
       for (int i = 0; i < n; i++)
         {
           FOR_DIM
-            fsum[dim] += f[i][dim];
-          PRINTF ("# XXX: f(%d) = (%f %f %f)\n", i, f[i][0], f[i][1], f[i][2]);
+            desum[dim] += de[i][dim];
+          PRINTF ("# XXX: grad(%d) = (%f %f %f)\n", i, de[i][0], de[i][1], de[i][2]);
         }
-      PRINTF ("# XXX: f(s) = (%f %f %f)\n", fsum[0], fsum[1], fsum[2]);
+      PRINTF ("# XXX: grad(s) = (%f %f %f)\n", desum[0], desum[1], desum[2]);
     }
 
   /* Last used for x = -βv + t and in chempot code above. */
