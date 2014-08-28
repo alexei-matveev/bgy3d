@@ -4,6 +4,7 @@
   Copyright (c) 2013, 2014 Alexei Matveev
   Copyright (c) 2013 Bo Li
 */
+#include <libguile.h>           /* SCM */
 
 void hnc3d_solvent_solve (const ProblemData *PD,
                           int m, const Site solvent[m],
@@ -13,7 +14,7 @@ void hnc3d_solute_solve (const ProblemData *PD,
                          const int m, const Site solvent[m],
                          const int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         real *mu, /* out, chemical potential */
-                         Vec g[m], /* out */
+                         SCM *dict, /* inout, association list */
+                         Vec g[m],  /* out */
                          Context **medium,   /* out */
                          Restart **restart); /* inout */

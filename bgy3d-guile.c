@@ -1105,7 +1105,7 @@ void (*SU) (const ProblemData *PD,
             const int m, const Site solvent[m],
             const int n, const Site solute[n],
             void (*density)(int k, const real x[k][3], real rho[k]),
-            real *mu,           /* out, chemical potential */
+            SCM *dict,          /* inout, alist */
             Vec g[m],           /* out */
             Context **medium,   /* out */
             Restart **restart); /* inout */
@@ -1169,10 +1169,12 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
     in disguise). This is NULL in the first call of a series:
   */
   Restart *restart_ = to_pointer (restart); /* maybe NULL */
-  real mu;                      /* excess chemical potential */
+
+  /* The code will fill the dictionary with results: */
+  SCM dict = SCM_EOL;
 
   solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
-                &mu,            /* out */
+                &dict,          /* inout, alist */
                 g,              /* out */
                 &medium_,       /* out */
                 &restart_);     /* inout */
@@ -1189,12 +1191,8 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
   SCM gs = from_vec1 (m, g);
   SCM medium = from_pointer (medium_);
 
-  /*
-    Return  a dictionary  of results.  Caller is  supposed  to destroy
-    them!
-  */
-  SCM dict = SCM_EOL;
-  dict = scm_acons (scm_from_locale_symbol ("free-energy"), scm_from_double (mu), dict);
+  /* Extend  result   dictionary.   Caller  is   supposed  to  destroy
+     these! */
   dict = scm_acons (scm_from_locale_symbol ("GUV"), gs, dict);
   dict = scm_acons (scm_from_locale_symbol ("POTENTIAL"), medium, dict);
   dict = scm_acons (scm_from_locale_symbol ("RESTART"), restart, dict);

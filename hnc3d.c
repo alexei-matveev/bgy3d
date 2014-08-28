@@ -1649,7 +1649,7 @@ hnc3d_solute_solve (const ProblemData *PD,
                     const int m, const Site solvent[m],
                     const int n, const Site solute[n],
                     void (*density)(int k, const real x[k][3], real rho[k]),
-                    real *mu,   /* out, chemical potential */
+                    SCM *dict,  /* inout, association list */
                     Vec g[m],
                     Context **medium,  /* out */
                     Restart **restart) /* inout, so far unchanged  */
@@ -2084,8 +2084,12 @@ hnc3d_solute_solve (const ProblemData *PD,
       First   and  foremost   compute  the   self-consistent  chemical
       potential to be returned to the caller:
     */
-    *mu = chempot (HD, HD->PD->closure, 1, m,
-                   (void*) x, (void*) h, (void*) c, (void*) cl);
+    const real mu = chempot (HD, HD->PD->closure, 1, m,
+                             (void*) x, (void*) h, (void*) c, (void*) cl);
+
+    /* Cons an entry onto the dictionary of results: */
+    *dict = scm_acons (scm_from_locale_symbol ("free-energy"),
+                       scm_from_double (mu), *dict);
 
     /* This computes,  prints and  discards chemical potential  by all
        available functionals */

@@ -891,7 +891,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          int m, const Site solvent[m],
                          int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         real *mu,          /* out */
+                         SCM *dict,         /* inout, alist */
                          Vec g[m],          /* out */
                          Context **medium,  /* out, optional */
                          Restart **restart) /* inout, optional */
@@ -970,9 +970,12 @@ void bgy3d_solute_solve (const ProblemData *PD,
 
   bgy3d_state_destroy (BHD);
 
-  /* FIXME: chemical potential  is not computed here but  we still try
-     to preserve the same interface as in hnc3d_solute_solve(): */
-  *mu = 0.0;
+  /*
+    FIXME: chemical  potential is  not computed here,  we also  do not
+    return any  other result yet.   Still trying to preserve  the same
+    interface as in hnc3d_solute_solve():
+  */
+  (void) dict;
 }
 
 

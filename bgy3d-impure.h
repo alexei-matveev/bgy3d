@@ -4,6 +4,7 @@
   Copyright (c) 2013, 2014 Alexei Matveev
   Copyright (c) 2013 Bo Li
 */
+#include <libguile.h>           /* SCM */
 
 /*
   A Restart* token to be  passed there an back for resuming iterations
@@ -27,7 +28,7 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          int m, const Site solvent[m],
                          int n, const Site solute[n],
                          void (*density)(int k, const real x[k][3], real rho[k]),
-                         real *mu,           /* out */
+                         SCM *dict,          /* inout, alist */
                          Vec g[m],           /* out */
                          Context **medium,   /* out, optional */
                          Restart **restart); /* inout, optional */
