@@ -85,6 +85,8 @@
    make-pes
    env-ref
    env-set
+   mesh/lin
+   mesh/log
    *settings*
    *server*
    vec-print
