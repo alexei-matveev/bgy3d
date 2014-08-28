@@ -42,8 +42,9 @@
     (bgy3d-restart-destroy (assoc-ref alist 'RESTART))
     ;; Return free energy:
     (let ((e (assoc-ref alist 'free-energy))
-          (g (assoc-ref alist 'free-energy-gradient)))
-      (list e g))))
+          (g (assoc-ref alist 'free-energy-gradient))
+          (r (assoc-ref alist 'free-energy-response)))
+      (list e g r))))
 
 (define (pes-3d d/2)
   (do-3d (make-solute d/2)))
@@ -78,8 +79,7 @@
      (for-each
       (lambda (row)
         (match row
-          ((d/2 (e ((_ _ ga)
-                    (_ _ gb))))
-                (format #t "~A ~A ~A ~A\n" d/2 e ga gb))))
+          ((d/2 (e ((_ _ ga) (_ _ gb)) ((_ _ ra) (_ _ rb))))
+                (format #t "~A ~A ~A ~A ~A ~A\n" d/2 e ga gb ra rb))))
       *results*))))
 
