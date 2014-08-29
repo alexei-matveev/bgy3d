@@ -241,13 +241,6 @@
 ;;;
 ;;; update sigma, epsilon and charge with new values
 ;;;
-
-(define (find-site sites site-name)
-  ;; (remove-if-not (lambda (x) (equal? (car x) site-name)) sites))
-  (let ((site (assoc site-name sites)))
-    (if (not site)
-      (error "Not in sites" site-name))))
-
 (define (update-param molecule target-site param value)
   (let ((name (molecule-name molecule))
         (sites (molecule-sites molecule)))
@@ -267,7 +260,9 @@
                   (update-charge site value)
                   site))))
 
-    (find-site sites target-site)
+    ;; Error if target-site is not in the molecule:
+    (unless (assoc target-site sites)
+            (error "No such site:" target-site))
     (make-molecule name (map update-site sites))))
 
 (define (update-sigma site new-sigma)
