@@ -257,15 +257,15 @@
              ("sigma"
               (if (equal? target-site (site-name site))
                   (update-sigma site value)
-                  (update-sigma site (site-sigma site))))
+                  site))
              ("epsilon"
               (if (equal? target-site (site-name site))
                   (update-epsilon site value)
-                  (update-epsilon site (site-epsilon site))))
+                  site))
              ("charge"
               (if (equal? target-site (site-name site))
                   (update-charge site value)
-                  (update-charge site (site-charge site))))))
+                  site))))
 
     (find-site sites target-site)
     (make-molecule name (map update-site sites))))
