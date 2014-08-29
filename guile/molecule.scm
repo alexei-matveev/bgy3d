@@ -20,6 +20,7 @@
   #:export
   (make-molecule
    move-molecule
+   translate-molecule
    molecule-name
    molecule-sites
    molecule-positions
@@ -202,6 +203,13 @@
   (let ((name (molecule-name solute))
         (sites (molecule-sites solute)))
     (make-molecule name (map move-site sites positions))))
+
+(define (translate-molecule solute dx)
+  (let* ((positions (molecule-positions solute))
+         (translated (map (lambda (x) (map + x dx))
+                          positions)))
+    (move-molecule solute translated)))
+
 
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
