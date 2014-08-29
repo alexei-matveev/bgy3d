@@ -256,16 +256,16 @@
       (match param
              ("sigma"
               (if (equal? target-site (site-name site))
-                (update-sigma site value)
-                (update-sigma site (site-sigma site))))
+                  (update-sigma site value)
+                  (update-sigma site (site-sigma site))))
              ("epsilon"
               (if (equal? target-site (site-name site))
-                (update-epsilon site value)
-                (update-epsilon site (site-epsilon site))))
+                  (update-epsilon site value)
+                  (update-epsilon site (site-epsilon site))))
              ("charge"
               (if (equal? target-site (site-name site))
-                (update-charge site value)
-                (update-charge site (site-charge site))))))
+                  (update-charge site value)
+                  (update-charge site (site-charge site))))))
 
     (find-site sites target-site)
     (make-molecule name (map update-site sites))))
