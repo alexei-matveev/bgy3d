@@ -87,6 +87,7 @@
    env-set
    mesh/lin
    mesh/log
+   linspace
    *settings*
    *server*
    vec-print
@@ -825,6 +826,15 @@ computes the sum of all vector elements."
 (define (mesh/log min max n)
   (map exp (mesh/lin (log min) (log max) n)))
 
+;;;
+;;; (linspace  a b n)  behaves as  in NumPy  for n  > 1:  a and  b are
+;;; included in  the mesh. This  is usefull for "centered"  meshes say
+;;; between -1 and +1.
+;;;
+(define (linspace min max n)
+  (let ((dr (/ (- max min) (- n 1))))
+    (map (lambda (i) (+ min (* dr i)))
+         (iota n))))
 
 ;;;
 ;;; Should work for any number of columns:
