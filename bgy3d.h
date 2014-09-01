@@ -232,11 +232,17 @@ typedef struct ProblemData
 
       L[i] = N[i] * h[i]
 
-    modulo floating point arithmetics, as usual.
+    modulo floating point arithmetics,  as usual.  In earlier versions
+    the radial parameters rmax and  nrad were max(L)/2 and max(N). But
+    even then we had to "upscale" radial parameters to use the results
+    in 3D RISM. From now on radial parameters are independent, but see
+    the logic for the default values.
   */
   int N[3];                     /* global grid size */
   real L[3];                    /* box size */
   real h[3];                    /* mesh width */
+  real rmax;                    /* radial extent (1D) */
+  int nrad;                     /* number of radial points (1D) */
   real beta;                    /* inverse temperature, 1/kT */
   real rho;                     /* solvent density */
 

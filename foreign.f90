@@ -58,25 +58,24 @@ module foreign
 
   type, public, bind (c) :: problem_data
      !
-     ! These three are redundant and should fulfil the relation
+     ! See  bgy3d.h.  The  fields prefixed  with  XX are  not used  in
+     ! Fortran code.
      !
-     !   L(i) = N(i) * h(i)
-     !
-     ! modulo floating point arithmetics, as usual.
-     !
-     integer (c_int) :: N(3)    ! global grid size
-     real (c_double) :: L(3)    ! box size
-     real (c_double) :: h(3)    ! mesh width
+     integer (c_int) :: XXN(3)  ! global grid size
+     real (c_double) :: XXL(3)  ! box size
+     real (c_double) :: XXh(3)  ! mesh width
+     real (c_double) :: rmax    ! radial extent (1D)
+     integer (c_int) :: nrad    ! number of radial points (1D)
      real (c_double) :: beta    ! inverse temperature, 1/kT
      real (c_double) :: rho     ! solvent density
 
      ! Other staff  that was retrieved by the  solvers themselves from
      ! the (Petsc) environment:
-     real (c_double) :: lambda   ! Mixing parameter.
-     real (c_double) :: damp     ! Scaling factor.
-     integer (c_int) :: max_iter ! Maximal number of iterations.
-     real (c_double) :: norm_tol ! Convergence threshold.
-     integer (c_int) :: closure  ! enum for HNC, KH, or PY
+     real (c_double) :: XXlambda   ! Mixing parameter.
+     real (c_double) :: XXdamp     ! Scaling factor.
+     integer (c_int) :: XXmax_iter ! Maximal number of iterations.
+     real (c_double) :: XXnorm_tol ! Convergence threshold.
+     integer (c_int) :: closure    ! enum for HNC, KH, or PY
   end type problem_data
 
   !

@@ -38,7 +38,7 @@ contains
     integer (c_int) :: nrad
     ! *** end of interface ***
 
-    nrad = maxval (pd % n)
+    nrad = pd % nrad
   end function rism_nrad
 
 
@@ -53,7 +53,7 @@ contains
     real (c_double) :: rmax
     ! *** end of interface ***
 
-    rmax = maxval (pd % L) / 2
+    rmax = pd % rmax
   end function rism_rmax
 
 
@@ -68,11 +68,8 @@ contains
     ! *** end of interface ***
 
     xpd = pd
-
-    ! FIXME: get rid of redundancies:
-    xpd % n = xpd % n * 16
-    xpd % L = xpd % L * 4
-    xpd % h = xpd % L / xpd % n
+    xpd % nrad = xpd % nrad * 16
+    xpd % rmax = xpd % rmax * 4
   end function rism_upscale
 
 

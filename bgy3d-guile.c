@@ -309,6 +309,16 @@ problem_data (SCM alist)
   // assert (n < 1291);
 
   /*
+    Radial  parameters for use  in 1D  RISM, were  previousely derived
+    like this  directly from L[] and  N[]. Note that the  3D code when
+    calling 1D RISM will scale rmax and nrad up, by default.
+  */
+  PD.rmax = MAX (MAX (PD.L[0], PD.L[1]), PD.L[2]) / 2;
+  PD.nrad = MAX (MAX (PD.N[0], PD.N[1]), PD.N[2]);
+  alist_getopt_real (alist, "rmax", &PD.rmax);
+  alist_getopt_int (alist, "nrad", &PD.nrad);
+
+  /*
     Closure is only  used in HNC-like methods. Supply  default for the
     case the settings do not provide it.
 
