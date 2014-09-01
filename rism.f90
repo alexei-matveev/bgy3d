@@ -11,9 +11,6 @@ module rism
   ! from C-side:
   public :: rism_solvent
   public :: rism_solute
-  public :: rism_nrad
-  public :: rism_rmax
-  public :: rism_upscale
   public :: rism_solute_renorm
   ! *** END OF INTERFACE ***
 
@@ -26,52 +23,6 @@ module rism
   integer, parameter :: GOOD_HOPE = 1         ! σ(ab) = [σ(a) * σ(b)]^(1/2)
 
 contains
-
-  function rism_nrad (pd) result (nrad) bind (c)
-    !
-    ! Needs to be consistent with ./rism.h
-    !
-    use iso_c_binding, only: c_int
-    use foreign, only: problem_data
-    implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE
-    integer (c_int) :: nrad
-    ! *** end of interface ***
-
-    nrad = pd % nrad
-  end function rism_nrad
-
-
-  function rism_rmax (pd) result (rmax) bind (c)
-    !
-    ! Needs to be consistent with ./rism.h
-    !
-    use iso_c_binding, only: c_double
-    use foreign, only: problem_data
-    implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE
-    real (c_double) :: rmax
-    ! *** end of interface ***
-
-    rmax = pd % rmax
-  end function rism_rmax
-
-
-  function rism_upscale (pd) result (xpd) bind (c)
-    !
-    ! Needs to be consistent with ./rism.h
-    !
-    use foreign, only: problem_data
-    implicit none
-    type (problem_data), intent (in) :: pd ! no VALUE
-    type (problem_data) :: xpd
-    ! *** end of interface ***
-
-    xpd = pd
-    xpd % nrad = xpd % nrad * 16
-    xpd % rmax = xpd % rmax * 4
-  end function rism_upscale
-
 
   function rism_self_energy (n, sites, spec) result (eg) bind (c)
     !
@@ -135,7 +86,7 @@ contains
     real (rk), pointer :: t(:, :, :), x(:, :, :)
     type (obj), pointer :: dict
 
-    nrad = rism_nrad (pd)
+    nrad = pd % nrad
 
     ! FIXME:  The  code operates  with  arrays  of  the [m,  m,  nrad]
     ! shape. However,  for historical reasons  the C-interface assumes
@@ -175,7 +126,7 @@ contains
     real (rk), pointer :: x(:, :, :)
     type (obj), pointer :: dict
 
-    nrad = rism_nrad (pd)
+    nrad = pd % nrad
 
     ! FIXME:  The  code operates  with  arrays  of  the [m,  m,  nrad]
     ! shape. However,  for historical reasons  the C-interface assumes
@@ -276,8 +227,8 @@ contains
     uv = present (solute)
     vv = .not. uv .or. uv .and. .not. present (x)
 
-    rmax = rism_rmax (pd)
-    nrad = rism_nrad (pd)
+    rmax = pd % rmax
+    nrad = pd % nrad
 
     if (verbosity() > 0) then
        print *, "# L =", rmax, "(for 1d)"

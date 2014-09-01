@@ -1200,7 +1200,7 @@ static SCM guile_rism_solvent (SCM solvent)
 
 
   /* Always use this function to derive number of radial points: */
-  const int nrad = rism_nrad (&PD);
+  const int nrad = PD.nrad;
 
   /* Guile m x m x nrad array of doubles: */
   SCM chi_fft = scm_make_typed_array (scm_from_locale_symbol ("f64"),

@@ -685,6 +685,19 @@ print_chempot (const State *HD, int n, int m,
                  ((methods[i] == HD->PD->closure)? "*" : ""));
 }
 
+static inline ProblemData
+upscale (const ProblemData *PD)
+{
+  /*
+    FIXME: how  do we proceed if  the user specified nrad  and rmax in
+    the command line knowing better as he/she always does?
+  */
+  ProblemData pd = *PD;
+  pd.rmax = pd.rmax * 4;
+  pd.nrad = pd.nrad * 16;
+  return pd;
+}
+
 
 /*
   Solving for indirect correlation t = h - c and thus, also for direct
@@ -726,12 +739,13 @@ hnc3d_solvent_solve (const ProblemData *PD,
   {
     /*
       Problem data for use in 1d-RISM code. If you do not upscale, the
-      rmax = max (PD->L) / 2 will be too low for interpolation:
+      default  rmax   =  max  (PD->L)  /   2  will  be   too  low  for
+      interpolation.
     */
-    ProblemData pd = rism_upscale (PD);
+    ProblemData pd = upscale (PD);
 
-    const int nrad = rism_nrad (&pd);
-    const real rmax = rism_rmax (&pd);
+    const int nrad = pd.nrad;
+    const real rmax = pd.rmax;
 
     real t_rad[m][m][nrad];
 
@@ -1377,15 +1391,14 @@ solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
     rmax =  max (PD->L) / 2 will  be too low for  interpolation on the
     r-grid. Though here only the k-grid is of interest.
   */
-  ProblemData pd = rism_upscale (HD->PD);
+  ProblemData pd = upscale (HD->PD);
 
   /*
-    The struct  ProblemData encodes 3D  domain, the 1D solver  has its
-    own  conventions how  to derive  the radial  grid  parameters from
-    those of the 3D domain:
+    The L[] and N[] fields encode 3D domain, the radial parameters for
+    1D solver are separate.
    */
-  const int nrad = rism_nrad (&pd);
-  const real rmax = rism_rmax (&pd);
+  const int nrad = pd.nrad;
+  const real rmax = pd.rmax;
 
   real x_fft[m][m][nrad];
 

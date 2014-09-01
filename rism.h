@@ -4,10 +4,6 @@
 */
 
 /* Implemented in Fortran. See rism.f90 */
-int rism_nrad (const ProblemData *PD);
-real rism_rmax (const ProblemData *PD);
-ProblemData rism_upscale (const ProblemData *PD);
-
 SCM rism_self_energy (int n, const Site sites[n], const int spec[n]);
 
 void rism_solvent (const ProblemData *PD,
