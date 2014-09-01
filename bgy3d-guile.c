@@ -228,16 +228,18 @@ bgy3d_getopt_string (const char key[], int len, char val[len])
 
 
 /*
-  Get  problem data  (e.g.   from command  line) using  bgy3d_getopt_*
-  interface.
+  Get  problem data  from the  association  list (set  e.g.  from  the
+  command line).  This interface evolved from asking PETSC environment
+  to  consulting  the settings  fluid  passed  here  explicitly as  an
+  association list over  time. It is not always  convenient to restart
+  executable to change a parameter.
 
-  FIXME:  some parameters are  still handled  by the  solvers themself
-  each having potentially its own set of the defaults.
+  Do not forget to set the defaults, the environment may not contain a
+  setting for every field!  FIXME:  some parameters are handled by the
+  working code itself having potentially its own defaults.
 
-  Do not forget to set the  defaults, the command line may not contain
-  a setting for every ProblemData field!
+  Will longjmp() on error!
 */
-/* Will longjmp() on error! */
 static ProblemData
 problem_data (SCM alist)
 {
