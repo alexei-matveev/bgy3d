@@ -578,11 +578,12 @@ bgy3d_solute_form (const State *BHD,
   vec_kmap3 (BHD, f3, f_fft);
 
   /* Pointwise-product in k-space: */
-  complex pure mul (complex a, complex b)
+  void mul (int n, complex a[n], complex b[n])
   {
-    return a * b;
+    for (int i = 0; i < n; i++)
+      b[i] *= a[i];
   }
-  vec_fft_map2 (v_fft, mul, f_fft, v_fft); /* aliasing! */
+  vec_fft_app2 (mul, f_fft, v_fft);
 
   vec_destroy (&f_fft);
 }
