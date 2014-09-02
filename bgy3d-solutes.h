@@ -34,8 +34,7 @@ void bgy3d_solute_field1 (const State *BHD,
                           real dx[n][3],                /* in */
                           Vec dv[m]);                   /* out */
 
-void bgy3d_solute_form (const State *BHD,
-                        int m, const real q[m], real x[m][3],
+void bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
                         Vec v_fft); /* inout */
 
 

@@ -595,14 +595,13 @@ konv (Vec a_fft, Vec b_fft)
   factor is  centered, so v_fft must  be a convolution  kernel "at the
   corner" on entry if it wants to be centered on exit. Or vice versa.
  */
-void
-bgy3d_solute_form (const State *BHD,
-                   int m, const real q[m], real x[m][3],
-                   Vec v_fft)   /* inout */
+static void
+solute_form (const State *BHD, int m, const real q[m], real x[m][3],
+             Vec v_fft)   /* inout */
 {
   local Vec f_fft = vec_duplicate (v_fft);
 
-  /* Tabulate form factor: */
+  /* FIXME: recomputing this every call? Tabulate form factor: */
   complex pure f3 (const real k[3])
   {
     return form_factor (k, m, q, x);
@@ -621,11 +620,11 @@ bgy3d_solute_form (const State *BHD,
 
 
 /* Differential of bgy3d_solute_form() */
-void
-bgy3d_solute_form1 (const State *BHD,
-                    int m, const real q[m],
-                    real x[m][3], real dx[m][3],
-                    Vec dv_fft)   /* inout */
+static void
+solute_form1 (const State *BHD,
+              int m, const real q[m],
+              real x[m][3], real dx[m][3],
+              Vec dv_fft)   /* inout */
 {
   local Vec f_fft = vec_duplicate (dv_fft);
 
@@ -636,7 +635,7 @@ bgy3d_solute_form1 (const State *BHD,
   }
   vec_kmap3 (BHD, f3, f_fft);
 
-  /* See bgy3d_solute_form() for explanation: */
+  /* See solute_form() for explanation: */
   bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, f_fft);
 
   /* Pointwise-product in k-space, v(k) *= f(k): */
@@ -644,6 +643,24 @@ bgy3d_solute_form1 (const State *BHD,
 
   vec_destroy (&f_fft);
 }
+
+
+void
+bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
+                   Vec v_fft)   /* inout */
+{
+  real q[n], x[n][3];
+
+  for (int i = 0; i < n; i++)
+    {
+      q[i] = solute[i].charge;
+
+      FOR_DIM
+        x[i][dim] = solute[i].x[dim];
+    }
+  solute_form (BHD, n, q, x, v_fft);
+}
+
 
 /*
   In  the   spherically  symmetric  single  center   case  the  smooth
@@ -711,7 +728,7 @@ coulomb_long_fft (const State *BHD,
     shift  in uc(k=0)  would not  matter.  FIXME:  1/k² is  not finite
     though, hopefully we get a meaningful dipole field here:
   */
-  bgy3d_solute_form (BHD, n, q, x, uc_fft);
+  solute_form (BHD, n, q, x, uc_fft);
 
   /*
     Form factor is  centerd, uc_fft was also centered  --- this is one

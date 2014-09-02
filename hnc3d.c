@@ -1756,26 +1756,12 @@ hnc3d_solute_solve (const ProblemData *PD,
       vec_destroy1 (m, tau_fft); /* dont keep zeroes around */
     else
       {
-        /* Once again,  n is  the number of  solute sites  form factor
-           will get n charges and n positions: */
-        real q[n], x[n][3];
-
-        /* The   charges  we   have  copied   before  were   those  of
-           solvent. Here we need those of solute. And positions: */
-        for (int i = 0; i < n; i++)
-          {
-            q[i] = solute[i].charge;
-
-            FOR_DIM
-              x[i][dim] = solute[i].x[dim];
-          }
-
         /*
           The convolution  with the electric form  factor adds another
           charge dimension to the result.   Do not forget to scale the
           term  by  -β/ε₀, when  adding  to  the  renormalized t,  see
           iterate_t1(). FIXME: or should we rather make tau_fft[] have
-          the dimension  of the potential  to be measuted in  kcal? In
+          the dimension  of the potential  to be measured in  kcal? In
           this case one  would need to scale by  1/ε₀ right away. Here
           form  factor   is  centered,  and  tau_fft   (on  input)  is
           "cornered" so that on output it must be centered again.
@@ -1784,8 +1770,7 @@ hnc3d_solute_solve (const ProblemData *PD,
           number of different renormalization functions tau_fft[m].
         */
         for (int i = 0; i < m; i++) /* m: over solvent sites ... */
-          bgy3d_solute_form (HD, n, q, x, tau_fft[i]);
-        /* n, q[n], x[n][3]: solute charges and positions */
+          bgy3d_solute_form (HD, n, solute, tau_fft[i]);
       }
 
     /*
