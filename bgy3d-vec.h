@@ -531,28 +531,7 @@ vec_app8 (void (*f)(int n,
 }
 
 
-/* ys  = map (f,  xs).  Should  also work  with aliased  arguments for
-   in-place transform: */
-static inline void
-vec_fft_map1 (Vec y, /* out */
-              complex (*f)(complex x),
-              Vec x) /* in */
-{
-  const int n = vec_local_size (x);
-  assert (vec_local_size (y) == n);
-  assert (n % 2 == 0);
-
-  local complex *x_ = (complex*) vec_get_array (x);
-  local complex *y_ = (complex*) vec_get_array (y);
-
-  for (int i = 0; i < n / 2; i++)
-    y_[i] = f (x_[i]);
-
-  vec_restore_array (x, (void*) &x_);
-  vec_restore_array (y, (void*) &y_);
-}
-
-
+/* Apply elemental f() to complex arrays: */
 static inline void
 vec_fft_app2 (void (*f)(int n, complex x0[n], complex x1[n]),
           Vec x0, Vec x1)
