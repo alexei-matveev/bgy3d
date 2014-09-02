@@ -1371,13 +1371,27 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
   const int nrad = pd.nrad;
   const real rmax = pd.rmax;
 
+  /* 1D versions of chi_fft[][] and tau_fft[]: */
   real x_fft[m][m][nrad];
+  real t_fft[m][nrad];
 
   /*
     1D-RISM calculation.   Dont need neither  indirect correlation nor
     the result dictionary, only need χ(k):
   */
   rism_solvent (&pd, m, solvent, NULL, x_fft, NULL);
+
+  /*
+    Ask the 1D code to compute T[v] + v = χ * v for a Coulomb field of
+    a Gaussian charge distribution of finite width.  The input Coulomb
+    field is  fully specified by  the Gaussian width and  solvent site
+    charges.   Note  that the  1/ε₀  factor  is  NOT included  in  the
+    dimensionless result. The output is non-trivially site-specific.
+  */
+  rism_solute_renorm (m, solvent, rmax, nrad, x_fft,
+                      G_COULOMB_INVERSE_RANGE,
+                      t_fft); /* out */
+
 
   /*
     The code  that tabulates  the k-rep on  3D grid  makes assumptions
@@ -1387,29 +1401,15 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
   const real dk = M_PI / rmax;
 
   /*
-    Ask the 1D code to compute T[v] + v = χ * v for a Coulomb field of
-    a Gaussian charge distribution of finite width.  The input Coulomb
-    field is  fully specified by  the Gaussian width and  solvent site
-    charges.   Note  that the  1/ε₀  factor  is  NOT included  in  the
-    dimensionless result. The output is non-trivially site-specific.
+    We choose  not to translate  the distribution to the  grid center,
+    thus  treating   tau_fft[]  as  convolution   kernels  similar  to
+    chi_fft[][].  Well, the  former (1 -> m) is  just a contraction of
+    the latter (m -> m).
   */
   if (tau_fft)
-    {
-      real tau_fft_[m][nrad];   /* 1D version */
+    for (int i = 0; i < m; i++)
+      vec_ktab (HD, nrad, t_fft[i], dk, tau_fft[i]);
 
-      rism_solute_renorm (m, solvent, rmax, nrad, x_fft,
-                          G_COULOMB_INVERSE_RANGE,
-                          tau_fft_); /* out */
-
-      /*
-        We  choose  not to  translate  the  distribution  to the  grid
-        center, thus treating tau_fft[] as convolution kernels similar
-        to  chi_fft[][].   Well,  the  former  (1  ->  m)  is  just  a
-        contraction of the latter (m -> m).
-      */
-      for (int i = 0; i < m; i++)
-        vec_ktab (HD, nrad, tau_fft_[i], dk, tau_fft[i]);
-    }
   /*
     By now in each of m  3D tables tau_fft[i] we have an approximation
     for  some radial  function  that corresponds  to  a unit  gaussian
