@@ -33,6 +33,15 @@ real len3 (const real a[3])
 }
 
 
+static inline
+real distance (const real a[3], const real b[3])
+{
+  return sqrt (SQR (a[0] - b[0]) +
+               SQR (a[1] - b[1]) +
+               SQR (a[2] - b[2]));
+}
+
+
 /* Singular as 4/r¹² */
 static inline pure real
 lj0 (real r)
@@ -357,9 +366,7 @@ field0 (const State *BHD, const Site *a,
         const real qab = a->charge * b->charge * EPSILON0INV;
 
         /* Distance from a grid point to this site: */
-        const real rab = sqrt (SQR (x[0] - b->x[0]) +
-                               SQR (x[1] - b->x[1]) +
-                               SQR (x[2] - b->x[2]));
+        const real rab = distance (x, b->x);
 
         /* Lennard-Jones + Coulomb, short range part: */
         e += eab * ljcap0 (rab / sab) + qab * G * cscap0 (G * rab);
@@ -751,9 +758,7 @@ coulomb_long (const State *BHD,
     for (int i = 0; i < n; i++)
       {
         /* Distance from a grid point to this site: */
-        real r = sqrt (SQR (y[0] - x[i][0]) +
-                       SQR (y[1] - x[i][1]) +
-                       SQR (y[2] - x[i][2]));
+        real r = distance (y, x[i]);
 
         /* cl0(r) == erf(r)/r */
         sum += q[i] * G * cl0 (G * r);
