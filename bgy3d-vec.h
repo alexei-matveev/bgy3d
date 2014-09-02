@@ -550,30 +550,6 @@ vec_fft_app2 (void (*f)(int n, complex x0[n], complex x1[n]),
 }
 
 
-/* zs = map (f, xs, ys).   Should also work with aliased arguments for
-   in-place transform: */
-static inline void vec_fft_map2 (Vec z, /* out */
-                                 complex (*f)(complex x, complex y),
-                                 Vec x, Vec y) /* in */
-{
-  const int n = vec_local_size (x);
-  assert (vec_local_size (y) == n);
-  assert (vec_local_size (z) == n);
-  assert (n % 2 == 0);
-
-  local complex *x_ = (complex*) vec_get_array (x);
-  local complex *y_ = (complex*) vec_get_array (y);
-  local complex *z_ = (complex*) vec_get_array (z);
-
-  for (int i = 0; i < n / 2; i++)
-    z_[i] = f (x_[i], y_[i]);
-
-  vec_restore_array (x, (void*) &x_);
-  vec_restore_array (y, (void*) &y_);
-  vec_restore_array (z, (void*) &z_);
-}
-
-
 static inline void
 vec_fft_app3 (void (*f)(int n, complex x0[n], complex x1[n], complex x2[n]),
               Vec x0, Vec x1, Vec x2)
@@ -592,33 +568,6 @@ vec_fft_app3 (void (*f)(int n, complex x0[n], complex x1[n], complex x2[n]),
   vec_restore_array (x0, (void*) &x0_);
   vec_restore_array (x1, (void*) &x1_);
   vec_restore_array (x2, (void*) &x2_);
-}
-
-
-/* ws = map (f, xs, ys,  zs).  Should also work with aliased arguments
-   for in-place transform: */
-static inline void vec_fft_map3 (Vec w, /* out */
-                                 complex (*f)(complex x, complex y, complex z),
-                                 Vec x, Vec y, Vec z) /* in */
-{
-  const int n = vec_local_size (x);
-  assert (vec_local_size (y) == n);
-  assert (vec_local_size (z) == n);
-  assert (vec_local_size (w) == n);
-  assert (n % 2 == 0);
-
-  local complex *x_ = (complex*) vec_get_array (x);
-  local complex *y_ = (complex*) vec_get_array (y);
-  local complex *z_ = (complex*) vec_get_array (z);
-  local complex *w_ = (complex*) vec_get_array (w);
-
-  for (int i = 0; i < n / 2; i++)
-    w_[i] = f (x_[i], y_[i], z_[i]);
-
-  vec_restore_array (x, (void*) &x_);
-  vec_restore_array (y, (void*) &y_);
-  vec_restore_array (z, (void*) &z_);
-  vec_restore_array (w, (void*) &w_);
 }
 
 
