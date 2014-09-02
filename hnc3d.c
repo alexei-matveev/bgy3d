@@ -1073,6 +1073,7 @@ star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
 */
 typedef struct Ctx1
 {
+  bool renorm;                  /* use tau_fft[] or v_long_fft */
   bool flag;                    /* false, but see jacobian_t1() */
   State *HD;
   int m;
@@ -1136,7 +1137,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
         The long-range asymptotics is  of electrostatic origin so that
         site-specific potentials are proportional to the site charges:
       */
-      if (!ctx->tau_fft)
+      if (!ctx->renorm)
         VecAXPY (ctx->c_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
     }
 
@@ -1170,7 +1171,7 @@ iterate_t1 (Ctx1 *ctx, Vec T, Vec dT)
           T := T - βV
            S         L
       */
-      if (ctx->tau_fft)
+      if (ctx->renorm)
         VecAXPY (ctx->t_fft[i], -beta * EPSILON0INV, ctx->tau_fft[i]);
       else
         VecAXPY (ctx->t_fft[i], -beta * ctx->charge[i], ctx->v_long_fft);
@@ -1355,7 +1356,7 @@ solvent_kernel_file (int m, Vec chi_fft[m][m]) /* out */
 static void
 solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
                       Vec chi_fft[m][m], /* out, corner */
-                      Vec tau_fft[m])    /* out, center, optional */
+                      Vec tau_fft[m])    /* out, corner */
 {
   /*
     Problem data for use in 1d-RISM  code.  If you do not upscale, the
@@ -1406,9 +1407,8 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     chi_fft[][].  Well, the  former (1 -> m) is  just a contraction of
     the latter (m -> m).
   */
-  if (tau_fft)
-    for (int i = 0; i < m; i++)
-      vec_ktab (HD, nrad, t_fft[i], dk, tau_fft[i]);
+  for (int i = 0; i < m; i++)
+    vec_ktab (HD, nrad, t_fft[i], dk, tau_fft[i]);
 
   /*
     By now in each of m  3D tables tau_fft[i] we have an approximation
@@ -1444,7 +1444,8 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
 static void
 solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
                 Vec chi_fft[m][m],                       /* out */
-                Vec **tau_fft)  /* out, [m] or NULL */
+                Vec tau_fft[m],                          /* out */
+                bool *renorm) /* out, true if tau_fft[] is meaningful */
 {
   if (bgy3d_getopt_test ("solvent-3d"))
     {
@@ -1454,31 +1455,30 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
         sources are consistent.
 
         FIXME: Optimized NG scheme  not implemented in these branches,
-        we do yet construct, allocate and return tau_fft[m] here:
+        fill them with zeros and idicate the case.
       */
-      tau_fft = NULL;
-      solvent_kernel_file (m, chi_fft); /* regular case */
+      solvent_kernel_file (m, chi_fft);
+
+      for (int i = 0; i < m; i++)
+        VecSet (tau_fft[i], 0.0);
+
+      *renorm = false;
     }
   else
     {
-      /*
-        Here we can offer  renormalization of the indirect correlation
-        function t.   Other branches do  not, so it would  be somewhat
-        illogical to  request that solvent_kernel()  always expects an
-        array  of allocated Vecs.   Instead we  create and  return one
-        only in this case:
-      */
-      if (bgy3d_getopt_test ("no-renorm"))
-        *tau_fft = NULL;
-      else
-        {
-          /* The caller is reponsible to free them: */
-          *tau_fft = malloc (m * sizeof (Vec));
-          vec_create1 (HD->dc, m, *tau_fft);
-        }
+      /* Regular case  ...  Here we  can offer renormalization  of the
+         indirect correlation function t. */
+      solvent_kernel_rism (HD, m, solvent, chi_fft, tau_fft);
 
-      /* Should handle NULL for last argument */
-      solvent_kernel_rism (HD, m, solvent, chi_fft, *tau_fft);
+      /* The flag --no-renorm for debugging only: */
+      *renorm = true;
+      if (bgy3d_getopt_test ("no-renorm"))
+        {
+          for (int i = 0; i < m; i++)
+            VecSet (tau_fft[i], 0.0);
+
+          *renorm = false;
+        }
     }
 }
 
@@ -1667,8 +1667,8 @@ hnc3d_solute_solve (const ProblemData *PD,
     Charge density  corresponding to the long-range  Coulomb, used for
     observables at  the very end, computed later  together with solute
     field once  it is clear which  route is used  (see branches around
-    tau_fft).  FIXME: not used  in iterations, just sits occupying the
-    memory.
+    renorm  boolean).   FIXME:  not  used  in  iterations,  just  sits
+    occupying the memory.
   */
   local Vec uc_rho = vec_create (HD->da);
 
@@ -1723,33 +1723,38 @@ hnc3d_solute_solve (const ProblemData *PD,
       artifacts). We are wasting here quite some memory!
     */
     local Vec chi_fft[m][m];
-    vec_create2 (HD->dc, m, chi_fft);        /* complex */
+    vec_create2 (HD->dc, m, chi_fft); /* complex */
 
     /*
-      This one will hold site-specific renormalization χ * uc later as
-      an array tau_fft[m]. Only used for an optimized Ng scheme if the
+      This one  will hold site-specific  renormalization χ * uc  as an
+      array tau_fft[m].  Only used for  an optimized Ng scheme  if the
       solvent_kernel() can supply  that. Currenly, only 1D-RISM kernel
       is capable of doing that.
     */
-    local Vec *tau_fft = NULL;  /* complex, [m] or NULL */
+    local Vec tau_fft[m];
+    vec_create1 (HD->dc, m, tau_fft); /* complex */
 
     /*
       Get  the solvent-solvent  susceptibility  (offset by  one) as  a
       matrix of complex Vecs chi_fft[m][m]. The kernel derived from 1D
       RISM is  capable or supplying an array  of renormalization terms
-      in tau_fft[m] in addition. Others just set it to NULL:
+      in tau_fft[m] in addition. Others just fill them with zeroes:
     */
-    solvent_kernel (HD, m, solvent, chi_fft, &tau_fft);
+    bool renorm;
+    solvent_kernel (HD, m, solvent, chi_fft, tau_fft, &renorm);
 
     /*
-      Now  chi_fft[][] contains  χ -  1  and tau_fft[],  if not  NULL,
-      contains the  result of application χ  * uc for  a single center
-      uc.   The solvent  kernel knows  nothing about  geometry  of the
-      solute and it should stay  like that.  To get a superposition of
-      the  long-range potentials  of  all solute  centers weighted  by
-      their charge we apply the convolution with the form factor here:
+      Now  chi_fft[][] contains  χ  -  1 and  tau_fft[],  if the  flag
+      "renorm" was set, contains the  result of application χ * uc for
+      a  single center  uc.  The  solvent kernel  knows  nothing about
+      geometry of the  solute and it should stay like  that.  To get a
+      superposition of the long-range potentials of all solute centers
+      weighted by their charge we  apply the convolution with the form
+      factor here:
     */
-    if (tau_fft)
+    if (!renorm)
+      vec_destroy1 (m, tau_fft); /* dont keep zeroes around */
+    else
       {
         /* Once again,  n is  the number of  solute sites  form factor
            will get n charges and n positions: */
@@ -1803,7 +1808,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       only used when the solvent kernel didnt supply tau_fft:
     */
     local Vec uc_fft;
-    if (!tau_fft)
+    if (!renorm)
       uc_fft = vec_create (HD->dc);
     else
       uc_fft = NULL;
@@ -1822,21 +1827,22 @@ hnc3d_solute_solve (const ProblemData *PD,
       pointer argument: Ctx1* vs. void*:
     */
     {
-      /* Work area  for iterate_t1(). If  and only if  ctx->tau_fft is
-         NULL then ctx->v_long_fft will be used. */
+      /* Work  area for iterate_t1().  If and  only if  ctx->renorm is
+         false then ctx->v_long_fft will be used. */
       Ctx1 ctx =
         {
+          .renorm = renorm,     /* use tau_fft[] or v_long_fft */
           .flag = false,        /* always */
           .HD = HD,
           .m = m,
           .charge = charge,           /* [m], in */
           .v_short = v_short,         /* [m], real, in */
-          .v_long_fft = uc_fft,       /* or NULL, complex, in */
+          .v_long_fft = uc_fft,       /* complex, in, or junk */
           .c = h,                     /* [m], work for c(t) */
           .chi_fft = (void*) chi_fft, /* [m][m], pair quantitity, in */
           .c_fft = c_fft,             /* [m], work for c(t) */
           .t_fft = t_fft,             /* [m], work for t(c(t))) */
-          .tau_fft = tau_fft,         /* [m] or NULL, complex, in */
+          .tau_fft = tau_fft,         /* [m] complex, in, or junk */
         };
 
       bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
@@ -2014,15 +2020,10 @@ hnc3d_solute_solve (const ProblemData *PD,
     vec_destroy1 (m, t_fft);
 
     /* Either one or another should be used: */
-    if (tau_fft)
-      {
-        vec_destroy1 (m, tau_fft);
-        free (tau_fft);
-        tau_fft = NULL;         /* because local */
-      }
+    if (renorm)
+      vec_destroy1 (m, tau_fft);
     else
       vec_destroy (&uc_fft);
-
 
     /* This should have been the only pair quantity: */
     vec_destroy2 (m, chi_fft);
