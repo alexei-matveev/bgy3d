@@ -1694,32 +1694,13 @@ hnc3d_solute_solve (const ProblemData *PD,
   vec_create1 (HD->da, m, v_short);
 
   /*
-    Get   solute-solvent  interaction.    Fill  v_short[i]   with  the
-    short-range potential  acting on solvent site  "i". The long-range
-    part, Vec uc_fft,  is represented on the k-grid  and is assumed to
-    differ  only   by  factors   proportional  to  the   solvent  site
-    charges. Neither  one is spherically  symmetric for a solute  of a
-    general shape --- do not confuse with 1D formalizm.
-
-    Note that  asymptotic Coulomb field of the  *neutral* solute would
-    be formally of  the short-range.  In practice it  appears that the
-    observables do not  change if we treat it as  either the short- or
-    the long  range (as now).  Also  for such neutral  species it does
-    not matter much if we  obtain the real space representation of the
-    Coulomb, needed later for chemical potential, by an FFT of uc_fft.
-
-    Fourier transform  of long-range Coulomb field of  the solute, and
-    the corresponging charge density  of smeared cores (used later for
-    observables) go here:
+    Charge density  corresponding to the long-range  Coulomb, used for
+    observables at  the very end, computed later  together with solute
+    field once  it is clear which  route is used  (see branches around
+    tau_fft).  FIXME: not used  in iterations, just sits occupying the
+    memory.
   */
-  local Vec uc_fft = vec_create (HD->dc);
-  local Vec uc_rho = vec_create (HD->da); /* used for observables */
-
-  bgy3d_solute_field (HD, m, solvent, n, solute,
-                      v_short, uc_fft,    /* out */
-                      uc_rho,   /* out, smeared cores */
-                      NULL,     /* dont need uc, yet */
-                      density); /* in, electron density callback */
+  local Vec uc_rho = vec_create (HD->da);
 
   /*
     Scaling  factors  for  the  site-specific long  range  potentials.
@@ -1831,12 +1812,46 @@ hnc3d_solute_solve (const ProblemData *PD,
       }
 
     /*
+      Get  solute-solvent  interaction.    Fill  v_short[i]  with  the
+      short-range potential acting on solvent site "i". The long-range
+      part, Vec uc_fft, is represented on the k-grid and is assumed to
+      differ  only  by  factors   proportional  to  the  solvent  site
+      charges. Neither one is spherically  symmetric for a solute of a
+      general shape --- do not confuse with 1D formalizm.
+
+      Note that asymptotic Coulomb field of the *neutral* solute would
+      be formally of the short-range.  In practice it appears that the
+      observables do not change if we treat it as either the short- or
+      the long range (as now).   Also for such neutral species it does
+      not matter  much if we  obtain the real space  representation of
+      the Coulomb, needed  later for chemical potential, by  an FFT of
+      uc_fft.
+
+      Fourier transform of long-range  Coulomb field of the solute, is
+      only used when the solvent kernel didnt supply tau_fft:
+    */
+    local Vec uc_fft;
+    if (!tau_fft)
+      uc_fft = vec_create (HD->dc);
+    else
+      uc_fft = NULL;
+
+    bgy3d_solute_field (HD, m, solvent, n, solute,
+                        v_short,  /* out */
+                        uc_fft,   /* out, optional */
+                        uc_rho,   /* out, smeared cores */
+                        NULL,     /* dont need uc, yet */
+                        density); /* in, electron density callback */
+
+
+    /*
       Find T  such that dt  as returned by  iterate_t1 (HD, T,  dT) is
       zero. Cast is there to silence the mismatch in the type of first
       pointer argument: Ctx1* vs. void*:
     */
     {
-      /* Work area for iterate_t1(): */
+      /* Work area  for iterate_t1(). If  and only if  ctx->tau_fft is
+         NULL then ctx->v_long_fft will be used. */
       Ctx1 ctx =
         {
           .flag = false,        /* always */
@@ -1844,7 +1859,7 @@ hnc3d_solute_solve (const ProblemData *PD,
           .m = m,
           .charge = charge,           /* [m], in */
           .v_short = v_short,         /* [m], real, in */
-          .v_long_fft = uc_fft,       /* complex, in */
+          .v_long_fft = uc_fft,       /* or NULL, complex, in */
           .c = h,                     /* [m], work for c(t) */
           .chi_fft = (void*) chi_fft, /* [m][m], pair quantitity, in */
           .c_fft = c_fft,             /* [m], work for c(t) */
@@ -2023,15 +2038,19 @@ hnc3d_solute_solve (const ProblemData *PD,
     }
 
     /* Should not be needed anymore: */
-    vec_destroy (&uc_fft);
     vec_destroy1 (m, c_fft);
     vec_destroy1 (m, t_fft);
+
+    /* Either one or another should be used: */
     if (tau_fft)
       {
         vec_destroy1 (m, tau_fft);
         free (tau_fft);
         tau_fft = NULL;         /* because local */
       }
+    else
+      vec_destroy (&uc_fft);
+
 
     /* This should have been the only pair quantity: */
     vec_destroy2 (m, chi_fft);
