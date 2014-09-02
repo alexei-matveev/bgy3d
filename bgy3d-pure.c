@@ -321,12 +321,13 @@ void bgy3d_omega_fft_create (const State *BHD, int m, const Site solvent[m],
 static void omega_apply (Vec w, int n, Vec x[n], Vec y[n])
 {
   /* Set y(k) := w(k) * x(k). Note that w(k) is actually real: */
-  complex pure f (complex w, complex x)
+  void f (int n, complex w[n], complex x[n], complex y[n])
   {
-    return w * x;
+    for (int i = 0; i < n; i++)
+      y[i] = w[i] * x[i];
   }
   for (int i = 0; i < n; i++)
-    vec_fft_map2 (y[i], f, w, x[i]);
+    vec_fft_app3 (f, w, x[i], y[i]);
 }
 
 /*
