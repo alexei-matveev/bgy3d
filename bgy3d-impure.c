@@ -315,16 +315,17 @@ static void kernel (const DA dc,
   Complex  Vec du  is intent(inout).   Dont forget  to clear  it early
   enough.
 */
-static void apply (Vec ker_fft, Vec g_fft, const real scale, /* in */
-                   Vec du_fft)  /* inout */
+static void
+apply (Vec ker_fft, Vec g_fft, const real scale, /* in */
+       Vec du_fft)                               /* inout */
 {
   /* FMA stays for "fused multiply-add" */
-  complex pure fma (complex du, complex c, complex g)
+  void fma (int n, complex du[n], complex c[n], complex g[n])
   {
-    return du + scale * (c * g);
+    for (int i = 0; i < n; i++)
+      du[i] += scale * (c[i] * g[i]);
   }
-
-  vec_fft_map3 (du_fft, fma, du_fft, ker_fft, g_fft); /* aliasing! */
+  vec_fft_app3 (fma, du_fft, ker_fft, g_fft);
 }
 
 /*
@@ -393,11 +394,12 @@ static void solvent_kernel (State *BHD, int m, const Site solvent[m],
 /* g := exp (-u) */
 static void mexp (Vec g, Vec u)
 {
-  real pure f (real u)
+  void f (int n, real g[n], real u[n])
   {
-    return exp (-u);
+    for (int i = 0; i < n; i++)
+      g[i] = exp (-u[i]);
   }
-  vec_map1 (g, f, u);
+  vec_app2 (f, g, u);
 }
 
 static void iterate (State *BHD,
