@@ -5894,12 +5894,7 @@ with
 \end_inset
 
  we define 
-\begin_inset Formula 
-\begin{eqnarray*}
-F[t] & = & T[t]-t\\
- & = & (\chi-1)\ast(f(-\beta v+t)-t)-t?
-\end{eqnarray*}
-
+\begin_inset Formula $F[t]=T[t]-t$
 \end_inset
 
 .
@@ -5919,23 +5914,21 @@ To facilitate solution of the non-linear equations and approach the linear
  
 \begin_inset Formula 
 \begin{eqnarray*}
-J\ast\delta t=\delta F & = & (\chi-1)\ast\delta c-\delta t\\
- & = & \left[(\chi-1)\ast\left(\frac{\partial f}{\partial t}-1\right)-1\right]\ast\delta t
+J\ast\delta t=\delta F & = & (\chi-1)\ast\delta c-\delta t
 \end{eqnarray*}
 
 \end_inset
 
-The first row involving the response 
-\begin_inset Formula $\delta c$
+We let the expression contain the response 
+\begin_inset Formula $\delta c=(\delta c/\delta t)\ast\delta t$
 \end_inset
 
- as an intermediate is a more intuitive and straightforward way to compute
+ as an intermediate as a more intuitive and straightforward way to compute
  the operator result 
 \begin_inset Formula $J\ast\delta t$
 \end_inset
 
 .
- The form in the second row has uncertain value.
  Note that the Jacobian 
 \begin_inset Formula $J^{\prime}=\delta T/\delta t$
 \end_inset
