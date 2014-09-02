@@ -19,6 +19,20 @@
 #include "bgy3d-vec.h"          /* bgy3d_vec_read() */
 
 
+static inline
+real dot3 (const real a[3], const real b[3])
+{
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+
+static inline
+real len3 (const real a[3])
+{
+  return sqrt (dot3 (a, a));
+}
+
+
 /* Singular as 4/r¹² */
 static inline pure real
 lj0 (real r)
@@ -389,17 +403,13 @@ field1 (const State *BHD, const Site *a,
             ab[dim] = x[dim] - b->x[dim];
 
           /* Distance itself: */
-          const real rab = sqrt (SQR (ab[0]) +
-                                 SQR (ab[1]) +
-                                 SQR (ab[2]));
+          const real rab = len3 (ab);
 
           /* Differential of rab, there is no sensible limit for rab
              -> 0 */
           real drab;
           if (likely (rab > 0.0))
-            drab = - (ab[0] * dx[i][0] +
-                      ab[1] * dx[i][1] +
-                      ab[2] * dx[i][2]) / rab;
+            drab = - dot3 (ab, dx[i]) / rab;
           else
             drab = 0.0;
 
@@ -548,9 +558,7 @@ form_factor (const real k[3], int m, const real q[m], real x[m][3])
   */
   complex sum = 0.0;
   for (int i = 0; i < m; i++)
-    sum += q[i] * cexp (-I * (k[0] * x[i][0] +
-                              k[1] * x[i][1] +
-                              k[2] * x[i][2]));
+    sum += q[i] * cexp (-I * dot3 (k, x[i]));
   return sum;
 }
 
