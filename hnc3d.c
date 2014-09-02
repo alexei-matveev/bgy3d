@@ -1765,12 +1765,8 @@ hnc3d_solute_solve (const ProblemData *PD,
           this case one  would need to scale by  1/ε₀ right away. Here
           form  factor   is  centered,  and  tau_fft   (on  input)  is
           "cornered" so that on output it must be centered again.
-
-          Again,  m is the  number of  solvent sites  and this  is the
-          number of different renormalization functions tau_fft[m].
         */
-        for (int i = 0; i < m; i++) /* m: over solvent sites ... */
-          bgy3d_solute_form (HD, n, solute, tau_fft[i]);
+        bgy3d_solute_form (HD, n, solute, m, tau_fft);
       }
 
     /*

@@ -35,7 +35,7 @@ void bgy3d_solute_field1 (const State *BHD,
                           Vec dv[m]);                   /* out */
 
 void bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
-                        Vec v_fft); /* inout */
+                        int m, Vec v_fft[m]); /* inout */
 
 
 /* Make functions  used as force field primitives  available to Scheme

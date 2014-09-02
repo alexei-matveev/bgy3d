@@ -596,15 +596,15 @@ konv (Vec a_fft, Vec b_fft)
   corner" on entry if it wants to be centered on exit. Or vice versa.
  */
 static void
-solute_form (const State *BHD, int m, const real q[m], real x[m][3],
-             Vec v_fft)   /* inout */
+solute_form (const State *BHD, int n, const real q[n], real x[n][3],
+             int m, Vec v_fft[m]) /* inout */
 {
-  local Vec f_fft = vec_duplicate (v_fft);
+  local Vec f_fft = vec_create (BHD->dc);
 
   /* FIXME: recomputing this every call? Tabulate form factor: */
   complex pure f3 (const real k[3])
   {
-    return form_factor (k, m, q, x);
+    return form_factor (k, n, q, x);
   }
   vec_kmap3 (BHD, f3, f_fft);
 
@@ -613,7 +613,8 @@ solute_form (const State *BHD, int m, const real q[m], real x[m][3],
   bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, f_fft);
 
   /* Pointwise-product in k-space, v(k) *= f(k): */
-  konv (f_fft, v_fft);
+  for (int i = 0; i < m; i++)
+    konv (f_fft, v_fft[i]);
 
   vec_destroy (&f_fft);
 }
@@ -621,17 +622,16 @@ solute_form (const State *BHD, int m, const real q[m], real x[m][3],
 
 /* Differential of bgy3d_solute_form() */
 static void
-solute_form1 (const State *BHD,
-              int m, const real q[m],
-              real x[m][3], real dx[m][3],
-              Vec dv_fft)   /* inout */
+solute_form1 (const State *BHD, int n, const real q[n], real x[n][3],
+              real dx[n][3],
+              int m, Vec dv_fft[m]) /* inout */
 {
-  local Vec f_fft = vec_duplicate (dv_fft);
+  local Vec f_fft = vec_create (BHD->dc);
 
   /* Tabulate form factor: */
   complex pure f3 (const real k[3])
   {
-    return form_factor1 (k, m, q, x, dx);
+    return form_factor1 (k, n, q, x, dx);
   }
   vec_kmap3 (BHD, f3, f_fft);
 
@@ -639,7 +639,8 @@ solute_form1 (const State *BHD,
   bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, f_fft);
 
   /* Pointwise-product in k-space, v(k) *= f(k): */
-  konv (f_fft, dv_fft);
+  for (int i = 0; i < m; i++)
+    konv (f_fft, dv_fft[i]);
 
   vec_destroy (&f_fft);
 }
@@ -647,7 +648,7 @@ solute_form1 (const State *BHD,
 
 void
 bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
-                   Vec v_fft)   /* inout */
+                   int m, Vec v_fft[m]) /* inout */
 {
   real q[n], x[n][3];
 
@@ -658,7 +659,7 @@ bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
       FOR_DIM
         x[i][dim] = solute[i].x[dim];
     }
-  solute_form (BHD, n, q, x, v_fft);
+  solute_form (BHD, n, q, x, m, v_fft);
 }
 
 
@@ -728,7 +729,7 @@ coulomb_long_fft (const State *BHD,
     shift  in uc(k=0)  would not  matter.  FIXME:  1/k² is  not finite
     though, hopefully we get a meaningful dipole field here:
   */
-  solute_form (BHD, n, q, x, uc_fft);
+  solute_form (BHD, n, q, x, 1, &uc_fft); /* fake uc_fft[1] */
 
   /*
     Form factor is  centerd, uc_fft was also centered  --- this is one
