@@ -5851,11 +5851,16 @@ Non-linear equations that are solved for 3D RISM for a special case of the
 \end_inset
 
  can be cast into the following form
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
-\begin{eqnarray}
-t & = & (\chi-1)\ast c\\
-c & = & f(-v+t)-t
-\end{eqnarray}
+\begin{equation}
+\begin{cases}
+t & =(\chi-1)\ast c\\
+c & =f(-v+t)-t
+\end{cases}
+\end{equation}
 
 \end_inset
 
@@ -5864,7 +5869,7 @@ For brevity we use the units with
 \end_inset
 
 .
- In other words, we measure potential in units of temperature.
+ In other words, we measure potential in units of temperature here.
  By substituting the direct correlation 
 \begin_inset Formula $c$
 \end_inset
@@ -5900,10 +5905,15 @@ with
 \end_inset
 
  we define 
-\begin_inset Formula $F[t]=T[t]-t$
+\begin_inset Formula 
+\begin{eqnarray}
+F[t] & = & T[t]-t\label{eq:fixpoint-to-non-linear}\\
+ & = & (\chi-1)\ast c(t)-t.\nonumber 
+\end{eqnarray}
+
 \end_inset
 
-.
+
 \end_layout
 
 \begin_layout Standard
@@ -5963,18 +5973,106 @@ J=J^{\prime}-1
 \end_layout
 
 \begin_layout Standard
-The Ng scheme [Ref]
+The Ng scheme [Ref] separates the asymptotics 
+\begin_inset Formula $v_{\text{L}}$
+\end_inset
+
+ of the indirect correlation 
+\begin_inset Formula $t$
+\end_inset
+
+ and 
+\begin_inset Formula $-v_{\text{L}}$
+\end_inset
+
+ of direct correlation 
+\begin_inset Formula $c$
+\end_inset
+
+ operating primarily with the short range counterparts 
+\begin_inset Formula $v_{\text{S}}$
+\end_inset
+
+ , 
+\begin_inset Formula $c_{\text{S}}$
+\end_inset
+
+ and 
+\begin_inset Formula $t_{\text{S}}$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{equation}
-T[t]=(\chi-1)\ast(c(t)+c_{\text{L}})-c_{\text{L}}
-\end{equation}
+\begin{eqnarray}
+T_{\text{S}}[t_{\text{S}}] & = & (\chi-1)\ast(c_{\text{S}}(t_{\text{S}})-v_{\text{L}})-v_{\text{L}}\\
+ & = & (\chi-1)\ast c_{\text{S}}(t_{\text{S}})-\chi\ast v_{\text{L}}\nonumber 
+\end{eqnarray}
 
 \end_inset
 
+The form in the second line could be viewed as an optimization of Ng scheme.
+ Moreover it might be appropriate to carefully pre-compute 
+\begin_inset Formula $\tau=\chi\ast v_{\text{L}}$
+\end_inset
 
+, as convolutions involving long range potentials are problematic numerically.
+ The corresponding non-linear functional 
+\begin_inset Formula 
+\begin{eqnarray}
+F_{\text{S}}[t_{\text{S}}] & = & T_{\text{S}}[t_{\text{S}}]-t_{\text{S}}\\
+ & = & \left[(\chi-1)\ast c_{\text{S}}(t_{\text{S}})-t_{\text{S}}\right]-\tau\nonumber 
+\end{eqnarray}
+
+\end_inset
+
+and the corresponding closure 
+\begin_inset Formula $c_{\text{S}}(t_{\text{S}})=f(-v_{\text{S}}+t_{\text{S}})-t_{\text{S}}$
+\end_inset
+
+ both have essentially the same functional form as before, albeit with a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+constant
+\begin_inset Quotes erd
+\end_inset
+
+ addition 
+\begin_inset Formula $-\tau$
+\end_inset
+
+ in the non-linear functional, compare to Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:fixpoint-to-non-linear"
+
+\end_inset
+
+.
+ Thus, this constant term does not affect the form of Jacobian.
+ However, the 
+\begin_inset Quotes eld
+\end_inset
+
+constant
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $-\tau$
+\end_inset
+
+ will, in general, depend on model parameters such as solute geometry and
+ this dependence needs to be considered for the response properties of the
+ equations.
 \end_layout
 
 \begin_layout Subsection
