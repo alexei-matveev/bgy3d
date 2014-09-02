@@ -10,8 +10,8 @@ module rism
   ! These are  all bind(c)  and are not  used in Fortran  sources, but
   ! from C-side:
   public :: rism_solvent
+  public :: rism_solvent_renorm
   public :: rism_solute
-  public :: rism_solute_renorm
   ! *** END OF INTERFACE ***
 
   interface gnuplot
@@ -138,7 +138,7 @@ contains
     call main (pd, solvent, solute, x=x, dict=dict)
   end subroutine rism_solute
 
-  subroutine rism_solute_renorm (m, solvent, rmax, nrad, x_kvv, alpha, s_kv) bind (c)
+  subroutine rism_solvent_renorm (m, solvent, rmax, nrad, x_kvv, alpha, s_kv) bind (c)
     !
     ! In  k-space  applies  convolutions  with solvent  site  specific
     ! operator (dimensionless, if you think of charges so)
@@ -157,7 +157,12 @@ contains
     !   s  = X * v = Σ  χ   q  * v
     !    i    i       j  ij  j
     !
-    ! is also dimensionless (again, if you think of charges as such).
+    ! is also dimensionless (again, if  you think of charges as such).
+    ! As radial  functions of k-magnitude  these m functions  could be
+    ! viewed   as   convolution   kernels   that   can   produce   the
+    ! renormalization   term   for   arbitrary  charge   distribution,
+    ! including but not limited  to the superposition of point charges
+    ! representing solute sites.
     !
     ! Needs to be consistent with ./rism.h
     !
@@ -200,7 +205,8 @@ contains
        enddo
        s_kv(:, i) = x * v
     enddo
-  end subroutine rism_solute_renorm
+  end subroutine rism_solvent_renorm
+
 
   subroutine main (pd, solvent, solute, t, x, dict)
     !

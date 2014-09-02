@@ -1388,9 +1388,9 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     charges.   Note  that the  1/ε₀  factor  is  NOT included  in  the
     dimensionless result. The output is non-trivially site-specific.
   */
-  rism_solute_renorm (m, solvent, rmax, nrad, x_fft,
-                      G_COULOMB_INVERSE_RANGE,
-                      t_fft); /* out */
+  rism_solvent_renorm (m, solvent, rmax, nrad, x_fft,
+                       G_COULOMB_INVERSE_RANGE,
+                       t_fft); /* out */
 
 
   /*
