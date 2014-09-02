@@ -563,6 +563,31 @@ form_factor (const real k[3], int m, const real q[m], real x[m][3])
 }
 
 
+/* Differential of form_factor() */
+static inline complex
+form_factor1 (const real k[3], int m, const real q[m],
+              real x[m][3], real dx[m][3])
+{
+  complex sum = 0.0;
+  for (int i = 0; i < m; i++)
+    sum += q[i] * cexp (-I * dot3 (k, x[i])) * (-I * dot3 (k, dx[i]));
+  return sum;
+}
+
+
+/* Pointwise-product in k-space, b(k) *= a(k): */
+static inline void
+konv (Vec a_fft, Vec b_fft)
+{
+  void f (int n, complex a[n], complex b[n])
+  {
+    for (int i = 0; i < n; i++)
+      b[i] *= a[i];
+  }
+  vec_fft_app2 (f, a_fft, b_fft);
+}
+
+
 /*
   Updates  v_fft with  its  convolution with  the "instantaneous  core
   density" of solutes. Technically, scales the k-component v(k) by the
@@ -585,13 +610,31 @@ bgy3d_solute_form (const State *BHD,
   }
   vec_kmap3 (BHD, f3, f_fft);
 
-  /* Pointwise-product in k-space: */
-  void mul (int n, complex a[n], complex b[n])
+  /* Pointwise-product in k-space, v(k) *= f(k): */
+  konv (f_fft, v_fft);
+
+  vec_destroy (&f_fft);
+}
+
+
+/* Differential of bgy3d_solute_form() */
+void
+bgy3d_solute_form1 (const State *BHD,
+                    int m, const real q[m],
+                    real x[m][3], real dx[m][3],
+                    Vec dv_fft)   /* inout */
+{
+  local Vec f_fft = vec_duplicate (dv_fft);
+
+  /* Tabulate form factor: */
+  complex pure f3 (const real k[3])
   {
-    for (int i = 0; i < n; i++)
-      b[i] *= a[i];
+    return form_factor1 (k, m, q, x, dx);
   }
-  vec_fft_app2 (mul, f_fft, v_fft);
+  vec_kmap3 (BHD, f3, f_fft);
+
+  /* Pointwise-product in k-space, v(k) *= f(k): */
+  konv (f_fft, dv_fft);
 
   vec_destroy (&f_fft);
 }
