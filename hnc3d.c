@@ -1362,7 +1362,7 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     rmax =  max (PD->L) / 2 will  be too low for  interpolation on the
     r-grid. Though here only the k-grid is of interest.
   */
-  ProblemData pd = upscale (HD->PD);
+  const ProblemData pd = upscale (HD->PD);
 
   /*
     The L[] and N[] fields encode 3D domain, the radial parameters for
