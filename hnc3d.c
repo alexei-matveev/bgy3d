@@ -216,12 +216,13 @@ delta (int i, int j)
 static void
 compute_t2_1 (real rho, Vec c_fft, Vec t_fft)
 {
-  complex pure f (complex c)
+  void f (int n, complex c[n], complex t[n])
   {
-    /* return c / (1.0 - rho * c) - c; */
-    return rho * (c * c) / (1.0 - rho * c);
+    /* Same as c / (1 - rho * c) - c: */
+    for (int i = 0; i < n; i++)
+      t[n] = rho * (c[n] * c[n]) / (1.0 - rho * c[n]);
   }
-  vec_fft_map1 (t_fft, f, c_fft);
+  vec_fft_app2 (f, c_fft, t_fft);
 }
 
 
