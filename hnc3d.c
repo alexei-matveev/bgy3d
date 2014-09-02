@@ -1035,9 +1035,10 @@ star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
       y  += A  * x
        i     ij   j
   */
-  complex pure fma (complex y, complex a, complex x)
+  void fma (int n, complex y[n], complex a[n], complex x[n])
   {
-    return y + a * x;
+    for (int i = 0; i < n; i++)
+      y[i] += a[i] * x[i];
   }
 
   /* For each solvent site ... */
@@ -1046,8 +1047,7 @@ star (int m, Vec a_fft[m][m], Vec x_fft[m], Vec y_fft[m])
       /* ... sum over solvent sites: */
       VecSet (y_fft[i], 0.0);
       for (int j = 0; j < m; j++)
-        vec_fft_map3 (y_fft[i], /* argument aliasing! */
-                      fma, y_fft[i], a_fft[i][j], x_fft[j]);
+        vec_fft_app3 (fma, y_fft[i], a_fft[i][j], x_fft[j]);
     }
 }
 
