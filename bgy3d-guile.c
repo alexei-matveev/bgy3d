@@ -770,11 +770,12 @@ static SCM guile_vec_map1 (SCM f, SCM x)
   Vec x_ = to_vec (x);
   Vec y_ = vec_duplicate (x_);
 
-  double f_ (double x)
+  void f_ (int n, double x[n], double y[n])
   {
-    return scm_to_double (scm_call_1 (f, scm_from_double (x)));
+    for (int i = 0; i < n; i++)
+      y[i] = scm_to_double (scm_call_1 (f, scm_from_double (x[i])));
   }
-  vec_map1 (y_, f_, x_);
+  vec_app2 (f_, x_, y_);
 
   return from_vec (y_);
 }
@@ -786,11 +787,13 @@ static SCM guile_vec_map2 (SCM f, SCM x, SCM y)
   Vec y_ = to_vec (y);
   Vec z_ = vec_duplicate (x_);
 
-  double f_ (double x, double y)
+  void f_ (int n, double x[n], double y[n], double z[n])
   {
-    return scm_to_double (scm_call_2 (f, scm_from_double (x), scm_from_double (y)));
+    for (int i = 0; i < n; i++)
+      z[i] = scm_to_double
+        (scm_call_2 (f, scm_from_double (x[i]), scm_from_double (y[i])));
   }
-  vec_map2 (z_, f_, x_, y_);
+  vec_app3 (f_, x_, y_, z_);
 
   return from_vec (z_);
 }
