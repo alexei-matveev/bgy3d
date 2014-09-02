@@ -591,10 +591,9 @@ konv (Vec a_fft, Vec b_fft)
 /*
   Updates  v_fft with  its  convolution with  the "instantaneous  core
   density" of solutes. Technically, scales the k-component v(k) by the
-  form   factor   derived  from   the   weights   q  and   coordinates
-  x. Intuitively, replaces v(r) of a single unit charge at origin by a
-  weighted superposition of such potentials  from every core in x. You
-  choose which definition fits the most.
+  form factor derived  from the weights q and  coordinates x. The form
+  factor is  centered, so v_fft must  be a convolution  kernel "at the
+  corner" on entry if it wants to be centered on exit. Or vice versa.
  */
 void
 bgy3d_solute_form (const State *BHD,
@@ -609,6 +608,10 @@ bgy3d_solute_form (const State *BHD,
     return form_factor (k, m, q, x);
   }
   vec_kmap3 (BHD, f3, f_fft);
+
+  /* We choose to center the form  factor, so that it becomes the true
+     fourier representation of the point charge density: */
+  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, f_fft);
 
   /* Pointwise-product in k-space, v(k) *= f(k): */
   konv (f_fft, v_fft);
@@ -632,6 +635,9 @@ bgy3d_solute_form1 (const State *BHD,
     return form_factor1 (k, m, q, x, dx);
   }
   vec_kmap3 (BHD, f3, f_fft);
+
+  /* See bgy3d_solute_form() for explanation: */
+  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, f_fft);
 
   /* Pointwise-product in k-space, v(k) *= f(k): */
   konv (f_fft, dv_fft);
@@ -706,6 +712,12 @@ coulomb_long_fft (const State *BHD,
     though, hopefully we get a meaningful dipole field here:
   */
   bgy3d_solute_form (BHD, n, q, x, uc_fft);
+
+  /*
+    Form factor is  centerd, uc_fft was also centered  --- this is one
+    phase factor too much. Make the result centered:
+  */
+  bgy3d_vec_fft_trans (BHD->dc, BHD->PD->N, uc_fft);
 }
 
 

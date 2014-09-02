@@ -1397,15 +1397,18 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     {
       real tau_fft_[m][nrad];   /* 1D version */
 
-      rism_solute_renorm (m, solvent, rmax, nrad, x_fft, G_COULOMB_INVERSE_RANGE,
-                          tau_fft_);
+      rism_solute_renorm (m, solvent, rmax, nrad, x_fft,
+                          G_COULOMB_INVERSE_RANGE,
+                          tau_fft_); /* out */
 
+      /*
+        We  choose  not to  translate  the  distribution  to the  grid
+        center, thus treating tau_fft[] as convolution kernels similar
+        to  chi_fft[][].   Well,  the  former  (1  ->  m)  is  just  a
+        contraction of the latter (m -> m).
+      */
       for (int i = 0; i < m; i++)
         vec_ktab (HD, nrad, tau_fft_[i], dk, tau_fft[i]);
-
-      /* Translate distribution to the grid center: */
-      for (int i = 0; i < m; i++)
-        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, tau_fft[i]);
     }
   /*
     By now in each of m  3D tables tau_fft[i] we have an approximation
@@ -1768,7 +1771,9 @@ hnc3d_solute_solve (const ProblemData *PD,
           term  by  -β/ε₀, when  adding  to  the  renormalized t,  see
           iterate_t1(). FIXME: or should we rather make tau_fft[] have
           the dimension  of the potential  to be measuted in  kcal? In
-          this case one would need to scale by 1/ε₀ right away.
+          this case one  would need to scale by  1/ε₀ right away. Here
+          form  factor   is  centered,  and  tau_fft   (on  input)  is
+          "cornered" so that on output it must be centered again.
 
           Again,  m is the  number of  solvent sites  and this  is the
           number of different renormalization functions tau_fft[m].
