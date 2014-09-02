@@ -1334,56 +1334,26 @@ response_t1 (Ctx1 *ctx, Vec T, Vec dV, Vec dT)
 }
 
 
-/*************************************************************/
-/* A FEW FUNCTIONS TO MAKE SOLVENT SUSCEPTIBILITY AVAIALBLE. */
-/*************************************************************/
-
 
 /*
+  A FEW FUNCTIONS TO MAKE SOLVENT SUSCEPTIBILITY AVAIALBLE
+  ========================================================
+
   Layed off  from solvent_kernel().  Reads  χ - 1 into  chi_fft[][] as
   previousely  written by  solvent solver.   See hnc3d_solvent_solve()
   above.
 */
 static void
-solvent_kernel_file3 (int m, Vec chi_fft[m][m]) /* out */
+solvent_kernel_file (int m, Vec chi_fft[m][m]) /* out */
 {
   bgy3d_vec_read2 ("x%d%d-fft.bin", m, chi_fft); /* ready for use as is */
 }
 
 
-/* Layed off from  solvent_kernel(). Reads 1d site-site susceptibility
-   into a 3d Vec then FFTs it. Not really used. */
-static void
-solvent_kernel_file1 (State *HD, int m, Vec chi_fft[m][m]) /* out */
-{
-  /*
-    Load radial  data from text file.   FIXME: representing long-range
-    on a real-space grid is intrinsically broken!
-  */
-  const real dV = volume_element (HD->PD);
-
-  local Vec chi[m][m];
-  vec_create2 (HD->da, m, chi);
-
-  bgy3d_vec_read_radial2 (HD->da, HD->PD, "x%d%d.txt", m, chi);
-
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j <= i; j++)
-      {
-        MatMult (HD->fft_mat, chi[i][j], chi_fft[i][j]);
-        VecScale (chi_fft[i][j], dV);
-
-        /* Translate the distribution to the grid corner. This is what
-           one expects in convolution integrals. */
-        bgy3d_vec_fft_trans (HD->dc, HD->PD->N, chi_fft[i][j]);
-      }
-  vec_destroy2 (m, chi);
-}
-
 /* Layed off  from solvent_kernel().  Puts χ -  1 into  chi_fft[][] as
    computed by 1d RISM solvent solver. See ./rism.f90. */
 static void
-solvent_kernel_rism1 (State *HD, int m, const Site solvent[m], /* in */
+solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
                       Vec chi_fft[m][m], /* out, corner */
                       Vec tau_fft[m])    /* out, center, optional */
 {
@@ -1484,10 +1454,7 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
         we do yet construct, allocate and return tau_fft[m] here:
       */
       tau_fft = NULL;
-      if (bgy3d_getopt_test ("from-radial-g2")) /* FIXME: better name? */
-        solvent_kernel_file1 (HD, m, chi_fft);    /* never used */
-      else
-        solvent_kernel_file3 (m, chi_fft); /* regular case */
+      solvent_kernel_file (m, chi_fft); /* regular case */
     }
   else
     {
@@ -1508,7 +1475,7 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
         }
 
       /* Should handle NULL for last argument */
-      solvent_kernel_rism1 (HD, m, solvent, chi_fft, *tau_fft);
+      solvent_kernel_rism (HD, m, solvent, chi_fft, *tau_fft);
     }
 }
 
