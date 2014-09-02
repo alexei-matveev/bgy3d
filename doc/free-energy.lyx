@@ -5847,19 +5847,25 @@ Jacobian of the non-linear system
 \begin_layout Standard
 Non-linear equations that are solved for 3D RISM for a special case of the
  closure relation 
-\begin_inset Formula $h=f(-\beta v+t)$
+\begin_inset Formula $h=f(-v+t)$
 \end_inset
 
  can be cast into the following form
 \begin_inset Formula 
-\begin{eqnarray*}
+\begin{eqnarray}
 t & = & (\chi-1)\ast c\\
-c & = & f(-\beta v+t)-t
-\end{eqnarray*}
+c & = & f(-v+t)-t
+\end{eqnarray}
 
 \end_inset
 
-By substituting the direct correlation 
+For brevity we use the units with 
+\begin_inset Formula $\beta=1$
+\end_inset
+
+.
+ In other words, we measure potential in units of temperature.
+ By substituting the direct correlation 
 \begin_inset Formula $c$
 \end_inset
 
@@ -5870,22 +5876,22 @@ By substituting the direct correlation
 
  of the non-linear equation
 \begin_inset Formula 
-\[
+\begin{equation}
 t=T[t]
-\]
+\end{equation}
 
 \end_inset
 
 where the fix point iterator functional reads
 \begin_inset Formula 
-\[
+\begin{equation}
 T[t]=(\chi-1)\ast c(t)
-\]
+\end{equation}
 
 \end_inset
 
 with 
-\begin_inset Formula $c(t)=f(-\beta v+t)-t$
+\begin_inset Formula $c(t)=f(-v+t)-t$
 \end_inset
 
  as before.
@@ -5913,9 +5919,9 @@ To facilitate solution of the non-linear equations and approach the linear
 
  
 \begin_inset Formula 
-\begin{eqnarray*}
+\begin{eqnarray}
 J\ast\delta t=\delta F & = & (\chi-1)\ast\delta c-\delta t
-\end{eqnarray*}
+\end{eqnarray}
 
 \end_inset
 
@@ -5939,9 +5945,9 @@ We let the expression contain the response
 
  is related to that of the non-linear system by
 \begin_inset Formula 
-\[
+\begin{equation}
 J=J^{\prime}-1
-\]
+\end{equation}
 
 \end_inset
 
@@ -5954,6 +5960,21 @@ J=J^{\prime}-1
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+The Ng scheme [Ref]
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+T[t]=(\chi-1)\ast(c(t)+c_{\text{L}})-c_{\text{L}}
+\end{equation}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -6014,9 +6035,9 @@ Consider an infinitesimal perturbation of the external (solute) potential
 
  too to satisfy this
 \begin_inset Formula 
-\[
+\begin{equation}
 F_{v+\delta v}[t+\delta t]\approx J\ast\delta t-b=0
-\]
+\end{equation}
 
 \end_inset
 
@@ -6036,9 +6057,9 @@ In the Taylor expansion we again used the definition of the unperturbed
 
  
 \begin_inset Formula 
-\[
+\begin{equation}
 J\ast\delta t=b
-\]
+\end{equation}
 
 \end_inset
 
@@ -6065,10 +6086,10 @@ What is the most intuitive way to compute
 
 ?
 \begin_inset Formula 
-\begin{eqnarray*}
+\begin{eqnarray}
 -b & = & (\partial F_{v}/\partial v)\ast\delta v\\
- & = & (\chi-1)\ast(\partial c/\partial v)\ast\delta v
-\end{eqnarray*}
+ & = & (\chi-1)\ast(\partial c/\partial v)\ast\delta v\nonumber 
+\end{eqnarray}
 
 \end_inset
 
@@ -6077,7 +6098,7 @@ In order to compute the intermediate
 \end_inset
 
  for 
-\begin_inset Formula $c(t)=f(-\beta v+t)-t$
+\begin_inset Formula $c(t)=f(-v+t)-t$
 \end_inset
 
  one could compare 
@@ -6085,7 +6106,7 @@ In order to compute the intermediate
 \end_inset
 
  and 
-\begin_inset Formula $\partial c/\partial v=-\beta f^{\prime}=-\beta(\delta c/\delta t+1)$
+\begin_inset Formula $\partial c/\partial v=-f^{\prime}=-(\delta c/\delta t+1)$
 \end_inset
 
  and use the code that computes 
@@ -6094,10 +6115,10 @@ In order to compute the intermediate
 
  for use as an intermediate in Jacobian:
 \begin_inset Formula 
-\begin{eqnarray*}
-(\partial c/\partial v)\ast\delta v & = & -\beta(\delta c/\delta t+1)\ast\delta v\\
- & = & -\beta\left[(\delta c/\delta t)\ast\delta v+\delta v\right]
-\end{eqnarray*}
+\begin{eqnarray}
+(\partial c/\partial v)\ast\delta v & = & -(\delta c/\delta t+1)\ast\delta v\\
+ & = & -\left[(\delta c/\delta t)\ast\delta v+\delta v\right]\nonumber 
+\end{eqnarray}
 
 \end_inset
 
@@ -6105,11 +6126,11 @@ The first term in the last expression has exactly the form of the direct
  correlation response and the second term is trivial.
  Thus
 \begin_inset Formula 
-\begin{eqnarray*}
--b & = & -\beta(\chi-1)\ast\left[(\delta c/\delta t)\ast\delta v+\delta v\right]\\
- & = & -\beta J^{\prime}\ast\delta v-\beta(\chi-1)\ast\delta v\\
- & = & -\beta(J+\chi)\ast\delta v
-\end{eqnarray*}
+\begin{eqnarray}
+-b & = & -(\chi-1)\ast\left[(\delta c/\delta t)\ast\delta v+\delta v\right]\\
+ & = & -J^{\prime}\ast\delta v-(\chi-1)\ast\delta v\nonumber \\
+ & = & -(J+\chi)\ast\delta v\nonumber 
+\end{eqnarray}
 
 \end_inset
 
@@ -6119,22 +6140,22 @@ The first term in the last expression has exactly the form of the direct
 
  the linear response equation reads
 \begin_inset Formula 
-\[
-J\ast\delta t=\beta(J+\chi)\ast\delta v
-\]
+\begin{equation}
+J\ast\delta t=(J+\chi)\ast\delta v
+\end{equation}
 
 \end_inset
 
  or, alternatively, as
 \begin_inset Formula 
-\[
-J\ast\delta x=\beta\chi\ast\delta v
-\]
+\begin{equation}
+J\ast\delta x=\chi\ast\delta v
+\end{equation}
 
 \end_inset
 
  with the new unknown 
-\begin_inset Formula $\delta x=\delta t-\beta\delta v$
+\begin_inset Formula $\delta x=\delta t-\delta v$
 \end_inset
 
 .
