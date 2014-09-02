@@ -536,14 +536,14 @@ static inline void
 vec_fft_app2 (void (*f)(int n, complex x0[n], complex x1[n]),
           Vec x0, Vec x1)
 {
-  const int n = vec_local_size (x0);
-  assert (vec_local_size (x1) == n);
-  assert (n % 2 == 0);
+  const int n = vec_local_size (x0) / 2;
+  assert (vec_local_size (x0) == 2 * n);
+  assert (vec_local_size (x1) == 2 * n);
 
   local complex *x0_ = (complex*) vec_get_array (x0);
   local complex *x1_ = (complex*) vec_get_array (x1);
 
-  f (n / 2, x0_, x1_);
+  f (n, x0_, x1_);
 
   vec_restore_array (x0, (void*) &x0_);
   vec_restore_array (x1, (void*) &x1_);
@@ -571,6 +571,27 @@ static inline void vec_fft_map2 (Vec z, /* out */
   vec_restore_array (x, (void*) &x_);
   vec_restore_array (y, (void*) &y_);
   vec_restore_array (z, (void*) &z_);
+}
+
+
+static inline void
+vec_fft_app3 (void (*f)(int n, complex x0[n], complex x1[n], complex x2[n]),
+              Vec x0, Vec x1, Vec x2)
+{
+  const int n = vec_local_size (x0) / 2;
+  assert (vec_local_size (x0) == 2 * n);
+  assert (vec_local_size (x1) == 2 * n);
+  assert (vec_local_size (x2) == 2 * n);
+
+  local complex *x0_ = (complex*) vec_get_array (x0);
+  local complex *x1_ = (complex*) vec_get_array (x1);
+  local complex *x2_ = (complex*) vec_get_array (x2);
+
+  f (n, x0_, x1_, x2_);
+
+  vec_restore_array (x0, (void*) &x0_);
+  vec_restore_array (x1, (void*) &x1_);
+  vec_restore_array (x2, (void*) &x2_);
 }
 
 
