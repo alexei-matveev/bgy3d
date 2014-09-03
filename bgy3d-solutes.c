@@ -421,18 +421,13 @@ field1 (const State *BHD, const Site *a,
             drab = 0.0;
 
           /*
-            Radial derivative of capped  Coulomb interaction qa * qb /
-            rab.  Note  that for  the capped Coulomb  ccap0(G *  r) /=
-            G^-1 *  ccap0(r) for very small  r. That is why  we do not
-            simplify this further:
+            Note that  for the capped Coulomb  ccap0(G * r)  /= G^-1 *
+            ccap0(r) for very small r.  That is why we do not simplify
+            this further.
           */
-          real vr = - qab * G * ccap1 (G * rab);
-
-          /* Radial derivative of eab * lj(r / sab): */
-          if (likely (sab != 0.0))
-            vr = vr + (eab / sab) * ljcap1 (rab / sab);
-
-          de += vr * drab;
+          assert (likely (sab != 0.0));
+          de += drab *
+            ((eab / sab) * ljcap1 (rab / sab) + qab * G * G * ccap1 (G * rab));
         }
       return de;
     }
