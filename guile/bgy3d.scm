@@ -82,6 +82,7 @@
    hnc3d-run-solute
    bgy3d-run-solvent
    bgy3d-run-solute
+   destroy
    make-pes
    env-ref
    env-set
@@ -726,6 +727,19 @@ computes the sum of all vector elements."
     (pretty-print/serial (cons 'core-potentials potentials))
     (pretty-print/serial (cons 'core-energy energy))))
 
+;;;
+;;; Some solvers  return distributions and other results  that need to
+;;; be explicitly destroyed. If there were a way to reliably trigger a
+;;; collective operation on all MPI ranks by a garbage collector ...
+;;;
+(define (destroy alist)
+  (and-let* ((guv (assoc-ref alist 'GUV)))
+    (map vec-destroy guv))
+  (and-let* ((potential (assoc-ref alist 'POTENTIAL)))
+    (bgy3d-pot-destroy potential))
+  (and-let* ((restart (assoc-ref alist 'RESTART)))
+    (bgy3d-restart-destroy restart)))
+
 
 ;;;
 ;;; FIXME: at  the moment this  function only emulates the  minimum of
@@ -767,8 +781,7 @@ computes the sum of all vector elements."
                ;; sites and the corresponding total energy:
                ;;
                (let ((potential (assoc-ref alist 'POTENTIAL)))
-                 (maybe-print-potentials solute potential)
-                 (bgy3d-pot-destroy potential))
+                 (maybe-print-potentials solute potential))
                ;;
                ;; Output excess chemical potential to tty:
                ;;
@@ -779,12 +792,11 @@ computes the sum of all vector elements."
                ;; Write g?.bin files:
                ;;
                (let ((g1 (assoc-ref alist 'GUV)))
-                 (map vec-save (g1-file-names g1) g1)
-                 (map vec-destroy g1))
+                 (map vec-save (g1-file-names g1) g1))
                ;;
-               ;; Ignores NULL:
+               ;; Destroy all Vecs, potential, restart info, etc ...
                ;;
-               (bgy3d-restart-destroy (assoc-ref alist 'RESTART)))
+               (destroy alist))
              ;;
              ;; Pure solvent:
              ;;
