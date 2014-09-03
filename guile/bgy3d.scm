@@ -651,7 +651,7 @@ computes the sum of all vector elements."
      (value #t)
      (predicate ,(lambda (x)
                    (let ((y (string->symbol x)))
-                     (and (member y '(HNC PY KH PSE0 PSE1 PSE2 PSE3 PSE4 PSE5 PSE6 PSE8))
+                     (and (member y '(HNC PY KH PSE0 PSE1 PSE2 PSE3 PSE4 PSE5 PSE6 PSE7))
                           y)))))
     (dielectric         (value #t)      (predicate ,string->number))
     (comb-rule          (value #t)      (predicate ,string->number))
