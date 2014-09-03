@@ -1029,13 +1029,15 @@ computes the sum of all vector elements."
          ;; Only then run pure solvent, if --solvent was present in the
          ;; command line:
          ;;
+         (error "FIXME: is this branch used? Sep. 2014")
          (bgy3d-run-solvent solvent settings))
         ;;
         ((or "solute" "solutes")
          ;;
-         ;; Check  if we can find  the solutes by names  early, typos are
-         ;; common:
+         ;; Check if we can find the solutes by names early, typos are
+         ;; common. FIXME: If this never fires, maybe delete the case?
          ;;
+         (error "FIXME: I think bgy3d-run-solute returns an alist by now")
          (let ((solutes (map find-molecule args)))
            (map (lambda (solute)
                   (let-values (((g1 ve restart)
