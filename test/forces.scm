@@ -40,14 +40,13 @@
                                  *solvent*
                                  *settings*
                                  %null-pointer)))
-    (map vec-destroy (assoc-ref alist 'GUV))
-    (bgy3d-pot-destroy (assoc-ref alist 'POTENTIAL))
-    (bgy3d-restart-destroy (assoc-ref alist 'RESTART))
     ;; Return free energy and gradients computed in two different
     ;; ways:
     (let ((e (assoc-ref alist 'free-energy))
           (g (assoc-ref alist 'free-energy-gradient))
           (r (assoc-ref alist 'free-energy-response)))
+      ;; Destroy all returned objects that need it:
+      (destroy alist)
       (list e g r))))
 
 (define (pes-3d x)

@@ -79,11 +79,10 @@
                                    *solvent*
                                    settings
                                    %null-pointer)))
-      (map vec-destroy (assoc-ref alist 'GUV))
-      (bgy3d-pot-destroy (assoc-ref alist 'POTENTIAL))
-      (bgy3d-restart-destroy (assoc-ref alist 'RESTART))
       ;; Return free energy:
-      (assoc-ref alist 'free-energy))))
+      (let ((e (assoc-ref alist 'free-energy)))
+        (destroy alist)
+        e))))
 
 (define *res-1d*
   (map (lambda (clo)
