@@ -1647,6 +1647,9 @@ hnc3d_solute_solve (const ProblemData *PD,
   /* Update if specified by user, or leave as is: */
   bgy3d_getopt_bool ("derivatives", &derivatives);
 
+  /* Derivatives by linear response (expensive): */
+  const bool response = false;
+
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
 
@@ -1829,7 +1832,7 @@ hnc3d_solute_solve (const ProblemData *PD,
       bgy3d_snes_default (PD, &ctx, (VecFunc1) iterate_t1, (VecFunc2) jacobian_t1, T);
 
       /* XXX: Derivatives by linear response: */
-      if (derivatives)
+      if (response)
         {
           local Vec dV = vec_duplicate (T);
           local Vec dT = vec_duplicate (T);
