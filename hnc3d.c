@@ -1484,15 +1484,20 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
 
 
 /*
-  XXX: hm,  I am  getting very big  (in absolute terms)  mean energies
-  here, around -25.8 kcal for PR-SPC/E water. Most of it, around -28.5
-  kcal  is  the  (long-range)  electrostatic energy.   The  literature
-  operates  with energies  of about  -41  kJ instead  [1]. The  formal
-  definition of the internal energy is rather U = ∂(βA) / ∂β, and I am
-  not  even sure  if  the *excess*  chemical  potential μ  == A  here.
-  Numerical  experiment shows that  such a  derivative might  be quite
-  different, in  this case about  -13 kcal or  -55 kJ. Anyway,  we are
-  mostly  testing integration  of  singular terms  in preparation  for
+  You will get very big (in absolute terms) interaction energies here,
+  around -25.8 kcal for PR-SPC/E water and about -20.0 kcal for cSPC/E
+  water.   Most of  it, around  -28.5  kcal (PR-SPC/E)  or -21.2  kcal
+  (cSPC/E)  is   the  (long-range)  electrostatics.    The  literature
+  operates with energies of about  -41 kJ (about -10 kcal) instead [1]
+  calling it an "average  configurational energy" sometimes.  But note
+  that the "interaction  energy" when divided in half  between the two
+  interacting sides is not that far from the -10 kcals.
+
+  The formal definition  of the internal energy is rather  U = ∂(βA) /
+  ∂β, and I am not even sure if the *excess* chemical potential μ == A
+  here.  Numerical  experiment shows that  such a derivative  might be
+  quite different, in  this case about -13 kcal or  -55 kJ. Anyway, we
+  are mostly testing integration  of singular terms in preparation for
   forces here.
 
   [1] http://www1.lsbu.ac.uk/water/models.html
