@@ -974,7 +974,7 @@ computes the sum of all vector elements."
       ;;
       (match cmd
         ;;
-        ((or "energy" "gradients" "taylor")
+        ((or "energy" "gradient" "gradients" "taylor")
          (let-values (((x f fg) (if solvent
                                     (make-pes solute solvent settings)
                                     (make-pes/gp solute settings))))
@@ -982,7 +982,7 @@ computes the sum of all vector elements."
              ("energy"
               (let ((e (f x)))
                 (pretty-print/serial e)))
-             ("gradients"
+             ((or "gradient" "gradients")
               (let-values (((e g) (fg x)))
                 (pretty-print/serial g)))
              ("taylor"
