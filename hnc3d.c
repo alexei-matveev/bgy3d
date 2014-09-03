@@ -85,7 +85,7 @@
   with
 
     χ   = 1 + ρ  h                                                 (10)
-     uv        v  vv
+     vv        v  vv
 
   which is  equivalent to Eq. (7). Note  that χ, as it  stands, is not
   symmetric, unless ρ is the same for all sites. FIXME: the code makes
