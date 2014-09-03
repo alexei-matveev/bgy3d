@@ -56,7 +56,8 @@
 ;;;
 ;;; Let-over-lambda here.  Given  a function (f x ...)   The result of
 ;;; (memoize f) is a function (f' x ...)  == (f x ...) that will cache
-;;; all results.
+;;; all results. The lookup function "assoc" uses equal? predicate for
+;;; key comparisons.
 ;;;
 (define (memoize f)
   (let ((*cache* '()))                  ; empty cache
