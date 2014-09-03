@@ -665,6 +665,24 @@ bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
 }
 
 
+void
+bgy3d_solute_form1 (const State *BHD, int n, const Site solute[n],
+                    real dx[n][3],
+                    int m, Vec dv_fft[m]) /* inout */
+{
+  real q[n], x[n][3];
+
+  for (int i = 0; i < n; i++)
+    {
+      q[i] = solute[i].charge;
+
+      FOR_DIM
+        x[i][dim] = solute[i].x[dim];
+    }
+  solute_form1 (BHD, n, q, x, dx, m, dv_fft);
+}
+
+
 /*
   In  the   spherically  symmetric  single  center   case  the  smooth
   assymptotic potential is chosen as

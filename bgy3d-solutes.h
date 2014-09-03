@@ -34,8 +34,15 @@ void bgy3d_solute_field1 (const State *BHD,
                           real dx[n][3],                /* in */
                           Vec dv[m]);                   /* out */
 
+
+/* Replaces   v_fft[]  by  their   convolutions  with   electric  form
+   factor: */
 void bgy3d_solute_form (const State *BHD, int n, const Site solute[n],
                         int m, Vec v_fft[m]); /* inout */
+
+void bgy3d_solute_form1 (const State *BHD, int n, const Site solute[n],
+                         real dx[n][3],
+                         int m, Vec dv_fft[m]); /* inout */
 
 
 /* Make functions  used as force field primitives  available to Scheme
