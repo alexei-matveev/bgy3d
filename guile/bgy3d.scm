@@ -397,13 +397,17 @@
   (assoc-ref settings key))
 
 ;;;
-;;; Almost as acons/alist-cons but makes deletes the previous setting,
-;;; if present.   Note that alist-delete does not  modify the original
-;;; but the result may share the tail with the input.
+;;; Almost as  acons/alist-cons but  deletes the previous  setting, if
+;;; present.  Note that alist-delete  does not modify the original but
+;;; the result may share the  tail with the input.  FIXME: memoization
+;;; in  (guile  utils)  is  based  on  association  lists  and  equal?
+;;; comparisons, so that the branch is actually redundant.
 ;;;
 (define (env-set key val settings)
-  (let ((settings' (alist-delete key settings)))
-    (alist-cons key val settings')))
+  (if (equal? val (env-ref settings key))
+      settings
+      (let ((settings' (alist-delete key settings)))
+        (alist-cons key val settings'))))
 
 
 ;;;
@@ -907,9 +911,7 @@ computes the sum of all vector elements."
            ;; Make sure to request evaluation of gradients for (g x)
            ;; but not for (f x). Using two different settings impedes
            ;; memoization:
-           (settings (if (env-ref settings 'derivatives)
-                         settings       ; for the sake of memoization
-                         (env-set 'derivatives #t settings)))
+           (settings (env-set 'derivatives #t settings))
            ;; PES tuple (fg x) -> energy, gradients:
            (fg (lambda (x)
                  (let ((dict (rism x settings)))
