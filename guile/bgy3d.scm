@@ -656,6 +656,7 @@ computes the sum of all vector elements."
     (save-guess         (value #f))
     (load-guess         (value #f))
     (derivatives        (value #f))
+    (response           (value #f))
     (snes-solver
      (value #t)
      (predicate ,(lambda (x)

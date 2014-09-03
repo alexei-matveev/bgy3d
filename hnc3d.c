@@ -1642,13 +1642,16 @@ hnc3d_solute_solve (const ProblemData *PD,
   /* Default is to not apply boundary condition in HNC code: */
   const PetscBool cage = false;
 
+  /* Gradients of chemical potential by TPT theorem: */
   bool derivatives = false;
+
+  /* Derivatives by linear response (expensive): */
+  bool response = false;
 
   /* Update if specified by user, or leave as is: */
   bgy3d_getopt_bool ("derivatives", &derivatives);
+  bgy3d_getopt_bool ("response", &response);
 
-  /* Derivatives by linear response (expensive): */
-  const bool response = false;
 
   /* Code used to be verbose: */
   bgy3d_problem_data_print (PD);
