@@ -885,15 +885,22 @@ computes the sum of all vector elements."
 ;;; handle pure solvent and solute/solvent simultaneously.
 ;;;
 (define (make-pes solute solvent settings)
-  (let ((chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
+  (let ((three-dee (env-ref settings 'hnc))
+        (chi (delay (let ((dct (rism-solvent solvent settings))) ; solvent run here!
                       (assoc-ref dct 'susceptibility))))) ; extract susceptibility
     (let* ((m (or solute solvent))      ; molecule to be "moved"
            (x0 (molecule-positions m))  ; unperturbed geometry
            (rism (lambda (x s)          ; (x, settings) -> alist
                    (let ((m' (move-molecule m x)))
-                     (if solute
-                         (rism-solute m' solvent s (force chi))
-                         (rism-solvent m' s)))))
+                     (if three-dee
+                         (if solute
+                             (let ((dct (hnc3d-run-solute solute solvent s %null-pointer)))
+                               (destroy dct) ; deallocate Vecs ...
+                               dct)
+                             (error "Not implemented!"))
+                         (if solute
+                             (rism-solute m' solvent s (force chi))
+                             (rism-solvent m' s))))))
            ;; FIXME: Leaking much?  A geometry optimization may easily
            ;; require a few hundred evaluations:
            (rism (memoize rism))
