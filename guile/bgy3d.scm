@@ -344,6 +344,12 @@
 ;;;
 (define *settings* (make-fluid))
 
+;;;
+;;; Some    functions,   notably   rism-solute,    rism-solvent,   and
+;;; hnc3d-run-solute return a  dictionary of results in the  form of a
+;;; nested  association   list.   The  two   established  entries  are
+;;; free-energy and, occasionally, free-energy-gradient.
+;;;
 (define (rism-self-energy molecule species settings)
   (with-fluids ((*settings* settings))
     (rism-self-energy/c molecule species)))
@@ -370,7 +376,11 @@
 
 (define (hnc3d-run-solvent solvent settings)
   (with-fluids ((*settings* settings))
-    (hnc3d-run-solvent/c solvent)))
+    ;; FIXME:  make it return dicts  like the others, I  think it just
+    ;; returns the settings as is:
+    (let* ((dct (hnc3d-run-solvent/c solvent))
+           (dct (acons 'free-energy 'FIXME! dct)))
+      dct)))
 
 (define (hnc3d-run-solute solute solvent settings . rest)
   (with-fluids ((*settings* settings))
@@ -897,7 +907,7 @@ computes the sum of all vector elements."
                              (let ((dct (hnc3d-run-solute m' solvent s)))
                                (destroy dct) ; deallocate Vecs ...
                                dct)
-                             (error "Not implemented!"))
+                             (hnc3d-run-solvent m' s)) ; FIXME: returns fake
                          (if solute
                              (rism-solute m' solvent s (force chi))
                              (rism-solvent m' s))))))
