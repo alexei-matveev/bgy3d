@@ -4,6 +4,8 @@
 ;;; Atomic data
 ;;;
 (define-module (guile atoms)
+  #:use-module (srfi srfi-1)            ; list manipulation
+  #:use-module (srfi srfi-2)            ; and-let*
   #:use-module (ice-9 pretty-print)
   #:export
   (canonical-name
@@ -119,7 +121,8 @@
     ))
 
 ;;;
-;;; List of site names for each atom that deviate from the default:
+;;; List  of  site   names  for  each  atom  that   deviate  from  the
+;;; default. Hm, not a good idea. I've seen H1-H8.
 ;;;
 (define *site-names*
   '(("H" "HW")
@@ -143,6 +146,15 @@
   (or (hash-ref *canonical-names* name)
       name))
 
+;;;
+;;; FIXME: Solute  database contains atoms with "weird"  names such as
+;;; "H8"  (yes, really). We  should not  make code  to guess  ... Self
+;;; energy of such solutes will be wrong. These radii are only used to
+;;; "guess topology" and  omit computing non-bonded interaction within
+;;; a species.
+;;;
 (define (covalent-radius name)
   (let ((atom (canonical-name name)))
-    (cadr (assoc atom *periodic-table*))))
+    (or (and-let* ((row (assoc-ref *periodic-table* atom)))
+          (first row))
+        0.0)))                          ; FIXME: a better solution?
