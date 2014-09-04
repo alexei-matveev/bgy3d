@@ -364,17 +364,17 @@
   (with-fluids ((*settings* settings))
     (bgy3d-run-solvent/c solvent)))
 
-(define (bgy3d-run-solute solute solvent settings restart)
+(define (bgy3d-run-solute solute solvent settings . rest)
   (with-fluids ((*settings* settings))
-    (bgy3d-run-solute/c solute solvent restart)))
+    (apply bgy3d-run-solute/c solute solvent rest)))
 
 (define (hnc3d-run-solvent solvent settings)
   (with-fluids ((*settings* settings))
     (hnc3d-run-solvent/c solvent)))
 
-(define (hnc3d-run-solute solute solvent settings restart)
+(define (hnc3d-run-solute solute solvent settings . rest)
   (with-fluids ((*settings* settings))
-    (hnc3d-run-solute/c solute solvent restart)))
+    (apply hnc3d-run-solute/c solute solvent rest)))
 
 ;;;
 ;;; This compacts  association list  with entries coming  later having
@@ -894,7 +894,7 @@ computes the sum of all vector elements."
                    (let ((m' (move-molecule m x)))
                      (if three-dee
                          (if solute
-                             (let ((dct (hnc3d-run-solute solute solvent s %null-pointer)))
+                             (let ((dct (hnc3d-run-solute solute solvent s)))
                                (destroy dct) ; deallocate Vecs ...
                                dct)
                              (error "Not implemented!"))
