@@ -942,11 +942,10 @@ computes the sum of all vector elements."
              ((hnc bgy)
               (if solute                ; either #f or real solute
                   ;;
-                  ;; Solute with solvent. Supply NULL as the restart
-                  ;; parameter --- we cannot offer anything here. Dont
-                  ;; forget to destroy the objects returned:
+                  ;; Solute with solvent. Dont forget to destroy the
+                  ;; objects returned:
                   ;;
-                  (let ((alist (run-solute solute solvent settings %null-pointer)))
+                  (let ((alist (run-solute solute solvent settings)))
                     ;;
                     ;; Evaluate and print potential at positions of
                     ;; solute sites and the corresponding total
@@ -1061,7 +1060,7 @@ computes the sum of all vector elements."
          (let ((solutes (map find-molecule args)))
            (map (lambda (solute)
                   (let-values (((g1 ve restart)
-                                (bgy3d-run-solute solute solvent settings %null-pointer)))
+                                (bgy3d-run-solute solute solvent settings)))
                     ;;
                     ;; Save distributions if requested from command
                     ;; line. FIXME: the file names do not relate to
