@@ -6,7 +6,7 @@
 ;;;  ../bgy3d -L ../ -s ./cavity.scm
 ;;;
 (use-modules
- (guile bgy3d)          ; rism-solute, hnc3d-run-solute, %null-pointer
+ (guile bgy3d)          ; rism-solute, hnc3d-run-solute
  (guile molecule)       ; find-molecule
  (guile utils)          ; numbers->strings
  (ice-9 match)

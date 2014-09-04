@@ -7,7 +7,7 @@
 ;;;  ../bgy3d -L ../ -s ./run-ions.scm
 ;;;
 (use-modules
- (guile bgy3d)          ; rism-solute, hnc3d-run-solute, %null-pointer
+ (guile bgy3d)          ; rism-solute, hnc3d-run-solute
  (guile molecule)       ; find-molecule
  (guile utils)          ; numbers->strings
  (ice-9 pretty-print))
@@ -75,10 +75,7 @@
 (define (run-3d solute closure)
   ;; 3D cannot handle large dimensions. FIXME: literals here:
   (let ((settings (env-set 'N 64 (env-set 'L 10.0 (env-set 'closure closure *settings*)))))
-    (let ((alist (hnc3d-run-solute solute
-                                   *solvent*
-                                   settings
-                                   %null-pointer)))
+    (let ((alist (hnc3d-run-solute solute *solvent* settings)))
       ;; Return free energy:
       (let ((e (assoc-ref alist 'free-energy)))
         (destroy alist)

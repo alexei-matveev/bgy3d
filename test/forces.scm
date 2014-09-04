@@ -4,7 +4,7 @@
 ;;;  ../bgy3d -L ../ -s ./forces.scm
 ;;;
 (use-modules
- (guile bgy3d)                       ; hnc3d-run-solute, %null-pointer
+ (guile bgy3d)                       ; hnc3d-run-solute
  (guile molecule)                    ; find-molecule
  (guile utils)                       ; ldot, ddd
  (srfi srfi-1)
@@ -36,10 +36,7 @@
 ;;; Call sequence for 3D RISM:
 ;;;
 (define (do-3d solute)
-  (let ((alist (hnc3d-run-solute solute
-                                 *solvent*
-                                 *settings*
-                                 %null-pointer)))
+  (let ((alist (hnc3d-run-solute solute *solvent* *settings*)))
     ;; Return free energy and gradients computed in two different
     ;; ways:
     (let ((e (assoc-ref alist 'free-energy))
