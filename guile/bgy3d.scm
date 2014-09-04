@@ -979,9 +979,10 @@ computes the sum of all vector elements."
 ;;;
 (define (new-main argv)
   (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
-         (args (env-ref settings '())) ; positional arguments
-         (cmd (car args))                ; first the command ...
-         (args (cdr args)))              ; ... then the real args
+         (args (env-ref settings '()))        ; positional arguments
+         (args (if (null? args) '("energy") args)) ; Do what I mean
+         (cmd (car args))               ; first the command ...
+         (args (cdr args)))             ; ... then the real args
     (let ((solvent (and-let* ((name (env-ref settings 'solvent)))
                      (find-molecule name))) ; Maybe solvent
           (solute (find-solute settings))   ; Maybe solute
