@@ -905,7 +905,13 @@ computes the sum of all vector elements."
            ;; require a few hundred evaluations:
            (rism (memoize rism))
            ;; Define solute species once, using the reference
-           ;; geometry. Otherwise self-energy may become discontinous:
+           ;; geometry.  Otherwise self-energy may become
+           ;; discontinous. FIXME: the idea is that we can guess
+           ;; topology of any solute by our limited means is just
+           ;; broken. Nothing of importance should depend on "species"
+           ;; defined in this automatic way. In particular covalent
+           ;; radii of unknown sites (see ./guile/atoms.scm) will be
+           ;; zero.
            (scale (env-ref settings 'bond-length-thresh))
            (species (and solute
                          (molecule-species solute scale)))
