@@ -756,88 +756,6 @@ computes the sum of all vector elements."
 
 
 ;;;
-;;; FIXME: at  the moment this  function only emulates the  minimum of
-;;; the   functionality   of  the   original   executable.   The   new
-;;; functionality is in  flux.  Note that at variance  with the legacy
-;;; code   the  function  find-molecule   uses  on-disk   database  in
-;;; ./solutes.scm and not the compiled in set from bgy3d-solutes.c and
-;;; bgy3d-solvents.h:
-;;;
-(define (old-main argv)
-  (let* ((settings (parse-command-line argv))
-         (solvent (and-let* ((name (env-ref settings 'solvent)))
-                    (find-molecule name))) ; Maybe solvent
-         (solute (find-solute settings)))  ; Maybe solute
-    (pretty-print/serial (list 'solvent: solvent))
-    (pretty-print/serial (list 'solute: solute))
-    (let-values
-        (((method run-solvent run-solute) ; three method-dependent values:
-          (cond
-           ((env-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
-           ((env-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
-           ((env-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
-      (case method
-        ;;
-        ;; 3d HNC/BGY.  The functions bound to run-solvent and
-        ;; run-solute share the interface. The code that calls them is
-        ;; the same.
-        ;;
-        ((hnc bgy)
-         (if solute                     ; either #f or real solute
-             ;;
-             ;; Solute with solvent. Supply NULL as the restart
-             ;; parameter --- we cannot offer anything here. Dont
-             ;; forget to destroy the objects returned:
-             ;;
-             (let ((alist (run-solute solute solvent settings %null-pointer)))
-               ;;
-               ;; Evaluate and print potential at positions of solute
-               ;; sites and the corresponding total energy:
-               ;;
-               (let ((potential (assoc-ref alist 'POTENTIAL)))
-                 (maybe-print-potentials solute potential))
-               ;;
-               ;; Output excess chemical potential to tty:
-               ;;
-               (let ((free-energy (assoc-ref alist 'free-energy))
-                     (closure (env-ref settings 'closure)))
-                 (pretty-print/serial (list closure free-energy)))
-               ;;
-               ;; Write g?.bin files:
-               ;;
-               (let ((g1 (assoc-ref alist 'GUV)))
-                 (map vec-save (g1-file-names g1) g1))
-               ;;
-               ;; Destroy all Vecs, potential, restart info, etc ...
-               ;;
-               (destroy alist))
-             ;;
-             ;; Pure solvent:
-             ;;
-             (run-solvent solvent settings)))
-        ;;
-        ;; 1d-RISM:
-        ;;
-        ((rism)
-         (if solute                     ; either #f or real solute
-             ;;
-             ;; Solute with solvent:
-             ;;
-             (let ((res (run-solute solute solvent settings)))
-               (pretty-print/serial res))
-             ;;
-             ;; Pure solvent:
-             ;;
-             (let ((res (run-solvent solvent settings)))
-               (pretty-print/serial res))))
-        ;;
-        ;; Fall through to the new variant:
-        ;;
-        (else
-         (new-main argv))))))
-
-
-;;;
 ;;; Linear mesh.  Note that the last point  is max - dr  < max. FIXME:
 ;;; division by zero for n = 0.
 ;;;
@@ -984,13 +902,12 @@ computes the sum of all vector elements."
 ;;; name of the solute. Note that  you may need to first run a solvent
 ;;; calculation with cmd == "solvent".
 ;;;
-;;; FIXME: reprot an error  meaningfully when called without arguments
-;;; when (car args) is about to fail.
+;;; FIXME: report usage meaningfully when called incorrectly
 ;;;
 (define (new-main argv)
   (let* ((settings (parse-command-line argv)) ; argv[0] is ignored
          (args (env-ref settings '()))        ; positional arguments
-         (args (if (null? args) '("energy") args)) ; Do what I mean
+         (args (if (null? args) '("old-main") args)) ; hack
          (cmd (car args))               ; first the command ...
          (args (cdr args)))             ; ... then the real args
     (let ((solvent (and-let* ((name (env-ref settings 'solvent)))
@@ -999,6 +916,83 @@ computes the sum of all vector elements."
           (save-binary (env-ref settings 'save-binary)))
       ;;
       (match cmd
+        ("old-main"
+         ;;
+         ;; This branch emulates historical interface --- no
+         ;; subcommands just flags. The new functionality is in the
+         ;; flux.  Note that at variance with the legacy code the
+         ;; function find-molecule uses on-disk database in
+         ;; ./solutes.scm and not the compiled in set from
+         ;; bgy3d-solutes.c and bgy3d-solvents.h:
+         ;;
+         (pretty-print/serial (list 'solvent: solvent))
+         (pretty-print/serial (list 'solute: solute))
+         (let-values
+             (((method run-solvent run-solute) ; three method-dependent values:
+               (cond
+                ((env-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
+                ((env-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
+                ((env-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
+           (case method
+             ;;
+             ;; 3d HNC/BGY.  The functions bound to run-solvent and
+             ;; run-solute share the interface. The code that calls
+             ;; them is the same.
+             ;;
+             ((hnc bgy)
+              (if solute                ; either #f or real solute
+                  ;;
+                  ;; Solute with solvent. Supply NULL as the restart
+                  ;; parameter --- we cannot offer anything here. Dont
+                  ;; forget to destroy the objects returned:
+                  ;;
+                  (let ((alist (run-solute solute solvent settings %null-pointer)))
+                    ;;
+                    ;; Evaluate and print potential at positions of
+                    ;; solute sites and the corresponding total
+                    ;; energy:
+                    ;;
+                    (let ((potential (assoc-ref alist 'POTENTIAL)))
+                      (maybe-print-potentials solute potential))
+                    ;;
+                    ;; Output excess chemical potential to tty:
+                    ;;
+                    (let ((free-energy (assoc-ref alist 'free-energy))
+                          (closure (env-ref settings 'closure)))
+                      (pretty-print/serial (list closure free-energy)))
+                    ;;
+                    ;; Write g?.bin files:
+                    ;;
+                    (let ((g1 (assoc-ref alist 'GUV)))
+                      (map vec-save (g1-file-names g1) g1))
+                    ;;
+                    ;; Destroy all Vecs, potential, restart info, etc ...
+                    ;;
+                    (destroy alist))
+                  ;;
+                  ;; Pure solvent:
+                  ;;
+                  (run-solvent solvent settings)))
+             ;;
+             ;; 1d-RISM:
+             ;;
+             ((rism)
+              (if solute                ; either #f or real solute
+                  ;;
+                  ;; Solute with solvent:
+                  ;;
+                  (let ((res (run-solute solute solvent settings)))
+                    (pretty-print/serial res))
+                  ;;
+                  ;; Pure solvent:
+                  ;;
+                  (let ((res (run-solvent solvent settings)))
+                    (pretty-print/serial res))))
+             ;;
+             ;; FIXME: print usage help here ...
+             ;;
+             (else
+              (display "I dont understand you, my master.\n")))))
         ;;
         ((or "energy" "gradient" "gradients" "taylor")
          (let-values (((x f fg) (if solvent
@@ -1257,12 +1251,9 @@ computes the sum of all vector elements."
 
 ;;;
 ;;; We are  trying to  emulate behaviour of  old executable  unless we
-;;; find a better  interface. The old behaviour is  triggered only for
-;;; --bgy, --hnc and --rism options:
+;;; find a better interface. The  old behaviour is triggered only when
+;;; there are  no positonal  arguments or with  the "old-main"  as the
+;;; first positional argument.
 ;;;
 (define (bgy3d-main argv)
-  (if (or (member "--bgy" argv)
-          (member "--hnc" argv)
-          (member "--rism" argv))
-      (old-main argv)
-      (new-main argv)))
+  (new-main argv))
