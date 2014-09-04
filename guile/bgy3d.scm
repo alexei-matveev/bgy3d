@@ -894,7 +894,7 @@ computes the sum of all vector elements."
                    (let ((m' (move-molecule m x)))
                      (if three-dee
                          (if solute
-                             (let ((dct (hnc3d-run-solute solute solvent s)))
+                             (let ((dct (hnc3d-run-solute m' solvent s)))
                                (destroy dct) ; deallocate Vecs ...
                                dct)
                              (error "Not implemented!"))
