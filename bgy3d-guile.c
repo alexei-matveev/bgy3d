@@ -1126,12 +1126,23 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
   Context *medium_;
 
   /*
-    If the  argument SCM  restart is SCM  NULL no  restart information
-    from the previous run is available yet.  This is a pointer to some
-    structure holding restart  info (ok, so far it is  just a long Vec
-    in disguise). This is NULL in the first call of a series:
+    If SCM  restart is  not bound  (was not supplied  at call  site in
+    Scheme), skip this reading, we are not going through this pain ...
+
+    Otherwise, if the argument SCM restart is %null-pointer no restart
+    information from the previous  run is available yet.  Any non-NULL
+    value is a pointer to  some structure holding restart info (ok, so
+    far it is just a long Vec in disguise).  Thus the C-value *restart
+    can be NULL  on entry to the solver and will  eventually be set to
+    something on return from the solver.   So if you ask the solver to
+    use and set *restart, make sure to clean up.
   */
-  Restart *restart_ = to_pointer (restart); /* maybe NULL */
+  Restart *restart_;
+  Restart **pass = &restart_;
+  if (!SCM_UNBNDP (restart))
+    restart_ = to_pointer (restart); /* maybe NULL */
+  else
+    pass = NULL;                /* dont have, dont want anything */
 
   /* The code will fill the dictionary with results: */
   SCM dict = SCM_EOL;
@@ -1140,10 +1151,7 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
                 &dict,          /* inout, alist */
                 g,              /* out */
                 &medium_,       /* out */
-                &restart_);     /* inout */
-
-  /* Not NULL if solver supports restarting: */
-  restart = from_pointer (restart_);
+                pass);          /* NULL, or inout */
 
   free (solute_name);
   free (solute_sites);
@@ -1158,7 +1166,12 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
      these! */
   dict = scm_acons (scm_from_locale_symbol ("GUV"), gs, dict);
   dict = scm_acons (scm_from_locale_symbol ("POTENTIAL"), medium, dict);
-  dict = scm_acons (scm_from_locale_symbol ("RESTART"), restart, dict);
+
+  /* Add an entry with whatever *restart_ was assigned to. But only if
+     we did ask for that: */
+  if (pass)
+    dict = scm_acons
+      (scm_from_locale_symbol ("RESTART"), from_pointer (restart_), dict);
 
   return dict;
 }
@@ -1586,9 +1599,9 @@ static void module_init (void* unused)
     a macro that does both.
   */
   EXPORT ("hnc3d-run-solvent/c", 1, 0, 0, guile_hnc3d_solvent);
-  EXPORT ("hnc3d-run-solute/c", 3, 0, 0, guile_hnc3d_solute);
+  EXPORT ("hnc3d-run-solute/c", 2, 1, 0, guile_hnc3d_solute);
   EXPORT ("bgy3d-run-solvent/c", 1, 0, 0, guile_bgy3d_solvent);
-  EXPORT ("bgy3d-run-solute/c", 3, 0, 0, guile_bgy3d_solute);
+  EXPORT ("bgy3d-run-solute/c", 2, 1, 0, guile_bgy3d_solute);
   EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);
