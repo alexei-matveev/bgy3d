@@ -827,8 +827,13 @@ static int guile_vec_print (SCM vec, SCM port, scm_print_state *pstate)
 
   scm_puts ("#<vec addr: ", port);
   scm_display (from_pointer (c_vec), port);
-  scm_puts (", length: ", port);
-  scm_display (guile_vec_length (vec), port);
+  /* Someone  will try to  display a  Vec that  has been  destroyed in
+     Scheme: */
+  if (c_vec)
+    {
+      scm_puts (", length: ", port);
+      scm_display (guile_vec_length (vec), port);
+    }
   scm_puts (">", port);
   scm_remember_upto_here_1 (vec);
   return 1;                     /* non-zero means success */
