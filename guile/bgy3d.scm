@@ -932,7 +932,8 @@ computes the sum of all vector elements."
                (cond
                 ((env-ref settings 'hnc)  (values 'hnc hnc3d-run-solvent hnc3d-run-solute))
                 ((env-ref settings 'bgy)  (values 'bgy bgy3d-run-solvent bgy3d-run-solute))
-                ((env-ref settings 'rism) (values 'rism rism-solvent rism-solute)))))
+                ((env-ref settings 'rism) (values 'rism rism-solvent rism-solute))
+                (else (error "no luck, use subcommands")))))
            (case method
              ;;
              ;; 3d HNC/BGY.  The functions bound to run-solvent and
