@@ -181,6 +181,28 @@ module lisp
        type (obj), intent (in), value :: port
        type (obj) :: undef
      end function scm_newline
+
+     function scm_variable_ref (var) result (val) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: var
+       type (obj) :: val
+     end function scm_variable_ref
+
+     function scm_c_resolve_module (path) result (mod) bind (c)
+       import
+       implicit none
+       character (kind=c_char), intent (in) :: path
+       type (obj) :: mod
+     end function scm_c_resolve_module
+
+     function scm_c_module_lookup (mod, key) result (var) bind (c)
+       import
+       implicit none
+       type (obj), intent (in), value :: mod
+       character (kind=c_char), intent (in) :: key
+       type (obj) :: var
+     end function scm_c_module_lookup
   end interface
 
   interface not
@@ -287,6 +309,7 @@ module lisp
   public :: display, newline
   public :: values, list
   public :: funcall
+  public :: lookup
 
 contains
 
@@ -396,5 +419,20 @@ contains
 
     new = cons (cons (key, val), old)
   end function acons
+
+
+  function lookup (module, name) result (val)
+    !
+    ! Lookup a name in a module.
+    !
+    use iso_c_binding, only: C_NULL_CHAR
+    implicit none
+    character (len=*), intent (in) :: module, name
+    type (obj) :: val
+    ! *** end of interface ***
+
+    val = scm_variable_ref (scm_c_module_lookup &
+         (scm_c_resolve_module (module // C_NULL_CHAR), name // C_NULL_CHAR))
+  end function lookup
 
 end module lisp
