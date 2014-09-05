@@ -921,11 +921,13 @@ contains
 
   subroutine guess_self_energy (rule, solute, dict)
     !
-    ! Adds an entry with self energy to the dictionary.
+    ! Adds an entry with self energy to the dictionary. FIXME: this is
+    ! getting cumbersome.
     !
     use foreign, only: site
     use options, only: getopt
-    use lisp, only: obj, acons, symbol, flonum, car, cdr, int
+    use lisp, only: obj, acons, symbol, flonum, car, cdr, int, nil, &
+         cons, flonum, funcall, lookup
     use units, only: kcal, angstrom
     implicit none
     integer, intent (in) :: rule
@@ -933,21 +935,38 @@ contains
     type (obj), intent (inout) :: dict
     ! *** end of interface ***
 
-    real (rk) :: e, g(3, size (solute))
+    real (rk) :: e, g(3, size (solute)), scale
     integer :: i, species(size(solute))
-    type (obj) :: ilist
+    type (obj) :: ilist, func, sites
+
+
+    func = lookup ("guile molecule", "sites->species")
+
+    ! FIXME: reconstructing solute as a list of sites to call a Scheme
+    ! function here:
+    sites = nil
+    do i = size (solute), 1, -1
+       sites = cons (solute(i) % obj, sites)
+    enddo
 
     ! Get  species  ID.  Sites  belong  to  the  same species  if  the
-    ! distance is below a typical bond length:
-    if (getopt ("solute-species", ilist)) then
-       do i = 1, size (species)
-          species(i) = int (car (ilist))
-          ilist = cdr (ilist)
-       enddo
-    else
-       ! FIXME: here a literal constant:
-       species = identify_species (solute, 2 * ANGSTROM)
+    ! distance  is below a  typical bond  length. Earlier  version got
+    ! this  list  from the  environment,  but  the  C-code is  calling
+    ! Fortran code with  the solvent as the solute  and any meaning of
+    ! solute/solvent     specific     environment    variables     get
+    ! confused.  FIXME: make  the  topology a  field  or a  computable
+    ! property of the molecule.
+    if (.not. getopt ("bond-length-thresh", scale)) then
+       scale = 1.0
     endif
+
+    ! (let ((ilist (sites->species sites scale))) ...)
+    ilist = funcall (func, sites, flonum (scale))
+
+    do i = 1, size (species)
+       species(i) = int (car (ilist))
+       ilist = cdr (ilist)
+    enddo
 
     if (verbosity() > 1) then
        do i = 1, size (solute)
