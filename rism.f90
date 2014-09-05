@@ -24,7 +24,7 @@ module rism
 
 contains
 
-  function rism_self_energy (n, sites, spec) result (eg) bind (c)
+  function rism_self_energy (n, sites, species) result (eg) bind (c)
     !
     ! Calculate the energy summation between each pair of residues for
     ! a given site.
@@ -38,7 +38,7 @@ contains
     implicit none
     integer (c_int), intent (in), value :: n
     type (site), intent (in) :: sites(n)
-    integer (c_int), intent (in) :: spec(n)
+    integer (c_int), intent (in) :: species(n)
     type (obj) :: eg            ! multiple values (e, g)
     ! *** end of interface ***
 
@@ -49,7 +49,7 @@ contains
     ! behaviour is better controlled via its arguments:
     if (.not. getopt ("comb-rule", rule)) rule = LORENTZ_BERTHELOT
 
-    call self_energy (rule, sites, spec, e, g)
+    call self_energy (rule, sites, species, e, g)
     eg = values (list (flonum (e), list2 (g)))
   end function rism_self_energy
 
