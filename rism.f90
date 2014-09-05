@@ -993,7 +993,7 @@ contains
     ! Adds an entry with self energy to the dictionary. FIXME: this is
     ! getting cumbersome.
     !
-    use foreign, only: site
+    use foreign, only: site, pad
     use options, only: getopt
     use lisp, only: obj, acons, symbol, flonum, car, cdr, int, nil, &
          cons, flonum, funcall, lookup
@@ -1039,7 +1039,7 @@ contains
 
     if (verbosity() > 1) then
        do i = 1, size (solute)
-          print *, solute(i) % name, species(i)
+          print *, pad (solute(i) % name), species(i)
        enddo
     endif
 
