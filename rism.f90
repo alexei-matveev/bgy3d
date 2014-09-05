@@ -403,7 +403,30 @@ contains
     ! Find t such that iterate_t  (t) == 0. FIXME: passing an internal
     ! function as a callback is an F08 feature. GFortran 4.3 on Debian
     ! Lenny does not support that:
-    call snes_default (t, iterate_t)
+    !
+    ! Transformation from f(r)  to r * f(r) is  linear and invertible,
+    ! note  that here minval  (r) =  dr /  2.  The  non-linear solvers
+    ! operate with some specific norm of residual.  Such an L2-norm of
+    ! rf(r) would  be proportional to  the volume integral  of |f(r)|²
+    ! without unnecessarily emphasizing small  r regions. At least for
+    ! cSPC/E  water with  some  settings, rmax  =  10 A,  nrad =  256,
+    ! epsilon =  78.4, this method  converges using plain  Newton, and
+    ! the original needs  tweaking like adding Picard pre-optimization
+    ! by snes-solver = trial. FIXME: maybe add Jacobian?
+    !
+    if (.false.) then
+       ! Solve for t(r):
+       call snes_default (t, iterate_t)
+    else
+       ! Solve for r * t(r):
+       block
+          real (rk) :: rt(m, m, nrad)
+
+          rt = to (t)
+          call snes_default (rt, iterate_rt)
+          t = from (rt)
+       end block
+    endif
 
     ! Do not assume c has a meaningfull value, it was overwritten with
     ! c(k):
@@ -511,6 +534,52 @@ contains
       ! Return the increment that vanishes at convergence:
       dt = dt - t
     end function iterate_t
+
+
+    function iterate_rt (rt) result (drt)
+      implicit none
+      real (rk), intent (in) :: rt(:, :, :) ! (m, m, nrad)
+      real (rk) :: drt(size (t, 1), size (t, 2), size (t, 3))
+      ! *** end of interface ***
+
+      drt = to (iterate_t (from (rt)))
+    end function iterate_rt
+
+    function to (x) result (y)
+      !
+      ! y = r * x
+      !
+      implicit none
+      real (rk), intent (in) :: x(:, :, :)
+      real (rk) :: y(size (x, 1), size (x, 2), size (x, 3))
+      ! *** end of interface ***
+
+      integer :: i, j
+
+      do i = 1, size (x, 1)
+         do j = 1, size (x, 2)
+            y(i, j, :) = r * x(i, j, :)
+         enddo
+      enddo
+    end function to
+
+    function from (x) result (y)
+      !
+      ! y = x / r
+      !
+      implicit none
+      real (rk), intent (in) :: x(:, :, :)
+      real (rk) :: y(size (x, 1), size (x, 2), size (x, 3))
+      ! *** end of interface ***
+
+      integer :: i, j
+
+      do i = 1, size (x, 1)
+         do j = 1, size (x, 2)
+            y(i, j, :) = x(i, j, :) / r
+         enddo
+      enddo
+    end function from
   end subroutine rism_vv
 
 
