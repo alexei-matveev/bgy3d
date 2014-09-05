@@ -919,23 +919,43 @@ contains
   end subroutine derivatives
 
 
-  subroutine guess_self_energy (rule, solute, spec, dict)
+  subroutine guess_self_energy (rule, solute, dict)
     !
     ! Adds an entry with self energy to the dictionary.
     !
     use foreign, only: site
-    use lisp, only: obj, acons, symbol, flonum
+    use options, only: getopt
+    use lisp, only: obj, acons, symbol, flonum, car, cdr, int
     use units, only: kcal, angstrom
     implicit none
     integer, intent (in) :: rule
     type (site), intent (in) :: solute(:) ! (n)
     type (obj), intent (inout) :: dict
-    integer, intent (in) :: spec(:) ! (n)
     ! *** end of interface ***
 
     real (rk) :: e, g(3, size (solute))
+    integer :: i, species(size(solute))
+    type (obj) :: ilist
 
-    call self_energy (rule, solute, spec, e, g)
+    ! Get  species  ID.  Sites  belong  to  the  same species  if  the
+    ! distance is below a typical bond length:
+    if (getopt ("solute-species", ilist)) then
+       do i = 1, size (species)
+          species(i) = int (car (ilist))
+          ilist = cdr (ilist)
+       enddo
+    else
+       ! FIXME: here a literal constant:
+       species = identify_species (solute, 2 * ANGSTROM)
+    endif
+
+    if (verbosity() > 1) then
+       do i = 1, size (solute)
+          print *, solute(i) % name, species(i)
+       enddo
+    endif
+
+    call self_energy (rule, solute, species, e, g)
 
     if (verbosity() > 0) then
        print *, "# Self energy = ", e / kcal, " kcal/mol"
@@ -1770,32 +1790,8 @@ contains
     call bridge_correction (method, rmax, beta, rho, solute, solvent, &
          v, t, dict=dict, rbc=rbc)
 
-    block
-       integer :: i, species(size(solute))
-       type (obj) :: ilist
-
-       ! Get  species ID.   Sites belong  to the  same species  if the
-       ! distance is below a typical bond length:
-       if (getopt ("solute-species", ilist)) then
-          do i = 1, size (species)
-             species(i) = int (car (ilist))
-             ilist = cdr (ilist)
-          enddo
-       else
-          ! FIXME: here a literal constant:
-          species = identify_species (solute, 2 * ANGSTROM)
-       endif
-
-       if (verbosity() > 1) then
-          do i = 1, size (solute)
-             print *, solute(i) % name, species(i)
-          enddo
-       endif
-
-       ! Adds an entry with self energy to the dictionary:
-       call guess_self_energy (rule, solute, species, dict)
-    end block
-
+    ! Adds an entry with self energy to the dictionary:
+    call guess_self_energy (rule, solute, dict)
   contains
 
     pure function epsln (beta, y, c) result (e)
