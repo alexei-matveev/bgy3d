@@ -2158,28 +2158,6 @@ contains
   end function lj1
 
 
-  function distance_matrix (sites) result (rij)
-    !
-    ! Calculate distance matrix of each atomic pair for a given site.
-    !
-    use foreign, only: site
-    implicit none
-    type (site), intent (in) :: sites(:)         ! (m)
-    real (rk) :: rij(size (sites), size (sites)) ! (m, m)
-    ! *** end of interface ***
-
-    integer i, j, m
-
-    m = size (sites)
-
-    do j = 1, m
-       do i = 1, m
-          rij(i, j) = norm2 (sites(i) % x - sites(j) % x)
-       enddo
-    enddo
-  end function distance_matrix
-
-
   subroutine self_energy (rule, sites, spec, e, g)
     !
     ! Calculate the energy summation between each pair of residues for
