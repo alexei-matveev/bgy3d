@@ -26,7 +26,7 @@
    molecule-positions
    molecule-charge
    molecule-dipole
-   molecule-species
+   sites->species
    molecule-self-energy
    make-force-field
    scan-property
@@ -319,7 +319,7 @@
           (dot q y)
           (dot q z))))
 
-(define (molecule-species solute scale)
+(define (sites->species sites scale)
   ;;
   ;; Estimate the length of a typical bond between two such sites:
   ;;
@@ -379,8 +379,7 @@
   ;; Return  a list of numeric  IDs. This list is  passed to C/Fortran
   ;; code occasionally:
   ;;
-  (let* ((sites (molecule-sites solute))
-         (species (classify sites)))
+  (let ((species (classify sites)))
     (map (lambda (a)
            (lookup a species))
          sites)))
@@ -572,7 +571,7 @@
 
 
 (define (scan-self-energy mol x0 x1)
-  (let* ((species (molecule-species mol 1.0))) ; Keep species during scan.
+  (let* ((species (sites->species (molecule-sites mol) 1.0))) ; Keep species during scan.
     (scan-property (lambda (mol)
                      (molecule-self-energy mol species))
                    (move-molecule mol x0)

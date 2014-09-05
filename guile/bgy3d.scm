@@ -842,7 +842,7 @@ computes the sum of all vector elements."
            ;; zero.
            (scale (env-ref settings 'bond-length-thresh))
            (species (and solute
-                         (molecule-species solute scale)))
+                         (sites->species (molecule-sites solute) scale)))
            (settings (if species
                          (env-set 'solute-species species settings)
                          settings))
@@ -871,7 +871,7 @@ computes the sum of all vector elements."
 ;;;
 (define (make-pes/gp solute settings)
   (let* ((scale (env-ref settings 'bond-length-thresh))
-         (species (molecule-species solute scale)) ; list of ints
+         (species (sites->species (molecule-sites solute) scale)) ; list of ints
          (x0 (molecule-positions solute))
          (fg (lambda (x)              ; x -> (values energy gradients)
                (let ((solute' (move-molecule solute x)))
@@ -1196,7 +1196,7 @@ computes the sum of all vector elements."
                (pretty-print/serial
                 (map cons
                      (map site-name (molecule-sites mol))
-                     (molecule-species mol scale)))))
+                     (sites->species (molecule-sites mol) scale)))))
            args)))
         ;;
         ("self-energy"
