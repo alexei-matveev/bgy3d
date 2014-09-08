@@ -52,6 +52,18 @@ n    sym   method    E(tot), au            dE, kcal  dG, kcal  U-OU, pm  U-OW, p
 wat  C2V   gp/spc       -76.502960020395
            pcm/spc      -76.514210290228      -7.06
            rs/spc                             -7.86929437074687
+KH3 10/96:
+           r3/spc                             -5.10197173104617
+KH3 20/256:
+           r3/spc                             -5.13483960376192
+PSE2 10/96:
+           r3/spc                             -6.02261426281553
+PSE2 20/256:
+           r3/spc                             -6.04947698519647
+PSE3 10/96:
+           r3/spc                             -6.24845168721811
+PSE3 20/256:
+           r3/spc                             -6.27658427691278
 
 
 1) dE = AQ(mol/aq) - GP(mol/gp), except for water, where both
