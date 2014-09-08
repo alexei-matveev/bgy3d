@@ -1754,13 +1754,13 @@ bgy3d_molmech (int n, double x[n][3], double *e, double g[n][3])
   /* FIXME: this "if" is questionable, should we rather fail? */
   if (scm_is_true (fg))
     {
-      scm_display (fg, scm_current_output_port());
-      scm_newline (scm_current_output_port());
+      /* scm_display (fg, scm_current_output_port()); */
+      /* scm_newline (scm_current_output_port()); */
 
       SCM eg = scm_call_1 (fg, from_double2 (n, 3, x));
 
-      scm_display (eg, scm_current_output_port());
-      scm_newline (scm_current_output_port());
+      /* scm_display (eg, scm_current_output_port()); */
+      /* scm_newline (scm_current_output_port()); */
       /* assert (scm_c_nvalues (eg) == 2); */
 
       SCM ex = scm_c_value_ref (eg, 0);
