@@ -1,4 +1,4 @@
-#!/users/alexei/darcs/ttfs-mac/guile-qm
+#!/users/alexei/git/ttfs-work-gpl/guile-qm
 ;;; -*- mode: scheme; -*- vim: set syntax=scheme:
 !#
 ;;;
@@ -17,7 +17,7 @@
 ;;;
 (eval-when
  (eval load compile)      ; extend %load-path at compile time with 2.0
- (set! %load-path (cons* "/users/alexei/darcs/ttfs-mac"
+ (set! %load-path (cons* "/users/alexei/git/ttfs-work-gpl"
                          "/users/alexei/darcs/bgy3d-wheezy"
                          %load-path)))
 
