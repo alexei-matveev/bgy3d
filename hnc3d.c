@@ -2190,5 +2190,10 @@ hnc3d_solute_solve (const ProblemData *PD,
   for (int i = 0; i < m; i++)
     g[i] = h[i];                /* FIXME: misnomer! */
 
-  bgy3d_vec_save1 ("g%d.bin", m, g);
+  {
+    bool save = false;
+    bgy3d_getopt_bool ("save-binary", &save);
+    if (save)
+      bgy3d_vec_save1 ("g%d.bin", m, g);
+  }
 }
