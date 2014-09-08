@@ -313,7 +313,8 @@ bgy3d_solvent_field (const State *BHD, /* intent(in) */
     vec_destroy (&x);
   }
 
-  bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
+  if (false)
+    bgy3d_vec_save ("ve.bin", ve); /* for debugging only */
 }
 
 
