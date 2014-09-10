@@ -144,6 +144,25 @@ Free energy minimization for uranyl aqua complexes
 \end_layout
 
 \begin_layout Standard
+Note how QM+PSE2 and QM+PSE3 predict the bond length of the four coordinated
+ complex by 0.3--0.4
+\begin_inset space ~
+\end_inset
+
+pm shorter than for 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl.
+ The RISM medium around bare uranyl apparently corresponds to more than
+ four water ligands.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
