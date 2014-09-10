@@ -669,6 +669,7 @@ computes the sum of all vector elements."
     (no-renorm          (value #f)) ; dont do lon-range renormalization
     (from-radial-g2     (value #f))
     (save-guess         (value #f))
+    (save-binary        (value #f))
     (load-guess         (value #f))
     (derivatives        (value #f))
     (response           (value #f))
