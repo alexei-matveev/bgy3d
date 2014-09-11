@@ -6,7 +6,12 @@
 #include "bgy3d.h"              /* State */
 #include "bgy3d-vec.h"          /* vec_create() */
 #include "bgy3d-fftw.h"         /* bgy3d_fft_interp() */
+#include "bgy3d-interp.h"       /* bgy3d_interp() */
 #include "lebed/lebed.h"        /* genpts() */
+
+
+/* Flip this to use expensive trigonometric interpolation: */
+static bool trilinear = true;
 
 void
 rism_rdf (State *dom, Vec g,
@@ -17,12 +22,17 @@ rism_rdf (State *dom, Vec g,
 {
   const ProblemData *PD = dom->PD;
 
-  /* Prepare Fourier coefficients: */
-  local Vec g_fft = vec_create (dom->dc);
+  /* Prepare Fourier coefficients.  Only needed for trigonometric
+     interpolation: */
+  local Vec g_fft = NULL;
+  if (!trilinear)
+    {
+      g_fft = vec_create (dom->dc);
 
-  MatMult (dom->fft_mat, g, g_fft);
-  /* Do not  VecScale (g_fft, volume_element  (PD)), the interpolation
-     code assumes that ... */
+      MatMult (dom->fft_mat, g, g_fft);
+      /* Do not VecScale (g_fft, volume_element (PD)), the
+         interpolation code assumes that ... */
+    }
 
   /* Coordinates  and weights of  spherical quadrature.  Only mm  <= m
      points are valid: */
@@ -42,8 +52,12 @@ rism_rdf (State *dom, Vec g,
         FOR_DIM
           y[i][dim] = (a[dim] + r[j] * x[i][dim] + PD->L[dim] / 2) / PD->h[dim];
 
-      /* FIXME: very expensive trigonometric interpolation: */
-      bgy3d_fft_interp (dom->fft_mat, g_fft, mm, y, gr);
+      /* NOTE:  trigonometric  interpolation   is  O(N^3)  per  point,
+         trilinear is O(1): */
+      if (trilinear)
+        bgy3d_interp (dom->da, g, mm, y, gr);
+      else
+        bgy3d_fft_interp (dom->fft_mat, g_fft, mm, y, gr);
 
       /* Scale by integration weights: */
       for (int i = 0; i < mm; i++)
@@ -53,5 +67,6 @@ rism_rdf (State *dom, Vec g,
       rdf[j] = sum (mm, gr);
     }
 
-  vec_destroy (&g_fft);
+  if (!trilinear)
+    vec_destroy (&g_fft);
 }
