@@ -287,6 +287,11 @@ problem_data (SCM alist)
   for (int i = 0; i < 3; i++)
     PD.L[i] = 2 * length;
 
+  /* FIXME: testing non-cubic boxes: */
+  alist_getopt_real (alist, "sx", &PD.L[0]);
+  alist_getopt_real (alist, "sy", &PD.L[1]);
+  alist_getopt_real (alist, "sz", &PD.L[2]);
+
   /* Grid points in 1 dimension */
   int n = 32;
   alist_getopt_int (alist, "N", &n);
@@ -294,6 +299,11 @@ problem_data (SCM alist)
 
   for (int i = 0; i < 3; i++)
     PD.N[i] = n;
+
+  /* FIXME: testing non-cubic boxes: */
+  alist_getopt_int (alist, "nx", &PD.N[0]);
+  alist_getopt_int (alist, "ny", &PD.N[1]);
+  alist_getopt_int (alist, "nz", &PD.N[2]);
 
   alist_getopt_int (alist, "max-iter", &PD.max_iter);
 
