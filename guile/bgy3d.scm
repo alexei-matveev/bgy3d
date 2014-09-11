@@ -1157,10 +1157,20 @@ computes the sum of all vector elements."
          ;;
          ;; Print Gnuplot-ready RDF table. E.g. by executing this:
          ;;
-         ;; mpirun guile/runbgy.scm rdf --N 96 --L 10 0 0 0 test/*.bin
+         ;;   mpirun guile/runbgy.scm rdf --N 96 --L 10 "(1 1 -1)" *.bin
+         ;;   mpirun guile/runbgy.scm rdf --N 96 --L 10 --solute="XY" "X" *.bin
          ;;
-         (let* ((center (map string->number (take args 3)))
-                (args (drop args 3))
+         ;; Coordinates may be negative, thus it is cumbersome to
+         ;; specify real numbers in command line and handle short
+         ;; flags as well. Specify site names. FIXME: site names are
+         ;; not unique, maybe use indices instead?
+         ;;
+         (let* ((center-spec (with-input-from-string (first args) read))
+                (center (if (list? center-spec)
+                            center-spec
+                            (site-position (assoc (symbol->string center-spec)
+                                                  (molecule-sites solute)))))
+                (args (cdr args))
                 (angular-order 110)     ; FIXME: literals here ...
                 (rmin 0.75)             ; cannot be zero for log-mesh
                 (rmax (env-ref settings 'L)) ; a choice ...
@@ -1175,7 +1185,7 @@ computes the sum of all vector elements."
                            args)))
            (state-destroy domain)
            (begin/serial
-            (format #t "# center = ~A\n" center)
+            (format #t "# center = ~A inferred from input ~A\n" center center-spec)
             (apply print-columns mesh rdfs))))
         ;;
         ("dump"
