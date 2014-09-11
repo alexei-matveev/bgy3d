@@ -686,6 +686,104 @@ print_chempot (const State *HD, int n, int m,
                  ((methods[i] == HD->PD->closure)? "*" : ""));
 }
 
+/*
+   These two kernel functions are used to calculate isothermal
+   compressibility and partial molar volume, with the formula used in
+   Hirata's book (pp. 148), in which the summation reads:
+       ~                  →    →
+   ρ∑  c (k=0) ≡ ρ∑  ∫c (|r|) dr
+     uv uv         uv  uv
+*/
+
+/* 1.  calculate the summed density ∑c[n][m] */
+static void compute_kc_density (int n, int m, Vec c[n][m], /* in */
+                                Vec kc_dens)              /* out */
+{
+  /* initialize the accumulator density */
+  VecSet (kc_dens, 0.0);
+
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < m; j++)
+    {
+      VecAXPY (kc_dens, 1.0, c[i][j]);
+    }
+}
+
+/* 2. The volumen integral ∫c(r)dr, scaled by ρ */
+static real compute_kc (const State *HD, int n, int m, Vec c[n][m])
+{
+  const ProblemData *PD = HD->PD;
+  // const real beta = PD->beta;
+  const real h3 = volume_element (PD);
+  const real rho = PD->rho;
+
+  local Vec kc_dens = vec_create (HD->da);
+
+  compute_kc_density (n, m, c, kc_dens);
+
+  const real kc = rho * vec_sum (kc_dens) * h3;
+
+  vec_destroy (&kc_dens);
+  return kc;
+}
+
+/* Calculate partial molar volume as used by Palmer et al. (2010):
+
+   βV = κ[1 - ρ∫c(r)dr],
+
+   where κ is pure solent isothermal compressibility, needs to be
+   calcualted seperately by a pure solvent calculation. FIXME: Here
+   "PMV" is not scaled with kappa, one need to apply it by hand. ρ is
+   number density of solute site
+
+*/
+
+static void print_pmv (const State *HD, int n, int m, Vec c[n][m])
+{
+  real pmv;
+
+  /* kernel ρ∫c(r)dr */
+  pmv = compute_kc (HD, n, m, c);
+
+  /* V/κ = (1 - kernel) / β */
+  pmv = (1 - pmv) / HD->PD->beta;
+  PRINTF (" # Calculated partial molar volume (PMV), need to be scaled by kappa:\n");
+  PRINTF (" # PMV = %f \n", pmv);
+  /* unscaled ρV */
+  PRINTF (" # PMV * rho = %f \n", pmv * HD->PD->rho);
+}
+
+
+/* Calculate isothermal compressibility κ
+                      ~
+   κ = β / ρ[1 - ρ∑   c  (k=0)]
+                   vv' vv'
+   and the correction coefficient
+             ~
+   a =  ρ∑   c  (k=0) / 2β
+          vv' vv' 
+  */
+
+static void print_kappa (const State *HD, int n, int m, Vec c[n][m])
+{
+  real kappa;
+  const real rho = HD->PD->rho;
+  const real beta =  HD->PD->beta;
+
+  /* kernel ρ∫c(r)dr */
+  kappa = compute_kc (HD, m, m, c);
+
+
+  /* coefficient a = kernel / 2β */
+  PRINTF (" # Correction coefficent: \n");
+  PRINTF (" # a = %f \n", kappa / 2 / beta);
+
+  /* κ = β / ρ[1 - kernel] */
+  kappa = beta / (1 - kappa) / rho;
+  PRINTF (" # Isothermal compressibility: \n");
+  PRINTF (" # kappa = %f A^3 / kcal \n", kappa);
+}
+
 static inline ProblemData
 upscale (const ProblemData *PD)
 {
@@ -902,6 +1000,9 @@ hnc3d_solvent_solve (const ProblemData *PD,
     vec_destroy2 (m, cl);
     vec_destroy2 (m, x);
   }
+
+  /* isothermal compressibility */
+  print_kappa (HD, m, m, c);
 
   /* No more used: */
   vec_aliases_destroy2 (T, m, t);
@@ -2115,6 +2216,12 @@ hnc3d_solute_solve (const ProblemData *PD,
 
     vec_destroy1 (m, cl);
     vec_destroy1 (m, x);
+  }
+
+  /* print PMV */
+  {
+    /* it is unscaled by κ */
+    print_pmv (HD, 1, m, (void*) c);
   }
 
   /* Derivatives of the chemical potential: */
