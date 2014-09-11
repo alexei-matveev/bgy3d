@@ -27,7 +27,11 @@ include $(PETSC_DIR)/conf/variables # on Wheezy, Ubuntu 12.04
 # dependencies.  A  serial "make clean" might  be sometimes sufficient
 # to initally populate *.d files.
 #
-all: bgy3d
+
+# You could change this teporarily to test compilation while there are
+# jobs running that use the executable:
+exe = bgy3d
+all: $(exe)
 
 # Shell
 SHELL = /bin/sh
@@ -155,7 +159,7 @@ libbgy3d.so: $(libbgy3d.a)
 	ln -sf libbgy3d.so.1.0 libbgy3d.so.1
 	ln -sf libbgy3d.so.1 libbgy3d.so
 
-bgy3d: $(OBJECTS) $(if $(shared), libbgy3d.so, libbgy3d.a)
+$(exe): $(OBJECTS) $(if $(shared), libbgy3d.so, libbgy3d.a)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJECTS) -L. -lbgy3d $(LIBS)
 
 #
@@ -167,12 +171,12 @@ test-all:
 clean:
 	rm -f $(generated-depfiles)
 	rm -f *.a *.so *.o *.mod *.bin *.info
-	rm -f bgy3d
+	rm -f $(exe)
 	$(MAKE) -C test clean
 
 distclean:
 	rm -f *.o *.so *.d
-	rm -f bgy3d
+	rm -f $(exe)
 .PHONY: distclean
 
 # Even if you issue "make clean" the uncoditional include will lead to
