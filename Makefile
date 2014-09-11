@@ -110,6 +110,7 @@ c-objs = \
 	bgy3d-snes.o \
 	bgy3d-vec.o \
 	bgy3d-mat.o \
+	bgy3d-interp.o \
 	bgy3d-fft.o \
 	bgy3d-fftw3.o \
 	bgy3d-potential.o
