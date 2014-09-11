@@ -24,6 +24,7 @@
    molecule-name
    molecule-sites
    molecule-positions
+   molecule-bounding-box
    molecule-charge
    molecule-dipole
    sites->species
@@ -210,6 +211,20 @@
                           positions)))
     (move-molecule solute translated)))
 
+;;;
+;;; Returns two corners of the bounding box.
+;;;
+(define (molecule-bounding-box mol)
+ (let ((sites (molecule-sites mol)))
+   (let ((xs (map site-x sites))
+         (ys (map site-y sites))
+         (zs (map site-z sites)))
+     (list (list (apply min xs)
+                 (apply min ys)
+                 (apply min zs))
+           (list (apply max xs)
+                 (apply max ys)
+                 (apply max zs))))))
 
 ;;;
 ;;; Return  the   force  field   parameter  table  in   each  molecule
