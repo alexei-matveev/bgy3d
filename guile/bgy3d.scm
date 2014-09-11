@@ -819,13 +819,19 @@ computes the sum of all vector elements."
                       (assoc-ref dct 'susceptibility))))) ; extract susceptibility
     (let* ((m (or solute solvent))      ; molecule to be "moved"
            (x0 (molecule-positions m))  ; unperturbed geometry
+           (restart %null-pointer)
            (rism (lambda (x s)          ; (x, settings) -> alist
                    (let ((m' (move-molecule m x)))
                      (if three-dee
                          (if solute
-                             (let ((dct (hnc3d-run-solute m' solvent s)))
-                               (destroy dct) ; deallocate Vecs ...
-                               dct)
+                             (let ((dct (hnc3d-run-solute m' solvent s restart)))
+                               ;; FIXME: lots of memory leaks here,
+                               ;; need a way to dispose of PES
+                               ;; functions:
+                               (set! restart (assoc-ref dct 'RESTART))
+                               (let ((dct (alist-delete 'RESTART dct)))
+                                 (destroy dct) ; deallocate Vecs ...
+                                 dct))
                              (hnc3d-run-solvent m' s)) ; FIXME: returns fake
                          (if solute
                              (rism-solute m' solvent s (force chi))
