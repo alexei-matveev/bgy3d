@@ -1,3 +1,14 @@
+2014-09-11  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* rism-rdf.c (rism_rdf): Use trilinear interpolation for RDF. This
+	is much faster: O(1) per point  instead of O(n^3). RDFs are not in
+	the  testsuite  so  this  change  will go  unnoticed.   A  notable
+	observable  change however  is the  absense of  "ringing"  next to
+	sharp  edges  typical for  trigonometric  interpolation.  Also  it
+	looks like  the peaks  and other features  of RDF  got "smoother".
+	There is no flag yet to turn the old behaviour on, you may need to
+	flip the variable in this file.
+
 2014-07-25  Alexei Matveev  <alexei.matveev@gmail.com>
 
 	* hnc3d.c (solvent_kernel): Inquire --no-renorm flag. This changes
