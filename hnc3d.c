@@ -753,34 +753,35 @@ print_pmv (const State *HD, int n, int m, Vec c[n][m])
 }
 
 
-/* Calculate isothermal compressibility κ
-                      ~
-   κ = β / ρ[1 - ρ∑   c  (k=0)]
-                   vv' vv'
-   and the correction coefficient
-             ~
-   a =  ρ∑   c  (k=0) / 2β
-          vv' vv' 
-  */
+/*
+  Calculate isothermal compressibility κ
 
-static void print_kappa (const State *HD, int n, int m, Vec c[n][m])
+                       ~
+    κ = β / ρ[1 - ρ∑   c  (k=0)]
+                    vv' vv'
+
+  and the correction coefficient
+              ~
+    a =  ρ∑   c  (k=0) / 2β
+           vv' vv' 
+*/
+static void
+print_kappa (const State *HD, int n, int m, Vec c[n][m])
 {
-  real kappa;
   const real rho = HD->PD->rho;
   const real beta =  HD->PD->beta;
 
-  /* kernel ρ∫c(r)dr */
-  kappa = compute_kc (HD, m, m, c);
+  /* Kernel ρ∫c(r)d³r = ρc(k=0): */
+  const real c0 = compute_kc (HD, m, m, c);
 
+  /* Coefficient a = ρc(0) / 2β */
+  PRINTF (" # Correction coefficent:\n");
+  PRINTF (" # a = %f kcal\n", c0 / 2 / beta);
 
-  /* coefficient a = kernel / 2β */
-  PRINTF (" # Correction coefficent: \n");
-  PRINTF (" # a = %f \n", kappa / 2 / beta);
-
-  /* κ = β / ρ[1 - kernel] */
-  kappa = beta / (1 - kappa) / rho;
-  PRINTF (" # Isothermal compressibility: \n");
-  PRINTF (" # kappa = %f A^3 / kcal \n", kappa);
+  /* κ = β / ρ[1 - c0] */
+  const real kappa = beta / (1 - c0) / rho;
+  PRINTF (" # Isothermal compressibility:\n");
+  PRINTF (" # kappa = %f A³/kcal\n", kappa);
 }
 
 static inline ProblemData
