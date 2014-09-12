@@ -757,7 +757,7 @@ print_kappa (const State *HD, int n, int m, Vec c[n][m])
   const real beta =  HD->PD->beta;
 
   /* Kernel ρ∫c(r)d³r = ρc(k=0): */
-  const real c0 = compute_kc (HD, m, m, c);
+  const real c0 = compute_kc (HD, n, m, c);
 
   /* Coefficient a = ρc(0) / 2β */
   PRINTF (" # Correction coefficent:\n");
@@ -987,7 +987,7 @@ hnc3d_solvent_solve (const ProblemData *PD,
     vec_destroy2 (m, x);
   }
 
-  /* isothermal compressibility */
+  /* Isothermal compressibility: */
   print_kappa (HD, m, m, c);
 
   /* No more used: */
