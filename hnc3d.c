@@ -2215,12 +2215,16 @@ hnc3d_solute_solve (const ProblemData *PD,
     */
     const real v = pmv_factor (HD, 1, m, (void*) c);
 
-    /* These two numbers were the original output: */
+    /* These two numbers  were the original output: V  and ρV both not
+       scaled by κ: */
     PRINTF (" # Calculated partial molar volume (PMV), need to be scaled by kappa:\n");
     PRINTF (" # PMV: 1 - ρ∫c(r)d³r = %f\n", v);
     PRINTF (" # PMV: V/κ = %f kcal\n", v / HD->PD->beta);
-    /* Unscaled ρV */
     PRINTF (" # PMV: ρV/κ = %f kcal/A³\n", v * HD->PD->rho / HD->PD->beta);
+
+    /* Cons the PMV factor onto the dictionary of results: */
+    *dict = scm_acons (scm_from_locale_symbol ("partial-molar-volume-factor"),
+                       scm_from_double (v), *dict);
   }
 
   /* Derivatives of the chemical potential: */
