@@ -1686,7 +1686,7 @@ contains
        !
        block
           integer :: i, j
-          real (rk) :: c0(n, m), v
+          real (rk) :: c0(n, m), v, pmv
 
           ! 4πρ∫c(r)r²dr = ...
           do j = 1, m
@@ -1702,12 +1702,16 @@ contains
           ! * v has a meaning of  number of solvent molecules that fit
           ! into the partial molar volume of the solvent:
           v = 1 - sum (c0)
+          pmv = compressibility_factor * v
 
           if (comm_rank() == 0) then
-             write (*, *) "# PMV factor: 1 - 4πρ∫c(r)r²dr =", v
-             write (*, *) "# PMV: ρ δV =", v * compressibility_factor, &
-                  "(κ derived from χ)"
+             write (*, *) "# PMV: 1 - 4πρ∫c(r)r²dr =", v
+             write (*, *) "# PMV: ρV =", pmv, "(κ derived from χ)"
           endif
+
+          ! Cons key/value pairs onto the list:
+          dict = acons (symbol ("partial-molar-volume"), flonum (pmv), dict)
+          dict = acons (symbol ("partial-molar-volume-factor"), flonum (v), dict)
        end block
 
 
