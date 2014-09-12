@@ -1431,6 +1431,7 @@ contains
 
     integer :: nrad, n, m, rule
     integer :: verb
+    real (rk) :: compressibility_factor
 
     ! Initialize intent (out) argument:
     dict = nil
@@ -1598,8 +1599,10 @@ contains
              kerr = (kmax - kmin) / 2
 
              if (comm_rank() == 0) then
-                write (*, *) "# Hole (KB) vv-integrals: s(k=0) - 1 =", &
+                write (*, *) "# KB integral (vv): s(0) - 1 =", &
                      savg - 1, "±", serr
+                write (*, *) "# Compressibility factor: ρκ/β = s(0) =", &
+                     savg, "±", serr
                 write (*, *) "# Isothermal compressibility: κ =", &
                      kavg, "±", kerr, "A³/kcal"
                 write (*, *) "#                               =", &
@@ -1607,10 +1610,15 @@ contains
                 write (*, *) "#                               =", &
                      kavg * (MOL / Bar**(-1)), "±", kerr * (MOL / Bar**(-1)), "Bar^-1"
              endif
+             ! FIXME: the one derived from solvent KB integral, 1 +
+             ! 4πρ∫h(r)r²dr, seems to be more numerically stable:
+             compressibility_factor = savg
 
              ! Cons key/value pairs onto the list:
              dict = acons (symbol ("compressibility"), flonum (kavg), dict)
              dict = acons (symbol ("compressibility-error"), flonum (kerr), dict)
+          else
+             compressibility_factor = 0.0 ! FIXME: what should I do?
           endif
        end block
 
@@ -1656,13 +1664,50 @@ contains
           kmax = maxval (k0)
 
           if (comm_rank() == 0) then
-             write (*, *) "# Hole (KB) uv-integrals: 4πρ∫h(r)r²dr =", &
+             write (*, *) "# KB integral (uv): 4πρ∫h(r)r²dr =", &
                   havg, "±", herr
           endif
 
           ! Cons key/value pairs onto the list:
           dict = acons (symbol ("excess-coordination"), flonum (havg), dict)
           dict = acons (symbol ("excess-coordination-error"), flonum (herr), dict)
+       end block
+
+       !
+       ! Partial molar volume (PVM), here dimensionless:
+       !
+       !   ρ δV = ρκ/β * v
+       !
+       ! here  expressed via another  dimensionless quantity  (does it
+       ! have a name?):
+       !
+       !   v = 1 - ρ Σ   c (k=0)
+       !              uv  uv
+       !
+       block
+          integer :: i, j
+          real (rk) :: c0(n, m), v
+
+          ! 4πρ∫c(r)r²dr = ...
+          do j = 1, m
+             do i = 1, n
+                c0(i, j) = integrate (c(i, j, :)) * (rho * dr**3)
+             enddo
+          enddo
+
+          ! Dimensionless factor entering solute  PVM. You may need to
+          ! scale that  by solvent compressibility  factor ρκ/β =  1 +
+          ! 4πρ∫h(r)r²dr  and,  eventually, divide  by  ρ  to get  the
+          ! volume in real units. If you do not divide by ρ, then ρκ/β
+          ! * v has a meaning of  number of solvent molecules that fit
+          ! into the partial molar volume of the solvent:
+          v = 1 - sum (c0)
+
+          if (comm_rank() == 0) then
+             write (*, *) "# PMV factor: 1 - 4πρ∫c(r)r²dr =", v
+             write (*, *) "# PMV: ρ δV =", v * compressibility_factor, &
+                  "(κ derived from χ)"
+          endif
        end block
 
 
