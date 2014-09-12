@@ -686,46 +686,31 @@ print_chempot (const State *HD, int n, int m,
                  ((methods[i] == HD->PD->closure)? "*" : ""));
 }
 
+
 /*
-   These two kernel functions are used to calculate isothermal
-   compressibility and partial molar volume, with the formula used in
-   Hirata's book (pp. 148), in which the summation reads:
-       ~                  →    →
-   ρ∑  c (k=0) ≡ ρ∑  ∫c (|r|) dr
-     uv uv         uv  uv
+  This function  is used  to calculate isothermal  compressibility and
+  partial  molar  volume,  with  the  formula used  in  Hirata's  book
+  (pp. 148), in which the summation reads:
+
+        ~
+    ρ∑  c (k=0) = ρ∑   ∫c (r) d³r
+      uv uv         uv   uv
+
+  Calculate the sum of volume integrals ∫c(r)d³r, scaled by ρ:
 */
-
-/* 1.  calculate the summed density ∑c[n][m] */
-static void compute_kc_density (int n, int m, Vec c[n][m], /* in */
-                                Vec kc_dens)              /* out */
-{
-  /* initialize the accumulator density */
-  VecSet (kc_dens, 0.0);
-
-  for (int i = 0; i < n; i++)
-    for (int j = 0; j < m; j++)
-    {
-      VecAXPY (kc_dens, 1.0, c[i][j]);
-    }
-}
-
-/* 2. The volumen integral ∫c(r)dr, scaled by ρ */
-static real compute_kc (const State *HD, int n, int m, Vec c[n][m])
+static real
+compute_kc (const State *HD, int n, int m, Vec c[n][m])
 {
   const ProblemData *PD = HD->PD;
-  // const real beta = PD->beta;
-  const real h3 = volume_element (PD);
-  const real rho = PD->rho;
 
-  local Vec kc_dens = vec_create (HD->da);
+  real kc = 0.0;
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < m; j++)
+      kc += vec_sum (c[i][j]) * (PD->rho * volume_element (PD));
 
-  compute_kc_density (n, m, c, kc_dens);
-
-  const real kc = rho * vec_sum (kc_dens) * h3;
-
-  vec_destroy (&kc_dens);
   return kc;
 }
+
 
 /*
   Calculate partial molar volume as used by Palmer et al. (2010):
@@ -763,7 +748,7 @@ print_pmv (const State *HD, int n, int m, Vec c[n][m])
   and the correction coefficient
               ~
     a =  ρ∑   c  (k=0) / 2β
-           vv' vv' 
+           vv' vv'
 */
 static void
 print_kappa (const State *HD, int n, int m, Vec c[n][m])
@@ -783,6 +768,7 @@ print_kappa (const State *HD, int n, int m, Vec c[n][m])
   PRINTF (" # Isothermal compressibility:\n");
   PRINTF (" # kappa = %f A³/kcal\n", kappa);
 }
+
 
 static inline ProblemData
 upscale (const ProblemData *PD)
