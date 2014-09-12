@@ -727,30 +727,29 @@ static real compute_kc (const State *HD, int n, int m, Vec c[n][m])
   return kc;
 }
 
-/* Calculate partial molar volume as used by Palmer et al. (2010):
+/*
+  Calculate partial molar volume as used by Palmer et al. (2010):
 
-   βV = κ[1 - ρ∫c(r)dr],
+    βV = κ[1 - ρ∫c(r)d³r],
 
-   where κ is pure solent isothermal compressibility, needs to be
-   calcualted seperately by a pure solvent calculation. FIXME: Here
-   "PMV" is not scaled with kappa, one need to apply it by hand. ρ is
-   number density of solute site
-
+  where κ  is pure solent  isothermal compressibility. It needs  to be
+  calcualted seperately by a pure solvent calculation or inferred from
+  the  solvent susceptibility.   FIXME: Here  PMV is  not  scaled with
+  kappa,  one need  to apply  it  by hand.   ρ is  the solvent  number
+  density.
 */
-
-static void print_pmv (const State *HD, int n, int m, Vec c[n][m])
+static void
+print_pmv (const State *HD, int n, int m, Vec c[n][m])
 {
-  real pmv;
+  /* Kernel ρ∫c(r)d³r = ρc(k=0): */
+  const real c0 = compute_kc (HD, n, m, c);
 
-  /* kernel ρ∫c(r)dr */
-  pmv = compute_kc (HD, n, m, c);
-
-  /* V/κ = (1 - kernel) / β */
-  pmv = (1 - pmv) / HD->PD->beta;
+  /* V/κ = (1 - c0) / β */
+  const real pmv = (1 - c0) / HD->PD->beta;
   PRINTF (" # Calculated partial molar volume (PMV), need to be scaled by kappa:\n");
-  PRINTF (" # PMV = %f \n", pmv);
-  /* unscaled ρV */
-  PRINTF (" # PMV * rho = %f \n", pmv * HD->PD->rho);
+  PRINTF (" # PMV: V/κ = %f kcal\n", pmv);
+  /* Unscaled ρV */
+  PRINTF (" # PMV: ρV/κ = %f kcal/A³\n", pmv * HD->PD->rho);
 }
 
 
