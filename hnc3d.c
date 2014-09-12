@@ -713,28 +713,27 @@ compute_kc (const State *HD, int n, int m, Vec c[n][m])
 
 
 /*
-  Calculate partial molar volume as used by Palmer et al. (2010):
+  To calculate partial molar volume V as used by Palmer et al. (2010)
+  one may explore the following relation:
 
-    βV = κ[1 - ρ∫c(r)d³r],
+    ρV = (ρκ/β) * [1 - ρ∫c(r)d³r],
 
-  where κ  is pure solent  isothermal compressibility. It needs  to be
+  where dimensionless  ρV is a product of  a dimensionless combination
+  (ρκ/β)  with  κ being  pure  solent  isothermal compressibility  and
+  another dimensionless  integral. Solvent compressibiliy  needs to be
   calcualted seperately by a pure solvent calculation or inferred from
-  the  solvent susceptibility.   FIXME: Here  PMV is  not  scaled with
-  kappa,  one need  to apply  it  by hand.   ρ is  the solvent  number
-  density.
+  the solvent  susceptibility.  Here ρ is the  solvent number density,
+  what else. This function computes the second PMV factor, 1 - ρ∫c(r)d³r:
 */
-static void
-print_pmv (const State *HD, int n, int m, Vec c[n][m])
+static real
+pmv_factor (const State *HD, int n, int m, Vec c[n][m])
 {
-  /* Kernel ρ∫c(r)d³r = ρc(k=0): */
+  /* Volume integrals ρ∫c(r)d³r = ρc(k=0) summed over all solvent
+     sites: */
   const real c0 = compute_kc (HD, n, m, c);
 
-  /* V/κ = (1 - c0) / β */
-  const real pmv = (1 - c0) / HD->PD->beta;
-  PRINTF (" # Calculated partial molar volume (PMV), need to be scaled by kappa:\n");
-  PRINTF (" # PMV: V/κ = %f kcal\n", pmv);
-  /* Unscaled ρV */
-  PRINTF (" # PMV: ρV/κ = %f kcal/A³\n", pmv * HD->PD->rho);
+  /* 1 - ρc(0) */
+  return (1 - c0);
 }
 
 
@@ -2204,10 +2203,24 @@ hnc3d_solute_solve (const ProblemData *PD,
     vec_destroy1 (m, x);
   }
 
-  /* print PMV */
+  /* Print PMV */
   {
-    /* it is unscaled by κ */
-    print_pmv (HD, 1, m, (void*) c);
+    /*
+      This returns  the factor v =  1 - ρ∫c(r)d³r that  enters the PMV
+      expression:
+
+        ρV = (ρκ/β) * [1 - ρ∫c(r)d³r]
+
+      To compute the actual PMV you need to scale this by κ/β:
+    */
+    const real v = pmv_factor (HD, 1, m, (void*) c);
+
+    /* These two numbers were the original output: */
+    PRINTF (" # Calculated partial molar volume (PMV), need to be scaled by kappa:\n");
+    PRINTF (" # PMV: 1 - ρ∫c(r)d³r = %f\n", v);
+    PRINTF (" # PMV: V/κ = %f kcal\n", v / HD->PD->beta);
+    /* Unscaled ρV */
+    PRINTF (" # PMV: ρV/κ = %f kcal/A³\n", v * HD->PD->rho / HD->PD->beta);
   }
 
   /* Derivatives of the chemical potential: */
