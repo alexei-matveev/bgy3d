@@ -16,7 +16,7 @@ from __future__ import with_statement
 # the same node as the rank-0 MPI process. This is NOT guaranteed when
 # one  uses "salloc  -n8 run.py".   It  is an  aknowledged feature  of
 # "salloc" that the  driver script is executed locally  and only those
-# commands  prefixed  by  srun/mpirun  use the  allocated  nodes.  Use
+# commands  prefixed by  srun/mpiexec  use the  allocated nodes.   Use
 # "sbatch -n8 run.py" instead.
 #
 # This script is not self-contained, it refers to other files that are
@@ -53,7 +53,7 @@ solvent_name = "water, PR-SPC/E"
 # or self-energy of the solute:
 cmd = \
 """
-mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solute "%s"
 """ % solute_name (NW)
 
@@ -62,7 +62,7 @@ mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
 """
-mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "%s"
 --solute "%s"
 --norm-tol 1e-14 --dielectric 78.4
