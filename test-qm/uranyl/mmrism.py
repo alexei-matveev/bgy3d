@@ -187,5 +187,5 @@ with Server (cmd) as g, Server (alt) as h:
     ss = [s0, s1]
     with g + h as e:
         for s in ss:
-            print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
+            print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e (s) / kcal, "(kcal)"
     exit (0)
