@@ -95,11 +95,11 @@ def make_uranyl (x):
     # for uranyl:
     s = zmt.pinv (x)
 
-    # Average bond length and 180 degrees angle. Note that if you plug
-    # these internal variables into z-matrix you will not get zmt(s) ~
-    # x  even though  s was  derived from  x. That  is because  of the
-    # default orientation z-matrix chooses:
-    s_bond = sum (s[:2]) / 2
+    # Set the bond  lengths equal and 180 degrees  angle. Note that if
+    # you plug these internal variables into z-matrix you will not get
+    # zmt(s) ~  x even when s was  derived from x. That  is because of
+    # the default orientation z-matrix chooses:
+    s_bond = 1.79 # A or sum (s[:2]) / 2
     s = [s_bond, s_bond, pi]
 
     # Uranyl  will be  fixed, but  to adjust  orientation, rotate  a rigid
@@ -179,9 +179,8 @@ with Server (cmd) as g, Server (alt) as h:
     # MM self-energy with RISM solvation:
     with g + h as e:
         s, info = opt (e, s, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: MM+rism", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s1 = s
-    exit (0)
 
     # This prints  a table of  various functionals applied  to several
     # geometries:
@@ -189,3 +188,4 @@ with Server (cmd) as g, Server (alt) as h:
     with g + h as e:
         for s in ss:
             print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
+    exit (0)
