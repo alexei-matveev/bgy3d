@@ -15,6 +15,9 @@
 (define (pg-output nw)
   (string-append "o." nw ",gp"))
 
+(define (output-dir nw clo)
+   (string-append "o." nw "," clo))
+
 (define (make-cmd nw closure)
   (let ((closure-flag (string-append "--closure=" closure))
         (solute-name (string-append "uranyl, " nw ", pcm"))
@@ -38,17 +41,18 @@
 (define (sh* . args)
   (apply system* args))
 
-(define (run nw clo)
-  (sh* "rm" "-f" "hesse.dat" "saved_scfstate.dat")
-  (sh* "rm" "-rf" (pg-output nw))
-  (sh* "cp" (gxfile nw clo) "gxfile")
-  (apply sh* (make-cmd nw clo))
-  (sh* "mv" "gxfile" (gxfile nw clo))
-  (sh* "mv" (pg-output nw) (string-append "o." nw "," clo)))
+(define (maybe-run nw clo)
+  (unless (file-exists? (output-dir nw clo))
+          (sh* "rm" "-f" "hesse.dat" "saved_scfstate.dat")
+          (sh* "rm" "-rf" (pg-output nw))
+          (sh* "cp" (gxfile nw clo) "gxfile")
+          (apply sh* (make-cmd nw clo))
+          (sh* "mv" "gxfile" (gxfile nw clo))
+          (sh* "mv" (pg-output nw) (output-dir nw clo))))
 
 (for-each (lambda (clo)
             (for-each (lambda (nw)
-                        (run nw "KH"))
+                        (maybe-run nw clo))
                       ss))
           cs)
 
