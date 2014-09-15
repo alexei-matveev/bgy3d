@@ -4,12 +4,12 @@ from __future__ import with_statement
 #
 # Tell Python interpreter where to find custom modules:
 #
-#   export PYTHONPATH=~/PYTHON:~/darcs/bgy3d/python
+#   export PYTHONPATH=~/PYTHON:~/darcs/bgy3d-wheezy/python
 #
 # For the runbgy.scm  script to run one might need  to set the library
 # search path:
 #
-# export LD_LIBRARY_PATH=~/darcs/bgy3d
+#   export LD_LIBRARY_PATH=~/darcs/bgy3d-wheezy
 #
 # Note that this driver script communicates with MPI processes using a
 # named FIFO.  For that to work  the driver script must be executed on
@@ -22,10 +22,6 @@ from __future__ import with_statement
 # This script is not self-contained, it refers to other files that are
 # used as input:
 #
-#   uranyl,%d-waters.scm
-#
-#     PG input.
-#
 #   uo22+,%dh2o.xyz
 #
 #     Initial geometry. It does  not necessarily use the same geometry
@@ -36,13 +32,11 @@ from __future__ import with_statement
 #     Geometry of SPC/E water.
 #
 import os
-from ase.calculators.paragauss import ParaGauss
 from ase.io import read, write
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal, eV, Hartree
-from pts.func import compose, NumDiff
+from pts.func import compose
 from pts.zmat import Fixed, Rigid, ManyBody
-from pts.qfunc import QFunc
 from pts.fopt import minimize
 from rism import Server
 from numpy import max, abs, zeros, array
@@ -74,18 +68,6 @@ mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --norm-tol 1e-14 --dielectric 78.4
 --rho 0.0333295 --beta 1.6889 --L 20 --N 512
 """ % (solvent_name, solute_name (NW))
-
-alt1 = \
-"""
-mpirun /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
---solvent "%s"
---solute "%s"
---norm-tol 1e-14 --dielectric 78.4
---rho 0.0333295 --beta 1.6889 --L 160 --N 4096
-""" % (solvent_name, solute_name (NW))
-
-calc = ParaGauss (cmdline="mpirun ~/darcs/ttfs-mac/runqm",
-                  input=("uranyl,%d-waters.scm" % NW))
 
 atoms = read ("uo22+,%dh2o.xyz" % NW)
 
@@ -154,37 +136,19 @@ trafo = ManyBody (uranyl, *waters)
 # 6 dof per rigid water:
 s = zeros (6 * len (waters))
 
-#
-# FIXME: PG will  choke on gxfile, and saved_scfstate  from a previous
-# calculation unless you clean:
-#
-def clean ():
-    files = ["./gxfile", "./saved_scfstate.dat"]
-    for path in files:
-        try:
-            os.unlink (path)
-        except:
-            pass
-
-clean ()
-
 # Destructively updates "atoms"
 def write_xyz (path, x):
     atoms.set_positions (x)
     write (path, atoms)
 
-with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt1) as h1:
+with Server (cmd) as g, Server (alt) as h:
     # Change  the  salts  to   discard  memoized  results  (or  delete
     # ./cache.d):
-    f = Memoize (f, DirStore (salt="uo22+, 5h2o, bp"))
-    g = Memoize (g, DirStore (salt=cmd + "Dec3(b)"))
-    h = Memoize (h, DirStore (salt=alt + "Dec3(b)"))
-    h1 = Memoize (h1, DirStore (salt=alt1 + "Dec 17a"))
+    g = Memoize (g, DirStore (salt=cmd + "Sep14"))
+    h = Memoize (h, DirStore (salt=alt + "Sep14"))
 
-    f = compose (f, trafo)  # QM self-energy
     g = compose (g, trafo)  # MM self-energy
     h = compose (h, trafo)  # RISM solvation energy
-    h1 = compose (h1, trafo)  # RISM solvation energy, hi precision
 
     def opt (e, s, name, **kwargs):
         print "XXX: " + name + "..."
@@ -214,40 +178,14 @@ with QFunc (atoms, calc) as f, Server (cmd) as g, Server (alt) as h, Server (alt
 
     # MM self-energy with RISM solvation:
     with g + h as e:
-        s, info = opt (e, s, "MM+rism", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
+        s, info = opt (e, s, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM+rism", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
     s1 = s
-
-    # MM self-energy with RISM solvation using higher grid quality:
-    with g + h1 as e:
-        s, info = opt (e, s1, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    S1 = s
-
-    # QM self-energy (start with MM geom):
-    with f as e:
-        s, info = opt (e, s0, "QM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: QM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    s2 = s
-
-    # QM self-energy  with RISM  solvation. Be carefull  with "weaker"
-    # uranyl force fields -- optimization may diverge:
-    with f + h as e:
-        s, info = opt (e, s1, "QM+RISM", algo=1, maxstep=0.1, maxit=98, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: QM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    s3 = s
+    exit (0)
 
     # This prints  a table of  various functionals applied  to several
     # geometries:
-    ss = [s0, s1, s2, s3]
-    with f + h as e, g + h as e1:
+    ss = [s0, s1]
+    with g + h as e:
         for s in ss:
-            print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
-                "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
-
-    ss = [s0, S1, s2, s3]
-    with h1 as h:
-        with f + h as e, g + h as e1:
-            for s in ss:
-                print "QM=", f (s) / kcal, "MM=", g (s) / kcal, "RISM=", h (s) / kcal, \
-                    "QM+RISM=", e (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
+            print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e1 (s) / kcal, "(kcal)"
