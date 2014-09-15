@@ -1,0 +1,1944 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass revtex4
+\begin_preamble
+\usepackage{mathptmx}
+\usepackage{times}
+\end_preamble
+\options preprint,showkeys,superscriptaddress
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding default
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf2
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine natbib_authoryear
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Combination of 3D-RISM with Paragauss
+\end_layout
+
+\begin_layout Author
+Bo Li
+\end_layout
+
+\begin_layout Author
+Alexei Matveev
+\end_layout
+
+\begin_layout Author Email
+matveev@theochem.tu-muenchen.de
+\end_layout
+
+\begin_layout Author
+Sven Krüger
+\end_layout
+
+\begin_layout Affiliation
+Department Chemie and Catalysis Research Center, Technische Universität
+ München, 85747 Garching, Germany
+\end_layout
+
+\begin_layout Author
+Notker Rösch
+\end_layout
+
+\begin_layout Author Email
+roesch@mytum.de
+\end_layout
+
+\begin_layout Affiliation
+Department Chemie and Catalysis Research Center, Technische Universität
+ München, 85747 Garching, Germany
+\end_layout
+
+\begin_layout Affiliation
+Institute of High Performance Computing, Agency for Science, Technology
+ and Research, 1 Fusionopolis Way, #16-16 Connexis, Singapore 138632, Singapore
+\end_layout
+
+\begin_layout Date
+July 2014
+\end_layout
+
+\begin_layout Keywords
+3D-RISM-SCF, electron density
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The environment of an aqueous solution can completely change the products,
+ mechanism and rate of a given chemical reaction.
+ Therefore, its modelling is of central importance of understanding many
+ chemical reactions of organic and inorganic species as well as for industrial
+ applications.
+ Example of pertinent application fields are catalytic reactions like hydrogen
+ production, CO
+\begin_inset Formula $_{2}$
+\end_inset
+
+ conversion, biomass conversion, or solution chemistry of actinides, which
+ is important for radioactive waste disposal.
+\end_layout
+
+\begin_layout Standard
+To support current experimental efforts in various areas of catalysis and
+ materials science in aqueous media, computational studies are needed to
+ examine/predict species and processes at the atomic level.
+ One of the two most popular strategies in computational chemistry to study
+ solution systems is the combination of quantum mechanics (QM) calculations
+ with implicit solvation models, for example, polarizable continuum model
+ (PCM) and its variant based the conductor-like solvation model (COSMO).
+ Although implicit solvation models have been applied to various chemical
+ processes in solution, they provide no insight into the structure and statistic
+al fluctuations of the solvent.
+ Another type of model is the so-called explicit solvation model, which
+ includes the hybrid method between QM calculation and molecular mechanics
+ (MM) description of the solvent medium (QM/MM method), and the more accurate
+ approach by directly performing molecular dynamics (MD) simulation from
+ first principle (ab initio MD, shorthanded as AIMD).
+ However, the results of statistical sampling in QM/MM method are only as
+ good as the effective force field used to parameterize the solvent-solvent
+ and solute-solvent interactions, and the polarizability of the solvent
+ medium has to be taken into account to compete with continuum models in
+ reproducing electrostatic interactions.
+ Also, the statistical sampling of large numbers of solvent configurations
+ entails significant computational cost to the combination of QM and MM
+ calculations.
+ For that same reason, more accurate QM dynamic simulations are restricted
+ to a comparably small number of solvent molecules due to their very high
+ computational demand.
+\end_layout
+
+\begin_layout Standard
+Given the difficulties mentioned above, strategies which combine QM methods
+ with integral equation theory of molecular liquids are regarded as a promising
+ direction to study ions and complexes and their chemical reactions in aqueous
+ solution with sufficient accuracy and at affordable cost.
+ One successful approach of this type is the reference interaction site
+ model (RISM) which provides solvation energies and also averaged solvent
+ structures via site-site radial distribution functions (RDF).
+ The hybrid approach of one dimensional (1D) RISM with self-consistent field
+ (SCF) QM calculation was first proposed by Ten-no, Hirata and Kato on the
+ basis of a variational method to Hartree-Fock equation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tenno93"
+
+\end_inset
+
+.
+ However, RDFs in 1D-RISM are radial symmetric and dependent only on the
+ distance between interaction sites.
+ To take into account the solvent structure information presented in three
+ dimensional (3D) space around the solute molecule, Kovalenko and Hirata
+ combined the Kohn-Sham density functional theory (KS-DFT) with 3D-RISM
+ to investigate the electronic structure for a metal--water interface 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+.
+ Until now, many implementations have been made to combine RISM theory with
+ state-of-the-art QM method to provide researchers an alternative approach
+ for classical implicit and explicit solvation models to study chemical
+ reactions and processes in solutions.
+\end_layout
+
+\begin_layout Standard
+For example, the hybridization of 3D-RISM with ab inito molecular orbital
+ theory was carried out by Sato et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato00"
+
+\end_inset
+
+ for solvation effect on carbon monoxide in aqueous solution.
+ Later Du and Wei 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Du03"
+
+\end_inset
+
+ independently combined 3D-RISM equation with hypernetted chain (HNC) closure
+ with Gaussian 94 package to study the solvation and polarization of the
+ N-methyl amine molecule in aqueous solution.
+ Gusarov et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gusarov06"
+
+\end_inset
+
+ also reported their implementation of 3D-RISM with Amsterdam Density Functional
+ (ADF) package with analytical gradients, and later applied to study solvation
+ effect on conformational equilibria, tautomerization energies and activation
+ barriers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Casanova07"
+
+\end_inset
+
+.
+ A most recent combination of Gaussian (Gaussian 03) with 3D-RISM was carried
+ out by Kloss et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kloss08"
+
+\end_inset
+
+ via an embedded cluster (EC) approach, and applied to the reaction free
+ energy for the gauche--trans equilibrium and pKa shift calculations.
+ The latest release of NWChem Package.
+ To investigate the solvent effects on the electronic structure of solvated
+ large-molecular system, Yoshida et al.
+ proposed the combination of 3D-RISM with the QM/MM procedure 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yoshida11"
+
+\end_inset
+
+ as well as with the fragment molecular orbital (FMO) method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yoshida14"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Despite the numerous implementations, most current hybrid methods of RISM
+ with QM calculation construct the electrostatic potential (ESP) induced
+ by QM solute with atomic charge fitted from solute electron density.
+ However, it is not sufficient to describe the ESP generated by fitted charge
+ only 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Minezawa07"
+
+\end_inset
+
+, and more problems would emerge from the existence of a buried atom in
+ the system, without saying that the choice for the grid set for fitting
+ process has influence on the accuracy 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yokogawa07,Sato13"
+
+\end_inset
+
+.
+ To obtain more realistic Coulomb interactions, Yokogawa et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yokogawa07"
+
+\end_inset
+
+ proposed the second generation of RISM-SCF theory 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato13"
+
+\end_inset
+
+, in which the spatial electron density distribution (SEDD) of QM solute
+ is included in the RISM-SCF calculation (RISM-SCF-SEDD), by utilizing the
+ auxiliary basis set (ABSs) at each atom following the procedure of Gill
+ et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gill92"
+
+\end_inset
+
+.
+ At the same time, Minezawa et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Minezawa07"
+
+\end_inset
+
+ also reported their 3D-RISM-SCF implementation in which the ESP map on
+ a 3D grid is constructed directly from the electron density.
+ In this article, we proposed a new method to derive ESP directly from the
+ real-space electron density of KS-DFT orbitals, and combine it with the
+ parallel code ParaGauss 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ParaGaussV3.1"
+
+\end_inset
+
+.
+ By utilizing the soft-core pseudopotentials, our hybrid method provides
+ an alternative approach for accurate and robust implementation for 3D-RISM-SCF
+ implementation, which could be extended to other QM code by coupling the
+ real-space representation of solute with 3D RISM solvent medium via an
+ convenient interface.
+\end_layout
+
+\begin_layout Section
+Methodology
+\end_layout
+
+\begin_layout Subsection
+3D-RISM theory
+\end_layout
+
+\begin_layout Standard
+The detailed aspects of 3D-RISM theory have been thoroughly discussed in
+ previous work 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99,Kovalenko00b,book:Hirata03,Sato13"
+
+\end_inset
+
+.
+ thus here we shortly go through the fundamental formulas in the theory.
+ The solute-solvent 3D-RISM integral equation has the following form:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+h^{uv}=c^{uv}\ast\chi^{v}.\label{eq:rism-uv}
+\end{equation}
+
+\end_inset
+
+Here 
+\begin_inset Formula $h^{uv}$
+\end_inset
+
+ and 
+\begin_inset Formula $c^{uv}$
+\end_inset
+
+ are (rectangular) matrices of the 3D total correlation functions 
+\begin_inset Formula $h_{\alpha}^{uv}(\vec{r})$
+\end_inset
+
+ and 3D direct correlation functions 
+\begin_inset Formula $c_{\alpha}^{uv}(\vec{r})$
+\end_inset
+
+, both unknowns of the equation.
+ The superscripts 
+\begin_inset Formula $u$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ label the solute and the solvent, respectively.
+ The subscript 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ enumerate the solvent site interacting with the whole solute.
+ The star denotes the convolution integral and the sum over corresponding
+ matrix induces.
+ The solvent in the Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-uv"
+
+\end_inset
+
+) is represented by its (square symmetric) susceptibility matrix 
+\begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
+\end_inset
+
+ obtained self-consistently from the pure solvent 1D-RISM equation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+h^{vv}=\omega^{v}\ast c^{vv}\ast\chi^{v}\label{eq:rism-vv}
+\end{equation}
+
+\end_inset
+
+at a specific solvent number density 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\omega^{v}$
+\end_inset
+
+ is the (square symmetric) matrices built of intra-molecular correlation
+ functions of solvent.
+ Below, we will omit the superscripts 
+\begin_inset Formula $u$
+\end_inset
+
+ and 
+\begin_inset Formula $v$
+\end_inset
+
+ for brevity.
+\end_layout
+
+\begin_layout Standard
+A closure term 
+\begin_inset Formula $h_{\alpha}=f(-\beta u_{\alpha}+h_{\alpha}-c_{\alpha})$
+\end_inset
+
+ is necessary to solve the 3D-RISM equation Eq.
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:rism-uv"
+
+\end_inset
+
+), with 
+\begin_inset Formula $f(x)=\exp(x)-1$
+\end_inset
+
+ for 
+\begin_inset Formula $x\le0$
+\end_inset
+
+ it reads as the famous HNC closure 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85"
+
+\end_inset
+
+ and 
+\begin_inset Formula $f(x)=x$
+\end_inset
+
+ it is the KH closure formulated by Kovalenko and Hirata 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+.
+ Here 
+\begin_inset Formula $\beta=1/T$
+\end_inset
+
+ is the inverse of the temperature 
+\begin_inset Formula $T$
+\end_inset
+
+, and 
+\begin_inset Formula $u_{\alpha}(\vec{r})$
+\end_inset
+
+ is the interaction potential between solvent site 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and the solute.
+\end_layout
+
+\begin_layout Standard
+Finally, the excess chemical potential of solvation could be analytically
+ derived from distribution functions.
+ For HNC closure, it has the following form 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85"
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Delta\mu=\frac{2\pi\rho}{\beta}\sum_{\alpha=1}^{N_{v}}\int_{0}^{\infty}\left[|h_{\alpha}|^{2}-2c_{\alpha}-c_{\alpha}h_{\alpha}\right]d\vec{r}
+\end{equation}
+
+\end_inset
+
+and in the corresponding expression for the KH closure the terms 
+\begin_inset Formula $\sim h^{2}$
+\end_inset
+
+ contribute only in the depletion regions where 
+\begin_inset Formula $h_{\alpha}<0$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Interaction between QM solute and RISM solvent
+\end_layout
+
+\begin_layout Standard
+As in the 3D-RISM-MM theory, the interaction potential between solvent site
+ 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ and QM solute could also be defined as the sum of two parts: 
+\begin_inset Formula $u_{\alpha}=u_{\alpha}^{\text{C}}+u_{\alpha}^{\text{LJ}}$
+\end_inset
+
+.
+ The LJ type potential term 
+\begin_inset Formula $u_{\alpha}^{\text{LJ}}(r)=4\sum_{i=1}^{N_{u}}\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
+\end_inset
+
+ accounts for short-range repulsion and dispersion interactions is the same
+ with the MM case, while the electrostatic interaction between QM solute
+ electron and charged solvent site 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ reads:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u_{\alpha}^{\text{C}}=\sum_{\alpha}\int n_{v}(\vec{r})f_{\alpha}(\vec{r}-\vec{r}')n(\vec{r}')d^{3}rd^{3}r'\label{eq:solute-solvent-interaction}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $n(\vec{r}')$
+\end_inset
+
+ is the solute electron density, 
+\begin_inset Formula $n_{v}(\vec{r})=\sum_{\alpha}z_{\alpha}\rho_{\alpha}(\vec{r})$
+\end_inset
+
+ is the charge density of solvent site 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ which is the number density 
+\begin_inset Formula $\rho_{\alpha}(\vec{r})$
+\end_inset
+
+ scaling by site charge 
+\begin_inset Formula $z_{\alpha}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $f_{\alpha}(\vec{r}-\vec{r}')$
+\end_inset
+
+ is a isotropic function depending only on the pairwise distance.
+ The double integral in the Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:solute-solvent-interaction"
+
+\end_inset
+
+ could be evaluated in two ways:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+u_{\alpha}^{\text{C}}=\int v_{S}(\vec{r})n(\vec{r})d^{3}r=\sum_{\alpha}\int n_{v}(\vec{r})v_{\alpha}(\vec{r})d^{3}r
+\end{equation}
+
+\end_inset
+
+with
+\begin_inset Formula 
+\begin{equation}
+v_{\text{S}}(\vec{r})=\sum_{\alpha}\int f_{\alpha}(\vec{r}-\vec{r}^{\prime})n_{v}(\vec{r}^{\prime})d^{3}r^{\prime}
+\end{equation}
+
+\end_inset
+
+being the solvent potential acting on electron density and
+\begin_inset Formula 
+\begin{equation}
+v_{\alpha}(\vec{r})=\int f_{\alpha}(\vec{r}-\vec{r}^{\prime})n(\vec{r}^{\prime})d^{3}r^{\prime}
+\end{equation}
+
+\end_inset
+
+being the electron-induced site-specific potential acting on solvent.
+ Both of these expressions are convolution integrals with the same isotropic
+ kernel 
+\begin_inset Formula $f_{\alpha}(\vec{r})$
+\end_inset
+
+.
+ To avoid near-singularities in the KS potential due to the localized peaks
+ in the solvent distribution functions, electron-solvent interaction kernel
+ is described by 
+\begin_inset Formula $f_{\alpha}(r)=-\text{erf}(\eta r)/r$
+\end_inset
+
+ and a short range interaction 
+\begin_inset Formula $\text{erfc}(\eta r)/r$
+\end_inset
+
+ is introduced when comparing with Coulomb law, 
+\begin_inset Formula $-1/r$
+\end_inset
+
+.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+These formulas and descriptions are from the free energy proposal, but in
+ the code we actually used a Poisson solver to get the potential, need revision.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The electronic structure of solute in gas phase is determined by the Schrödinger
+ equation
+\begin_inset Formula 
+\begin{equation}
+H_{0}\Psi_{\text{gas}}=E_{0}\Psi_{\text{gas}}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $H_{0}$
+\end_inset
+
+ is the Hamiltonian of solute molecule and 
+\begin_inset Formula $\Psi_{\text{gas}}$
+\end_inset
+
+ is the eigenfunction.
+ In solution the Hamiltonian of solute molecule is perturbed by the solvent
+ contribution as 
+\begin_inset Formula 
+\begin{equation}
+(H_{0}+W)\Psi_{\text{sol}}=E_{\text{sol}}\Psi_{\text{sol}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+here we only consider the solvent electrostatic perturbation, thus the solvent
+ perturbation could be written as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+W=\sum_{b}Z_{b}\phi(\boldsymbol{R}_{b})-\phi(\boldsymbol{r})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Computational details
+\end_layout
+
+\begin_layout Section
+Results and discussion
+\end_layout
+
+\begin_layout Subsection
+Evaluation of the implementation
+\end_layout
+
+\begin_layout Subsection
+QM solutes in aqueous solution
+\end_layout
+
+\begin_layout Subsubsection
+3D solvent structure information
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Oxygen (a) and hydrogen (b) spatial distribution function (SDF) of water
+ solvent aroud methanol solute at z = 0 plane calculated with 3D-RISM/QM
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:SDF-water-methanol"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename 3d-rism.d/Picture1.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Comparison with continumm solvation model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Dipole moment 
+\begin_inset Formula $D{}_{\text{u}}$
+\end_inset
+
+ (Debye), energy difference between the isolated state and solvated state
+ 
+\begin_inset Formula $E_{\text{reorg}}$
+\end_inset
+
+ (kcal/mol) and solvation free energy 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ (kcal/mol) of the selected solutes, calculated with QM/3D-RISM and QM/PCM,
+ 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+ measured by experiments is also shown for comparison
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Comparison-of-rism-pcm"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="11">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+QM/3D-RISM
+\begin_inset Formula $^{a}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+QM/PCM
+\begin_inset Formula $^{a}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Exp.
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Solute
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $D{}_{\text{u}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $E_{\text{reorg}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{sol}}^{\text{GF}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{sol}}^{\text{KH}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $D{}_{\text{u}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $E_{\text{reorg}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CH
+\begin_inset Formula $_{3}$
+\end_inset
+
+OH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+2.9(
+\begin_inset Formula $-$
+\end_inset
+
+9.1)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7(
+\begin_inset Formula $-$
+\end_inset
+
+5.5)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+5.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+5.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HCOOH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+4.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+7.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+7.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CH
+\begin_inset Formula $_{2}$
+\end_inset
+
+O
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2(
+\begin_inset Formula $-$
+\end_inset
+
+5.8)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.3(
+\begin_inset Formula $-$
+\end_inset
+
+2.6)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+3.6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+1.7
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+10.6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+8.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+9.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+6.3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NH
+\begin_inset Formula $_{3}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.05
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+2.0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.04
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+3.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+4.3
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HCN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+1.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-1.6$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.3
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+4.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+3.2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+footnotetext{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{a}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+This work.
+ 
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Ref.
+\begin_inset space \space{}
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand citet
+key "Cabani81"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusion remarks
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "3d-rism"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
