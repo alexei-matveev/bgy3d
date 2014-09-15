@@ -73,21 +73,21 @@ def p2 (xo, xh, x1, x2, x3):
 subplot (2, 1, 1)
 p2 ("../uo2.d/md-uo.dat",
     "../uo2.d/md-uh.dat",
-    "0w,PSE3,U.rdf",
-    "0w,PSE2,U.rdf",
-    "0w,KH,U.rdf")
+    "5w,PSE3,U.rdf",
+    "5w,PSE2,U.rdf",
+    "5w,KH,U.rdf")
 title ("U-OW, U-HW")
 ylabel ("g(r)")
 
 subplot (2, 1, 2)
 p2 ("../uo2.d/md-oo.dat",
     "../uo2.d/md-oh.dat",
-    "0w,PSE3,OU.rdf",
-    "0w,PSE2,OU.rdf",
-    "0w,KH,OU.rdf")
+    "5w,PSE3,OU.rdf",
+    "5w,PSE2,OU.rdf",
+    "5w,KH,OU.rdf")
 title ("O-OW, O-HW")
 ylabel ("g(r)")
 xlabel ("r, A")
 
-show()
-# savefig(sys.argv[1], transparent=True, bbox_inches='tight')
+# show()
+savefig (sys.argv[1], transparent=True, bbox_inches='tight')
