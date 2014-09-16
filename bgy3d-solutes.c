@@ -538,7 +538,7 @@ cores (const State *BHD,
            rather an inverse of it: */
         sum += q[i] * exp(- SQR (G) * r2);
       }
-    return pow (G / sqrt (M_PI), 3.0) * sum;
+    return pow (G / sqrt (M_PI), 3) * sum;
   }
   vec_rmap3 (BHD, f3, rho);
 }
