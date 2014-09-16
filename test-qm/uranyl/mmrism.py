@@ -45,7 +45,10 @@ from numpy import max, abs, zeros, array
 NW = 5
 
 def solute_name (nw):
-    return "UO2_%dH2O, KL2-PRSPC" % nw
+    if nw == 4:
+        return "UO2_%dH2O, D4H, KL2-PRSPC" % nw
+    else:
+        return "UO2_%dH2O, KL2-PRSPC" % nw
 
 solvent_name = "water, PR-SPC/E"
 
@@ -65,8 +68,14 @@ alt = \
 mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solvent "%s"
 --solute "%s"
---norm-tol 1e-14 --dielectric 78.4
---rho 0.0333295 --beta 1.6889 --L 20 --N 512
+--norm-tol=1e-14
+--dielectric=78.4
+--rho=0.0333295
+--beta=1.6889
+--L=10
+--N=96
+--closure=KH
+--hnc
 """ % (solvent_name, solute_name (NW))
 
 atoms = read ("uo22+,%dh2o.xyz" % NW)
@@ -172,15 +181,13 @@ with Server (cmd) as g, Server (alt) as h:
 
     # MM self-energy:
     with g as e:
-        s, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
+        s0, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    s0 = s
 
     # MM self-energy with RISM solvation:
     with g + h as e:
-        s, info = opt (e, s, "MM+RISM", algo=1, maxstep=0.1, maxit=100, ftol=5.0e-3, xtol=5.0e-3)
+        s1, info = opt (e, (s if NW == 4 else s0), "MM+RISM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
         print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
-    s1 = s
 
     # This prints  a table of  various functionals applied  to several
     # geometries:
