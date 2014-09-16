@@ -33,15 +33,14 @@ from __future__ import with_statement
 #
 #     Geometry of SPC/E water.
 #
-import os
 from ase.io import read, write
 from pts.memoize import Memoize, DirStore
-from pts.units import kcal, eV, Hartree
+from pts.units import kcal
 from pts.func import compose
 from pts.zmat import Fixed, Rigid, ManyBody
 from pts.fopt import minimize
 from rism import Server
-from numpy import max, abs, zeros, array
+from numpy import max, abs, zeros
 
 # File  names  and  command  line   flags  depend  on  the  number  of
 # waters. FIXME: name solutes uniformely:
