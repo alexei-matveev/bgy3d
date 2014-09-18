@@ -1065,7 +1065,11 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-5-1
+5
+\begin_inset Formula $-$
+\end_inset
+
+1
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -1647,7 +1651,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--219.1
+\begin_inset Formula $-$
+\end_inset
+
+219.1
 \end_layout
 
 \end_inset
@@ -1656,7 +1663,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--270.7
+\begin_inset Formula $-$
+\end_inset
+
+270.7
 \end_layout
 
 \end_inset
@@ -1665,7 +1675,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--293.8
+\begin_inset Formula $-$
+\end_inset
+
+293.8
 \end_layout
 
 \end_inset
@@ -1697,7 +1710,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--363.1
+\begin_inset Formula $-$
+\end_inset
+
+363.1
 \end_layout
 
 \end_inset
@@ -1706,7 +1722,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--382.0
+\begin_inset Formula $-$
+\end_inset
+
+382.0
 \end_layout
 
 \end_inset
@@ -1715,7 +1734,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--391.9
+\begin_inset Formula $-$
+\end_inset
+
+391.9
 \end_layout
 
 \end_inset
@@ -1724,7 +1746,10 @@ MM+KH (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--396.8
+\begin_inset Formula $-$
+\end_inset
+
+396.8
 \end_layout
 
 \end_inset
@@ -1824,7 +1849,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--217.6
+\begin_inset Formula $-$
+\end_inset
+
+217.6
 \end_layout
 
 \end_inset
@@ -1833,7 +1861,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--271.6
+\begin_inset Formula $-$
+\end_inset
+
+271.6
 \end_layout
 
 \end_inset
@@ -1842,7 +1873,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--294.8
+\begin_inset Formula $-$
+\end_inset
+
+294.8
 \end_layout
 
 \end_inset
@@ -1874,7 +1908,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--378.7
+\begin_inset Formula $-$
+\end_inset
+
+378.7
 \end_layout
 
 \end_inset
@@ -1883,7 +1920,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--389.1
+\begin_inset Formula $-$
+\end_inset
+
+389.1
 \end_layout
 
 \end_inset
@@ -1892,7 +1932,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--392.5-
+\begin_inset Formula $-$
+\end_inset
+
+392.5-
 \end_layout
 
 \end_inset
@@ -1901,7 +1944,10 @@ MM+PSE2 (3D)
 \begin_inset Text
 
 \begin_layout Plain Layout
--397.2
+\begin_inset Formula $-$
+\end_inset
+
+397.2
 \end_layout
 
 \end_inset
@@ -2010,7 +2056,10 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
--270.7
+\begin_inset Formula $-$
+\end_inset
+
+270.7
 \end_layout
 
 \end_inset
@@ -2019,7 +2068,10 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
--293.8
+\begin_inset Formula $-$
+\end_inset
+
+293.8
 \end_layout
 
 \end_inset
@@ -2051,7 +2103,10 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
--383.4
+\begin_inset Formula $-$
+\end_inset
+
+383.4
 \end_layout
 
 \end_inset
@@ -2069,7 +2124,10 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
--392.3
+\begin_inset Formula $-$
+\end_inset
+
+392.3
 \end_layout
 
 \end_inset
@@ -2078,7 +2136,10 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
--397.0
+\begin_inset Formula $-$
+\end_inset
+
+397.0
 \end_layout
 
 \end_inset
@@ -2152,7 +2213,7 @@ O)
 \begin_inset Formula $d$
 \end_inset
 
-(U--O) of 1.79 A.
+(U--O) of 1.790 A.
  It is identically zero for rigid bare uranyl (
 \begin_inset Formula $n=0$
 \end_inset
