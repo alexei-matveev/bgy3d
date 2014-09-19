@@ -385,6 +385,29 @@ field1 (const State *BHD, const Site *a,
         Vec dv)                       /* out */
 {
   const real G = G_COULOMB_INVERSE_RANGE;
+
+  /*
+    The  calling convention  is to  supply a  mode vector  dx[n][3] to
+    compute  the  differential.  Currently  the  only  modes that  are
+    supplied here  are cartesian  displacements of single  atoms. This
+    will probably remain  a common use case for some  time.  In such a
+    case the sum  over sites in the body of the  funciton reduces to a
+    single  term ---  that for  which  dx[i] /=  0. That  is why  this
+    optimization.  Compute the range  and mask  of moving  atoms, note
+    that [lo, hi] is inclusive.
+  */
+  bool moving[n];
+  int lo = n, hi = -1;
+  for (int i = 0; i < n; i++)
+    {
+      moving[i] = dx[i][0] != 0.0 || dx[i][1] != 0.0 || dx[i][2] != 0.0;
+      lo = moving[i]? MIN (lo, i) : lo;
+      hi = moving[i]? MAX (hi, i) : hi;
+    }
+  /* FIXME: look at the code again when this fires: */
+  assert (lo == hi);
+  assert (moving[lo]);
+
   /* Differential  of  potential energy  of  Site  a  at x[3]  in  the
      presense of n-site solute: */
   real f3 (const real x[3])
@@ -392,10 +415,20 @@ field1 (const State *BHD, const Site *a,
       /* Differential of the interaction energy: */
       real de = 0.0;
 
-      /* Sum contribution from all solute sites. FIXME: dx[i][] may be
-         zero for most of the sites! */
-      for (int i = 0; i < n; i++)
+      /*
+        Sum contribution from  all solute sites. Note how  we skip the
+        sites  for which  dx[i][] zero  identically, actually  most of
+        them!
+      */
+      for (int i = lo; i <= hi; i++)
         {
+          /*
+            FIXME: hm, not moving is  formally a likely case, but I am
+            hesitant  to knowingly force  a branch  prediction failure
+            for the only case when the *actual* work needs to be done.
+          */
+          if (!moving[i]) continue;
+
           const Site *b = &solute[i]; /* shorter alias */
 
           /* Interaction parameters for a pair of LJ sites: */
