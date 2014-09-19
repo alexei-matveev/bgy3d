@@ -46,7 +46,7 @@ real distance (const real a[3], const real b[3])
 static inline pure real
 lj0 (real r)
 {
-  const real p6 = 1 / pow (r, 6);
+  const real p6 = pow (r, -6);
   return 4 * p6 * (p6 - 1);
 }
 
@@ -55,7 +55,7 @@ lj0 (real r)
 static inline pure real
 lj1 (real r)
 {
-  const real p6 = 1 / pow (r, 6);
+  const real p6 = pow (r, -6);
   return 4 * p6 * (6 - 12 * p6) / r;
 }
 
