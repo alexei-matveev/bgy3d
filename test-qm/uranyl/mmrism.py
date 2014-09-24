@@ -37,10 +37,14 @@ from ase.io import read, write
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal
 from pts.func import compose
-from pts.zmat import Fixed, Rigid, ManyBody
-from pts.fopt import minimize
+from pts.zmat import Fixed, Rigid, ManyBody, Move, relate
+from pts.cfunc import Cartesian
+from pts.rc import Distance, Difference, Array
+from pts.fopt import minimize, cminimize
+from pts.path import Path
 from rism import Server
-from numpy import max, abs, zeros
+from numpy import max, abs, zeros, array, asarray, linspace, savetxt, loadtxt, pi
+print ("kcal=", kcal)
 
 # File  names  and  command  line   flags  depend  on  the  number  of
 # waters. FIXME: name solutes uniformely:
@@ -76,12 +80,12 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=64
 --closure=KH
 --hnc
 """ % (solvent_name, solute_name (NW))
 
-atoms = read ("uo22+,%dh2o.xyz" % NW)
+atoms = read ("%dw,mm.xyz" % NW)
 
 x = atoms.get_positions ()
 
@@ -90,13 +94,12 @@ x = atoms.get_positions ()
 xs = [x[3 * i: 3 * i + 3] for i in range (len (x) / 3)]
 assert (len (xs) == 1 + NW)
 
-def make_uranyl (x):
+def make_uranyl (x, flexible=False):
     """
     Return the "best" linear approximation to the uranyl geometry as a
     Fixed() func.
     """
     from pts.zmat import ZMat
-    from numpy import pi
 
     # Make uranyl linear:
     zmt = ZMat ([(None, None, None),
@@ -114,13 +117,21 @@ def make_uranyl (x):
     s_bond = 1.79 # A or sum (s[:2]) / 2
     s = [s_bond, s_bond, pi]
 
-    # Uranyl  will be  fixed, but  to adjust  orientation, rotate  a rigid
-    # object:
+    # Uranyl  may or  may not  be  fixed, but  to adjust  orientation,
+    # rotate a rigid object:
     Y = Rigid (zmt (s))
-    return Fixed (Y (Y.pinv (x)))
+    y = Y (Y.pinv (x))
+
+    if not flexible:
+        return Fixed (y)
+    else:
+        # return Move (relate (x, zmt (s)), zmt)
+        return ManyBody (Fixed (x[0:1]), Cartesian (x[1:3]), dof=[0, 6])
+
+flexible = True
 
 if True:
-    uranyl = make_uranyl (xs[0]) # linear
+    uranyl = make_uranyl (xs[0], flexible)
 else:
     uranyl = Fixed (xs[0])      # may be bent
 
@@ -143,23 +154,84 @@ def make_waters (xs):
 waters = make_waters (xs[1:])
 # waters = [Rigid (y) for y in xs[1:]]
 
-trafo = ManyBody (uranyl, *waters)
+# FIXME: waters are free-floating, so formally for a flexible uranyl 3
+# dofs  should  suffice. But  making  waters  dance  around uranyl  is
+# counter-intuitive. Instead we set the OU oxygens free:
+if flexible:
+    dof = [6] + [6] * len (waters)
+else:
+    dof = [0] + [6] * len (waters)
 
-# 6 dof per rigid water:
-s = zeros (6 * len (waters))
+trafo = ManyBody (uranyl, *waters, dof=dof)
+
+# 6 dof per rigid water
+if flexible:
+    s = zeros (6 + 6 * len (waters))
+    # s[0:3] = (1.79, 1.79, pi)
+else:
+    s = zeros (6 * len (waters))
 
 # Destructively updates "atoms"
 def write_xyz (path, x):
     atoms.set_positions (x)
     write (path, atoms)
 
+#
+# Bending force constant:
+#
+# Ref. [1]: 198 (1255) kJ/rad^2 = 2.05 (13.01) eV/rad^2
+# Ref. [2]: 13.009 eV/rad^2
+#
+# Angle is 180, naturally. For  them kcal is 4.184 J. Stretching force
+# constant:
+#
+# Ref. [1]: r0 = 0.176 nm, k = 622300 kJ/nm^2 = 64.50 eV/A^2
+# Ref. [2]: r0 = 1.8 A, k = 43.364 eV/A^2
+#
+# [1] Tiwari et al., PCCP 16 8060 (2014)
+#
+# [2] Derived from GW force field in Kerisit and Liu,
+#     J. Phys. Chem. A, 2013, 117 (30), pp 6421-6432
+#
+# Build  a  Func  of  cartesian coordinates,  stretching  and  bending
+# parameters as tuples.  Parameters not hashed, beware of memoization!
+#
+if flexible:
+    from pts.pes.ab2 import AB2
+    # Base units here: A, radians, eV:
+    # uo2 = AB2 ((1.76, 64.50), (pi, 2.05)) # Ref. [1]
+    uo2 = AB2 ((1.80, 43.364), (pi, 13.009)) # Ref. [2]
+else:
+    uo2 = None
+
+
+def test_uranyl ():
+    e = compose (uo2, uranyl)
+    # s = array ([1.79, 1.79, pi])
+    s = zeros (6) + 0.1
+    # print (uranyl (s))
+    # exit (0)
+    sm, info = minimize (e, s)
+    print ("e(0)=", e (s), "e(1)=", e(sm), "iterations=", info["iterations"])
+
+if uo2 is not None:
+    test_uranyl()
+
+write_xyz ("a1.xyz", trafo (s))
+
 
 def optimization (s):
     with Server (cmd) as g, Server (alt) as h:
         # Change  the  salts  to   discard  memoized  results  (or  delete
         # ./cache.d):
-        g = Memoize (g, DirStore (salt=cmd + "Sep14"))
-        h = Memoize (h, DirStore (salt=alt + "Sep14"))
+        g = Memoize (g, DirStore (salt=cmd + "TESTING1 Sep14"))
+        h = Memoize (h, DirStore (salt=alt + "TESTING1 Sep14"))
+
+        # A  Func  of cartesian  coordinates,  stretching and  bending
+        # parameters  as  tuples.  Parameters  not  hashed, beware  of
+        # memoization of this term!:
+        if uo2 is not None:
+            g = g + uo2
 
         g = compose (g, trafo)  # MM self-energy
         h = compose (h, trafo)  # RISM solvation energy
@@ -175,11 +247,12 @@ def optimization (s):
             write_xyz (name + ".xyz", trafo (s))
 
             # print info
-            traj = info["trajectory"]
-            print (map(e, traj))
-            for i, si in enumerate (traj):
-                # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
-                pass
+            if "trajectory" in info:
+                traj = info["trajectory"]
+                print (map(e, traj))
+                for i, si in enumerate (traj):
+                    # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
+                    pass
 
             return s, info
 
@@ -189,6 +262,7 @@ def optimization (s):
             s0, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
             print ("XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"])
 
+        exit (0)
         # MM self-energy with RISM solvation:
         with g + h as e:
             s1, info = opt (e, (s if NW == 4 else s0), "MM+RISM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
@@ -199,7 +273,126 @@ def optimization (s):
         ss = [s0, s1]
         with g + h as e:
             for s in ss:
-                print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e (s) / kcal, "(kcal)"
-        exit (0)
+                print ("MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e (s) / kcal, "(kcal)")
 
-optimization (s)
+
+# optimization (s)
+# exit (0)
+
+def exchange (s):
+    # Functions of cartesian coordinates:
+    ra = Distance ([0, 3])
+    rb = Distance ([0, 18])
+    rc = Difference (ra, rb)
+    with Server (cmd) as f0, Server (alt) as h0:
+        f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
+        h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
+
+        # A  Func  of cartesian  coordinates,  stretching and  bending
+        # parameters  as  tuples.  Parameters  not  hashed, beware  of
+        # memoization of this term!:
+        if uo2 is not None:
+            f1 = f1 + uo2
+
+        f = compose (f1, trafo)
+        h = compose (h1, trafo)
+        c = compose (rc, trafo)
+
+        # The input geometry  may be reasonable, but it  may not be an
+        # exact minimum. Reoptimize:
+        s, info = minimize (f, s, maxit=100, ftol=5.0e-4, xtol=5.0e-4, algo=1)
+        print ("converged=", info["converged"], "in", info["iterations"])
+
+        # The value of reaction coordinate in the initial geometry:
+        c0 = c(s)
+        print ("XXX: rc(0)=", c0)
+
+        it = 0
+        ss = []
+        qs = []
+        algo = 1
+        while c(s) > -c0:
+            it += 1
+            # write_xyz ("in-%03d.xyz" % it, trafo (s))
+            print ("XXX: rc(0)=", c(s))
+            s, info = cminimize (f, s, Array (c), maxit=200, ftol=5.0e-3, xtol=5.0e-3, algo=algo)
+            # Collect optimized geometries and the corresponding
+            # values of reaction coordinate:
+            ss.append (s)
+            qs.append (c(s))
+            print ("converged=", info["converged"], "in", info["iterations"])
+            print ("XXX: rc(1)=", c(s))
+            # write_xyz ("out-%03d.xyz" % it, trafo (s))
+            # Here  c.fprime(s) is how  much that  reaction coordinate
+            # will change if you  modify the coordinates. Hacky way to
+            # chage a geometry so that the RC is modified too:
+            s = s - 0.1 * c.fprime (s)
+
+        ss = asarray (ss)
+        qs = asarray (qs)
+        print ("qs=", qs)
+        p = Path (ss, qs)
+        print ("path=", p)
+        qs = linspace (c0, -c0, 21)
+        print ("qs=", qs)
+        ss = map (p, qs)
+        res = map (lambda s: cminimize (f, s, Array (c), maxit=200, ftol=1.0e-3, xtol=1.0e-3, algo=algo), ss)
+        infos = [inf for _, inf in res]
+        ss = [s for s, _ in res]
+        for info in infos:
+            print ("converged=", info["converged"], "in", info["iterations"])
+        for i, s in enumerate (ss):
+            write_xyz ("out-%03d.xyz" % i, trafo (s))
+        p = Path (ss, qs)
+        # Energy profile:
+        print ("# q, ra(q), rb(q), E(q)")
+        for q in linspace (c0, -c0, 100):
+            print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
+        exit (0)
+        # Energy profile:
+        print ("# q, ra(q), rb(q), E(q), G(q)")
+        for q in qs: # linspace (0, 1, 100):
+            print (q, f(p(q)), h(p(q)))
+        with f + h as e:
+            def copt (s):
+                sm, info = cminimize (e, s, Array (c), maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=0)
+                print ("converged=", info["converged"], "in", info["iterations"])
+                return sm
+            if True:
+                ss = loadtxt ("ss.txt")
+            ss = array (map (copt, ss))
+            savetxt ("ss.txt", ss)
+
+            # Terminals were constrained, obtain fully unconstrained
+            # ones:
+            sab = (ss[0], ss[-1])
+            def opt (s):
+                sm, info = minimize (e, s, maxit=100, ftol=1.0e-3, xtol=1.0e-3, algo=1)
+                print ("converged=", info["converged"], "in", info["iterations"])
+                return sm
+            sab = map (opt, sab)
+            qab = map (c, sab)
+
+            # Energy profile:
+            print ("# Optimized profile:")
+            qa, qb = qab
+            sa, sb = sab
+            print (qa, f(sa), h(sa), e(sa))
+            for q, s in zip (qs, ss):
+                print (q, f(s), h(s), e(s))
+            print (qb, f(sb), h(sb), e(sb))
+
+            write_xyz ("KH-aaa.xyz", trafo (sa))
+            write_xyz ("KH-bbb.xyz", trafo (sb))
+            for i, s in enumerate (ss):
+                write_xyz ("KH-%03d.xyz" % i, trafo (s))
+
+            p = Path (ss, qs)
+            print ("# Interpolated profile:")
+            for q in linspace (c0, -c0, 3 * len (qs)):
+                print (q, f(p(q)), h(p(q)), e(p(q)))
+
+
+exchange (s)
+exit (0)
+
