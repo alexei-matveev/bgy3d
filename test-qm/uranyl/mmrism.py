@@ -1,6 +1,6 @@
 #!/usr/bin/python -u
 
-from __future__ import with_statement
+from __future__ import with_statement, print_function
 #
 # Tell Python interpreter where to find custom modules:
 #
@@ -165,18 +165,18 @@ def optimization (s):
         h = compose (h, trafo)  # RISM solvation energy
 
         def opt (e, s, name, **kwargs):
-            print "XXX: " + name + "..."
+            print ("XXX: " + name + "...")
 
-            print name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit"
+            print (name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit")
 
             s, info = minimize (e, s, **kwargs)
 
-            print name + ": converged =", info["converged"], "in", info["iterations"], "iterations"
+            print (name + ": converged =", info["converged"], "in", info["iterations"], "iterations")
             write_xyz (name + ".xyz", trafo (s))
 
             # print info
             traj = info["trajectory"]
-            print map(e, traj)
+            print (map(e, traj))
             for i, si in enumerate (traj):
                 # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
                 pass
@@ -187,12 +187,12 @@ def optimization (s):
         # MM self-energy:
         with g as e:
             s0, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
-            print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+            print ("XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"])
 
         # MM self-energy with RISM solvation:
         with g + h as e:
             s1, info = opt (e, (s if NW == 4 else s0), "MM+RISM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
-            print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+            print ("XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"])
 
         # This prints  a table of  various functionals applied  to several
         # geometries:
