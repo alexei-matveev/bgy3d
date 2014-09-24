@@ -153,49 +153,53 @@ def write_xyz (path, x):
     atoms.set_positions (x)
     write (path, atoms)
 
-with Server (cmd) as g, Server (alt) as h:
-    # Change  the  salts  to   discard  memoized  results  (or  delete
-    # ./cache.d):
-    g = Memoize (g, DirStore (salt=cmd + "Sep14"))
-    h = Memoize (h, DirStore (salt=alt + "Sep14"))
 
-    g = compose (g, trafo)  # MM self-energy
-    h = compose (h, trafo)  # RISM solvation energy
+def optimization (s):
+    with Server (cmd) as g, Server (alt) as h:
+        # Change  the  salts  to   discard  memoized  results  (or  delete
+        # ./cache.d):
+        g = Memoize (g, DirStore (salt=cmd + "Sep14"))
+        h = Memoize (h, DirStore (salt=alt + "Sep14"))
 
-    def opt (e, s, name, **kwargs):
-        print "XXX: " + name + "..."
+        g = compose (g, trafo)  # MM self-energy
+        h = compose (h, trafo)  # RISM solvation energy
 
-        print name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit"
+        def opt (e, s, name, **kwargs):
+            print "XXX: " + name + "..."
 
-        s, info = minimize (e, s, **kwargs)
+            print name + ": e(0)=", e (s) / kcal, "kcal, |g|=", max (abs (e.fprime (s))) / kcal, "kcal/Unit"
 
-        print name + ": converged =", info["converged"], "in", info["iterations"], "iterations"
-        write_xyz (name + ".xyz", trafo (s))
+            s, info = minimize (e, s, **kwargs)
 
-        # print info
-        traj = info["trajectory"]
-        print map(e, traj)
-        for i, si in enumerate (traj):
-            # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
-            pass
+            print name + ": converged =", info["converged"], "in", info["iterations"], "iterations"
+            write_xyz (name + ".xyz", trafo (s))
 
-        return s, info
+            # print info
+            traj = info["trajectory"]
+            print map(e, traj)
+            for i, si in enumerate (traj):
+                # write_xyz ("traj-%s-%03d.xyz" % (name, i), trafo (si))
+                pass
+
+            return s, info
 
 
-    # MM self-energy:
-    with g as e:
-        s0, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+        # MM self-energy:
+        with g as e:
+            s0, info = opt (e, s, "MM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
+            print "XXX: MM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
 
-    # MM self-energy with RISM solvation:
-    with g + h as e:
-        s1, info = opt (e, (s if NW == 4 else s0), "MM+RISM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
-        print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
+        # MM self-energy with RISM solvation:
+        with g + h as e:
+            s1, info = opt (e, (s if NW == 4 else s0), "MM+RISM", algo=1, maxstep=0.1, maxit=200, ftol=5.0e-3, xtol=5.0e-3)
+            print "XXX: MM+RISM", e (s), "eV", e (s) / kcal, "kcal", info["converged"]
 
-    # This prints  a table of  various functionals applied  to several
-    # geometries:
-    ss = [s0, s1]
-    with g + h as e:
-        for s in ss:
-            print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e (s) / kcal, "(kcal)"
-    exit (0)
+        # This prints  a table of  various functionals applied  to several
+        # geometries:
+        ss = [s0, s1]
+        with g + h as e:
+            for s in ss:
+                print "MM=", g (s) / kcal, "RISM=", h (s) / kcal, "MM+RISM=", e (s) / kcal, "(kcal)"
+        exit (0)
+
+optimization (s)
