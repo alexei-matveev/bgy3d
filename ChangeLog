@@ -1,3 +1,14 @@
+2014-09-25  Alexei Matveev  <alexei.matveev@gmail.com>
+
+	* bgy3d-solutes.c: Lennard-Jones, Coulomb-short,  and by way of it
+	also Coulomb total  are regularized starting at 20%  of the length
+	scale:  combined  sigma  for  LJ  and Ewald  scale  parameter  for
+	Coulomb. See comments on RMIN. The summary is lj0(1/5) = 976500000
+	is still huge  and Coulomb at this distance is 5  * 332 kcal which
+	is huge too. The real reason is that this setting was already used
+	for  quite some calculations  and I  want it  to be  recorded. The
+	effect of the observables is minimal.
+
 2014-09-11  Alexei Matveev  <alexei.matveev@gmail.com>
 
 	* rism-rdf.c (rism_rdf): Use trilinear interpolation for RDF. This
