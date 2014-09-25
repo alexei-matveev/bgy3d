@@ -1452,6 +1452,21 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     {
       nrad = HD->PD->nrad;
       rmax = HD->PD->rmax;
+
+      /*
+        Warn  the user  if  the rmax/nrad  are inappropriate.   FIXME:
+        criteria  are somewhat  arbitrary ---  by comparison  with the
+        historical  automatic choice (cp.   the other  branch).  There
+        are  hard constraints  on  kmax  ~ π/dr  with  dr =  rmax/nrad
+        because of  missing extrapolation  for k >  kmax. Also  do not
+        forget the typical √3 factor for  π/dh with dh = L/N for cubic
+        boxes!   In such  case the  program will  crash  in vec_ktab()
+        called from here. FIXME: is extrapolation really bad?
+      */
+      const ProblemData pd = upscale (HD->PD);
+      if (nrad < pd.nrad || rmax < pd.rmax || rmax / nrad > pd.rmax / pd.nrad)
+        FPRINTF (stderr, "Warning: rmax=%f and nrad=%d too low!"
+                 " Consider rmax=%f and nrad=%d\n", rmax, nrad, pd.rmax, pd.nrad);
     }
   else
     {
