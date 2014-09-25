@@ -777,8 +777,8 @@ upscale (const ProblemData *PD)
     the command line knowing better as he/she always does?
   */
   ProblemData pd = *PD;
-  pd.rmax = pd.rmax * 4;
-  pd.nrad = pd.nrad * 16;
+  pd.rmax = 4 * MAX (MAX (PD->L[0], PD->L[1]), PD->L[2]) / 2;
+  pd.nrad = 16 * MAX (MAX (PD->N[0], PD->N[1]), PD->N[2]);
   return pd;
 }
 
@@ -1441,32 +1441,46 @@ solvent_kernel_file (int m, Vec chi_fft[m][m]) /* out */
    computed by 1d RISM solvent solver. See ./rism.f90. */
 static void
 solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
-                      Vec chi_fft[m][m], /* out, corner */
-                      Vec tau_fft[m])    /* out, corner */
+                     const real *chi_fft_buf, /* NULL, or [m][m][nrad] */
+                     Vec chi_fft[m][m],       /* out, corner */
+                     Vec tau_fft[m])          /* out, corner */
 {
-  /*
-    Problem data for use in 1d-RISM  code.  If you do not upscale, the
-    rmax =  max (PD->L) / 2 will  be too low for  interpolation on the
-    r-grid. Though here only the k-grid is of interest.
-  */
-  const ProblemData pd = upscale (HD->PD);
+  bool caller_supplied_chi = (chi_fft_buf != NULL);
+  int nrad;
+  real rmax;
+  if (caller_supplied_chi)
+    {
+      nrad = HD->PD->nrad;
+      rmax = HD->PD->rmax;
+    }
+  else
+    {
+      /*
+        Problem data for use in  1d-RISM code.  If you do not upscale,
+        the rmax =  max (PD->L) / 2 will be  too low for interpolation
+        on the r-grid. Though here only the k-grid is of interest.
+      */
+      const ProblemData pd = upscale (HD->PD);
 
-  /*
-    The L[] and N[] fields encode 3D domain, the radial parameters for
-    1D solver are separate.
-   */
-  const int nrad = pd.nrad;
-  const real rmax = pd.rmax;
+      /*
+        The L[] and N[] fields encode 3D domain, the radial parameters
+        for 1D solver are separate.
+      */
+      nrad = pd.nrad;
+      rmax = pd.rmax;
 
-  /* 1D versions of chi_fft[][] and tau_fft[]: */
-  real x_fft[m][m][nrad];
+      /* 1D version of chi_fft[][]: */
+      chi_fft_buf = malloc (m * m * nrad * sizeof (double));
+
+      /*
+        1D-RISM calculation.   Dont need neither  indirect correlation
+        nor the result dictionary, only need χ(k):
+      */
+      rism_solvent (&pd, m, solvent, NULL, (void*) chi_fft_buf, NULL);
+    }
+
+  /* 1D versions of tau_fft[]: */
   real t_fft[m][nrad];
-
-  /*
-    1D-RISM calculation.   Dont need neither  indirect correlation nor
-    the result dictionary, only need χ(k):
-  */
-  rism_solvent (&pd, m, solvent, NULL, x_fft, NULL);
 
   /*
     Ask the 1D code to compute T[v] + v = χ * v for a Coulomb field of
@@ -1475,7 +1489,7 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     charges.   Note  that the  1/ε₀  factor  is  NOT included  in  the
     dimensionless result. The output is non-trivially site-specific.
   */
-  rism_solvent_renorm (m, solvent, rmax, nrad, x_fft,
+  rism_solvent_renorm (m, solvent, rmax, nrad, (void*) chi_fft_buf,
                        G_COULOMB_INVERSE_RANGE,
                        t_fft); /* out */
 
@@ -1510,15 +1524,24 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
     to scale the dimensionless addition by -β/ε₀, see iterate_t1().
   */
 
-  /* The solute/solvent code expects χ - 1. Offset the diagonal: */
-  for (int i = 0; i < m; i++)
-    for (int k = 0; k < nrad; k++)
-      x_fft[i][i][k] -= 1;
+  double (*const view)[m][m][nrad] = (void*) chi_fft_buf;
 
-  /* FIXME: assuming symmetric χ - 1 with aliasing: */
+  /*
+    The solute/solvent code expects χ - 1.  Offset the diagonal before
+    tabulating on the  3D grid.  FIXME: assuming symmetric  χ - 1 with
+    aliasing:
+  */
+  real table[nrad];
   for (int i = 0; i < m; i++)
     for (int j = 0; j <= i; j++)
-      vec_ktab (HD, nrad, x_fft[i][j], dk, chi_fft[i][j]);
+      {
+        for (int k = 0; k < nrad; k++)
+          table[k] = (*view)[i][j][k] - delta (i, j);
+        vec_ktab (HD, nrad, table, dk, chi_fft[i][j]);
+      }
+
+  if (!caller_supplied_chi)
+    free ((void*) chi_fft_buf);
 }
 
 
@@ -1529,8 +1552,9 @@ solvent_kernel_rism (State *HD, int m, const Site solvent[m], /* in */
 */
 static void
 solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
-                Vec chi_fft[m][m],                       /* out */
-                Vec tau_fft[m],                          /* out */
+                const real *chi_fft_buf, /* NULL, or [m][m][nrad] */
+                Vec chi_fft[m][m],       /* out */
+                Vec tau_fft[m],          /* out */
                 bool *renorm) /* out, true if tau_fft[] is meaningful */
 {
   if (bgy3d_getopt_test ("solvent-3d"))
@@ -1554,7 +1578,7 @@ solvent_kernel (State *HD, int m, const Site solvent[m], /* in */
     {
       /* Regular case  ...  Here we  can offer renormalization  of the
          indirect correlation function t. */
-      solvent_kernel_rism (HD, m, solvent, chi_fft, tau_fft);
+      solvent_kernel_rism (HD, m, solvent, chi_fft_buf, chi_fft, tau_fft);
 
       /* The flag --no-renorm for debugging only: */
       *renorm = true;
@@ -1731,7 +1755,6 @@ hnc3d_solute_solve (const ProblemData *PD,
                     Context **medium,        /* out */
                     Restart **restart) /* inout, so far unchanged  */
 {
-  assert (chi_fft_buf == NULL);
   /* Default is to not apply boundary condition in HNC code: */
   const PetscBool cage = false;
 
@@ -1840,7 +1863,8 @@ hnc3d_solute_solve (const ProblemData *PD,
       in tau_fft[m] in addition. Others just fill them with zeroes:
     */
     bool renorm;
-    solvent_kernel (HD, m, solvent, chi_fft, tau_fft, &renorm);
+    solvent_kernel (HD, m, solvent, chi_fft_buf,
+                    chi_fft, tau_fft, &renorm);
 
     /*
       Now  chi_fft[][] contains  χ  -  1 and  tau_fft[],  if the  flag
