@@ -923,6 +923,8 @@
 (1005   H     "Amine -NH2"                    1.008     0.4000     0.0460    0.36)
 (1006   Na    "Sodium Ion Na+"               22.990     3.3300     0.00277   1.0) ; Jorgensen(2004)
 (1007   HO    "Hydroxide Ion OH-"             1.008     0.4000     0.0460    0.3000)
+(1008   S     "Thiophene S"                  32.060     3.5500     0.2500   -0.1900) ; http://virtualchemistry.org/molecules/110-02-1/OPLS/110-02-1.top
+(1009   Cl    "11-dichloroethane Cl"         35.453     3.4000     0.3000   -0.1000) ; charge from http://virtualchemistry.org/molecules/75-34-3/OPLS/75-34-3.top
 )
 ;;;
 ;;; See ./solutes.scm:
