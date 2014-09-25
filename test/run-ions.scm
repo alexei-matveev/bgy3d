@@ -77,17 +77,16 @@
     free-energy))
 
 ;;;
-;;; Call sequence for 3D RISM:
+;;; Call sequence for 3D RISM. 3D cannot handle large dimensions!
 ;;;
 (define (run-3d solute closure)
-  ;; 3D cannot handle large dimensions!
-  (let ((settings (env-set 'closure closure *settings*))
-        (chi (assoc-ref *chi* closure)))
-    (let ((alist (hnc3d-run-solute solute *solvent* settings chi)))
-      ;; Return free energy:
-      (let ((e (assoc-ref alist 'free-energy)))
-        (destroy alist)
-        e))))
+  (let* ((settings (env-set 'closure closure *settings*))
+         (chi (assoc-ref *chi* closure))
+         (alist (hnc3d-run-solute solute *solvent* settings chi))
+         (free-energy (assoc-ref alist 'free-energy)))
+    ;; Dont leak memory:
+    (destroy alist)
+    free-energy))
 
 (define *res-1d*
   (map (lambda (clo)
