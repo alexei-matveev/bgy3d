@@ -1080,15 +1080,17 @@ void (*SU) (const ProblemData *PD,
             void (*density)(int k, const real x[k][3], real rho[k]),
             SCM *dict,          /* inout, alist */
             Vec g[m],           /* out */
-            Context **medium,   /* out */
-            Restart **restart); /* inout */
+            const real *chi_fft_buf, /* NULL, or [m][m][nrad] */
+            Context **medium,        /* out */
+            Restart **restart);      /* inout */
 
 
 
 /* Decode SCM input,  encode output to SCM. The  first argument is the
    actual solver that operates with C-types. */
 static SCM
-run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
+run_solute (SU solute_solve, SCM solute, SCM solvent,
+            SCM chi_fft, SCM restart)
 {
   /* Lookup dynvar: */
   SCM settings = guile_get_settings ();
@@ -1126,6 +1128,27 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
   alist_getopt_funptr (settings, "qm-density", (void (**)()) &qm_density);
 
   /*
+    Only if the  caller supplied a suitable Guile  array, then we pass
+    its contents further.  The caller is responsible to make sure that
+    susceptibility  corresponds  to   the  actual  solvent  and  other
+    settings (notably radial dimensions):
+  */
+  const real *chi_fft_buf = NULL;
+  if (!SCM_UNBNDP (chi_fft) && scm_is_true (chi_fft))
+    {
+      /*
+        This should  have as  much space as  a real array  declared as
+        double chi_fft_buf[m][m][nrad].  The buffer is read-only here.
+      */
+      assert (scm_is_bytevector (chi_fft));
+      const size_t len = scm_c_bytevector_length (chi_fft);
+      const int nrad = len / (m * m * sizeof (double));
+      assert (len == m * m * nrad * sizeof (double));
+      assert (nrad == PD.nrad);
+      chi_fft_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
+    }
+
+  /*
     A call to solute_solve() takes part of the input from the disk and
     returns solvent  distribution in Vec  g[] (dont forget  to destroy
     them).  If  no additional  charge distribution is  associated with
@@ -1160,6 +1183,7 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
   solute_solve (&PD, m, solvent_sites, n, solute_sites, qm_density,
                 &dict,          /* inout, alist */
                 g,              /* out */
+                chi_fft_buf,    /* NULL, or [m][m][nrad] */
                 &medium_,       /* out */
                 pass);          /* NULL, or inout */
 
@@ -1188,16 +1212,16 @@ run_solute (SU solute_solve, SCM solute, SCM solvent, SCM restart)
 
 
 static SCM
-guile_bgy3d_solute (SCM solute, SCM solvent, SCM restart)
+guile_bgy3d_solute (SCM solute, SCM solvent, SCM chi_fft, SCM restart)
 {
-  return run_solute (bgy3d_solute_solve, solute, solvent, restart);
+  return run_solute (bgy3d_solute_solve, solute, solvent, chi_fft, restart);
 }
 
 
 static SCM
-guile_hnc3d_solute (SCM solute, SCM solvent, SCM restart)
+guile_hnc3d_solute (SCM solute, SCM solvent, SCM chi_fft, SCM restart)
 {
-  return run_solute (hnc3d_solute_solve, solute, solvent, restart);
+  return run_solute (hnc3d_solute_solve, solute, solvent, chi_fft, restart);
 }
 
 
@@ -1241,16 +1265,16 @@ static SCM guile_rism_solvent (SCM solvent)
   {
     /*
       This  should have  as much  space as  a real  array  declared as
-      double x_buf[m][m][nrad].  Void* is to silence the warnings:
+      double chi_fft_buf[m][m][nrad].
     */
-    void *x_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
+    void *chi_fft_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
 
     /*
       Actual  pure  solvent   calculation  here.   NULL  indicates  an
       optional output  argument. Supply NULL  if you dont  need either
       solvent indirect correlation or solvent susceptibility:
     */
-    rism_solvent (&PD, m, solvent_sites, NULL, x_buf, &retval);
+    rism_solvent (&PD, m, solvent_sites, NULL, chi_fft_buf, &retval);
   }
 
   free (solvent_name);
@@ -1305,7 +1329,7 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
       rism_solute() will have to run a pure solvent calculation too in
       this case:
     */
-    const real *x_buf = NULL;
+    const real *chi_fft_buf = NULL;
 
     /*
       Only if the caller supplied a suitable array of doubles, then we
@@ -1317,17 +1341,16 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
       {
         /*
           This should have  as much space as a  real array declared as
-          double x_buf[m][m][nrad].  The buffer is  read-only here, so
-          we  cast the  pointer  to (void*)  when  passing further  to
-          silence the warning.
+          double  chi_fft_buf[m][m][nrad].   The  buffer is  read-only
+          here.
         */
         assert (scm_is_bytevector (chi_fft));
-        x_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
+        chi_fft_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
       }
 
     /* Actual solute/solvent calculation here: */
     rism_solute (&PD, n, solute_sites, m, solvent_sites,
-                 (void*) x_buf, &retval);
+                 (void*) chi_fft_buf, &retval);
   }
 
 
@@ -1594,9 +1617,9 @@ static void module_init (void* unused)
     a macro that does both.
   */
   EXPORT ("hnc3d-run-solvent/c", 1, 0, 0, guile_hnc3d_solvent);
-  EXPORT ("hnc3d-run-solute/c", 2, 1, 0, guile_hnc3d_solute);
+  EXPORT ("hnc3d-run-solute/c", 2, 2, 0, guile_hnc3d_solute);
   EXPORT ("bgy3d-run-solvent/c", 1, 0, 0, guile_bgy3d_solvent);
-  EXPORT ("bgy3d-run-solute/c", 2, 1, 0, guile_bgy3d_solute);
+  EXPORT ("bgy3d-run-solute/c", 2, 2, 0, guile_bgy3d_solute);
   EXPORT ("bgy3d-pot-interp", 2, 0, 0, guile_pot_interp);
   EXPORT ("bgy3d-pot-destroy", 1, 0, 0, guile_pot_destroy);
   EXPORT ("bgy3d-restart-destroy", 1, 0, 0, guile_restart_destroy);

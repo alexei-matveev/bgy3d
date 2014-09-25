@@ -895,9 +895,11 @@ void bgy3d_solute_solve (const ProblemData *PD,
                          void (*density)(int k, const real x[k][3], real rho[k]),
                          SCM *dict,         /* inout, alist */
                          Vec g[m],          /* out */
+                         const real *x_buf, /* NULL, or [m][m][nrad] */
                          Context **medium,  /* out, optional */
                          Restart **restart) /* inout, optional */
 {
+  (void) x_buf;
   /* Show solvent/solute parameters: */
   bgy3d_sites_show ("Solvent", m, solvent);
   bgy3d_sites_show ("Solute", n, solute);

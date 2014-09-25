@@ -601,7 +601,7 @@ computes the sum of all vector elements."
     ;; garbage-collected. As of now it expects the solvent description
     ;; such as g??.bin or x??-fft.bin to exist as files:
     ;;
-    (let ((alist (run-solute solute solvent settings restart)))
+    (let ((alist (run-solute solute solvent settings #f restart)))
       ;;
       ;; Save g1-files to disk:
       ;;
@@ -824,7 +824,7 @@ computes the sum of all vector elements."
                    (let ((m' (move-molecule m x)))
                      (if three-dee
                          (if solute
-                             (let ((dct (hnc3d-run-solute m' solvent s restart)))
+                             (let ((dct (hnc3d-run-solute m' solvent s #f restart)))
                                ;; FIXME: lots of memory leaks here,
                                ;; need a way to dispose of PES
                                ;; functions:

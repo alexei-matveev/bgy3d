@@ -1727,9 +1727,11 @@ hnc3d_solute_solve (const ProblemData *PD,
                     void (*density)(int k, const real x[k][3], real rho[k]),
                     SCM *dict,  /* inout, association list */
                     Vec g[m],
-                    Context **medium,  /* out */
+                    const real *chi_fft_buf, /* NULL, or [m][m][nrad] */
+                    Context **medium,        /* out */
                     Restart **restart) /* inout, so far unchanged  */
 {
+  assert (chi_fft_buf == NULL);
   /* Default is to not apply boundary condition in HNC code: */
   const PetscBool cage = false;
 
