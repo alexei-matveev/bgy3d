@@ -637,12 +637,14 @@ computes the sum of all vector elements."
     (hnc                (value #f))
     (rism               (value #f))
     (verbosity          (value #t)      (predicate ,string->number)) ; dont use -v
-    (N                  (value #t)      (predicate ,string->number))
     (rho                (value #t)      (predicate ,string->number))
     (beta               (value #t)      (predicate ,string->number))
+    (L                  (value #t)      (predicate ,string->number))
+    (N                  (value #t)      (predicate ,string->number))
+    (rmax               (value #t)      (predicate ,string->number))
+    (nrad               (value #t)      (predicate ,string->number))
     (norm-tol           (value #t)      (predicate ,string->number))
     (max-iter           (value #t)      (predicate ,string->number))
-    (L                  (value #t)      (predicate ,string->number))
     (damp-start         (value #t)      (predicate ,string->number))
     (lambda             (value #t)      (predicate ,string->number))
     (solvent
