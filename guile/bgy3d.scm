@@ -1171,8 +1171,12 @@ computes the sum of all vector elements."
          (let* ((center-spec (with-input-from-string (first args) read))
                 (center (if (list? center-spec)
                             center-spec
-                            (site-position (assoc (symbol->string center-spec)
-                                                  (molecule-sites solute)))))
+                            (let ((site-name (symbol->string center-spec)))
+                              (site-position (or (assoc site-name
+                                                        (molecule-sites solute))
+                                                 (error "No such site!"
+                                                        'site: site-name
+                                                        'solute: solute))))))
                 (args (cdr args))
                 (angular-order 110)     ; FIXME: literals here ...
                 (rmin 0.75)             ; cannot be zero for log-mesh
