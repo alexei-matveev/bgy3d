@@ -14,8 +14,10 @@
 
 
 (define *settings*
-  '((L . 160.0)
-    (N . 4096)
+  '((rmax . 160.0)
+    (nrad . 4096)
+    (L . 10)
+    (N . 64)
     (rho . 0.0333295)
     (beta . 1.6889)
     (dielectric . 78.4)
@@ -45,12 +47,17 @@
   (map find-molecule *names*))
 
 (define *closures*
-  (list 'KH 'PSE1 'PSE2 'PSE3 'PSE7 'HNC))
+  (list 'KH
+        'PSE1
+        'PSE2
+        'PSE3
+        'PSE7
+        'HNC))
 
-;;; Solvent susceptibility  for both closures.  Two  pure solvent runs
-;;; here.  Previous version  used  the same  (HNC) susceptibility  for
-;;; doing KH and  HNC ions in water calculations.  The KH numbers were
-;;; thus slightly wrong.
+;;; Solvent  susceptibility for  all closures.   Several  pure solvent
+;;; runs here.   Previous version  used the same  (HNC) susceptibility
+;;; for doing KH  and HNC ions in water  calculations.  The KH numbers
+;;; were thus slightly wrong.
 (define *chi*
   (map (lambda (closure)
          (let ((alist (rism-solvent *solvent*
@@ -73,9 +80,10 @@
 ;;; Call sequence for 3D RISM:
 ;;;
 (define (run-3d solute closure)
-  ;; 3D cannot handle large dimensions. FIXME: literals here:
-  (let ((settings (env-set 'N 64 (env-set 'L 10.0 (env-set 'closure closure *settings*)))))
-    (let ((alist (hnc3d-run-solute solute *solvent* settings)))
+  ;; 3D cannot handle large dimensions!
+  (let ((settings (env-set 'closure closure *settings*))
+        (chi (assoc-ref *chi* closure)))
+    (let ((alist (hnc3d-run-solute solute *solvent* settings chi)))
       ;; Return free energy:
       (let ((e (assoc-ref alist 'free-energy)))
         (destroy alist)
