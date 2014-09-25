@@ -1233,24 +1233,17 @@ static SCM guile_rism_solvent (SCM solvent)
   /* Always use this function to derive number of radial points: */
   const int nrad = PD.nrad;
 
-  /* Guile m x m x nrad array of doubles: */
-  SCM chi_fft = scm_make_typed_array (scm_from_locale_symbol ("f64"),
-                                      SCM_UNSPECIFIED,
-                                      scm_list_3 (scm_from_int (m),
-                                                  scm_from_int (m),
-                                                  scm_from_int (nrad)));
+  /* Space for m x m x nrad array of doubles: */
+  SCM chi_fft = scm_c_make_bytevector (m * m * nrad * sizeof (double));
 
   /* This association list will contain essential results: */
   SCM retval;
   {
-    scm_t_array_handle handle;
-    scm_array_get_handle (chi_fft, &handle);
-
     /*
       This  should have  as much  space as  a real  array  declared as
       double x_buf[m][m][nrad].  Void* is to silence the warnings:
     */
-    void *x_buf = scm_array_handle_f64_writable_elements (&handle);
+    void *x_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
 
     /*
       Actual  pure  solvent   calculation  here.   NULL  indicates  an
@@ -1258,8 +1251,6 @@ static SCM guile_rism_solvent (SCM solvent)
       solvent indirect correlation or solvent susceptibility:
     */
     rism_solvent (&PD, m, solvent_sites, NULL, x_buf, &retval);
-
-    scm_array_handle_release (&handle);
   }
 
   free (solvent_name);
@@ -1308,8 +1299,6 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
   /* This association list will contain essential results: */
   SCM retval;
   {
-    scm_t_array_handle handle;
-
     /*
       By default, there is no solvent susceptibility from a prior pure
       solvent  calculation  to  be  used here.  The  Fortran  function
@@ -1319,30 +1308,26 @@ static SCM guile_rism_solute (SCM solute, SCM solvent, SCM chi_fft)
     const real *x_buf = NULL;
 
     /*
-      Only if the caller supplied a suitable Guile array, then we pass
-      its contents  further.  The caller  is responsible to  make sure
-      that susceptibility corresponds to  the actual solvent and other
-      settings (notably radial dimensions):
+      Only if the caller supplied a suitable array of doubles, then we
+      pass its  contents further.  The  caller is responsible  to make
+      sure that  susceptibility corresponds to the  actual solvent and
+      other settings (notably radial dimensions):
     */
     if (!SCM_UNBNDP (chi_fft))
       {
-        scm_array_get_handle (chi_fft, &handle);
-
         /*
           This should have  as much space as a  real array declared as
           double x_buf[m][m][nrad].  The buffer is  read-only here, so
           we  cast the  pointer  to (void*)  when  passing further  to
           silence the warning.
         */
-        x_buf = scm_array_handle_f64_elements (&handle);
+        assert (scm_is_bytevector (chi_fft));
+        x_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
       }
 
     /* Actual solute/solvent calculation here: */
     rism_solute (&PD, n, solute_sites, m, solvent_sites,
                  (void*) x_buf, &retval);
-
-    if (!SCM_UNBNDP (chi_fft))
-      scm_array_handle_release (&handle);
   }
 
 
