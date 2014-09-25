@@ -60,7 +60,7 @@ lj1 (real r)
 }
 
 
-#define RMIN 0.02               /* 2% of sigma */
+#define RMIN 0.2                /* 20% of sigma */
 /*
   Regularized at R,  the same as lj0(r) for r >=  R.  For lower values
   of the distance  r we reperesent potential by  a cap, an upside-down
@@ -210,7 +210,7 @@ cs1 (real r)
 }
 
 
-#define RMIN 0.02               /* 2% of G^-1 */
+#define RMIN 0.2                /* 20% of G^-1 */
 /*
   Regularized at R,  the same as cs0(r) for r >=  R.  For lower values
   of the distance  r we reperesent potential by  a cap, an upside-down
