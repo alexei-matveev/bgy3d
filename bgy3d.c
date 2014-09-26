@@ -33,7 +33,7 @@ State* bgy3d_state_make (const ProblemData *PD)
   */
   const int nmax = 1291;
   if (PD->N[0] >= nmax && PD->N[1] >= nmax && PD->N[2] >= nmax)
-    fprintf (stderr, "Warning: grid %d x %d x %d too large for 3D!\n",
+    FPRINTF (stderr, "Warning: grid %d x %d x %d too large for 3D!\n",
              PD->N[0], PD->N[1], PD->N[2]);
 
   /* Also initialize all pointers stored in State to NULL: */
