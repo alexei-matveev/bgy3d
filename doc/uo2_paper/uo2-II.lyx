@@ -4064,6 +4064,65 @@ name "fig:rdfs-vs-closure-5w"
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Water oxygen distribution around the uranyl aqua complex with four explicit
+ water ligands.
+ The isosurface corresponds to 
+\begin_inset Formula $h=2$
+\end_inset
+
+.
+ The locations around the the missing equatorial ligand are characterized
+ by values of 
+\begin_inset Formula $h$
+\end_inset
+
+ more than ten times as high.
+ Other lopes of the isosurface feature 
+\begin_inset Formula $h<6$
+\end_inset
+
+.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rdfs-vs-closure-5w-1"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename uo2-II.d/4w.png
+	lyxscale 50
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Concluding remarks
 \end_layout
