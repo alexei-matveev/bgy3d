@@ -23,7 +23,7 @@ H = 2 * L / N
 L1 = L * (N - 2) / N
 def C (i):
     return i * H - L
-assert L1 - C(N - 1) == 0.0
+assert np.abs (L1 - C(N - 1)) < 1.0e-7
 
 # Parsing text takes lots of time:
 try:
@@ -42,12 +42,10 @@ def extrema (g):
     # y = range (N)
     x = np.linspace (-L, L1, N)
     y = np.linspace (-L, L1, N)
-    print (x)
     # x, y = np.meshgrid (x, y)
     from scipy.interpolate import RectBivariateSpline as spline
     from pts.func import NumDiff
     G = spline (x, y, g)
-    print (g[0, 0], G(-L, -L))
 
     def f (r):
         x, y = r
@@ -56,7 +54,7 @@ def extrema (g):
     f = NumDiff (f)
     def gn (r):
         df = f.fprime (r)
-        return np.linalg.norm (df)
+        return np.linalg.norm (df)**2
 
     from scipy.optimize import minimize
 
