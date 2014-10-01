@@ -77,17 +77,18 @@ def extrema (g):
     print ("x=", xt, "G=", f(xt), "|grad G|=", gn (xt))
     ex.append (xt)
 
-extrema (g3[:, 63, :])
+n = N // 2
+extrema (g3[:, n, :])
 ex = np.array (ex)
 print (ex)
 
 # Less than a quater of a plane:
-g2 = g3[64:64+32, 63, 64:64+32]
+g2 = g3[n:n + n // 2, n, n:n + n // 2]
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-X = np.linspace(C(63), C(64+32-1), 32)
-Y = np.linspace(C(63), C(64+32-1), 32)
+X = np.linspace(C(n), C(n + n // 2 - 1), n // 2)
+Y = np.linspace(C(n), C(n + n // 2 - 1), n // 2)
 X, Y = np.meshgrid(X, Y)
 
 # Z truncated at 5 kcal here:
