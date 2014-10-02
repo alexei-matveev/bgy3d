@@ -80,7 +80,9 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=64
+--N=96
+--rmax=40
+--nrad=1536
 --closure=KH
 --hnc
 """ % (solvent_name, solute_name (NW))
@@ -199,8 +201,12 @@ def write_xyz (path, x):
 if flexible:
     from pts.pes.ab2 import AB2
     # Base units here: A, radians, eV:
-    # uo2 = AB2 ((1.76, 64.50), (pi, 2.05)) # Ref. [1]
-    uo2 = AB2 ((1.80, 43.364), (pi, 13.009)) # Ref. [2]
+    if True:
+        # PM13 soft uranyl:
+        uo2 = AB2 ((1.76, 64.50), (pi, 2.05)) # Ref. [1]
+    else:
+        # KL13 aka GW hard uranyl:
+        uo2 = AB2 ((1.80, 43.364), (pi, 13.009)) # Ref. [2]
 else:
     uo2 = None
 
@@ -216,8 +222,6 @@ def test_uranyl ():
 
 if uo2 is not None:
     test_uranyl()
-
-write_xyz ("a1.xyz", trafo (s))
 
 
 def optimization (s):
@@ -344,16 +348,33 @@ def exchange (s):
         for i, s in enumerate (ss):
             write_xyz ("out-%03d.xyz" % i, trafo (s))
         p = Path (ss, qs)
-        # Energy profile:
+
+        # Energy profile, smooth:
         print ("# q, ra(q), rb(q), E(q)")
         for q in linspace (c0, -c0, 100):
             print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
-        exit (0)
-        # Energy profile:
-        print ("# q, ra(q), rb(q), E(q), G(q)")
-        for q in qs: # linspace (0, 1, 100):
-            print (q, f(p(q)), h(p(q)))
+
+        # Energy profile, coarse, with dG(q):
+        with open ("./profile,mm.txt", "w") as file:
+            print ("# q, ra(q), rb(q), E(q), dG(q)", file=file)
+            for q in qs:
+                print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), file=file)
+
         with f + h as e:
+            # Terminals  were constrained, obtain  fully unconstrained
+            # ones:
+            sab = (ss[0], ss[-1])
+            def opt (s):
+                sm, info = minimize (e, s, maxit=100, ftol=1.0e-3, xtol=1.0e-3, algo=1)
+                print ("converged=", info["converged"], "in", info["iterations"])
+                return sm
+            sab = map (opt, sab)
+            qab = map (c, sab)
+            qa, qb = qab
+            sa, sb = sab
+            write_xyz ("KH-aaa.xyz", trafo (sa))
+            write_xyz ("KH-bbb.xyz", trafo (sb))
+
             def copt (s):
                 sm, info = cminimize (e, s, Array (c), maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
@@ -363,36 +384,24 @@ def exchange (s):
             ss = array (map (copt, ss))
             savetxt ("ss.txt", ss)
 
-            # Terminals were constrained, obtain fully unconstrained
-            # ones:
-            sab = (ss[0], ss[-1])
-            def opt (s):
-                sm, info = minimize (e, s, maxit=100, ftol=1.0e-3, xtol=1.0e-3, algo=1)
-                print ("converged=", info["converged"], "in", info["iterations"])
-                return sm
-            sab = map (opt, sab)
-            qab = map (c, sab)
-
             # Energy profile:
-            print ("# Optimized profile:")
-            qa, qb = qab
-            sa, sb = sab
-            print (qa, f(sa), h(sa), e(sa))
-            for q, s in zip (qs, ss):
-                print (q, f(s), h(s), e(s))
-            print (qb, f(sb), h(sb), e(sb))
+            with open ("./profile,rs.txt", "w") as file:
+                print ("# Optimized profile:", file=file)
+                print (qa, f(sa), h(sa), e(sa), file=file)
+                for q, s in zip (qs, ss):
+                    print (q, f(s), h(s), e(s), file=file)
+                print (qb, f(sb), h(sb), e(sb), file=file)
 
-            write_xyz ("KH-aaa.xyz", trafo (sa))
-            write_xyz ("KH-bbb.xyz", trafo (sb))
             for i, s in enumerate (ss):
                 write_xyz ("KH-%03d.xyz" % i, trafo (s))
 
             p = Path (ss, qs)
-            print ("# Interpolated profile:")
-            for q in linspace (c0, -c0, 3 * len (qs)):
-                print (q, f(p(q)), h(p(q)), e(p(q)))
+            with open ("./profile,rs,interp.txt", "w") as file:
+                print ("# Interpolated profile:", file=file)
+                for q in linspace (c0, -c0, 3 * len (qs)):
+                    print (q, f(p(q)), h(p(q)), e(p(q)), file=file)
 
 
 exchange (s)
-exit (0)
+
 
