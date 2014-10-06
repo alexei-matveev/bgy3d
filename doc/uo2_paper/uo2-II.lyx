@@ -377,7 +377,7 @@ Because of the highly non-linear closure relation a single variable fix
 \begin_inset Formula $c(t)=f(-v+t)-t$
 \end_inset
 
- as derived from the non-linear equation system Eqs.
+ as derived from the non-linear equation system, Eqs.
 \begin_inset space ~
 \end_inset
 
@@ -388,7 +388,24 @@ reference "eq:rsim-h-c-t"
 
 \end_inset
 
- is bound to diverge for all but the simplest cases.
+, is bound to diverge for all but the simplest cases.
+ Instead we solve the reduced non-linear problem 
+\begin_inset Formula $F[t]=T[t]-t=0$
+\end_inset
+
+ using the Newton--Krylov non-linear solver 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "petsc-user-ref"
+
+\end_inset
+
+ with analytic matrix-free Jacobian, 
+\begin_inset Formula $J[t]=\delta F/\delta t$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -532,14 +549,14 @@ with
 \end_inset
 
  closures: 
-\begin_inset Formula $\phi_{n}(x)=-\Theta(x)x^{n+1}/(n+1)!$
+\begin_inset Formula $\phi_{n}(x)=-x^{n+1}/(n+1)!$
 \end_inset
 
- with 
-\begin_inset Formula $\Theta(x)$
+ for 
+\begin_inset Formula $x>0$
 \end_inset
 
- being the Heaviside function 
+ and zero otherwise 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kast08"
