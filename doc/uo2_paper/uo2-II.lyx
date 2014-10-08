@@ -1959,25 +1959,6 @@ Free energy minimization for uranyl aqua complexes
 \end_layout
 
 \begin_layout Standard
-Note how QM+PSE2 and QM+PSE3 predict the bond length of the four coordinated
- complex by 0.3--0.4
-\begin_inset space ~
-\end_inset
-
-pm shorter than for 
-\begin_inset Quotes eld
-\end_inset
-
-bare
-\begin_inset Quotes erd
-\end_inset
-
- uranyl.
- The RISM medium around bare uranyl apparently corresponds to more than
- four water ligands.
-\end_layout
-
-\begin_layout Standard
 \begin_inset Float table
 wide false
 sideways false
@@ -2103,10 +2084,6 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 5
-\begin_inset Formula $^{c}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -2116,10 +2093,6 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 5+1
-\begin_inset Formula $^{c}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -2907,14 +2880,19 @@ Bond lengths in pm, energies in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-Structures in Figure
+MM structure is 
+\begin_inset Formula $D_{4\text{h}}$
+\end_inset
+
+ but MM+RISM structure features a vacancy in the equatorial plane corresponding
+ to the missing ligand, see Figure
 \begin_inset space ~
 \end_inset
 
 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:geometries"
+reference "fig:spatial-distribution-4w"
 
 \end_inset
 
@@ -2935,10 +2913,81 @@ status open
 \end_inset
 
 
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Water oxygen distribution around the uranyl aqua complex with four explicit
+ water ligands.
+ The isosurface corresponds to 
+\begin_inset Formula $h=2$
+\end_inset
+
+.
+ The locations around the the missing equatorial ligand are characterized
+ by values of 
+\begin_inset Formula $h$
+\end_inset
+
+ more than ten times as high.
+ Other lopes of the isosurface feature 
+\begin_inset Formula $h<6$
+\end_inset
+
+.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:spatial-distribution-4w"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename uo2-II.d/4w.png
+	lyxscale 50
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Text
+Note how QM+PSE2 and QM+PSE3 predict the bond length of the four coordinated
+ complex by 0.3--0.4
+\begin_inset space ~
+\end_inset
+
+pm shorter than for 
+\begin_inset Quotes eld
+\end_inset
+
+bare
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl.
+ The RISM medium around bare uranyl apparently corresponds to more than
+ four water ligands.
 \end_layout
 
 \begin_layout Standard
@@ -4735,65 +4784,6 @@ name "fig:rdfs-vs-closure-5w"
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename uo2-II.d/fig2.svg
-	width 100line%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Water oxygen distribution around the uranyl aqua complex with four explicit
- water ligands.
- The isosurface corresponds to 
-\begin_inset Formula $h=2$
-\end_inset
-
-.
- The locations around the the missing equatorial ligand are characterized
- by values of 
-\begin_inset Formula $h$
-\end_inset
-
- more than ten times as high.
- Other lopes of the isosurface feature 
-\begin_inset Formula $h<6$
-\end_inset
-
-.
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:spatial-distribution-4w"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename uo2-II.d/4w.png
-	lyxscale 50
 	width 100line%
 
 \end_inset
