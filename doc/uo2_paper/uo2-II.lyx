@@ -627,6 +627,77 @@ key "Bo14"
  
 \end_layout
 
+\begin_layout Standard
+The uranyl solvation energy is then estimated as
+\color green
+ 
+\color inherit
+
+\begin_inset Formula 
+\begin{eqnarray}
+\Delta G_{\text{sol}} & = & G[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-nG[\text{H}_{2}\text{O}]-E[\text{UO}_{2}^{2+}]
+\end{eqnarray}
+
+\end_inset
+
+for 
+\begin_inset Formula $n\ge0$
+\end_inset
+
+ explicit aqua ligands.
+ The internal energy 
+\begin_inset Formula $\Delta E_{\text{intra}}$
+\end_inset
+
+ of the solute model complex is obtained by substituting 
+\begin_inset Formula $E$
+\end_inset
+
+ for 
+\begin_inset Formula $G$
+\end_inset
+
+ in the last equation.
+ Note that without proper statistical sampling over the solute degrees of
+ freedom 
+\begin_inset Formula $s$
+\end_inset
+
+ this approximation for solvation energy, justified to some extent for sufficien
+tly rigid solutes, breaks for increasingly many explicit water molecules
+ outside of the tightly bound first solvation shell as 
+\begin_inset Formula $n\to\infty$
+\end_inset
+
+.
+ Indeed, in a thought experiment the difference 
+\begin_inset Formula $G[(\text{H}_{2}\text{O})_{n}]-nG[\text{H}_{2}\text{O}]$
+\end_inset
+
+ for the above definition of 
+\begin_inset Formula $G$
+\end_inset
+
+ applied to water droplets asymptotically approaches 
+\begin_inset Formula $n(\bar{E}[\text{H}_{2}\text{O}]-G[\text{H}_{2}\text{O}])$
+\end_inset
+
+ where 
+\begin_inset Formula $\bar{E}$
+\end_inset
+
+ is the average configurational energy of a water molecule which is about
+ 10
+\begin_inset space ~
+\end_inset
+
+kcal to be compared to 6.3
+\begin_inset space ~
+\end_inset
+
+kcal of the water solvation energy (FXIME: refs).
+\end_layout
+
 \begin_layout Subsection
 Numerical solution of RISM equations
 \end_layout
