@@ -1142,9 +1142,7 @@ run_solute (SU solute_solve, SCM solute, SCM solvent,
       */
       assert (scm_is_bytevector (chi_fft));
       const size_t len = scm_c_bytevector_length (chi_fft);
-      const int nrad = len / (m * m * sizeof (double));
-      assert (len == m * m * nrad * sizeof (double));
-      assert (nrad == PD.nrad);
+      assert (len == m * m * PD.nrad * sizeof (double));
       chi_fft_buf = (real*) SCM_BYTEVECTOR_CONTENTS (chi_fft);
     }
 
