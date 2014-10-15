@@ -2509,8 +2509,8 @@ key "Joung13"
 \end_inset
 
  for the solvation of alkali and halide ions, applying the cSPC/E water
- model, see Table
-\begin_inset space ~
+ model (Table
+\begin_inset space \space{}
 \end_inset
 
 
@@ -2520,12 +2520,13 @@ reference "tab:simple-ions"
 
 \end_inset
 
-.
- As can be seen, the values of the excess chemical potential of simple ions
- calculated with our 1D-RISM code are in satisfactory agreement with reported
- RISM values and comparable to MD with SPC/E water and experimental results.
+).
+ As can be seen, the values of the excess chemical potential of simple ions,
+ calculated with our 1D-RISM code, agree satisfactorily with the reported
+ values and are comparable to results of MD calculations with SPC/E water
+ and of experiments.
  The most significant technical difference to Ref.
-\begin_inset space ~
+\begin_inset space \space{}
 \end_inset
 
 
@@ -2535,7 +2536,30 @@ key "Joung13"
 
 \end_inset
 
- is the choice of a smaller radial range (160 versus 819
+ is the choice of a smaller radial range, 160
+\begin_inset space ~
+\end_inset
+
+Å (819
+\begin_inset space ~
+\end_inset
+
+Å in Ref.
+\begin_inset space \space{}
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+), and a somewhat coarser grid spacing, 0.0390625
+\begin_inset space ~
+\end_inset
+
+Å (0.025
 \begin_inset space ~
 \end_inset
 
@@ -2547,51 +2571,14 @@ key "Joung13"
 
 \end_inset
 
-)
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
- SK: long range terms still necessary? AM: yes.
- Coulomb interaction at this distance is 332 kcal * A /160 A ~ 2 kcal
-\end_layout
-
-\end_inset
-
- and a slightly coarser grid spacing (0.0390625 versus 0.025
-\begin_inset space ~
-\end_inset
-
-Å in Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Joung13"
-
-\end_inset
-
-) made in this work.
- Overall the HNC closure relation yields slightly better results than KH
- with respect to MD and experimental reference data.
- Note that the RISM model underestimates the magnitude of solvation free
- energies of cations by a few percent only compared to experiment; the results
- for anions are slightly worse.
- The difference is in part intrinsic to the RISM approximation and part
- is due to the difference in LJ parameters of water hydrogens.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
+).
+ Overall the HNC closure relation yields slightly better results than the
+ KH closure as compared to MD and experimental reference data.
+ Note that the RISM model underestimates the magnitude of the solvation
+ free energies of cations by a few percent only, compared to experiments;
+ the results for anions are slightly worse.
+ The difference is in part intrinsic to the RISM approximation and in part
+ is due to the difference in LJ parameters of the hydrogen centers of water.
 \end_layout
 
 \begin_layout Standard
@@ -2605,9 +2592,10 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-The solvation energy (excess chemical potential) for alkali and halide ions
- by RISM approach with the cSPC/E water model.
- MD and experimental values are also shown for comparison.
+Solvation energy (excess chemical potential) of alkali and halide ions calculate
+d by the RISM approach with the cSPC/E water model as well as KH and HNC
+ closure relations.
+ MD results and experimental values are shown for comparison.
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -2668,6 +2656,10 @@ Ion
 
 \begin_layout Plain Layout
 KH
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2677,41 +2669,6 @@ KH
 
 \begin_layout Plain Layout
 KH
-\begin_inset Formula $^{b}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-HNC
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-HNC
-\begin_inset Formula $^{b}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MD
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -2724,8 +2681,43 @@ MD
 \begin_inset Text
 
 \begin_layout Plain Layout
-Exp
+HNC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HNC
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MD
 \begin_inset Formula $^{d}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Exp
+\begin_inset Formula $^{e}$
 \end_inset
 
 
@@ -3301,9 +3293,34 @@ footnotetext{
 \end_inset
 
 Energies in kcal/mol.
- KH and HNC closure relations have been used.
  
 \begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+This work.
+ The susceptibility of solvent water is calculated with the HNC closure,
+ as done in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+ 
+\series bold
+(FIXME: really?)
+\series default
+.
+ 
+\begin_inset Formula $^{c}$
 \end_inset
 
 
@@ -3323,7 +3340,7 @@ key "Joung13"
 
 .
  
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{d}$
 \end_inset
 
 
@@ -3343,7 +3360,7 @@ key "Joung08"
 
 .
  
-\begin_inset Formula $^{d}$
+\begin_inset Formula $^{e}$
 \end_inset
 
 
@@ -3373,21 +3390,6 @@ status open
 \end_inset
 
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: We have no cSPC/E MD simulation? so either RISM or the modified water
- models may be the reason for the deviations.
- AM: yes we do not.
- RDFs were produced with SPC/E too.
- Yes we say so in the next section.
- Added the same clause above as well.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
