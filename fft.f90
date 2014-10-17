@@ -123,40 +123,50 @@ contains
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
     ! *** end of interface ***
 
-    integer :: p, i, j, n
+    integer :: m, n
+
+    m = size (f, 1) * size (f, 2)
+    n = size (f, 3)
+    call do_fourier_rows (m, n, f, g)
+  end function fourier_rows
+
+
+  subroutine do_fourier_rows (m, n, f, g)
+    implicit none
+    integer, intent (in) :: m, n
+    real (rk), intent (in) :: f(m, n)
+    real (rk), intent (out) :: g(m, n)
+    ! *** end of interface ***
+
+    integer :: p, i
     real (rk) :: fac
     real (rk), parameter :: one = 1
 
-    n = size (f, 3)
     !
     ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
-    !$omp parallel do private(fac, p, i, j)
+    !$omp parallel do private(fac, p, i)
     do p = 1, n
        fac = 2 * n * (2 * p - 1)
-       do j = 1, size (f, 2)
-          do i = 1, size (f, 1)
-             g(i, j, p) =  f(i, j, p) * fac
-          enddo
+       do i = 1, m
+          g(i, p) =  f(i, p) * fac
        enddo
     enddo
     !$omp end parallel do
 
     call dst_rows (g)
 
-    !$omp parallel do private(fac, p, i, j)
+    !$omp parallel do private(fac, p, i)
     do p = 1, n
        fac = one / (2 * p - 1)
-       do j = 1, size (g, 2)
-          do i = 1, size (g, 1)
-             g(i, j, p) = g(i, j, p) * fac
-          enddo
+       do i = 1, m
+          g(i, p) = g(i, p) * fac
        enddo
     enddo
     !$omp end parallel do
-  end function fourier_rows
+  end subroutine do_fourier_rows
 
 
   function fourier_cols (f) result (g)
@@ -165,28 +175,42 @@ contains
     real (rk) :: g(size (f, 1), size (f, 2), size (f, 3))
     ! *** end of interface ***
 
-    integer :: p, i, j, n
+    integer :: m, n
 
     n = size (f, 1)
+    m = size (f, 2) * size (f, 3)
+    call do_fourier_cols (n, m, f, g)
+  end function fourier_cols
+
+
+  subroutine do_fourier_cols (n, m, f, g)
+    implicit none
+    integer, intent (in) :: n, m
+    real (rk), intent (in) :: f(n, m)
+    real (rk), intent (out) :: g(n, m)
+    ! *** end of interface ***
+
+    integer :: p, i
+
     !
     ! We use  RODFT11 (DST-IV) that is  "odd around j =  -0.5 and even
     ! around j  = n - 0.5".   Here we use integer  arithmetics and the
     ! identity (2 * j - 1) / 2 == j - 0.5.
     !
-    !$omp parallel workshare private(p, i, j)
-    forall (p = 1:n, i = 1:size (f, 2), j = 1:size (f, 3))
-       g(p, i, j) =  f(p, i, j) * (2 * n * (2 * p - 1))
+    !$omp parallel workshare private(p, i)
+    forall (p = 1:n, i = 1:m)
+       g(p, i) =  f(p, i) * (2 * n * (2 * p - 1))
     end forall
     !$omp end parallel workshare
 
     call dst_columns (g)
 
     !$omp parallel workshare private(p, i, j)
-    forall (p = 1:n, i = 1:size (g, 2), j = 1:size (g, 3))
-       g(p, i, j) = g(p, i, j) / (2 * p - 1)
+    forall (p = 1:n, i = 1:m)
+       g(p, i) = g(p, i) / (2 * p - 1)
     end forall
     !$omp end parallel workshare
-  end function fourier_cols
+  end subroutine do_fourier_cols
 
 
   function fourier (f) result (g)
@@ -275,14 +299,14 @@ contains
   subroutine dst_columns (f)
     use iso_c_binding, only: c_int
     implicit none
-    real (rk), intent (inout) :: f(:, :, :) ! ~ (n, m)
+    real (rk), intent (inout) :: f(:, :) ! (n, m)
     ! *** end of interface ***
 
     integer (c_int) :: m, n
 
     ! cast to c_int
     n = size (f, 1)
-    m = size (f) / n
+    m = size (f, 2)
 
     call rism_dst_columns (m, n, f)
   end subroutine dst_columns
@@ -291,14 +315,14 @@ contains
   subroutine dst_rows (f)
     use iso_c_binding, only: c_int
     implicit none
-    real (rk), intent (inout) :: f(:, :, :) ! ~ (m, n)
+    real (rk), intent (inout) :: f(:, :) ! (m, n)
     ! *** end of interface ***
 
     integer (c_int) :: m, n
 
     ! cast to c_int
-    n = size (f, 3)
-    m = size (f) / n
+    n = size (f, 2)
+    m = size (f, 1)
 
     call rism_dst_rows (n, m, f)
   end subroutine dst_rows
