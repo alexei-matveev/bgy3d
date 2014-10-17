@@ -2572,13 +2572,151 @@ key "Joung13"
 \end_inset
 
 ).
- Overall the HNC closure relation yields slightly better results than the
+ 
+\color blue
+The excess chemical potential is insensitive to the specific value of the
+ radial range of that order.
+ By repeating the same calculations with radial range set to 320
+\begin_inset space ~
+\end_inset
+
+Å and 80
+\begin_inset space ~
+\end_inset
+
+Å while keeping the same grid spacing we obtained the intervals of a width
+ no more than 0.01
+\begin_inset space ~
+\end_inset
+
+kcal/mol for each of the quoted values.
+ In contrast, explicit solvent models may require a size-dependent correction
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kastenholz06I,Kastenholz06II"
+
+\end_inset
+
+.
+ The RISM model predicts a double charge layer on a neutral ion cavity surface
+ leading to a finite electrostatic cavity potential of about 10--14
+\begin_inset space ~
+\end_inset
+
+kcal/(mol
+\begin_inset Formula $\cdot e$
+\end_inset
+
+) depending on the size and dispersion parameters of the ion.
+ This is comparable to the MD estimates of the vacuum--liquid interfacial
+ potential jump (cp.
+\begin_inset space \space{}
+\end_inset
+
+e.g.
+\begin_inset space \space{}
+\end_inset
+
+Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Warren07"
+
+\end_inset
+
+) and about half of the value for orientationally disordered liquid 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kastenholz06I"
+
+\end_inset
+
+ which are sometimes needed to correct ion solvation energies in explicit
+ methods.
+\end_layout
+
+\begin_layout Standard
+Overall the HNC closure relation yields slightly better results than the
  KH closure as compared to MD and experimental reference data.
  Note that the RISM model underestimates the magnitude of the solvation
  free energies of cations by a few percent only, compared to experiments;
  the results for anions are slightly worse.
  The difference is in part intrinsic to the RISM approximation and in part
  is due to the difference in LJ parameters of the hydrogen centers of water.
+ 
+\color blue
+An intrinsic problem of the RISM approach is an overestimation of the cavity
+ formation energy defined e.g.
+\begin_inset space ~
+\end_inset
+
+as the solvation energy of the uncharged solute.
+ For larger anions the cavity formation energy amounts to 14--19
+\begin_inset space ~
+\end_inset
+
+kcal/mol whereas the MD suggests smaller values of about 7
+\begin_inset space ~
+\end_inset
+
+kcal/mol, see e.g.
+\begin_inset space ~
+\end_inset
+
+Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Joung13"
+
+\end_inset
+
+ or supplementary material of Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Reif11b"
+
+\end_inset
+
+.
+ The error is significant for neutral solutes and less so for the ions where
+ the electrostatic contribution dominates.
+ To some extent this overestimation may be compensated by a correction proportio
+nal to the molar volume of the solute 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sergiievskyi14"
+
+\end_inset
+
+ cf.
+\begin_inset space \space{}
+\end_inset
+
+the KH+PMV and HNC+PMV rows of the Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:simple-ions"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -2740,10 +2878,6 @@ I
 
 \begin_layout Plain Layout
 KH
-\begin_inset Formula $^{b}$
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -2827,7 +2961,7 @@ KH
 
 \begin_layout Plain Layout
 KH
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -2997,7 +3131,7 @@ HNC
 
 \begin_layout Plain Layout
 HNC
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -3083,7 +3217,13 @@ HNC
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 KH+PMV
+\begin_inset Formula $^{c}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3092,6 +3232,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3104,6 +3246,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3116,6 +3260,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3128,6 +3274,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3140,6 +3288,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3152,6 +3302,8 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3166,7 +3318,13 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 HNC+PMV
+\begin_inset Formula $^{c}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3175,6 +3333,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3187,6 +3347,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3199,6 +3361,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3211,6 +3375,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3223,6 +3389,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3235,6 +3403,8 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
+
+\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3471,32 +3641,6 @@ Energies in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-This work.
- The susceptibility of solvent water is calculated with the HNC closure,
- as done in Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Joung13"
-
-\end_inset
-
- 
-\series bold
-(FIXME: really?)
-\series default
-.
- 
-\begin_inset Formula $^{c}$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
 Ref.
 \begin_inset space ~
 \end_inset
@@ -3509,6 +3653,30 @@ key "Joung13"
 \end_inset
 
 .
+ 
+\color blue
+
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+With partial molar volume correction as in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sergiievskyi14"
+
+\end_inset
+
+.
+
+\color inherit
  
 \begin_inset Formula $^{d}$
 \end_inset
