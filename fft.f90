@@ -38,6 +38,7 @@ module fft
   !   dr * dk = 2π / 2n
   !
   public :: mkgrid
+  public :: fourier             ! f(1:n) -> g(1:n)
   public :: fourier_rows        ! f(*, 1:n) -> g(*, 1:n)
 ! public :: fourier_cols        ! f(1:n, *) -> g(1:n, *)
   public :: integrate           ! f(1:n) -> scalar
@@ -214,6 +215,9 @@ contains
 
 
   function fourier (f) result (g)
+    !
+    ! We could call eithr do_fourier_rows() or do_fourier_cols() here.
+    !
     implicit none
     real (rk), intent (in) :: f(:)
     real (rk) :: g(size (f))
