@@ -1404,6 +1404,7 @@ contains
     ! Prints some results.
     !
     use fft, only: mkgrid, fourier_rows, FT_FW, integral, integrate
+    use fft, only: fourier, FT_BW
     use linalg, only: polyfit
     use foreign, only: site, HNC => CLOSURE_HNC, KH => CLOSURE_KH, PY => CLOSURE_PY, &
          comm_rank
@@ -1497,6 +1498,7 @@ contains
        real (rk) :: ni(n, m, nrad) ! number integral
        real (rk) :: chg(n, nrad) ! charge density around solute sites
        real (rk) :: chn(n, nrad) ! charge integral for each solute site
+       real (rk) :: chp(n, nrad) ! potential of the charge density
 
        ! Dont like to pass redundant info, recompute grid from rmax:
        call mkgrid (rmax, r, dr, k, dk)
@@ -1874,6 +1876,23 @@ contains
                chg(i, :) = chg(i, :) + g(i, j, :) * q(j)
             enddo
             chn(i, :) = integral (chg(i, :)) * (rho * dr**3)
+
+            ! Solve Poisson equation using  FT. This potential is only
+            ! used for visualization and  no other purpose.  First, FT
+            ! of the density:
+            chp (i, :) = fourier (chg(i, :)) * (rho * dr**3 / FT_FW)
+
+            ! This is FT of the Coulomb potential:
+            chp (i, :) = 4 * pi * chp (i, :) / k**2
+
+            ! This  is real  space Coulomb  field of  the  solvent, in
+            ! kcals:
+            chp (i, :) = fourier (chp(i, :)) * (EPSILON0INV * dk**3 / FT_BW)
+
+            if (verb > 0 .and. nrad > 0) then
+               print *, "# Medium charge integral for site", i, "is", chn(i, nrad)
+               print *, "# Medium charge potential at site", i, "is", chp(i, 1)
+            endif
          enddo
        end block
 
@@ -1886,9 +1905,11 @@ contains
              col = 0
              write (*, 100) "Distance r, A", col + 1
              col = col + 1
-             write (*, 100) "Charge density z(u)", col + 1, col + n
+             write (*, 100) "Charge density z(u), e/A^3", col + 1, col + n
              col = col + n
-             write (*, 100) "Charge integral Z(u)", col + 1, col + n
+             write (*, 100) "Charge integral Z(u), e", col + 1, col + n
+             col = col + n
+             write (*, 100) "Charge potential V(u), kcal/e", col + 1, col + n
              col = col + n
              write (*, 100) "RDF g(u, v)", col + 1, col + n * m
              col = col + n * m
@@ -1900,7 +1921,7 @@ contains
              col = col + n * m
              write (*, 100) "Direct correlation c(u, v)", col + 1, col + n * m
              col = col + n * m
-             write (*, 100) "Momentum k", col + 1
+             write (*, 100) "Momentum k, A^-1", col + 1
              col = col + 1
              write (*, 100) "Solvent susceptibility x(v, v)", col + 1, col + m * m
              col = col + m * m
@@ -1909,6 +1930,7 @@ contains
                 write (*, *) r(p), &
                      (chg(i, p), i=1,n), &
                      (chn(i, p), i=1,n), &
+                     (chp(i, p), i=1,n), &
                      ((g(i, j, p), i=1,n), j=1,m), &
                      ((ni(i, j, p), i=1,n), j=1,m), &
                      ((v(i, j, p), i=1,n), j=1,m), &
