@@ -520,29 +520,26 @@ reference "eq:rism-uv"
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
- obtained self-consistently from the pure solvent RISM equation 
+ obtained self-consistently from the 
+\color blue
+analogous
+\color inherit
+ pure solvent 
+\color blue
+RISM equation at a specific solvent number density 
+\begin_inset Formula $\rho$
+\end_inset
+
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,Hirata83"
 
 \end_inset
 
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-h^{vv}=\omega^{v}\ast c^{vv}\ast\chi^{v}\label{eq:rism-vv}
-\end{equation}
-
-\end_inset
-
-at a specific solvent number density 
-\begin_inset Formula $\rho$
-\end_inset
-
 .
+
+\color inherit
  Finally, 
 \begin_inset Formula $\omega^{u}$
 \end_inset
@@ -601,7 +598,9 @@ Since there are two unknowns,
 \begin_inset Formula $c$
 \end_inset
 
-, in either Eqs.
+, 
+\color blue
+in Eq.
 \begin_inset space ~
 \end_inset
 
@@ -612,14 +611,9 @@ reference "eq:rism-uv"
 
 \end_inset
 
-) or (
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:rism-vv"
-
-\end_inset
-
-), one needs a closure relation to make the equations solvable.
+) 
+\color inherit
+one needs a closure relation to make the equations solvable.
  Such a relation between 
 \begin_inset Formula $h$
 \end_inset
@@ -797,59 +791,32 @@ key "book:Hirata03,book:Hansen06"
 
 \begin_layout Standard
 The solvation free energy at infinite dilution of a solute, approximated
- by the excess chemical potential for a rigid solute geometry 
+ by the excess chemical 
+\color blue
+potential 
+\begin_inset Formula $\Delta\mu$
+\end_inset
+
+ for
+\color inherit
+ a rigid solute geometry 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,book:Hansen06"
 
 \end_inset
 
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
 , can be determined by gradually increasing the solute-solvent coupling
- from zero to full strength during thermodynamic integration (TI).
- Within the framework of RISM theory, it can be expressed by the Kirkwood
- formula in terms of the pair correlation functions and an integral over
- the Kirkwood coupling parameter 
-\begin_inset Formula $\xi$
-\end_inset
-
- from 0 to 1 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "book:Hirata03"
-
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-\Delta\mu=\frac{4\pi\rho}{\beta}\sum_{i=1}^{N_{u}}\sum_{\alpha=1}^{N_{v}}\int_{0}^{1}d\xi\int_{0}^{\infty}u_{i\alpha}(r)g_{i\alpha}(r,\xi)r^{2}dr,
-\end{equation}
-
-\end_inset
-
-Here 
-\begin_inset Formula $g_{i\alpha}=h_{i\alpha}+1$
-\end_inset
-
- is the site-site distribution function.
- For the HNC closure, an analytical expression of 
-\begin_inset Formula $\Delta\mu$
-\end_inset
-
- has been derived by Singer and Chandler 
+ from zero to full strength during 
+\color blue
+thermodynamic integration.
+ For the HNC closure,
+\color inherit
+ an analytical 
+\color blue
+expression has been
+\color inherit
+ derived by Singer and Chandler 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85"
@@ -1148,7 +1115,9 @@ key "petsc-user-ref"
 \begin_inset Formula $-\partial F/\partial\vec{s}$
 \end_inset
 
-, is confined to the intra-molecular correlation function 
+, is confined to the intra-molecular correlation 
+\color blue
+function 
 \begin_inset Formula $\omega^{u}$
 \end_inset
 
@@ -1156,85 +1125,12 @@ key "petsc-user-ref"
 \end_layout
 
 \begin_layout Standard
-A similar approach is used to solve the RISM equations for the pure solvent,
- Eqs.
-\begin_inset space ~
-\end_inset
 
-(
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:rism-vv"
-
-\end_inset
-
-) and (
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:closure-hnc"
-
-\end_inset
-
-).
- The only significant difference is that solving Eq.
-\begin_inset space ~
-\end_inset
-
-(
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:rism-vv"
-
-\end_inset
-
-) for 
-\begin_inset Formula $h$
-\end_inset
-
- given 
-\begin_inset Formula $c[t]$
-\end_inset
-
- involves a system of linear equations.
- The total correlation function 
-\begin_inset Formula $h$
-\end_inset
-
- is calculated with the help of the direct correlation function 
-\begin_inset Formula $c$
-\end_inset
-
- using either Eq.
-\begin_inset space ~
-\end_inset
-
-(
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:rism-uv"
-
-\end_inset
-
-) or (
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:rism-vv"
-
-\end_inset
-
-) using fast Fourier transform 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "FFTW05"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-The long-range interactions are separated from the short-range ones and
- treated using the Ng scheme 
+\color blue
+The 
+\color inherit
+long-range interactions are separated from the short-range ones and treated
+ using the Ng scheme 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ng74"
@@ -2358,8 +2254,19 @@ All our calculations were carried out at the temperature of 298 K, with
 
 -norm of the indirect correlation matrix.
  The discrete sine transform was applied as Fourier transform when calculating
- convolution integrals.
- With the water solvent susceptibility as input, the solvent-solute RISM
+ 
+\color blue
+convolution integrals 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "FFTW05"
+
+\end_inset
+
+.
+ 
+\color inherit
+With the water solvent susceptibility as input, the solvent-solute RISM
  equations were solved iteratively to determine radial distribution functions
  and to evaluate the excess chemical potential.
  
