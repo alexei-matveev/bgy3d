@@ -21,6 +21,7 @@
   (make-molecule
    move-molecule
    translate-molecule
+   scale-molecule-charge
    molecule-name
    molecule-sites
    molecule-positions
@@ -211,6 +212,13 @@
                           positions)))
     (move-molecule solute translated)))
 
+(define (scale-molecule-charge solute scale-factor)
+  (let ((name (molecule-name solute))
+        (sites (molecule-sites solute)))
+    (make-molecule name
+                   (map (lambda (site) (scale-site-charge site scale-factor))
+                        sites))))
+
 ;;;
 ;;; Returns two corners of the bounding box.
 ;;;
@@ -294,6 +302,12 @@
   (match site
     ((name position sigma epsilon old-charge)
      (make-site name position sigma epsilon new-charge))))
+
+(define (scale-site-charge site scale-factor)
+  (match site
+    ((name position sigma epsilon old-charge)
+     (let ((new-charge (* scale-factor old-charge)))
+       (make-site name position sigma epsilon new-charge)))))
 
 (define (move-site site new-position)
   (match site
