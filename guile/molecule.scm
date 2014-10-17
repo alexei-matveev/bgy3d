@@ -264,15 +264,15 @@
       (match param
              ("sigma"
               (if (equal? target-site (site-name site))
-                  (update-sigma site value)
+                  (update-site-sigma site value)
                   site))
              ("epsilon"
               (if (equal? target-site (site-name site))
-                  (update-epsilon site value)
+                  (update-site-epsilon site value)
                   site))
              ("charge"
               (if (equal? target-site (site-name site))
-                  (update-charge site value)
+                  (update-site-charge site value)
                   site))))
 
     ;; Error if target-site is not in the molecule:
@@ -280,17 +280,17 @@
             (error "No such site:" target-site))
     (make-molecule name (map update-site sites))))
 
-(define (update-sigma site new-sigma)
+(define (update-site-sigma site new-sigma)
   (match site
     ((name position old-sigma epsilon charge)
      (make-site name position new-sigma epsilon charge))))
 
-(define (update-epsilon site new-epsilon)
+(define (update-site-epsilon site new-epsilon)
   (match site
     ((name position sigma old-epsilon charge)
      (make-site name position sigma new-epsilon charge))))
 
-(define (update-charge site new-charge)
+(define (update-site-charge site new-charge)
   (match site
     ((name position sigma epsilon old-charge)
      (make-site name position sigma epsilon new-charge))))
