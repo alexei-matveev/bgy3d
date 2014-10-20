@@ -10050,58 +10050,45 @@ status open
 \end_layout
 
 \begin_layout Section
-Concluding remarks
+Conclusions
 \end_layout
 
 \begin_layout Standard
 The atomistic nature of the RISM model offers a more detailed and consistent
  view on solvation effects of uranyl aqua complexes in comparison to the
- state of the art PCM model: a combined QM+RISM model predicts essentially
- the same uranyl bond lengths and similar solvation free energies independent
- of the number of explicit water molecules introduced into the first solvation
- shell.
- The results of the PCM model of solvation depend stronger on the structure
+ state-of-the-art PCM models.
+ Combined QM+RISM models predict essentially the same uranyl bond lengths
+ and similar solvation free energies, independent of the number of explicit
+ water molecules introduced into the first solvation shell.
+ The results of the PCM solvation model depend more strongly on the structure
  of an explicitly treated first solvation shell.
- The exploration of the free energy surface with the MM+RISM combination
- suggests a qualitative difference to the continuum model: the solvation
- energy and the structure of the first solvation shell of an under-coordinated
- complex of uranyl with four water molecules matches those of a five-coordinated
- complex.
- This is a sign of the interchangeability of explicit water molecules and
- their net statistical effect as modeled with the RISM approach.
- The qualitative difference between the PCM and RISM models that the former
- predicts uranyl--water distances shorter in solution than in the gas phase
- and the latter yields only a small change remains to be interpreted.
- 
-\color black
-Without the need for statistical sampling as required for explicit solvation
- models, the RISM method predicts the correct water solvent structure around
- the uranyl ion in good agreement with experimental results.
- Moreover, the hybrid QM+RISM calculation provides a small free energy differenc
-e 
-\color inherit
-of
-\begin_inset Formula $-1.6$
-\end_inset
-
-
+ Exploration of the free energy surface with a MM+RISM method suggests a
+ qualitative difference to the polarizable continuum models.
+ The solvation energy and the structure of the first solvation shell of
+ an under-coordinated complex of uranyl with four water molecules match
+ those of a five-coordinated complex.
+ Thus, explicit water molecules in the first solvation shell and their net
+ statistical effect, as modeled with the RISM approach, are largely interchangea
+ble.
+ One qualitative difference between the PCM and RISM models remains to be
+ interpreted.
+ The former method predicts uranyl–water distances shorter in solution than
+ in the gas phase and the latter yields only a small change due to solvation.
+ Without the need for statistical sampling, as required for explicit solvation
+ models, the RISM method predicts a water-solvent structure around a uranyl
+ ion, in good qualitative agreement with experiment.
+ The QM+RISM approach yields a small free energy difference, −1.6
 \begin_inset space ~
 \end_inset
 
-kcal/mol
-\color black
- between four- and five-coordinated uranyl in aqueous solution, which is
- close to the experimental value 
-\color inherit
-of
-\begin_inset Formula $-1.2$
-\end_inset
-
-
+kcal/mol, between four- and five-coordinated uranyl in aqueous solution,
+ in excellent agreement with the experimental result, −1.2
 \begin_inset space ~
 \end_inset
 
-kcal/mol, but overestimated by continuum solvation model and AIMD calculations.
+kcal/mol.
+ This is success is in contrast to the results of polarizable continuum
+ models and AIMD calculations which both notably overestimate this difference.
 \end_layout
 
 \begin_layout Section*
@@ -10109,8 +10096,40 @@ Acknowledgments
 \end_layout
 
 \begin_layout Standard
-BL is grateful for a fellowship by the International Graduate School of
+We thank Prof.
+\begin_inset space ~
+\end_inset
+
+H.-J.
+\begin_inset space ~
+\end_inset
+
+Bungartz and co-workers for valuable discussions and Dr.
+\begin_inset space ~
+\end_inset
+
+L.
+\begin_inset space ~
+\end_inset
+
+Jager and Prof.
+\begin_inset space ~
+\end_inset
+
+M.
+\begin_inset space ~
+\end_inset
+
+Griebel for providing the source of the BGY3D program package.
+ BL thanks Dr.
+ I.
+\begin_inset space ~
+\end_inset
+
+Chiorescu for helpful discussions.
+ BL is grateful for a fellowship by the International Graduate School of
  Science and Engineering at Technische Universität München.
+ 
 \end_layout
 
 \begin_layout Standard
