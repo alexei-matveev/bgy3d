@@ -1356,7 +1356,11 @@ Lennard--Jones interaction parameters for uranyl:
 \begin_inset Formula $q$
 \end_inset
 
- in natural units.
+ (
+\begin_inset Formula $e$
+\end_inset
+
+).
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -1864,7 +1868,11 @@ Lennard--Jones interaction parameters for water:
 \begin_inset Formula $q$
 \end_inset
 
- in natural units.
+ (
+\begin_inset Formula $e$
+\end_inset
+
+).
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3865,19 +3873,20 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Coordination number 
+RISM results for solvated uranyl described by the PM13 force field and various
+ water models: coordination number 
 \begin_inset Formula $N$
 \end_inset
 
- of the first solvation shell, position of the first peak, 
+ of the first solvation shell, position of the first peak 
 \begin_inset Formula $d_{1}$
 \end_inset
 
-(U--OW) (pm), and solvation energy 
+(U--OW) (pm), and solvation free energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- (kcal/mol) of uranyl for the PM13 force field model and various water models.
+ (kcal/mol).
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -4794,19 +4803,21 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Coordination number 
+Calculated and experimental results for uranyl solvated in water: coordination
+ number 
 \begin_inset Formula $N$
 \end_inset
 
- of the first solvation shell, positions of the first, 
+ of the first solvation shell, positions (pm) of the first, 
 \begin_inset Formula $d_{1}$
 \end_inset
 
-(U--OW), and second, 
+(U–OW), and second, 
 \begin_inset Formula $d_{2}$
 \end_inset
 
-(U--OW) (pm), peaks and solvation free energy, 
+(U–OW), peaks of the radial distribution function, solvation free energy
+ 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
@@ -5933,7 +5944,11 @@ footnotetext{
 \begin_inset Formula $^{a}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -5948,7 +5963,11 @@ key "Nichols08"
 \begin_inset Formula $^{b}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -5963,7 +5982,11 @@ key "Buehl06"
 \begin_inset Formula $^{c}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -5978,7 +6001,11 @@ key "Frick09"
 \begin_inset Formula $^{d}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -5993,7 +6020,11 @@ key "Guilbaud93"
 \begin_inset Formula $^{e}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6008,7 +6039,11 @@ key "Rai12"
 \begin_inset Formula $^{f}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6023,7 +6058,11 @@ key "Neuefeind04"
 \begin_inset Formula $^{g}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6038,7 +6077,11 @@ key "Wahlgren99"
 \begin_inset Formula $^{h}$
 \end_inset
 
- Ref.
+
+\begin_inset space ~
+\end_inset
+
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6054,7 +6097,11 @@ key "Soderholm05"
 \begin_inset Formula $^{i}$
 \end_inset
 
- Computed from 
+
+\begin_inset space ~
+\end_inset
+
+Calculated from 
 \begin_inset Formula $\Delta_{\text{hyd}}H_{\text{abs}}^{\circ}=-1345\pm20$
 \end_inset
 
@@ -6074,7 +6121,7 @@ J/(mol
 \begin_inset Formula $\cdot$
 \end_inset
 
-K) in Ref.
+K) as in Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6090,7 +6137,11 @@ key "Marcus86"
 \begin_inset Formula $^{k}$
 \end_inset
 
- Computed from 
+
+\begin_inset space ~
+\end_inset
+
+Calculated from 
 \begin_inset Formula $\Delta H_{\text{hyd}}=-1665\pm64$
 \end_inset
 
@@ -6126,7 +6177,11 @@ key "Gibson05"
 \begin_inset Formula $^{l}$
 \end_inset
 
- Computed from 
+
+\begin_inset space ~
+\end_inset
+
+Calculated from 
 \begin_inset Formula $\Delta H_{\text{f}}^{\circ}=-371\pm60$
 \end_inset
 
@@ -6134,7 +6189,11 @@ key "Gibson05"
 \begin_inset space ~
 \end_inset
 
-kcal/mol for gas-phase uranyl 
+kcal/mol for uranyl in gas-phase, from Ref.
+\begin_inset space ~
+\end_inset
+
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cornehl96"
@@ -6153,7 +6212,7 @@ cal/(mol
 \begin_inset Formula $\cdot$
 \end_inset
 
-K) in Ref.
+K) following Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6176,35 +6235,6 @@ status open
 \end_inset
 
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: please use consistently kcal/mol.
- AM: This is intentional.
- We use a slightly unusual definition of a kcal throughout, the International
- Steam Table kcal of 4.1868 kJ (hardwired in the code).
- Most people use thermochemical kcal of 4.184 kJ.
- On the other hand, some papers directly cite kcals (not feasible to find
- out which, likely thermochemical).
- Also it was difficult to attribute the values copied over publications
- AND converted to the values in the original literature during my literature
- research.
- So I intentionally keep the quoted data as they were published in the original
- literature, including the units and notation.
- For 
-\begin_inset Formula $\Delta S$
-\end_inset
-
- conventional units are anyway different either cal or J (not kcal or kJ),
- otherwise the value is too low.
- As is, it makes it easier to trace back, I think.
- No change.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -6341,16 +6371,17 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Average uranyl--water distance, 
+Properties of solvated uranyl from various force-field models: average uranyl–wa
+ter distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW), intra-molecular interaction between the uranyl ion and its explicit
- water ligands, 
+(U–OW), intra-molecular interaction energy, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
-, and solvation free energy, 
+, between a uranyl ion and its water ligands, and solvation free energy,
+ 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
@@ -7026,11 +7057,12 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Average uranyl--water distance of the first solvation shell, 
+Calculated properties of solvated uranyl from molecular mechanics calculations
+ using n explicit water ligands: average uranyl–water distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW), intra-molecular energy 
+(U–OW), to the first solvation shell, intra-molecular energy 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
@@ -7038,12 +7070,11 @@ Average uranyl--water distance of the first solvation shell,
 \begin_inset Formula $^{a}$
 \end_inset
 
- without and with RISM solvent.
- The uranyl solvation energy, 
+ with and without RISM solvent, and solvation free energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, is also shown.
+.
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -7525,11 +7556,7 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Corresponds to binding energy of 
-\begin_inset Formula $4\leq n\leq6$
-\end_inset
-
- water ligands in [UO
+Value corresponds to the binding energy of the water ligands in [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7545,11 +7572,15 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
- and is identically zero for rigid bare uranyl (
+, 
+\begin_inset Formula $n=4-6$
+\end_inset
+
+, but is identically zero for rigid bare uranyl, 
 \begin_inset Formula $n=0$
 \end_inset
 
-).
+.
  
 \begin_inset Formula $^{b}$
 \end_inset
@@ -7558,7 +7589,7 @@ O)
 \begin_inset space ~
 \end_inset
 
-Bond lengths in pm, energies in kcal/mol.
+Distances in pm, energies in kcal/mol.
  
 \begin_inset Formula $^{c}$
 \end_inset
@@ -7567,7 +7598,7 @@ Bond lengths in pm, energies in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-Structures in Figure
+For the structure, see Figure
 \begin_inset space ~
 \end_inset
 
@@ -7578,7 +7609,7 @@ reference "fig:geometries"
 
 \end_inset
 
-
+.
 \begin_inset ERT
 status open
 
@@ -8319,28 +8350,33 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Uranyl bond length, 
+Calculated properties of solvated uranyl from QM calculations, either pure
+ or with solvent models: uranyl bond length, 
 \begin_inset Formula $d$
 \end_inset
 
-(U--O), uranyl--water distance, 
+(U–O), uranyl–water distance, 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW), intra-molecular energy, 
+(U–OW), intra-molecular energy, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
-, its changes due to the solvent environment, 
+,
+\begin_inset Formula $^{a}$
+\end_inset
+
+ its changes due to the solvent environment, 
 \begin_inset Formula $\Delta^{2}E_{\text{intra}}$
 \end_inset
 
-, and the uranyl solvation energy, 
+, and the solvation free energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-.
-\begin_inset Formula $^{a}$
+, of uranyl.
+\begin_inset Formula $^{b}$
 \end_inset
 
  
@@ -9178,8 +9214,7 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Bond lengths in pm, energies in kcal/mol.
- Symmetric uranyl aqua complexes [UO
+Value corresponds to the binding energy of the water ligands in [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -9196,15 +9231,14 @@ O)
 \end_inset
 
 , 
-\begin_inset Formula $4\leq n\leq6$
+\begin_inset Formula $n=4-6$
 \end_inset
 
- and a bare uranyl (
+, but is identically zero for rigid bare uranyl, 
 \begin_inset Formula $n=0$
 \end_inset
 
-) are treated by QM while interactions with the PR-SPC/E water solvent are
- treated by KL2 force field.
+.
  
 \begin_inset Formula $^{b}$
 \end_inset
@@ -9213,11 +9247,33 @@ O)
 \begin_inset space ~
 \end_inset
 
-
-\begin_inset Formula $D_{4\text{h}}$
+Bond lengths in pm, energies in kcal/mol.
+ Uranyl aqua complexes [UO
+\begin_inset Formula $_{2}$
 \end_inset
 
- structure.
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, 
+\begin_inset Formula $n=4-6$
+\end_inset
+
+, and a bare uranyl (
+\begin_inset Formula $n=0$
+\end_inset
+
+) treated by QM while interactions with the PR-SPC/E water solvent are described
+ by the KL2 force field.
  
 \begin_inset Formula $^{c}$
 \end_inset
@@ -9226,24 +9282,32 @@ O)
 \begin_inset space ~
 \end_inset
 
+Symmetry constraints (see text): 
+\begin_inset Formula $D_{4\text{h}}$
+\end_inset
 
+ for 
+\begin_inset Formula $n=4$
+\end_inset
+
+, 
 \begin_inset Formula $D_{5\text{h}}$
 \end_inset
 
- structure.
- 
-\begin_inset Formula $^{d}$
+ for 
+\begin_inset Formula $n=5$
 \end_inset
 
-
-\begin_inset space ~
-\end_inset
-
-
+, and 
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
- structure.
+ for 
+\begin_inset Formula $n=6$
+\end_inset
+
+.
+ 
 \begin_inset ERT
 status open
 
@@ -9272,23 +9336,48 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Uranyl bond length, 
+Properties
+\begin_inset Formula $^{a}$
+\end_inset
+
+ of solvated uranyl, modeled as [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{5}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+ (with two exceptions
+\begin_inset Formula $^{b,c}$
+\end_inset
+
+) calculated by combinations of QM and solvation models: uranyl bond length
+ 
 \begin_inset Formula $d$
 \end_inset
 
-(U--O), uranyl--water distance, 
+(U–O), uranyl–water distance 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW), uranyl solvation- and reaction energies, 
+(U–OW), solvation energy 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
- and 
-\begin_inset Formula $\Delta G_{\text{R}}$
+ of uranyl, reaction energy 
+\begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, Eq.
+ for adding an explicit water ligand to the tetra-coordinated complex, Eq.
 \begin_inset space ~
 \end_inset
 
@@ -9299,10 +9388,8 @@ reference "eq:four-to-five"
 
 \end_inset
 
-), by combinations of QM and solvent models and experiment.
-\begin_inset Formula $^{a}$
-\end_inset
-
+).
+ Experimental values shown for comparison.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -9336,7 +9423,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="9" columns="5">
+<lyxtabular version="3" rows="10" columns="5">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
@@ -9407,8 +9494,8 @@ Method
 \begin_inset Text
 
 \begin_layout Plain Layout
-BP+PCM
-\begin_inset Formula $^{b}$
+BP+COSMO
+\begin_inset Formula $^{d}$
 \end_inset
 
 
@@ -9465,7 +9552,7 @@ BP+PCM
 
 \begin_layout Plain Layout
 BP+RISM
-\begin_inset Formula $^{b}$
+\begin_inset Formula $^{d}$
 \end_inset
 
 
@@ -9522,7 +9609,7 @@ BP+RISM
 
 \begin_layout Plain Layout
 MP2+IEFPCM
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{e}$
 \end_inset
 
 
@@ -9544,7 +9631,7 @@ MP2+IEFPCM
 
 \begin_layout Plain Layout
 244
-\begin_inset Formula $\sim$
+\begin_inset Formula $-$
 \end_inset
 
 248
@@ -9578,12 +9665,66 @@ MP2+IEFPCM
 </cell>
 </row>
 <row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+B3LYP+COSMO
+\begin_inset Formula $^{f}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+176
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+249
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+11.1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
 <cell alignment="left" valignment="top" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 PBE+COSMO
-\begin_inset Formula $^{d}$
+\begin_inset Formula $^{g}$
 \end_inset
 
 
@@ -9640,7 +9781,7 @@ PBE+COSMO
 
 \begin_layout Plain Layout
 BLYP+CPMD
-\begin_inset Formula $^{e}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -9694,7 +9835,7 @@ BLYP+CPMD
 
 \begin_layout Plain Layout
 MP2+SCIPCM
-\begin_inset Formula $^{f}$
+\begin_inset Formula $^{i}$
 \end_inset
 
 
@@ -9750,8 +9891,8 @@ MP2+SCIPCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-MP2+PCM
-\begin_inset Formula $^{g}$
+MP2+SCIPCM
+\begin_inset Formula $^{c}$
 \end_inset
 
 
@@ -9773,7 +9914,7 @@ MP2+PCM
 
 \begin_layout Plain Layout
 244
-\begin_inset Formula $\sim$
+\begin_inset Formula $-$
 \end_inset
 
 250
@@ -9812,7 +9953,7 @@ MP2+PCM
 
 \begin_layout Plain Layout
 HEXS
-\begin_inset Formula $^{h}$
+\begin_inset Formula $^{i}$
 \end_inset
 
 
@@ -9896,7 +10037,7 @@ footnotetext{
 
 \end_inset
 
- 
+
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -9904,7 +10045,7 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Bond lengths in pm, energies in kcal/mol.
+Distances in pm, energies in kcal/mol.
  
 \begin_inset Formula $^{b}$
 \end_inset
@@ -9913,64 +10054,15 @@ Bond lengths in pm, energies in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-Derived from [UO
+Car-Parinello molecular dynamics (CPMD) calculation on uranyl, UO
 \begin_inset Formula $_{2}$
 \end_inset
 
-(H
-\begin_inset Formula $_{2}$
-\end_inset
 
-O)
-\begin_inset Formula $_{5}$
-\end_inset
-
-]
 \begin_inset Formula $^{2+}$
 \end_inset
 
- aqua complex in this work.
- 
-\begin_inset Formula $^{c}$
-\end_inset
-
- Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Cao05"
-
-\end_inset
-
-.
- 
-\begin_inset Formula $^{d}$
-\end_inset
-
- Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Shamov05"
-
-\end_inset
-
-.
- 
-\begin_inset Formula $^{e}$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-Ref.
+, in a water solution, Ref.
 \begin_inset space ~
 \end_inset
 
@@ -9983,14 +10075,14 @@ key "Buehl05"
 
 .
  
-\begin_inset Formula $^{f}$
+\begin_inset Formula $^{c}$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-Ref.
+Self-consistent isodensity polarizable continuum model (SCIPCM), Ref.
 \begin_inset space ~
 \end_inset
 
@@ -10001,7 +10093,57 @@ key "Gutowski06"
 
 \end_inset
 
-, geometry optimized at the B3LYP level in the gas phase.
+; structure optimization at the B3LYP level on a model in the gas phase
+ that includes the second solvation shell.
+ 
+\begin_inset Formula $^{d}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+This work.
+ 
+\begin_inset Formula $^{e}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Integral equation formalism polarizable continuum model (IEFPCM), Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Cao05"
+
+\end_inset
+
+.
+ 
+\begin_inset Formula $^{f}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Small-core effective core potential, Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shamov05"
+
+\end_inset
+
+.
  
 \begin_inset Formula $^{g}$
 \end_inset
@@ -10010,7 +10152,22 @@ key "Gutowski06"
 \begin_inset space ~
 \end_inset
 
-Same approach as (f), but including explicitly the second solvation shell.
+All-electron four-component scalar relativistic calculation, Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shamov05"
+
+\end_inset
+
+, except the value of 
+\begin_inset Formula $\Delta G_{\text{sol}}$
+\end_inset
+
+.
  
 \begin_inset Formula $^{h}$
 \end_inset
@@ -10019,7 +10176,48 @@ Same approach as (f), but including explicitly the second solvation shell.
 \begin_inset space ~
 \end_inset
 
-Ref.
+Single-point calculation at the all-electron zeroth order regular approximation
+ (ZORA) level, Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shamov05"
+
+\end_inset
+
+.
+ 
+\begin_inset Formula $^{i}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Self-consistent isodensity polarizable continuum model (SCIPCM), Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gutowski06"
+
+\end_inset
+
+; structure optimization at the B3LYP level on a model in the gas phase.
+ 
+\begin_inset Formula $^{j}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Experimental results, Ref.
 \begin_inset space ~
 \end_inset
 
@@ -10031,6 +10229,7 @@ key "Soderholm05"
 \end_inset
 
 .
+ 
 \begin_inset ERT
 status open
 
