@@ -7602,20 +7602,7 @@ QM+RISM
 \end_layout
 
 \begin_layout Standard
-The uranyl--water interactions according to DFT as employed in QM, QM+PCM,
- and QM+RISM calculations are of an overall strength comparable to the KL1
- and KL2 force field models.
- The typical internal energy corresponding to the binding of the five ligands
- of the penta-aqua uranyl complex, including uranyl relaxation, is about
- 
-\begin_inset Formula $-270$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol, Table
+In Table
 \begin_inset space ~
 \end_inset
 
@@ -7626,35 +7613,41 @@ reference "tab:QM+RISM-vs-QM+PCM"
 
 \end_inset
 
- cp.
+, results of gas phase, PCM, and RISM calculations for bare uranyl as well
+ as models with 4–6 explicit aqua ligands are compared.
+ The uranyl–water interactions according to DFT as employed in QM, QM+PCM,
+ and QM+RISM calculations are of an overall strength comparable to the KL1
+ and KL2 force field models.
+ The typical internal energy corresponding to the binding of the five ligands
+ of the penta-aqua uranyl complex, including uranyl relaxation, is about
+ −270
 \begin_inset space ~
 \end_inset
 
-Table
+kcal, Table
 \begin_inset space ~
 \end_inset
 
 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "tab:energy-vs-model"
+reference "tab:QM+RISM-vs-QM+PCM"
 
 \end_inset
 
 .
- On the other hand, a visual inspection of the potential energy as a function
- of 
-\begin_inset Formula $d$
+ On the other hand, visual inspection shows that the attractive branch of
+ the QM potential as a function of 
+\begin_inset Formula $d(\text{U}-\text{OW})$
 \end_inset
 
-(U--OW) shows that the attractive branch of the potential is less steep
- in QM than with the KL2 force field.
- Maybe in part due to this inconsistency we found some free energy minimizations
- with the QM+RISM approach and without symmetry constraints to diverge towards
- substitution of explicit waters by the RISM medium.
- Hence, when comparing QM, QM+PCM, and QM+RISM models, we resorted to symmetric
- conformations of the solute complexes (with point group symmetries 
-\begin_inset Formula $D{}_{4\text{h}}$
+ is less steep than when calculated with the KL2 force field.
+ This inconsistency may rationalize in part why some free energy minimizations
+ with the QM+RISM approach, without symmetry constraints, showed a substitution
+ of explicit water molecules by the RISM medium.
+ Hence, when comparing QM, QM+PCM, and QM+RISM models we resorted to symmetric
+ conformations of the solute complexes, with point group symmetries 
+\begin_inset Formula $D_{4\text{h}}$
 \end_inset
 
  for 
@@ -7669,7 +7662,7 @@ reference "tab:energy-vs-model"
 \begin_inset Formula $n=5$
 \end_inset
 
- and 
+, and 
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
@@ -7677,7 +7670,7 @@ reference "tab:energy-vs-model"
 \begin_inset Formula $n=6$
 \end_inset
 
-).
+.
 \end_layout
 
 \begin_layout Standard
@@ -7692,8 +7685,8 @@ reference "tab:QM+RISM-vs-QM+PCM"
 
 \end_inset
 
- compares results of QM, QM+PCM, and QM+RISM calculations for high-symmetry
- uranyl model aqua complexes [UO
+ compares results of QM, QM+PCM, and QM+RISM calculations for such symmetric
+ uranyl aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7710,21 +7703,21 @@ O)
 \end_inset
 
  with 
-\begin_inset Formula $4\le n\le6$
+\begin_inset Formula $n=4-6$
 \end_inset
 
- explicit water ligands, as well as for a bare uranyl solute model 
-\begin_inset Formula $(n=0)$
+ explicit water ligands, as well as a bare uranyl ion as solute (
+\begin_inset Formula $n=0$
 \end_inset
 
-.
- The binding energies 
+).
+ In all cases the binding energies 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
- of explicit water molecules in all cases are nearly independent of the
- method used to optimize the geometry of the complexes as indicated by the
- low values of 
+ of explicit water molecules are almost independent of the method used to
+ optimize the geometry of the solvated complex, as indicated by the low
+ second-order deviations 
 \begin_inset Formula $|\Delta^{2}E_{\text{intra}}|\le2.2$
 \end_inset
 
@@ -7732,22 +7725,18 @@ O)
 \begin_inset space ~
 \end_inset
 
-kcal/mol relative to bare uranyl.
- For the bare uranyl model 
+kcal/mol relative to the gas phase.
+ For the model with bare uranyl, 
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
  corresponds to the relaxation energy of uranyl itself.
- Its change due to solvation by 6.7
+ Its change due to solvation, by 6.7
 \begin_inset space ~
 \end_inset
 
-kcal/mol in the RISM approach is larger than for the other complexes.
- This relaxation manifests in an elongation of the U--O bond by 8
-\begin_inset space ~
-\end_inset
-
-pm from 172
+kcal/mol in the RISM approach, is larger than for the other complexes.
+ In fact, the U–O bond increases from 172
 \begin_inset space ~
 \end_inset
 
@@ -7767,65 +7756,56 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_inset
 
 .
- Modeling the first solvation shell explicitly does not affected this distance
- much.
- In QM+RISM calculations for 
-\begin_inset Formula $4\le n\le6$
+ Modelling the first solvation shell explicitly does not affect that distance
+ much: for all 
+\begin_inset Formula $n=4-6$
 \end_inset
 
- it amounts to 181
+, the terminal distance U–O is 181
 \begin_inset space ~
 \end_inset
 
-pm, which is only 1
+pm, i.e.
+ it is only 1
 \begin_inset space ~
 \end_inset
 
 pm longer than for the bare uranyl model.
- This is different for the QM+PCM approach.
+ The results of the QM+PCM approach are rather different.
  Here the relaxation of bare uranyl due to the medium is much smaller, 0.4
 \begin_inset space ~
 \end_inset
 
-kcal/mol, with a corresponding bond elongation of about 2
+kcal/mol, with a corresponding bond elongation of only ~2
 \begin_inset space ~
 \end_inset
 
 pm.
- Only when explicit water molecules are introduced in the first solvation
- shell the U--O bond reaches values in the range of 179--180
+ The U–O bond reaches values in the range of 179–180
 \begin_inset space ~
 \end_inset
 
-pm.
- 
+pm only when explicit water molecules are introduced in the first solvation
+ shell.
 \end_layout
 
 \begin_layout Standard
 Another qualitative difference between QM+PCM and QM+RISM results is the
- consistent shortening of the U--OW bonds to water ligands by 4--6
+ consistent shortening of the U–OW bonds to water ligands by 4–6
 \begin_inset space ~
 \end_inset
 
-pm by the QM+PCM approach in comparison to the gas phase QM results.
- This solvent effect is not confirmed by QM+RISM calculations.
+pm with the QM+PCM approach, in comparison to the gas phase QM results.
+ This solvent effect is not confirmed by the QM+RISM results.
  Here the changes of 
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) due to solvation are between 
-\begin_inset Formula $-1$
-\end_inset
-
-
+(U--OW) due to solvation are between −1
 \begin_inset space ~
 \end_inset
 
-pm and 
-\begin_inset Formula $+4$
-\end_inset
-
-
+pm and +4
 \begin_inset space ~
 \end_inset
 
@@ -7841,16 +7821,17 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_inset
 
 .
- Tentatively, the relatively long U--OW bonds of the RISM models may be
- explained by an increased first shell coordination of uranyl due to a RISM
- solvent contribution in addition to the explicit aqua ligands, which is
- visible as a peak in the U--OW radial distribution function.
+ Tentatively, the relatively long U–OW bonds of the RISM models may be rationali
+zed by an increased first shell coordination of uranyl due to a RISM solvent
+ contribution, in addition to the explicit aqua ligands.
+ This effect is manifest as a peak in the U–OW radial distribution function
+ (not shown).
  
 \end_layout
 
 \begin_layout Standard
-While most experimental measurements reported that the number of water ligands
- bound to UO
+While most experimental work reported that the number of water ligands bound
+ to UO
 \begin_inset Formula $_{2}^{2+}$
 \end_inset
 
@@ -7861,8 +7842,8 @@ key "Soderholm05,Neuefeind04,Wahlgren99"
 
 \end_inset
 
-, the computational chemistry studies examined by us find the five-coordinated
- uranyl to be dominating 
+, computational chemistry studies examined by us found five-coordinated
+ uranyl to be the dominating species 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl11,Shamov05,Cao05,Buehl05"
@@ -7870,7 +7851,6 @@ key "Buehl11,Shamov05,Cao05,Buehl05"
 \end_inset
 
 .
- 
 \end_layout
 
 \begin_layout Standard
@@ -7879,11 +7859,7 @@ Neglecting the small differences due to relaxation, the binding energy,
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
-, varies by about 
-\begin_inset Formula $-26$
-\end_inset
-
-
+, varies by about −26
 \begin_inset space ~
 \end_inset
 
@@ -7895,11 +7871,7 @@ kcal/mol when going from
 \begin_inset Formula $n=5$
 \end_inset
 
- and by further 
-\begin_inset Formula $-19$
-\end_inset
-
-
+ and by another −19
 \begin_inset space ~
 \end_inset
 
@@ -7907,28 +7879,16 @@ kcal/mol when going to
 \begin_inset Formula $n=6$
 \end_inset
 
- (QM results) and thus is not useful to compare the stability of these conformat
-ions in solution, cp.
- Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Moskaleva04"
-
-\end_inset
-
-.
+ (QM results).
+ Therefore, it is not useful to compare the stability of these conformations
+ in solution.
  However, the solvation free energy of uranyl for various conformations
- of the first solvation shell, as estimated using our model complexes for
- 
-\begin_inset Formula $4\le n\le6$
+ of the first solvation shell, as estimated using these complexes for 
+\begin_inset Formula $n=4-6$
 \end_inset
 
  shows quite a different trend.
- According to QM+PCM and QM+RISM calculations the five-coordinated uranyl
+ According to QM+PCM and QM+RISM calculations, the five-coordinated uranyl
  complex is the most stable conformation with 
 \begin_inset Formula $\Delta G_{\text{sol}}=-426$
 \end_inset
@@ -7946,28 +7906,29 @@ kcal/mol (QM+PCM) and
 \end_inset
 
 kcal/mol (QM+RISM).
- The latter value is at about the middle of experimental range 
-\begin_inset Formula $-437\sim-318$
+ The latter value is close to the center of experimental range of results,
+ from −437
+\begin_inset space ~
 \end_inset
 
-
+kcal/mol to −318
 \begin_inset space ~
 \end_inset
 
 kcal/mol, whereas the former is closer to its lower bound.
- Apart from the overall difference in magnitude there is also a qualitative
+ Apart from the overall difference in magnitude, there is also a qualitative
  difference between QM+PCM and QM+RISM results for the relative stability
- of the four-, five-, and six-coordinated uranyl conformations.
- The QM+PCM model predicts the six-coordinated and four-coordinated complexes
- to be 1
+ of the four-, five-, and six-coordinated conformations.
+ The QM+PCM model predicts the four-coordinated and six-coordinated complexes
+ to be 10
 \begin_inset space ~
 \end_inset
 
-kcal/mol and 10
+kcal/mol and 1
 \begin_inset space ~
 \end_inset
 
-kcal/mol less stable than the five-coordinated one, respectively (Table
+kcal/mol, respectively, less stable than the five-coordinated one (Table
 \begin_inset space ~
 \end_inset
 
@@ -7985,11 +7946,7 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \end_inset
 
 kcal/mol less stable than the five-coordinated one and the six-coordinated
- complex is higher in energy by about 6
-\begin_inset space ~
-\end_inset
-
-kcal/mol, Table
+ complex lies higher in energy by about 6 kcal/mol, Table
 \begin_inset space ~
 \end_inset
 
@@ -7997,45 +7954,29 @@ kcal/mol, Table
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:QM+RISM-vs-QM+PCM"
-
-\end_inset
-
-, in qualitative agreement with experimental estimates of the preferred
- coordination number (Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:observables-vs-uranyl-model"
-
-\end_inset
-
-).
- Not quite surprisingly, the free solvation energies at QM+RISM and at MM+RISM
- levels of modeling agree very well for corresponding structures, compare
- Tables
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:QM+RISM-vs-QM+PCM"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:energy-vs-coordination"
 
 \end_inset
 
 .
- While most quantities in QM+RISM calculations are rather independent of
- the number of aqua ligands, the U--OW distances to the explicit aqua ligands
+ Not surprisingly, the free solvation energies at the QM+RISM and the MM+RISM
+ levels agree very well for comparable structures, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:QM+RISM-vs-QM+PCM"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+While most quantities in QM+RISM calculations are rather independent of
+ the number of aqua ligands, the U–OW distances to the explicit aqua ligands
  increase with increasing 
 \begin_inset Formula $n$
 \end_inset
@@ -8072,8 +8013,8 @@ reference "tab:QM+RISM-vs-QM+PCM"
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW) compared to QM+PCM calculations, which also overestimate the experimenta
-l results of 241--242
+(U--OW) compared to the results of QM+PCM calculations, which also overestimate
+ the experimental results of 241–242
 \begin_inset space ~
 \end_inset
 
@@ -8092,17 +8033,24 @@ reference "tab:observables-vs-uranyl-model"
  model.
  Besides the explicit aqua ligands, also RISM water contributes to first
  shell coordination of uranyl, leading to effective coordination numbers
- of 5.8, 6.2, and 6.9, for 
-\begin_inset Formula $4\le n\le6$
+ of 5.8 (
+\begin_inset Formula $n=4$
 \end_inset
 
-, respectively.
- 
+), 6.2 (
+\begin_inset Formula $n=5$
+\end_inset
+
+), and 6.9 (
+\begin_inset Formula $n=6$
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Standard
-Another useful quantity to inspect the preferred coordination number is
- the reaction energy 
+A useful quantity to determine the preferred coordination number is the
+ reaction energy 
 \begin_inset Formula $\Delta G_{\text{R}}$
 \end_inset
 
@@ -8117,33 +8065,53 @@ Another useful quantity to inspect the preferred coordination number is
 
 \end_inset
 
+In Table
+\begin_inset space ~
+\end_inset
 
-\end_layout
 
-\begin_layout Standard
-High-Energy X-ray Scattering (HEXS) experiments 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
+ we compare results of various QM calculations of uranyl solvation to those
+ of a high-energy x-ray scattering (HEXS) experiment 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05"
 
 \end_inset
 
- determined a difference of the free energies of four- and five-coordinated
- uranyl aqua complexes of about 
-\begin_inset Formula $-1.2$
-\end_inset
-
-
+.
+ A small free energy difference, −1.2
 \begin_inset space ~
 \end_inset
 
-kcal/mol by estimating the relative weights of four- and five-coordinated
- species from an average coordination number.
- However, current computational results considering explicitly the first
- solvation shell offer a much more negative value, suggesting that five-coordina
-ted uranyl is the dominating species in aqueous solution.
- For example, using the integral equation formalism polarizable continuum
- model (IEFPCM) and the Møller--Plesset (MP2) method, Cao et al.
+kcal/mol, between coordination 4 and 5 of uranyl in aqueous solution has
+ been determined in the HEXS experiment by estimating the relative weights
+ of four- and five-coordinated species, based on an average coordination
+ number.
+ Various computational results reveal (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
+) that 
+\begin_inset Formula $\Delta G_{\text{R}}$
+\end_inset
+
+ is commonly overestimated when determined by combinations of QM and continuum
+ solvation models as well as by first-principles MD calculations.
+ Density functional and MP2 calculations combined with COSMO or SCIPCM variants
+ (our work and Refs.
 \begin_inset space \space{}
 \end_inset
 
@@ -8154,17 +8122,38 @@ key "Cao05"
 
 \end_inset
 
- reported 
-\begin_inset Formula $\Delta G_{\text{sol}}=-464$
+ and 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shamov05"
+
 \end_inset
 
+) yield 
+\begin_inset Formula $\Delta G_{\text{R}}$
+\end_inset
 
+ values between −11.1
 \begin_inset space ~
 \end_inset
 
-kcal/mol, which is below the range of experimental values.
- The corresponding free energy difference between four- and five-coordinated
- uranyl aqua complexes is calculated as 
+kcal/mol and –4.9
+\begin_inset space ~
+\end_inset
+
+kcal/mol (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
+), which are more negative than the experimental estimate.
+ The strongest overestimation, 
 \begin_inset Formula $\Delta G_{\text{R}}=-24.7$
 \end_inset
 
@@ -8172,137 +8161,43 @@ kcal/mol, which is below the range of experimental values.
 \begin_inset space ~
 \end_inset
 
-kcal/mol, which is more negative than the gas phase values from this and
- other studies 
+kcal/mol, of the experimental value is determined with the MP2+IEFPCM approach
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Buehl05,Shamov05,Gutowski06"
+key "Cao05"
 
 \end_inset
 
 .
- By combining different levels of QM theory and continuum solvation models,
- Shamov et al.
-\begin_inset space \space{}
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Shamov05"
-
-\end_inset
-
- provided 
-\begin_inset Formula $\Delta G_{\text{R}}=-11.1$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol at the density functional B3LYP level together with COSMO PCM.
- At the MP2 level with the same solvation model 
-\begin_inset Formula $\Delta G_{\text{R}}=-4.9$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol has been obtained 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Shamov05"
-
-\end_inset
-
-, which is closer to the experimental value.
- Gutowski et al.
-\begin_inset space \space{}
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Gutowski06"
-
-\end_inset
-
- applied the self-consistent isodensity polarizable continuum model (SCIPCM)
- and calculated 
-\begin_inset Formula $\Delta G_{\text{sol}}=-412$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol, 
-\begin_inset Formula $\Delta G_{\text{R}}=-7.8$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol at the MP2 level, which are comparable with our results 
-\begin_inset Formula $\Delta G_{\text{sol}}=-426$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol and 
-\begin_inset Formula $\Delta G_{\text{R}}=-10.3$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol as calculated at the BP level with PCM.
- Bühl et al.
-\begin_inset space \space{}
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Buehl05"
-
-\end_inset
-
- determined 
-\begin_inset Formula $\Delta G_{\text{R}}=-8.7$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol from Car--Parrinello MD (CPMD) simulations at the BLYP level, which
- is quite close to our BP+PCM result and the MP2+SCIPCM result of Gutowski
- et al.
-\begin_inset space \space{}
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Gutowski06"
-
-\end_inset
-
-, but more negative than the experimental value.
- By taking the explicit second solvation shell into account, Gutowski et
- al.
-\begin_inset space \space{}
-\end_inset
-
-achieved an improved reaction energy of 
+ A noteworthy better 
+\color blue
+result
+\color inherit
+, 
 \begin_inset Formula $\Delta G_{\text{R}}=-2.5$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, has been achieved with the MP2+SCIPCM approach when explicitly
+ accounting for the second solvation shell 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gutowski06"
+
+\end_inset
+
+.
+ An 
+\emph on
+ab-inito
+\emph default
+ Car−Parinello MD simulation also somewhat overestimated the preference
+ for the five-coordinated species, 
+\begin_inset Formula $\Delta G_{\text{R}}=-8.7$
 \end_inset
 
 
@@ -8312,38 +8207,13 @@ achieved an improved reaction energy of
 kcal/mol 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Gutowski06"
+key "Buehl05"
 
 \end_inset
 
-, while the solvation free energy varied only by 1
-\begin_inset space ~
-\end_inset
-
-kcal/mol.
-\end_layout
-
-\begin_layout Standard
-These findings, summarized in Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:comparison-reaction-energy"
-
-\end_inset
-
-, reveal that the slight free energy difference between coordination 4 and
- 5 of uranyl in aqueous solution, as determined from the HEXS experiment,
- is commonly overestimated by combinations of QM and continuum solvation
- models as well as by first principle MD calculations, especially when explicit
- water ligands are present only in the first solvation shell.
- Without increasing the computational costs significantly beyond those of
- QM calculations, the QM+RISM approach leads to a favorable result.
- The reaction energy for water addition to the four-coordinated uranyl aqua
- complex to form the five-coordinated species 
+.
+ Without significantly increasing the computational cost beyond those of
+ QM calculations, the QM+RISM approach leads to a favorable result, 
 \begin_inset Formula $\Delta G_{\text{R}}=-1.6$
 \end_inset
 
@@ -8351,8 +8221,7 @@ reference "tab:comparison-reaction-energy"
 \begin_inset space ~
 \end_inset
 
-kcal/mol, as calculated with the QM+RISM method, is in the best agreement
- with the experimental result of 
+kcal/mol, in the best agreement with the experimental result of 
 \begin_inset Formula $\Delta G_{\text{R}}=-1.2$
 \end_inset
 
@@ -8360,49 +8229,15 @@ kcal/mol, as calculated with the QM+RISM method, is in the best agreement
 \begin_inset space ~
 \end_inset
 
-kcal/mol and the solvation free energy of 
-\begin_inset Formula $\Delta G_{\text{sol}}=-390$
-\end_inset
+kcal/mol.
+ However, a caveat is in order.
+ The quality of the present result should not be overinterpreted as it likely
+ due to a favorable method combination, i.e., the force fields and the exchange-co
+rrelation functional.
+\end_layout
 
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol lies about in the middle of experimental range (Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:comparison-reaction-energy"
-
-\end_inset
-
-).
- The uranyl bond from our RISM calculations of 181 pm is by 2.3% larger than
- the experimental values of 177--178
-\begin_inset space ~
-\end_inset
-
-pm 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Wahlgren99,Soderholm05,Neuefeind04"
-
-\end_inset
-
-, and longer than results of PCM solvation models (see above).
- The uranyl--water distance of 248 pm is also longer than the experimental
- predictions of 241--242
-\begin_inset space ~
-\end_inset
-
-pm 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Wahlgren99,Soderholm05,Neuefeind04"
-
-\end_inset
-
- but in agreement with results of other methods, like BLYP and MP2 together
- with PCM models (Table
+\begin_layout Standard
+Finally, we briefly discuss the geometric parameters shown in Table
 \begin_inset space ~
 \end_inset
 
@@ -8413,11 +8248,65 @@ reference "tab:comparison-reaction-energy"
 
 \end_inset
 
+.
+ The uranyl bond, 181
+\begin_inset space ~
+\end_inset
+
+pm, of our RISM calculations is by 2.3% larger than the experimental value,
+ 177−178
+\begin_inset space ~
+\end_inset
+
+pm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wahlgren99,Soderholm05,Neuefeind04"
+
+\end_inset
+
+, and longer than results of the PCM solvation models, 178−179
+\begin_inset space ~
+\end_inset
+
+pm (see above).
+ The uranyl–water distance, 
+\begin_inset Formula $d$
+\end_inset
+
+(U–OW) = 248
+\begin_inset space ~
+\end_inset
+
+pm, as calculated with RISM, is also longer than the experimental results,
+ 241–242
+\begin_inset space ~
+\end_inset
+
+pm 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wahlgren99,Soderholm05,Neuefeind04"
+
+\end_inset
+
+, and agrees with results calculated with other methods, like BLYP and MP2
+ together with PCM models (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:comparison-reaction-energy"
+
+\end_inset
+
 ).
- These results indicate, that as an alternative to traditional continuum
- solvation models, the RISM approach may provide a favorable accuracy when
- used to study chemical reactions and processes which are sensitive to the
- solvent environment.
+ In summary, when studying chemical processes that respond to the solvent
+ environment, the RISM approach seems to provide an accuracy that is equal
+ or superior to that of traditional continuum solvation models.
+ 
 \end_layout
 
 \begin_layout Standard
