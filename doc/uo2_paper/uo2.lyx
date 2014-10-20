@@ -6218,12 +6218,21 @@ Free energy minimization for uranyl aqua complexes
 
 \begin_layout Standard
 More insight into the structure of the first solvation shell and details
- of the uranyl--water interactions can be gained by introducing explicit
+ of the uranyl–water interactions can be gained by introducing explicit
  water ligands into the solute model embedded in RISM.
- In these models the uranyl geometry is either fixed (MM, MM+RISM) or relaxed
- (QM, QM+RISM, see below) while the positions and orientations of the water
- lingands are optimized.
- Table
+ We employed models where the uranyl geometry is either fixed (MM, MM+RISM)
+ or not (QM, QM+RISM, see below) while the positions and orientations of
+ the water ligands are optimized.
+ In the following we will first discuss results of MM, then of QM treatments,
+ of the solute, embedded in water treated at the RISM level.
+\end_layout
+
+\begin_layout Subsubsection
+MM+RISM
+\end_layout
+
+\begin_layout Standard
+Table
 \begin_inset space ~
 \end_inset
 
@@ -6238,9 +6247,8 @@ reference "tab:energy-vs-model"
 \begin_inset Formula $\Delta E_{\text{intra}}$
 \end_inset
 
-, which corresponds here to the binding energy of five water ligands, and
- the solvation free energy for uranyl determined via the solvated aqua complex
- [UO
+, here the binding energy of five water ligands, and the solvation free
+ energy of uranyl, determined via the solvated aqua complex [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6256,15 +6264,10 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-.
+ as determined with MM+RISM for various uranyl force fields.
  These energies confirm the classification of the uranyl force fields into
- two groups: the three weaker force fields (GW, RM12, and PM13) suggest
- a binding energy of uranyl to its five first shell aqua ligands in the
- range of 
-\begin_inset Formula $-216$
-\end_inset
-
-
+ two groups: the three weaker force fields (GW, RM12, PM13) suggest a binding
+ energy of uranyl to its five first shell aqua ligands in the range of −216
 \begin_inset space ~
 \end_inset
 
@@ -6272,34 +6275,22 @@ kcal/mol
 \begin_inset Formula $\leq\Delta E_{\text{intra}}\le$
 \end_inset
 
- 
-\begin_inset Formula $-210$
-\end_inset
-
-
+ −210
 \begin_inset space ~
 \end_inset
 
-kcal/mol, whereas the two stronger force fields suggest a notably stronger
- ligand binding of 
-\begin_inset Formula $-268$
-\end_inset
-
-
+kcal/mol, whereas the two stronger force fields suggest notably larger ligand
+ binding energies, −268
 \begin_inset space ~
 \end_inset
 
-kcal/mol (KL1) and 
-\begin_inset Formula $-271$
-\end_inset
-
-
+kcal/mol (KL1) and −271
 \begin_inset space ~
 \end_inset
 
 kcal/mol (KL2).
  Consistent with this picture, the solvation free energies correlate with
- the strength of the uranyl--water interactions, Table
+ the strength of the uranyl–water interactions, Table
 \begin_inset space ~
 \end_inset
 
@@ -6312,11 +6303,11 @@ reference "tab:energy-vs-model"
 
 .
  Note that the free energies based on the model with five explicit water
- ligands are roughly by 10--15
+ ligands are by 10–15
 \begin_inset space ~
 \end_inset
 
-kcal/mol lower than those of a bare uranyl model, compare the respective
+kcal/mol lower than those of a bare uranyl model; compare the corresponding
  rows of Tables
 \begin_inset space ~
 \end_inset
@@ -6328,7 +6319,7 @@ reference "tab:observables-vs-water-model"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:energy-vs-model"
@@ -6754,7 +6745,7 @@ status open
 \end_layout
 
 \begin_layout Standard
-For further free energy minimizations of uranyl aqua complexes [UO
+For further free energy minimizations of the uranyl aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6771,12 +6762,12 @@ O)
 \end_inset
 
 , 
-\begin_inset Formula $4\le n\le6$
+\begin_inset Formula $n=4-6$
 \end_inset
 
-, we restricted ourselves to the KL2 force field, which yielded a reasonable
- agreement for geometry parameters and a favorable solvation energy for
- the bare uranyl model (Table
+, we restricted ourselves to the force field KL2 which gave reasonable agreement
+ for geometry parameters and a favorable solvation energy for the bare uranyl
+ model, Table
 \begin_inset space ~
 \end_inset
 
@@ -6787,11 +6778,16 @@ reference "tab:observables-vs-uranyl-model"
 
 \end_inset
 
-).
+.
  We carried out geometry optimizations of these complexes in the gas phase
- at the MM and in solution at the MM+RISM levels of theory without symmetry
- constraints.
- As can be seen from Figure
+ at the MM level of theory and in solution at the MM+RISM level, both without
+ symmetry constraints.
+ The force field optimization in the gas phase leads to nearly symmetric
+ structures for 
+\begin_inset Formula $n=4$
+\end_inset
+
+ and 5, Figure
 \begin_inset space ~
 \end_inset
 
@@ -6802,28 +6798,23 @@ reference "fig:geometries"
 
 \end_inset
 
-, force field optimization in the gas phase leads to nearly symmetric structures
- for 
-\begin_inset Formula $n=4$
-\end_inset
-
- and 5.
+.
  For 
 \begin_inset Formula $n=6$
 \end_inset
 
  a water ligand is moved to a position outside the first solvation shell:
  
-\begin_inset Formula $d$
+\begin_inset Formula $d(\text{U}-\text{OW})=411$
 \end_inset
 
-(U--OW) = 411
+
 \begin_inset space ~
 \end_inset
 
 pm.
- The RISM solvent compensated the fifth water molecule in the undercoordinated
- uranyl aqua complex [UO
+ The RISM solvent environment compensated the fifth water molecule in less
+ coordinated uranyl aqua complex [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6839,7 +6830,7 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-, which results in an asymmetric structure (Figure
+, which results in an asymmetric structure, Figure
 \begin_inset space ~
 \end_inset
 
@@ -6850,17 +6841,10 @@ reference "fig:geometries"
 
 \end_inset
 
-a).
- This compensation is also reflected in the average first shell U--OW distance,
- which is shorter in the gas phase (239
-\begin_inset space ~
-\end_inset
-
-pm), but very similar in solution (245
-\begin_inset space ~
-\end_inset
-
-pm) for [UO
+a.
+ This compensation is also reflected in the U–OW distance, averaged over
+ the first shell.
+ For [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -6876,8 +6860,32 @@ O)
 \begin_inset Formula $^{2+}$
 \end_inset
 
-compared to the solute models with five explicit first-shell aqua ligands
- (Figure
+ that quantity is shorter in the gas phase, 239
+\begin_inset space ~
+\end_inset
+
+pm, than in [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{5}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, but in solution the corresponding value, 245
+\begin_inset space ~
+\end_inset
+
+pm, compares well with that of the solute models with five explicit first-shell
+ aqua ligands (Figure
 \begin_inset space ~
 \end_inset
 
@@ -6906,11 +6914,11 @@ O)
 \end_inset
 
  a similar structure as in the gas phase is obtained, albeit with a considerably
- longer U--OW distance of 453
+ longer U–OW distance, 453
 \begin_inset space ~
 \end_inset
 
-pm to the second-shell aqua ligand.
+pm, to the second-shell aqua ligand.
  Free energy values in Table
 \begin_inset space ~
 \end_inset
@@ -6923,23 +6931,25 @@ reference "tab:energy-vs-coordination"
 \end_inset
 
  show that embedding into the RISM solvent yields a solvation free energy
- that is essentially constant and independent of the number of explicit
+ that is essentially constant and thus independent of the number of explicit
  water ligands.
- Again, it is more negative 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- by about 10
+ Again, it is more negative by about 10
 \begin_inset space ~
 \end_inset
 
-kcal/mol than the solvation energy of the bare uranyl solvent model.
+kcal/mol than the solvation energy of the bare uranyl solvent model, Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:observables-vs-uranyl-model"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -7585,6 +7595,10 @@ status open
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection
+QM+RISM
 \end_layout
 
 \begin_layout Standard
