@@ -3830,7 +3830,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution functions of solvated uranyl calculated with three modificat
+Radial distribution function of solvated uranyl, calculated with three modificat
 ions of the SPC/E water model.
  SPC/E MD results are shown for comparison.
  
@@ -4761,7 +4761,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution functions from RISM calculations applying various force
+Radial distribution function from RISM calculations applying various force
  field models for uranyl.
  
 \begin_inset CommandInset label
@@ -6993,7 +6993,8 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Geometries of selected local minima of the uranyl aqua complexes [UO
+Optimized structure of selected local minima of the uranyl aqua complexes
+ [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -7010,12 +7011,12 @@ O)
 \end_inset
 
 , 
-\begin_inset Formula $4\leq n\leq6$
+\begin_inset Formula $n=4-6$
 \end_inset
 
 , with (first row) and without (second row) embedding in an aqueous RISM
  solvent medium.
- U--OW distances are averages over solvation shells.
+ U–OW distances (pm) are averaged over the solvation shell.
  
 \begin_inset CommandInset label
 LatexCommand label
