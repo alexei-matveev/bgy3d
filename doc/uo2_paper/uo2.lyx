@@ -6247,9 +6247,102 @@ More insight into the structure of the first solvation shell and details
  water ligands into the solute model embedded in RISM.
  We employed models where the uranyl geometry is either fixed (MM, MM+RISM)
  or not (QM, QM+RISM, see below) while the positions and orientations of
- the water ligands are optimized.
+ the water ligands are optimized 
+\color blue
+by minimizing the (free) energy.
+
+\color inherit
  In the following we will first discuss results of MM, then of QM treatments,
  of the solute, embedded in water treated at the RISM level.
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+A tightly bound aqua ligand is thus treated a part of the solute.
+ Restricting statistical sampling over the additional degrees of freedom
+ introduced with the ligand to a single representative structure minimizing
+ the conformation free energy can be justified to some extent for the strong
+ bonds.
+ A free-floating water or a loosely associated aqua ligand, on the other
+ hand, should be subject of the statistical sampling, implemented here by
+ RISM.
+ The water molecules located close to the equatorial plane of the uranyl
+ and bound to the highly charged uranium atom and the water molecules from
+ the apical region associated with the slightly negative oxygen atoms of
+ uranyl are the representatives of these two types.
+ Using preliminary version of the 3D RISM code we examined the 3D profile
+ of the potential of the mean force (PMF) derived from the water oxygen
+ distribution around the uranyl: the local PMF minimum in the equatorial
+ plane is of the order of 
+\begin_inset Formula $-2.8T$
+\end_inset
+
+ corresponding to the notable distribution peak of about 
+\begin_inset Formula $g\approx16$
+\end_inset
+
+, cp.
+\begin_inset space \space{}
+\end_inset
+
+Figures
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-water-model"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+; the PMF minimum in the apical region is significantly shallower, 
+\begin_inset Formula $-1.1T$
+\end_inset
+
+, corresponding to 
+\begin_inset Formula $g\approx3$
+\end_inset
+
+, cp.
+\begin_inset space \space{}
+\end_inset
+
+the 
+\emph on
+second
+\emph default
+ peak in U--OW RDFs.
+ Note that the RDFs for O--OW and O--HW pairs in Figures
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-water-model"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rdf-vs-uranyl-model"
+
+\end_inset
+
+ do not resolve between equatorial and apical water.
+ For these reasons, the notion of the first solvation shell (sphere) that
+ includes only the equatorial ligands, even if slightly confusing, will
+ be adopted here.
 \end_layout
 
 \begin_layout Subsubsection
