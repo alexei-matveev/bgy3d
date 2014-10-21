@@ -114,28 +114,28 @@ July 2014
 
 \begin_layout Abstract
 We apply the one-dimensional reference interaction site model (RISM) to
- uranyl solvation.
- Uranyl aqua complexes with 4--6 explicit water ligands and implicit water
- solvent modeled by RISM representing the further solvent environment are
- compared.
- Interactions of explicitly represented atoms of the aqua complexes are
- treated either by molecular mechanics or by density functional theory to
+ the solvation of uranyl in water.
+ Uranyl aqua complexes with 4–6 explicit water ligands and an implicit water
+ solvent, modeled by RISM to represent the further solvent environment,
+ have been examined.
+ The interaction of explicitly represented atoms of the aqua complexes are
+ treated either by molecular mechanics or density functional theory, to
  build the free energy functional.
  A comparison of solvation energies and geometries of the aqua complexes
- for different numbers of explicit water ligands at a local minimum of the
- free energy surface indicate interchangeability of explicit and implicit
- solvent models.
- Consequently the solvation energy is rather independent of the uranyl aqua
- complex used as solute model, in contrast to results of a polarizable continuum
- model of solvation.
- A comparison of conformation free energies of a uranyl with four and five
- explicit water molecules in the first solvation shell reveals only a minor
- preference for the latter, in agreement with experiment.
- Other computational approaches tend to overestimate this energy.
+ for different numbers of explicit water ligands at the local minimum of
+ the free energy surface indicate the interchangeability of explicit and
+ implicit solvent models.
+ Consequently the solvation energy is rather independent of the number of
+ aqua ligands of the uranyl complex used as solute model, in contrast to
+ results of a polarizable continuum model of solvation.
+ For uranyl with four and five explicit water ligands in the first solvation
+ shell we determined only a minor preference for the latter, in agreement
+ with experiment.
+ Other computational approaches tend to overestimate this preference.
 \end_layout
 
 \begin_layout Keywords
-RISM, uranyl, solvation
+Reference interaction site model, aqueous environment, uranyl, solvation
 \end_layout
 
 \begin_layout Section
