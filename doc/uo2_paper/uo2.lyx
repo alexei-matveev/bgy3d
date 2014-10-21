@@ -1111,16 +1111,15 @@ name "sec:computational-details"
 \end_layout
 
 \begin_layout Standard
-For evaluation purposes, we chose the force field parameters for uranyl
- of the model of Guilbaud and Wipff (GW) 
+For evaluation purpose, we chose the force-field parameters for uranyl as
+ suggested by Guilbaud and Wipff (GW) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
 
 \end_inset
 
- and compare the results to those of models newly developed by Maginn et
- al.
+ and compared the results to those of models developed by Maginn et al.
 \begin_inset space \space{}
 \end_inset
 
@@ -1131,18 +1130,18 @@ key "Rai12,Pomogaev13"
 
 \end_inset
 
-, see Table 
+ (Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:params-uranyl"
 
 \end_inset
 
-.
+).
  Recently, Kerisit and Liu modified the parameters of the GW model to strengthen
- the uranyl--water interaction.
- For their newly derived models KL1 and KL2 they reported improved values
- for the hydration free energy and the water exchange rate 
+ the uranyl–water interaction.
+ For their models KL1 and KL2 they reported improved values for the hydration
+ free energy and the water exchange rate 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -1150,8 +1149,8 @@ key "Kerisit13"
 \end_inset
 
  of the uranyl aqua complex.
- For the water solvent, we adopted atomic charges and LJ potential parameters
- of the SPC/E (extended simple point charge) model 
+ For the water solvent, we adopted the atomic charges and LJ potential parameter
+s of the extended simple point charge model SPC/E 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
@@ -1162,7 +1161,7 @@ key "Berendsen87"
  While the original SPC/E water model does not contain a repulsive potential
  for hydrogen atoms, a LJ-type potential for hydrogen atoms is necessary
  in RISM calculations to avoid numerical singularities.
- Pettitt and Rosky 
+ In their early study, Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pettitt82"
@@ -1185,7 +1184,7 @@ key "Pettitt82"
 \begin_inset space ~
 \end_inset
 
-kcal/mol (PR-SPC/E) in their early study.
+kcal/mol (PR-SPC/E).
  Sato and Hirata 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1227,7 +1226,6 @@ reference "tab:params-water"
 \end_inset
 
  summarizes the details of these three popular modified water models.
- 
 \end_layout
 
 \begin_layout Standard
@@ -2121,9 +2119,13 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Standard
-All our calculations were carried out at the temperature of 298 K, with
- the dielectric constant set to 78.4 and with a corresponding water solvent
- density of 
+All our free energy calculations were carried out for the temperature of
+ 298
+\begin_inset space ~
+\end_inset
+
+K, with the dielectric constant set to 78.4 and with the corresponding water
+ solvent density
 \begin_inset Formula $\rho=0.0333295$
 \end_inset
 
@@ -2136,19 +2138,23 @@ All our calculations were carried out at the temperature of 298 K, with
 \end_inset
 
 .
- The grid which was used to represent correlation functions was chosen with
- a uniform grid spacing of 0.0390625
+ These parameters correspond to a pressure of 1
 \begin_inset space ~
 \end_inset
 
-Å and 4096 grid points, which amounts to a radial range of 160
+atm.
+ The grid which was used to represent the correlation functions was chosen
+ with 4096 grid points and a uniform spacing of 0.0390625
+\begin_inset space ~
+\end_inset
+
+Å; this amounts to a radial range of 160
 \begin_inset space ~
 \end_inset
 
 Å.
  The solvent susceptibility was determined from the pure water site-site
- RISM equation by the Newton iteration method with a convergence tolerance
- of 
+ RISM equation by Newton iteration with a convergence tolerance of 
 \begin_inset Formula $10^{-14}$
 \end_inset
 
@@ -2156,9 +2162,9 @@ All our calculations were carried out at the temperature of 298 K, with
 \begin_inset Formula $L_{2}$
 \end_inset
 
--norm of the indirect correlation matrix.
- The discrete sine transform was applied as Fourier transform when calculating
- 
+ norm of the indirect correlation matrix.
+ The discrete sine transform was applied for Fourier transformation when
+ calculating 
 \color blue
 convolution integrals 
 \begin_inset CommandInset citation
@@ -2171,14 +2177,13 @@ key "FFTW05"
  
 \color inherit
 With the water solvent susceptibility as input, the solvent-solute RISM
- equations were solved iteratively to determine radial distribution functions
- and to evaluate the excess chemical potential.
- 
+ equations were solved iteratively to determine the radial distribution
+ functions and to evaluate the excess chemical potential.
 \end_layout
 
 \begin_layout Standard
-All-electron QM calculations were carried out with the linear combination
- of Gaussian-type orbitals fitting-functions density functional method 
+All-electron calculations were carried out with the linear combination of
+ Gaussian-type orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunlap90"
@@ -2193,25 +2198,95 @@ key "ParaGaussV3.1"
 \end_inset
 
 .
- We used the COSMO PCM solvation model for comparison 
+ The second-order Douglas–Kroll–Hess all-electron scalar-relativistic approach
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rev:roesch96"
+
+\end_inset
+
+ was used to account for important relativistic effects in the electronic
+ structure of the actinide compound 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kaltsoyannis06"
+
+\end_inset
+
+.
+ We employed the gradient-corrected exchange-correlation functional (generalized
+ gradient approximation, GGA) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goerling99,kochDFT"
+
+\end_inset
+
+, as suggested by Becke and Perdew (BP) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Becke88,Perdew86c"
+
+\end_inset
+
+.
+ The Kohn–Sham orbitals were represented by flexible Gaussian-type basis
+ sets, contracted in a generalized fashion using atomic eigenvectors.
+ Basis sets and further computational details are the same as in earlier
+ studies on uranyl(VI) species 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b"
+
+\end_inset
+
+.
+ For U, we used a basis set of the size (24s, 19p, 16d, 11f), contracted
+ to [10s, 7p, 7d, 4f]; O and H atoms were described by standard basis sets,
+ (9s, 5p, 1d) 
+\begin_inset Formula $\to$
+\end_inset
+
+ [5s, 4p, 1d] and (6s, 1p) 
+\begin_inset Formula $\to$
+\end_inset
+
+ [4s, 1p], respectively.
+\end_layout
+
+\begin_layout Standard
+We used a COSMO PCM solvation model for comparison 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Fuchs02"
 
 \end_inset
 
- using van der Waals radii tabulated by Bondi 
+, with the cavity defined via an effective solvent radius of 1.4
+\begin_inset space ~
+\end_inset
+
+Å and van der Waals radii of solute atoms as tabulated by Bondi 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bondi64"
 
 \end_inset
 
- and the fixed points with variable areas approach to cavity tessellation
- 
+ and scaled by 1.125 (except for hydrogen).
+ We carried out the cavity tessellation with the FIXPVA approach 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Su09"
+key "Su09,Kremleva12b"
+
+\end_inset
+
+ (fixed points with variable areas) to obtain numerically stable energies
+ and forces 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kremleva12b"
 
 \end_inset
 
@@ -2220,8 +2295,8 @@ key "Su09"
 \end_layout
 
 \begin_layout Standard
-Geometry optimizations have been done using quasi-Newton method as implemented
- in ParaTools 
+Geometry optimizations have been carried out using the quasi-Newton method
+ as implemented in the utility package ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chaffey-Millar11,Nikodem13"
@@ -2229,42 +2304,51 @@ key "Chaffey-Millar11,Nikodem13"
 \end_inset
 
 .
- In QM calculations, the U--O bonds were relaxed but constrained to have
+ In QM calculations, the U–O bonds were relaxed but constrained to have
  the same value by symmetry.
  In MM and MM+RISM calculations uranyl was rigid, however.
- The U--O distances were fixed to 176
+ Motivated by earlier results, the U–O distances were fixed to 176
 \begin_inset space ~
 \end_inset
 
-pm in RISM calculations for the bare uranyl ion.
- In MM+RISM geometry optimization of uranyl aqua complexes the uranyl bonds
- were stretched to 177
-\begin_inset Formula $\sim$
+pm in RISM calculations of the bare uranyl ion 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rai12,Pomogaev13"
+
 \end_inset
 
-178
+.
+ In MM+RISM geometry optimizations of uranyl aqua complexes , the uranyl
+ bonds were fixed to 178
 \begin_inset space ~
 \end_inset
 
-pm based on our previous experience with QM calculations 
-\begin_inset Note Note
-status open
+pm for 
+\begin_inset Formula $n=4$
+\end_inset
 
-\begin_layout Plain Layout
-SK: which value accurately?, which experience? sounds arbitrarily.
- AM: Calculation with different n = 0, 4, 5, 6 used different distances.
- Experience with PCM calculations (mentioned now).
- Li Bo took some geometries from Ion, some where PCM, some where gas phase
- with explicit waters.
- It sounds arbitrary because it is arbitrary.
- We discussed that over e-mail not long ago.
- Does it make results invalid?
-\end_layout
+ and 
+\begin_inset Formula $n=5$
+\end_inset
+
+, and set to 177
+\begin_inset space ~
+\end_inset
+
+pm for 
+\begin_inset Formula $n=6$
+\end_inset
+
+; these choices are consistent with results of previous studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04,Cao05,Buehl05"
 
 \end_inset
 
- with these species.
- The SPC/E geometry of explicit water ligands in [UO
+.
+ The SPC/E geometry of explicit water ligands in the aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
 
@@ -2281,18 +2365,19 @@ O)
 \end_inset
 
 , 
-\begin_inset Formula $4\leq n\leq6$
+\begin_inset Formula $n=4-6$
 \end_inset
 
-, features an O--H distance of 100
+, features an O–H distance of 100
 \begin_inset space ~
 \end_inset
 
-pm and an H--O--H angle of 109.47
+pm and an H–O–H angle of 109.47
 \begin_inset Formula $^{\circ}$
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Section
