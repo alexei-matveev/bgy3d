@@ -796,12 +796,12 @@ where
 \begin_inset Formula $E[n_{\text{e}},\vec{s}]$
 \end_inset
 
- is the solute internal energy depending on the geometric degrees of freedom
- 
+ is the solute internal energy that depends on the geometric degrees of
+ freedom 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- and, in the case of a QM solute, also on the electronic density 
+ and, in the case of the QM solute, also on the electron density 
 \begin_inset Formula $n_{\text{e}}$
 \end_inset
 
@@ -810,15 +810,15 @@ where
 \end_inset
 
 .
- This choice leaves the Kohn--Sham matrix unmodified; the interaction of
- the electrons with solvent charge is approximated by that of fixed effective
- atomic charges.
- The additive form of the free energy functional, 
+ This choice leaves the Kohn–Sham matrix unmodified; the interaction of
+ the electrons with the solvent charge is approximated by that of fixed
+ effective atomic charges.
+ The additive form of the free energy functional 
 \begin_inset Formula $G[n_{\text{e}},\vec{s}]$
 \end_inset
 
-, is to some extent justified by a common practice of including net polarization
- effects into the force field parameters 
+ is to some extent justified by the common practice of including net polarizatio
+n effects into the site charges specifying the force field 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Berendsen87"
@@ -832,9 +832,9 @@ key "Berendsen87"
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- thus are the uranyl bond length and positions and orientations of explicit
- aqua ligands All other degrees of freedom were fixed during the free energy
- minimization.
+ thus are the uranyl bond length as well as positions and orientations of
+ the explicit aqua ligands.
+ All other degrees of freedom were fixed during the free energy minimization.
  Effective forces on the solute sites are calculated as linear response
  to a perturbation of the solute geometry.
  The uranyl solvation energy is then calculated as
@@ -875,7 +875,7 @@ Numerical solution of RISM equation
 \end_layout
 
 \begin_layout Standard
-The system of non-linear RISM Eqs.
+The system of non-linear Eqs.
 \begin_inset space ~
 \end_inset
 
@@ -894,7 +894,7 @@ reference "eq:closure-hnc"
 \end_inset
 
 ) has to be solved iteratively.
- For numerical reasons it is advantageous 
+ For numerical reasons it appears to be advantageous 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Beglov95,Luchko10"
@@ -941,7 +941,11 @@ reference "eq:closure-hnc"
 \begin_inset Formula $F[t]=T[t]-t$
 \end_inset
 
- using a state of the art non-linear solver 
+ using a state of the art non-linear 
+\color blue
+solver
+\color inherit
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "petsc-user-ref"
@@ -953,34 +957,14 @@ key "petsc-user-ref"
 \begin_inset Formula $J[t]=\delta F/\delta t$
 \end_inset
 
-, is only practical if implemented as a linear function 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: approximation? or what is the alternative? AM: Alternatives are impractical,
- see http://en.wikipedia.org/wiki/Matrix-free_methods 
-\end_layout
-
-\end_inset
-
- applicable to an arbitrary vector 
+, is only practical if implemented as a linear function, applicable to an
+ arbitrary vector 
 \begin_inset Formula $\delta t$
 \end_inset
 
 .
- Computing and storing all of the Jacobian matrix elements is prohibitively
+ Computing and storing all elements of the Jacobian matrix is prohibitively
  expensive.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  The Jacobian is readily available given the simple closed form of 
 \begin_inset Formula $c[t]$
 \end_inset
@@ -996,7 +980,7 @@ This Jacobian is also used to compute the linear response of the solution
 \end_inset
 
  to a perturbation of the solute geometry as one step in computing the forces.
- A system of linear equations 
+ The system of linear equations 
 \begin_inset Formula $J[t]\delta t_{s}=-\partial F/\partial\vec{s}$
 \end_inset
 
@@ -1004,11 +988,11 @@ This Jacobian is also used to compute the linear response of the solution
 \begin_inset Formula $\delta t_{s}$
 \end_inset
 
- infinitesimal changes of parameters 
+ to infinitesimal distortions of the geometry parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- by a standard procedure 
+ applying a standard procedure 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "petsc-user-ref"
@@ -1020,11 +1004,11 @@ key "petsc-user-ref"
 \begin_inset Formula $F[t]$
 \end_inset
 
- on the solute geometric parameters 
+ on the solute geometry parameters 
 \begin_inset Formula $\vec{s}$
 \end_inset
 
- which results in the inhomogeneity on the right hand side 
+ which results in the inhomogeneity 
 \begin_inset Formula $-\partial F/\partial\vec{s}$
 \end_inset
 
@@ -1043,7 +1027,7 @@ function
 The 
 \color inherit
 long-range interactions are separated from the short-range ones and treated
- using the Ng scheme 
+ using a scheme proposed by Ng 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Ng74"
@@ -1055,22 +1039,22 @@ key "Ng74"
 \begin_inset Formula $u_{\text{L}}$
 \end_inset
 
-, which determines the direct- and the indirect correlation functions, 
+, which determines the direct correlations 
 \begin_inset Formula $c_{\text{L}}=-\beta u_{\text{L}}$
 \end_inset
 
- and 
+ and the indirect correlations 
 \begin_inset Formula $t_{\text{L}}=\beta u_{\text{L}}$
 \end_inset
 
-at long distances, is chosen sufficiently smooth to be represented by a
- truncated Fourier expansion with known coefficients to avoid numerically
+ at long distances, is chosen sufficiently smooth to be represented by a
+ truncated Fourier expansion with known coefficients, thus avoiding numerically
  problematic fast Fourier transforms of these terms.
  The new primary variable 
 \begin_inset Formula $t_{\text{S}}=t-t_{\text{L}}$
 \end_inset
 
-, the new intermediate 
+ and the new intermediate 
 \begin_inset Formula $c_{\text{S}}[t_{\text{S}}]=f(-\beta u_{\text{S}}+t_{\text{S}})-t_{\text{S}}$
 \end_inset
 
@@ -1086,26 +1070,25 @@ T_{\text{S}}[t_{\text{S}}]=\omega\ast(c_{\text{L}}+c_{\text{S}}[t_{\text{S}}])\a
 
 \end_inset
 
-are all of short range and thus amenable to a representation on a finite
- radial grid of moderate size as well as to fast Fourier transforms.
- Technically, addition of the long-range correlation 
+are all of short range and thus amenable to a representation on finite radial
+ grids of moderate size as well as to fast Fourier transformation.
+ Technically, the addition of the long-range correlation 
 \begin_inset Formula $c_{\text{L}}$
 \end_inset
 
  in the above equation is carried out using its Fourier representation after
- the forward Fourier transform of 
+ forward Fourier transformation of 
 \begin_inset Formula $c_{\text{S}}$
 \end_inset
 
 .
- The solvent equations are treated similarly, however, in this case we also
- apply the dielectrically consistent RISM (DRISM) correction to improve
- the shape of the solvent susceptibility 
+ The solvent equations are treated similarly; however, in this case we also
+ apply the DRISM correction to improve the shape of the solvent susceptibility
+ 
 \begin_inset Formula $\tilde{\chi}(k)$
 \end_inset
 
- at low wave numbers for use in both solvent and solute/solvent equations
- 
+ at low wave numbers, in both solvent and solute/solvent equations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kovalenko00b,Cummings81"
