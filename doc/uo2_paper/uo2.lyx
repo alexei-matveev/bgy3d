@@ -143,10 +143,9 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Understanding the structural and thermodynamic properties of uranium compounds
- in aqueous solution is crucial for safety considerations and designing
- of effective processes in radioactive waste disposal and recycling from
- used nuclear fuel 
+Understanding the thermodynamic and structural properties of uranium in
+ aqueous solution is crucial for modeling processes during geological radioactiv
+e waste disposal and recycling of used nuclear fuel 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Silva95,book:Grenthe92"
@@ -155,84 +154,50 @@ key "Silva95,book:Grenthe92"
 
 .
  Thus, both experimental and theoretical studies have been carried out to
- elucidate structural and energetic information of the uranyl(VI) cation,
- which is the most common stable oxidation state in aqueous solution 
+ elucidate structural and energetic information of uranyl(VI) cation, UO
+\begin_inset Formula $_{2}^{2+}$
+\end_inset
+
+, which is the most common stable oxidation state in aqueous solution 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Katz86,Arnold09"
 
 \end_inset
 
-
-\color green
- 
-\color inherit
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: this review is about UO
-\begin_inset Formula $_{2}^{+}$
-\end_inset
-
 .
- AM: Yes, I know.
- This is the quote from the abstract to supports directly the claim about
- the most common oxidation state: 
-\begin_inset Quotes eld
-\end_inset
-
-The uranyl dication, [UO2]2+, is the most prevalent and most thermodynamically
- stable form of uranium and is a soluble and problematic environmental contamina
-nt.
- [...] In contrast, the pentavalent uranyl cation [UO2]+ is unstable in an
- aqueous environment with respect to disproportionation into tetravalent
- uranium species and [UO2]2+.
- 
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-I added another one used by Schlosser to quote possible oxidation states
- in his diss.
- Why dont you suggest anything? Is this a quiz?
-\end_layout
-
-\end_inset
-
- While researchers have to face the radiotoxicity of uranium in experimental
- studies, theoretical methods, including quantum mechanics (QM) and classical
- molecular mechanics (MM) simulations, provide alternative ways to study
- the solvation environment of the uranyl cation with considerable accuracy.
+ Whereas in experimental studies researchers have to face the radiotoxicity
+ of uranium, theoretical methods, including quantum mechanics (QM) and classical
+ molecular mechanics (MM) simulations, provide alternative ways for studying
+ with considerable accuracy the solvation environment of uranyl cations.
 \end_layout
 
 \begin_layout Standard
-Up to now, the most popular strategy in QM studies of solvated uranyl and
- its complexes is using the polarizable continuum model (PCM) 
+Till now, the most popular strategy in QM studies of uranyl and its complexes
+ in an aqueous environment is by invoking the polarizable continuum model
+ (PCM) 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Fuchs02"
+key "Tomasi05,Fuchs02"
 
 \end_inset
 
  to represent the water solvent.
- Although the PCM variant based on the conductor-like solvation model (COSMO)
- has been successfully applied in various studies of uranyl complexes 
+ The PCM variant based on the conductor-like screening model (COSMO) has
+ successfully been applied in various studies of uranyl complexes 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04,Cao05,Shamov05,Gutowski06"
 
 \end_inset
 
-, it provides no insight into the structure and statistical fluctuations
- of the water solvent.
- On the other hand, MM dynamic simulations (molecular dynamics, MD; Monte-Carlo,
- MC) based on empirical model potentials yield explicit configurations of
- the water solvent around uranyl for large numbers of solvent molecules
+.
+ Yet, it does not provide any insight into the structure and the statistical
+ distribution of the water solvent.
+ On the other hand, MM dynamic simulations, either by molecular dynamics
+ (MD) or Monte-Carlo (MC) methods, based on empirical model potentials yield
+ explicit configurations of the water solvent around uranyl for large numbers
+ of solvent molecules 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Tiwari14"
@@ -240,15 +205,6 @@ key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Tiwari14"
 \end_inset
 
 .
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  Several studies 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -256,66 +212,46 @@ key "hagberg05,Frick09,Tirler13"
 
 \end_inset
 
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-also attempted to combine QM and MM simulations to simultaneously treat
- both, the chemical behavior of the uranyl solute and the explicit solvent
- structure.
+ also attempted to combine QM and MM simulations to simultaneously treat
+ both, the chemical behavior of uranyl solute and the explicit solvent structure.
  However, the results of such a statistical sampling are only as good as
- the effective force field used to parameterize the solvent-solvent and
- solute-solvent interactions 
+ the effective force field used to parameterize the solute-solvent and solvent-s
+olvent interactions 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Gordon00"
 
 \end_inset
 
-, and the polarizability of the solvent medium has to be taken into account
- to compete with continuum models in reproducing electrostatic interactions.
- Also, the statistical sampling of large numbers of solvent configurations
- entails significant computational cost to the combination of QM and MM
- calculations.
- For that same reason, more accurate QM dynamic simulations 
+.
+ These approaches have to account for the polarizability of the solvent
+ medium to compete with continuum models in adequately reproducing the electrost
+atic interactions.
+ Also, statistical sampling of large numbers of solvent configurations entails
+ a significant computational cost of such combined QM/MM calculations.
+ Therefore, in view of their very high computational demand, more accurate
+ QM dynamic simulations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl05,Buehl06,Buehl11,Nichols08"
 
 \end_inset
 
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
- are restricted to a comparably small number of solvent molecules due to
- their very high computational demand.
+ are restricted to comparably small numbers of solvent molecules.
 \end_layout
 
 \begin_layout Standard
-Given the difficulties mentioned above, strategies which combine QM methods
+Given the difficulties just mentioned, strategies which combine QM methods
  with integral equation theory of molecular liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "book:Hirata03,book:Hansen06"
+key "book:Hirata03,book:Hansen06,Kloss08"
 
 \end_inset
 
- are regarded as a promising direction to study ions and complexes and their
- chemical reactions in aqueous solution with sufficient accuracy and at
- affordable cost.
+ are regarded as a promising direction for studying ions and complexes as
+ well as their chemical reactions in aqueous solution with sufficient accuracy
+ and at affordable cost.
  One successful approach of this type is the reference interaction site
  model (RISM) 
 \begin_inset CommandInset citation
@@ -325,7 +261,7 @@ key "Chandler72"
 \end_inset
 
  which provides solvation energies and also averaged solvent structures
- via site-site radial distribution functions (RDF).
+ via site-site radial distribution functions (RDFs).
  The one-dimensional (1D) RISM method has been applied to simple atomic
  solutes 
 \begin_inset CommandInset citation
@@ -348,7 +284,7 @@ key "Kovalenko00a"
 
 \end_inset
 
-, and various polar and hydrophobic solutes 
+, and polymers in polar and quadrupolar liquids 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03,Chuev07,Ratkova10"
@@ -356,26 +292,17 @@ key "book:Hirata03,Chuev07,Ratkova10"
 \end_inset
 
 .
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok? 
-\end_layout
-
-\end_inset
-
- And by enforcing the desired dielectric constant for all thermodynamic
- routes, the RISM method has been extended (dielectrically consistent RISM
- (DRISM) 
+ By enforcing the desired dielectric constant for all thermodynamic routes,
+ with the recent extension to the dielectrically consistent RISM (DRISM)
+ variant 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
 
 \end_inset
 
-) to electrolyte solutions containing ionic species 
+, it has become possible to treat electrolyte solutions containing ionic
+ species 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns94,Chiodo07,Chuev08,Joung13"
@@ -383,23 +310,12 @@ key "Perkyns94,Chiodo07,Chuev08,Joung13"
 \end_inset
 
 .
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
-In this work, we apply the RISM approach for the first time to study uranyl(VI)
+In this work, we apply the RISM approach for the first time to uranyl(VI)
  in aqueous solution.
- By using classical 
+ Using well-tried 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
@@ -413,17 +329,19 @@ key "Rai12,Pomogaev13,Kerisit13"
 
 \end_inset
 
- empirical force field parameterizations for uranyl and using a suitable
+ empirical force field parameterizations for uranyl as well as a suitable
  water model, we first inspect water solvent structures around the bare
- uranyl ion with the 1D-RISM method and compare the results with an MD simulatio
-n.
- Then we extend our study with the same method to uranyl--water complexes
+ uranyl ion with the 1D-RISM method and we compare with the results of MD
+ simulations.
+ Then we extend our study with the same method to uranyl–water complexes
  as solute models, in which the first solvation shell around the uranyl
  cation is represented by explicitly treated water molecules.
- Finally, free energy surfaces of uranyl--water complexes are generated,
- both with MM and QM methods in the presence of a RISM water solvent environment
- outside the first solvation shell, and geometry optimizations are carried
- out to study the stability and dynamics of the first solvation shell.
+ Finally, we generated free energy surfaces of uranyl–water complexes, both
+ with MM and QM methods in the presence of a RISM water solvent environment,
+ outside the first solvation shell.
+ With that approach, we carried out geometry optimizations to study the
+ stability and dynamics of the first solvation shell of uranyl in an aqueous
+ environment.
 \end_layout
 
 \begin_layout Section
