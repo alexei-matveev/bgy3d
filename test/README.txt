@@ -33,6 +33,8 @@ KH  "Li+, JC08, SPC/E" -108.4576 -8.3757478855243385E-004 -108.4540
     "I-, JC08, SPC/E"   -63.1219  2.4508131957428017       -73.3839
     "I-, JC08, SPC/E"   -63.1270
 
+(Max interval width 0.0064 kcal)
+
     "Li+, JC08, SPC/E" -111.6739
 HNC "Li+, JC08, SPC/E" -111.6720 -0.44455307028116448     -110.3438
     "Li+, JC08, SPC/E" -111.6656
@@ -57,6 +59,8 @@ HNC "Li+, JC08, SPC/E" -111.6720 -0.44455307028116448     -110.3438
     "I-, JC08, SPC/E"   -64.9494  2.6186437518085195       -72.7730
     "I-, JC08, SPC/E"   -64.9430
 
+(Max interval width 0.0083 kcal)
+
 
 
 RISM-1D zero charge:
@@ -77,7 +81,24 @@ HNC "Li+, JC08, SPC/E"    0.9433  0.27682909477177470       0.1162
     "I-, JC08, SPC/E"    17.5595  4.0208056339222189        5.5467
 
 
-Water, KH, HNC and the energy scale of the PMV correction a
+
+Potential of  the medium  charge for charged  water and  *neutral* ion
+cavities  is  non-zero.  For  neutral  cavities  the  origin  of  this
+potential is a double charge layer at the cavity surface:
+
+         KH                   HNC
+--------------------------------------------------
+OW  is   26.062302974871152   26.155168038488135
+HW  is    0.192136065163674  0.2143324611269721615
+Li+ is   13.318369206936721   13.650568870315309
+Na+ is   12.508125590920542   12.763565490611917
+K+  is   12.043611245711858   12.241958124886928
+Cl- is   10.174864590800949   10.245167004447064
+Br- is   10.238841534764399   10.306513320983548
+I-  is   10.172960542695895   10.234556894535574
+
+
+Water  by KH,  HNC  with the  energy  scale of  the  PMV correction  a
 computed as
 
          a = T * (1 - β/ρκ) / 2
