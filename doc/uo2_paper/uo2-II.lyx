@@ -333,16 +333,12 @@ With
 \begin_inset Formula $n=\infty$
 \end_inset
 
- the second branch reduces 
-\begin_inset Formula $f(x)=\exp(x)-1$
-\end_inset
-
- as well and one recovers the hypenetted chain (HNC) closure.
+ one recovers the hypenetted chain (HNC) closure.
  Another popular closure with 
 \begin_inset Formula $n=1$
 \end_inset
 
- was popularized by Kovalenko and Hirata (KH) for improving numerical stability
+ was proposed by Kovalenko and Hirata (KH) for improving numerical stability
  of equations 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -355,12 +351,12 @@ key "Kovalenko99"
 \begin_inset Formula $n>1$
 \end_inset
 
- are usually referred to as PSE-
+ are usually referred to as PSE
 \begin_inset Formula $n$
 \end_inset
 
  closures.
- For consistency, we will also refer to KH closure as PSE-1 in this work.
+ For consistency, we will also refer to KH closure as PSE1 in this work.
 \end_layout
 
 \begin_layout Standard
@@ -503,7 +499,7 @@ with
 \begin_inset Formula $\phi(x)=f(x)-x-\int_{0}^{x}f(y)dy$
 \end_inset
 
- having particularly simple form for the PSE-
+ having particularly simple form for the PSE
 \begin_inset Formula $n$
 \end_inset
 
@@ -523,7 +519,7 @@ key "Kast08"
 \end_inset
 
 .
- In the case of KH (PSE-1) closure the additional term 
+ In the case of KH (PSE1) closure the additional term 
 \begin_inset Formula $-x^{2}/2$
 \end_inset
 
@@ -1959,14 +1955,14 @@ Free energy minimization for uranyl aqua complexes
 \end_layout
 
 \begin_layout Standard
-In this section we examine a more accessible combination of 3D RISM for
- the bulk of the water and a force-field potential energy surface for interactio
-ns of uranyl and 
+In this section we examine an accessible combination of 3D RISM for the
+ bulk water and a force-field potential energy surface for interactions
+ of uranyl and 
 \begin_inset Formula $n$
 \end_inset
 
  explicit water ligands for 
-\begin_inset Formula $n\in\{0,4,5,6\}$
+\begin_inset Formula $n=4-6$
 \end_inset
 
 .
@@ -1974,9 +1970,9 @@ ns of uranyl and
 \begin_inset Formula $n=4$
 \end_inset
 
- features a missing equatorial ligand which manifests in a qualitative differenc
-e of the structures obtained by minimizing the MM expression for potential
- energy surface and MM+RISM combination for the free energy surface.
+ features a missing equatorial ligand demonstrates a qualitative difference
+ of the optimal structures obtained by minimizing the MM and and MM+RISM
+ expressions for potential (free) energy.
  Similar to the findings in our previous work using the 1D RISM formalizm
  
 \begin_inset CommandInset citation
@@ -2012,7 +2008,7 @@ pm is slightly shorter than the corresponding 240--242
 \begin_inset space ~
 \end_inset
 
-pm of the structure optimized at MM+RISM level, Table
+pm distances of the structures optimized at MM+RISM level, Table
 \begin_inset space ~
 \end_inset
 
@@ -2025,13 +2021,15 @@ reference "tab:mm-rism"
 
 .
  That may indicate a lack of the steric ligand-ligand interactions in the
- under-coordinated complex.
- But note a non-obvious effect of shorter U--OW distances of 240
+ under-coordinated gas-phase complex in the absence of the solvent environment
+ to compensate for that.
+ Note, however, a non-obvious opposite effect of shortening U--OW distances
+ to 240
 \begin_inset space ~
 \end_inset
 
-pm in five-coordinated uranyl complexes immersed into the RISM medium in
- comparison to the MM results of about 243--244
+pm in five-coordinated uranyl complexes after embedding a gas phase complex
+ into the RISM medium; the gas phase MM results are about 243--244
 \begin_inset space ~
 \end_inset
 
@@ -2047,13 +2045,13 @@ reference "tab:mm-rism"
 \end_inset
 
 .
- This could be an indication of a partial screening of a steric repulsion
- of the equatorial ligands by the solvent.
+ This could be an indication of a partial screening of steric repulsions
+ of the equatorial ligands by the solvent in saturated complexes.
 \end_layout
 
 \begin_layout Standard
-The MM+RISM model compensates for the missing ligand by local increase of
- the water density at this location, Figure
+The mechanism by which the MM+RISM model compensates for the missing ligand
+ is the local increase of the water density at this location, Figure
 \begin_inset space ~
 \end_inset
 
@@ -2067,7 +2065,8 @@ reference "fig:spatial-distribution-4w"
 .
  Due to notable width of the local distribution, both in tangential and
  apical directions and less so in radial direction the RISM representation
- of the missing ligand is not an exact substitute.
+ of the missing ligand is not an exact substitute for an explicit water
+ ligand.
  Indeed, there is a measurable difference of the average U--OW distances
  between the complexes with 4 and 5 explicit waters in the first solvation
  shell: 241--242
@@ -2083,7 +2082,7 @@ pm for
 \end_inset
 
 pm for 
-\begin_inset Formula $n\ge5$
+\begin_inset Formula $n=5$
 \end_inset
 
 , Table
@@ -2275,7 +2274,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-239.2
+239
 \end_layout
 
 \end_inset
@@ -2284,7 +2283,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-243.5
+244
 \end_layout
 
 \end_inset
@@ -2293,7 +2292,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-243.1
+243
 \end_layout
 
 \end_inset
@@ -2402,7 +2401,7 @@ MM+PSE1
 \begin_inset Text
 
 \begin_layout Plain Layout
-241.2
+241
 \end_layout
 
 \end_inset
@@ -2411,7 +2410,7 @@ MM+PSE1
 \begin_inset Text
 
 \begin_layout Plain Layout
-239.9
+240
 \end_layout
 
 \end_inset
@@ -2420,7 +2419,7 @@ MM+PSE1
 \begin_inset Text
 
 \begin_layout Plain Layout
-239.9
+240
 \end_layout
 
 \end_inset
@@ -2591,7 +2590,7 @@ MM+PSE2
 \begin_inset Text
 
 \begin_layout Plain Layout
-241.7
+242
 \end_layout
 
 \end_inset
@@ -2600,7 +2599,7 @@ MM+PSE2
 \begin_inset Text
 
 \begin_layout Plain Layout
-240.0
+240
 \end_layout
 
 \end_inset
@@ -2609,7 +2608,7 @@ MM+PSE2
 \begin_inset Text
 
 \begin_layout Plain Layout
-239.9
+240
 \end_layout
 
 \end_inset
@@ -2789,7 +2788,7 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
-240.0
+240
 \end_layout
 
 \end_inset
@@ -2798,7 +2797,7 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
-239.9
+240
 \end_layout
 
 \end_inset
