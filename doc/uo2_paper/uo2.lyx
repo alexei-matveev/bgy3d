@@ -315,7 +315,7 @@ key "Perkyns94,Chiodo07,Chuev08,Joung13"
 \begin_layout Standard
 In this work, we apply the RISM approach for the first time to uranyl(VI)
  in aqueous solution.
- Using well-tried 
+ As a first test, using well-tried 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guilbaud96"
@@ -330,18 +330,40 @@ key "Rai12,Pomogaev13,Kerisit13"
 \end_inset
 
  empirical force field parameterizations for uranyl as well as a suitable
- water model, we first inspect water solvent structures around the bare
- uranyl ion with the 1D-RISM method and we compare with the results of MD
- simulations.
- Then we extend our study with the same method to uranyl–water complexes
- as solute models, in which the first solvation shell around the uranyl
- cation is represented by explicitly treated water molecules.
- Finally, we generated free energy surfaces of uranyl–water complexes, both
- with MM and QM methods in the presence of a RISM water solvent environment,
+ water model, we inspected solvent structures around the 
+\emph on
+bare
+\emph default
+ uranyl ion with the 1D-RISM method and we compared with results of MD simulatio
+ns.
+ Then we turned to the 
+\emph on
+standard model
+\emph default
+ of uranyl solvation in water where the solute is described as aqua complexes
+ 
+\begin_inset Formula $[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}]^{2+}$
+\end_inset
+
+, (
+\begin_inset Formula $n=4-6$
+\end_inset
+
+), i.e., the first solvation shell of uranyl is represented by explicitly
+ treated water molecules in equatorial positions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fuchs02,Moskaleva04,Shamov05,Gutowski06,Buehl06,Buehl11,Moskaleva06a"
+
+\end_inset
+
+.
+ We generated free energy surfaces of uranyl–water complexes, both with
+ MM and QM methods in the presence of a RISM water solvent environment,
  outside the first solvation shell.
  With that approach, we carried out geometry optimizations to study the
  stability and dynamics of the first solvation shell of uranyl in an aqueous
- environment.
+ environment and we compared these results to those of PCM calculations.
 \end_layout
 
 \begin_layout Section
@@ -2469,23 +2491,25 @@ key "Joung13"
 
 ).
  
-\color blue
+\end_layout
+
+\begin_layout Standard
 The excess chemical potential is insensitive to the specific value of the
  radial range of that order.
- By repeating the same calculations with radial range set to 320
+ With the radial range set to 320
 \begin_inset space ~
 \end_inset
 
-Å and 80
+Å or 80
 \begin_inset space ~
 \end_inset
 
-Å while keeping the same grid spacing we obtained the intervals of a width
- no more than 0.01
+Å while keeping the same grid spacing, the excess chemical potential changed
+ at most by 0.01
 \begin_inset space ~
 \end_inset
 
-kcal/mol for each of the quoted values.
+kcal.
  In contrast, explicit solvent models may require a size-dependent correction
  
 \begin_inset CommandInset citation
@@ -2495,8 +2519,8 @@ key "Kastenholz06I,Kastenholz06II"
 \end_inset
 
 .
- The RISM model predicts a double charge layer on a neutral ion cavity surface
- leading to a finite electrostatic cavity potential of about 10--14
+ The RISM model predicts a double charge layer around a neutral ion leading
+ to a finite electrostatic cavity potential of 10–14
 \begin_inset space ~
 \end_inset
 
@@ -2504,36 +2528,24 @@ kcal/(mol
 \begin_inset Formula $\cdot e$
 \end_inset
 
-) depending on the size and dispersion parameters of the ion.
- This is comparable to the MD estimates of the vacuum--liquid interfacial
- potential jump (cp.
-\begin_inset space \space{}
-\end_inset
-
-e.g.
-\begin_inset space \space{}
-\end_inset
-
-Ref.
-\begin_inset space ~
-\end_inset
-
-
+) depending on the size of the ion and the dispersion parameters.
+ This is comparable to MD estimates of the jump of the vacuum-liquid interface
+ potential 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Warren07"
 
 \end_inset
 
-) and about half of the value for orientationally disordered liquid 
+ and about half of the value for an orientationally disordered liquid 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kastenholz06I"
 
 \end_inset
 
- which are sometimes needed to correct ion solvation energies in explicit
- methods.
+, which in explicit methods are highly sensitive to the Coulomb summation
+ scheme.
 \end_layout
 
 \begin_layout Standard
@@ -2544,51 +2556,31 @@ Overall the HNC closure relation yields slightly better results than the
  the results for anions are slightly worse.
  The difference is in part intrinsic to the RISM approximation and in part
  is due to the difference in LJ parameters of the hydrogen centers of water.
- 
-\color blue
-An intrinsic problem of the RISM approach is an overestimation of the cavity
- formation energy defined e.g.
+\end_layout
+
+\begin_layout Standard
+An intrinsic problem of the RISM approach is the overestimation of the cavity
+ formation energy defined, for instance, as the solvation energy of the
+ uncharged solute.
+ For larger anions the cavity formation energy amounts to 14–19
 \begin_inset space ~
 \end_inset
 
-as the solvation energy of the uncharged solute.
- For larger anions the cavity formation energy amounts to 14--19
+kcal/mol whereas the MD suggests smaller values of ~7
 \begin_inset space ~
 \end_inset
 
-kcal/mol whereas the MD suggests smaller values of about 7
-\begin_inset space ~
-\end_inset
-
-kcal/mol, see e.g.
-\begin_inset space ~
-\end_inset
-
-Ref.
-\begin_inset space ~
-\end_inset
-
-
+kcal/mol 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Joung13"
-
-\end_inset
-
- or supplementary material of Ref.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Reif11b"
+key "Joung13,Reif11b"
 
 \end_inset
 
 .
- The error is significant for neutral solutes and less so for the ions where
- the electrostatic contribution dominates.
+ Although this error is notable for neutral solutes, it is less important
+ for ions where the electrostatic contribution dominates.
+ This holds even more so for the uranyl di-cation.
  To some extent this overestimation may be compensated by a correction proportio
 nal to the molar volume of the solute 
 \begin_inset CommandInset citation
@@ -2597,11 +2589,8 @@ key "Sergiievskyi14"
 
 \end_inset
 
- cf.
-\begin_inset space \space{}
-\end_inset
-
-the KH+PMV and HNC+PMV rows of the Table
+, see calculations with the so-called PMV corrections (“proportional to
+ the partial molar volume”, Table
 \begin_inset space ~
 \end_inset
 
@@ -2612,7 +2601,7 @@ reference "tab:simple-ions"
 
 \end_inset
 
-.
+).
 \end_layout
 
 \begin_layout Standard
@@ -3113,8 +3102,6 @@ HNC
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 KH+PMV
 \begin_inset Formula $^{c}$
 \end_inset
@@ -3128,8 +3115,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3142,8 +3127,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3156,8 +3139,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3170,8 +3151,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3184,8 +3163,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3198,8 +3175,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3214,8 +3189,6 @@ KH+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 HNC+PMV
 \begin_inset Formula $^{c}$
 \end_inset
@@ -3229,8 +3202,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3243,8 +3214,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3257,8 +3226,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3271,8 +3238,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3285,8 +3250,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3299,8 +3262,6 @@ HNC+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-
-\color blue
 \begin_inset Formula $-$
 \end_inset
 
@@ -3550,8 +3511,6 @@ key "Joung13"
 
 .
  
-\color blue
-
 \begin_inset Formula $^{c}$
 \end_inset
 
@@ -3559,7 +3518,7 @@ key "Joung13"
 \begin_inset space ~
 \end_inset
 
-With partial molar volume correction as in Ref.
+This work, with partial molar volume correction as proposed in Ref.
 \begin_inset space ~
 \end_inset
 
@@ -3571,8 +3530,6 @@ key "Sergiievskyi14"
 \end_inset
 
 .
-
-\color inherit
  
 \begin_inset Formula $^{d}$
 \end_inset
@@ -6233,102 +6190,9 @@ More insight into the structure of the first solvation shell and details
  water ligands into the solute model embedded in RISM.
  We employed models where the uranyl geometry is either fixed (MM, MM+RISM)
  or not (QM, QM+RISM, see below) while the positions and orientations of
- the water ligands are optimized 
-\color blue
-by minimizing the (free) energy.
-
-\color inherit
+ the water ligands are optimized.
  In the following we will first discuss results of MM, then of QM treatments,
  of the solute, embedded in water treated at the RISM level.
-\end_layout
-
-\begin_layout Standard
-
-\color blue
-A tightly bound aqua ligand is thus treated a part of the solute.
- Restricting statistical sampling over the additional degrees of freedom
- introduced with the ligand to a single representative structure minimizing
- the conformation free energy can be justified to some extent for the strong
- bonds.
- A free-floating water or a loosely associated aqua ligand, on the other
- hand, should be subject of the statistical sampling, implemented here by
- RISM.
- The water molecules located close to the equatorial plane of the uranyl
- and bound to the highly charged uranium atom and the water molecules from
- the apical region associated with the slightly negative oxygen atoms of
- uranyl are the representatives of these two types.
- Using preliminary version of the 3D RISM code we examined the 3D profile
- of the potential of the mean force (PMF) derived from the water oxygen
- distribution around the uranyl: the local PMF minimum in the equatorial
- plane is of the order of 
-\begin_inset Formula $-2.8T$
-\end_inset
-
- corresponding to the notable distribution peak of about 
-\begin_inset Formula $g\approx16$
-\end_inset
-
-, cp.
-\begin_inset space \space{}
-\end_inset
-
-Figures
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:rdf-vs-water-model"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:rdf-vs-uranyl-model"
-
-\end_inset
-
-; the PMF minimum in the apical region is significantly shallower, 
-\begin_inset Formula $-1.1T$
-\end_inset
-
-, corresponding to 
-\begin_inset Formula $g\approx3$
-\end_inset
-
-, cp.
-\begin_inset space \space{}
-\end_inset
-
-the 
-\emph on
-second
-\emph default
- peak in U--OW RDFs.
- Note that the RDFs for O--OW and O--HW pairs in Figures
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:rdf-vs-water-model"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:rdf-vs-uranyl-model"
-
-\end_inset
-
- do not resolve between equatorial and apical water.
- For these reasons, the notion of the first solvation shell (sphere) that
- includes only the equatorial ligands, even if slightly confusing, will
- be adopted here.
 \end_layout
 
 \begin_layout Subsubsection
