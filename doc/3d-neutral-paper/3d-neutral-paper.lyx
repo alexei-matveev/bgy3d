@@ -79,7 +79,6 @@ Alexei V.
 \end_layout
 
 \begin_layout Author Email
-
 matveev@theochem.tu-muenchen.de
 \end_layout
 
@@ -97,7 +96,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -2881,7 +2879,7 @@ name "fig:Correlation-of-solvation"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename 3d-rism.d/draw1.png
+	filename 3d-neutral.d/draw1.png
 	width 8cm
 
 \end_inset
@@ -4359,7 +4357,7 @@ Griebel for providing the source of the BGY3D program package.
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "3d-rism"
+bibfiles "3d-neutral-paper"
 
 \end_inset
 
