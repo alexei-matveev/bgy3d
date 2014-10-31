@@ -7,6 +7,9 @@ from pylab import *
 import matplotlib.pyplot  as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
+colorH = "#000000"              # black
+colorS = "#c0c0c0"              # silver
+
 kcal = 0.0433641195867 # eV
 
 # Each of these has 4 columns (q, E(q), dG(q), G(q)):
@@ -23,8 +26,8 @@ def one ():
         plot (r_int, g_int, "--", color=color)
         plot (r_opt, g_opt, "o", color=color, label=label)
 
-    pp (soft, label="Soft", color="red")
-    pp (hard, label= "Hard", color="blue")
+    pp (soft, label="Soft", color=colorS)
+    pp (hard, label= "Hard", color=colorH)
 
 figure (figsize=(8, 4))
 one ()
