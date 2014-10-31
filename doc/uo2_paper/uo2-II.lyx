@@ -4540,13 +4540,26 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution functions of solvated uranyl: U--OW (top panel, red),
- U--HW (top panel, blue), O--OW (bottom panel, red) and O--HW (bottom panel,
- blue).
- Results employing the KH (aka PSE1) closure are shown with the thick lines
- in the foreground.
+Radial distribution functions of solvated uranyl: U--OW (top panel, black),
+ U--HW (top panel, gray), O--OW (bottom panel, black) and O--HW (bottom
+ panel, gray).
+ Results employing PSE1 closure are shown with the thick lines in the foreground.
  Results employing PSE2 and PSE3 closures are displayed using thinner lines
  in the background.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Number integrals for U--OW RDFs up to r=3.2
+\begin_inset space ~
+\end_inset
+
+A are 5.3, 6.2, and 6.4 for PSE1, PSE2 and PSE3 closures, respectively.
+\end_layout
+
+\end_inset
+
  
 \begin_inset CommandInset label
 LatexCommand label
