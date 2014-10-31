@@ -7,6 +7,9 @@ from pylab import *
 import matplotlib.pyplot  as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
+colorOW = "#000000"              # black
+colorHW = "#C0C0C0"              # silver
+
 def p (path):
     return "/home/matveev/darcs/bgy3d/test-qm/uranyl/sym/rdfs-10x256-trilin/" + path
 
@@ -39,11 +42,11 @@ def one (path, ymax=8, rmax=3.0, linewidth=1.0):
         # title (path)
         # axvline(rmax, color="black")
         # axhline(1.0, color="black")
-        print "n(", rmax, ") =", N(rmax)
+        print "n(", rmax, ") =", N(rmax), color, path
         # print "n(", r[-1], ") =", N(r[-1])
 
-    pp (gO, color="red")
-    pp (gH, color="blue")
+    pp (gO, color=colorOW)
+    pp (gH, color=colorHW)
 
 figure (figsize=(8, 6))
 rmax = 3.2
@@ -62,21 +65,24 @@ def p1 (path, color="black"):
 def p2 (xo, xh, x1, x2, x3):
     # FIXME: MD data uses PM13 uranyl:
     if False:
-        p1 (xo, color="red")
-        p1 (xh, color="blue")
+        p1 (xo, color=colorOW)
+        p1 (xh, color=colorHW)
 
     # RISM data:
     one (p (x1), ymax=ymax, rmax=rmax, linewidth=1.0)
     one (p (x2), ymax=ymax, rmax=rmax, linewidth=1.6)
     one (p (x3), ymax=ymax, rmax=rmax, linewidth=2.56)
 
+#
+# For another figure replace 0 <-> 5:
+#
 subplot (2, 1, 1)
 p2 ("../uo2.d/md-uo.dat",
     "../uo2.d/md-uh.dat",
     "5w,PSE3,U.rdf",
     "5w,PSE2,U.rdf",
     "5w,KH,U.rdf")
-title ("U-OW, U-HW")
+title ("U-OW, U-HW", loc="left")
 ylabel ("g(r)")
 
 subplot (2, 1, 2)
@@ -85,7 +91,7 @@ p2 ("../uo2.d/md-oo.dat",
     "5w,PSE3,OU.rdf",
     "5w,PSE2,OU.rdf",
     "5w,KH,OU.rdf")
-title ("O-OW, O-HW")
+title ("O-OW, O-HW", loc="left")
 ylabel ("g(r)")
 xlabel ("r, A")
 
