@@ -2092,7 +2092,7 @@ Q29.1094 64.7031 21.8438 57.7812
 Q14.5938 50.875 14.5938 34.7188" id="ArialMT-4f"/>
      <path id="ArialMT-20"/>
     </defs>
-    <g transform="translate(223.205625 17.50725)scale(0.144 -0.144)">
+    <g transform="translate(43.115625 17.50725)scale(0.144 -0.144)">
      <use xlink:href="#ArialMT-55"/>
      <use x="72.216796875" xlink:href="#ArialMT-2d"/>
      <use x="105.517578125" xlink:href="#ArialMT-4f"/>
@@ -4082,7 +4082,7 @@ L43.1156 211.016" style="fill:none;stroke:#000000;"/>
    </g>
    <g id="text_37">
     <!-- O-OW, O-HW -->
-    <g transform="translate(222.404625 206.016340909)scale(0.144 -0.144)">
+    <g transform="translate(43.115625 206.016340909)scale(0.144 -0.144)">
      <use xlink:href="#ArialMT-4f"/>
      <use x="77.783203125" xlink:href="#ArialMT-2d"/>
      <use x="111.083984375" xlink:href="#ArialMT-4f"/>
