@@ -198,7 +198,7 @@ L442.089 169.064
 L461.628 168.319
 L480.679 167.768
 L489.819 167.617
-L489.819 167.617" style="fill:none;stroke:#ff0000;stroke-linecap:square;"/>
+L489.819 167.617" style="fill:none;stroke:#000000;stroke-linecap:square;"/>
    </g>
    <g id="line2d_3">
     <path clip-path="url(#p2ad02bd805)" d="
@@ -328,7 +328,7 @@ L442.688 170.117
 L453.595 169.897
 L469.162 169.338
 L489.819 168.461
-L489.819 168.461" style="fill:none;stroke:#0000ff;stroke-linecap:square;"/>
+L489.819 168.461" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;"/>
    </g>
    <g id="line2d_5">
     <path clip-path="url(#p2ad02bd805)" d="
@@ -488,7 +488,7 @@ L418.182 170.438
 L459.142 168.582
 L480.032 167.886
 L489.819 167.669
-L489.819 167.669" style="fill:none;stroke:#ff0000;stroke-linecap:square;stroke-width:1.6;"/>
+L489.819 167.669" style="fill:none;stroke:#000000;stroke-linecap:square;stroke-width:1.6;"/>
    </g>
    <g id="line2d_7">
     <path clip-path="url(#p2ad02bd805)" d="
@@ -608,7 +608,7 @@ L444.488 170.097
 L455.437 169.894
 L471.063 169.357
 L489.819 168.575
-L489.819 168.575" style="fill:none;stroke:#0000ff;stroke-linecap:square;stroke-width:1.6;"/>
+L489.819 168.575" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;stroke-width:1.6;"/>
    </g>
    <g id="line2d_9">
     <path clip-path="url(#p2ad02bd805)" d="
@@ -760,7 +760,7 @@ L421.032 170.655
 L435.553 170.058
 L483.925 167.886
 L489.819 167.722
-L489.819 167.722" style="fill:none;stroke:#ff0000;stroke-linecap:square;stroke-width:2.56;"/>
+L489.819 167.722" style="fill:none;stroke:#000000;stroke-linecap:square;stroke-width:2.56;"/>
    </g>
    <g id="line2d_11">
     <path clip-path="url(#p2ad02bd805)" d="
@@ -858,7 +858,7 @@ L450.54 169.924
 L462.252 169.75
 L476.811 169.311
 L489.819 168.813
-L489.819 168.813" style="fill:none;stroke:#0000ff;stroke-linecap:square;stroke-width:2.56;"/>
+L489.819 168.813" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;stroke-width:2.56;"/>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
@@ -1884,7 +1884,7 @@ L435.553 327.114
 L470.429 329.543
 L480.679 329.833
 L489.819 329.997
-L489.819 329.997" style="fill:none;stroke:#ff0000;stroke-linecap:square;"/>
+L489.819 329.997" style="fill:none;stroke:#000000;stroke-linecap:square;"/>
    </g>
    <g id="line2d_45">
     <path clip-path="url(#p7af6e845db)" d="
@@ -2148,7 +2148,7 @@ L469.795 328.618
 L476.811 329.381
 L483.274 329.87
 L489.819 330.187
-L489.819 330.187" style="fill:none;stroke:#0000ff;stroke-linecap:square;"/>
+L489.819 330.187" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;"/>
    </g>
    <g id="line2d_47">
     <path clip-path="url(#p7af6e845db)" d="
@@ -2398,7 +2398,7 @@ L462.876 329.397
 L471.063 329.847
 L480.679 330.146
 L489.819 330.304
-L489.819 330.304" style="fill:none;stroke:#ff0000;stroke-linecap:square;stroke-width:1.6;"/>
+L489.819 330.304" style="fill:none;stroke:#000000;stroke-linecap:square;stroke-width:1.6;"/>
    </g>
    <g id="line2d_49">
     <path clip-path="url(#p7af6e845db)" d="
@@ -2632,7 +2632,7 @@ L472.335 328.744
 L480.032 329.494
 L487.191 329.965
 L489.819 330.097
-L489.819 330.097" style="fill:none;stroke:#0000ff;stroke-linecap:square;stroke-width:1.6;"/>
+L489.819 330.097" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;stroke-width:1.6;"/>
    </g>
    <g id="line2d_51">
     <path clip-path="url(#p7af6e845db)" d="
@@ -2848,7 +2848,7 @@ L463.501 329.502
 L471.063 330.018
 L480.032 330.408
 L489.819 330.603
-L489.819 330.603" style="fill:none;stroke:#ff0000;stroke-linecap:square;stroke-width:2.56;"/>
+L489.819 330.603" style="fill:none;stroke:#000000;stroke-linecap:square;stroke-width:2.56;"/>
    </g>
    <g id="line2d_53">
     <path clip-path="url(#p7af6e845db)" d="
@@ -3040,7 +3040,7 @@ L466.009 327.544
 L478.097 328.724
 L487.847 329.453
 L489.819 329.575
-L489.819 329.575" style="fill:none;stroke:#0000ff;stroke-linecap:square;stroke-width:2.56;"/>
+L489.819 329.575" style="fill:none;stroke:#c0c0c0;stroke-linecap:square;stroke-width:2.56;"/>
    </g>
    <g id="matplotlib.axis_3">
     <g id="xtick_8">
