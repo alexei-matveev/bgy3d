@@ -7,6 +7,8 @@ from pylab import *
 import matplotlib.pyplot  as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
+color = "black"                 # "#696969" # dimgray
+
 def p (path):
     return "/home/matveev/darcs/bgy3d/test-qm/uranyl/sym/rdfs-10x256-trilin/" + path
 
@@ -46,7 +48,7 @@ def one (path, ymax=8, rmax=3.0, linewidth=1.0):
         print ("rb=", rb, "W(ra)=", W(rb))
         print ("rc=", rc, "W(ra)=", W(rc))
 
-    pp (gO, color="red")
+    pp (gO, color=color)
 
 figure (figsize=(8, 4))
 rmax = 3.2
