@@ -2219,7 +2219,7 @@ Average uranyl--water distance of the first solvation shell,
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, obtained using combinations of MM and RISM models.
+, obtained using gas phase MM and MM+RISM models.
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -3332,7 +3332,7 @@ Uranyl bond length,
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, obtained using combinations of the QM and several solvation models.
+, obtained using gas phase QM, QM+PCM and QM+RISM models.
 \begin_inset Formula $^{a}$
 \end_inset
 
