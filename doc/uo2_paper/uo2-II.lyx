@@ -1123,14 +1123,14 @@ name "sub:simple-ions"
 
 \begin_layout Standard
 To verify our 3D RISM implementation for charged solutes, we performed compariso
-n to the 1D RISM results for mono-atomic alkali and halide ions ions 
+n to the 1D RISM results for mono-atomic alkali and halide ions 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Joung13,Bo15"
 
 \end_inset
 
-, applying the cSPC/E water model, see Table
+ applying the cSPC/E water model, see Table
 \begin_inset space ~
 \end_inset
 
@@ -1142,11 +1142,11 @@ reference "tab:simple-ions"
 \end_inset
 
 .
- With moderate settings for the grid resolution with the total of 
+ With moderate settings for the grid resolution of 
 \begin_inset Formula $64^{3}$
 \end_inset
 
- points and a box size of 
+ points in total and a cubic box volume of 
 \begin_inset Formula $20^{3}$
 \end_inset
 
@@ -1173,7 +1173,7 @@ key "Sergiievskyi14"
 
 \end_inset
 
- as in 
+ as was demonstrated in our previous work 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bo15"
@@ -2011,7 +2011,7 @@ In this section we examine an accessible combination of 3D RISM for the
 \begin_inset Formula $n=4$
 \end_inset
 
- features a missing equatorial ligand demonstrates a qualitative difference
+ features a missing equatorial ligand and demonstrates a qualitative difference
  of the optimal structures obtained by minimizing the MM and and MM+RISM
  expressions for potential (free) energy.
  Similar to the findings in our previous work using the 1D RISM formalizm
@@ -2066,9 +2066,9 @@ reference "tab:mm-rism"
 \end_inset
 
 .
- That may indicate a lack of the steric ligand-ligand interactions in the
- under-coordinated gas-phase complex in the absence of the solvent environment
- to compensate for that.
+ The shorter distances indicate weaker steric ligand-ligand interactions
+ in the under-coordinated gas-phase complex in the absence of the solvent
+ environment to compensate for that.
  Note, however, a non-obvious opposite effect of shortening U--OW distances
  to 240
 \begin_inset space ~
@@ -2092,12 +2092,14 @@ reference "tab:mm-rism"
 
 .
  This could be an indication of a partial screening of steric repulsions
- of the equatorial ligands by the solvent in saturated complexes.
+ of the equatorial ligands by the solvent of the second solvation shell
+ in saturated complexes.
 \end_layout
 
 \begin_layout Standard
 The mechanism by which the MM+RISM model compensates for the missing ligand
- is the local increase of the water density at this location, Figure
+ is the local increase of the water density at the location of the missing
+ explicit ligand, Figure
 \begin_inset space ~
 \end_inset
 
@@ -2164,9 +2166,9 @@ reference "tab:mm-rism"
  Results for the five-coordinated uranyl models, on the other hand, are
  essentially independent of the closure choice.
  The bare uranyl model, where the axial symmetry makes the localization
- issue less severe, does converge though the results are significantly affected
- by the closure choice --- solvation energy at PSE3 level of theory is by
- 20
+ issue less severe, does converge for all three closures, though the results
+ are significantly affected by the closure choice --- solvation energy at
+ PSE3 level of theory is by 20
 \begin_inset space ~
 \end_inset
 
@@ -2220,9 +2222,9 @@ reference "eq:dG-sol-definition"
 kcal lower in the latter case.
  This is likely an artifact of a missing statistical sum over positions
  and orientations of the second shell water molecule.
- Thus a successful model shall treat the strongly bound aqua ligands explicitly
+ Hence a successful model shall treat the strongly bound aqua ligands explicitly
  as a part of the solute and the weakly associated or free-floating water
- as a RISM medium in order to by numerically stable and closure independent.
+ as a RISM medium in order to be numerically stable and closure independent.
  
 \end_layout
 
@@ -3042,7 +3044,7 @@ QM+RISM
 \begin_layout Standard
 The symmetric models of uranyl aqua complexes we use to compare PCM and
  RISM representation of the solvent in QM calculations do not feature a
- vacancy in an under-coordinated species with all water ligand equal by
+ vacancy in an under-coordinated species with all water ligands equal by
  symmetry also for the six-coordinated uranyl.
  These models feature an additional intra-molecular degree of freedom, the
  uranyl bond length, in contrast to the the MM models from the previous
@@ -3061,7 +3063,7 @@ key "Bo15"
 
  we observed a consistently longer U--O and U--OW bond lengths in QM+RISM
  calculations in comparison to QM+PCM and experiment.
- We speculatively attributed that to the excess coordination of the uranyl
+ We speculatively attributed that to the excess coordination of the uranyl,
  manifested by the presence of the leftover peak in U--OW distribution for
  models with explicit ligands.
  This artifact is specific to 1D RISM and is not reproduced in 3D RISM calculati
@@ -3069,7 +3071,7 @@ ons, cp.
 \begin_inset space \space{}
 \end_inset
 
-Figures
+Figure
 \begin_inset space ~
 \end_inset
 
@@ -3080,16 +3082,20 @@ reference "fig:rdfs-vs-closure-0w"
 
 \end_inset
 
- and 
+ featuring high first peak in U--OW RDFs and Figure
+\begin_inset space ~
+\end_inset
+
+
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:rdfs-vs-closure-5w"
 
 \end_inset
 
-.
- The number integrals of 5.3, 6.2, and 6.4 for U--OW RDFs with PSE closures
- of order 1--3, Figure
+ with no features at that separation.
+ The number integrals of 5.3, 6.2, and 6.4 for the first peak of U--OW RDFs
+ with PSE closures of order 1 to 3, respectively, Figure
 \begin_inset space ~
 \end_inset
 
@@ -3126,8 +3132,8 @@ reference "tab:qm+rism-vs-qm+pcm"
 \begin_inset space ~
 \end_inset
 
-pm for uranyl bond length which is shorter than for the four-coordinated
- uranyl, the QM+RISM results is around 179
+pm for uranyl bond length which is shorter than for the uranyl with just
+ four water ligands, the QM+RISM result is around 179
 \begin_inset space ~
 \end_inset
 
@@ -3157,7 +3163,11 @@ reference "tab:qm+rism-vs-qm+pcm"
 .
  The effect of the RISM medium on the bond length of the bare uranyl is
  thus comparable to that of the explicit water ligands; the elongation of
- the uranyl bond corresponds to 5--6
+ the uranyl bond by 7--8
+\begin_inset space ~
+\end_inset
+
+pm corresponds to 5--6
 \begin_inset space ~
 \end_inset
 
@@ -3182,7 +3192,7 @@ key "Bo15"
 
 .
  Again, we interpret this effect of the medium as a screening of repulsive
- ligand-ligand interactions by the solvent.
+ ligand-ligand interactions in the first shell by the solvent.
  
 \end_layout
 
@@ -3253,16 +3263,16 @@ reference "tab:qm+rism-vs-qm+pcm"
 \begin_inset space ~
 \end_inset
 
-kcal obtained in the previous work using 1D RISM 
+kcal/mol reported in the previous work using 1D RISM 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bo15"
 
 \end_inset
 
- remarkably close to an estimate based on relative weights of four- and
- five-coordinated species and an average coordination number from a high-energy
- x-ray scattering (HEXS) experiment 
+ to be remarkably close to an estimate based on relative weights of four-
+ and five-coordinated species and an average coordination number from a
+ high-energy x-ray scattering (HEXS) experiment 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Soderholm05"
@@ -3271,7 +3281,7 @@ key "Soderholm05"
 
 .
  Given the limitations of the 1D RISM exposed by the current 3D RISM approach
- we should interpret that agreement as fortuitous.
+ we should interpret that past agreement as fortuitous.
  The estimate based on the six-coordinated 
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
@@ -3280,7 +3290,7 @@ key "Soderholm05"
 \begin_inset space ~
 \end_inset
 
-kcal more negative than the result of the standard model with five explicit
+kcal/mol more negative than the result of the standard model with five explicit
  water ligands.
  The corresponding PCM difference is only 1
 \begin_inset space ~
@@ -3332,7 +3342,50 @@ When the water exchange section is in shape, one should add a statment on
 
 \end_inset
 
+ Again, the solvation energy by QM+PCM model is quite off for uranyl without
+ explicit water ligands.
+ The QM+PCM solvation energy of 
+\begin_inset Formula $-426$
+\end_inset
 
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol given by the standard five-coordinated uranyl model appears to
+ be too low 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04"
+
+\end_inset
+
+ in the view of most recent experimental estimate of 
+\begin_inset Formula $-369\pm15$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gibson05"
+
+\end_inset
+
+.
+ The corresponding QM+RISM solvation energy of 
+\begin_inset Formula $-389$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol is significantly closer to that interval.
+ 
 \end_layout
 
 \begin_layout Standard
