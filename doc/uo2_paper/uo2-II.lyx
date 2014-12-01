@@ -615,7 +615,7 @@ where
  
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -1117,7 +1117,7 @@ To verify our 3D RISM implementation for charged solutes, we performed compariso
 n to the 1D RISM results for mono-atomic alkali and halide ions ions 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Joung13,Bo14"
+key "Joung13,Bo15"
 
 \end_inset
 
@@ -1156,6 +1156,22 @@ reference "tab:simple-ions"
 kcal/mol or better.
  The accuracy is slightly better for small cations than for the larger anions.
  The values are comparable to MD with SPC/E water and experimental results.
+ The agreement may be slightly improved by a correction proportional to
+ the molar volume of the solute 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sergiievskyi14"
+
+\end_inset
+
+ as in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bo15"
+
+\end_inset
+
+.
  
 \end_layout
 
@@ -1895,7 +1911,7 @@ Energies in kcal/mol.
 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -1993,7 +2009,7 @@ In this section we examine an accessible combination of 3D RISM for the
  
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -3030,7 +3046,7 @@ In our previous work exploring these models in combination with 1D RISM
  
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -3151,7 +3167,7 @@ pm.
  The 1D RISM approach did not show this effect convincingly 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -3184,7 +3200,7 @@ kcal/mol using the standard model with five explicit water ligands vary
 kcal/mol from our previous work 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
@@ -3231,7 +3247,7 @@ reference "tab:qm+rism-vs-qm+pcm"
 kcal obtained in the previous work using 1D RISM 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Bo14"
+key "Bo15"
 
 \end_inset
 
