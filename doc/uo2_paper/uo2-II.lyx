@@ -2215,21 +2215,12 @@ Average uranyl--water distance of the first solvation shell,
 \begin_inset Formula $d$
 \end_inset
 
-(U--OW), intra-molecular energy 
-\begin_inset Formula $\Delta E_{\text{intra}}$
-\end_inset
-
-
-\begin_inset Formula $^{a}$
-\end_inset
-
- without and with RISM solvent.
- Estimate for the uranyl solvation energy, 
+(U--OW), and an estimate for the uranyl solvation energy, 
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
-, is also shown.
-\begin_inset Formula $^{b}$
+, obtained using combinations of MM and RISM models.
+\begin_inset Formula $^{a}$
 \end_inset
 
  
@@ -2310,7 +2301,7 @@ begin{ruledtabular}
 \end_inset
 
 1
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
@@ -2342,7 +2333,10 @@ begin{ruledtabular}
 \begin_inset Text
 
 \begin_layout Plain Layout
-MM
+\begin_inset Formula $d$
+\end_inset
+
+(U--OW)
 \end_layout
 
 \end_inset
@@ -2351,10 +2345,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $d$
-\end_inset
-
-(U--OW)
+GP
 \end_layout
 
 \end_inset
@@ -2410,78 +2401,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta E_{\text{intra}}$
-\end_inset
-
- 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-233
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-272
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-295
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MM+PSE1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $d$
-\end_inset
-
-(U--OW)
+PSE1
 \end_layout
 
 \end_inset
@@ -2537,10 +2457,191 @@ MM+PSE1
 \begin_inset Text
 
 \begin_layout Plain Layout
+PSE2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+---
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+242
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PSE3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+---
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+na
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 \begin_inset Formula $\Delta G_{\text{sol}}$
 \end_inset
 
 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GP
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+---
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+233
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+272
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+295
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PSE1
 \end_layout
 
 \end_inset
@@ -2599,65 +2700,6 @@ MM+PSE1
 \begin_inset Text
 
 \begin_layout Plain Layout
-MM+PSE2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $d$
-\end_inset
-
-(U--OW)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
----
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-242
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-240
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-240
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -2667,10 +2709,7 @@ MM+PSE2
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta G_{\text{sol}}$
-\end_inset
-
-
+PSE2
 \end_layout
 
 \end_inset
@@ -2729,65 +2768,6 @@ MM+PSE2
 \begin_inset Text
 
 \begin_layout Plain Layout
-MM+PSE3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $d$
-\end_inset
-
-(U--OW)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
----
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-na
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-240
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-240
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -2797,10 +2777,7 @@ na
 \begin_inset Text
 
 \begin_layout Plain Layout
-\begin_inset Formula $\Delta G_{\text{sol}}$
-\end_inset
-
-
+PSE3
 \end_layout
 
 \end_inset
@@ -2887,46 +2864,8 @@ footnotetext{
 
 \end_inset
 
-
-\begin_inset Formula $^{a}$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-Corresponds to binding energy of 
-\begin_inset Formula $4\leq n\leq6$
-\end_inset
-
- water ligands in [UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-(H
-\begin_inset Formula $_{2}$
-\end_inset
-
-O)
-\begin_inset Formula $_{n}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
- with a rigid uranyl and 
-\begin_inset Formula $d$
-\end_inset
-
-(U--O) of 1.790 A.
- It is identically zero for rigid bare uranyl (
-\begin_inset Formula $n=0$
-\end_inset
-
-).
  
-\begin_inset Formula $^{b}$
+\begin_inset Formula $^{a}$
 \end_inset
 
 
@@ -2935,18 +2874,18 @@ O)
 
 Bond lengths in pm, energies in kcal/mol.
  
-\begin_inset Formula $^{c}$
+\begin_inset Formula $^{b}$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-MM structure is 
+GP structure is 
 \begin_inset Formula $D_{4\text{h}}$
 \end_inset
 
- but MM+RISM structure features a vacancy in the equatorial plane corresponding
+ but the RISM structures feature a vacancy in the equatorial plane corresponding
  to the missing ligand, see Figure
 \begin_inset space ~
 \end_inset
@@ -2959,6 +2898,44 @@ reference "fig:spatial-distribution-4w"
 \end_inset
 
 
+.
+ 
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\lang english
+
+\begin_inset space ~
+\end_inset
+
+The row shows binding energies of 
+\begin_inset Formula $n$
+\end_inset
+
+ water molecules to a rigid uranyl with 
+\begin_inset Formula $d$
+\end_inset
+
+(U--O) of 1.790
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+AA
+\end_layout
+
+\end_inset
+
+.
+ 
 \begin_inset ERT
 status open
 
