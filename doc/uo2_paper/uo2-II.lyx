@@ -4674,9 +4674,9 @@ Potential of mean force,
 \begin_inset Formula $W(r)=-T\ln g(r)$
 \end_inset
 
-, for U--OW distribution functions obtained with KH, PSE2 and PSE3 closures
- (solid lines of increasing weight).
- The dashed line are the PM13 (?) MD results.
+, for U--OW distribution functions obtained with PSE1, PSE2 and PSE3 closures
+ (solid lines of decreasing weight).
+ The dashed line are the MD results.
  
 \begin_inset CommandInset label
 LatexCommand label
