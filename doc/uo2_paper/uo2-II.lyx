@@ -5387,6 +5387,113 @@ name "fig:free-energy-profiles"
 
 \end_layout
 
+\begin_layout Standard
+The two intra-molecular force fields for uranyl species differ primarily
+ by the force constant corresponding to the bending modes of uranyl.
+ The force-field referred here to as 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ corresponds to the frequency of the bending mode of 159
+\begin_inset space ~
+\end_inset
+
+cm
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tiwari14"
+
+\end_inset
+
+.
+ The alternative 
+\begin_inset Quotes eld
+\end_inset
+
+hard
+\begin_inset Quotes erd
+\end_inset
+
+ force field features a significantly higher frequency of the mode of 393
+\begin_inset space ~
+\end_inset
+
+cm
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerisit13"
+
+\end_inset
+
+.
+ The hindered bending vibration in solution and crystals has been characterized
+ by frequencies in the range of 180--270
+\begin_inset space ~
+\end_inset
+
+cm
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Denning76,Denning79,Toth81,Gal92"
+
+\end_inset
+
+.
+ Standard DFT is likely to predict too soft a bending mode of an isolated
+ uranyl likely because of the self-interaction error for 
+\begin_inset Formula $f$
+\end_inset
+
+-electrons 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ramakrishnan11"
+
+\end_inset
+
+ while hybrid DFT and CCSD(T) estimate the bending frequency around 160--180
+\begin_inset space ~
+\end_inset
+
+cm
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Jackson08"
+
+\end_inset
+
+.
+ In this light the force field with the 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ bending mode is probably more appropriate.
+\end_layout
+
 \begin_layout Section
 Concluding remarks
 \end_layout
