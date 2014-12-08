@@ -80,7 +80,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=64
+--N=96
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -356,19 +356,26 @@ def exchange (s):
         h = compose (h1, trafo)
         c = compose (rc, trafo)
 
-        qs, ss = initial_path(f, s, c)
+        if True:
+            ss = loadtxt ("ss,initial.txt")
+            qs = array (map (c, ss))
+        else:
+            qs, ss = initial_path(f, s, c)
+
         p = Path (ss, qs)
 
-        # Energy profile, smooth:
-        print ("# q, ra(q), rb(q), E(q)")
-        for q in linspace (qs[0], qs[-1], 100):
-            print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
+        if True:
+            # Energy profile, smooth:
+            print ("# q, ra(q), rb(q), E(q)")
+            for q in linspace (qs[0], qs[-1], 100):
+                print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
 
-        # Energy profile, coarse, with dG(q):
-        with open ("./profile,mm.txt", "w") as file:
-            print ("# q, ra(q), rb(q), E(q), dG(q)", file=file)
-            for q in qs:
-                print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), file=file)
+        if True:
+            # Energy profile, coarse, with dG(q):
+            with open ("./profile,intial.txt", "w") as file:
+                print ("# q, ra(q), rb(q), E(q), dG(q)", file=file)
+                for q in qs:
+                    print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), file=file)
 
         with f + h as e:
             # Terminals  were constrained, obtain  fully unconstrained
@@ -389,8 +396,7 @@ def exchange (s):
                 sm, info = cminimize (e, s, Array (c), maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
-            if True:
-                ss = loadtxt ("ss,initial.txt")
+
             ss = array (map (copt, ss))
             savetxt ("ss.txt", ss)
 
