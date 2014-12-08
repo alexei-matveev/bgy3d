@@ -387,7 +387,7 @@ def exchange (s):
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=100, ftol=1.0e-3, xtol=1.0e-3, algo=1)
+                sm, info = minimize (e, s, maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
             sab = map (opt, sab)
