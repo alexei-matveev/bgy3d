@@ -80,7 +80,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=64
+--N=96
 --rmax=40
 --nrad=1536
 --closure=KH
