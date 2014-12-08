@@ -80,7 +80,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=64
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -356,7 +356,8 @@ def exchange (s):
         h = compose (h1, trafo)
         c = compose (rc, trafo)
 
-        if True:
+        refine = True
+        if refine:
             ss = loadtxt ("ss,initial.txt")
             qs = array (map (c, ss))
         else:
@@ -380,7 +381,11 @@ def exchange (s):
         with f + h as e:
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
-            sab = (ss[0], ss[-1])
+            if refine:
+                sab = loadtxt ("sab,initial.txt")
+            else:
+                sab = (ss[0], ss[-1])
+
             def opt (s):
                 sm, info = minimize (e, s, maxit=100, ftol=1.0e-3, xtol=1.0e-3, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
@@ -389,6 +394,7 @@ def exchange (s):
             qab = map (c, sab)
             qa, qb = qab
             sa, sb = sab
+            savetxt ("sab.txt", sab)
             write_xyz ("KH-aaa.xyz", trafo (sa))
             write_xyz ("KH-bbb.xyz", trafo (sb))
 
