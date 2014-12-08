@@ -334,7 +334,7 @@ def initial_path (f, s, c):
     for i, s in enumerate (ss):
         write_xyz ("out-%03d.xyz" % i, trafo (s))
 
-    return c0, qs, ss
+    return qs, ss
 
 
 def exchange (s):
@@ -356,12 +356,12 @@ def exchange (s):
         h = compose (h1, trafo)
         c = compose (rc, trafo)
 
-        c0, qs, ss = initial_path(f, s, c)
+        qs, ss = initial_path(f, s, c)
         p = Path (ss, qs)
 
         # Energy profile, smooth:
         print ("# q, ra(q), rb(q), E(q)")
-        for q in linspace (c0, -c0, 100):
+        for q in linspace (qs[0], qs[-1], 100):
             print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
 
         # Energy profile, coarse, with dG(q):
@@ -408,7 +408,7 @@ def exchange (s):
             p = Path (ss, qs)
             with open ("./profile,rs,interp.txt", "w") as file:
                 print ("# Interpolated profile:", file=file)
-                for q in linspace (c0, -c0, 3 * len (qs)):
+                for q in linspace (qs[0], -qs[-1], 3 * len (qs)):
                     print (q, f(p(q)), h(p(q)), e(p(q)), file=file)
 
 
