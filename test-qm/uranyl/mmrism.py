@@ -37,7 +37,7 @@ from ase.io import read, write
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal
 from pts.func import compose
-from pts.zmat import Fixed, Rigid, ManyBody, Move, relate
+from pts.zmat import Fixed, Rigid, ManyBody #, Move, relate
 from pts.cfunc import Cartesian
 from pts.rc import Distance, Difference, Array
 from pts.fopt import minimize, cminimize
@@ -67,7 +67,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --solute "%s"
 """ % solute_name (NW)
 
-# With  thin command  line the  RISM  server will  return the  "excess
+# With  this command  line the  RISM  server will  return the  "excess
 # chemical  potential" of  the  solute in  solvent.  This is,  roughly
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
@@ -80,7 +80,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=64
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -283,6 +283,60 @@ def optimization (s):
 # optimization (s)
 # exit (0)
 
+def initial_path (f, s, c):
+    """
+    This  is  called  with  pure  MM  PES f(s)  to  get  some  initial
+    path. Somewhat ad-hoc.
+    """
+    # The input  geometry s may  be reasonable, but  it may not  be an
+    # exact minimum. Reoptimize:
+    s, info = minimize (f, s, maxit=100, ftol=5.0e-4, xtol=5.0e-4, algo=1)
+    print ("converged=", info["converged"], "in", info["iterations"])
+
+    # The value of reaction coordinate in the initial geometry:
+    c0 = c(s)
+    print ("XXX: rc(0)=", c0)
+
+    it = 0
+    ss = []
+    qs = []
+    algo = 1
+    while c(s) > -c0:
+        it += 1
+        # write_xyz ("in-%03d.xyz" % it, trafo (s))
+        print ("XXX: rc(0)=", c(s))
+        s, info = cminimize (f, s, Array (c), maxit=200, ftol=5.0e-3, xtol=5.0e-3, algo=algo)
+        # Collect optimized geometries and the corresponding
+        # values of reaction coordinate:
+        ss.append (s)
+        qs.append (c(s))
+        print ("converged=", info["converged"], "in", info["iterations"])
+        print ("XXX: rc(1)=", c(s))
+        # write_xyz ("out-%03d.xyz" % it, trafo (s))
+        # Here  c.fprime(s) is how  much that  reaction coordinate
+        # will change if you  modify the coordinates. Hacky way to
+        # chage a geometry so that the RC is modified too:
+        s = s - 0.1 * c.fprime (s)
+
+    ss = asarray (ss)
+    qs = asarray (qs)
+    print ("qs=", qs)
+    p = Path (ss, qs)
+    print ("path=", p)
+    qs = linspace (c0, -c0, 21)
+    print ("qs=", qs)
+    ss = map (p, qs)
+    res = map (lambda s: cminimize (f, s, Array (c), maxit=200, ftol=1.0e-3, xtol=1.0e-3, algo=algo), ss)
+    infos = [inf for _, inf in res]
+    ss = [s for s, _ in res]
+    for info in infos:
+        print ("converged=", info["converged"], "in", info["iterations"])
+    for i, s in enumerate (ss):
+        write_xyz ("out-%03d.xyz" % i, trafo (s))
+
+    return c0, qs, ss
+
+
 def exchange (s):
     # Functions of cartesian coordinates:
     ra = Distance ([0, 3])
@@ -302,51 +356,7 @@ def exchange (s):
         h = compose (h1, trafo)
         c = compose (rc, trafo)
 
-        # The input geometry  may be reasonable, but it  may not be an
-        # exact minimum. Reoptimize:
-        s, info = minimize (f, s, maxit=100, ftol=5.0e-4, xtol=5.0e-4, algo=1)
-        print ("converged=", info["converged"], "in", info["iterations"])
-
-        # The value of reaction coordinate in the initial geometry:
-        c0 = c(s)
-        print ("XXX: rc(0)=", c0)
-
-        it = 0
-        ss = []
-        qs = []
-        algo = 1
-        while c(s) > -c0:
-            it += 1
-            # write_xyz ("in-%03d.xyz" % it, trafo (s))
-            print ("XXX: rc(0)=", c(s))
-            s, info = cminimize (f, s, Array (c), maxit=200, ftol=5.0e-3, xtol=5.0e-3, algo=algo)
-            # Collect optimized geometries and the corresponding
-            # values of reaction coordinate:
-            ss.append (s)
-            qs.append (c(s))
-            print ("converged=", info["converged"], "in", info["iterations"])
-            print ("XXX: rc(1)=", c(s))
-            # write_xyz ("out-%03d.xyz" % it, trafo (s))
-            # Here  c.fprime(s) is how  much that  reaction coordinate
-            # will change if you  modify the coordinates. Hacky way to
-            # chage a geometry so that the RC is modified too:
-            s = s - 0.1 * c.fprime (s)
-
-        ss = asarray (ss)
-        qs = asarray (qs)
-        print ("qs=", qs)
-        p = Path (ss, qs)
-        print ("path=", p)
-        qs = linspace (c0, -c0, 21)
-        print ("qs=", qs)
-        ss = map (p, qs)
-        res = map (lambda s: cminimize (f, s, Array (c), maxit=200, ftol=1.0e-3, xtol=1.0e-3, algo=algo), ss)
-        infos = [inf for _, inf in res]
-        ss = [s for s, _ in res]
-        for info in infos:
-            print ("converged=", info["converged"], "in", info["iterations"])
-        for i, s in enumerate (ss):
-            write_xyz ("out-%03d.xyz" % i, trafo (s))
+        c0, qs, ss = initial_path(f, s, c)
         p = Path (ss, qs)
 
         # Energy profile, smooth:
@@ -380,7 +390,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
             if True:
-                ss = loadtxt ("ss.txt")
+                ss = loadtxt ("ss,initial.txt")
             ss = array (map (copt, ss))
             savetxt ("ss.txt", ss)
 
