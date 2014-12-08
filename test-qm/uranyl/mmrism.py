@@ -420,7 +420,7 @@ def exchange (s):
             p = Path (ss, qs)
             with open ("./profile,rs,interp.txt", "w") as file:
                 print ("# Interpolated profile:", file=file)
-                for q in linspace (qs[0], -qs[-1], 3 * len (qs)):
+                for q in linspace (qs[0], qs[-1], 3 * len (qs)):
                     print (q, f(p(q)), h(p(q)), e(p(q)), file=file)
 
 
