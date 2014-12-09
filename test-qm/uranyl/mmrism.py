@@ -80,7 +80,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=64
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -201,7 +201,7 @@ def write_xyz (path, x):
 if flexible:
     from pts.pes.ab2 import AB2
     # Base units here: A, radians, eV:
-    if True:
+    if False:
         # PM13 soft uranyl:
         uo2 = AB2 ((1.76, 64.50), (pi, 2.05)) # Ref. [1]
     else:
