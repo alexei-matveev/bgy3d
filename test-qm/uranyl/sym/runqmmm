@@ -21,8 +21,8 @@
                          "/users/alexei/darcs/bgy3d-wheezy"
                          %load-path)))
 
-(display %load-path)
-(newline)
+;; (display %load-path)
+;; (newline)
 
 (use-modules ((guile paragauss)
               #:select
