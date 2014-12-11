@@ -38,7 +38,7 @@
 \use_esint 1
 \use_mhchem 1
 \use_mathdots 1
-\cite_engine natbib_authoryear
+\cite_engine natbib_numerical
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
@@ -1638,7 +1638,7 @@ MM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.60
+0.59
 \end_layout
 
 \end_inset
@@ -1752,7 +1752,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.99
+0.96
 \end_layout
 
 \end_inset
@@ -1761,7 +1761,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.57
+0.56
 \end_layout
 
 \end_inset
@@ -1875,7 +1875,7 @@ FED+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.87
+0.90
 \end_layout
 
 \end_inset
@@ -1989,7 +1989,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.53
+0.51
 \end_layout
 
 \end_inset
@@ -2007,7 +2007,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.54
+0.53
 \end_layout
 
 \end_inset
@@ -2121,7 +2121,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.88
+0.90
 \end_layout
 
 \end_inset
@@ -2130,7 +2130,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.58
+0.57
 \end_layout
 
 \end_inset
@@ -2208,7 +2208,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.95
+0.93
 \end_layout
 
 \end_inset
@@ -2217,7 +2217,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.64
+0.58
 \end_layout
 
 \end_inset
@@ -2226,25 +2226,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.99
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.74
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.94
+0.97
 \end_layout
 
 \end_inset
@@ -2254,6 +2236,24 @@ SCF--QM
 
 \begin_layout Plain Layout
 0.68
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.92
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.65
 \end_layout
 
 \end_inset
@@ -2331,7 +2331,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.88
+0.90
 \end_layout
 
 \end_inset
@@ -2358,7 +2358,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.50
+0.49
 \end_layout
 
 \end_inset
@@ -2367,7 +2367,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.87
+0.88
 \end_layout
 
 \end_inset
@@ -2376,7 +2376,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.71
+0.64
 \end_layout
 
 \end_inset
@@ -2436,7 +2436,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.66
+0.67
 \end_layout
 
 \end_inset
@@ -2445,7 +2445,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.67
+0.71
 \end_layout
 
 \end_inset
@@ -2481,7 +2481,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.74
+0.78
 \end_layout
 
 \end_inset
@@ -2490,7 +2490,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.70
+0.65
 \end_layout
 
 \end_inset
@@ -2550,24 +2550,6 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.27
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.81
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 0.30
 \end_layout
 
@@ -2577,7 +2559,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.81
+0.89
 \end_layout
 
 \end_inset
@@ -2586,7 +2568,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.19
+0.33
 \end_layout
 
 \end_inset
@@ -2595,7 +2577,25 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.77
+0.88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.89
 \end_layout
 
 \end_inset
@@ -2613,7 +2613,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.79
+0.86
 \end_layout
 
 \end_inset
@@ -2622,7 +2622,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.66
+0.73
 \end_layout
 
 \end_inset
@@ -2732,7 +2732,7 @@ reference "tab:correcoeff-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- =0.99, and MAD=1.10 kcal/mol from Table
+=0.99, and MAD=1.10 kcal/mol from Table
 \begin_inset space ~
 \end_inset
 
@@ -2844,7 +2844,17 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
-, we noticed that 
+, we noticed that the solvation free energy from the uncorrected QM/3D-RISM
+ calculation is still strongly correlated with the MM and FED treatment
+ of solute, with 
+\begin_inset Formula $r$
+\end_inset
+
+=0.99 and 
+\begin_inset Formula $r$
+\end_inset
+
+=0.96 respectively.
 \end_layout
 
 \begin_layout Subsection
@@ -2878,6 +2888,12 @@ name "fig:Correlation-of-solvation"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset Graphics
+	filename 3d-neutral.d/draw1.png
+	width 8cm
+
+\end_inset
+
 
 \end_layout
 
@@ -3288,7 +3304,7 @@ MM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.54
+16.61
 \end_layout
 
 \end_inset
@@ -3407,7 +3423,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.11
+16.17
 \end_layout
 
 \end_inset
@@ -3517,7 +3533,7 @@ FED+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.01
+0.94
 \end_layout
 
 \end_inset
@@ -3627,7 +3643,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-17.76
+17.83
 \end_layout
 
 \end_inset
@@ -3636,7 +3652,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.77
+1.80
 \end_layout
 
 \end_inset
@@ -3728,7 +3744,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-15.33
+15.39
 \end_layout
 
 \end_inset
@@ -3737,7 +3753,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.22
+1.24
 \end_layout
 
 \end_inset
@@ -3746,7 +3762,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-14.89
+14.96
 \end_layout
 
 \end_inset
@@ -3755,7 +3771,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.64
+1.65
 \end_layout
 
 \end_inset
@@ -3764,7 +3780,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.54
+16.61
 \end_layout
 
 \end_inset
@@ -3838,7 +3854,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.10
+2.29
 \end_layout
 
 \end_inset
@@ -3847,7 +3863,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-14.59
+14.66
 \end_layout
 
 \end_inset
@@ -3856,7 +3872,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.52
+1.74
 \end_layout
 
 \end_inset
@@ -3874,7 +3890,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-3.23
+3.38
 \end_layout
 
 \end_inset
@@ -3883,7 +3899,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-13.37
+13.44
 \end_layout
 
 \end_inset
@@ -3957,7 +3973,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.93
+1.86
 \end_layout
 
 \end_inset
@@ -3993,7 +4009,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-3.08
+3.07
 \end_layout
 
 \end_inset
@@ -4067,7 +4083,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.52
+1.49
 \end_layout
 
 \end_inset
@@ -4076,7 +4092,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.56
+16.57
 \end_layout
 
 \end_inset
@@ -4085,7 +4101,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.42
+1.47
 \end_layout
 
 \end_inset
@@ -4094,7 +4110,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-18.21
+18.22
 \end_layout
 
 \end_inset
@@ -4103,7 +4119,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.82
+1.76
 \end_layout
 
 \end_inset
@@ -4112,7 +4128,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-15.04
+15.05
 \end_layout
 
 \end_inset
@@ -4121,7 +4137,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.24
+2.28
 \end_layout
 
 \end_inset
@@ -4168,7 +4184,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-18.20
+18.01
 \end_layout
 
 \end_inset
@@ -4177,7 +4193,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.74
+1.57
 \end_layout
 
 \end_inset
@@ -4186,7 +4202,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-17.58
+17.57
 \end_layout
 
 \end_inset
@@ -4195,7 +4211,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.50
+1.40
 \end_layout
 
 \end_inset
@@ -4204,7 +4220,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-19.24
+19.23
 \end_layout
 
 \end_inset
@@ -4213,7 +4229,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.76
+2.62
 \end_layout
 
 \end_inset
@@ -4231,7 +4247,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.68
+1.55
 \end_layout
 
 \end_inset
@@ -4240,7 +4256,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.54
+1.44
 \end_layout
 
 \end_inset
