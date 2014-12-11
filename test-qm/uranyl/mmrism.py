@@ -34,9 +34,11 @@ from __future__ import with_statement, print_function
 #     Geometry of SPC/E water.
 #
 from ase.io import read, write
+from ase.calculators.paragauss import ParaGauss
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal
 from pts.func import compose
+from pts.qfunc import QFunc
 from pts.zmat import Fixed, Rigid, ManyBody #, Move, relate
 from pts.cfunc import Cartesian
 from pts.rc import Distance, Difference, Array
@@ -86,6 +88,27 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --closure=KH
 --hnc
 """ % (solvent_name, solute_name (NW))
+
+# Command  line for  ./sym/runqmmm  used as  PG  calculator. Input  is
+# specified separately on call to constructor.
+qmd0 = \
+"""
+mpiexec ./sym/runqmmm
+--solvent "water, PR-SPC/E"
+--solute "uranyl, 6w, pcm"
+--norm-tol=1e-14
+--dielectric=78.4
+--rho=0.0333295
+--beta=1.6889
+--L=10
+--N=64
+--rmax=40
+--nrad=1536
+--closure=KH
+--hnc
+"""
+
+qmd = "mpiexec /users/alexei/git/ttfs-work-gpl/runqm"
 
 atoms = read ("%dw,mm.xyz" % NW)
 
@@ -201,28 +224,33 @@ def write_xyz (path, x):
 if flexible:
     from pts.pes.ab2 import AB2
     # Base units here: A, radians, eV:
-    if False:
+    if True:
         # PM13 soft uranyl:
         uo2 = AB2 ((1.76, 64.50), (pi, 2.05)) # Ref. [1]
-    else:
+    if False:
         # KL13 aka GW hard uranyl:
         uo2 = AB2 ((1.80, 43.364), (pi, 13.009)) # Ref. [2]
+    if False:
+        print ("CMDLINE=", qmd)
+        uo2 = QFunc (atoms, ParaGauss (cmdline=qmd, input="6w,c1.scm"))
 else:
     uo2 = None
 
 
 def test_uranyl ():
     e = compose (uo2, uranyl)
+    e = Memoize (e, DirStore (salt="XXX YYY"))
     # s = array ([1.79, 1.79, pi])
-    s = zeros (6) + 0.1
-    # print (uranyl (s))
+    s = zeros (6) # + 0.1
+    print (uranyl (s))
+    # print (e(s))
     # exit (0)
-    sm, info = minimize (e, s)
+    sm, info = minimize (e, s, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+    print (uranyl (sm))
     print ("e(0)=", e (s), "e(1)=", e(sm), "iterations=", info["iterations"])
 
-if uo2 is not None:
+if False:
     test_uranyl()
-
 
 def optimization (s):
     with Server (cmd) as g, Server (alt) as h:
@@ -342,9 +370,11 @@ def exchange (s):
     ra = Distance ([0, 3])
     rb = Distance ([0, 18])
     rc = Difference (ra, rb)
-    with Server (cmd) as f0, Server (alt) as h0:
+    F0 = QFunc (atoms, ParaGauss (cmdline=qmd, input="6w,c1.scm"))
+    with Server (cmd) as f0, Server (alt) as h0, F0 as F0:
         f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
         h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
+        F1 = Memoize (F0, DirStore (salt=qmd + "XXX3 low grid qm only"))
 
         # A  Func  of cartesian  coordinates,  stretching and  bending
         # parameters  as  tuples.  Parameters  not  hashed, beware  of
@@ -355,6 +385,7 @@ def exchange (s):
         f = compose (f1, trafo)
         h = compose (h1, trafo)
         c = compose (rc, trafo)
+        F = compose (F1, trafo)
 
         refine = True
         if refine:
@@ -365,20 +396,28 @@ def exchange (s):
 
         p = Path (ss, qs)
 
-        if True:
+        if False:
+            for i, q in enumerate (qs):
+                write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
+            exit (0)
+
+        if False:
             # Energy profile, smooth:
-            print ("# q, ra(q), rb(q), E(q)")
+            print ("# q, ra(q), rb(q), E(q), E_qm(q)")
             for q in linspace (qs[0], qs[-1], 100):
                 print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
 
         if True:
             # Energy profile, coarse, with dG(q):
             with open ("./profile,intial.txt", "w") as file:
-                print ("# q, ra(q), rb(q), E(q), dG(q)", file=file)
+                print ("# q, ra(q), rb(q), F(q)", file=file)
+                # print ("# q, ra(q), rb(q), E(q), dG(q), F(q)", file=file)
                 for q in qs:
-                    print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), file=file)
+                    print (q, ra (trafo (p(q))), rb (trafo (p (q))), F(p(q)), file=file)
+                    # print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), F(p(q)), file=file)
 
-        with f + h as e:
+        # with f + h as e:
+        with F as e:
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
             if refine:
