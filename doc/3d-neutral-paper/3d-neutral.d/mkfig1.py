@@ -15,8 +15,8 @@ data = [loadtxt(_) for _ in source]
 def sub(ax, i, title, do_legend=False):
     d = data[i]
     plt.title (title, loc="left", fontsize=fontsize)
-    plt.plot(d[:, 0], d[:, 1], 'rs')
-    plt.plot(d[:, 0], d[:, 2], 'bo')
+    plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
+    plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
 
     # linear fit
     linewidth=2.0
@@ -34,11 +34,15 @@ def sub(ax, i, title, do_legend=False):
 
     plt.ylim((-10.0, 30.0))
 
+    if do_legend:
+	plt.legend (ncol=1, numpoints=1, frameon=False,
+		fontsize=fontsize, loc='upper left')
+
     if i < 3:
 	setp (ax.get_xticklabels(), visible=False)
 
 figure(figsize=(4, 4 * 3))
-sub(subplot(4, 1, 1), 0, "MM")
+sub(subplot(4, 1, 1), 0, "MM", do_legend=True)
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
 
 sub(subplot(4, 1, 2), 1, "FED")
@@ -48,7 +52,7 @@ sub(subplot(4, 1, 3), 2, "QM")
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
 
 sub(subplot(4, 1, 4), 3, "SCF QM")
-plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{rism} - \Delta G_{Expt}}}$')
+plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
 plt.xlabel(r'$\mathrm{\mathsf{\rho * V}}$')
 
 # show()
