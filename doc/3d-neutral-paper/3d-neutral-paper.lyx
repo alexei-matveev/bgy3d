@@ -79,6 +79,7 @@ Alexei V.
 \end_layout
 
 \begin_layout Author Email
+
 matveev@theochem.tu-muenchen.de
 \end_layout
 
@@ -96,6 +97,7 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
+
 roesch@mytum.de
 \end_layout
 
@@ -937,10 +939,6 @@ reference "eq:3DRISM-UC"
 \end_inset
 
 , where 
-\begin_inset Formula $ $
-\end_inset
-
-
 \begin_inset Formula $\tilde{c_{s}}(k)$
 \end_inset
 
@@ -1197,7 +1195,7 @@ key "Kovalenko00a,Du03"
 
 \end_inset
 
-, the solvation free energies for the 44 neutral solutes calculated with
+, the solvation free energies for the 43 neutral solutes calculated with
  MM/3D-RISM are highly estimated.
  As can be seen from Table
 \begin_inset space ~
@@ -1214,7 +1212,7 @@ reference "tab:correcoeff-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- between MM/3D-RISM with experimental values is only 0.27, which means that
+ between MM/3D-RISM with experimental values is only 0.30, which means that
  calculation results are poorly linear correlated with experiments.
  The mean absolute deviation (MAD) between MM/3D-RISM and experimental values
  could be found in Table
@@ -1228,14 +1226,64 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, which shows that the calculated values are overestimated by 18.2 kcal/mol
- in average.
+, which shows that the calculated values are overestimated by 18.01
+\begin_inset space ~
+\end_inset
+
+kcal/mol in average.
  After the PMV correction was applied, the linear correlation relationship
  between MM/3D-RISM and experiments are greatly improved, with 
 \begin_inset Formula $r$
 \end_inset
 
-=0.81 and MAD=1.74 kcal/mol.
+=0.89 and MAD=1.57
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ 
+\end_layout
+
+\begin_layout Standard
+The effect of the PMV correction could be confirmed from Fig
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+, which shows the correlation between the calculated partial molar volume
+ and the difference between the experimental and 3D-RISM calculated solvation
+ free energy.
+ When PMV correction is not applied, the solvation free energy difference
+ between MM/3D-RISM calculation and experimental result are is in a significant
+ linear correlation with PMV.
+ The coefficient of determination from the linear fitting of the uncorrected
+ results is 
+\begin_inset Formula $R^{2}=0.97$
+\end_inset
+
+, with the standard deviation (STDEV) equal to 5.09
+\begin_inset space ~
+\end_inset
+
+kcal/mol, which fall to 
+\begin_inset Formula $R^{2}=0.37$
+\end_inset
+
+ and STDEV=1.12
+\begin_inset space ~
+\end_inset
+
+kcal/mol in the corrected results.
+ This indicates that the cavity formation of the solute is mainly responsible
+ for the error of solvation free energy in 3D-RISM calculation.
+ The remaining error noises in corrected results are partially due to the
+ accuracy of the correction coefficient.
  
 \begin_inset Float table
 wide true
@@ -2709,9 +2757,9 @@ FED/3D-RISM
 \end_layout
 
 \begin_layout Standard
-Our second combination strategy is replacing the partial atomic charge represent
-ation of solute sites as frozen electron density distributed in the simulation
- cell.
+Our second combination strategy is to replace the partial atomic charge
+ representation of solute sites as frozen electron density distributed in
+ the simulation cell.
  Here the FED of solute is determined only from the gas-phase QM calculations,
  while the water solvent distribution functions around solutes are solved
  from 3D-RISM equation with the electrostatic interaction between solute
@@ -2732,7 +2780,11 @@ reference "tab:correcoeff-matrix"
 \begin_inset Formula $r$
 \end_inset
 
-=0.99, and MAD=1.10 kcal/mol from Table
+=0.96, and MAD=1.10
+\begin_inset space ~
+\end_inset
+
+kcal/mol from Table
 \begin_inset space ~
 \end_inset
 
@@ -2743,27 +2795,44 @@ reference "tab:mad-matrix"
 
 \end_inset
 
- indicates that the small difference between results from uncorrected FED/3D-RIS
-M and uncorrected MM/3D-RISM.
+, which indicates that the small difference between results from uncorrected
+ FED/3D-RISM and uncorrected MM/3D-RISM.
  Therefore, it is not surprising to find again the weak linear correlation
  relationship when comparing uncorrected FED/3D-RISM with experimental values,
  with 
 \begin_inset Formula $r$
 \end_inset
 
-=0.30 and MAD=17.58 kcal/mol.
- Again the linear correlation was massively increased when PMV correction
+=0.33 and MAD=17.57
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ Again the linear correlation was dramatically increased when PMV correction
  was introduced, with 
 \begin_inset Formula $r$
 \end_inset
 
-=0.81 and MAD=1.50 kcal/mol.
- The deviation of solvation free energy between FED/3D-RISM and experiments
- is slightly lowered by about 0.2 kcal/mol when PMV correction is applied,
- and by about 0.6 kcal/mol without PMV correction.
- From above, we could find that by replacing the atomic partial charge on
- solute sites as electron density representation, the overestimation of
- solvation free energy from 3D-RISM is slightly offset.
+=0.88 and MAD=1.40
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ When comparing the MM/3D-RISM calculation, the deviation of solvation free
+ energy between FED/3D-RISM and experiments is slightly lowered by about
+ 0.17
+\begin_inset space ~
+\end_inset
+
+kcal/mol when PMV correction is applied, and by 0.44
+\begin_inset space ~
+\end_inset
+
+kcal/mol without PMV correction.
+ From the numbers discussed above, we could find that by replacing the atomic
+ partial charge on solute sites as frozen electron density representation,
+ the solvation free energy calculated from FED/3D-RISM is in good agreement
+ with MM method.
  
 \begin_inset Note Note
 status open
@@ -2871,8 +2940,8 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Correlation of solvation free energy calculated by SCF--QM/3D-RISM with
- experimental values 
+Correlation between the calculated partial molar volume and the difference
+ between the experimental and 3D-RISM calculated solvation free energy 
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:Correlation-of-solvation"
@@ -2889,7 +2958,7 @@ name "fig:Correlation-of-solvation"
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename 3d-neutral.d/draw1.png
+	filename 3d-neutral.d/fig1.svg
 	width 8cm
 
 \end_inset
