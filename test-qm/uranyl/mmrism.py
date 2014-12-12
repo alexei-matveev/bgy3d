@@ -181,7 +181,11 @@ waters = make_waters (xs[1:])
 
 # FIXME: waters are free-floating, so formally for a flexible uranyl 3
 # dofs  should  suffice. But  making  waters  dance  around uranyl  is
-# counter-intuitive. Instead we set the OU oxygens free:
+# counter-intuitive. Instead we set the OU oxygens free. For isotropic
+# PES  this, however,  introduces  degeneracy wrt  orientation of  the
+# complex as a whole. The path images, for example, may "diffuse" from
+# each  other  in  orientation   so  that  interpolation  will  become
+# problematic.
 if flexible:
     dof = [6] + [6] * len (waters)
 else:
@@ -370,8 +374,10 @@ def exchange (s):
     ra = Distance ([0, 3])
     rb = Distance ([0, 18])
     rc = Difference (ra, rb)
+    f0 = Server (cmd)
+    h0 = Server (alt)
     F0 = QFunc (atoms, ParaGauss (cmdline=qmd, input="6w,c1.scm"))
-    with Server (cmd) as f0, Server (alt) as h0, F0 as F0:
+    with f0 as f0, h0 as h0, F0 as F0:
         f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
         h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
         F1 = Memoize (F0, DirStore (salt=qmd + "XXX3 low grid qm only"))
@@ -399,7 +405,6 @@ def exchange (s):
         if False:
             for i, q in enumerate (qs):
                 write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
-            exit (0)
 
         if False:
             # Energy profile, smooth:
@@ -407,7 +412,7 @@ def exchange (s):
             for q in linspace (qs[0], qs[-1], 100):
                 print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
 
-        if True:
+        if False:
             # Energy profile, coarse, with dG(q):
             with open ("./profile,intial.txt", "w") as file:
                 print ("# q, ra(q), rb(q), F(q)", file=file)
@@ -426,7 +431,7 @@ def exchange (s):
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=10, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
             sab = map (opt, sab)
@@ -438,7 +443,7 @@ def exchange (s):
             write_xyz ("KH-bbb.xyz", trafo (sb))
 
             def copt (s):
-                sm, info = cminimize (e, s, Array (c), maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=0)
+                sm, info = cminimize (e, s, Array (c), maxit=10, ftol=1.0e-2, xtol=1.0e-2, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
@@ -456,11 +461,12 @@ def exchange (s):
             for i, s in enumerate (ss):
                 write_xyz ("KH-%03d.xyz" % i, trafo (s))
 
-            p = Path (ss, qs)
-            with open ("./profile,rs,interp.txt", "w") as file:
-                print ("# Interpolated profile:", file=file)
-                for q in linspace (qs[0], qs[-1], 3 * len (qs)):
-                    print (q, f(p(q)), h(p(q)), e(p(q)), file=file)
+            if False:
+                p = Path (ss, qs)
+                with open ("./profile,rs,interp.txt", "w") as file:
+                    print ("# Interpolated profile:", file=file)
+                    for q in linspace (qs[0], qs[-1], 3 * len (qs)):
+                        print (q, f(p(q)), h(p(q)), e(p(q)), file=file)
 
 
 exchange (s)
