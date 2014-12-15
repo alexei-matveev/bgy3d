@@ -2931,8 +2931,6 @@ reference "fig:spatial-distribution-4w"
 \end_inset
 
 
-\lang english
-
 \begin_inset space ~
 \end_inset
 
@@ -3372,7 +3370,135 @@ key "Gibson05"
 \end_inset
 
 kcal/mol is significantly closer to that interval.
- 
+ The properties in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:qm+rism-vs-qm+pcm"
+
+\end_inset
+
+ obtained using the models with explicit water ligands separating the uranyl
+ di-cation and the RISM medium (
+\begin_inset Formula $n=4-6$
+\end_inset
+
+) hardly depend on the closure order --- the observation that may justify
+ widespread use of the lowest order PS1 (KH) closure.
+\end_layout
+
+\begin_layout Standard
+The energies in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:qm+rism-vs-qm+pcm"
+
+\end_inset
+
+ are different estimates for the single quantity, the urany solvation energy
+ for which an ideal model with proper sampling over ligand positions and
+ orientations is supposed to return the same number, irrespective of the
+ number of explicit water molecules 
+\begin_inset Formula $n$
+\end_inset
+
+, Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:dG-sol-definition"
+
+\end_inset
+
+.
+ To compare the relative stability of specific four-, five- and six coordinated
+ complexes, on the other hand, it is more appropriate to first bring the
+ numbers to the common base with the same effective count of explicit water
+ molecules.
+ We clearly missed this point in our discussion of relative stability of
+ the complexes in our previous work 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bo15"
+
+\end_inset
+
+.
+ By adding/subtracting the solvation energy of an isolated water molecule
+ of
+\begin_inset Formula $-$
+\end_inset
+
+6.2 kcal (PSE3 closure) to the numbers obtained using four- and six-coordinated
+ models, respectively, we estimate the free energies of the four-, five-,
+ and six-coordinated structures as 
+\begin_inset Formula $-$
+\end_inset
+
+385
+\begin_inset space ~
+\end_inset
+
+kcal/mol, 
+\begin_inset Formula $-$
+\end_inset
+
+389
+\begin_inset space ~
+\end_inset
+
+kcal/mol, and 
+\begin_inset Formula $-$
+\end_inset
+
+387
+\begin_inset space ~
+\end_inset
+
+kcal/mol with the five-coordinated structure featuring the lowest free energy
+ among the three as expected.
+ The corresponding PCM numbers adapted in the same fashion 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+using 7.06
+\begin_inset space ~
+\end_inset
+
+kcal/mol water solvation energy
+\end_layout
+
+\end_inset
+
+ are 
+\begin_inset Formula $-$
+\end_inset
+
+423, 
+\begin_inset Formula $-$
+\end_inset
+
+426, and 
+\begin_inset Formula $-$
+\end_inset
+
+418
+\begin_inset space ~
+\end_inset
+
+kcal/mol suggesting the lower relative stability of the six-coordinated
+ complex.
 \end_layout
 
 \begin_layout Standard
@@ -3434,7 +3560,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="16" columns="6">
+<lyxtabular version="3" rows="20" columns="6">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -4415,6 +4541,318 @@ PSE3
 \end_inset
 
 393
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta G_{\text{rel}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+PCM
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+357
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+423
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+426
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+-418
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+PSE1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+383
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+382
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+388
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+388
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(temp)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+PSE2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+403
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+385
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+389
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+387
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+PSE3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+409
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+385
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+389
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+\begin_inset Formula $-$
+\end_inset
+
+387
 \end_layout
 
 \end_inset
@@ -5584,7 +6022,7 @@ name "fig:potential-of-mean-force-2d"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption
