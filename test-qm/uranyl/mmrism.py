@@ -431,7 +431,7 @@ def exchange (s):
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=10, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=30, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
             sab = map (opt, sab)
@@ -443,7 +443,7 @@ def exchange (s):
             write_xyz ("KH-bbb.xyz", trafo (sb))
 
             def copt (s):
-                sm, info = cminimize (e, s, Array (c), maxit=10, ftol=1.0e-2, xtol=1.0e-2, algo=0)
+                sm, info = cminimize (e, s, Array (c), maxit=30, ftol=1.0e-2, xtol=1.0e-2, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
