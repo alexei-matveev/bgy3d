@@ -82,7 +82,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=64
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -422,7 +422,7 @@ def exchange (s):
                     # print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), F(p(q)), file=file)
 
         # with f + h as e:
-        with F as e:
+        with F + h as e:
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
             if refine:
