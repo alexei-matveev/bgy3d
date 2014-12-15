@@ -95,13 +95,20 @@ QM water in SPC/E geometry and  uranyl with 172 pm, C1, ADKH, BP.  See
          Water                 Uranyl
 30/131   -76.502720816987      -28110.765076538421
 50/291   -76.502943687787      -28110.790576816220
+50/291   -76.502960020395      -28110.790792414213 (older)
 
-Uranyl + 6 waters:
+
+Therefore, to make the energies comparable to MM one needs to subtract
+the energy of GP uranyl + 6 waters. Make sure to use
+
+        ase.units.Hartree  = 27.211395655517308 eV/H
+
+(used in ASE PG calculator) when converting Hartrees to eV.
 
 30/131   -28110.765076538421 -76.502720816987 * 6 =
          -28569.781401440343 H =
-         -777431.120630755321118694 eV
+         -777423.62550623293672912596 eV
 50/291   -28110.790576816220 -76.502943687787 * 6 =
          -28569.808238942942 H =
-         -777431.850923697619217836 eV
+         -777424.35579213456409218810 eV
 
