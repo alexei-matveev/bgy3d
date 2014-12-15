@@ -86,3 +86,22 @@ b) D4H stationary structure obtained in MM+KH optimization starting
 
 c) PSE3 closure with under-coordinated uranyl in the non-symmetric
    conformation diverges.
+
+
+
+QM water in SPC/E geometry and  uranyl with 172 pm, C1, ADKH, BP.  See
+1w,c1.scm and uranyl,c1.scm.
+
+         Water                 Uranyl
+30/131   -76.502720816987      -28110.765076538421
+50/291   -76.502943687787      -28110.790576816220
+
+Uranyl + 6 waters:
+
+30/131   -28110.765076538421 -76.502720816987 * 6 =
+         -28569.781401440343 H =
+         -777431.120630755321118694 eV
+50/291   -28110.790576816220 -76.502943687787 * 6 =
+         -28569.808238942942 H =
+         -777431.850923697619217836 eV
+
