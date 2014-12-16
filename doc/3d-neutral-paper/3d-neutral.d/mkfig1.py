@@ -44,16 +44,20 @@ def sub(ax, i, title, do_legend=False):
 figure(figsize=(4, 4 * 3))
 sub(subplot(4, 1, 1), 0, "MM", do_legend=True)
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
+plt.text(0.25, 30, '(a)')
 
 sub(subplot(4, 1, 2), 1, "FED")
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
+plt.text(0.25, 30, '(b)')
 
 sub(subplot(4, 1, 3), 2, "QM")
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
+plt.text(0.25, 30, '(c)')
 
 sub(subplot(4, 1, 4), 3, "SCF QM")
 plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
 plt.xlabel(r'$\mathrm{\mathsf{\rho * V}}$')
+plt.text(0.25, 30, '(d)')
 
 # show()
 savefig(sys.argv[1], transparent=True, bbox_inches='tight')
