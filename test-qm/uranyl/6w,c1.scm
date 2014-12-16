@@ -57,7 +57,7 @@
     ("H_6.1_4.1" "HW"))
  (mixing (chmix 0.1) (start-after-cycle 5))
  (grid (sym-reduce #t) (weight-grads #t))
- (gridatom (nrad 30) (nang 131))       ; the same for all unique atoms
+ (gridatom (nrad 50) (nang 291))       ; the same for all unique atoms
  (xc-control (xc "bp"))
  (occupation (charge 2.0))
  (convergence-list
