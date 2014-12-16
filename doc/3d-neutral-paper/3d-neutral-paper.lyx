@@ -79,7 +79,6 @@ Alexei V.
 \end_layout
 
 \begin_layout Author Email
-
 matveev@theochem.tu-muenchen.de
 \end_layout
 
@@ -97,7 +96,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -1259,7 +1257,22 @@ reference "fig:Correlation-of-solvation"
 , which shows the correlation between the calculated partial molar volume
  and the difference between the experimental and 3D-RISM calculated solvation
  free energy.
- When PMV correction is not applied, the solvation free energy difference
+ As in Fig
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(a), When PMV correction is not applied, the solvation free energy difference
  between MM/3D-RISM calculation and experimental result are is in a significant
  linear correlation with PMV.
  The coefficient of determination from the linear fitting of the uncorrected
@@ -1283,7 +1296,9 @@ kcal/mol in the corrected results.
  This indicates that the cavity formation of the solute is mainly responsible
  for the error of solvation free energy in 3D-RISM calculation.
  The remaining error noises in corrected results are partially due to the
- accuracy of the correction coefficient.
+ accuracy of the correction coefficient, since the fitted slope in the uncorrect
+ed results is 4.88, higher than the correction coefficient 4.22 which we derived
+ from the solvent.
  
 \begin_inset Float table
 wide true
@@ -2762,8 +2777,8 @@ Our second combination strategy is to replace the partial atomic charge
  the simulation cell.
  Here the FED of solute is determined only from the gas-phase QM calculations,
  while the water solvent distribution functions around solutes are solved
- from 3D-RISM equation with the electrostatic interaction between solute
- and solvent are described with the ESP field derived from solute FED.
+ from 3D-RISM equation, with the electrostatic interaction between solute
+ and solvent determined with the ESP field of solute FED.
  From the correlation coefficient matrix of Table
 \begin_inset space ~
 \end_inset
@@ -2818,57 +2833,69 @@ kcal/mol.
 \end_inset
 
 kcal/mol.
- When comparing the MM/3D-RISM calculation, the deviation of solvation free
- energy between FED/3D-RISM and experiments is slightly lowered by about
- 0.17
-\begin_inset space ~
-\end_inset
-
-kcal/mol when PMV correction is applied, and by 0.44
-\begin_inset space ~
-\end_inset
-
-kcal/mol without PMV correction.
- From the numbers discussed above, we could find that by replacing the atomic
- partial charge on solute sites as frozen electron density representation,
- the solvation free energy calculated from FED/3D-RISM is in good agreement
- with MM method.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-(FIXME:may need more materials for the 
-\begin_inset Quotes eld
-\end_inset
-
-advantage
-\begin_inset Quotes erd
-\end_inset
-
- of using electron density?)
-\end_layout
-
-\end_inset
-
- The linear correlation relationship between MM/3D-RISM and FED/3D-RISM
- is weakened when PMV correction is applied in both cases, with 
+ By comparing the MM and FED methods both with the PMV correction, we found
+ that the results are still quite close to each other, with 
 \begin_inset Formula $r$
 \end_inset
 
-=0.87 and MAD=1.01 kcal/mol, this is caused by the different solvent correlation
- functions determined with ESP derived from atomic charge and electron density.
-\begin_inset Note Note
-status open
+=0.90 and MAD=0.94
+\begin_inset space ~
+\end_inset
 
-\begin_layout Plain Layout
-(FIXME:Not sure this direction of discussion is interesting, may need a
- picture showing the different ESP field of atomic charge and electron density?)
+kcal/mol.
+ From the numbers discussed above, we could reach the conclusion that by
+ replacing the atomic partial charge on solute sites as frozen electron
+ density representation, the solvation free energy calculated from FED/3D-RISM
+ is in the same accuracy with MM method.
+ By eliminating the major source of error caused by solution cavity formation,
+ the calculated solvation free energy with FED is comparable with experimental
+ results.
 \end_layout
+
+\begin_layout Standard
+Again we could easily inspect how the correction works in FED calculation
+ from Fig
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
 
 \end_inset
 
 
+\begin_inset space ~
+\end_inset
+
+(b).
+ The difference between uncorrected solvation free energy with experimental
+ value shows the significant linear correlation with PMV, of which the linear
+ fitting gives results with 
+\begin_inset Formula $R^{2}$
+\end_inset
+
+=0.97 and STDEV=5.34
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ With PMV correction applied, the linear correlation breaks, with 
+\begin_inset Formula $R^{2}$
+\end_inset
+
+=0.51 and STDEV=1.31
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ Here we need to emphasize that the slope fitted from uncorrected FED result
+ is 5.12, slightly higher than 4.88 in MM method.
+ This difference is expected, since the ESP derived from atomic charge based
+ on force field database, and not necessarily the same with that from electron
+ density.
+  
 \end_layout
 
 \begin_layout Subsection
@@ -4386,6 +4413,53 @@ status open
 
 \end_inset
 
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Dipole moment of solute in gas phase and in aqueous phase
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Dipole-moment"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename 3d-neutral.d/fig2.svg
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 
 \end_layout
 
