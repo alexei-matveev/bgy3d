@@ -1,4 +1,10 @@
-# Optimized profile:
+# Optimized profile at low grid settings 30/131 and 64. To get the
+# binding energies offset the last column by
+# -777423.62550623293672912596 which is the QM energy of isolated
+# uranyl and 6 waters in GP. The first and last lines are
+# unconstrained optimizations. See test-qm/uranyl/6w,rs,rc,qm,lo.txt.
+#
+# Q, MM(q), RISM(q), G(q) = QM(q) + RISM(q)
 1.62744380072 -11.6053778216 -6.08416336376 -777442.648513
 1.70192820668 -11.3579775366 -6.16469020523 -777442.622547
 1.53182294801 -11.6252250249 -6.0671676871 -777442.628038
