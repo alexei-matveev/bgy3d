@@ -396,13 +396,14 @@ def exchange (s):
         refine = True
         if refine:
             ss = loadtxt ("ss,initial.txt")
+            ss = ss[::-1]
             qs = array (map (c, ss))
         else:
             qs, ss = initial_path(f, s, c)
 
         p = Path (ss, qs)
 
-        if False:
+        if True:
             for i, q in enumerate (qs):
                 write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
 
@@ -427,11 +428,12 @@ def exchange (s):
             # ones:
             if refine:
                 sab = loadtxt ("sab,initial.txt")
+                sab = sab[::-1]
             else:
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=30, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=5, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
             sab = map (opt, sab)
@@ -442,12 +444,13 @@ def exchange (s):
             write_xyz ("KH-aaa.xyz", trafo (sa))
             write_xyz ("KH-bbb.xyz", trafo (sb))
 
-            def copt (s):
-                sm, info = cminimize (e, s, Array (c), maxit=30, ftol=1.0e-2, xtol=1.0e-2, algo=0)
+            def copt (s, maxit):
+                sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-2, xtol=1.0e-2, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            ss = array (map (copt, ss))
+            maxit = [31] * 6 + [10] * (len (ss) - 6 - 2) + [31] * 2
+            ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
             # Energy profile:
