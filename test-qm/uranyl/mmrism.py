@@ -37,13 +37,14 @@ from ase.io import read, write
 from ase.calculators.paragauss import ParaGauss
 from pts.memoize import Memoize, DirStore
 from pts.units import kcal
-from pts.func import compose
+from pts.func import compose, Inverse
 from pts.qfunc import QFunc
 from pts.zmat import Fixed, Rigid, ManyBody #, Move, relate
 from pts.cfunc import Cartesian
 from pts.rc import Distance, Difference, Array
 from pts.fopt import minimize, cminimize
-from pts.path import Path
+from pts.path import Path, MetricPath
+from pts.metric import Metric
 from rism import Server
 from numpy import max, abs, zeros, array, asarray, linspace, savetxt, loadtxt, pi
 print ("kcal=", kcal)
@@ -396,8 +397,29 @@ def exchange (s):
         refine = True
         if refine:
             ss = loadtxt ("ss,initial.txt")
-            ss = ss[::-1]
             qs = array (map (c, ss))
+            print ("qs=", qs)
+            print ("dq=", qs[1:] - qs[:-1])
+            if True:
+                P = Path (ss, qs)
+                C = compose (c, P)
+                print ("q=", qs)
+                def solve (q):
+                    x = q
+                    while abs (C(x) - q) > 1.0e-10:
+                        f, fprime = C.taylor (x)
+                        df = f - q
+                        x = x - df / fprime
+                    return x
+                xs = []
+                for q in linspace (qs[0], qs[-1], 21):
+                    x = solve (q)
+                    print ("x=", x, "C(x)=", C(x), "q=", q)
+                    xs.append (x)
+                ss = array (map (P, xs))
+                qs = array (map (c, ss))
+                print ("qs=", qs)
+                print ("dq=", qs[1:] - qs[:-1])
         else:
             qs, ss = initial_path(f, s, c)
 
@@ -428,7 +450,6 @@ def exchange (s):
             # ones:
             if refine:
                 sab = loadtxt ("sab,initial.txt")
-                sab = sab[::-1]
             else:
                 sab = (ss[0], ss[-1])
 
@@ -449,7 +470,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [31] * 6 + [10] * (len (ss) - 6 - 2) + [31] * 2
+            maxit = [5] * 12 + [2] * (len (ss) - 12 - 4) + [5] * 4
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
