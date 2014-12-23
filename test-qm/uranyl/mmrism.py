@@ -75,7 +75,7 @@ mpiexec /users/alexei/darcs/bgy3d/guile/runbgy.scm
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
 """
-mpiexec -n 8 /users/alexei/darcs/bgy3d/guile/runbgy.scm
+mpiexec /users/alexei/darcs/bgy3d/guile/runbgy.scm
 --solvent "%s"
 --solute "%s"
 --norm-tol=1e-14
@@ -109,7 +109,7 @@ mpiexec ./sym/runqmmm
 --hnc
 """
 
-qmd = "mpiexec -n 8 /users/alexei/git/ttfs-work-gpl/runqm"
+qmd = "mpiexec /users/alexei/git/ttfs-work-gpl/runqm"
 
 atoms = read ("%dw,mm.xyz" % NW)
 
@@ -324,7 +324,7 @@ def make_bias (r0, k):
         Bias (r0, k , [0, 9]) + \
         Bias (r0, k , [0, 15])
 
-bias = make_bias (2.45, 50.0)
+bias = make_bias (2.50, 50.0)
 
 def initial_path (f, s, c):
     """
@@ -441,7 +441,7 @@ def exchange (s):
             for i, q in enumerate (qs):
                 write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
 
-        if True:
+        if False:
             # Energy profile, smooth:
             with open ("profile-initial.txt", "w") as file:
                 print ("# q, ra(q), rb(q), E(q), E_qm(q), B(q)", file=file)
@@ -459,6 +459,7 @@ def exchange (s):
 
         # with f + h as e:
         with F + h + B as e:
+            print ("XXX")
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
             if refine:
@@ -492,10 +493,10 @@ def exchange (s):
             # Energy profile:
             with open ("./profile,rs.txt", "w") as file:
                 print ("# Optimized profile:", file=file)
-                print (qa, f(sa), h(sa), e(sa), file=file)
+                # print (qa, f(sa), h(sa), e(sa), file=file)
                 for q, s in zip (qs, ss):
                     print (q, f(s), h(s), e(s), file=file)
-                print (qb, f(sb), h(sb), e(sb), file=file)
+                # print (qb, f(sb), h(sb), e(sb), file=file)
 
             for i, s in enumerate (ss):
                 write_xyz ("KH-%03d.xyz" % i, trafo (s))
