@@ -486,7 +486,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [20] * len (ss)
+            maxit = [30] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
