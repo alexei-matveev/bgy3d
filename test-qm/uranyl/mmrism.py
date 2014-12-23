@@ -66,7 +66,7 @@ solvent_name = "water, PR-SPC/E"
 # or self-energy of the solute:
 cmd = \
 """
-mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpiexec /users/alexei/darcs/bgy3d/guile/runbgy.scm
 --solute "%s"
 """ % solute_name (NW)
 
@@ -75,7 +75,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 # speaking, the "averaged" solute-solvent interaction:
 alt = \
 """
-mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
+mpiexec -n 8 /users/alexei/darcs/bgy3d/guile/runbgy.scm
 --solvent "%s"
 --solute "%s"
 --norm-tol=1e-14
@@ -83,7 +83,7 @@ mpiexec /users/alexei/darcs/bgy3d-wheezy/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=96
+--N=48
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -109,7 +109,7 @@ mpiexec ./sym/runqmmm
 --hnc
 """
 
-qmd = "mpiexec /users/alexei/git/ttfs-work-gpl/runqm"
+qmd = "mpiexec -n 8 /users/alexei/git/ttfs-work-gpl/runqm"
 
 atoms = read ("%dw,mm.xyz" % NW)
 
@@ -254,7 +254,7 @@ def test_uranyl ():
     print (uranyl (sm))
     print ("e(0)=", e (s), "e(1)=", e(sm), "iterations=", info["iterations"])
 
-if False:
+if True:
     test_uranyl()
 
 def optimization (s):
@@ -315,6 +315,16 @@ def optimization (s):
 
 # optimization (s)
 # exit (0)
+
+def make_bias (r0, k):
+    from pts.pes.bias import Bias
+    return \
+        Bias (r0, k , [0, 6]) + \
+        Bias (r0, k , [0, 12]) + \
+        Bias (r0, k , [0, 9]) + \
+        Bias (r0, k , [0, 15])
+
+bias = make_bias (2.45, 50.0)
 
 def initial_path (f, s, c):
     """
@@ -393,6 +403,7 @@ def exchange (s):
         h = compose (h1, trafo)
         c = compose (rc, trafo)
         F = compose (F1, trafo)
+        B = compose (bias, trafo)
 
         refine = True
         if refine:
@@ -400,7 +411,7 @@ def exchange (s):
             qs = array (map (c, ss))
             print ("qs=", qs)
             print ("dq=", qs[1:] - qs[:-1])
-            if True:
+            if False:
                 P = Path (ss, qs)
                 C = compose (c, P)
                 print ("q=", qs)
@@ -421,7 +432,8 @@ def exchange (s):
                 print ("qs=", qs)
                 print ("dq=", qs[1:] - qs[:-1])
         else:
-            qs, ss = initial_path(f, s, c)
+            qs, ss = initial_path(f + B, s, c)
+            savetxt ("ss-initial.txt", ss)
 
         p = Path (ss, qs)
 
@@ -429,11 +441,12 @@ def exchange (s):
             for i, q in enumerate (qs):
                 write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
 
-        if False:
+        if True:
             # Energy profile, smooth:
-            print ("# q, ra(q), rb(q), E(q), E_qm(q)")
-            for q in linspace (qs[0], qs[-1], 100):
-                print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)))
+            with open ("profile-initial.txt", "w") as file:
+                print ("# q, ra(q), rb(q), E(q), E_qm(q), B(q)", file=file)
+                for q in linspace (qs[0], qs[-1], 100):
+                    print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), B (p(q)), file=file)
 
         if False:
             # Energy profile, coarse, with dG(q):
@@ -445,7 +458,7 @@ def exchange (s):
                     # print (q, ra (trafo (p(q))), rb (trafo (p (q))), f(p(q)), h(p(q)), F(p(q)), file=file)
 
         # with f + h as e:
-        with F + h as e:
+        with F + h + B as e:
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
             if refine:
@@ -457,7 +470,9 @@ def exchange (s):
                 sm, info = minimize (e, s, maxit=5, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
-            sab = map (opt, sab)
+
+            if False:
+                sab = map (opt, sab)
             qab = map (c, sab)
             qa, qb = qab
             sa, sb = sab
@@ -470,7 +485,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [5] * 12 + [2] * (len (ss) - 12 - 4) + [5] * 4
+            maxit = [20] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
