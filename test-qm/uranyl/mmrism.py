@@ -482,11 +482,11 @@ def exchange (s):
             write_xyz ("KH-bbb.xyz", trafo (sb))
 
             def copt (s, maxit):
-                sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-2, xtol=1.0e-2, algo=0)
+                sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-3, xtol=1.0e-3, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [80] * len (ss)
+            maxit = [100] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
