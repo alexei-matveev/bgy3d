@@ -82,8 +82,11 @@ def protocol (server):
         # Energy:
         e = y[0]
 
-        # Gradients
-        g = array (y[1:])
+        # Gradients. FIXME: specify  the type explicitly, otherwise it
+        # will be a Numpy array  of objects which is, for example, not
+        # accepted in odeint() of SciPy fame:
+        g = array (y[1:], dtype=float)
+        # print ("g:", type (g), g.dtype, file=sys.stderr)
 
         return e * kcal, g * kcal
 
