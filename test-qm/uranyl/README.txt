@@ -105,6 +105,9 @@ the energy of GP uranyl + 6 waters. Make sure to use
 
 (used in ASE PG calculator) when converting Hartrees to eV.
 
+20/91    -28110.931719705168 -76.504226371401 * 6 =
+         -28569.957077933574 H =
+         -777428.40590879761927829263 eV
 30/131   -28110.765076538421 -76.502720816987 * 6 =
          -28569.781401440343 H =
          -777423.62550623293672912596 eV
