@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2013 Alexei Matveev
 #
-from __future__ import with_statement
+from __future__ import with_statement, print_function
 
 import sys
 import os
@@ -206,9 +206,9 @@ def main (cmd):
 
     with Server (["/home/alexei/darcs/bgy3d/guile/runbgy.scm"]) as f:
         for _ in range (10):
-            print f(x)
+            print (f(x))
         g = NumDiff (f)
-        print g.fprime(x)
+        print (g.fprime(x))
 
 
 if __name__ == "__main__":
