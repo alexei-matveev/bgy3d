@@ -83,7 +83,7 @@ mpiexec /users/alexei/darcs/bgy3d/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=48
+--N=64
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -486,7 +486,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [100] * len (ss)
+            maxit = [20] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
