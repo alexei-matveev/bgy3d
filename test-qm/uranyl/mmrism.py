@@ -391,7 +391,7 @@ def exchange (s):
     with f0 as f0, h0 as h0, F0 as F0:
         f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
         h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
-        F1 = Memoize (F0, DirStore (salt=qmd + "XXX3 low grid qm only"))
+        F1 = Memoize (F0, DirStore (salt=qmd + "XXX4 low grid qm only"))
 
         # A  Func  of cartesian  coordinates,  stretching and  bending
         # parameters  as  tuples.  Parameters  not  hashed, beware  of
@@ -463,23 +463,24 @@ def exchange (s):
             # Terminals  were constrained, obtain  fully unconstrained
             # ones:
             if refine:
-                sab = loadtxt ("sab,initial.txt")
+                sab = loadtxt ("sab,initial.txt", ndmin=2)
             else:
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=5, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=20, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            if False:
+            if True:
+                print ("before: q=", map (c, sab))
                 sab = map (opt, sab)
-            qab = map (c, sab)
-            qa, qb = qab
-            sa, sb = sab
+                print ("after: q=", map (c, sab))
             savetxt ("sab.txt", sab)
-            write_xyz ("KH-aaa.xyz", trafo (sa))
-            write_xyz ("KH-bbb.xyz", trafo (sb))
+
+            for i, s in enumerate (sab):
+                write_xyz ("min-%03d.xyz" % i, trafo (s))
+            exit (0)
 
             def copt (s, maxit):
                 sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-3, xtol=1.0e-3, algo=0)
