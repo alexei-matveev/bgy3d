@@ -119,7 +119,10 @@ Two  "minima"   obtained  by  unconstrained   minimization  with  bias
 potential applied to 5 waters:
 
 n         Grid       G, eV              dG, kcal
-5+1       30/131/64  -777442.672597     -439.24
+5+1       30/131/64  -777442.672597     -439.24 (+0.0)
+(340pm)              -777442.399267             (+6.3)
+(320pm)              -777442.140456             (+12.3)
+(300pm)              -777442.155114             (+11.9)
 6         30/131/64  -777442.445809     -434.01 (+5.23)
 
 The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
