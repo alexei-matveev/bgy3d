@@ -115,3 +115,33 @@ the energy of GP uranyl + 6 waters. Make sure to use
          -28569.808238942942 H =
          -777424.35579213456409218810 eV
 
+Two  "minima"   obtained  by  unconstrained   minimization  with  bias
+potential applied to 5 waters:
+
+n         Grid       G, eV              dG, kcal
+5+1       30/131/64  -777442.672597     -439.24
+6         30/131/64  -777442.445809     -434.01 (+5.23)
+
+The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
+distances are longer than 250 pm:
+
+Distances for 5+1:
+0.179 nm
+0.18 nm
+0.395 nm
+0.245 nm
+0.245 nm
+0.242 nm
+0.251 nm
+0.251 nm
+
+Distances for 6:
+0.18 nm
+0.18 nm
+0.253 nm
+0.25 nm
+0.25 nm
+0.25 nm
+0.25 nm
+0.25 nm
+
