@@ -320,9 +320,10 @@ def make_bias (r0, k):
     from pts.pes.bias import Bias
     return \
         Bias (r0, k , [0, 6]) + \
-        Bias (r0, k , [0, 12]) + \
         Bias (r0, k , [0, 9]) + \
-        Bias (r0, k , [0, 15])
+        Bias (r0, k , [0, 12]) + \
+        Bias (r0, k , [0, 15]) + \
+        Bias (r0, k , [0, 18])
 
 bias = make_bias (2.50, 50.0)
 
@@ -468,7 +469,7 @@ def exchange (s):
                 sab = (ss[0], ss[-1])
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=20, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=100, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
