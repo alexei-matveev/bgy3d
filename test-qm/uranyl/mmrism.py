@@ -325,6 +325,11 @@ def make_bias (r0, k):
         Bias (r0, k , [0, 15]) + \
         Bias (r0, k , [0, 18])
 
+#
+# B(r) =  25 * (r - 2.50)^2  eV, for r >  2.50 A. For 2.51  A the bias
+# amounts to  2.5 meV or 0.06  kcal. For 2.55  A it is 25  times more:
+# 0.0625 eV or 1.44 kcal.
+#
 bias = make_bias (2.50, 50.0)
 
 def initial_path (f, s, c):
@@ -385,7 +390,8 @@ def exchange (s):
     # Functions of cartesian coordinates:
     ra = Distance ([0, 3])
     rb = Distance ([0, 18])
-    rc = Difference (ra, rb)
+    # rc = Difference (ra, rb)
+    rc = ra
     f0 = Server (cmd)
     h0 = Server (alt)
     F0 = QFunc (atoms, ParaGauss (cmdline=qmd, input="6w,c1.scm"))
@@ -468,27 +474,41 @@ def exchange (s):
             else:
                 sab = (ss[0], ss[-1])
 
+            if False:
+                p1 = Path (loadtxt ("sxy.txt", ndmin=2))
+                c1 = compose (c, p1)
+                q1 = linspace (0., 1., 21)
+                for i, q in enumerate (q1):
+                    write_xyz ("interp-%03d.xyz" % i, trafo (p1 (q)))
+                print ("c=", [c1(q) for q in q1])
+                Q1 = Inverse (c1)
+                q2 = [Q1(c_) for c_ in [3.1]]
+                print ("q=", q2, "c=", [c1(q) for q in q2])
+                s2 = array ([p1(q) for q in q2])
+                savetxt ("sxy1.txt", s2)
+                exit (0)
+
             def opt (s):
                 sm, info = minimize (e, s, maxit=100, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            if True:
+            if False:
                 print ("before: q=", map (c, sab))
                 sab = map (opt, sab)
                 print ("after: q=", map (c, sab))
-            savetxt ("sab.txt", sab)
+                savetxt ("sab.txt", sab)
 
-            for i, s in enumerate (sab):
-                write_xyz ("min-%03d.xyz" % i, trafo (s))
-            exit (0)
+                for i, s in enumerate (sab):
+                    write_xyz ("min-%03d.xyz" % i, trafo (s))
+
 
             def copt (s, maxit):
                 sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-3, xtol=1.0e-3, algo=0)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [50] * len (ss)
+            maxit = [100] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 

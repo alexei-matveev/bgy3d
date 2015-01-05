@@ -120,17 +120,21 @@ potential applied to 5 waters:
 
 n         Grid       G, eV              dG, kcal
 5+1       30/131/64  -777442.672597     -439.24 (+0.0)
-(340pm)              -777442.445183             (+5.24)
-(320pm)              -777442.19431              (+11.0)
-(300pm)              -777442.21424              (+10.6)
+(340pm)              -777442.696429             (-0.5)
+(320pm)              -777442.293271             (+8.7)
+(310pm)              -777442.23707              (+10.0)
+(300pm)              -777442.250265             (+9.7)
 6         30/131/64  -777442.445809     -434.01 (+5.23)
 
 The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
-distances are longer than 250 pm:
+distances are  longer than  250 pm. Quadratic  bias potential  has the
+effect of 2.5  meV or 0.06 kcal  for an elongation by 1  pm beyond 250
+pm.  In the  six-coordinated complex the 6th water with  U-O of 253 pm
+has no bias potential applied.
 
 Distances for 5+1:
 0.179 nm
-0.18 nm
+0.180 nm
 0.395 nm
 0.245 nm
 0.245 nm
@@ -139,12 +143,12 @@ Distances for 5+1:
 0.251 nm
 
 Distances for 6:
-0.18 nm
-0.18 nm
+0.180 nm
+0.180 nm
 0.253 nm
-0.25 nm
-0.25 nm
-0.25 nm
-0.25 nm
-0.25 nm
+0.250 nm
+0.250 nm
+0.250 nm
+0.250 nm
+0.250 nm
 
