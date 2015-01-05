@@ -14,7 +14,7 @@ data = [loadtxt(_) for _ in source]
 
 def sub(ax, i, title, do_legend=False):
     d = data[i]
-    plt.title (title, loc="left", fontsize=fontsize)
+    plt.title (title, loc="center", fontsize=fontsize)
     plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
     plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
 
@@ -43,21 +43,18 @@ def sub(ax, i, title, do_legend=False):
 
 figure(figsize=(4, 4 * 3))
 sub(subplot(4, 1, 1), 0, "MM", do_legend=True)
-plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
-plt.text(0.25, 30, '(a)')
+plt.text(5.6, 26, '(a)')
 
 sub(subplot(4, 1, 2), 1, "FED")
-plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
-plt.text(0.25, 30, '(b)')
+plt.text(5.6, 26, '(b)')
 
 sub(subplot(4, 1, 3), 2, "QM")
-plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
-plt.text(0.25, 30, '(c)')
+plt.text(5.6, 26, '(c)')
 
-sub(subplot(4, 1, 4), 3, "SCF QM")
-plt.ylabel(r'$\mathrm{\mathsf{\Delta G_{RISM} - \Delta G_{Expt}}}$')
+sub(subplot(4, 1, 4), 3, "SCF-QM")
+plt.ylabel(r'$\mathrm{\mathsf{\Delta\Delta G}}$')
 plt.xlabel(r'$\mathrm{\mathsf{\rho * V}}$')
-plt.text(0.25, 30, '(d)')
+plt.text(5.6, 26, '(d)')
 
 # show()
 savefig(sys.argv[1], transparent=True, bbox_inches='tight')
