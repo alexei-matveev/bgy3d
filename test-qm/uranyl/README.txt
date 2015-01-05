@@ -128,29 +128,40 @@ Struct    G, eV              dG, kcal
 (300pm)   -777442.250265             (+9.7)
 6         -777442.445809     -434.01 (+5.23)
 
+Grid 50/291/96:
+5+1       -777444.015779     -453.37   (uranyl bent)
+(320pm)
+(310pm)
+(300pm)
+6         -777442.947949     -428.74
+
 The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
 distances are  longer than  250 pm. Quadratic  bias potential  has the
 effect of 2.5  meV or 0.06 kcal  for an elongation by 1  pm beyond 250
 pm.  In the  six-coordinated complex the 6th water with  U-O of 253 pm
-has no bias potential applied.
+has  no bias  potential applied.  FIXME: with  50/291/96 grid  the 5+1
+structure features uranyl bent by 137 deg (reoptimize with linear?).
 
 Distances for 5+1:
-0.179 nm
-0.180 nm
-0.395 nm
-0.245 nm
-0.245 nm
-0.242 nm
-0.251 nm
-0.251 nm
 
-Distances for 6:
-0.180 nm
-0.180 nm
-0.253 nm
-0.250 nm
-0.250 nm
-0.250 nm
-0.250 nm
-0.250 nm
+30/131/64     50/291/96
+0.179         0.181
+0.180         0.184
+0.395         0.383
+0.245         0.247
+0.245         0.251
+0.242         0.251
+0.251         0.252
+0.251         0.252
 
+Distances for 6 (nm):
+
+30/131/64     50/291/96
+0.180         0.180
+0.180         0.180
+0.253         0.254
+0.250         0.250
+0.250         0.250
+0.250         0.250
+0.250         0.250
+0.250         0.250
