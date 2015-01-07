@@ -2924,7 +2924,6 @@ reference "fig:spatial-distribution-4w"
 
 \end_inset
 
-
 .
  
 \begin_inset Formula $^{c}$
@@ -3421,10 +3420,10 @@ reference "eq:dG-sol-definition"
 \end_inset
 
 .
- To compare the relative stability of specific four-, five- and six coordinated
- complexes, on the other hand, it is more appropriate to first bring the
- numbers to the common base with the same effective count of explicit water
- molecules.
+ To compare the small differences in relative stability of four-, five-
+ and six coordinated complexes, on the other hand, it appears to be more
+ appropriate to employ a model with the same effective count of explicit
+ water molecules.
  We clearly missed this point in our discussion of relative stability of
  the complexes in our previous work 
 \begin_inset CommandInset citation
@@ -5296,11 +5295,11 @@ reference "fig:potential-of-mean-force-2d"
 
 \end_inset
 
- is corresponds to the U--OW distance of 318
+ corresponds to the U--OW distance of 318
 \begin_inset space ~
 \end_inset
 
-pm comparable with the respective values in Table
+pm comparable with the respective PSE1 value in Table
 \begin_inset space ~
 \end_inset
 
@@ -6032,18 +6031,14 @@ Free energy profiles,
 \begin_inset Formula $G(q)$
 \end_inset
 
-, along water exchange pathway for the two force field models of intra-molecular
- interactions of uranyl species.
+, along water exchange pathway with two intra-molecular force fields with
+ soft- and hard uranyl bending modes (squares and diamonds, respectively)
+ and a QM model (circles).
  Reaction coordinate 
 \begin_inset Formula $q$
 \end_inset
 
- is the difference of two distances between uranium atom and two water oxygens,
- 
-\begin_inset Formula $q=d(\text{U-OW}_{1})-d(\text{U-OW}_{2})$
-\end_inset
-
- in angstrom.
+ is the difference of two distances between uranium atom and two water oxygens.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -6076,7 +6071,12 @@ name "fig:free-energy-profiles"
 
 \begin_layout Standard
 The two intra-molecular force fields for uranyl species differ primarily
- by the force constant corresponding to the bending modes of uranyl.
+ by the force constant corresponding to the bending modes of uranyl and
+ the equilibrium bond length 
+\begin_inset Formula $d_{0}$
+\end_inset
+
+(U--O).
  The force-field referred here to as 
 \begin_inset Quotes eld
 \end_inset
@@ -6093,7 +6093,15 @@ cm
 \begin_inset Formula $^{-1}$
 \end_inset
 
- 
+ and 
+\begin_inset Formula $d_{0}$
+\end_inset
+
+(U--O) of 176
+\begin_inset space ~
+\end_inset
+
+pm 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tiwari14"
@@ -6117,7 +6125,15 @@ cm
 \begin_inset Formula $^{-1}$
 \end_inset
 
- 
+ and a somewhat too long an uranyl bond 
+\begin_inset Formula $d_{0}$
+\end_inset
+
+(U--O) of 180
+\begin_inset space ~
+\end_inset
+
+pm 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
@@ -6125,8 +6141,8 @@ key "Kerisit13"
 \end_inset
 
 .
- The hindered bending vibration in crystals and solution has been characterized
- by frequencies in the range of 180--270
+ The hindered bending vibration in crystals and solution has been experimentally
+ characterized by frequencies in the range of 180--270
 \begin_inset space ~
 \end_inset
 
@@ -6142,8 +6158,17 @@ key "Denning76,Denning79,Toth81,Gal92"
 \end_inset
 
 .
- Standard DFT is likely to predict too soft a bending mode of an isolated
- uranyl likely because of the self-interaction error for 
+ The DFT models with 5--6 explicit water ligands we employ in this and earlier
+ works predict the bending frequency in this experimental range 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Matveev08"
+
+\end_inset
+
+.
+ For the gas phase uranyl the standard DFT predicts too soft a bending mode
+ likely because of the self-interaction error for 
 \begin_inset Formula $f$
 \end_inset
 
@@ -6178,11 +6203,253 @@ soft
 \begin_inset Quotes erd
 \end_inset
 
- bending mode is probably more appropriate.
+ bending mode may appear to be a more consistent model both for uranyl bending
+ and its bond length.
+\end_layout
+
+\begin_layout Standard
+However, a comparison of the free energy profiles obtained with the QM and
+ the two force filed models of uranyl aqua complex in RISM medium reveals
+ a serious deficiency for both force field models.
+ The Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:free-energy-profiles"
+
+\end_inset
+
+ shows the three free energy profiles along the reaction coordinate, 
+\begin_inset Formula $q=d(\text{U--OW}_{1})-d(\text{U--OW}_{2})$
+\end_inset
+
+, which is a difference of two uranium--water oxygen distances for incoming
+ and leaving water molecules.
+ All of the three profiles feature an intermediate metastable state roughly
+ corresponding to the six-coordinated 
+\begin_inset Formula $D_{3\text{d}}$
+\end_inset
+
+-like water complex.
+ With the 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ force field the uranyl species in the metastable state is bent featuring
+ an O--U--O angle of 155
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+ and the distances to the two water ligands participating in exchange which
+ are by about 15
+\begin_inset space ~
+\end_inset
+
+pm longer than than the distances to the other four water ligands; the deviation
+s from the 
+\begin_inset Formula $D_{3\text{d}}$
+\end_inset
+
+ geometry for other two models, QM and 
+\begin_inset Quotes eld
+\end_inset
+
+hard
+\begin_inset Quotes erd
+\end_inset
+
+ force field, are less pronounced.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+QM geometry features waters in D3D positions but slightly rotated
+\end_layout
+
+\end_inset
+
+ The transition state approximated by the structure with the highest free
+ energy is at about 
+\begin_inset Formula $q=\pm70$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+pm for both the QM and the 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl models with the longest U--OW distance of 330
+\begin_inset space ~
+\end_inset
+
+pm and 310
+\begin_inset space ~
+\end_inset
+
+pm, respectively.
+ These distances are roughly comparable to the estimates derived from the
+ 1d and 3d PMFs above.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+hard
+\begin_inset Quotes erd
+\end_inset
+
+ uranyl model, on the other hand, suggests a transition state with a much
+ shorter distance to the outermost water ligand of about 280
+\begin_inset space ~
+\end_inset
+
+pm and a shallow metastable state.
+ This is likely due to the significantly longer U--O bond of the solvated
+ uranyl species of about 186
+\begin_inset space ~
+\end_inset
+
+pm which is more than 6
+\begin_inset space ~
+\end_inset
+
+pm longer that for the other two models employed here and in other works
+ and should be considered a deficiency of the parametrization.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Distances QM: 329/261/180 pm, Soft: 309/241/180 pm, Hard: 280/246/186 pm
+\end_layout
+
+\end_inset
+
+ In turn, the 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ model does not convincingly show the preference for the five-coordinated
+ uranyl with the sixth water in the second solvation shell over the six-coordina
+ted broken symmetry 
+\begin_inset Quotes eld
+\end_inset
+
+metastable
+\begin_inset Quotes erd
+\end_inset
+
+ structure.
+ Finally, the water exchange barrier of 2 and 4
+\begin_inset space ~
+\end_inset
+
+kcal/mol observed with the 
+\begin_inset Quotes eld
+\end_inset
+
+soft
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+hard
+\begin_inset Quotes erd
+\end_inset
+
+ force-field models, not very far from the estimates we obtained above from
+ the PMF analysis, are significantly lower than the 10
+\begin_inset space ~
+\end_inset
+
+kcal/mol barrier of the QM model, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:free-energy-profiles"
+
+\end_inset
+
+, and the 9
+\begin_inset space ~
+\end_inset
+
+kcal/mol experimental estimate 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Farkas00"
+
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+QM: 10 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Concluding remarks
+\end_layout
+
+\begin_layout Standard
+We presented a robust parallelized implementation of the 3D RISM for charged
+ species and verified its performance on examples of single atom ions and
+ uranyl aqua complexes.
+ We demonstrated that the method is not susceptible to a deficiency exposed
+ in our previous work for 1D RISM technique where an artificial supposition
+ of explicit aqua ligands and RISM medium leads to an overestimation of
+ effective water coordination and an excess elongation of the U--O and U--OW
+ bonds: for the standard models with 4--6 explicit water ligands RISM predict
+ essentially the same structure of the first solvation shell as PCM.
+ A net effect of a missing explicit aqua ligand is qualitatively correctly
+ represented by an excess density of the RISM medium leading, for example,
+ to comparable results for uranyl with 5 and 4 explicit water ligands.
+ However, because of the strong closure order dependence of results, and
+ occasionally divergence with higher order closures a successful model will
+ avoid treating the first solvation shell of highly charged ions implicitly.
+ With a first solvation shell treated explicitly, the observables are nearly
+ independent of the closure order.
+\end_layout
+
+\begin_layout Itemize
+Eliminated artifacts of 1D PRISM
+\end_layout
+
+\begin_layout Itemize
+On the example of water exchange: FF for everything is very insightful,
+ yet near order by QM and outer shells by RISM based on FF is better.
 \end_layout
 
 \begin_layout Standard
