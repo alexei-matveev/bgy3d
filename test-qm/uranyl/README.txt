@@ -131,10 +131,10 @@ Struct    G, eV              dG, kcal
 
 Grid 50/291/96:
 5+1       -777444.015779     -453.37   (uranyl bent)
-(320pm)
-(310pm)
-(300pm)
-6         -777442.947949     -428.74
+(320pm)   -777442.837054     -426.19
+(310pm)   -777442.795784     -425.24
+(300pm)   -777442.784967     -424.99
+6         -777442.947949     -428.75-
 
 The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
 distances  are longer  than  250 pm  (unless  uranyl is  forced to  be
