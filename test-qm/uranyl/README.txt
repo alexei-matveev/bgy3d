@@ -122,6 +122,7 @@ Grid 30/131/64:
 
 Struct    G, eV              dG, kcal
 5+1       -777442.672597     -439.24 (+0.0)
+5+1       -777442.663931     -439.04 (linear uranyl)
 (340pm)   -777442.696429             (-0.5)
 (320pm)   -777442.293271             (+8.7)
 (310pm)   -777442.23707              (+10.0)
@@ -136,11 +137,12 @@ Grid 50/291/96:
 6         -777442.947949     -428.74
 
 The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
-distances are  longer than  250 pm. Quadratic  bias potential  has the
-effect of 2.5  meV or 0.06 kcal  for an elongation by 1  pm beyond 250
-pm.  In the  six-coordinated complex the 6th water with  U-O of 253 pm
-has  no bias  potential applied.  FIXME: with  50/291/96 grid  the 5+1
-structure features uranyl bent by 137 deg (reoptimize with linear?).
+distances  are longer  than  250 pm  (unless  uranyl is  forced to  be
+linear). Quadratic  bias potential has the  effect of 2.5  meV or 0.06
+kcal for an elongation by 1  pm beyond 250 pm.  In the six-coordinated
+complex  the 6th  water  with U-O  of  253 pm  has  no bias  potential
+applied.  FIXME: with 50/291/96 grid the 5+1 structure features uranyl
+bent by 137 deg (reoptimize with linear?).
 
 Distances for 5+1:
 
@@ -153,6 +155,18 @@ Distances for 5+1:
 0.242         0.251
 0.251         0.252
 0.251         0.252
+
+Linear Uranyl:
+
+30/131/64     50/291/96
+0.179
+0.180
+0.401
+0.245
+0.244
+0.242
+0.250
+0.250
 
 Distances for 6 (nm):
 
