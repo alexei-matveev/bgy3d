@@ -40,7 +40,7 @@ from pts.units import kcal
 from pts.func import compose, Inverse
 from pts.qfunc import QFunc
 from pts.zmat import Fixed, Rigid, ManyBody #, Move, relate
-from pts.cfunc import Cartesian
+from pts.cfunc import Cartesian, Affine
 from pts.rc import Distance, Difference, Array
 from pts.fopt import minimize, cminimize
 from pts.path import Path, MetricPath
@@ -120,7 +120,7 @@ x = atoms.get_positions ()
 xs = [x[3 * i: 3 * i + 3] for i in range (len (x) / 3)]
 assert (len (xs) == 1 + NW)
 
-def make_uranyl (x, flexible=False):
+def make_uranyl (x, flexible=6):
     """
     Return the "best" linear approximation to the uranyl geometry as a
     Fixed() func.
@@ -148,13 +148,23 @@ def make_uranyl (x, flexible=False):
     Y = Rigid (zmt (s))
     y = Y (Y.pinv (x))
 
-    if not flexible:
-        return Fixed (y)
-    else:
+    if flexible == 0:
+        return Fixed (y)    # 0 dof
+    elif flexible == 2:
+        # liear uranyl with flexible bonds:
+        def f (x):
+            ra, rb = x
+            return array ([[0., 0., 0.],
+                           [0., 0., ra],
+                           [0., 0., -rb]])
+        return Affine (f, array ([0., 0.])) # 2 dof
+    elif flexible == 6:
         # return Move (relate (x, zmt (s)), zmt)
         return ManyBody (Fixed (x[0:1]), Cartesian (x[1:3]), dof=[0, 6])
+    else:
+        assert False
 
-flexible = True
+flexible = 2
 
 if True:
     uranyl = make_uranyl (xs[0], flexible)
@@ -187,19 +197,12 @@ waters = make_waters (xs[1:])
 # complex as a whole. The path images, for example, may "diffuse" from
 # each  other  in  orientation   so  that  interpolation  will  become
 # problematic.
-if flexible:
-    dof = [6] + [6] * len (waters)
-else:
-    dof = [0] + [6] * len (waters)
+dof = [flexible] + [6] * len (waters)
 
 trafo = ManyBody (uranyl, *waters, dof=dof)
 
 # 6 dof per rigid water
-if flexible:
-    s = zeros (6 + 6 * len (waters))
-    # s[0:3] = (1.79, 1.79, pi)
-else:
-    s = zeros (6 * len (waters))
+s = zeros (flexible + 6 * len (waters))
 
 # Destructively updates "atoms"
 def write_xyz (path, x):
@@ -226,7 +229,7 @@ def write_xyz (path, x):
 # Build  a  Func  of  cartesian coordinates,  stretching  and  bending
 # parameters as tuples.  Parameters not hashed, beware of memoization!
 #
-if flexible:
+if flexible != 0:
     from pts.pes.ab2 import AB2
     # Base units here: A, radians, eV:
     if True:
@@ -254,7 +257,7 @@ def test_uranyl ():
     print (uranyl (sm))
     print ("e(0)=", e (s), "e(1)=", e(sm), "iterations=", info["iterations"])
 
-if True:
+if False:
     test_uranyl()
 
 def optimization (s):
@@ -398,7 +401,7 @@ def exchange (s):
     with f0 as f0, h0 as h0, F0 as F0:
         f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
         h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
-        F1 = Memoize (F0, DirStore (salt=qmd + "XXX4 low grid qm only"))
+        F1 = Memoize (F0, DirStore (salt=qmd + "XXX3 30/131 qm only"))
 
         # A  Func  of cartesian  coordinates,  stretching and  bending
         # parameters  as  tuples.  Parameters  not  hashed, beware  of
@@ -413,7 +416,7 @@ def exchange (s):
         B = compose (bias, trafo)
 
         refine = True
-        if refine:
+        if False:
             ss = loadtxt ("ss,initial.txt")
             qs = array (map (c, ss))
             print ("qs=", qs)
@@ -438,13 +441,14 @@ def exchange (s):
                 qs = array (map (c, ss))
                 print ("qs=", qs)
                 print ("dq=", qs[1:] - qs[:-1])
-        else:
+            p = Path (ss, qs)
+
+        if False:
             qs, ss = initial_path(f + B, s, c)
             savetxt ("ss-initial.txt", ss)
+            p = Path (ss, qs)
 
-        p = Path (ss, qs)
-
-        if True:
+        if False:
             for i, q in enumerate (qs):
                 write_xyz ("in-%03d.xyz" % i, trafo (p (q)))
 
@@ -467,13 +471,6 @@ def exchange (s):
         # with f + h as e:
         with F + h + B as e:
             print ("XXX")
-            # Terminals  were constrained, obtain  fully unconstrained
-            # ones:
-            if refine:
-                sab = loadtxt ("sab,initial.txt", ndmin=2)
-            else:
-                sab = (ss[0], ss[-1])
-
             if False:
                 p1 = Path (loadtxt ("sxy.txt", ndmin=2))
                 c1 = compose (c, p1)
@@ -489,11 +486,15 @@ def exchange (s):
                 exit (0)
 
             def opt (s):
-                sm, info = minimize (e, s, maxit=100, ftol=1.0e-2, xtol=1.0e-2, algo=1)
+                sm, info = minimize (e, s, maxit=50, ftol=1.0e-2, xtol=1.0e-2, algo=1)
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            if False:
+            if True:
+                # Unconstrained termnals:
+                sab = loadtxt ("sab,initial.txt", ndmin=2)
+                # sab = (ss[0], ss[-1])
+
                 print ("before: q=", map (c, sab))
                 sab = map (opt, sab)
                 print ("after: q=", map (c, sab))
@@ -501,7 +502,7 @@ def exchange (s):
 
                 for i, s in enumerate (sab):
                     write_xyz ("min-%03d.xyz" % i, trafo (s))
-
+                exit (0)
 
             def copt (s, maxit):
                 sm, info = cminimize (e, s, Array (c), maxit=maxit, ftol=1.0e-3, xtol=1.0e-3, algo=0)
