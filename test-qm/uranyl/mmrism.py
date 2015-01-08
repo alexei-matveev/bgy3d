@@ -83,7 +83,7 @@ mpiexec /users/alexei/darcs/bgy3d/guile/runbgy.scm
 --rho=0.0333295
 --beta=1.6889
 --L=10
---N=64
+--N=96
 --rmax=40
 --nrad=1536
 --closure=KH
@@ -401,7 +401,7 @@ def exchange (s):
     with f0 as f0, h0 as h0, F0 as F0:
         f1 = Memoize (f0, DirStore (salt=cmd + "TESTING"))
         h1 = Memoize (h0, DirStore (salt=alt + "TESTING"))
-        F1 = Memoize (F0, DirStore (salt=qmd + "XXX3 30/131 qm only"))
+        F1 = Memoize (F0, DirStore (salt=qmd + "XXX4 50/291"))
 
         # A  Func  of cartesian  coordinates,  stretching and  bending
         # parameters  as  tuples.  Parameters  not  hashed, beware  of
@@ -479,7 +479,7 @@ def exchange (s):
                     write_xyz ("interp-%03d.xyz" % i, trafo (p1 (q)))
                 print ("c=", [c1(q) for q in q1])
                 Q1 = Inverse (c1)
-                q2 = [Q1(c_) for c_ in [3.1]]
+                q2 = [Q1(c_) for c_ in [3.05]]
                 print ("q=", q2, "c=", [c1(q) for q in q2])
                 s2 = array ([p1(q) for q in q2])
                 savetxt ("sxy1.txt", s2)
@@ -509,7 +509,7 @@ def exchange (s):
                 print ("converged=", info["converged"], "in", info["iterations"])
                 return sm
 
-            maxit = [100] * len (ss)
+            maxit = [30] * len (ss)
             ss = array (map (copt, ss, maxit))
             savetxt ("ss.txt", ss)
 
