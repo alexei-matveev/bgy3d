@@ -138,15 +138,24 @@ Grid 50/291/96:
 (300pm)   -777442.795583     -425.23  (+9.12) (lam = -0.09411888)
 6         -777442.947949     -428.75- (+5.61)
 
-The  5+1 model  is apparently  affected by  the bias,  as the  two U-O
-distances  are longer  than  250 pm  (unless  uranyl is  forced to  be
+Based on the values of largrange multipliers for 300 pm and 305 pm the
+zero point for  lagrange multiplier is at 303  pm. The absolute values
+of largrange multipliers below 0.1 eV imply that the first order terms
+g * dr = -lambda  * dc < 0.12 kcal over the interval 300  pm < c < 305
+pm.   For that reason  the energy  at the  stationary point  should be
+satisfactorily  approximated by  the highest  of the  two  numbers 9.1
+kcal.
+
+The 5+1 is  apparently affected by the bias, as  the two U-O distances
+are   longer  than   250   pm   (unless  uranyl   is   forced  to   be
 linear). Quadratic  bias potential has the  effect of 2.5  meV or 0.06
 kcal for an elongation by 1  pm beyond 250 pm.  In the six-coordinated
 complex  the 6th  water  with U-O  of  253 pm  has  no bias  potential
-applied.  FIXME: with 50/291/96 grid the 5+1 structure features uranyl
-bent by 137 deg (reoptimize with linear?).
+applied.  With  50/291/96 grid the 5+1 structure  features uranyl bent
+by  137 deg  and too  low an  energy. It  appears to  be  necessary to
+enforce a linear uranyl.
 
-Distances for 5+1:
+Distances for 5+1 (in nm as from Jmol):
 
 30/131/64     50/291/96
 0.179         0.181
@@ -161,14 +170,14 @@ Distances for 5+1:
 Linear Uranyl:
 
 30/131/64     50/291/96
-0.179
-0.180
-0.401
-0.245
-0.244
-0.242
-0.250
-0.250
+0.179         0.179
+0.180         0.179
+0.401         0.397
+0.245         0.246
+0.244         0.245
+0.242         0.248
+0.250         0.245
+0.250         0.246
 
 Distances for 6 (nm):
 
