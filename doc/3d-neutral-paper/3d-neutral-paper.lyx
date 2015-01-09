@@ -79,6 +79,7 @@ Alexei V.
 \end_layout
 
 \begin_layout Author Email
+
 matveev@theochem.tu-muenchen.de
 \end_layout
 
@@ -96,6 +97,7 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
+
 roesch@mytum.de
 \end_layout
 
@@ -404,7 +406,8 @@ key "Kovalenko99,Kovalenko00b,book:Hirata03,Sato13"
 
 .
  thus here we shortly go through the fundamental formulas in the theory.
- The solute-solvent 3D-RISM integral equation has the following form:
+ The solute-solvent 3D-RISM integral equation has the following convolution
+ form:
 \end_layout
 
 \begin_layout Standard
@@ -446,9 +449,7 @@ Here
 \end_inset
 
  enumerate the solvent site interacting with the whole solute.
- The star denotes the convolution integral and the sum over corresponding
- matrix induces.
- The solvent in the Eq.
+ In Eq.
 \begin_inset space ~
 \end_inset
 
@@ -459,49 +460,24 @@ reference "eq:rism-uv"
 
 \end_inset
 
-) is represented by its (square symmetric) susceptibility matrix 
+), the solvent is represented by its (square symmetric) susceptibility matrix
+ 
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
- obtained self-consistently from the pure solvent 1D-RISM equation:
-\end_layout
+ and could be obtained self-consistently from the pure solvent 1D-RISM equation
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "book:Hirata03,Kovalenko99b"
 
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-h^{vv}=\omega^{v}\ast c^{vv}\ast\chi^{v}\label{eq:rism-vv}
-\end{equation}
-
-\end_inset
-
-at a specific solvent number density 
-\begin_inset Formula $\rho$
 \end_inset
 
 .
- 
-\begin_inset Formula $\omega^{v}$
-\end_inset
-
- is the (square symmetric) matrices built of intra-molecular correlation
- functions of solvent.
- Below, we will omit the superscripts 
-\begin_inset Formula $u$
-\end_inset
-
- and 
-\begin_inset Formula $v$
-\end_inset
-
- for brevity.
 \end_layout
 
 \begin_layout Standard
-A closure term 
-\begin_inset Formula $h_{\alpha}=f(-\beta u_{\alpha}+h_{\alpha}-c_{\alpha})$
-\end_inset
-
- is necessary to solve the 3D-RISM equation Eq.
+Similar to 1D-RISM case, the closure relation is needed to render the Eq.
 \begin_inset space ~
 \end_inset
 
@@ -512,30 +488,16 @@ reference "eq:rism-uv"
 
 \end_inset
 
-), with 
-\begin_inset Formula $f(x)=\exp(x)-1$
-\end_inset
-
- for 
-\begin_inset Formula $x\le0$
-\end_inset
-
- it reads as the famous HNC closure 
+) solvable.
+ In this paper, the Kovalenko and Hirata (KH) 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Singer85"
+LatexCommand citep
+key "Kovalenko99a"
 
 \end_inset
 
- and 
-\begin_inset Formula $f(x)=x$
-\end_inset
-
- it is the KH closure formulated by Kovalenko and Hirata 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Kovalenko99"
-
+ closure is used, which reads 
+\begin_inset Formula $h_{\alpha}=-\beta u_{\alpha}+h_{\alpha}-c_{\alpha}$
 \end_inset
 
 .
@@ -589,8 +551,73 @@ and in the corresponding expression for the KH closure the terms
 
  
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Kovalenko99"
+LatexCommand citep
+key "Kovalenko99a"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The PMV correction term is based on the “universal correction (UC)” term
+ for 3D-RISM proposed by Palmer et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Palmer10"
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\Delta G_{\text{sol}}^{\text{3DRISM-UC}}=\Delta G_{\text{sol}}^{\text{3DRISM}}+a(\rho V)+b\label{eq:3DRISM-UC}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Instead of by fitting the parameters, here the correction coefficients are
+ chose following the strategy of Sergiievskyi et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Sergiievskyi14"
+
+\end_inset
+
+, with 
+\begin_inset Formula $a=\frac{1}{2\beta}\sum_{s=1}^{N_{\text{solvent}}}\rho_{s}\tilde{c_{s}}(k=0)$
+\end_inset
+
+ and 
+\begin_inset Formula $b=0$
+\end_inset
+
+, where 
+\begin_inset Formula $\tilde{c_{s}}(k)$
+\end_inset
+
+ is the Fourier representation of direct correlation function and 
+\begin_inset Formula $\rho_{s}$
+\end_inset
+
+ is the number density for solvent site 
+\begin_inset Formula $s$
+\end_inset
+
+.
+ The PMV of solute could be obtained from the standard expression 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "book:Hirata03,Palmer10"
 
 \end_inset
 
@@ -612,13 +639,13 @@ As in the 3D-RISM-MM theory, the interaction potential between solvent site
 \end_inset
 
 .
- The LJ type potential term 
+ The Lennard-Jones (LJ) type potential term 
 \begin_inset Formula $u_{\alpha}^{\text{LJ}}(r)=4\sum_{i=1}^{N_{u}}\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r)^{12}-(\sigma_{i\alpha}/r)^{6}\right]$
 \end_inset
 
- accounts for short-range repulsion and dispersion interactions is the same
- with the MM case, while the electrostatic interaction between QM solute
- electron and charged solvent site 
+ which accounts for short-range repulsion and dispersion interactions is
+ the same with the MM case, while the electrostatic interaction between
+ QM solute electron and charged solvent site 
 \begin_inset Formula $\alpha$
 \end_inset
 
@@ -661,7 +688,7 @@ Here
 \begin_inset Formula $\alpha$
 \end_inset
 
- which is the number density 
+, which is the number density 
 \begin_inset Formula $\rho_{\alpha}(\vec{r})$
 \end_inset
 
@@ -720,9 +747,9 @@ being the electron-induced site-specific potential acting on solvent.
 \end_inset
 
 .
- To avoid near-singularities in the KS potential due to the localized peaks
- in the solvent distribution functions, electron-solvent interaction kernel
- is described by 
+ To avoid near-singularities in the Kohn-Sham potential due to the localized
+ peaks in the solvent distribution functions, electron-solvent interaction
+ kernel is described by 
 \begin_inset Formula $f_{\alpha}(r)=-\text{erf}(\eta r)/r$
 \end_inset
 
@@ -823,8 +850,39 @@ where
 \end_inset
 
  is the ESP induced by the solvent.
- The solute electron reorganization energy 
-\begin_inset Formula $E_{\text{rerog}}=E_{\text{sol}}-E_{\text{0}}$
+ The solute electron relaxation energy 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+NR insists that 
+\begin_inset Quotes eld
+\end_inset
+
+reorganization energy
+\begin_inset Quotes erd
+\end_inset
+
+ is a well-defined term in electrochemistry, so we invent a new name instead
+ of using the one which other RISM people used
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Formula $E_{\text{relax}}=E_{\text{sol}}-E_{\text{0}}$
 \end_inset
 
  is the difference between solute electron energy in solution and in gas
@@ -839,161 +897,12 @@ where
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Delta G_{\text{sol}}=E_{\text{reorg}}+\Delta\mu
+\Delta G_{\text{sol}}=E_{\text{relax}}+\Delta\mu
 \end{equation}
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Subsection
-Partial molar volume correction
-\end_layout
-
-\begin_layout Standard
-Palmer et al.
- 
-\begin_inset CommandInset citation
-LatexCommand citet
-key "Palmer10"
-
-\end_inset
-
- reported the linear correlation relationship between partial molar volume
- (PMV) of solute with the solvation free energy difference of 3D-RISM and
- experimental values.
- They proposed the 
-\begin_inset Quotes eld
-\end_inset
-
-universal correction (UC)
-\begin_inset Quotes erd
-\end_inset
-
- term for 3D-RISM:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-\Delta G_{\text{sol}}^{\text{3DRISM-UC}}=\Delta G_{\text{sol}}^{\text{3DRISM}}+a(\rho V)+b\label{eq:3DRISM-UC}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-by fitting the parameters 
-\begin_inset Formula $a$
-\end_inset
-
- and 
-\begin_inset Formula $b$
-\end_inset
-
- to the product of solvent number density 
-\begin_inset Formula $\rho$
-\end_inset
-
- with solute partial molar volume 
-\begin_inset Formula $V$
-\end_inset
-
-, with the solvation free energy difference between 3D-RISM calculation
- and experimental values.
- Recently, Sergiievskyi et al.
- 
-\begin_inset CommandInset citation
-LatexCommand citet
-key "Sergiievskyi14"
-
-\end_inset
-
- reported a more generalized method to derive the analytical expression
- to correct solvation free energy calculation, in the framework of molecular
- density function theory (MDFT).
- By extending the formula to 3D-RISM, their correction term has the similar
- form with 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:3DRISM-UC"
-
-\end_inset
-
-, with coefficient 
-\begin_inset Formula $a=\frac{1}{2\beta}\sum_{s=1}^{N_{\text{solvent}}}\rho_{s}\tilde{c_{s}}(k=0)$
-\end_inset
-
- and 
-\begin_inset Formula $b=0$
-\end_inset
-
-, where 
-\begin_inset Formula $\tilde{c_{s}}(k)$
-\end_inset
-
- is the Fourier representation of direct correlation function and 
-\begin_inset Formula $\rho_{s}$
-\end_inset
-
- is the number density for solvent site 
-\begin_inset Formula $s$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Since the fitting parameters are dependent on the choice of solvent and
- solute models, in this paper we applied the correction expression of Sergiievsk
-yi et al.
- with the coefficient 
-\begin_inset Formula $a$
-\end_inset
-
- directly derived from pure solvent calculations.
- The PMV of solute could be obtained from the standard expression 
-\begin_inset CommandInset citation
-LatexCommand citet
-key "book:Hirata03,Palmer10"
-
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-V=\frac{\kappa}{\beta}[1-\rho\sum_{\alpha=1}^{N_{\text{solute}}}\int c_{\alpha}(\vec{r})d^{3}r]
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-where 
-\begin_inset Formula $\kappa$
-\end_inset
-
- is the pure solvent isothermal compressibility, 
-\begin_inset Formula $c_{\alpha}(\vec{r})$
-\end_inset
-
- is the direct correlation function for solute site 
-\begin_inset Formula $\alpha$
-\end_inset
-
- and 
-\begin_inset Formula $\rho$
-\end_inset
-
- is the solvent number density.
 \end_layout
 
 \begin_layout Section
@@ -1049,7 +958,7 @@ The geometries of 43 neutral solutes are taken from the database used by
  Mobley et al.
  
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Mobley09"
 
 \end_inset
@@ -1058,7 +967,7 @@ key "Mobley09"
  The Lennard-Jones (LJ) parameters and partial atomic charges of the solutes
  are taken from OPLS-AA force field 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Jorgensen04"
 
 \end_inset
@@ -1066,7 +975,7 @@ key "Jorgensen04"
  which is distributed with Tinker software.
  The water solvent model was originated from TIP3P 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Jorgensen83"
 
 \end_inset
@@ -1124,7 +1033,7 @@ key "Goerling99,Koch01"
 
 , as suggested by Perdew, Burke and Ernzerhof (PBE) 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "Perdew96a,Perdew97"
 
 \end_inset
@@ -1183,8 +1092,8 @@ The theory of 3D-RISM was originally derived from the pair-wise interaction
  from the well-tested standard force field database.
  Similar with those were observed in previous researches 
 \begin_inset CommandInset citation
-LatexCommand citet
-key "Kovalenko00a,Du03"
+LatexCommand citep
+key "Kovalenko00a,Du03,book:Hirata03"
 
 \end_inset
 
