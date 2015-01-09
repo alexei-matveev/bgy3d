@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-from numpy import loadtxt, array, shape
+from numpy import loadtxt, array, shape, arange
 from pylab import *
 import matplotlib.pyplot as plt
 
@@ -14,7 +14,7 @@ data = [loadtxt(_) for _ in source]
 
 def sub(ax, i, title, do_legend=False):
     d = data[i]
-    plt.title (title, loc="center", fontsize=fontsize)
+    # plt.title (title, loc="center", fontsize=fontsize)
     plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
     plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
 
@@ -34,6 +34,15 @@ def sub(ax, i, title, do_legend=False):
 
     plt.ylim((-10.0, 30.0))
 
+    # ticks
+    xticks = np.arange (2.0, 6.1, 1.0)
+    yticks = np.arange (-10, 31, 10)
+    plt.xticks (xticks)
+    plt.yticks (yticks)
+
+    # text label in plot
+    plt.text (5.7, 26, title, fontsize = 15)
+
     if do_legend:
 	plt.legend (ncol=1, numpoints=1, frameon=False,
 		fontsize=fontsize, loc='upper left')
@@ -42,19 +51,20 @@ def sub(ax, i, title, do_legend=False):
 	setp (ax.get_xticklabels(), visible=False)
 
 figure(figsize=(4, 4 * 3))
-sub(subplot(4, 1, 1), 0, "MM", do_legend=True)
-plt.text(5.6, 26, '(a)')
+# MM
+sub(subplot(4, 1, 1), 0, "a", do_legend=False)
+# plt.ylabel(r'$\mathrm{\mathsf{\Delta^2 G}}$', rotation='horizontal', )
+plt.text (1.2, 33, r'$\mathrm{\mathsf{\Delta^{2}G}}$', rotation='horizontal')
 
-sub(subplot(4, 1, 2), 1, "FED")
-plt.text(5.6, 26, '(b)')
+# FED
+sub(subplot(4, 1, 2), 1, "b")
 
-sub(subplot(4, 1, 3), 2, "QM")
-plt.text(5.6, 26, '(c)')
+# QM
+sub(subplot(4, 1, 3), 2, "c")
 
-sub(subplot(4, 1, 4), 3, "SCF-QM")
-plt.ylabel(r'$\mathrm{\mathsf{\Delta\Delta G}}$')
-plt.xlabel(r'$\mathrm{\mathsf{\rho * V}}$')
-plt.text(5.6, 26, '(d)')
+# SCF QM
+sub(subplot(4, 1, 4), 3, "d")
+plt.xlabel(r'$\mathrm{\mathsf{\rho V}}$')
 
 # show()
 savefig(sys.argv[1], transparent=True, bbox_inches='tight')
