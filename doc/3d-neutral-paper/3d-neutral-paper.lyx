@@ -3235,8 +3235,12 @@ kcal/mol.
 \end_inset
 
  in SCF-QM/3D-RISM exists even in the “ideal” fitting line.
- By eliminating the dependence of ΔΔG with PMV, we can see that the source
- of this deviation is due to the solute electron relaxation.
+ By eliminating the dependence of 
+\begin_inset Formula $\Delta^{2}G$
+\end_inset
+
+ with PMV, we can see that the source of this deviation is due to the solute
+ electron relaxation.
  The intercept of the linear fitting line for corrected results is still
  
 \begin_inset Formula $-$
