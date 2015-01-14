@@ -79,7 +79,6 @@ Alexei V.
 \end_layout
 
 \begin_layout Author Email
-
 matveev@theochem.tu-muenchen.de
 \end_layout
 
@@ -97,7 +96,6 @@ Notker Rösch
 \end_layout
 
 \begin_layout Author Email
-
 roesch@mytum.de
 \end_layout
 
@@ -204,8 +202,8 @@ key "Tenno93"
  combined the Kohn-Sham density functional theory (KS-DFT) with 3D-RISM
  to investigate the electronic structure for a metal--water interface 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Kovalenko99"
+LatexCommand citet
+key "Kovalenko99a"
 
 \end_inset
 
@@ -416,8 +414,8 @@ Methodology
 The detailed aspects of 3D-RISM theory have been thoroughly discussed in
  previous work 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Kovalenko99,Kovalenko00b,book:Hirata03,Sato13"
+LatexCommand citealp
+key "Sato13,Kovalenko99a,Kovalenko00b,book:Hirata03"
 
 \end_inset
 
