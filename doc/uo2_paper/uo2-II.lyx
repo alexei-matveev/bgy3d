@@ -91,7 +91,41 @@ Nov 2014
 \end_layout
 
 \begin_layout Abstract
-We have done amazing work ...
+We report an implementation of the three-dimensional reference interaction
+ site model (3D RISM) specifically describing the approach to long-range
+ Coulomb field of charged species represented by point charges and/or distribute
+d charge density.
+ A comparison of 1D and 3D results for single atom ions demonstrates the
+ reasonable accuracy even for moderate box size and grid resolution.
+ In an application to uranyl aqua complexes with 4–6 explicit aqua ligands
+ and an implicit bulk solvent modeled by RISM, we demonstrate that the 3D
+ technique is not susceptible to the deficiencies of 1D technique exposed
+ in our previous work [Li, Matveev, Krüger, Rösch, 
+\emph on
+Comp.
+ Theor.
+ Chem.
+
+\emph default
+ 
+\series bold
+1051
+\series default
+, p.
+\begin_inset space ~
+\end_inset
+
+151, (2015)].
+ The 3D method eliminates artificial superposition of explicit aqua ligands
+ and a RISM medium predicting essentially the same values for uranyl and
+ uranyl-water bond lengths as the state of the art polarizable continuum
+ model.
+ We find that with the first solvation shell treated explicitly, the observables
+ are nearly independent of the closure order.
+ The water exchange activation barrier obtained in a hybrid approach combining
+ the quantum mechanical description of uranyl interaction within the first
+ solvation shell and the RISM model for the bulk solvent is in close agreement
+ with the experimental estimate.
 \end_layout
 
 \begin_layout Keywords
@@ -102,8 +136,287 @@ Reference interaction site model, aqueous environment, uranyl, solvation
 Introduction
 \end_layout
 
+\begin_layout Standard
+Thermodynamic and structural properties of uranyl(VI) cation, UO
+\begin_inset Formula $_{2}^{2+}$
+\end_inset
+
+, in aqueous solution are crucial for understanding processes in radioactive
+ waste disposal and recycling of used nuclear fuel 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Katz86,book:Grenthe92,Silva95"
+
+\end_inset
+
+.
+ The quantum mechanics (QM) and classical molecular mechanics (MM) simulations,
+ provide the two complimentary ways to address microscopic structure and
+ energetics of solvated uranyl species.
+ Till now, the most popular strategy to combine the accuracy of QM methods
+ and complexity of the statistical solvent description is to apply a polarizable
+ continuum model (PCM) to represent the effective electrostatic field of
+ the solvent usually employed in combination with phenomenological corrections
+ for dispersion-repulsion interactions and cavity formation energy using
+ empiric parameters 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tomasi05,Fuchs02"
+
+\end_inset
+
+.
+ The state of the art PCM is owing its success in part to the conductor-like
+ screening model (COSMO) of electrostatic interactions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Klamt95"
+
+\end_inset
+
+ and has successfully been applied in various studies of uranyl complexes
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fuchs02,Moskaleva04,Cao05,Shamov05,Gutowski06"
+
+\end_inset
+
+.
+ On the other hand, there is a significant effort to improve the empirical
+ model potentials for MM simulations, such as molecular dynamics (MD) or
+ Monte-Carlo (MC) methods, that yield the most explicit statistical solvent
+ description 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Kerisit13,Tiwari14"
+
+\end_inset
+
+.
+ Though several studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gordon00,hagberg05,Frick09,Tirler13"
+
+\end_inset
+
+ attempt to combine QM and MM simulations such combinations will inevitably
+ lack the reproducibility and efficiency of continuum models due to statistical
+ sampling techniques.
+ Yet more more demanding QM dynamic simulations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl05,Buehl06,Buehl11,Nichols08"
+
+\end_inset
+
+ are restricted to comparably small numbers of solvent molecules.
+ 
+\end_layout
+
+\begin_layout Standard
+Meanwhile, the integral equation theories of molecular liquids 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,book:Hansen06"
+
+\end_inset
+
+, may provide sufficient accuracy at an affordable cost for simulating chemical
+ processes in solution by employing standard numerical methods on contemporary
+ hardware.
+ Two approaches of this type are the reference interaction site model (RISM)
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler72,Hirata81,Hirata82,Kinoshita97"
+
+\end_inset
+
+ and its three-dimensional generalization (3D RISM) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Beglov95,Kovalenko98"
+
+\end_inset
+
+ which provide the solvent structure in form of the site-site radial distributio
+n functions (RDFs) or three-dimensional distribution functions of solvent
+ sites in an external (solute) field, respectively.
+ Both 1D and 3D theories provide variational expressions for the solvation
+ energy in the form of the excess chemical potential for several closure
+ types 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85,Kast08"
+
+\end_inset
+
+ and, hence, intutive expressions for the first derivatives.
+ The dielectrically consistent RISM (DRISM) variant 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Perkyns92"
+
+\end_inset
+
+ was designed to provide a better qualitative and quantitative models of
+ electrolyte solutions and ionic solutes 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Perkyns94,Chiodo07,Chuev08,Joung13"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The integral equation theory has been combined with Hartree--Fock electronic
+ structure theory for self-consistent field calculations (RISM SCF) in the
+ pioneering work of Ten-no, Hirata, and Kato and first applied to formaldehyde
+ and carbonyl compounds in water 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tenno93,Tenno94"
+
+\end_inset
+
+.
+ An extension to 3D RISM SCF was developed for density functional theory
+ (DFT) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko99"
+
+\end_inset
+
+ and 
+\emph on
+ab-initio
+\emph default
+ calculations 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kloss08"
+
+\end_inset
+
+.
+ The analytical gradients for the self-consistent combination of 3D RISM
+ and DFT 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gusarov06"
+
+\end_inset
+
+ simplify explorations of free energy landscape.
+ Some of the recent developments of hybrid approaches combining the integral
+ equation theories and quantum chemistry are discussed in the recent review
+ by Sato 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato13"
+
+\end_inset
+
+.
+ FIXME: 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fujishige13"
+
+\end_inset
+
+?
+\end_layout
+
+\begin_layout Standard
+In this work, we first describe the implementation 3D RISM approach and
+ a numerical treatment of long-range Coulomb field of the charged solute,
+ Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:methodology"
+
+\end_inset
+
+, and then validate the implementation by comparing the results of 1D and
+ 3D techniques for comparable models of single-center ions, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:simple-ions"
+
+\end_inset
+
+.
+ We further evaluate the performance of the method on example of the uranyl(VI)
+ dication in aqueous solution represented by aqua complexes 
+\begin_inset Formula $[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}]^{2+}$
+\end_inset
+
+, (
+\begin_inset Formula $n=4-6$
+\end_inset
+
+), using a force field, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:MM+RISM"
+
+\end_inset
+
+, and a quantum mechanical representation of interactions within the first
+ solvation shell, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:QM+RISM"
+
+\end_inset
+
+, and compare the results to those of PCM calculations.
+ The activation barrier of water exchange in the first solvation shell is
+ analyzed in Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:water-exchange"
+
+\end_inset
+
+ using QM and MM models of interactions in the first solvation shell.
+\end_layout
+
 \begin_layout Section
-Methodology
+Methodology 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:methodology"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -712,7 +1025,7 @@ kcal of the water solvation energy (FXIME: refs).
 \end_layout
 
 \begin_layout Subsection
-Numerical solution of RISM equations
+Numerical solution of 3D RISM equations
 \end_layout
 
 \begin_layout Standard
@@ -1106,15 +1419,1285 @@ name "sec:computational-details"
 
 \end_layout
 
-\begin_layout Section
-Results and discussion
+\begin_layout Standard
+The water Since the original SPC/E water model does not contain a repulsive
+ potential for hydrogen atoms, a LJ-type potential for hydrogen atoms is
+ necessary in RISM calculations to avoid numerical singularities.
+ In their early study, Pettitt and Rosky 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pettitt82"
+
+\end_inset
+
+ introduced a parameter set with 
+\begin_inset Formula $\sigma=0.4$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å and 
+\begin_inset Formula $\epsilon=0.046$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (PR-SPC/E).
+ Sato and Hirata 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato99"
+
+\end_inset
+
+ adopted the parameters for the hydrogen atom as 
+\begin_inset Formula $\sigma=1$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å and 
+\begin_inset Formula $\epsilon=0.05455$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (SH-SPC/E).
+ Recently Luchko and Kovalenko 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Luchko10"
+
+\end_inset
+
+ developed the coincident SPC/E water model (cSPC/E) by applying an embedded
+ site scheme to the parameters in SPC/E water.
+ Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-water"
+
+\end_inset
+
+ summarizes the details of these three popular modified water models.
 \end_layout
 
-\begin_layout Subsection
-Test calculations for simple ions 
+\begin_layout Standard
+For evaluation purpose, we chose the force-field parameters for uranyl as
+ suggested by Guilbaud and Wipff (GW) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Guilbaud96"
+
+\end_inset
+
+ and compared the results to those of models developed by Maginn et al.
+\begin_inset space \space{}
+\end_inset
+
+(RM12 and PM13) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rai12,Pomogaev13"
+
+\end_inset
+
+ (Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:params-uranyl"
+
+\end_inset
+
+).
+ Recently, Kerisit and Liu modified the parameters of the GW model to strengthen
+ the uranyl–water interaction.
+ For their models KL1 and KL2 they reported improved values for the hydration
+ free energy and the water exchange rate 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerisit13"
+
+\end_inset
+
+ of the uranyl aqua complex.
+ For the water solvent, we adopted the atomic charges and LJ potential parameter
+s of the extended simple point charge model SPC/E 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Lennard--Jones interaction parameters for uranyl: 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ (Å), 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ (kcal/mol), and atomic charge 
+\begin_inset Formula $q$
+\end_inset
+
+ (
+\begin_inset Formula $e$
+\end_inset
+
+).
+ 
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:simple-ions"
+name "tab:params-uranyl"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="7">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Uranyl model
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \sigma_{\text{U}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \epsilon_{\text{U}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm q_{\text{U}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \sigma_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \epsilon_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm q_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GW
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8152
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1181
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.25
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+RM12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.3334
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0268
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8344
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4290
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.25
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PM13
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.95
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1266
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.83
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0136
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.25
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+KL1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8509 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.25 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1181 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.625
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+KL2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.8152 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.3 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1181 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula $-$
+\end_inset
+
+0.75
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Lennard--Jones interaction parameters for water: 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ (Å), 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ (kcal/mol), and atomic charge 
+\begin_inset Formula $q$
+\end_inset
+
+ (
+\begin_inset Formula $e$
+\end_inset
+
+).
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:params-water"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="7">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Water model
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \sigma_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \epsilon_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm q_{\text{O}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \sigma_{\text{H}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm \epsilon_{\text{H}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula ${\rm q_{\text{H}}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SH-SPC/E 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1656 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1553 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0545 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4238
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PR-SPC/E
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1656
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1553
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.046
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 0.4238
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cSPC/E 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.1656 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1553 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+0.8476
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.1658
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.01553
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 0.4238
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{ruledtabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All our free energy calculations were carried out for the temperature of
+ 298
+\begin_inset space ~
+\end_inset
+
+K, with the dielectric constant set to 78.4 and with the corresponding water
+ solvent density
+\begin_inset Formula $\rho=0.0333295$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å
+\begin_inset Formula $^{-3}$
+\end_inset
+
+.
+ These parameters correspond to a pressure of 1
+\begin_inset space ~
+\end_inset
+
+atm.
+ The grid which was used to represent the correlation functions was chosen
+ with 4096 grid points and a uniform spacing of 0.0390625
+\begin_inset space ~
+\end_inset
+
+Å; this amounts to a radial range of 160
+\begin_inset space ~
+\end_inset
+
+Å.
+ The solvent susceptibility was determined from the pure water site-site
+ RISM equation by Newton iteration with a convergence tolerance of 
+\begin_inset Formula $10^{-14}$
+\end_inset
+
+ for the 
+\begin_inset Formula $L_{2}$
+\end_inset
+
+ norm of the indirect correlation matrix.
+ The discrete sine transform was applied for Fourier transformation when
+ calculating 
+\color blue
+convolution integrals 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "FFTW05"
+
+\end_inset
+
+.
+ 
+\color inherit
+With the water solvent susceptibility as input, the solvent-solute RISM
+ equations were solved iteratively to determine the radial distribution
+ functions and to evaluate the excess chemical potential.
+\end_layout
+
+\begin_layout Standard
+All-electron calculations were carried out with the linear combination of
+ Gaussian-type orbitals fitting-functions density functional method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Dunlap90"
+
+\end_inset
+
+ as implemented in the parallel code ParaGauss 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ParaGaussV3.1"
+
+\end_inset
+
+.
+ The second-order Douglas–Kroll–Hess all-electron scalar-relativistic approach
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "rev:roesch96"
+
+\end_inset
+
+ was used to account for important relativistic effects in the electronic
+ structure of the actinide compound 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kaltsoyannis06"
+
+\end_inset
+
+.
+ We employed the gradient-corrected exchange-correlation functional (generalized
+ gradient approximation, GGA) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goerling99,kochDFT"
+
+\end_inset
+
+, as suggested by Becke and Perdew (BP) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Becke88,Perdew86c"
+
+\end_inset
+
+.
+ The Kohn–Sham orbitals were represented by flexible Gaussian-type basis
+ sets, contracted in a generalized fashion using atomic eigenvectors.
+ Basis sets and further computational details are the same as in earlier
+ studies on uranyl(VI) species 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b"
+
+\end_inset
+
+.
+ For U, we used a basis set of the size (24s, 19p, 16d, 11f), contracted
+ to [10s, 7p, 7d, 4f]; O and H atoms were described by standard basis sets,
+ (9s, 5p, 1d) 
+\begin_inset Formula $\to$
+\end_inset
+
+ [5s, 4p, 1d] and (6s, 1p) 
+\begin_inset Formula $\to$
+\end_inset
+
+ [4s, 1p], respectively.
+\end_layout
+
+\begin_layout Standard
+We used a COSMO PCM solvation model for comparison 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Fuchs02"
+
+\end_inset
+
+, with the cavity defined via an effective solvent radius of 1.4
+\begin_inset space ~
+\end_inset
+
+Å and van der Waals radii of solute atoms as tabulated by Bondi 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bondi64"
+
+\end_inset
+
+ and scaled by 1.125 (except for hydrogen).
+ We carried out the cavity tessellation with the FIXPVA approach 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Su09,Kremleva12b"
+
+\end_inset
+
+ (fixed points with variable areas) to obtain numerically stable energies
+ and forces 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kremleva12b"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Geometry optimizations have been carried out using the quasi-Newton method
+ as implemented in the utility package ParaTools 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chaffey-Millar11,Nikodem13"
+
+\end_inset
+
+.
+ In QM calculations, the U–O bonds were relaxed but constrained to have
+ the same value by symmetry.
+ In MM and MM+RISM calculations uranyl was rigid, however.
+ Motivated by earlier results, the U–O distances were fixed to 176
+\begin_inset space ~
+\end_inset
+
+pm in RISM calculations of the bare uranyl ion 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rai12,Pomogaev13"
+
+\end_inset
+
+.
+ In MM+RISM geometry optimizations of uranyl aqua complexes , the uranyl
+ bonds were fixed to 178
+\begin_inset space ~
+\end_inset
+
+pm for 
+\begin_inset Formula $n=4$
+\end_inset
+
+ and 
+\begin_inset Formula $n=5$
+\end_inset
+
+, and set to 177
+\begin_inset space ~
+\end_inset
+
+pm for 
+\begin_inset Formula $n=6$
+\end_inset
+
+; these choices are consistent with results of previous studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04,Cao05,Buehl05"
+
+\end_inset
+
+.
+ The SPC/E geometry of explicit water ligands in the aqua complexes [UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+(H
+\begin_inset Formula $_{2}$
+\end_inset
+
+O)
+\begin_inset Formula $_{n}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+, 
+\begin_inset Formula $n=4-6$
+\end_inset
+
+, features an O–H distance of 100
+\begin_inset space ~
+\end_inset
+
+pm and an H–O–H angle of 109.47
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Simple ions 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:simple-ions"
 
 \end_inset
 
@@ -1130,14 +2713,10 @@ key "Joung13,Bo15"
 
 \end_inset
 
- applying the cSPC/E water model, see Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:simple-ions"
+ applying the cSPC/E water model 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87,Luchko10"
 
 \end_inset
 
@@ -1983,21 +3562,31 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
-Application to solvated uranyl(VI)
+\begin_layout Section
+uranyl aqua complexes 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:uranyl-aqua-complexes"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
-Free energy minimization for uranyl aqua complexes
-\end_layout
+MM+RISM 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:MM+RISM"
 
-\begin_layout Subsubsection
-MM+RISM
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 In this section we examine an accessible combination of 3D RISM for the
- bulk water and a force-field potential energy surface for interactions
+ bulk water and a force field potential energy surface for interactions
  of uranyl and 
 \begin_inset Formula $n$
 \end_inset
@@ -3021,8 +4610,15 @@ name "fig:spatial-distribution-4w"
 
 \end_layout
 
-\begin_layout Subsubsection
-QM+RISM
+\begin_layout Subsection
+QM+RISM 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:QM+RISM"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5113,8 +6709,15 @@ name "fig:rdfs-vs-closure-5w"
 
 \end_layout
 
-\begin_layout Subsubsection
-Water exchange
+\begin_layout Subsection
+Water exchange 
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:water-exchange"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5323,7 +6926,11 @@ reference "tab:pmf-extrema"
 \begin_inset space ~
 \end_inset
 
-kcal/mol and -1.7
+kcal/mol and 
+\begin_inset Formula $-1.7$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -5977,7 +7584,8 @@ Potential of mean force,
 \begin_inset Formula $W(x,y)=-T\ln g(x,y)$
 \end_inset
 
-, with 
+, for U--OW distribution functions obtained with PSE1 closure.
+ Here 
 \begin_inset Formula $x$
 \end_inset
 
@@ -5985,9 +7593,7 @@ Potential of mean force,
 \begin_inset Formula $y$
 \end_inset
 
- being the radial and axial displacements from the uranium atom for U--OW
- distribution functions obtained with PSE1 closure.
- 
+ are the radial and axial displacements off the uranium atom 
 \begin_inset CommandInset label
 LatexCommand label
 name "fig:potential-of-mean-force-2d"
@@ -6031,14 +7637,15 @@ Free energy profiles,
 \begin_inset Formula $G(q)$
 \end_inset
 
-, along water exchange pathway with two intra-molecular force fields with
- soft- and hard uranyl bending modes (squares and diamonds, respectively)
- and a QM model (circles).
+, along water exchange pathway using two intra-molecular force fields with
+ soft- and hard uranyl bending modes (squares and diamonds, respectively).
+ QM+RISM profile is represented by three stationary states (circles) connected
+ by strait lines to guide the eye.
  Reaction coordinate 
 \begin_inset Formula $q$
 \end_inset
 
- is the difference of two distances between uranium atom and two water oxygens.
+ is the difference of two U--OW distances.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -6077,7 +7684,7 @@ The two intra-molecular force fields for uranyl species differ primarily
 \end_inset
 
 (U--O).
- The force-field referred here to as 
+ The force field referred here to as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6209,8 +7816,8 @@ soft
 
 \begin_layout Standard
 However, a comparison of the free energy profiles obtained with the QM and
- the two force filed models of uranyl aqua complex in RISM medium reveals
- a serious deficiency for both force field models.
+ the two force field models of uranyl aqua complex in RISM medium reveals
+ significant quantitative deficiencies for both force field models.
  The Fig.
 \begin_inset space ~
 \end_inset
@@ -6228,12 +7835,23 @@ reference "fig:free-energy-profiles"
 
 , which is a difference of two uranium--water oxygen distances for incoming
  and leaving water molecules.
- All of the three profiles feature an intermediate metastable state roughly
- corresponding to the six-coordinated 
+ The QM+RISM profile is represented schematically by just three stationary
+ points.
+ All of the three profiles feature an intermediate metastable state at around
+ 
+\begin_inset Formula $q=0$
+\end_inset
+
+ roughly corresponding to the six-coordinated 
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
--like water complex.
+-like uranyl aqua complex and are therefore fairly symmetric with respect
+ to 
+\begin_inset Formula $q=0$
+\end_inset
+
+ mirror plane (not shown).
  With the 
 \begin_inset Quotes eld
 \end_inset
@@ -6257,7 +7875,7 @@ s from the
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
- geometry for other two models, QM and 
+ geometry for the other two models, QM and 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6277,15 +7895,28 @@ QM geometry features waters in D3D positions but slightly rotated
 \end_inset
 
  The transition state approximated by the structure with the highest free
- energy is at about 
-\begin_inset Formula $q=\pm70$
+ energy is characterized by 
+\begin_inset Formula $q>0.6$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-pm for both the QM and the 
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+AA
+\end_layout
+
+\end_inset
+
+ for both the QM and the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6293,7 +7924,7 @@ soft
 \begin_inset Quotes erd
 \end_inset
 
- uranyl models with the longest U--OW distance of 330
+ uranyl models with the longest U--OW distance of 303
 \begin_inset space ~
 \end_inset
 
@@ -6302,8 +7933,8 @@ pm and 310
 \end_inset
 
 pm, respectively.
- These distances are roughly comparable to the estimates derived from the
- 1d and 3d PMFs above.
+ These distances are below but still comparable to the estimates derived
+ from the 1d and 3d PMFs above.
  The 
 \begin_inset Quotes eld
 \end_inset
@@ -6334,7 +7965,7 @@ pm longer that for the other two models employed here and in other works
 status collapsed
 
 \begin_layout Plain Layout
-Distances QM: 329/261/180 pm, Soft: 309/241/180 pm, Hard: 280/246/186 pm
+Distances QM: 303/249/179 pm, Soft: 309/241/180 pm, Hard: 280/246/186 pm
 \end_layout
 
 \end_inset
@@ -6349,16 +7980,57 @@ soft
 
  model does not convincingly show the preference for the five-coordinated
  uranyl with the sixth water in the second solvation shell over the six-coordina
-ted broken symmetry 
+ted broken symmetry metastable structure.
+ The QM and 
 \begin_inset Quotes eld
 \end_inset
 
-metastable
+hard
 \begin_inset Quotes erd
 \end_inset
 
- structure.
- Finally, the water exchange barrier of 2 and 4
+ force field models predict the six-coordinated 
+\begin_inset Formula $D_{3\text{d}}$
+\end_inset
+
+-like state by 5.6
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 3.6
+\begin_inset space ~
+\end_inset
+
+kcal/mol less stable than the five-coordinated structure with extra water
+ in the second shell, respectively.
+ The presence of such a six-coordinated intermediate suggests an associative
+ two-step water exchange mechanism as one of the possibilities.
+ The collective behavior of the uranyl aqua ligands is unspectacular and
+ can be described as a redistribution in the torus-shaped first solvation
+ shell roughly corresponding to the low PMF region, cp.
+\begin_inset space ~
+\end_inset
+
+Figs.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:potential-of-mean-force"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:potential-of-mean-force-2d"
+
+\end_inset
+
+, while the sixth water molecule enters or leaves the first solvation shell.
+ The water exchange barrier of 2.3 and 4.4
 \begin_inset space ~
 \end_inset
 
@@ -6378,12 +8050,13 @@ hard
 \begin_inset Quotes erd
 \end_inset
 
- force-field models, not very far from the estimates we obtained above from
- the PMF analysis, are significantly lower than the 10
+ force field models, respectively, though not very far from the estimates
+ we obtained above from the PMF analysis, are significantly lower than the
+ 9.1
 \begin_inset space ~
 \end_inset
 
-kcal/mol barrier of the QM model, Fig.
+kcal/mol barrier of the QM+RISM model, Fig.
 \begin_inset space ~
 \end_inset
 
@@ -6394,11 +8067,11 @@ reference "fig:free-energy-profiles"
 
 \end_inset
 
-, and the 9
+, which is in good agreement with the experimental estimate of 9
 \begin_inset space ~
 \end_inset
 
-kcal/mol experimental estimate 
+kcal/mol 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Farkas00"
@@ -6411,16 +8084,34 @@ key "Farkas00"
 status collapsed
 
 \begin_layout Plain Layout
-QM: 10 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal
+QM: 9.1 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal
 \end_layout
 
 \end_inset
 
+ The location and orientation of the second-shell explicit water relative
+ to the two explicit aqua ligands of uranyl it is connected to by hydrogen
+ bonds suggests that the force field models may slightly underestimate the
+ strength and directional nature of the hydrogen bonds.
+ This may explain the low water exchange activation energy and the stability
+ of the six-coordinated metastable state relative to the structure with
+ an explicit water in the second shell as predicted by the force field models,
+ Fig.
+\begin_inset space ~
+\end_inset
 
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:free-energy-profiles"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
-Concluding remarks
+Conclusions
 \end_layout
 
 \begin_layout Standard
@@ -6428,33 +8119,51 @@ We presented a robust parallelized implementation of the 3D RISM for charged
  species and verified its performance on examples of single atom ions and
  uranyl aqua complexes.
  We demonstrated that the method is not susceptible to a deficiency exposed
- in our previous work for 1D RISM technique where an artificial supposition
- of explicit aqua ligands and RISM medium leads to an overestimation of
- effective water coordination and an excess elongation of the U--O and U--OW
- bonds: for the standard models with 4--6 explicit water ligands RISM predict
- essentially the same structure of the first solvation shell as PCM.
+ in our previous work for 1D RISM technique where an artificial superposition
+ of explicit aqua ligands and a RISM medium leads to an overestimation of
+ effective uranyl--water coordination and an excessive elongation of the
+ U--O and U--OW bonds: for the standard models with 4--6 explicit water
+ ligands RISM predict essentially the same structure of the first solvation
+ shell as PCM.
  A net effect of a missing explicit aqua ligand is qualitatively correctly
  represented by an excess density of the RISM medium leading, for example,
  to comparable results for uranyl with 5 and 4 explicit water ligands.
  However, because of the strong closure order dependence of results, and
- occasionally divergence with higher order closures a successful model will
+ occasional divergence with higher order closures a successful model will
  avoid treating the first solvation shell of highly charged ions implicitly.
  With a first solvation shell treated explicitly, the observables are nearly
  independent of the closure order.
 \end_layout
 
-\begin_layout Itemize
-Eliminated artifacts of 1D PRISM
+\begin_layout Standard
+A hybrid approach employing two very different models of ion--water interactions
+, ab-initio and force field, relies heavily on the consistence of the two
+ interaction models.
+ Use of the KL2 force field featuring high charges of interacting sites
+ of uranyl and selected in our previous study as the one predicting the
+ highest uranyl solvation energy leads to a substitution of the explicit
+ QM aqua ligands by the RISM medium far too easily for routine calculations
+ to be practical.
+ Such artifacts affected the 1D RISM approach as well suggesting that this
+ particular QM+RISM combination may need to be revisited.
 \end_layout
 
-\begin_layout Itemize
-On the example of water exchange: FF for everything is very insightful,
- yet near order by QM and outer shells by RISM based on FF is better.
+\begin_layout Standard
+Nevertheless, by employing the 3D RISM model for the second solvation shell
+ and the bulk of the water exclusively the hybrid QM+RISM model produces
+ meaningful structure of the first solvation shell and solvation energies
+ competitive to the state of the PCM.
+ By examining the water exchange activation energy we demonstrated the usefulnes
+s of the hybrid QM+RISM models to address the properties that are not easily
+ reproduced by pure force field models.
+ The activation energy predicted too low with the force field models, likely
+ due to the misrepresentation of the hydrogen bonding, is in remarkably
+ good agreement with the experiment when the hybrid QM+RISM model is employed.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Activation energy for water exchange was estimated from the measured rate
