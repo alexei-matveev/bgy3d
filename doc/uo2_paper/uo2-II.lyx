@@ -87,7 +87,7 @@ Department Chemie, Technische Universität München, 85747 Garching, Germany
 \end_layout
 
 \begin_layout Date
-Nov 2014
+Jan 2015
 \end_layout
 
 \begin_layout Abstract
@@ -963,11 +963,8 @@ for
 \end_inset
 
  explicit aqua ligands.
- The internal energy 
-\begin_inset Formula $\Delta E_{\text{intra}}$
-\end_inset
-
- of the solute model complex is obtained by substituting 
+ The internal energy of the solute model complex is obtained by substituting
+ 
 \begin_inset Formula $E$
 \end_inset
 
@@ -1420,18 +1417,22 @@ name "sec:computational-details"
 \end_layout
 
 \begin_layout Standard
-The water Since the original SPC/E water model does not contain a repulsive
- potential for hydrogen atoms, a LJ-type potential for hydrogen atoms is
- necessary in RISM calculations to avoid numerical singularities.
- In their early study, Pettitt and Rosky 
+For uranyl solvation we employ the SPC/E water model 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87"
+
+\end_inset
+
+ modified as suggested by Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pettitt82"
 
 \end_inset
 
- introduced a parameter set with 
-\begin_inset Formula $\sigma=0.4$
+ by addition of the Lennard--Jones (LJ) term for hydrogen atoms with 
+\begin_inset Formula $\sigma_{\text{H}}=0.4$
 \end_inset
 
 
@@ -1439,7 +1440,7 @@ key "Pettitt82"
 \end_inset
 
 Å and 
-\begin_inset Formula $\epsilon=0.046$
+\begin_inset Formula $\epsilon_{\text{H}}=0.046$
 \end_inset
 
 
@@ -1447,15 +1448,9 @@ key "Pettitt82"
 \end_inset
 
 kcal/mol (PR-SPC/E).
- Sato and Hirata 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Sato99"
-
-\end_inset
-
- adopted the parameters for the hydrogen atom as 
-\begin_inset Formula $\sigma=1$
+ For atomic ions we adopted the coincident SPC/E water model (cSPC/E) with
+ 
+\begin_inset Formula $\sigma_{\text{H}}=1.1658$
 \end_inset
 
 
@@ -1463,982 +1458,56 @@ key "Sato99"
 \end_inset
 
 Å and 
-\begin_inset Formula $\epsilon=0.05455$
+\begin_inset Formula $\epsilon_{\text{H}}=0.01553$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-kcal/mol (SH-SPC/E).
- Recently Luchko and Kovalenko 
+kcal/mol as proposed by Luchko and Kovalenko 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Luchko10"
 
 \end_inset
 
- developed the coincident SPC/E water model (cSPC/E) by applying an embedded
- site scheme to the parameters in SPC/E water.
- Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:params-water"
-
+.
+ The uranyl-water interaction parameters were derived from the second model
+ proposed by Kerisit and Liu to strengthen the uranyl–water interaction
+ with the uranium charge of 3.5
+\begin_inset space ~
 \end_inset
 
- summarizes the details of these three popular modified water models.
-\end_layout
 
-\begin_layout Standard
-For evaluation purpose, we chose the force-field parameters for uranyl as
- suggested by Guilbaud and Wipff (GW) 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Guilbaud96"
-
-\end_inset
-
- and compared the results to those of models developed by Maginn et al.
-\begin_inset space \space{}
-\end_inset
-
-(RM12 and PM13) 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Rai12,Pomogaev13"
-
-\end_inset
-
- (Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:params-uranyl"
-
-\end_inset
-
-).
- Recently, Kerisit and Liu modified the parameters of the GW model to strengthen
- the uranyl–water interaction.
- For their models KL1 and KL2 they reported improved values for the hydration
- free energy and the water exchange rate 
+\emph on
+e
+\emph default
+ (KL2) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kerisit13"
 
 \end_inset
 
- of the uranyl aqua complex.
- For the water solvent, we adopted the atomic charges and LJ potential parameter
-s of the extended simple point charge model SPC/E 
+.
+ For convenience the reader may refer to our previous work 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Berendsen87"
+key "Bo15"
 
 \end_inset
 
-.
- 
+ where we summarized the literal values for the charge and LJ parameters
+ of several force-fields.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Lennard--Jones interaction parameters for uranyl: 
-\begin_inset Formula $\sigma$
-\end_inset
-
- (Å), 
-\begin_inset Formula $\epsilon$
-\end_inset
-
- (kcal/mol), and atomic charge 
-\begin_inset Formula $q$
-\end_inset
-
- (
-\begin_inset Formula $e$
-\end_inset
-
-).
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:params-uranyl"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{ruledtabular}
-\end_layout
-
-\end_inset
-
-
-\begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="7">
-<features tabularvalignment="middle">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Uranyl model
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \sigma_{\text{U}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \epsilon_{\text{U}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm q_{\text{U}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \sigma_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \epsilon_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm q_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-GW
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.8152
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1181
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.25
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-RM12
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.3334
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0268
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.8344
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4290
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.25
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-PM13
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.95
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.1266
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.83
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0136
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.25
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-KL1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.8509 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.12
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.25 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1181 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.2 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.625
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-KL2 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2.8152 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.3 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1181 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
- 
-\begin_inset Formula $-$
-\end_inset
-
-0.75
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{ruledtabular}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float table
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Lennard--Jones interaction parameters for water: 
-\begin_inset Formula $\sigma$
-\end_inset
-
- (Å), 
-\begin_inset Formula $\epsilon$
-\end_inset
-
- (kcal/mol), and atomic charge 
-\begin_inset Formula $q$
-\end_inset
-
- (
-\begin_inset Formula $e$
-\end_inset
-
-).
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "tab:params-water"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-begin{ruledtabular}
-\end_layout
-
-\end_inset
-
-
-\begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="7">
-<features tabularvalignment="middle">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Water model
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \sigma_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \epsilon_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm q_{\text{O}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \sigma_{\text{H}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm \epsilon_{\text{H}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula ${\rm q_{\text{H}}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-SH-SPC/E 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1656 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.1553 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.8476
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0545 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4238
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-PR-SPC/E
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1656
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.1553
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.8476
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.046
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
- 0.4238
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-cSPC/E 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3.1656 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.1553 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.8476
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.1658
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.01553
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
- 0.4238
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{ruledtabular}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-All our free energy calculations were carried out for the temperature of
- 298
+All free energy calculations were carried out for the temperature of 298
 \begin_inset space ~
 \end_inset
 
-K, with the dielectric constant set to 78.4 and with the corresponding water
- solvent density
+K, with the dielectric constant set to 78.4 and the solvent density 
 \begin_inset Formula $\rho=0.0333295$
 \end_inset
 
@@ -2456,47 +1525,54 @@ K, with the dielectric constant set to 78.4 and with the corresponding water
 \end_inset
 
 atm.
- The grid which was used to represent the correlation functions was chosen
- with 4096 grid points and a uniform spacing of 0.0390625
+ The 3D domain was represented by a cubic cell of 
+\begin_inset Formula $20^{3}$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
-Å; this amounts to a radial range of 160
+Å
+\begin_inset Formula $^{3}$
+\end_inset
+
+ and a Cartesian grid with 96
+\begin_inset Formula $^{3}$
+\end_inset
+
+ points and a resolution of about 0.21
 \begin_inset space ~
 \end_inset
 
 Å.
- The solvent susceptibility was determined from the pure water site-site
- RISM equation by Newton iteration with a convergence tolerance of 
-\begin_inset Formula $10^{-14}$
+ The radial grid used to precompute and interpolate the solvent susceptibility
+ and its contractions with the Coulomb kernel for use in Eq.
+\begin_inset space ~
 \end_inset
 
- for the 
-\begin_inset Formula $L_{2}$
-\end_inset
 
- norm of the indirect correlation matrix.
- The discrete sine transform was applied for Fourier transformation when
- calculating 
-\color blue
-convolution integrals 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "FFTW05"
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:tau"
 
 \end_inset
 
-.
+ was chosen with a radial range of 40
+\begin_inset space ~
+\end_inset
+
+Å and 1536 points corresponding to a resolution of about 0.03
+\begin_inset space ~
+\end_inset
+
+Å.
  
-\color inherit
-With the water solvent susceptibility as input, the solvent-solute RISM
- equations were solved iteratively to determine the radial distribution
- functions and to evaluate the excess chemical potential.
 \end_layout
 
 \begin_layout Standard
-All-electron calculations were carried out with the linear combination of
- Gaussian-type orbitals fitting-functions density functional method 
+All-electron QM calculations were carried out with the linear combination
+ of Gaussian-type orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunlap90"
@@ -2511,23 +1587,21 @@ key "ParaGaussV3.1"
 \end_inset
 
 .
- The second-order Douglas–Kroll–Hess all-electron scalar-relativistic approach
- 
+ The atomic approximation 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Matveev08"
+
+\end_inset
+
+ to the second-order Douglas–Kroll–Hess scalar-relativistic approach 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "rev:roesch96"
 
 \end_inset
 
- was used to account for important relativistic effects in the electronic
- structure of the actinide compound 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Kaltsoyannis06"
-
-\end_inset
-
-.
+ was used to account for relativistic effects.
  We employed the gradient-corrected exchange-correlation functional (generalized
  gradient approximation, GGA) 
 \begin_inset CommandInset citation
@@ -2546,15 +1620,6 @@ key "Becke88,Perdew86c"
 .
  The Kohn–Sham orbitals were represented by flexible Gaussian-type basis
  sets, contracted in a generalized fashion using atomic eigenvectors.
- Basis sets and further computational details are the same as in earlier
- studies on uranyl(VI) species 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b"
-
-\end_inset
-
-.
  For U, we used a basis set of the size (24s, 19p, 16d, 11f), contracted
  to [10s, 7p, 7d, 4f]; O and H atoms were described by standard basis sets,
  (9s, 5p, 1d) 
@@ -2566,6 +1631,16 @@ key "Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b"
 \end_inset
 
  [4s, 1p], respectively.
+ These basis sets and further computational details are the same as in earlier
+ studies on uranyl species 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b,Bo15"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2609,7 +1684,8 @@ key "Kremleva12b"
 
 \begin_layout Standard
 Geometry optimizations have been carried out using the quasi-Newton method
- as implemented in the utility package ParaTools 
+ and constrained minimization algorithm as implemented in the utility package
+ ParaTools 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Chaffey-Millar11,Nikodem13"
@@ -2617,43 +1693,14 @@ key "Chaffey-Millar11,Nikodem13"
 \end_inset
 
 .
- In QM calculations, the U–O bonds were relaxed but constrained to have
- the same value by symmetry.
- In MM and MM+RISM calculations uranyl was rigid, however.
- Motivated by earlier results, the U–O distances were fixed to 176
+ In QM+RISM calculations of symmetric uranyl aqua complexes the U–O bonds
+ were relaxed but constrained to have the same value by symmetry.
+ In the corresponding MM+RISM calculations uranyl was rigid with the U–O
+ distances fixed to 179
 \begin_inset space ~
 \end_inset
 
-pm in RISM calculations of the bare uranyl ion 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Rai12,Pomogaev13"
-
-\end_inset
-
-.
- In MM+RISM geometry optimizations of uranyl aqua complexes , the uranyl
- bonds were fixed to 178
-\begin_inset space ~
-\end_inset
-
-pm for 
-\begin_inset Formula $n=4$
-\end_inset
-
- and 
-\begin_inset Formula $n=5$
-\end_inset
-
-, and set to 177
-\begin_inset space ~
-\end_inset
-
-pm for 
-\begin_inset Formula $n=6$
-\end_inset
-
-; these choices are consistent with results of previous studies 
+pm motivated by earlier results 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Moskaleva04,Cao05,Buehl05"
@@ -2661,6 +1708,18 @@ key "Moskaleva04,Cao05,Buehl05"
 \end_inset
 
 .
+ However, for a study of the water exchange with MM+RISM we adopted a flexible
+ uranyl model without symmetry constraints and compared two sets of intra-molecu
+lar parameters 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kerisit13,Tiwari14"
+
+\end_inset
+
+ with unconstrained QM+RISM results.
+ The two force field models as we employed them differ only by uranyl equilibriu
+m bond length and force constants for stretching and bending modes.
  The SPC/E geometry of explicit water ligands in the aqua complexes [UO
 \begin_inset Formula $_{2}$
 \end_inset
@@ -5155,7 +4214,7 @@ begin{ruledtabular}
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="20" columns="6">
+<lyxtabular version="3" rows="16" columns="6">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -6136,318 +5195,6 @@ PSE3
 \end_inset
 
 393
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $\Delta G_{\text{rel}}$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-PCM
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-357
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-423
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-426
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
--418
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-PSE1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-383
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-382
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-388
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-388
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(temp)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-PSE2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-403
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-385
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-389
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-387
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-PSE3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-409
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-385
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-389
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\emph on
-\begin_inset Formula $-$
-\end_inset
-
-387
 \end_layout
 
 \end_inset
@@ -8115,9 +6862,9 @@ Conclusions
 \end_layout
 
 \begin_layout Standard
-We presented a robust parallelized implementation of the 3D RISM for charged
- species and verified its performance on examples of single atom ions and
- uranyl aqua complexes.
+We presented a parallelized implementation of the 3D RISM for charged species
+ and verified its performance on examples of single atom ions and uranyl
+ aqua complexes.
  We demonstrated that the method is not susceptible to a deficiency exposed
  in our previous work for 1D RISM technique where an artificial superposition
  of explicit aqua ligands and a RISM medium leads to an overestimation of
@@ -8128,11 +6875,11 @@ We presented a robust parallelized implementation of the 3D RISM for charged
  A net effect of a missing explicit aqua ligand is qualitatively correctly
  represented by an excess density of the RISM medium leading, for example,
  to comparable results for uranyl with 5 and 4 explicit water ligands.
- However, because of the strong closure order dependence of results, and
- occasional divergence with higher order closures a successful model will
- avoid treating the first solvation shell of highly charged ions implicitly.
- With a first solvation shell treated explicitly, the observables are nearly
- independent of the closure order.
+ However, because of the strong closure order dependence of the results
+ and occasional divergence with higher order closures a successful model
+ will avoid treating the first solvation shell of highly charged ions implicitly.
+ With a first solvation shell treated by explicit aqua ligands, the observables
+ are nearly independent of the closure order.
 \end_layout
 
 \begin_layout Standard
@@ -8248,6 +6995,37 @@ T is 0.5920886775377376 kcal in our calculations
 
 \begin_layout Section*
 Acknowledgments
+\end_layout
+
+\begin_layout Standard
+We thank Prof.
+\begin_inset space ~
+\end_inset
+
+H.-J.
+\begin_inset space ~
+\end_inset
+
+Bungartz and co-workers for valuable discussions and Dr.
+\begin_inset space ~
+\end_inset
+
+L.
+\begin_inset space ~
+\end_inset
+
+Jager and Prof.
+\begin_inset space ~
+\end_inset
+
+M.
+\begin_inset space ~
+\end_inset
+
+Griebel for providing the source of the BGY3D program package.
+ BL is grateful for a fellowship by the International Graduate School of
+ Science and Engineering at Technische Universität München.
+ 
 \end_layout
 
 \begin_layout Standard
