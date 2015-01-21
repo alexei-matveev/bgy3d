@@ -6,6 +6,7 @@
 \begin_preamble
 \usepackage{mathptmx}
 \usepackage{times}
+\usepackage{microtype}
 \end_preamble
 \options twocolumn,showkeys,superscriptaddress
 \use_default_options false
@@ -84,6 +85,20 @@ Bo Li
 
 \begin_layout Affiliation
 Department Chemie, Technische Universität München, 85747 Garching, Germany
+\end_layout
+
+\begin_layout Author
+Notker Rösch
+\end_layout
+
+\begin_layout Author Email
+
+roesch@mytum.de
+\end_layout
+
+\begin_layout Affiliation
+Department Chemie and Catalysis Research Center, Technische Universität
+ München, 85747 Garching, Germany
 \end_layout
 
 \begin_layout Date
@@ -254,15 +269,15 @@ key "Singer85,Kast08"
 \end_inset
 
  and, hence, intutive expressions for the first derivatives.
- The dielectrically consistent RISM (DRISM) variant 
+ The dielectrically consistent RISM (DRISM) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
 
 \end_inset
 
- was designed to provide a better qualitative and quantitative models of
- electrolyte solutions and ionic solutes 
+ was designed to compensate the error of the gas-like dielectric response
+ of RISM for electrolytes and ionic solutes 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns94,Chiodo07,Chuev08,Joung13"
@@ -270,6 +285,53 @@ key "Perkyns94,Chiodo07,Chuev08,Joung13"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+A correct handling of electrostatic field of a charge distribution requires
+ additional care when periodic boundary conditions are employed to simulate
+ finite systems 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Makov95"
+
+\end_inset
+
+.
+ It was understood early that the long-range asymptotes of the radial correlatio
+n functions induced by Coulomb interactions in RISM need a separate treatment
+ as well 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ng74"
+
+\end_inset
+
+.
+ For 3D RISM a few practical approaches include the background charge correction
+ technique 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko00b"
+
+\end_inset
+
+, monopole correction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kloss08b"
+
+\end_inset
+
+, and an exact re-summing for a superposition of gaussian charges 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Perkyns10"
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -323,14 +385,7 @@ key "Sato13"
 \end_inset
 
 .
- FIXME: 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Fujishige13"
-
-\end_inset
-
-?
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1006,11 +1061,18 @@ tly rigid solutes, breaks for increasingly many explicit water molecules
 \begin_inset Formula $-$
 \end_inset
 
-10
+9.9
 \begin_inset space ~
 \end_inset
 
-kcal to be compared to 
+kcal/mol 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Berendsen87,Mahoney00"
+
+\end_inset
+
+ to be compared to the solvation energy of 
 \begin_inset Formula $-$
 \end_inset
 
@@ -1018,7 +1080,15 @@ kcal to be compared to
 \begin_inset space ~
 \end_inset
 
-kcal of the water solvation energy (FXIME: refs).
+kcal/mol as derived from the ratio of the equilibrium vapor/liquid concentration
+s 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bridgeman64"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -5573,7 +5643,7 @@ key "Tiwari14"
 
 \end_inset
 
- but significantly lower that the experimental estimate.
+ but significantly lower than the experimental estimate.
  The transition between the first- and second solvation shells happens at
  U--OW separations 
 \begin_inset Formula $r_{b}=309-324$
@@ -6424,9 +6494,20 @@ name "fig:free-energy-profiles"
 \end_layout
 
 \begin_layout Standard
-The two intra-molecular force fields for uranyl species differ primarily
- by the force constant corresponding to the bending modes of uranyl and
- the equilibrium bond length 
+To investigate this collective behavior we need to treat the first solvation
+ shell and the incoming water molecule explicitly and also employ a flexible
+ uranyl mode as it was shown that the uranyl bending may affect the exchange
+ rate 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tiwari14"
+
+\end_inset
+
+.
+ The two intra-molecular force fields for a flexible uranyl species we compare
+ below differ primarily by the force constant corresponding to the bending
+ modes of uranyl and the equilibrium bond length 
 \begin_inset Formula $d_{0}$
 \end_inset
 
@@ -6479,7 +6560,7 @@ cm
 \begin_inset Formula $^{-1}$
 \end_inset
 
- and a somewhat too long an uranyl bond 
+ and a somewhat too long a uranyl bond 
 \begin_inset Formula $d_{0}$
 \end_inset
 
@@ -6650,20 +6731,7 @@ QM geometry features waters in D3D positions but slightly rotated
 \begin_inset space ~
 \end_inset
 
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-AA
-\end_layout
-
-\end_inset
-
- for both the QM and the 
+Å for both the QM and the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6681,7 +6749,7 @@ pm and 310
 
 pm, respectively.
  These distances are below but still comparable to the estimates derived
- from the 1d and 3d PMFs above.
+ from the 1D and 3D PMFs above.
  The 
 \begin_inset Quotes eld
 \end_inset
@@ -6899,7 +6967,7 @@ A hybrid approach employing two very different models of ion--water interactions
 Nevertheless, by employing the 3D RISM model for the second solvation shell
  and the bulk of the water exclusively the hybrid QM+RISM model produces
  meaningful structure of the first solvation shell and solvation energies
- competitive to the state of the PCM.
+ competitive to the state of the art PCM.
  By examining the water exchange activation energy we demonstrated the usefulnes
 s of the hybrid QM+RISM models to address the properties that are not easily
  reproduced by pure force field models.
