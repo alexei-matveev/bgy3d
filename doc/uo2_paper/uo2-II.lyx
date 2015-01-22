@@ -4158,25 +4158,21 @@ key "Bo15"
 \begin_inset Formula $-$
 \end_inset
 
-6.2 kcal (PSE3 closure) to the numbers obtained using four- and six-coordinated
- models, respectively, we estimate the free energies of the four-, five-,
- and six-coordinated structures as 
-\begin_inset Formula $-$
-\end_inset
-
-385
+6.2
 \begin_inset space ~
 \end_inset
 
-kcal/mol, 
+kcal/mol (PSE3 closure) to the numbers obtained using four- and six-coordinated
+ models, respectively, we estimate the free solvation energies of the four-,
+ five-, and six-coordinated structures as 
 \begin_inset Formula $-$
 \end_inset
 
-389
-\begin_inset space ~
+385, 
+\begin_inset Formula $-$
 \end_inset
 
-kcal/mol, and 
+389, and 
 \begin_inset Formula $-$
 \end_inset
 
@@ -4184,11 +4180,29 @@ kcal/mol, and
 \begin_inset space ~
 \end_inset
 
-kcal/mol with the five-coordinated structure featuring the lowest free energy
- among the three as expected.
- The corresponding PCM numbers adapted in the same fashion 
+kcal/mol, respectively, with the five-coordinated structure featuring the
+ lowest free energy among the three.
+ 
 \begin_inset Note Note
 status open
+
+\begin_layout Plain Layout
+-378.67 -6.248*(+1) = -384.918, (n = 4),
+\end_layout
+
+\begin_layout Plain Layout
+-388.91 -6.248*(0) = -388.91, (n = 5),
+\end_layout
+
+\begin_layout Plain Layout
+-393.45 -6.248*(-1) = -387.202, (n = 6)
+\end_layout
+
+\end_inset
+
+ The corresponding PCM numbers adapted in the same fashion 
+\begin_inset Note Note
+status collapsed
 
 \begin_layout Plain Layout
 using 7.06
