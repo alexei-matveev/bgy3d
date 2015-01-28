@@ -6259,5 +6259,519 @@ J\ast\delta x=\chi\ast\delta v
 .
 \end_layout
 
+\begin_layout Subsection
+Cavity formation energy
+\end_layout
+
+\begin_layout Subsubsection
+Extended depletion regions by linear response 
+\end_layout
+
+\begin_layout Standard
+Non-linear 3D RISM for a special case of the closure relation 
+\begin_inset Formula $h=f(x)$
+\end_inset
+
+ with 
+\begin_inset Formula $x=-v+t$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{cases}
+h & =\chi\ast c\\
+h & =c+t\\
+h & =f(-v+t)
+\end{cases}
+\end{equation}
+
+\end_inset
+
+Linearizion around 
+\begin_inset Formula $v=c=h=t=0$
+\end_inset
+
+ (here we already assume 
+\begin_inset Formula $f(0)=0$
+\end_inset
+
+) for small 
+\begin_inset Formula $v$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{cases}
+h & =\chi\ast c\\
+h & =c+t\\
+h & =-v+t
+\end{cases}
+\end{equation}
+
+\end_inset
+
+or
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\begin{cases}
+h & =-\chi\ast v\\
+c & =-v\\
+t & =-(\chi-1)\ast v
+\end{cases}
+\end{equation}
+
+\end_inset
+
+The linearization of the corresponding energy functional (here HNC) 
+\begin_inset Formula 
+\begin{eqnarray*}
+\mu & = & \rho\int\left(h^{2}/2-c-ch/2\right)d^{3}r\\
+ & \approx & \rho\int vd^{3}r
+\end{eqnarray*}
+
+\end_inset
+
+is consistent with thermodynamic perturbation theory where the free energy
+ change is an expectation of the perturbation (here 
+\begin_inset Formula $v)$
+\end_inset
+
+ with the unperturbed (here uniform) distribution.
+ The integral 
+\begin_inset Formula $\int vd^{3}r$
+\end_inset
+
+ or, equivalently, the 
+\begin_inset Formula $k=0$
+\end_inset
+
+ component of the Fourier transform 
+\begin_inset Formula $\tilde{v}(\vec{k})$
+\end_inset
+
+ for potentials that are about 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ within some base volume 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+ approach 
+\begin_inset Formula $\lambda V_{\text{0}}$
+\end_inset
+
+.
+ The excess chemical potential is thus also proportional to the 
+\begin_inset Quotes eld
+\end_inset
+
+base volume
+\begin_inset Quotes erd
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\mu=\rho\tilde{v}(0)=\lambda\rho V_{0}.
+\]
+
+\end_inset
+
+Note that the excess chemical potential is assymptotically proportional
+ to the base volume.
+\end_layout
+
+\begin_layout Standard
+Because of the finite solvent compressibility one might want to employ a
+ different measure of the solute (molar) volume.
+ Think of a volume corresponding to the 
+\begin_inset Quotes eld
+\end_inset
+
+excess coordination
+\begin_inset Quotes erd
+\end_inset
+
+ of a solute
+\begin_inset Formula 
+\[
+-\int hd^{3}r=V_{\text{e}}
+\]
+
+\end_inset
+
+where the integral 
+\begin_inset Formula $\int hd^{3}r$
+\end_inset
+
+ is again the 
+\begin_inset Formula $k=0$
+\end_inset
+
+ component of the Fourier transform 
+\begin_inset Formula $\tilde{h}(\vec{k})=-\tilde{\chi}(\vec{k})\tilde{v}(k)$
+\end_inset
+
+ and so differs by factor 
+\begin_inset Formula $-\tilde{\chi}(0)$
+\end_inset
+
+ from 
+\begin_inset Formula $\tilde{v}(0)\approx\lambda V_{0}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\mu=-\rho\tilde{h}(0)/\tilde{\chi}(0)=\kappa^{-1}V_{\text{e}}
+\]
+
+\end_inset
+
+where we introduced the solvent compressibility 
+\begin_inset Formula $\kappa$
+\end_inset
+
+ (here in temperature units) such that 
+\begin_inset Formula $\tilde{\chi}(0)=\rho\kappa$
+\end_inset
+
+.
+ For almost incompressible liquids we usually encounter 
+\begin_inset Formula $\rho\kappa\ll1$
+\end_inset
+
+ or 
+\begin_inset Formula $\kappa\ll1/\rho$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Another possible definition of the solute molar volume involves the direct
+ correlation function
+\begin_inset Formula 
+\[
+V_{\text{u}}=\kappa(1-\rho\int cd^{3}r).
+\]
+
+\end_inset
+
+It is related to our previous (arguable more intuitive) volume 
+\begin_inset Formula $V_{\text{e}}=-\tilde{h}(0)$
+\end_inset
+
+ derived from the excess coordination above by
+\begin_inset Formula 
+\[
+V_{\text{u}}=V_{\text{e}}+\kappa
+\]
+
+\end_inset
+
+by way of the convolution equation 
+\begin_inset Formula $h=\chi\ast c$
+\end_inset
+
+.
+ Thus we can express the excess chemical potential as
+\begin_inset Formula 
+\[
+\mu=\kappa^{-1}V_{\text{u}}-1.
+\]
+
+\end_inset
+
+All of the expressions for the excess chemical potential in the linearization
+ limit are thus assymptotically proportional to a measure of the solute
+ volume.
+\end_layout
+
+\begin_layout Subsubsection
+Empty cavities by repulsive potentials
+\end_layout
+
+\begin_layout Standard
+Let us consider solvent in a field with 
+\begin_inset Formula $v\gg1$
+\end_inset
+
+ over large extended domain 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+ and zero everywhere else.
+ Intuitively the total correlation 
+\begin_inset Formula $h=-1$
+\end_inset
+
+ in 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+ and zero outside.
+ Similarly the direct correlation 
+\begin_inset Formula $c=0$
+\end_inset
+
+ outside of 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+, but what is its value inside of the domain 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+? For finite range 
+\begin_inset Formula $\chi(r)$
+\end_inset
+
+ and regular 
+\begin_inset Formula $\tilde{\chi}(\vec{k})$
+\end_inset
+
+ for compressible liquids we 
+\begin_inset Formula $0<\tilde{\chi}(0)=\rho\kappa\ll1$
+\end_inset
+
+ and may approximate 
+\begin_inset Formula $\chi(r)$
+\end_inset
+
+ by 
+\begin_inset Formula $\rho\kappa\delta(r)$
+\end_inset
+
+ in the case of asymptotically large 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+.
+ At that scale the convolution relation between 
+\begin_inset Formula $h$
+\end_inset
+
+ and 
+\begin_inset Formula $c$
+\end_inset
+
+ simplifies to 
+\begin_inset Formula $h=\rho\kappa c$
+\end_inset
+
+ so that we conclude 
+\begin_inset Formula $c=-(\rho\kappa)^{-1}$
+\end_inset
+
+ inside 
+\begin_inset Formula $V_{0}$
+\end_inset
+
+, which is a large negative value for almost incompressible liquids.
+ Note that for such hard potentials there is little difference between various
+ solute volume measures asymptotically: 
+\begin_inset Formula $V_{0}\approx V_{\text{e}}\approx V_{\text{u}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The HNC expression for the excess chemical potential with these assumptions
+ may be approximated as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\mu & = & \rho\int\left(h^{2}/2-c-ch/2\right)d^{3}r\\
+ & \approx & \rho\left[V_{0}/2+(\rho\kappa)^{-1}V_{0}-(\rho\kappa)^{-1}V_{0}/2\right]\\
+ & = & \kappa^{-1}V_{0}\frac{1+\rho\kappa}{2}\\
+ & \approx & \kappa^{-1}V_{0}/2
+\end{eqnarray*}
+
+\end_inset
+
+where in the last approximation we used the low compressibility assumption
+ 
+\begin_inset Formula $\rho\kappa\ll1$
+\end_inset
+
+.
+ This looks like a very hydrophobic expression!
+\end_layout
+
+\begin_layout Subsubsection
+Generalized closure
+\end_layout
+
+\begin_layout Standard
+For general close of the form 
+\begin_inset Formula $h=f(-v+t)$
+\end_inset
+
+ the expression for the excess chemical potential reads
+\begin_inset Formula 
+\begin{equation}
+\mu_{f}=\mu+\rho\int\phi(x)d^{3}r
+\end{equation}
+
+\end_inset
+
+with 
+\begin_inset Formula $\phi(x)=f(x)-x-\int_{0}^{x}f(y)dy$
+\end_inset
+
+ having particularly simple form for the PSE
+\begin_inset Formula $n$
+\end_inset
+
+ closures: 
+\begin_inset Formula $\phi_{n}(x)=-x^{n+1}/(n+1)!$
+\end_inset
+
+ for 
+\begin_inset Formula $x>0$
+\end_inset
+
+ and zero otherwise 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kast08"
+
+\end_inset
+
+.
+ In the case of KH (PSE1) closure the additional term 
+\begin_inset Formula $-x^{2}/2$
+\end_inset
+
+ cancels the 
+\begin_inset Formula $h^{2}/2$
+\end_inset
+
+ term of the HNC integrand, in the regions where 
+\begin_inset Formula $x=h>0$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+What if we choose a closure such that 
+\begin_inset Formula $\phi(x)\approx-(2\rho\kappa)^{-1}$
+\end_inset
+
+ or another large negative constant 
+\begin_inset Formula $-\Phi$
+\end_inset
+
+ for sufficiently negative 
+\begin_inset Formula $x$
+\end_inset
+
+? Then 
+\begin_inset Formula 
+\[
+\mu_{f}\approx\mu-\rho\Phi V_{0}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solve for
+\begin_inset Formula 
+\[
+\phi(x)=-\Phi
+\]
+
+\end_inset
+
+ or
+\begin_inset Formula 
+\[
+f(x)-x-\int_{0}^{x}f(y)dy=-\Phi
+\]
+
+\end_inset
+
+ or first
+\begin_inset Formula 
+\[
+f^{\prime}-1-f=0
+\]
+
+\end_inset
+
+The homogeneous equation 
+\begin_inset Formula $f^{\prime}-f=0$
+\end_inset
+
+ is solved by 
+\begin_inset Formula $f=a\mathrm{e}^{x}$
+\end_inset
+
+.
+ By constant variation and solving 
+\begin_inset Formula $a^{\prime}\mathrm{e}^{x}=1$
+\end_inset
+
+ we conclude that 
+\begin_inset Formula $a(x)=-\mathrm{e}^{-x}+b$
+\end_inset
+
+ and thus 
+\begin_inset Formula $f=b\mathrm{e}^{x}-1$
+\end_inset
+
+.
+ The corresponding integral equation
+\begin_inset Formula 
+\[
+\left[b\mathrm{e}^{x}-1\right]-x-\left[b\mathrm{e}^{y}-y\right]_{0}^{x}=-\Phi
+\]
+
+\end_inset
+
+is solved identically when
+\begin_inset Formula 
+\[
+b=1-\Phi
+\]
+
+\end_inset
+
+ and for 
+\begin_inset Formula $\Phi=0$
+\end_inset
+
+ we recover 
+\begin_inset Formula $b=1$
+\end_inset
+
+ and 
+\begin_inset Formula $f=\mathrm{e}^{x}-1$
+\end_inset
+
+ as expected.
+\end_layout
+
 \end_body
 \end_document
