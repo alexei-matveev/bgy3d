@@ -2942,7 +2942,8 @@ name "fig:Correlation-of-solvation"
 \end_layout
 
 \begin_layout Standard
-The effect of the PMV correction could be confirmed from Fig
+The effect of the PMV correction could be confirmed from Fig.
+ 
 \begin_inset space ~
 \end_inset
 
@@ -2979,7 +2980,8 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 .
- As shown in Fig
+ As shown in Fig.
+ 
 \begin_inset space ~
 \end_inset
 
@@ -3167,7 +3169,8 @@ name "fig:Dipole-moment"
 
 \begin_layout Standard
 Again we could easily inspect how the correction works in FED calculation
- from Fig
+ from Fig.
+ 
 \begin_inset space ~
 \end_inset
 
@@ -3232,7 +3235,8 @@ kcal/mol.
  And this difference is due to be expected, since the ESP derived from atomic
  charge based on force field database, is not necessarily the same with
  that from electron density.
- The evidence could be found from Fig
+ The evidence could be found from Fig.
+ 
 \begin_inset space ~
 \end_inset
 
@@ -3397,7 +3401,8 @@ kcal/mol, with the close margin higher than MM and FED cases without correction.
 \end_layout
 
 \begin_layout Standard
-The more direct evidence could be observed from Fig
+The more direct evidence could be observed from Fig.
+ 
 \begin_inset space ~
 \end_inset
 
@@ -3539,6 +3544,7 @@ kcal/mol.
 
 \begin_layout Standard
 From Fig.
+ .
 \begin_inset space ~
 \end_inset
 
