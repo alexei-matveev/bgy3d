@@ -1416,107 +1416,6 @@ kcal/mol.
 \end_layout
 
 \begin_layout Standard
-The effect of the PMV correction could be confirmed from Fig
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Correlation-of-solvation"
-
-\end_inset
-
- and Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:Linear-correlation-Delta2G"
-
-\end_inset
-
-, which shows the correlation between the calculated partial molar volume
- 
-\begin_inset Formula $V$
-\end_inset
-
- which is scaled by solvent number density 
-\begin_inset Formula $\rho$
-\end_inset
-
-, and the difference between the experimental and 3D-RISM calculated solvation
- free energy 
-\begin_inset Formula $\Delta^{2}G$
-\end_inset
-
-.
- As shown in Fig
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Correlation-of-solvation"
-
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-(a), when PMV correction is not applied, the solvation free energy difference
- between MM/3D-RISM calculation and experimental result are is in a significant
- linear correlation with PMV.
- By referring to Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:Linear-correlation-Delta2G"
-
-\end_inset
-
-, the coefficient of determination from the linear fitting of the uncorrected
- results is 
-\begin_inset Formula $R^{2}=0.97$
-\end_inset
-
-, with the intercept value, which evaluates the average deviation between
- fitted and measured results, equal to 1.22
-\begin_inset space ~
-\end_inset
-
-kcal/mol.
- After applying the PMV correction, the linear correlation between 
-\begin_inset Formula $\Delta^{2}G$
-\end_inset
-
- with 
-\begin_inset Formula $\rho V$
-\end_inset
-
- is weakened, with 
-\begin_inset Formula $R^{2}=0.37$
-\end_inset
-
- while the intercept remains as 1.22
-\begin_inset space ~
-\end_inset
-
-kcal/mol.
- This indicates that the cavity formation of the solute is mainly responsible
- for the error of solvation free energy in 3D-RISM calculation.
- The remaining error noises in corrected results are partially due to the
- accuracy of the correction coefficient, since the fitted slope in the uncorrect
-ed results is 4.88, higher than the correction coefficient 4.22 which we derived
- from the solvent.
- 
 \begin_inset Float table
 wide true
 sideways false
@@ -2984,6 +2883,167 @@ status open
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Correlation between the calculated partial molar volume 
+\begin_inset Formula $V$
+\end_inset
+
+ scaled by solvent number density 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and the difference 
+\begin_inset Formula $\Delta^{2}G$
+\end_inset
+
+ (unit:kcal/mol) between the experiments and solvation free energy calculated
+ by 3D-RISM with different solute representations: a) MM, b) FED, c) QM
+ and d) SCF-QM.
+ The red solid square symbol stands for uncorrected results and the blue
+ solid circle for corrected results, both with the linear fitting line shown
+ for clarification.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Correlation-of-solvation"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename 3d-neutral.d/fig1.svg
+	width 85line%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The effect of the PMV correction could be confirmed from Fig
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+ and Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Linear-correlation-Delta2G"
+
+\end_inset
+
+, which shows the correlation between the calculated partial molar volume
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ which is scaled by solvent number density 
+\begin_inset Formula $\rho$
+\end_inset
+
+, and the difference between the experimental and 3D-RISM calculated solvation
+ free energy 
+\begin_inset Formula $\Delta^{2}G$
+\end_inset
+
+.
+ As shown in Fig
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(a), when PMV correction is not applied, the solvation free energy difference
+ between MM/3D-RISM calculation and experimental result are is in a significant
+ linear correlation with PMV.
+ By referring to Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Linear-correlation-Delta2G"
+
+\end_inset
+
+, the coefficient of determination from the linear fitting of the uncorrected
+ results is 
+\begin_inset Formula $R^{2}=0.97$
+\end_inset
+
+, with the intercept value, which evaluates the average deviation between
+ fitted and measured results, equal to 1.22
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ After applying the PMV correction, the linear correlation between 
+\begin_inset Formula $\Delta^{2}G$
+\end_inset
+
+ with 
+\begin_inset Formula $\rho V$
+\end_inset
+
+ is weakened, with 
+\begin_inset Formula $R^{2}=0.37$
+\end_inset
+
+ while the intercept remains as 1.22
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
+ This indicates that the cavity formation of the solute is mainly responsible
+ for the error of solvation free energy in 3D-RISM calculation.
+ The remaining error noises in corrected results are partially due to the
+ accuracy of the correction coefficient, since the fitted slope in the uncorrect
+ed results is 4.88, higher than the correction coefficient 4.22 which we derived
+ from the solvent.
+\end_layout
+
 \begin_layout Subsection
 FED/3D-RISM
 \end_layout
@@ -3061,6 +3121,48 @@ kcal/mol.
 
 kcal/mol.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Comparison of dipole moment of solute: a) in gas phase between MM with FED
+ model, and b) in aqueous phase between QM, SCF-QM with PCM model.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Dipole-moment"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename 3d-neutral.d/fig2.svg
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -3515,64 +3617,6 @@ kcal/mol, with the slope equal to 0.92 and
  of neutral solute in aqueous medium, should be examined carefully in relevant
  studies.
  
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Correlation between the calculated partial molar volume 
-\begin_inset Formula $V$
-\end_inset
-
- scaled by solvent number density 
-\begin_inset Formula $\rho$
-\end_inset
-
- and the difference 
-\begin_inset Formula $\Delta^{2}G$
-\end_inset
-
- (unit:kcal/mol) between the experiments and solvation free energy calculated
- by 3D-RISM with different solute representations: a) MM, b) FED, c) QM
- and d) SCF-QM.
- The red solid square symbol stands for uncorrected results and the blue
- solid circle for corrected results, both with the linear fitting line shown
- for clarification.
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Correlation-of-solvation"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename 3d-neutral.d/fig1.svg
-	width 100line%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -5644,52 +5688,6 @@ SCF-QM
 
 \end_inset
 
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Comparison of dipole moment of solute: a) in gas phase between MM with FED
- model, and b) in aqueous phase between QM, SCF-QM with PCM model.
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Dipole-moment"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename 3d-neutral.d/fig2.svg
-	width 100line%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
