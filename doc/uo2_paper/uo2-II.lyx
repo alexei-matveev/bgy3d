@@ -5797,8 +5797,25 @@ key "Farkas00"
 \end_inset
 
 .
- It was observed that most theoretical studies predict much faster water
- exchange than the available experimental data suggests 
+ It was observed that most theoretical studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vallet01,hagberg05,Frick09,Nichols08,Kerisit10"
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+ predict much faster water exchange than the available experimental data
+ suggests 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tiwari14"
@@ -5982,8 +5999,34 @@ reference "tab:pmf-extrema"
 \begin_inset Formula $^{\circ}$
 \end_inset
 
- to the uranyl axis; a hypothetical water exchange in the equatorial plane
- appears to be significantly hindered at room 
+ to the uranyl axis, 
+\color blue
+which is in good agreement with the result of 61.8
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+ from the transition state search at Hartree-Fock level of theory with water
+ solvent described by CPCM model
+\color inherit
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vallet01"
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ok?
+\end_layout
+
+\end_inset
+
+; a hypothetical water exchange in the equatorial plane appears to be significan
+tly hindered at room 
 \color blue
 temperature
 \color inherit
@@ -6880,6 +6923,45 @@ key "Matveev08"
 \end_inset
 
 .
+ 
+\color blue
+Here we only take into consideration of the 5--6 explicit water ligands
+ models since it has been thoroughly discussed in various theoretical studies
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tsushima07,Vallet01,Buehl06b,Rotzinger07,Tiwari14"
+
+\end_inset
+
+ that in the exchange process of aqueous 
+\color inherit
+[UO
+\begin_inset Formula $_{2}$
+\end_inset
+
+]
+\begin_inset Formula $^{2+}$
+\end_inset
+
+,
+\color blue
+ the associative mechanism is highly more favorable than the dissociative
+ mechanism which could be modeled by uranyl aqua complex with 4 to 5 explicit
+ water ligands.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\color blue
+ok?
+\end_layout
+
+\end_inset
+
+
+\color inherit
  For the gas phase uranyl the standard DFT predicts too soft a bending mode
  likely because of the self-interaction error for 
 \begin_inset Formula $f$
@@ -7086,11 +7168,18 @@ ok?
 
 \color inherit
  for the other two models employed here and in other works
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tiwari14,Kerisit13"
+
+\end_inset
+
+
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-maybe some refs?
+ok?
 \end_layout
 
 \end_inset
@@ -7220,27 +7309,7 @@ key "Farkas00"
 status open
 
 \begin_layout Plain Layout
-QM: 9.1 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal BL: shall we need to compare with
- other methods? E.g.
- 6.7
-\begin_inset space ~
-\end_inset
-
-kcal/mol in 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Buehl06b"
-
-\end_inset
-
-, values from other sources are also available in 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Tiwari14"
-
-\end_inset
-
- 
+QM: 9.1 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal 
 \end_layout
 
 \end_inset
@@ -7267,6 +7336,106 @@ reference "fig:free-energy-profiles"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+It should be noted that, water activation energy barrier computed by state-of-th
+e-art QM calculations are sensitive to the choice of reaction path, level
+ of theory and solvation models 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tiwari14"
+
+\end_inset
+
+, e.g.
+ Tsushima 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tsushima07"
+
+\end_inset
+
+reported the activation energy barrier of 10.1
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 4.8
+\begin_inset space ~
+\end_inset
+
+kcal/mol by considering the different intermediates at the B3LYP level together
+ with conductor-like polarizable continuum model (CPCM).
+ The latter value is close to the prediction of 4.5
+\begin_inset space ~
+\end_inset
+
+kcal/mol in an earlier study
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Vallet01"
+
+\end_inset
+
+, yet both are lower than the experimental result.
+
+\color inherit
+ 
+\color blue
+The comparison of PCM and self-consistent reaction field (SCRF) solvation
+ models is reported by Rotzinger 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rotzinger07"
+
+\end_inset
+
+ using the complete active space self-consistent field (CAS-SCF) technique,
+ with water associative energy barrier equal to 9.4
+\begin_inset space ~
+\end_inset
+
+kcal/mol and 6.5
+\begin_inset space ~
+\end_inset
+
+kcal/mol respectively.
+ Water exchange energy barrier based on the thermodynamic sampling is also
+ reported by Bühl et.al 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Buehl06b"
+
+\end_inset
+
+ using 
+\shape italic
+ab initio
+\shape default
+ Molecular Dynamics (AIMD) simulation, their result 6.7
+\begin_inset space ~
+\end_inset
+
+kcal/mol is however lower than experiments and QM+RISM value in this study.
+ The good agreement between QM+RISM result with experiment we reported here
+ indicates that RISM model provides an alternative way to investigate the
+ water exchange process in aqueous uranyl, with moderate accuracy and affordable
+ cost.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\color blue
+ok?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
