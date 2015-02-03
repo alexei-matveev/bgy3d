@@ -373,7 +373,7 @@ key "Kovalenko99"
 
  and 
 \emph on
-ab-initio
+ab initio
 \emph default
  calculations 
 \begin_inset CommandInset citation
@@ -3766,7 +3766,7 @@ reference "fig:spatial-distribution-4w"
 \begin_inset space ~
 \end_inset
 
-Five-coordinated structure with sixth water in the second shell.
+Five-coordinated structure with the sixth water in the second shell.
  
 \begin_inset Formula $^{d}$
 \end_inset
@@ -5804,16 +5804,6 @@ key "Vallet01,hagberg05,Frick09,Nichols08,Kerisit10"
 
 \end_inset
 
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  predict much faster water exchange than the available experimental data
  suggests 
 \begin_inset CommandInset citation
@@ -5824,11 +5814,7 @@ key "Tiwari14"
 
 .
  A simple way to obtain an estimate of the activation energy for the water
- exchange may 
-\color blue
-be
-\color inherit
- an inspection of the U--OW PMF, 
+ exchange may be an inspection of the U--OW PMF, 
 \begin_inset Formula $W(r)$
 \end_inset
 
@@ -5861,21 +5847,7 @@ reference "tab:pmf-extrema"
  minimum and the barrier top ranges from 3.4 to 5.2 kcal/mol increasing with
  the closure order.
  The number derived in a similar fashion from the MD RDF is 4.4 kcal/mol.
- The values are comparable 
-\color blue
-to
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
- the 5
+ The values are comparable to the 5
 \begin_inset space ~
 \end_inset
 
@@ -5906,23 +5878,8 @@ pm according to the radial PMF profiles.
 \end_inset
 
  provides no information on the collective behavior of the water ligands
- during the water exchange, 
-\color blue
-thus it offers
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color blue
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
- limited insight into possible mechanisms.
+ during the water exchange, thus it offers limited insight into possible
+ mechanisms.
  Also, the RISM model for bare uranyl assumes the rigid linear geometry
  of the species whereas it was shown that the uranyl bending essentially
  facilitates the water exchange 
@@ -5999,38 +5956,22 @@ reference "tab:pmf-extrema"
 \begin_inset Formula $^{\circ}$
 \end_inset
 
- to the uranyl axis, 
-\color blue
-which is in good agreement with the result of 61.8
+ to the uranyl axis.
+ This value is in good agreement with the result of 61.8
 \begin_inset Formula $^{\circ}$
 \end_inset
 
- from the transition state search at Hartree-Fock level of theory with water
- solvent described by CPCM model
-\color inherit
- 
+ from the transition state search at Hartree--Fock level of theory with
+ water solvent described by CPCM model 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Vallet01"
 
 \end_inset
 
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
-; a hypothetical water exchange in the equatorial plane appears to be significan
-tly hindered at room 
-\color blue
-temperature
-\color inherit
 .
+ A hypothetical water exchange in the equatorial plane appears to be significant
+ly hindered at room temperature.
  The PMF values at the location of the saddle point and at the equatorial
  minimum are 1.4
 \begin_inset space ~
@@ -6049,11 +5990,8 @@ kcal/mol, respectively (PSE1).
 \begin_inset space ~
 \end_inset
 
-kcal/mol which is only slightly less 
-\color blue
-than
-\color inherit
- the estimate from the radial PMF, Table
+kcal/mol which is only slightly less than the estimate from the radial PMF,
+ Table
 \begin_inset space ~
 \end_inset
 
@@ -6792,11 +6730,8 @@ name "fig:free-energy-profiles"
 \begin_layout Standard
 To investigate this collective behavior we need to treat the first solvation
  shell and the incoming water molecule explicitly and also employ a flexible
- uranyl 
-\color blue
-model
-\color inherit
- as it was shown that the uranyl bending may affect the exchange rate 
+ uranyl model as it was shown that the uranyl bending may affect the exchange
+ rate 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tiwari14"
@@ -6811,11 +6746,7 @@ key "Tiwari14"
 \end_inset
 
 (U--O).
- The force field 
-\color blue
-here referred
-\color inherit
- to as 
+ The force field here referred to as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6863,25 +6794,26 @@ cm
 \begin_inset Formula $^{-1}$
 \end_inset
 
- and a somewhat too long
+ and a somewhat too long a uranyl bond 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
-extra 
+sic! E.g.
+ 
 \begin_inset Quotes eld
 \end_inset
 
-a
+too long a time
 \begin_inset Quotes erd
 \end_inset
 
-
+ 
 \end_layout
 
 \end_inset
 
- uranyl bond 
+ 
 \begin_inset Formula $d_{0}$
 \end_inset
 
@@ -6923,45 +6855,6 @@ key "Matveev08"
 \end_inset
 
 .
- 
-\color blue
-Here we only take into consideration of the 5--6 explicit water ligands
- models since it has been thoroughly discussed in various theoretical studies
- 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Tsushima07,Vallet01,Buehl06b,Rotzinger07,Tiwari14"
-
-\end_inset
-
- that in the exchange process of aqueous 
-\color inherit
-[UO
-\begin_inset Formula $_{2}$
-\end_inset
-
-]
-\begin_inset Formula $^{2+}$
-\end_inset
-
-,
-\color blue
- the associative mechanism is highly more favorable than the dissociative
- mechanism which could be modeled by uranyl aqua complex with 4 to 5 explicit
- water ligands.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color blue
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
  For the gas phase uranyl the standard DFT predicts too soft a bending mode
  likely because of the self-interaction error for 
 \begin_inset Formula $f$
@@ -7058,26 +6951,8 @@ soft
 \begin_inset space ~
 \end_inset
 
-pm longer than 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-extra 
-\begin_inset Quotes eld
-\end_inset
-
-than
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
- the distances to the other four water ligands; the deviations from the
- 
+pm longer than the distances to the other four water ligands; the deviations
+ from the 
 \begin_inset Formula $D_{3\text{d}}$
 \end_inset
 
@@ -7151,43 +7026,18 @@ pm which is more than 6
 \begin_inset space ~
 \end_inset
 
-pm longer 
-\color blue
-than those
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color blue
-ok?
-\end_layout
-
-\end_inset
-
-
-\color inherit
- for the other two models employed here and in other works
+pm longer than those of the other models employed here and in other works
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tiwari14,Kerisit13"
 
 \end_inset
 
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-ok?
-\end_layout
-
-\end_inset
-
  and should be considered a deficiency of the parametrization.
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Distances QM: 303/249/179 pm, Soft: 309/241/180 pm, Hard: 280/246/186 pm
@@ -7230,7 +7080,20 @@ kcal/mol less stable than the five-coordinated structure with extra water
  in the second shell, respectively.
  The presence of such a six-coordinated intermediate suggests an associative
  two-step water exchange mechanism as one of the possibilities.
- The collective behavior of the uranyl aqua ligands is unspectacular and
+ This is consistent with the findings of the other theoretical studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tsushima07,Vallet01,Buehl06b,Rotzinger07,Tiwari14"
+
+\end_inset
+
+ suggesting that the associative mechanism is more favorable than the dissociati
+ve mechanism.
+ 
+\end_layout
+
+\begin_layout Standard
+The collective behavior of the uranyl aqua ligands is unspectacular and
  can be described as a redistribution in the torus-shaped first solvation
  shell roughly corresponding to the low PMF region, cp.
 \begin_inset space ~
@@ -7306,7 +7169,7 @@ key "Farkas00"
 .
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 QM: 9.1 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal 
@@ -7314,13 +7177,10 @@ QM: 9.1 kcal, Hard: 4.4 kcal, Soft: 2.2 kcal
 
 \end_inset
 
- The location and orientation of the second-shell explicit water relative
- to the two explicit aqua ligands of uranyl 
-\color blue
-which are
-\color inherit
- connected by hydrogen bonds suggests that the force field models may slightly
- underestimate the strength and directional nature of the hydrogen bonds.
+ The location and orientation of the second-shell explicit water which is
+ connected by hydrogen bonds to the two explicit aqua ligands of uranyl
+ suggests that the force field models may slightly underestimate the strength
+ and directional nature of the hydrogen bonds.
  This may explain the low water exchange activation energy and the stability
  of the six-coordinated metastable state relative to the structure with
  an explicit water in the second shell as predicted by the force field models,
@@ -7339,18 +7199,16 @@ reference "fig:free-energy-profiles"
 \end_layout
 
 \begin_layout Standard
-
-\color blue
-It should be noted that, water activation energy barrier computed by state-of-th
-e-art QM calculations are sensitive to the choice of reaction path, level
- of theory and solvation models 
+It should be noted that water activation energy barrier computed by state
+ of the art QM is sensitive to the choice of reaction path, level of theory,
+ and solvation model 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tiwari14"
 
 \end_inset
 
-, e.g.
+.
  Tsushima 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -7358,7 +7216,7 @@ key "Tsushima07"
 
 \end_inset
 
-reported the activation energy barrier of 10.1
+ reported the activation energy barriers of 10.1
 \begin_inset space ~
 \end_inset
 
@@ -7366,13 +7224,14 @@ kcal/mol and 4.8
 \begin_inset space ~
 \end_inset
 
-kcal/mol by considering the different intermediates at the B3LYP level together
- with conductor-like polarizable continuum model (CPCM).
+kcal/mol at the B3LYP level with the conductor-like polarizable continuum
+ model (CPCM) by considering the terminal states with one and two hydrogen
+ bonds, respectively.
  The latter value is close to the prediction of 4.5
 \begin_inset space ~
 \end_inset
 
-kcal/mol in an earlier study
+kcal/mol in an earlier study 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Vallet01"
@@ -7380,20 +7239,17 @@ key "Vallet01"
 \end_inset
 
 , yet both are lower than the experimental result.
-
-\color inherit
- 
-\color blue
-The comparison of PCM and self-consistent reaction field (SCRF) solvation
- models is reported by Rotzinger 
+ The comparison of PCM and a spherical cavity self-consistent reaction field
+ (SCRF) solvation models is reported by Rotzinger 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Rotzinger07"
 
 \end_inset
 
- using the complete active space self-consistent field (CAS-SCF) technique,
- with water associative energy barrier equal to 9.4
+ using the complete active space self-consistent field (CAS SCF) technique.
+ The corresponding energy barriers of the associative pathway are equal
+ to 9.4
 \begin_inset space ~
 \end_inset
 
@@ -7401,41 +7257,35 @@ kcal/mol and 6.5
 \begin_inset space ~
 \end_inset
 
-kcal/mol respectively.
+kcal/mol, respectively.
  Water exchange energy barrier based on the thermodynamic sampling is also
- reported by Bühl et.al 
+ estimated by Bühl et.
+\begin_inset space \space{}
+\end_inset
+
+al 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Buehl06b"
 
 \end_inset
 
- using 
+ using the 
 \shape italic
 ab initio
 \shape default
- Molecular Dynamics (AIMD) simulation, their result 6.7
+ molecular dynamics (AIMD).
+ Their result of 6.7
 \begin_inset space ~
 \end_inset
 
-kcal/mol is however lower than experiments and QM+RISM value in this study.
- The good agreement between QM+RISM result with experiment we reported here
- indicates that RISM model provides an alternative way to investigate the
- water exchange process in aqueous uranyl, with moderate accuracy and affordable
- cost.
+kcal/mol is however lower than the experiment and the QM+RISM value in this
+ study.
+ The good agreement of QM+RISM result with the experiment and the best of
+ other theoretical models indicates that the RISM model provides a viable
+ alternative solvation model for uranyl aqua complexes in hybrid calculations
+ and offers a reasonable accuracy at an affordable cost.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\color blue
-ok?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -7465,8 +7315,12 @@ We presented a parallelized implementation of the 3D RISM for charged species
 
 \begin_layout Standard
 A hybrid approach employing two very different models of ion--water interactions
-, ab-initio and force field, relies heavily on the consistence of the two
- interaction models.
+, 
+\emph on
+ab initio
+\emph default
+ and force field, relies heavily on the consistence of the two interaction
+ models.
  Use of the KL2 force field featuring high charges of interacting sites
  of uranyl and selected in our previous study as the one predicting the
  highest uranyl solvation energy leads to a substitution of the explicit
