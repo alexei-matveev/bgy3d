@@ -4880,7 +4880,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.89
+0.69
 \end_layout
 
 \end_inset
@@ -4892,7 +4892,7 @@ QM
 \begin_inset Formula $-$
 \end_inset
 
-3.89
+0.12
 \end_layout
 
 \end_inset
@@ -4901,7 +4901,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.25
+0.49
 \end_layout
 
 \end_inset
@@ -4910,7 +4910,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.27
+0.55
 \end_layout
 
 \end_inset
@@ -5574,33 +5574,29 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 kcal/mol.
- The smaller intercept value comparing to MM and FED is by accidentally
- offset by the error noise caused by the solute electron relaxation, because
- we find that when introducing of PMV correction, the linearity diminished
- with the slope of fitting line equal to 0.89, 
+ With PMV correction applied, the linearity diminished with the slope of
+ fitting line equal to 0.69, 
 \begin_inset Formula $R^{2}$
 \end_inset
 
- = 0.23 and intercept equal to 
+ = 0.49, yet the intercept remained as 
 \begin_inset Formula $-$
 \end_inset
 
-3.89
+0.12
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
- The smaller 
-\begin_inset Formula $R^{2}$
+ The average deviation between 
+\begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- and the increased intercept indicate the unordered noises in QM results
- are stronger, as could be easily seen from the scatter plot.
- The QM/3D-RISM results demonstrates that, careful attention must be paid
- when applying empirical fitting approach to correct the solvation free
- energy calculation in RISM method, because the error caused by solute electron
- relaxation which is not necessarily correlated to PMV, could be ignored
- in the fitting process.
+ and fitted value here reduced to 0.55
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
 \end_layout
 
 \begin_layout Subsection
