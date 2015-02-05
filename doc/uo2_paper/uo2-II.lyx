@@ -136,18 +136,8 @@ Comp.
  The water exchange activation barrier obtained in a hybrid approach combining
  the quantum mechanical description of the uranyl interaction within the
  first solvation shell and the RISM model for the bulk solvent is in close
- agreement with the experimental estimate.
+ agreement with the experimental and the best theoretical estimates.
  
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-SK: relation to other calculations?
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Keywords
@@ -173,7 +163,7 @@ key "book:Morss06,book:Grenthe92,Silva95"
 \end_inset
 
 .
- Quantum mechanics (QM) and classical molecular mechanics (MM) simulations,
+ Quantum mechanics (QM) and classical molecular mechanics (MM) simulations
  provide the two complimentary ways to address microscopic structure and
  energetics of solvated uranyl species.
  Till now, the most popular strategy to combine the accuracy of QM methods
@@ -230,7 +220,7 @@ y lack the precise reproducibility
 status open
 
 \begin_layout Plain Layout
-SK: lack the reproducibility? AM: +stochastic, +precise, + analytic
+SK: lack the reproducibility? AM: +stochastic, +precise, +analytic
 \end_layout
 
 \end_inset
@@ -349,7 +339,8 @@ key "Perkyns10"
 \end_inset
 
 .
- 
+ In this work we present a generalization of the exact re-summation technique
+ for arbitrary solute charge densities.
 \end_layout
 
 \begin_layout Standard
@@ -805,7 +796,7 @@ We used pair-wise interactions between solute and solvent sites
 \end_inset
 
  is the inverse temperature.
- Each putential 
+ Each potential 
 \begin_inset Formula $u_{i\alpha}$
 \end_inset
 
@@ -1529,7 +1520,7 @@ reference "eq:tau"
 \begin_inset space ~
 \end_inset
 
-Eq.
+Eqs.
 \begin_inset space ~
 \end_inset
 
@@ -1566,7 +1557,7 @@ key "Berendsen87"
 
 \end_inset
 
-, modified as suggested by Pettitt and Rosky 
+, modified as suggested by Pettitt and Rossky 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pettitt82"
@@ -1614,7 +1605,7 @@ key "Luchko10"
 
 \end_inset
 
- in order to compare with the published results.
+ in order to compare with published results.
  The uranyl-water interaction parameters were derived from the second model
  proposed by Kerisit and Liu to strengthen the uranyl–water interaction
  with the uranium charge of 3.5
@@ -2130,7 +2121,7 @@ I
 \begin_inset Text
 
 \begin_layout Plain Layout
-KH
+3D KH
 \end_layout
 
 \end_inset
@@ -2213,7 +2204,7 @@ KH
 \begin_inset Text
 
 \begin_layout Plain Layout
-KH
+1D KH
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -2300,7 +2291,7 @@ KH
 \begin_inset Text
 
 \begin_layout Plain Layout
-HNC
+3D HNC
 \end_layout
 
 \end_inset
@@ -2383,7 +2374,7 @@ HNC
 \begin_inset Text
 
 \begin_layout Plain Layout
-HNC
+1D HNC
 \begin_inset Formula $^{b}$
 \end_inset
 
@@ -2706,7 +2697,7 @@ Energies in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-1D RSIM from Ref.
+Ref.
 \begin_inset space ~
 \end_inset
 
@@ -5909,7 +5900,7 @@ key "Tiwari14"
 , but significantly lower than the experimental estimate.
  The transition between the first- and second solvation shells happens at
  U--OW separations 
-\begin_inset Formula $r_{b}=309-324$
+\begin_inset Formula $r_{\text{b}}=309-324$
 \end_inset
 
 
