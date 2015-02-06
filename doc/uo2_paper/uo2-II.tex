@@ -1,8 +1,7 @@
 %% LyX 2.0.6 created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing.
-\documentclass[english,twocolumn,showkeys,superscriptaddress]{revtex4}
+\documentclass[english,5p,sort&compress,times]{elsarticle}
 \usepackage[T1]{fontenc}
-\setcounter{secnumdepth}{3}
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{graphicx}
@@ -13,26 +12,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 %% Because html converters don't know tabularnewline
 \providecommand{\tabularnewline}{\\}
+%% A simple dot to overcome graphicx limitations
+\newcommand{\lyxdot}{.}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
-\@ifundefined{textcolor}{}
-{%
- \definecolor{BLACK}{gray}{0}
- \definecolor{WHITE}{gray}{1}
- \definecolor{RED}{rgb}{1,0,0}
- \definecolor{GREEN}{rgb}{0,1,0}
- \definecolor{BLUE}{rgb}{0,0,1}
- \definecolor{CYAN}{cmyk}{1,0,0,0}
- \definecolor{MAGENTA}{cmyk}{0,1,0,0}
- \definecolor{YELLOW}{cmyk}{0,0,1,0}
-}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
-\usepackage{mathptmx}
-\usepackage{times}
+%\usepackage{mathptmx}
+%\usepackage{times}
+%\def\thetable{\arabic{table}}
 \usepackage{microtype}
-\def\thetable{\arabic{table}}
+\journal{Computational and Theoretical Chemistry}
 
 \makeatother
 
@@ -43,27 +32,33 @@
 model}
 
 
-\author{Alexei Matveev}
-
-\email{alexei.matveev@gmail.com}
-
-\selectlanguage{english}%
-
-\author{Bo Li}
+\author[tum]{Alexei Matveev\corref{corr}}
 
 
-\affiliation{Department Chemie, Technische Universität München, 85747 Garching,
+\ead{alexei.matveev@gmail.com}
+
+
+\author[tum]{Bo Li}
+
+
+\ead{fixme@abc.com}
+
+
+\author[tum,crc]{Notker Rösch}
+
+
+\ead{fixme@xyz.com}
+
+
+\cortext[corr]{Corresponding author}
+
+
+\address[tum]{Department Chemie, Technische Universität München, 85747 Garching,
 Germany}
 
 
-\author{Notker Rösch}
-
-
-\affiliation{Department Chemie and Catalysis Research Center, Technische Universität
-München, 85747 Garching, Germany}
-
-
-\date{Jan 2015}
+\address[crc]{Catalysis Research Center, Technische Universität München, 85747
+Garching, Germany}
 \begin{abstract}
 We report an implementation of the three-dimensional reference interaction
 site model (3D RISM) specifically describing the treatment of the
@@ -84,11 +79,10 @@ of the closure order. The water exchange activation barrier obtained
 in a hybrid approach combining the quantum mechanical description
 of the uranyl interaction within the first solvation shell and the
 RISM model for the bulk solvent is in close agreement with the experimental
-and the best theoretical estimates. 
-\end{abstract}
-
-\keywords{Reference interaction site model, aqueous solution, uranyl, solvation}
-
+and the best theoretical estimates. \end{abstract}
+\begin{keyword}
+Reference interaction site model, uranyl, aqueous solution
+\end{keyword}
 \maketitle
 
 \section{Introduction}
@@ -97,7 +91,7 @@ Thermodynamic and structural properties of the uranyl(VI) cation,
 UO$_{2}^{2+}$, the most common uranium species in aqueous solution
 are crucial for understanding its environmental chemistry as well
 as chemical processes in radioactive waste disposal and recycling
-of used nuclear fuel \cite{book:Morss06,book:Grenthe92,Silva95}.
+of used nuclear fuel \citep{book:Morss06,book:Grenthe92,Silva95}.
 Quantum mechanics (QM) and classical molecular mechanics (MM) simulations
 provide the two complimentary ways to address microscopic structure
 and energetics of solvated uranyl species. Till now, the most popular
@@ -106,59 +100,60 @@ of the statistical solvent description is to apply a polarizable continuum
 model (PCM) to represent the effective electrostatic field of the
 solvent, usually employed in combination with phenomenological corrections
 for dispersion-repulsion interactions and cavity formation energy
-using empiric parameters \cite{Tomasi05,Fuchs02}. The state of the
+using empiric parameters \citep{Tomasi05,Fuchs02}. The state of the
 art PCM is owing its success in part to the conductor-like screening
-model (COSMO) of electrostatic interactions \cite{Klamt95} and has
-successfully been applied in various studies of uranyl complexes \cite{Fuchs02,Moskaleva04,Cao05,Shamov05,Gutowski06}.
+model (COSMO) of electrostatic interactions \citep{Klamt95} and has
+successfully been applied in various studies of uranyl complexes \citep{Fuchs02,Moskaleva04,Cao05,Shamov05,Gutowski06}.
 On the other hand, there is a significant effort to improve the empirical
 model potentials for MM simulations, such as molecular dynamics (MD)
 or Monte-Carlo (MC) methods, that yield the most explicit statistical
-solvent description \cite{Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Kerisit13,Tiwari14}.
-Though several studies \cite{Gordon00,hagberg05,Frick09,Tirler13}
+solvent description \citep{Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Kerisit13,Tiwari14}.
+Though several studies \citep{Gordon00,hagberg05,Frick09,Tirler13}
 attempt to combine QM and stochastic MM models such combinations will
 inevitably lack the precise reproducibility  and efficiency of analytic
 continuum models due to statistical sampling techniques. Yet more
-demanding QM dynamic simulations \cite{Buehl05,Buehl06,Buehl11,Nichols08}
+demanding QM dynamic simulations \citep{Buehl05,Buehl06,Buehl11,Nichols08}
 are restricted to comparably small numbers of solvent molecules. 
 
-Meanwhile, the integral equation theories of molecular liquids \cite{book:Hirata03,book:Hansen06},
+Meanwhile, the integral equation theories of molecular liquids \citep{book:Hirata03,book:Hansen06},
 may provide sufficient accuracy at an affordable cost for simulating
 chemical processes in solution by employing standard numerical methods
 on contemporary hardware. Two approaches of this type are the reference
-interaction site model (RISM) \cite{Chandler72,Hirata81,Hirata82,Kinoshita97}
-and its three-dimensional generalization (3D RISM) \cite{Beglov95,Kovalenko98}
+interaction site model (RISM) \citep{Chandler72,Hirata81,Hirata82,Kinoshita97}
+and its three-dimensional generalization (3D RISM) \citep{Beglov95,Kovalenko98}
 which provide the solvent structure in form of site-site radial distribution
 functions (RDFs) or three-dimensional distribution functions of solvent
 sites in an external (solute) field, respectively. Both 1D and 3D
 theories provide variational expressions for the solvation energy
 in the form of the excess chemical potential for several closure types
-\cite{Singer85,Kast08} and, hence, intuitive expressions for the
-first derivatives. The dielectrically consistent RISM (DRISM) \cite{Perkyns92}
+\citep{Singer85,Kast08} and, hence, intuitive expressions for the
+first derivatives. The dielectrically consistent RISM (DRISM) \citep{Perkyns92}
 was designed to compensate the error of the gas-like dielectric response
-of RISM for electrolytes and ionic solutes \cite{Perkyns94,Chiodo07,Chuev08,Joung13}.
+of RISM for electrolytes and ionic solutes \citep{Perkyns94,Chiodo07,Chuev08,Joung13}.
 
 A correct handling of the electrostatic field of a charge distribution
 requires additional care when periodic boundary conditions are employed
-to simulate finite systems \cite{Makov95}. It was understood early
+to simulate finite systems \citep{Makov95}. It was understood early
 that the long-range asymptotes of the radial correlation functions
 induced by Coulomb interactions in RISM need a separate treatment
-as well \cite{Ng74}. For 3D RISM the few practical approaches include
-the background charge correction technique \cite{Kovalenko00b}, monopole
-correction \cite{Kloss08b}, and an exact re-summation for a superposition
-of gaussian charges \cite{Perkyns10}. In this work we present a generalization
-of the exact re-summation technique for arbitrary solute charge densities.
+as well \citep{Ng74}. For 3D RISM the few practical approaches include
+the background charge correction technique \citep{Kovalenko00b},
+monopole correction \citep{Kloss08b}, and an exact re-summation for
+a superposition of gaussian charges \citep{Perkyns10}. In this work
+we present a generalization of the exact re-summation technique for
+arbitrary solute charge densities.
 
 The integral equation theory has been combined with Hartree--Fock
 electronic structure theory for self-consistent field calculations
 (RISM SCF) in the pioneering work of Ten-no, Hirata, and Kato and
 has been first applied to formaldehyde and carbonyl compounds in water
-\cite{Tenno93,Tenno94}. An extension to 3D RISM SCF was developed
-for density functional theory (DFT) \cite{Kovalenko99} and \emph{ab
-initio} calculations \cite{Kloss08}. The analytical gradients for
-the self-consistent combination of 3D RISM and DFT \cite{Gusarov06}
+\citep{Tenno93,Tenno94}. An extension to 3D RISM SCF was developed
+for density functional theory (DFT) \citep{Kovalenko99} and \emph{ab
+initio} calculations \citep{Kloss08}. The analytical gradients for
+the self-consistent combination of 3D RISM and DFT \citep{Gusarov06}
 simplify explorations of free energy landscapes. Some of the recent
 developments of hybrid approaches combining integral equation theories
-and quantum chemistry are discussed in the recent review by Sato \cite{Sato13}.
+and quantum chemistry are discussed in the recent review by Sato \citep{Sato13}.
 
 
 In this work, we first describe the implementation of the 3D RISM
@@ -188,7 +183,7 @@ are thus assumed to be pairwise, which in this formulation excludes
 \emph{polarizable} solutes. Further, the interactions are usually
 approximated by superposition of pairwise site-site contributions.
 The 3D RISM equations operating with site-specific distributions can
-be written in the following form \cite{book:Hirata03}:
+be written in the following form \citep{book:Hirata03}:
 
 \begin{equation}
 \begin{cases}
@@ -208,11 +203,11 @@ The solvent susceptibility $\chi$ in the first of the three Eqs.~\ref{eq:rsim-h-
 is represented by its (square symmetric) matrix $\chi_{\alpha\gamma}(r)$
 derived from the radial site-site correlation functions of the pure
 solvent in 1D RISM equations for a specific temperature and solvent
-number density $\rho$. \cite{book:Hirata03}. The star denotes the
+number density $\rho$. \citep{book:Hirata03}. The star denotes the
 convolution integral and the sum over corresponding matrix indices.
 For that reason it is convenient to represent the solvent susceptibility
 by its (dimensionless) Fourier image $\tilde{\chi}_{\alpha\gamma}(k)$
-\cite{Chandler72,book:Hirata03}. The solvent susceptibility as a
+\citep{Chandler72,book:Hirata03}. The solvent susceptibility as a
 function of either $r$ or $k$ is spherically symmetric by construction.
 
 The second of the Eqs.~\ref{eq:rsim-h-c-t} introduces the indirect
@@ -227,7 +222,7 @@ potentials $v$ are measured in units of temperature and thus are
 also dimensionless. For the purposes of this work we have chosen a
 very specific, though popular, form of the closure which happens to
 be a relation between $h$ and the sum $x=-v+t$ sometimes referred
-to as a renormalized indirect correlation \cite{Kast08}:
+to as a renormalized indirect correlation \citep{Kast08}:
 \begin{equation}
 f(x)=\begin{cases}
 \mathrm{e}^{x}-1 & x\le0\\
@@ -237,10 +232,10 @@ f(x)=\begin{cases}
 In the limit of $n\to\infty$ one recovers the hypernetted chain (HNC)
 closure. Another popular closure is obtained for $n=1$. It was proposed
 by Kovalenko and Hirata (KH) for improving the numerical stability
-of the equations \cite{Kovalenko99}. Higher order closures with $n>1$
-are referred to as partial series expansion closures of order $n$
-(PSE$n$). For consistency, we will also refer to the KH closure as
-PSE1 in this work.
+of the equations \citep{Kovalenko99}. Higher order closures with
+$n>1$ are referred to as partial series expansion closures of order
+$n$ (PSE$n$). For consistency, we will also refer to the KH closure
+as PSE1 in this work.
 
 We used pair-wise interactions between solute and solvent sites $i$
 and $\alpha$ to define the solute field: $v_{\alpha}(\vec{r})=\beta\sum_{i}u_{i\alpha}(|\vec{r}-\vec{r}_{i}|)$
@@ -251,7 +246,7 @@ from the regular long-range $f_{\text{CL}}(r)=\mathrm{erf}(r)/r$
 part, and a Lennard--Jones (LJ) type potential, $u_{i\alpha}^{\text{LJ}}(r)=\epsilon_{i\alpha}f_{\text{LJ}}(r/\sigma_{i\alpha})$
 with a LJ form $f_{\text{LJ}}(r)=4(r^{-12}-r^{-6})$. Parameters of
 the pair interactions were derived from site parameters using the
-Lorentz--Berthelot rules \cite{book:Hirata03}. The Ewald range parameter
+Lorentz--Berthelot rules \citep{book:Hirata03}. The Ewald range parameter
 $a=1.2$~Å$^{-1}$ is common for all site pairs. Further, to circumvent
 numerical problems with singularities the primitive forms $f_{\text{CS}}(r)$
 and $f_{\text{LJ}}(r)$ were regularized by substituting them with
@@ -265,11 +260,11 @@ in this work.
 
 The analytical expression for the excess chemical potential $\mu$
 of an unstructured solute and the HNC closure has been derived by
-Singer and Chandler (here in temperature units) \cite{Singer85}:
+Singer and Chandler (here in temperature units) \citep{Singer85}:
 \begin{equation}
 \mu_{\text{HNC}}=\rho\int d^{3}r\sum_{\alpha}\left[h_{\alpha}^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right].\label{eq:chem-pot-hnc}
 \end{equation}
-A modification for the KH closure \cite{Kovalenko99} and a generalization
+A modification for the KH closure \citep{Kovalenko99} and a generalization
 for the arbitrary closure of the form $h=f(x)$ with $x=-v+t$ are
 available: 
 \begin{equation}
@@ -277,14 +272,14 @@ available:
 \end{equation}
 with $\phi(x)=f(x)-x-\int_{0}^{x}f(y)dy$ having particularly a simple
 form for the PSE$n$ closures: $\phi_{n}(x)=-x^{n+1}/(n+1)!$ for
-$x>0$ and zero otherwise \cite{Kast08}. In the case of the KH (PSE1)
+$x>0$ and zero otherwise \citep{Kast08}. In the case of the KH (PSE1)
 closure the additional term $-x^{2}/2$ cancels the $h^{2}/2$ term
 of the HNC integrand, Eq.~\ref{eq:chem-pot-hnc}, in the regions
 where $x=h>0$. 
 
 The analytical expression for the excess chemical potential is a path-independent
 integral of the work required to ``switch on'' the external (solute)
-field $v$ \cite{Singer85,Kast08}. This property leads to straightforward
+field $v$ \citep{Singer85,Kast08}. This property leads to straightforward
 expressions for derivatives of the chemical potential with respect
 to parameters affecting the external field, such as the location of
 solute sites. Such a derivative is an expectation value of the corresponding
@@ -298,7 +293,7 @@ G[n_{\text{e}},s]=E[n_{\text{e}},s]+\mu(s),
 where $E[n_{\text{e}},s]$ is the solute internal energy depending
 on the solutes' geometric degrees of freedom $s$ and, in the case
 of a QM solute, also on the electronic density $n_{\text{e}}$, but
-not on the solvent site distribution functions $h$ \cite{Bo15}. 
+not on the solvent site distribution functions $h$ \citep{Bo15}. 
 
 The uranyl solvation energy is then estimated as\textcolor{green}{{}
 }
@@ -314,9 +309,9 @@ Indeed, in a gedankenexperiment the difference $G[(\text{H}_{2}\text{O})_{n}]-nG
 for the above definition of $G$ applied to water droplets asymptotically
 approaches $n(\bar{E}[\text{H}_{2}\text{O}]-G[\text{H}_{2}\text{O}])$
 where $\bar{E}$ is the average configurational energy of a water
-molecule which is about $-$9.9~kcal/mol \cite{Berendsen87,Mahoney00}
+molecule which is about $-$9.9~kcal/mol \citep{Berendsen87,Mahoney00}
 to be compared to the solvation energy of $-$6.3~kcal/mol derived
-from the ratio of the equilibrium vapor/liquid concentrations \cite{Bridgeman64}.
+from the ratio of the equilibrium vapor/liquid concentrations \citep{Bridgeman64}.
 
 
 \subsection{Numerical solution of 3D RISM equations}
@@ -327,12 +322,12 @@ and $c(t)=f(-v+t)-t$ as derived from the non-linear equation system,
 Eqs.~\ref{eq:rsim-h-c-t}, is bound to diverge for all but the simplest
 cases. To overcome the divergence problem we solve the reduced non-linear
 problem $F[t]=T[t]-t=0$ using the Newton--Krylov non-linear solver
-\cite{petsc-user-ref} with the analytic matrix-free Jacobian, $J[t]=\delta F/\delta t$,
+\citep{petsc-user-ref} with the analytic matrix-free Jacobian, $J[t]=\delta F/\delta t$,
 occasionally preceded by a few Picard iterations.
 
 The long-range field of a charged solute requires a special treatment
 in the 3D case. All of the practical approaches, including the Ng
-scheme \cite{Ng74}, separate the smooth asymptote $v_{\text{L}}$
+scheme \citep{Ng74}, separate the smooth asymptote $v_{\text{L}}$
 of the site specific potential off the indirect correlation $t$ as
 well as $-v_{\text{L}}$ off the direct correlation $c$ to operate
 primarily with the short range counterparts $v_{\text{S}}$ , $c_{\text{S}}$,
@@ -369,13 +364,13 @@ solvent susceptibility is regular
 \tilde{\chi}_{\alpha\gamma}(k)\sim\rho\kappa+\frac{1}{2}d_{\alpha\gamma}k^{2}
 \end{equation}
 with the limit for $k\to0$ being proportional to the solvent compressibility
-$\kappa$ (here in temperature units) \cite{book:Hansen06}. More
+$\kappa$ (here in temperature units) \citep{book:Hansen06}. More
 importantly, this limit is the same for all site pairs $\alpha$ and
 $\gamma$. Though not enforced, this property is obeyed in practical
 calculations with reasonable accuracy. The second, $o(k^{2})$, term
 is site pair specific and is in particular responsible for the dielectric
 response of the solvent --- it is this term that is addressed by the
-dielectric correction of the DRISM approach \cite{Perkyns92,Cummings81,Kovalenko00b}.
+dielectric correction of the DRISM approach \citep{Perkyns92,Cummings81,Kovalenko00b}.
 The result of the convolution, 
 \begin{equation}
 \tilde{\tau}_{\alpha}(\vec{k})=\tilde{n}(\vec{k})\left[\tilde{\varphi}(k)\sum_{\gamma}\tilde{\chi}_{\alpha\gamma}(k)q_{\gamma}\right]\sim2\pi Q\sum_{\gamma}d_{\alpha\gamma}q_{\gamma}\label{eq:tau}
@@ -392,19 +387,19 @@ $\tilde{\chi}_{\alpha\gamma}(k)$ itself. In the 1D case our deliberate
 choice of the self-inverse discrete sine transform of type IV (DST-IV)
 as a basic operation eliminates the need to treat the singularities
 at $r=0$ and $k=0$ as the discrete representation do not include
-these points by construction \cite{FFTW05}. The solute part is the
+these points by construction \citep{FFTW05}. The solute part is the
 electric form factor $\tilde{n}(\vec{k})$ of an arbitrary solute
 charge distribution $n(\vec{r})$ with a low $k$ expansion including
 all multipoles of the charge distribution; it is treated by regular
 3D techniques.
 
 A similar approach was applied before to a monopole field of the solute
-\cite{Kloss08b} and to a superposition of gaussian charge distributions
-\cite{Perkyns10}.  The argument line used above assumes the net
+\citep{Kloss08b} and to a superposition of gaussian charge distributions
+\citep{Perkyns10}.  The argument line used above assumes the net
 neutrality of the solvent species and is not directly applicable to
 electrolytes, though even then the low $k$ behavior of a convolution
 like in Eq.~\ref{eq:tau} can be assumed to be regular, cp.\ the
-discussion of the background charge correction in Ref.~\cite{Kovalenko00b}.
+discussion of the background charge correction in Ref.~\citep{Kovalenko00b}.
 An interpretation of Eq.~\ref{eq:tau} as a linear response of the
 pure solvent distribution to a (weak) electrostatic field of the charge
 distribution $n(\vec{r})$ offers an intuitive way to judge the range
@@ -414,17 +409,17 @@ for sound closures that fulfill $f(x)\sim x$ upon linearization.
 
 \section{Computational details \label{sec:computational-details}}
 
-To model uranyl solvation we employ the SPC/E water model \cite{Berendsen87},
-modified as suggested by Pettitt and Rossky \cite{Pettitt82} by addition
-of a Lennard--Jones (LJ) term for hydrogen atoms with $\sigma_{\text{H}}=0.4$~Å
+To model uranyl solvation we employ the SPC/E water model \citep{Berendsen87},
+modified as suggested by Pettitt and Rossky \citep{Pettitt82} by
+addition of a Lennard--Jones (LJ) term for hydrogen atoms with $\sigma_{\text{H}}=0.4$~Å
 and $\epsilon_{\text{H}}=0.046$~kcal/mol (PR-SPC/E). For atomic
 ions we adopted the coincident SPC/E water model (cSPC/E) with $\sigma_{\text{H}}=1.1658$~Å
 and $\epsilon_{\text{H}}=0.01553$~kcal/mol as proposed by Luchko
-and Kovalenko \cite{Luchko10} in order to compare with published
+and Kovalenko \citep{Luchko10} in order to compare with published
 results. The uranyl-water interaction parameters were derived from
 the second model proposed by Kerisit and Liu to strengthen the uranyl\textendash{}water
-interaction with the uranium charge of 3.5~\emph{e} (KL2) \cite{Kerisit13}.
-For convenience the reader may refer to our previous work \cite{Bo15}
+interaction with the uranium charge of 3.5~\emph{e} (KL2) \citep{Kerisit13}.
+For convenience the reader may refer to our previous work \citep{Bo15}
 where we summarized the literal values for the charge and LJ parameters
 of several force-fields.
 
@@ -441,40 +436,40 @@ of about 0.026~Å.
 
 All-electron QM calculations were carried out with the linear combination
 of Gaussian-type orbitals fitting-functions density functional method
-\cite{Dunlap90} as implemented in the parallel code ParaGauss \cite{ParaGaussV3.1}.
-The atomic approximation \cite{Matveev08} to the second-order Douglas\textendash{}Kroll\textendash{}Hess
-scalar-relativistic approach \cite{rev:roesch96} was used to account
+\citep{Dunlap90} as implemented in the parallel code ParaGauss \citep{ParaGaussV3.1}.
+The atomic approximation \citep{Matveev08} to the second-order Douglas\textendash{}Kroll\textendash{}Hess
+scalar-relativistic approach \citep{rev:roesch96} was used to account
 for relativistic effects; this approximation was shown to be very
 accurate for uranyl aqua complexes. We employed the gradient-corrected
 exchange-correlation functional (generalized gradient approximation,
-GGA) \cite{Goerling99,kochDFT}, as suggested by Becke and Perdew
-(BP) \cite{Becke88,Perdew86c}. The Kohn\textendash{}Sham orbitals
+GGA) \citep{Goerling99,kochDFT}, as suggested by Becke and Perdew
+(BP) \citep{Becke88,Perdew86c}. The Kohn\textendash{}Sham orbitals
 were represented by flexible Gaussian-type basis sets, contracted
 in a generalized fashion using atomic eigenvectors. For U, we used
 a basis set of the size (24s, 19p, 16d, 11f), contracted to {[}10s,
 7p, 7d, 4f{]}; O and H atoms were described by standard basis sets,
 (9s, 5p, 1d) $\to$ {[}5s, 4p, 1d{]} and (6s, 1p) $\to$ {[}4s, 1p{]},
 respectively. These basis sets and further computational details are
-the same as in earlier studies on uranyl species \cite{Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b,Bo15}. 
+the same as in earlier studies on uranyl species \citep{Moskaleva04,Moskaleva06b,Moskaleva06a,Kremleva12b,Bo15}. 
 
-We used a COSMO PCM solvation model for comparison \cite{Fuchs02},
+We used a COSMO PCM solvation model for comparison \citep{Fuchs02},
 with the cavity defined via an effective solvent radius of 1.4~Å
-and van der Waals radii of solute atoms as tabulated by Bondi \cite{Bondi64}
+and van der Waals radii of solute atoms as tabulated by Bondi \citep{Bondi64}
 and scaled by 1.125 (except for hydrogen). We carried out the cavity
-tessellation with the FIXPVA approach \cite{Su09,Kremleva12b} (fixed
+tessellation with the FIXPVA approach \citep{Su09,Kremleva12b} (fixed
 points with variable areas) to obtain numerically stable energies
-and forces \cite{Kremleva12b}. 
+and forces \citep{Kremleva12b}. 
 
 Geometry optimizations have been carried out using the quasi-Newton
 method and the constrained minimization algorithm as implemented in
-the utility package ParaTools \cite{Chaffey-Millar11,Nikodem13}.
+the utility package ParaTools \citep{Chaffey-Millar11,Nikodem13}.
 In QM+RISM calculations of symmetric uranyl aqua complexes the U\textendash{}O
 bonds were relaxed but constrained to have the same value by symmetry.
 In the corresponding MM+RISM calculations uranyl was rigid with the
 U\textendash{}O distances fixed to 179~pm motivated by earlier results
-\cite{Moskaleva04,Cao05,Buehl05}. However, for a study of the water
+\citep{Moskaleva04,Cao05,Buehl05}. However, for a study of the water
 exchange with MM+RISM we adopted a flexible uranyl model without symmetry
-constraints and compared two sets of intra-molecular parameters \cite{Kerisit13,Tiwari14}
+constraints and compared two sets of intra-molecular parameters \citep{Kerisit13,Tiwari14}
 with unconstrained QM+RISM results. The two uranyl force field models
 we employed differ only by uranyl equilibrium bond length and force
 constants for stretching and bending modes. The SPC/E geometry of
@@ -487,17 +482,20 @@ angle of 109.47$^{\circ}$.
 
 To verify our 3D RISM implementation for charged solutes, we performed
 a comparison to 1D RISM results for mono-atomic alkali and halide
-ions \cite{Joung13,Bo15} applying the cSPC/E water model \cite{Berendsen87,Luchko10}.
-With moderate settings  for the grid resolution of $64^{3}$ points
-in total and a cubic box volume of $20^{3}$~Å$^{3}$ we are able
-to match the 1D results up to 0.3~kcal/mol or better. The accuracy
-is slightly better for small cations than for the larger anions. The
-values are comparable to MD with SPC/E water and experimental results.
-The agreement may be slightly improved by a correction proportional
-to the molar volume of the solute \cite{Sergiievskyi14} as was demonstrated
-in our previous work \cite{Bo15}. 
+ions \citep{Joung13,Bo15} applying the cSPC/E water model \citep{Berendsen87,Luchko10}.
+With moderate settings for the grid \textcolor{blue}{size} of $64^{3}$
+points in total and a cubic box volume of $20^{3}$~Å$^{3}$ we are
+able to match the 1D results up to \textcolor{blue}{0.2}~kcal/mol
+or better. \textcolor{blue}{With a 50\% larger box size at the same
+grid density the agreement improves to 0.07~kcal/mol; a further increase
+of the grid density by 50\% improves the results insignificantly.}
+The accuracy is slightly better for small cations than for the larger
+anions. The values are comparable to MD with SPC/E water and experimental
+results. The agreement may be slightly improved by a correction proportional
+to the molar volume of the solute \citep{Sergiievskyi14} as was demonstrated
+in our previous work \citep{Bo15}.  
 
-\begin{table}
+\begin{table}[t]
 \begin{centering}
 \caption{The solvation energy (excess chemical potential) for alkali and halide
 ions by 3D and 1D RISM approaches with the cSPC/E water model. MD
@@ -505,29 +503,33 @@ and experimental values are also shown for comparison.$^{a}$ \label{tab:simple-i
 
 \par\end{centering}
 
-\begin{ruledtabular}
+\small\vspace{1ex}
 
+\begin{centering}
 \begin{tabular}{lrrrrrr}
+\hline 
  & Li$^{+}$ & Na$^{+}$ & K$^{+}$ & Cl$^{-}$ & Br$^{-}$ & I$^{-}$\tabularnewline
 \hline 
-3D KH & $-$108.5 & $-$85.0 & $-$68.5 & $-$78.4 & $-$72.5 & $-$62.9\tabularnewline
-1D KH$^{b}$ & $-$108.5 & $-$85.0 & $-$68.5 & $-$78.5 & $-$72.6 & $-$63.1\tabularnewline
-3D HNC & $-$111.8 & $-$86.3 & $-$69.3 & $-$79.8 & $-$74.1 & $-$64.7\tabularnewline
-1D HNC$^{b}$ & $-$111.7 & $-$86.3 & $-$69.3 & $-$79.9 & $-$74.2 & $-$64.9\tabularnewline
+KH & $-$108.5 & $-$85.0 & $-$68.5 & $-$78.4 & $-$72.\textcolor{blue}{6} & $-$62.9\tabularnewline
+KH$^{b}$ & $-$108.5 & $-$85.0 & $-$68.5 & $-$78.5 & $-$72.6 & $-$63.1\tabularnewline
+HNC & $-$111.\textcolor{blue}{7} & $-$86.3 & $-$69.3 & $-$79.8 & $-$74.1 & $-$64.7\tabularnewline
+HNC$^{b}$ & $-$111.7 & $-$86.3 & $-$69.3 & $-$79.9 & $-$74.2 & $-$64.9\tabularnewline
 MD$^{c}$ & $-$113.3 & $-$88.4 & $-$71.0 & $-$89.3 & $-$82.7 & $-$74.4\tabularnewline
 Exp$^{d}$ & $-$113.8 & $-$88.7 & $-$71.2 & $-$89.1 & $-$82.7 & $-$74.3\tabularnewline
 \end{tabular}
+\par\end{centering}
 
-\end{ruledtabular}
+\vspace{1ex}\footnotesize
 
-\footnotetext{$^{a}$~Energies in kcal/mol. KH and HNC closure relations
-have been used. 3D domain is $20^{3}$ Å$^{3}$ / $64^{3}$ pts. $^{b}$~Ref.~\cite{Bo15}.
-$^{c}$~MD with SPC/E water from Ref.~\cite{Joung08}. $^{d}$~Ref.~\cite{Schmid00}.} 
+$^{a}$~Energies in kcal/mol. KH and HNC closure relations have been
+used. 3D domain is $20^{3}$ Å$^{3}$ / $64^{3}$ pts. $^{b}$~1D
+RISM from Ref.~\citep{Bo15}. $^{c}$~MD with SPC/E water from Ref.~\citep{Joung08}.
+$^{d}$~Ref.~\citep{Schmid00}.
 \end{table}
 
 
 
-\section{uranyl aqua complexes \label{sec:uranyl-aqua-complexes}}
+\section{Uranyl aqua complexes \label{sec:uranyl-aqua-complexes}}
 
 
 \subsection{MM+RISM \label{sub:MM+RISM}}
@@ -539,7 +541,7 @@ $n=4$ features a missing equatorial ligand and demonstrates a qualitative
 difference of the optimal structures obtained by minimizing the MM
 and and MM+RISM expressions of the potential (free) energy. Similar
 to the findings in our previous work, using the 1D RISM formalism
-\cite{Bo15}, the MM+RISM combination features a vacancy in the equatorial
+\citep{Bo15}, the MM+RISM combination features a vacancy in the equatorial
 plane of the uranyl corresponding to the location of the missing water
 ligand, Figure~\ref{fig:spatial-distribution-4w}. The MM potential
 energy surface features a minimum at a $D_{4\text{h}}$-like structure
@@ -595,17 +597,17 @@ the strongly bound aqua ligands explicitly as a part of the solute
 and weakly associated or free-floating water as a RISM medium in order
 to be numerically stable and closure independent. 
 
-\begin{table}
+\begin{table}[t]
 \caption{Average uranyl--water distance of the first solvation shell, $d$(U--OW),
 and an estimate for the uranyl solvation energy, $\Delta G_{\text{sol}}$,
 obtained using gas phase MM (GP) and MM+RISM models with PSE closures
 of order $n=1-3$ (PSE$n$), see Eq.~\ref{eq:closure-pse}.$^{a}$
 \label{tab:mm-rism}}
+\small\vspace{1ex}
 
-
-\begin{ruledtabular}
-
+\begin{centering}
 \begin{tabular}{llrrrr}
+\hline 
 $n$ &  & 0 & 5$-$1$^{b}$ & 5 & 5+1$^{c}$\tabularnewline
 \hline 
 $d$(U--OW) & GP & --- & 239 & 244 & 243\tabularnewline
@@ -617,19 +619,19 @@ $\Delta G_{\text{sol}}$ & GP$^{e}$ & --- & $-$233 & $-$272 & $-$295\tabularnewli
  & PSE2 & $-$379 & $-$389 & $-$392 & $-$397\tabularnewline
  & PSE3 & $-$383 & na$^{d}$ & $-$392 & $-$397\tabularnewline
 \end{tabular}
+\par\end{centering}
 
-\end{ruledtabular}
+\vspace{1ex}\footnotesize
 
-\footnotetext{ $^{a}$~Bond lengths in pm, energies in kcal/mol.
-$^{b}$~GP structure is $D_{4\text{h}}$ but the RISM structures
-feature a vacancy in the equatorial plane corresponding to the missing
-ligand, see Figure~\ref{fig:spatial-distribution-4w}. $^{c}$~Five-coordinated
-structure with the sixth water in the second shell. $^{d}$~Value
-not available due to divergence. $^{e}$~The GP row shows binding
-energies of $n$ water molecules to a rigid uranyl with $d$(U--O)
-of 179~pm. }
+$^{a}$~Bond lengths in pm, energies in kcal/mol. $^{b}$~GP structure
+is $D_{4\text{h}}$ but the RISM structures feature a vacancy in the
+equatorial plane corresponding to the missing ligand, see Figure~\ref{fig:spatial-distribution-4w}.
+$^{c}$~Five-coordinated structure with the sixth water in the second
+shell. $^{d}$~Value not available due to divergence. $^{e}$~The
+GP row shows binding energies of $n$ water molecules to a rigid uranyl
+with $d$(U--O) of 179~pm. 
 \end{table}
-\begin{figure}
+\begin{figure}[t]
 \caption{Water oxygen distribution around the uranyl aqua complex with four
 explicit water ligands. The isosurface corresponds to $h=2$. The
 area around the missing equatorial ligand is characterized by values
@@ -637,7 +639,7 @@ of $h$ more than ten times as high. Other lopes of the isosurface
 correspond to second solvation shell and feature $h<6$. \label{fig:spatial-distribution-4w}}
 
 
-\includegraphics[width=1\linewidth]{4w}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/4w}
 \end{figure}
 
 
@@ -653,7 +655,7 @@ degree of freedom, the uranyl bond length, in contrast to the MM models
 discussed in the previous section where the uranyl bond was fixed
 to a reasonable value. 
 
-In our previous work exploring these models with 1D RISM \cite{Bo15}
+In our previous work exploring these models with 1D RISM \citep{Bo15}
 we observed consistently longer U--O and U--OW bond lengths in QM+RISM
 calculations in comparison to QM+PCM and experiment. We tentatively
 attributed that to the excess coordination of uranyl, manifested by
@@ -684,7 +686,7 @@ Another notable discrepancy between the PCM and 1D RISM results mentioned
 in our previous work is also resolved by the 3D RISM approach: the
 uranyl--water distances U--OW are consistently shorter in solvated
 complexes than in the gas phase by measurable 4--6~pm. The 1D RISM
-approach did not show this effect convincingly \cite{Bo15}. Again,
+approach did not show this effect convincingly \citep{Bo15}. Again,
 we interpret this effect of the medium as a screening of repulsive
 ligand-ligand interactions in the first coordination shell by the
 solvent. 
@@ -694,18 +696,18 @@ models is comparable with that obtained in our previous work using
 1D RISM. The estimates of $-$388 and $-$389~kcal/mol using the
 standard model of hydrated uranyl with five explicit water ligands
 vary only little with the closure order and agree well with $-$390~kcal/mol
-from our previous work \cite{Bo15}. However, the relative order of
-the estimates based on the four- and six-coordinated complexes is
-not reproduced. The estimate of $\Delta G_{\text{sol}}$ based on
-the four-coordinated complex is by $\sim$10~kcal/mol less negative
+from our previous work \citep{Bo15}. However, the relative order
+of the estimates based on the four- and six-coordinated complexes
+is not reproduced. The estimate of $\Delta G_{\text{sol}}$ based
+on the four-coordinated complex is by $\sim$10~kcal/mol less negative
 than the result of the standard model, Table~\ref{tab:qm+rism-vs-qm+pcm}.
 This difference (but not the absolute numbers) is the same as the
 PCM result, Table~\ref{tab:qm+rism-vs-qm+pcm}. However, this difference
 is significantly larger than the value of 1.6~kcal/mol obtained using
-1D RISM \cite{Bo15}, which is remarkably close to the free energy
+1D RISM \citep{Bo15}, which is remarkably close to the free energy
 difference corresponding to the relative weights of four- and five-coordinated
 species determined from an average coordination number in a high-energy
-x-ray scattering (HEXS) experiment \cite{Soderholm05}. Given the
+x-ray scattering (HEXS) experiment \citep{Soderholm05}. Given the
 limitations of 1D RISM exposed by the current 3D RISM approach we
 interpret that past agreement as fortuitous.  $\Delta G_{\text{sol}}$
 calculated from the six-coordinated $D_{3\text{d}}$ complex is by
@@ -723,24 +725,26 @@ to 3--5~kcal/mol even at the highest closure level, Table~\ref{tab:mm-rism}.
 explicit water ligands ($n=0$) is by $\sim$100~kcal/mol off the
 results obtained with $n=4-6$ explicit ligands, Table~\ref{tab:qm+rism-vs-qm+pcm}.
  The QM+PCM solvation energy of $-426$~kcal/mol given by the standard
-five-coordinated uranyl model appears to be too low \cite{Moskaleva04}
+five-coordinated uranyl model appears to be too low \citep{Moskaleva04}
 in the view of most recent experimental estimate of $-369\pm15$~kcal/mol
-\cite{Gibson05}. The corresponding QM+RISM solvation energy of $-389$~kcal/mol
+\citep{Gibson05}. The corresponding QM+RISM solvation energy of $-389$~kcal/mol
 is significantly closer to that interval. The properties in Table~\ref{tab:qm+rism-vs-qm+pcm}
 obtained using the models with explicit water ligands separating the
 uranyl di-cation and the RISM medium ($n=4-6$) hardly depend on the
 closure order. This observation may justify the widespread use of
 the lowest order PSE1 (KH) closure.  
 
-\begin{table}
+\begin{table}[t]
 \caption{Uranyl bond length, $d$(U--O), uranyl--water distance, $d$(U--OW),
 and the uranyl solvation energy estimate, $\Delta G_{\text{sol}}$,
 obtained using gas phase QM, QM+PCM and QM+RISM models.$^{a}$ \label{tab:qm+rism-vs-qm+pcm}}
 
 
-\begin{ruledtabular}
+\small\vspace{1ex}
 
+\begin{centering}
 \begin{tabular}{llrrrr}
+\hline 
 $n$ &  & 0 & 4$^{b}$ & 5$^{c}$ & 6$^{d}$\tabularnewline
 \hline 
 $d$(U--O) & GP & 172 & 177 & 177 & 178\tabularnewline
@@ -759,20 +763,20 @@ $\Delta G_{\text{sol}}$ & GP$^{e}$ & --- & $-$244 & $-$270 & $-$289\tabularnewli
  & PSE2 & $-$373 & $-$379 & $-$389 & $-$394\tabularnewline
  & PSE3 & $-$378 & $-$379 & $-$389 & $-$393\tabularnewline
 \end{tabular}
+\par\end{centering}
 
-\end{ruledtabular}
+\vspace{1ex}\footnotesize
 
-\footnotetext{ $^{a}$~Bond lengths in pm, energies in kcal/mol.
-Symmetric uranyl aqua complexes {[}UO$_{2}$(H$_{2}$O)$_{n}${]}$^{2+}$,
-$4\leq n\leq6$ and a bare uranyl ($n=0$) are treated by QM while
-interactions with the PR-SPC/E water solvent are treated by KL2 force
-field. $^{b}$~$D_{4\text{h}}$ structure. $^{c}$~$D_{5\text{h}}$
-structure. $^{d}$~$D_{3\text{d}}$ structure. $^{e}$~The row shows
-binding energies of $n$ water ligands. }
+$^{a}$~Bond lengths in pm, energies in kcal/mol. Symmetric uranyl
+aqua complexes {[}UO$_{2}$(H$_{2}$O)$_{n}${]}$^{2+}$, $4\leq n\leq6$
+and a bare uranyl ($n=0$) are treated by QM while interactions with
+the PR-SPC/E water solvent are treated by KL2 force field. $^{b}$~$D_{4\text{h}}$
+structure. $^{c}$~$D_{5\text{h}}$ structure. $^{d}$~$D_{3\text{d}}$
+structure. $^{e}$~The row shows binding energies of $n$ water ligands. 
 \end{table}
 
 
-\begin{figure}
+\begin{figure}[t]
 \caption{Radial distribution functions of the solvated uranyl without explicit
 aqua ligands: U--OW (top panel, black), U--HW (top panel, gray), O--OW
 (bottom panel, black) and O--HW (bottom panel, gray). Results employing
@@ -781,17 +785,17 @@ employing PSE2 and PSE3 closures are displayed using thinner lines
 in the background.  \label{fig:rdfs-vs-closure-0w}}
 
 
-\includegraphics[width=1\linewidth]{fig2}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/fig2}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[t]
 \caption{Radial distribution functions of the solvated uranyl complex with
 five explicit water ligands in the equatorial plane. See Fig.~\ref{fig:rdfs-vs-closure-0w}
 for explanation. \label{fig:rdfs-vs-closure-5w}}
 
 
-\includegraphics[width=1\linewidth]{fig3}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/fig3}
 \end{figure}
 
 
@@ -801,10 +805,10 @@ for explanation. \label{fig:rdfs-vs-closure-5w}}
 By way of the Eyring equation the activation energy of aqua ligand
 exchange process in the first solvation shell of uranyl computed from
 the experimentally available water exchange rate estimate of 1.3$\times$10$^{6}$~s$^{-1}$
-is about 9~kcal/mol \cite{Farkas00}. Many theoretical studies predict
+is about 9~kcal/mol \citep{Farkas00}. Many theoretical studies predict
 much faster water exchange than the available experimental data suggests
-\cite{Vallet01,hagberg05,Frick09,Nichols08,Kerisit10,Tiwari14}. A
-simple way to obtain an estimate of the activation energy for the
+\citep{Vallet01,hagberg05,Frick09,Nichols08,Kerisit10,Tiwari14}.
+A simple way to obtain an estimate of the activation energy for the
 water exchange may be the inspection of the U--OW potential of mean
 force (PMF), $W(r)=-T\ln g(r)$, derived from the uranyl--water oxygen
 RDF $g(r)$, Fig.\ \ref{fig:potential-of-mean-force}. In Table~\ref{tab:pmf-extrema}
@@ -814,7 +818,7 @@ The activation energy estimated by 3D RISM as the PMF difference of
 the first-shell minimum and the barrier top ranges from 3.4 to 5.2
 kcal/mol, increasing with the closure order. The corresponding number
 from the MD RDF is 4.4 kcal/mol. These values are comparable to the
-5~kcal/mol derived from the residence time by Tiwari et al.~\cite{Tiwari14},
+5~kcal/mol derived from the residence time by Tiwari et al.~\citep{Tiwari14},
 but significantly lower than the experimental estimate. The transition
 between the first- and second solvation shells happens at U--OW separations
 $r_{\text{b}}=309-324$~pm according to the radial PMF profiles.
@@ -823,7 +827,7 @@ on the collective behavior of the water ligands during the water exchange,
 thus it offers only limited insight into possible mechanisms. Also,
 the RISM model for bare uranyl assumes a rigid linear geometry whereas
 it was shown that uranyl bending essentially facilitates the water
-exchange \cite{Tiwari14}.
+exchange \citep{Tiwari14}.
 
 Additional insight is provided by a three-dimensional PMF $W(\vec{r})=-T\ln g(\vec{r})$
 given as $W(x,y)$ in Fig.\ \ref{fig:potential-of-mean-force-2d}
@@ -836,7 +840,7 @@ incoming/leaving water ligand estimated from that location is about
 60$^{\circ}$ to the uranyl axis. This value is in good agreement
 with the result of 61.8$^{\circ}$ from the transition state search
 at Hartree--Fock level of theory with water solvent described by CPCM
-model \cite{Vallet01}. A hypothetical water exchange in the equatorial
+model \citep{Vallet01}. A hypothetical water exchange in the equatorial
 plane appears to be significantly hindered at room temperature. The
 PMF values at the location of the saddle point and at the equatorial
 minimum are 1.4~kcal/mol and $-1.7$~kcal/mol, respectively (PSE1).
@@ -845,17 +849,17 @@ less than the estimate from the radial PMF, Table~\ref{tab:pmf-extrema}.
 Again it is not possible to draw a conclusion on a collective behavior
 of the incoming and leaving ligands from this one-particle property.
 
-\begin{figure}
+\begin{figure}[t]
 \caption{Potential of mean force, $W(r)$, for U--OW distribution functions
 obtained with PSE1, PSE2 and PSE3 closures (solid lines of decreasing
 weight). The dashed line represents the MD result. \label{fig:potential-of-mean-force}}
 
 
-\includegraphics[width=1\linewidth]{pmf}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/pmf}
 \end{figure}
 
 
-\begin{table}
+\begin{table}[t]
 \begin{centering}
 \caption{PMF extrema $\{r_{i},W(r_{i})\}$,$^{a}$ and an estimate for the
 water exchange activation energy, $\Delta W_{\text{ab}}=W(r_{\text{b}})-W(r_{\text{a}})$
@@ -864,9 +868,11 @@ extracted from the curves in Fig.\ \ref{fig:potential-of-mean-force}.
 
 \par\end{centering}
 
-\begin{ruledtabular}
+\small\vspace{1ex}
 
+\begin{centering}
 \begin{tabular}{lrrrrrrr}
+\hline 
  & $r_{\text{a}}$ & $W(r_{\text{a}})$ & $r_{\text{b}}$ & $W(r_{\text{b}})$ & $r_{\text{c}}$ & $W(r_{\text{c}})$ & $\Delta W_{\text{ab}}$\tabularnewline
 \hline 
 PSE1 & 236 & $-$0.9 & 324 & 2.5 & 465 & $-$0.3 & 3.4\tabularnewline
@@ -874,27 +880,28 @@ PSE2 & 238 & $-$1.4 & 313 & 3.4 & 462 & $-$0.3 & 4.8\tabularnewline
 PSE3 & 240 & $-$1.5 & 309 & 3.7 & 461 & $-$0.3 & 5.2\tabularnewline
 MD & 246 & $-$1.5 & 297 & 2.9 & 460 & $-$0.3 & 4.4\tabularnewline
 \end{tabular}
+\par\end{centering}
 
-\end{ruledtabular}
+\vspace{1ex}\footnotesize
 
-\footnotetext{$^{a}$~Distances in pm, energies in kcal/mol. Locations
-$r_{\text{a}}$ and $r_{\text{c}}$ correspond to the minima of first-
-and second solvation shells, respectively; $r_{\text{b}}$ is the
-highest point of the barrier connecting the two minima. } 
+$^{a}$~Distances in pm, energies in kcal/mol. Locations $r_{\text{a}}$
+and $r_{\text{c}}$ correspond to the minima of first- and second
+solvation shells, respectively; $r_{\text{b}}$ is the highest point
+of the barrier connecting the two minima. 
 \end{table}
 
 
-\begin{figure}
+\begin{figure}[t]
 \caption{Potential of mean force, $W(x,y)$, for the U--OW distribution functions
 obtained with PSE1 closure. Here $x$ and $y$ are the radial and
 axial displacements off the uranium atom. \label{fig:potential-of-mean-force-2d}}
 
 
-\includegraphics[width=1\linewidth]{pmf-2d}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/pmf-2d}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[t]
 \caption{Free energy profiles, $G(q)$, along the water exchange pathway using
 two intra-molecular force fields with soft- and hard uranyl bending
 modes (squares and diamonds, respectively). The QM+RISM profile is
@@ -903,7 +910,7 @@ lines to guide the eye. The reaction coordinate $q$ is the difference
 of U--OW distances of two designated water molecules. \label{fig:free-energy-profiles}}
 
 
-\includegraphics[width=1\linewidth]{profiles}
+\includegraphics[width=1\linewidth]{uo2-II\lyxdot d/profiles}
 \end{figure}
 
 
@@ -911,24 +918,24 @@ To investigate the collective behavior of the ligands in the water
 exchange process we need to treat the first solvation shell and the
 incoming water molecule explicitly and also employ a flexible uranyl
 model as it was shown that the uranyl bending may affect the exchange
-rate \cite{Tiwari14}. The two intra-molecular force fields for a
+rate \citep{Tiwari14}. The two intra-molecular force fields for a
 flexible uranyl species we compare below differ primarily by the force
 constant corresponding to the bending modes of uranyl and the equilibrium
 bond length $d_{0}$(U--O). The force field here referred to as ``soft''
 corresponds to the frequency of the bending mode of 159~cm$^{-1}$
-and $d_{0}$(U--O) of 176~pm \cite{Tiwari14}. The alternative ``hard''
+and $d_{0}$(U--O) of 176~pm \citep{Tiwari14}. The alternative ``hard''
 force field features a significantly higher frequency of the uranyl
 bending mode of 393~cm$^{-1}$ and a somewhat too long a uranyl bond
- $d_{0}$(U--O) of 180~pm \cite{Kerisit13}. The bending vibration
+ $d_{0}$(U--O) of 180~pm \citep{Kerisit13}. The bending vibration
 in crystals and solution has been experimentally characterized by
-frequencies in the range of 180--270~cm$^{-1}$ \cite{Denning76,Denning79,Toth81,Gal92}.
+frequencies in the range of 180--270~cm$^{-1}$ \citep{Denning76,Denning79,Toth81,Gal92}.
 The DFT models with 5--6 explicit water ligands that we employ in
 this and earlier works predict the bending frequency in this experimental
-range \cite{Matveev08}. For the gas phase uranyl the standard DFT
+range \citep{Matveev08}. For the gas phase uranyl the standard DFT
 predicts too soft a bending mode likely because of the self-interaction
-error for $f$-electrons \cite{Ramakrishnan11} while hybrid DFT and
-CCSD(T) estimate the bending frequency around 160--180~cm$^{-1}$
-\cite{Jackson08}. In this light the force field with the ``soft''
+error for $f$-electrons \citep{Ramakrishnan11} while hybrid DFT
+and CCSD(T) estimate the bending frequency around 160--180~cm$^{-1}$
+\citep{Jackson08}. In this light the force field with the ``soft''
 bending mode appears to be a more reliable choice.
 
 However, a comparison of the free energy profiles obtained with QM
@@ -957,17 +964,17 @@ a much shorter distance to the outermost water ligand of about 280~pm
 and a shallow metastable state. This is likely due to the significantly
 longer U--O bond of the solvated uranyl species of about 186~pm which
 is more than 6~pm longer than those of the other models employed
-here and in other works \cite{Tiwari14,Kerisit13} and should be considered
-a deficiency of the parametrization.  In turn, the ``soft'' model
-does not convincingly show the preference for five-coordinated uranyl
-with the sixth water in the second solvation shell over the six-coordinated
-broken symmetry metastable structure. The QM and ``hard'' force
-field models predict the six-coordinated $D_{3\text{d}}$-like state
-by 5.6~kcal/mol and 3.6~kcal/mol less stable than the five-coordinated
+here and in other works \citep{Tiwari14,Kerisit13} and should be
+considered a deficiency of the parametrization.  In turn, the ``soft''
+model does not convincingly show the preference for five-coordinated
+uranyl with the sixth water in the second solvation shell over the
+six-coordinated broken symmetry metastable structure. The QM and ``hard''
+force field models predict the six-coordinated $D_{3\text{d}}$-like
+state by 5.6~kcal/mol and 3.6~kcal/mol less stable than the five-coordinated
 structure with an extra water in the second shell, respectively. The
 presence of such a six-coordinated intermediate suggests an associative
 two-step water exchange mechanism as one of the possibilities. This
-is consistent with the findings of the other theoretical studies \cite{Tsushima07,Vallet01,Buehl06b,Rotzinger07,Tiwari14}
+is consistent with the findings of the other theoretical studies \citep{Tsushima07,Vallet01,Buehl06b,Rotzinger07,Tiwari14}
 suggesting that the associative mechanism is more favorable than the
 dissociative mechanism. 
 
@@ -981,7 +988,7 @@ force field models, respectively, though not very far from the estimates
 we obtained above from the PMF analysis, are significantly lower than
 the 9.1~kcal/mol barrier of the QM+RISM model, Fig.~\ref{fig:free-energy-profiles},
 which is in good agreement with the experimental estimate of 9~kcal/mol
-\cite{Farkas00}.  A comparison of locations and orientations of
+\citep{Farkas00}.  A comparison of locations and orientations of
 the second-shell explicit water which is connected by hydrogen bonds
 to the two explicit aqua ligands of uranyl between the three models
 suggests that the force field models may slightly underestimate the
@@ -993,21 +1000,21 @@ models, Fig.~\ref{fig:free-energy-profiles}.
 
 It should be noted that water activation energy barrier computed by
 state of the art QM is sensitive to the choice of reaction path, level
-of theory, and solvation model \cite{Tiwari14}. Tsushima \cite{Tsushima07}
+of theory, and solvation model \citep{Tiwari14}. Tsushima \citep{Tsushima07}
 reported the activation energy barriers of 10.1~kcal/mol and 4.8~kcal/mol
 at the B3LYP level with the conductor-like polarizable continuum model
 (CPCM) by considering the terminal states with one and two hydrogen
 bonds, respectively. The latter value is close to the prediction of
-4.5~kcal/mol in an earlier study \cite{Vallet01}, yet both are lower
-than the experimental result. The comparison of PCM and a spherical
+4.5~kcal/mol in an earlier study \citep{Vallet01}, yet both are
+lower than the experimental result. The comparison of PCM and a spherical
 cavity self-consistent reaction field (SCRF) solvation models is reported
-by Rotzinger \cite{Rotzinger07} using the complete active space self-consistent
-field (CAS SCF) technique. The corresponding energy barriers of the
-associative pathway are equal to 9.4~kcal/mol and 6.5~kcal/mol,
-respectively. Water exchange energy barrier based on the thermodynamic
-sampling is also estimated by Bühl et.\ al \cite{Buehl06b} using
-the \textit{ab initio} molecular dynamics (AIMD). Their result of
-6.7~kcal/mol is however lower than the experiment and the QM+RISM
+by Rotzinger \citep{Rotzinger07} using the complete active space
+self-consistent field (CAS SCF) technique. The corresponding energy
+barriers of the associative pathway are equal to 9.4~kcal/mol and
+6.5~kcal/mol, respectively. Water exchange energy barrier based on
+the thermodynamic sampling is also estimated by Bühl et.\ al \citep{Buehl06b}
+using the \textit{ab initio} molecular dynamics (AIMD). Their result
+of 6.7~kcal/mol is however lower than the experiment and the QM+RISM
 value in this study. The good agreement of QM+RISM result with the
 experiment and the best of other theoretical models indicates that
 the RISM model provides a viable alternative solvation model for uranyl
@@ -1068,6 +1075,7 @@ International Graduate School of Science and Engineering at Technische
 Universität München. This work was partially supported by Bundesministerium
 für Bildung und Forschung (grant No.\ 01RC1106A).
 
+\bibliographystyle{elsarticle-num}
 \bibliography{uo2}
 
 \end{document}
