@@ -1931,7 +1931,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.96
+0.98
 \end_layout
 
 \end_inset
@@ -1940,7 +1940,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.56
+0.57
 \end_layout
 
 \end_inset
@@ -2168,7 +2168,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.51
+0.48
 \end_layout
 
 \end_inset
@@ -2309,7 +2309,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.57
+0.54
 \end_layout
 
 \end_inset
@@ -2387,7 +2387,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.93
+0.94
 \end_layout
 
 \end_inset
@@ -2423,7 +2423,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.92
+0.93
 \end_layout
 
 \end_inset
@@ -2501,7 +2501,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.56
+0.57
 \end_layout
 
 \end_inset
@@ -2510,7 +2510,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.90
+0.91
 \end_layout
 
 \end_inset
@@ -2537,7 +2537,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.49
+0.48
 \end_layout
 
 \end_inset
@@ -2633,25 +2633,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.69
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.77
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.65
+0.71
 \end_layout
 
 \end_inset
@@ -2669,7 +2651,25 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.65
+0.63
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.78
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.67
 \end_layout
 
 \end_inset
@@ -2765,7 +2765,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.23
+0.20
 \end_layout
 
 \end_inset
@@ -3391,7 +3391,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.10
+0.95
 \end_layout
 
 \end_inset
@@ -3611,7 +3611,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.22
+1.28
 \end_layout
 
 \end_inset
@@ -3620,7 +3620,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-17.83
+17.70
 \end_layout
 
 \end_inset
@@ -3629,7 +3629,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.80
+1.66
 \end_layout
 
 \end_inset
@@ -3757,7 +3757,7 @@ QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.61
+16.48
 \end_layout
 
 \end_inset
@@ -3831,7 +3831,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.29
+2.20
 \end_layout
 
 \end_inset
@@ -3867,7 +3867,7 @@ SCF--QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-3.38
+3.19
 \end_layout
 
 \end_inset
@@ -3977,7 +3977,7 @@ SCF--QM+PMV
 \begin_inset Text
 
 \begin_layout Plain Layout
-19.62
+19.49
 \end_layout
 
 \end_inset
@@ -4051,7 +4051,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-17.00
+17.01
 \end_layout
 
 \end_inset
@@ -4078,7 +4078,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-1.47
+1.43
 \end_layout
 
 \end_inset
@@ -4087,7 +4087,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-18.22
+18.09
 \end_layout
 
 \end_inset
@@ -4114,7 +4114,7 @@ PCM
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.28
+2.25
 \end_layout
 
 \end_inset
@@ -4197,7 +4197,7 @@ Exp
 \begin_inset Text
 
 \begin_layout Plain Layout
-19.23
+19.10
 \end_layout
 
 \end_inset
@@ -5202,7 +5202,7 @@ reference "tab:correcoeff-matrix"
 \begin_inset Formula $r$
 \end_inset
 
-=0.96, and MAD=1.10
+=0.98, and MAD=0.95
 \begin_inset space ~
 \end_inset
 
@@ -5455,7 +5455,7 @@ reference "tab:mad-matrix"
 \begin_inset Formula $r$
 \end_inset
 
-=0.99, MAD=1.22
+=0.99, MAD=1.28
 \begin_inset space ~
 \end_inset
 
@@ -5463,7 +5463,7 @@ kcal/mol and
 \begin_inset Formula $r$
 \end_inset
 
-=0.96, MAD=1.80
+=0.96, MAD=1.66
 \begin_inset space ~
 \end_inset
 
@@ -5476,7 +5476,7 @@ kcal/mol respectively.
 \begin_inset Formula $r$
 \end_inset
 
-=0.23 and MAD=19.23
+=0.20 and MAD=19.10
 \begin_inset space ~
 \end_inset
 
@@ -5648,8 +5648,8 @@ reference "tab:mad-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- equal to 0.93, 0.97 and 0.92 with MM, FED and QM method respectively, the
- deviations are noticeable, which are 2.29, 1.74 and 3.38
+ equal to 0.94, 0.97 and 0.93 with MM, FED and QM method respectively, the
+ deviations are noticeable, which are 2.20, 1.74 and 3.19
 \begin_inset space ~
 \end_inset
 
@@ -5661,8 +5661,8 @@ kcal/mol.
  obtained results which are in good agreement with experimental values,
  with r = 0.86 and MAD = 1.55 kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
- slightly by 0.3 ~ 0.4 kcal/mol even the major errors are removed, which are
- 1.86, 1.44 and 3.07 kcal/mol for MM, FED and QM method respectively.
+ slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
+ kcal/mol for MM, FED and QM method respectively.
  
 \end_layout
 
