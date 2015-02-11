@@ -13,6 +13,7 @@ data = [loadtxt(_) for _ in source]
 
 
 def sub(ax, i, title, do_legend=False):
+    plt.axhline (color="black")
     d = data[i]
     # plt.title (title, loc="center", fontsize=fontsize)
     plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
