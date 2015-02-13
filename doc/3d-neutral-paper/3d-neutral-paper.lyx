@@ -4337,12 +4337,10 @@ Correlation between the calculated partial molar volume
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- (unit:kcal/mol) between the experiments and solvation free energy calculated
- by 3D-RISM with different solute representations: a) MM, b) FED, c) QM
- and d) SCF-QM.
- The red solid square symbol stands for uncorrected results and the blue
- solid circle for corrected results, both with the linear fitting line shown
- for clarification.
+ between the experiments and solvation free energy calculated by 3D-RISM
+ with different solute representations: a) MM, b) FED, c) QM and d) SCF-QM.
+ Gray squares stand for uncorrected results and white solid circles for
+ corrected results, both with the linear fitting line shown for clarification.
  
 \begin_inset CommandInset label
 LatexCommand label
