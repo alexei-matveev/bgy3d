@@ -4346,6 +4346,7 @@ name "fig:Correlation-of-solvation"
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
 	filename 3d-neutral.d/fig1.svg
 	width 85line%
@@ -5281,6 +5282,7 @@ name "fig:Dipole-moment"
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Graphics
 	filename 3d-neutral.d/fig2.svg
 	width 100line%
@@ -5601,6 +5603,61 @@ kcal/mol.
 
 \begin_layout Subsection
 SCF QM/3D-RISM
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Correlation of two contributions to the relaxation energy 
+\begin_inset Formula $\delta G=\delta E+\delta\mu$
+\end_inset
+
+ due to self-consistent treatment of electronic charge distribution and
+ solvent charge density.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:relaxation-terms"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 3d-neutral.d/fig3.svg
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
