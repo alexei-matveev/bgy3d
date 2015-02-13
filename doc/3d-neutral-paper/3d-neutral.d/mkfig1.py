@@ -7,7 +7,9 @@ from pylab import *
 import matplotlib.pyplot as plt
 
 fontsize = 10
-linewidth = 2.0
+kw = {"linewidth": 1.5,
+      "markeredgewidth": 1.0,
+      "markersize": 6}
 
 source = ["mm.dat", "fed.dat", "qm.dat", "scf-qm.dat"]
 
@@ -22,15 +24,15 @@ def sub(ax, i, title, do_legend=False):
     fit = polyfit(d[:, 0], d[:, 1], 1)
     fit_fn1 = poly1d(fit)
     fit = polyfit(d[:, 0], d[:, 2], 1)
-    fit_fn2 = poly1d(fit) 
+    fit_fn2 = poly1d(fit)
 
-
-    plt.plot(d[:, 0], fit_fn1(d[:, 0]), 'r-', linewidth=linewidth)
-    plt.plot(d[:, 0], fit_fn2(d[:, 0]), 'b-', linewidth=linewidth)
+    two = [1.6, 5.6]
+    plt.plot (two, fit_fn1 (two), '-', color="0.50", **kw)
+    plt.plot (two, fit_fn2 (two), '-', color="0.00", **kw)
 
     # plt.title (title, loc="center", fontsize=fontsize)
-    plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
-    plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
+    plt.plot(d[:, 0], d[:, 1], 's', label='uncorrected', color="0.50", mfc="0.75", mec="0.50", **kw)
+    plt.plot(d[:, 0], d[:, 2], 'o', label='corrected', color="1.00", mfc="1.00", **kw)
 
     # xlim
     plt.xlim((1.5, 6.0))
