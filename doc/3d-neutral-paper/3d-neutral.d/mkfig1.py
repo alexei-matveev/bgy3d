@@ -59,7 +59,7 @@ figure(figsize=(4, 4 * 3))
 # MM
 sub(subplot(4, 1, 1), 0, "a", do_legend=False)
 # plt.ylabel(r'$\mathrm{\mathsf{\Delta^2 G}}$', rotation='horizontal', )
-plt.text (1.2, 33, u"Δ$^\mathregular{2}$G", rotation='horizontal')
+plt.text (1.2, 33, u"Δ$^\mathregular{2}$G, kcal/mol", rotation='horizontal')
 
 # FED
 sub(subplot(4, 1, 2), 1, "b")
