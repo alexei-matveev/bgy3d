@@ -1350,6 +1350,19 @@ key "Kremleva12b"
 Results and discussion
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Max deviation of PMV gp vs mm: 5%, aq vs gp 2%.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 MM/3D-RISM
 \end_layout
