@@ -7,6 +7,7 @@ from pylab import *
 import matplotlib.pyplot as plt
 
 fontsize = 10
+linewidth = 2.0
 
 source = ["mm.dat", "fed.dat", "qm.dat", "scf-qm.dat"]
 
@@ -16,20 +17,20 @@ data = [loadtxt(_) for _ in source]
 def sub(ax, i, title, do_legend=False):
     plt.axhline (color="black")
     d = data[i]
-    # plt.title (title, loc="center", fontsize=fontsize)
-    plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
-    plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
 
-    # linear fit
-    linewidth=2.0
+    # Linear fit in the background:
     fit = polyfit(d[:, 0], d[:, 1], 1)
     fit_fn1 = poly1d(fit)
     fit = polyfit(d[:, 0], d[:, 2], 1)
     fit_fn2 = poly1d(fit) 
 
 
-    plt.plot(d[:, 0], fit_fn1(d[:, 0]), 'r--', linewidth=linewidth)
-    plt.plot(d[:, 0], fit_fn2(d[:, 0]), 'b--', linewidth=linewidth)
+    plt.plot(d[:, 0], fit_fn1(d[:, 0]), 'r-', linewidth=linewidth)
+    plt.plot(d[:, 0], fit_fn2(d[:, 0]), 'b-', linewidth=linewidth)
+
+    # plt.title (title, loc="center", fontsize=fontsize)
+    plt.plot(d[:, 0], d[:, 1], 'rs', label='uncorrected')
+    plt.plot(d[:, 0], d[:, 2], 'bo', label='corrected')
 
     # xlim
     plt.xlim((1.5, 6.0))
