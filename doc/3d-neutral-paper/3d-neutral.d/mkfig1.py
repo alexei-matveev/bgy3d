@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import sys
 from numpy import loadtxt, array, shape, arange
@@ -55,7 +56,7 @@ figure(figsize=(4, 4 * 3))
 # MM
 sub(subplot(4, 1, 1), 0, "a", do_legend=False)
 # plt.ylabel(r'$\mathrm{\mathsf{\Delta^2 G}}$', rotation='horizontal', )
-plt.text (1.2, 33, r'$\mathrm{\mathsf{\Delta^{2}G}}$', rotation='horizontal')
+plt.text (1.2, 33, u"Δ$^\mathregular{2}$G", rotation='horizontal')
 
 # FED
 sub(subplot(4, 1, 2), 1, "b")
@@ -65,7 +66,7 @@ sub(subplot(4, 1, 3), 2, "c")
 
 # SCF QM
 sub(subplot(4, 1, 4), 3, "d")
-plt.xlabel(r'$\mathrm{\mathsf{\rho V}}$')
+plt.xlabel (u"ρV")
 
 # show()
 savefig(sys.argv[1], transparent=True, bbox_inches='tight')
