@@ -113,8 +113,8 @@ Oct 2014
 \begin_layout Abstract
 We implement and apply the combination of three-dimensional reference interactio
 n site model (3D-RISM) with self-consistent field quantum mechanics (SCF
- QM) calculation, in which the electrostatic potential (ESP) induced by
- the solute is directly derived from its electron density.
+ QM) calculation, in which the electrostatic potential induced by the solute
+ is directly derived from its electron density.
  The accuracy of the calculation of solvation free energy for neutral solutes
  is analyzed, of which the mainly determining factor is confirmed as the
  solute cavity formation effect.
@@ -122,9 +122,9 @@ n site model (3D-RISM) with self-consistent field quantum mechanics (SCF
  aqueous medium, which is possibly induced by the hydrogen bond between
  solute and water solvent, also has noticeable influence on the results
  of SCF QM/3D-RISM calculation.
- By applying the partial molar volume (PMV) correction, our hybrid model
- shows results in good agreement with experiment and a polarizable continuum
- model (PCM), while in the latter the hydrogen bond effect is missing.
+ By applying the partial molar volume correction, our hybrid model shows
+ results in good agreement with experiment and a polarizable continuum model,
+ while in the latter the hydrogen bond effect is missing.
 \end_layout
 
 \begin_layout Keywords
