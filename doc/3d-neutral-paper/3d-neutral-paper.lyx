@@ -696,6 +696,53 @@ emperature we use in this work is about 1/16:
 == 1/ 15.80877754533947717127
 \end_layout
 
+\begin_layout Plain Layout
+A 1D RISM KH with PR-SPC/E water [1] gives
+\begin_inset Formula 
+\[
+\rho\kappa/\beta\approx1/15.628775452991835
+\]
+
+\end_inset
+
+A 1D RISM HNC with PR-SPC/E [1] water gives
+\begin_inset Formula 
+\[
+\rho\kappa/\beta\approx1/11.697126403306534
+\]
+
+\end_inset
+
+Both estimated from the formula 
+\begin_inset Formula $\rho\kappa/\beta=1/\left(1-4\pi\rho\int c(r)r^{2}dr\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Plain Layout
+Bo reported an estimate for the compressibility factor estimated from pure
+ water calculations using 3D machinery: 
+\begin_inset Formula 
+\[
+\rho\kappa/\beta\approx1/15.2408554670
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+_____________________________
+\end_layout
+
+\begin_layout Plain Layout
+[1] Command line: runbgy.scm energy --norm-tol=1e-14 --dielectric=78.4 --rho=0.0333
+295 --beta=1.6889 --L=160 --N=4096 --solvent="water, PR-SPC/E" --closure=KH
+ or --closure=HNC
+\end_layout
+
 \end_inset
 
  Thus the asymptotic RISM expression for cavity formation energy suggests
