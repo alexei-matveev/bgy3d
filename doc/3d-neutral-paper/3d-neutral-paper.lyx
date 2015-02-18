@@ -837,8 +837,8 @@ Surface tension:
 
 \end_inset
 
- On the other hand, the error of the RISM expression for chemical potential
- cannot be ignored in practical calculations.
+ On the other hand, the large error of the RISM expression for chemical
+ potential cannot be ignored in practical calculations.
  In passing, we note that an immediate reason for the erroneous behavior
  is the reliance on the solvent susceptibility 
 \begin_inset Formula $\chi$
@@ -865,7 +865,8 @@ Surface tension:
 \end_layout
 
 \begin_layout Standard
-The PMV correction term is based on the “universal correction
+The PMV correction term intended to compensate the asymptotic deficiency
+ of the 3D RISM expression is based on the “universal correction
 \begin_inset Quotes erd
 \end_inset
 
@@ -883,12 +884,12 @@ key "Palmer10"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu^{\text{UC}}=\Delta\mu+a\rho V_{\text{u}}+b\label{eq:3DRISM-UC}
+\Delta\mu^{\text{UC}}=\Delta\mu+a\rho V_{\text{u}}+b,\label{eq:3DRISM-UC}
 \end{equation}
 
 \end_inset
 
-Instead of fitting the parameters 
+However, instead of fitting the parameters 
 \begin_inset Formula $a$
 \end_inset
 
@@ -906,7 +907,7 @@ key "Sergiievskyi14"
 \end_inset
 
 , with 
-\begin_inset Formula $a=(2\beta)^{-1}\sum_{\alpha=1}^{N_{\text{v}}}\rho_{\alpha}\tilde{c}_{\alpha}(k=0)$
+\begin_inset Formula $\beta a=(\rho/2)\sum_{\alpha\gamma}\tilde{c}_{\alpha\gamma}^{\text{v}}(0)$
 \end_inset
 
  and 
@@ -914,26 +915,76 @@ key "Sergiievskyi14"
 \end_inset
 
 , where 
-\begin_inset Formula $\tilde{c}_{\alpha}(k)$
+\begin_inset Formula $\tilde{c}_{\alpha\gamma}^{\text{v}}(k)$
 \end_inset
 
- is the Fourier representation of direct correlation function and 
-\begin_inset Formula $\rho_{\alpha}$
-\end_inset
-
- is the number density for solvent site 
-\begin_inset Formula $\alpha$
+ is the Fourier representation of direct correlation function pure solvent.
+ By way of the 1D RISM equations used to evaluate the solvent properties
+ the rate coefficient may be alternatively expressed via the solvent compressibi
+lity factor: 
+\begin_inset Formula $\beta a=-(z^{-1}-1)/2$
 \end_inset
 
 .
  The dimensionless PMV of solute 
-\begin_inset Formula $\rho V_{\text{u}}=(\rho\kappa/\beta)\left(1-\rho\int\sum_{\alpha=1}^{N_{\text{v}}}c_{\alpha}(\vec{r})d^{3}r\right)$
+\begin_inset Formula $\rho V_{\text{u}}=z\left(1-\rho\sum_{\alpha=1}^{N_{\text{v}}}\tilde{c}_{\alpha}(0)\right)$
 \end_inset
 
- could be obtained from the standard expression 
+ involves the 3D direct correlation functions 
+\begin_inset Formula $\tilde{c}_{\alpha}(\vec{k})$
+\end_inset
+
+ and could be obtained from the standard expression 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "book:Hirata03,Palmer10"
+
+\end_inset
+
+.
+ Both 
+\begin_inset Formula $\tilde{c}_{\alpha\gamma}^{\text{v}}(0)$
+\end_inset
+
+ and 
+\begin_inset Formula $\tilde{c}_{\alpha}(0)$
+\end_inset
+
+ are rather computed as volume integrals of real-space representations 
+\begin_inset Formula $c_{\alpha\gamma}(r)$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{\alpha}(\vec{r})$
+\end_inset
+
+, respectively.
+ An extension of the asymptotic analysis for simple liquids to the PMV correctio
+n shows that it cancels the major 
+\begin_inset Formula $(\beta z)^{-1}\rho V_{0}/2$
+\end_inset
+
+ part of the asymptotic 3D RISM error in excess chemical potential for nearly
+ incompressible liquids with 
+\begin_inset Formula $z\ll1$
+\end_inset
+
+ when 
+\begin_inset Formula $V_{\text{u}}\approx V_{0}\to\infty$
+\end_inset
+
+.
+ Note that the derivation of this particular PMV correction form 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Sergiievskyi14"
+
+\end_inset
+
+ involves thermodynamic arguments that have been questioned later 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Song15"
 
 \end_inset
 
