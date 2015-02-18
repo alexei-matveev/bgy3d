@@ -1528,7 +1528,7 @@ kcal/mol.
 
 \begin_layout Standard
 \begin_inset Float table
-wide true
+wide false
 sideways false
 status open
 
@@ -2323,7 +2323,7 @@ status open
 
 \begin_layout Standard
 \begin_inset Float table
-wide true
+wide false
 sideways false
 status open
 
