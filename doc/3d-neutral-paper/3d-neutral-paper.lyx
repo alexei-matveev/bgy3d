@@ -395,13 +395,13 @@ key "Palmer10,Sergiievskyi14"
  with 3D-RISM while the ESP of solutes are represented with four different
  strategies: (1) The EPS of solutes are derived from the atomic partial
  charges assigned on each solute site, which are also tabulated in standard
- force field database as the LJ parameters in a MM manner; (2) By replacing
- the atomic charge as frozen electron density (FED) which is determined
- from gas-phase QM calculation, solving the solvent correlation functions
- from 3D-RISM equation; (3) QM solute is perturbed by the solvent field
- obtained from MM/3D-RISM; (4) The combination of (2) and (3), in which
- the solvent correlation functions and solute electronic structures are
- determined in the self consistent field (SCF) QM calculation.
+ force field database as the Lennard--Jones (LJ) parameters in a MM manner;
+ (2) By replacing the atomic charge as frozen electron density (FED) which
+ is determined from gas-phase QM calculation, solving the solvent correlation
+ functions from 3D-RISM equation; (3) QM solute is perturbed by the solvent
+ field obtained from MM/3D-RISM; (4) The combination of (2) and (3), in
+ which the solvent correlation functions and solute electronic structures
+ are determined in the self consistent field (SCF) QM calculation.
 \end_layout
 
 \begin_layout Section
