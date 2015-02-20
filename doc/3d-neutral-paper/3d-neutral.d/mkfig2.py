@@ -41,11 +41,11 @@ ax2 = subplot(2, 1, 2)
 # Line fit in the background:
 fit = polyfit(d[:, 4], d[:, 0], 1)
 fit_fn1 = poly1d(fit)
-txt1 = "y = %.2fx + %.2f" % tuple (fit)
+txt1 = "y = %.2fx + %.3f" % tuple (fit)
 
 fit = polyfit(d[:, 4], d[:, 2], 1)
 fit_fn2 = poly1d(fit)
-txt2 = "y = %.2fx + %.2f" % tuple (fit)
+txt2 = "y = %.2fx + %.3f" % tuple (fit)
 
 # Line fit across the box:
 two = [dmin, xdmax]
