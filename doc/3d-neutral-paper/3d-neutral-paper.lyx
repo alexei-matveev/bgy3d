@@ -3922,7 +3922,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-FED
+PT1
 \end_layout
 
 \end_inset
@@ -4020,7 +4020,7 @@ FED
 \begin_inset Text
 
 \begin_layout Plain Layout
-QM
+PT2
 \end_layout
 
 \end_inset
@@ -4029,55 +4029,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.91
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-\begin_inset Formula $-$
-\end_inset
-
-0.12
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.98
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.55
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69
+5.09
 \end_layout
 
 \end_inset
@@ -4089,7 +4041,7 @@ QM
 \begin_inset Formula $-$
 \end_inset
 
-0.12
+3.59
 \end_layout
 
 \end_inset
@@ -4098,7 +4050,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.49
+0.94
 \end_layout
 
 \end_inset
@@ -4107,7 +4059,55 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.55
+1.03
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.87
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $-$
+\end_inset
+
+3.59
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.33
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.03
 \end_layout
 
 \end_inset
@@ -4118,7 +4118,7 @@ QM
 \begin_inset Text
 
 \begin_layout Plain Layout
-SCF-QM
+SCF
 \end_layout
 
 \end_inset
