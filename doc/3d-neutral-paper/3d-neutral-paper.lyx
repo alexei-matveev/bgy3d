@@ -596,7 +596,7 @@ key "Singer85"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[|h_{\alpha}|^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r
+\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[|h_{\alpha}|^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r
 \end{equation}
 
 \end_inset
@@ -659,7 +659,7 @@ reference "eq:rism-uv"
 \end_inset
 
  for the compressibility factor, one obtains 
-\begin_inset Formula $\beta\Delta\mu\approx\rho V_{0}(z^{-1}+1)/2$
+\begin_inset Formula $\beta\mu\approx\rho V_{0}(z^{-1}+1)/2$
 \end_inset
 
 .
@@ -761,7 +761,7 @@ kcal/mol per each of the
  displaced water molecules at normal conditions.
  This asymptotic behavior is far too hydrophobic in comparison to the correct
  asymptote, 
-\begin_inset Formula $\Delta\mu\approx pV_{0}$
+\begin_inset Formula $\mu\approx pV_{0}$
 \end_inset
 
 , and the corresponding rate 
@@ -857,7 +857,7 @@ Surface tension:
 
  which must be obeyed in the low density regions the RISM asymptotic expression
  acquires the correct form 
-\begin_inset Formula $\Delta\mu\approx pV_{0}$
+\begin_inset Formula $\mu\approx pV_{0}$
 \end_inset
 
 .
@@ -884,7 +884,7 @@ key "Palmer10"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Delta\mu^{\text{UC}}=\Delta\mu+a\rho V_{\text{u}}+b,\label{eq:3DRISM-UC}
+\mu^{\text{UC}}=\mu+(a\rho V_{\text{u}}+b),\label{eq:3DRISM-UC}
 \end{equation}
 
 \end_inset
@@ -1177,7 +1177,7 @@ The solute charge density
 .
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 sic! The later change to analytically compute FT of the long-range nuclear
@@ -1211,12 +1211,22 @@ sic! The later change to analytically compute FT of the long-range nuclear
 
 , is treated in the same way as the LJ field by evaluating explicit expression
  at each grid point.
+ Notably, the overall method is only practical when employing effective
+ core potentials in QM calculations because of the reliance on the uniform
+ cartesian grid representation of electron charge density.
 \end_layout
 
 \begin_layout Standard
 In DFT the electronic structure of solute in gas phase is determined by
  minimizing the Kohn--Sham energy functional with respect to the the electronic
- density [FIXME].
+ density 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "kochDFT"
+
+\end_inset
+
+.
  For brevity we express the energy as a functional of the solute charge
  density, 
 \begin_inset Formula $E[n_{\text{u}}]$
@@ -1416,129 +1426,82 @@ Conversely, since
 
 \end_inset
 
-The so introduced PT2 expression thus includes a second order term estimated
- in a very approximate fashion.
+The so introduced PT2 expression thus includes a term of second order in
+ the solvent reaction field, though in a very approximate fashion.
  
 \end_layout
 
 \begin_layout Standard
-FIXME: the Schrödinger equation
-\begin_inset Formula 
-\begin{equation}
-H_{0}\Psi_{\text{gas}}=E_{0}\Psi_{\text{gas}}
-\end{equation}
+An intuitive result for the reaction field contributing to the Kohn--Sham
+ potential, 
+\begin_inset Formula $\phi_{\text{u}}=\delta\mu/\delta n_{\text{u}}$
+\end_inset
+
+, to be a mean Coulomb field of the solvent volume charge relies on the
+ observation that the KH expression for the excess chemical potential is
+ a path-independent work integral 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Singer85,Kast08"
 
 \end_inset
 
-where 
-\begin_inset Formula $H_{0}$
-\end_inset
-
- is the Hamiltonian of solute molecule and 
-\begin_inset Formula $\Psi_{\text{gas}}$
-\end_inset
-
- is the eigenfunction.
- In solution the Hamiltonian of solute molecule is perturbed by the solvent
- contribution as 
-\begin_inset Formula 
-\begin{equation}
-(H_{0}+W)\Psi_{\text{sol}}=E_{\text{sol}}\Psi_{\text{sol}}\label{eq:ham_sol}
-\end{equation}
+ and the model assumption that electrons interact with solvent sites by
+ Coulomb law 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gusarov06"
 
 \end_inset
 
-here we only consider the solvent electrostatic perturbation, thus the solvent
- perturbation could be written as
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-W=\sum_{b}Z_{b}v_{\text{S}}(\vec{R}_{b})-v_{\text{S}}(\vec{r})\label{eq:solv_perturb}
-\end{equation}
-
+.
+ The PMV correction, 
+\begin_inset Formula $\mu^{\text{UC}}-\mu$
 \end_inset
 
-where 
-\begin_inset Formula $Z_{b}$
-\end_inset
-
- and 
-\begin_inset Formula $\vec{R}_{b}$
-\end_inset
-
- are the proton number and position of the nuclei in solute molecule, and
- 
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-
-\begin_inset Formula $v_{\text{S}}(\vec{r})$
-\end_inset
-
- is the ESP induced by the solvent.
- The solute electron relaxation energy 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-NR insists that 
-\begin_inset Quotes eld
-\end_inset
-
-reorganization energy
-\begin_inset Quotes erd
-\end_inset
-
- is a well-defined term in electrochemistry, so we invent a new name instead
- of using the one which other RISM people used
-\end_layout
-
-\end_inset
-
- 
-\begin_inset Formula $E_{\text{relax}}=E_{\text{sol}}-E_{\text{0}}$
-\end_inset
-
- is the difference between solute electron energy in solution and in gas
- phase.
- The solvation free energy 
-\begin_inset Formula $\Delta G_{\text{sol}}$
-\end_inset
-
- then could be written as
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-\Delta G_{\text{sol}}=E_{\text{relax}}+\Delta\mu
-\end{equation}
-
+, Eq.
+\begin_inset space ~
 \end_inset
 
 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:3DRISM-UC"
+
+\end_inset
+
+, on the other hand, is considered an empiric post-SCF addition and not
+ a part of the self-consistent free energy functional, Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:free-energy-functional"
+
+\end_inset
+
+.
+ Such a post-SCF treatment of the PMV correction along the lines of the
+ first order perturbation theory can be justified, though, as we will show
+ that the molar volume is nearly independent of the approximation, 
+\begin_inset Formula $\bar{n}_{\text{u}}^{(0)}$
+\end_inset
+
+, 
+\begin_inset Formula $n_{\text{u}}^{(0)}$
+\end_inset
+
+ or 
+\begin_inset Formula $n_{\text{u}}^{(1)}$
+\end_inset
+
+, used to describe the solute charge distribution 
+\begin_inset Formula $n_{\text{u}}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -1546,8 +1509,11 @@ Computational details
 \end_layout
 
 \begin_layout Standard
-All our calculations were carried out at the temperature of 298 K, with
- a corresponding water solvent density of 
+All our calculations were carried out at the temperature of 298
+\begin_inset space ~
+\end_inset
+
+K, with a corresponding water solvent density of 
 \begin_inset Formula $\rho=0.033427745$
 \end_inset
 
@@ -1590,7 +1556,7 @@ All our calculations were carried out at the temperature of 298 K, with
 \end_layout
 
 \begin_layout Standard
-The geometries of 43 neutral solutes are taken from the database used by
+The geometries of 43 neutral solutes were taken from the database used by
  Mobley et al.
  
 \begin_inset CommandInset citation
@@ -1600,15 +1566,15 @@ key "Mobley09"
 \end_inset
 
  and NIST database.
- The Lennard-Jones (LJ) parameters and partial atomic charges of the solutes
- are taken from OPLS-AA force field 
+ The LJ parameters and solute site charges were taken from OPLS-AA force
+ field 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Jorgensen04"
 
 \end_inset
 
- which is distributed with Tinker software.
+ as distributed with Tinker software.
  The water solvent model was originated from TIP3P 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -1640,11 +1606,12 @@ key "Pettitt82"
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-All-electron calculations were carried out with the linear combination of
- Gaussian-type orbitals fitting-functions density functional method 
+QM calculations were carried out with the linear combination of Gaussian-type
+ orbitals fitting-functions density functional method 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunlap90"
@@ -1675,6 +1642,7 @@ key "Perdew96a,Perdew97"
 \end_inset
 
 .
+ FIXME: ECPs?
 \end_layout
 
 \begin_layout Standard
