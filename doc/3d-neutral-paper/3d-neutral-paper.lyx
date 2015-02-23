@@ -1869,7 +1869,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -1882,7 +1882,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -1895,7 +1895,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -2019,7 +2019,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \end_layout
 
 \end_inset
@@ -2093,7 +2093,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \end_layout
 
 \end_inset
@@ -2167,7 +2167,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \end_layout
 
 \end_inset
@@ -2389,7 +2389,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \end_layout
 
 \end_inset
@@ -2463,7 +2463,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \end_layout
 
 \end_inset
@@ -2537,7 +2537,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \end_layout
 
 \end_inset
@@ -2738,7 +2738,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \end_layout
 
 \end_inset
@@ -2747,7 +2747,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \end_layout
 
 \end_inset
@@ -2756,7 +2756,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \end_layout
 
 \end_inset
@@ -2868,7 +2868,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \end_layout
 
 \end_inset
@@ -2942,7 +2942,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \end_layout
 
 \end_inset
@@ -3016,7 +3016,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \end_layout
 
 \end_inset
@@ -3238,7 +3238,7 @@ MM
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP
+PT1
 \end_layout
 
 \end_inset
@@ -3312,7 +3312,7 @@ GP
 \begin_inset Text
 
 \begin_layout Plain Layout
-GP-R
+PT2
 \end_layout
 
 \end_inset
@@ -3386,7 +3386,7 @@ GP-R
 \begin_inset Text
 
 \begin_layout Plain Layout
-AQ+R
+SCF
 \end_layout
 
 \end_inset
