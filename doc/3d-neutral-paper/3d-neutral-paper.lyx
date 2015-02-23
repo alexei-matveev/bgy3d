@@ -66,7 +66,7 @@
 \begin_body
 
 \begin_layout Title
-Combination of 3D-RISM with ParaGauss
+Combination of three dimensional reference interaction site model with ParaGauss
 \end_layout
 
 \begin_layout Author
@@ -470,14 +470,14 @@ Here
 \begin_inset space ~
 \end_inset
 
-(
+
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:rism-uv"
 
 \end_inset
 
-), the solvent is represented by its (square symmetric) susceptibility matrix
+, the solvent is represented by its (square symmetric) susceptibility matrix
  
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
@@ -537,14 +537,14 @@ Similar to 1D-RISM case, the closure relation is needed to render the Eq.
 \begin_inset space ~
 \end_inset
 
-(
+
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:rism-uv"
 
 \end_inset
 
-) solvable.
+ solvable.
  In this paper, the Kovalenko and Hirata (KH) 
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -596,7 +596,7 @@ key "Singer85"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[|h_{\alpha}|^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r
+\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[|h_{\alpha}|^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r\label{eq:mu}
 \end{equation}
 
 \end_inset
@@ -621,14 +621,14 @@ key "Kovalenko99a"
 \begin_inset space ~
 \end_inset
 
-(
+
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:rism-uv"
 
 \end_inset
 
-), between the total and direct correlation functions 
+, between the total and direct correlation functions 
 \begin_inset Formula $h$
 \end_inset
 
@@ -918,7 +918,7 @@ key "Sergiievskyi14"
 \begin_inset Formula $\tilde{c}_{\alpha\gamma}^{\text{v}}(k)$
 \end_inset
 
- is the Fourier representation of direct correlation function pure solvent.
+ is the Fourier representation of direct correlation function of pure solvent.
  By way of the 1D RISM equations used to evaluate the solvent properties
  the rate coefficient may be alternatively expressed via the solvent compressibi
 lity factor: 
@@ -927,7 +927,7 @@ lity factor:
 
 .
  The dimensionless PMV of solute 
-\begin_inset Formula $\rho V_{\text{u}}=z\left(1-\rho\sum_{\alpha=1}^{N_{\text{v}}}\tilde{c}_{\alpha}(0)\right)$
+\begin_inset Formula $\rho V_{\text{u}}=z\left(1-\rho\sum_{\alpha}\tilde{c}_{\alpha}(0)\right)$
 \end_inset
 
  involves the 3D direct correlation functions 
@@ -951,7 +951,7 @@ key "book:Hirata03,Palmer10"
 \end_inset
 
  are rather computed as volume integrals of real-space representations 
-\begin_inset Formula $c_{\alpha\gamma}(r)$
+\begin_inset Formula $c_{\alpha\gamma}^{\text{v}}(r)$
 \end_inset
 
  and 
@@ -1438,8 +1438,19 @@ An intuitive result for the reaction field contributing to the Kohn--Sham
 \end_inset
 
 , to be a mean Coulomb field of the solvent volume charge relies on the
- observation that the KH expression for the excess chemical potential is
- a path-independent work integral 
+ observation that HNC and KH expressions for the excess chemical potential,
+ Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:mu"
+
+\end_inset
+
+, are path-independent work integrals 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85,Kast08"
