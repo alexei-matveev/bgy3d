@@ -1787,7 +1787,7 @@ kcal/mol in average.
 \begin_inset Formula $r$
 \end_inset
 
-=0.89 and MAD=1.57
+=0.88 and MAD=1.57
 \begin_inset space ~
 \end_inset
 
@@ -4372,17 +4372,18 @@ ed results is 4.88, higher than the correction coefficient 4.22 which we derived
 \end_layout
 
 \begin_layout Subsection
-FED/3D-RISM
+PT1/3D-RISM
 \end_layout
 
 \begin_layout Standard
 Our second combination strategy is to replace the partial atomic charge
- representation of solute sites as frozen electron density distributed in
+ representation of solute sites as frozen charge density distributed in
  the simulation cell.
- Here the FED of solute is determined only from the gas-phase QM calculations,
- while the water solvent distribution functions around solutes are solved
- from 3D-RISM equation, with the electrostatic interaction between solute
- and solvent determined with the ESP field of solute FED.
+ Here the charge density of solute is determined from the unperturbed gas-phase
+ QM calculations, while the water solvent distribution functions around
+ solutes are solved from 3D-RISM equation, with the electrostatic interaction
+ between solute and solvent calculated by placing the solvent site in the
+ ESP field of solute charge density.
  From the correlation coefficient matrix of Table
 \begin_inset space ~
 \end_inset
@@ -4394,7 +4395,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- one could notice that the uncorrected FED/3D-RISM and uncorrected MM/3D-RISM
+ one could notice that the uncorrected PT1/3D-RISM and uncorrected MM/3D-RISM
  are strongly linear correlated, with 
 \begin_inset Formula $r$
 \end_inset
@@ -4414,8 +4415,7 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, which proves the small difference between results from uncorrected FED/3D-RISM
- and uncorrected MM/3D-RISM.
+, which proves the small difference between them.
  Therefore, it is not surprising to find again the weak linear correlation
  relationship when comparing uncorrected FED/3D-RISM with experimental values,
  with 
@@ -4494,7 +4494,7 @@ name "fig:Dipole-moment"
 \end_layout
 
 \begin_layout Standard
-Again we could easily inspect how the correction works in FED calculation
+Again we could easily inspect how the correction works in PT1 calculation
  from Fig.
  
 \begin_inset space ~
@@ -4554,10 +4554,8 @@ kcal/mol.
 kcal/mol.
  The performance of applying correction term is similar as in MM method,
  yet with higher residence error.
- Here we need to emphasize that the slope fitted from uncorrected FED result
+ Here we need to emphasize that the slope fitted from uncorrected PT1 result
  is 5.12, slightly higher than 4.88 in MM method.
- This could be interpreted from the slope of the fitting line from uncorrected
- FED result, which is 5.12 and higher than 4.88 in MM method.
  And this difference is due to be expected, since the ESP derived from atomic
  charge based on force field database, is not necessarily the same with
  that from electron density.
@@ -4573,26 +4571,26 @@ reference "fig:Dipole-moment"
 
 \end_inset
 
-, in which the dipole moments of a gas phase solute, calculated with MM
- method and FED, show a moderate linear correlation.
- The slope of linear fitting is 0.81, with 
+, in which the dipole moments of gas phase solutes, calculated with MM method
+ and unperturbed gas-phase charge density, show a moderate linear correlation.
+ The slope of linear fitting is 0.84, with 
 \begin_inset Formula $R^{2}$
 \end_inset
 
 =0.68.
  Despite the tiny difference between the electrostatic property of solutes
- obtained from MM and FED, we could still reach the conclusion that by replacing
- the atomic partial charge on neutral solute sites as frozen electron density
- representation, the solvation free energy calculated from FED/3D-RISM is
- in the same accuracy with MM method.
+ obtained from MM and PT1 method, we could still reach the conclusion that
+ by replacing the atomic partial charge on neutral solute sites as unperturbed
+ gas-phase charge density, the solvation free energy calculated from PT1/3D-RISM
+ is at the same level of accuracy with MM method.
  The effect of solute cavity formation contributes the most part to the
  error of solvation free energy calculation for neutral solute, thus by
  introducing the correction term, the calculated solvation free energy with
- FED is comparable with experimental results.
+ PT1 is comparable with experimental results.
 \end_layout
 
 \begin_layout Subsection
-QM/3D-RISM
+PT2/3D-RISM
 \end_layout
 
 \begin_layout Standard
