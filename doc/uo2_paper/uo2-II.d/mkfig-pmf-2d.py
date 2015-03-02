@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 from __future__ import division, print_function
 import sys
 from mpl_toolkits.mplot3d import Axes3D
@@ -6,6 +7,8 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
+
+# FIXME: uses ParaTools to find the stationary point
 
 beta = 1.6889 # kcal^-1
 T = 1 / beta
@@ -101,9 +104,9 @@ cset = ax.contour(X, Y, Z, zdir='z', offset=-5, cmap=cm.coolwarm)
 ax.scatter (ex[:, 1], ex[:, 0], zs=-5, c="black")
 
 ax.set_zlim (-5.0, 5.0)
-ax.set_xlabel ('x, A')
-ax.set_ylabel ('y, A')
-ax.set_zlabel ('W(x,y), kcal/mol')
+ax.set_xlabel (u'r, Å')
+ax.set_ylabel (u'z, Å')
+ax.set_zlabel (u'W(r,z), kcal/mol')
 
 ax.zaxis.set_major_locator(LinearLocator(3))
 # ax.zaxis.set_major_formatter(FormatStrFormatter('%.01f'))
