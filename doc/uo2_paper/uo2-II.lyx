@@ -3211,7 +3211,7 @@ key "Bo15"
 
 , the MM+RISM combination features a vacancy in the equatorial plane of
  the uranyl that corresponds to the location of the missing water ligand,
- Figure
+ Fig.
 \begin_inset space ~
 \end_inset
 
@@ -3293,7 +3293,7 @@ reference "tab:mm-rism"
 \begin_layout Standard
 The mechanism by which the MM+RISM model compensates for the missing ligand
  is a local increase of the water density at the location of the missing
- explicit ligand, Figure
+ explicit ligand, Fig.
 \begin_inset space ~
 \end_inset
 
@@ -4158,7 +4158,7 @@ Bond lengths in pm, energies in kcal/mol.
 
  structure in the gas phase (GP), but the structures from RISM calculations
  feature a vacancy in the equatorial plane that corresponds to the missing
- ligand, see Figure
+ ligand, see Fig.
 \begin_inset space ~
 \end_inset
 
@@ -4380,7 +4380,7 @@ key "Bo15"
 \begin_inset Formula $_{\text{w}}$
 \end_inset
 
- RDFs from the models without any explicit water ligands of uranyl (Figure
+ RDFs from the models without any explicit water ligands of uranyl (Fig.
 \begin_inset space ~
 \end_inset
 
@@ -4391,7 +4391,7 @@ reference "fig:rdfs-vs-closure-0w"
 
 \end_inset
 
-) and with five such water ligands (Figure
+) and with five such water ligands (Fig.
 \begin_inset space ~
 \end_inset
 
@@ -4413,7 +4413,7 @@ reference "fig:rdfs-vs-closure-5w"
 \end_inset
 
  RDFs with PSE closures of orders 1 to 3, respectively, are overestimated
- in the model without explicit aqua ligands (Figure
+ in the model without explicit aqua ligands (Fig.
 \begin_inset space ~
 \end_inset
 
