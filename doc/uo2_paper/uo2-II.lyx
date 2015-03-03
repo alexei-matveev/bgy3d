@@ -2020,7 +2020,7 @@ key "Dunlap90"
 
  as implemented in the parallel code ParaGauss 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand citep
 key "ParaGaussV3.2"
 
 \end_inset
