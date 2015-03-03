@@ -2007,6 +2007,54 @@ reference "eq:tau"
 
 Å.
  
+\color blue
+With these parameters a cold-start calculation of solvent susceptibility,
+ solvation energy, and corresponding forces for uranyl with six explicit
+ water molecules takes about 40 seconds on 8 cores of two Intel
+\begin_inset Formula $^{\circledR}$
+\end_inset
+
+ Xeon
+\begin_inset Formula $^{\circledR}$
+\end_inset
+
+ E5630 @ 2.53
+\begin_inset space ~
+\end_inset
+
+GHz CPUs with parallel efficiency above 40%.
+ Non-linear solver converges in 8 iterations with about 380 Jacobian application
+s.
+ 
+\color inherit
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Uranyl with 6w (8 SNES iterations, 378 Krylov iterations):
+\end_layout
+
+\begin_layout Itemize
+8 cores, energy: 33.714 sec = (33.669 + 33.552 + 33.921) / 3
+\end_layout
+
+\begin_layout Itemize
+8 cores, forces: 38.425 sec = (38.423 + 38.429 + 38.292 + 38.517 + 38.463) / 5
+\end_layout
+
+\begin_layout Itemize
+1 core, forces: 130.122 sec = ((2*60+10.416) + (2*60+10.380) + (2*60+9.569))
+ / 3
+\end_layout
+
+\begin_layout Plain Layout
+Speedup: 3.39; efficiency: 0.42.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
