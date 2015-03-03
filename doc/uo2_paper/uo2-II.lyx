@@ -2,14 +2,14 @@
 \lyxformat 413
 \begin_document
 \begin_header
-\textclass revtex4
+\textclass elsarticle
 \begin_preamble
-\usepackage{mathptmx}
-\usepackage{times}
+%\usepackage{mathptmx}
+%\usepackage{times}
 \usepackage{microtype}
-\def\thetable{\arabic{table}}
+%\def\thetable{\arabic{table}}
 \end_preamble
-\options twocolumn,showkeys,superscriptaddress
+\options 5p,sort&compress,times
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -31,6 +31,7 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
+\float_placement t
 \paperfontsize default
 \spacing single
 \use_hyperref false
@@ -40,7 +41,7 @@
 \use_esint 1
 \use_mhchem 1
 \use_mathdots 1
-\cite_engine basic
+\cite_engine natbib_numerical
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
@@ -73,46 +74,124 @@ Uranyl solvation by a three-dimensional reference interaction site model
 
 \begin_layout Author
 Alexei Matveev
+\begin_inset Flex CorAuthormark
+status open
+
+\begin_layout Plain Layout
+corr
 \end_layout
 
-\begin_layout Affiliation
-Department Chemie, Technische Universität München, 85747 Garching, Germany
+\end_inset
+
+
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+tum
 \end_layout
 
-\begin_layout Author Email
+\end_inset
 
+
+\end_layout
+
+\begin_layout Email
 alexei.matveev@gmail.com
 \end_layout
 
 \begin_layout Author
 Bo Li
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+tum
 \end_layout
 
-\begin_layout Affiliation
-Department Chemie, Technische Universität München, 85747 Garching, Germany
+\end_inset
+
+
+\end_layout
+
+\begin_layout Email
+fixme@abc.com
 \end_layout
 
 \begin_layout Author
 Notker Rösch
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+crc,ihpc
 \end_layout
 
-\begin_layout Affiliation
-Department Chemie and Catalysis Research Center, Technische Universität
- München, 85747 Garching, Germany
+\end_inset
+
+
 \end_layout
 
-\begin_layout Affiliation
-Institute of High Performance Computing, Agency for Science, Technology
- and Research, 1 Fusionopolis Way, Connexis #16-16, Singapore 138632, Singapore
-\end_layout
-
-\begin_layout Author Email
-
+\begin_layout Email
 roesch@mytum.de
 \end_layout
 
-\begin_layout Date
-Feb 2015
+\begin_layout Corresponding author
+Corresponding author
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+corr
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+Department Chemie, Technische Universität München, 85747 Garching, Germany
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+tum
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+Department Chemie and Catalysis Research Center, Technische Universität
+ München, 85747 Garching, Germany
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+crc
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+Institute of High Performance Computing, Agency for Science, Technology
+ and Research, 1 Fusionopolis Way, Connexis #16-16, Singapore 138632, Singapore
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+ihpc
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -2317,6 +2396,13 @@ name "tab:simple-ions"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -2324,7 +2410,7 @@ status open
 
 
 \backslash
-begin{ruledtabular}
+small
 \end_layout
 
 \end_inset
@@ -2333,6 +2419,7 @@ begin{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
@@ -2344,7 +2431,7 @@ begin{ruledtabular}
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2353,7 +2440,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2366,7 +2453,7 @@ Li
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2379,7 +2466,7 @@ Na
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2392,7 +2479,7 @@ K
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2405,7 +2492,7 @@ Cl
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2418,7 +2505,7 @@ Br
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2862,7 +2949,7 @@ MD
 </cell>
 </row>
 <row>
-<cell alignment="left" valignment="top" usebox="none">
+<cell alignment="left" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2875,7 +2962,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2887,7 +2974,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2899,7 +2986,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2911,7 +2998,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2923,7 +3010,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2935,7 +3022,7 @@ Exp
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" usebox="none">
+<cell alignment="right" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -2956,6 +3043,10 @@ Exp
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
 \begin_inset ERT
 status open
 
@@ -2963,7 +3054,7 @@ status open
 
 
 \backslash
-end{ruledtabular}
+footnotesize
 \end_layout
 
 \end_inset
@@ -2972,19 +3063,6 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext{
-\end_layout
-
-\end_inset
-
-
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -3075,16 +3153,6 @@ key "Schmid00"
 \end_inset
 
 .
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
  
 \end_layout
 
@@ -3424,6 +3492,13 @@ name "tab:mm-rism"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -3431,7 +3506,7 @@ status open
 
 
 \backslash
-begin{ruledtabular}
+small
 \end_layout
 
 \end_inset
@@ -3440,6 +3515,7 @@ begin{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="6">
 <features tabularvalignment="middle">
@@ -3450,7 +3526,7 @@ begin{ruledtabular}
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3462,7 +3538,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3471,7 +3547,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3480,7 +3556,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3497,7 +3573,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3506,7 +3582,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3964,7 +4040,7 @@ PSE2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3973,7 +4049,7 @@ PSE2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3982,7 +4058,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -3994,7 +4070,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4007,7 +4083,7 @@ na
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4019,7 +4095,7 @@ na
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4040,6 +4116,10 @@ na
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
 \begin_inset ERT
 status open
 
@@ -4047,7 +4127,7 @@ status open
 
 
 \backslash
-end{ruledtabular}
+footnotesize
 \end_layout
 
 \end_inset
@@ -4056,19 +4136,6 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext{
-\end_layout
-
-\end_inset
-
- 
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -4144,17 +4211,6 @@ The GP results show binding energies of
 
 pm.
  
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -4245,6 +4301,13 @@ cut slice
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace smallskip
 \end_inset
 
 
@@ -4790,6 +4853,13 @@ name "tab:qm+rism-vs-qm+pcm"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -4797,7 +4867,7 @@ status open
 
 
 \backslash
-begin{ruledtabular}
+small
 \end_layout
 
 \end_inset
@@ -4806,6 +4876,7 @@ begin{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="16" columns="6">
 <features tabularvalignment="middle">
@@ -4816,7 +4887,7 @@ begin{ruledtabular}
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4828,7 +4899,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4837,7 +4908,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4846,7 +4917,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4859,7 +4930,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -4872,7 +4943,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5733,7 +5804,7 @@ PSE2
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5742,7 +5813,7 @@ PSE2
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5751,7 +5822,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5763,7 +5834,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5775,7 +5846,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5787,7 +5858,7 @@ PSE3
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -5808,6 +5879,10 @@ PSE3
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
 \begin_inset ERT
 status open
 
@@ -5815,7 +5890,7 @@ status open
 
 
 \backslash
-end{ruledtabular}
+footnotesize
 \end_layout
 
 \end_inset
@@ -5824,19 +5899,6 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext{
-\end_layout
-
-\end_inset
-
- 
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -5924,17 +5986,6 @@ Binding energies of
 
  aqua ligands.
  
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -6003,6 +6054,13 @@ name "fig:rdfs-vs-closure-0w"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \align center
 \begin_inset Graphics
 	filename uo2-II.d/fig2.svg
@@ -6052,6 +6110,13 @@ name "fig:rdfs-vs-closure-5w"
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace smallskip
 \end_inset
 
 
@@ -6495,6 +6560,13 @@ name "fig:potential-of-mean-force"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \align center
 \begin_inset Graphics
 	filename uo2-II.d/pmf.svg
@@ -6536,7 +6608,7 @@ Extrema
 
 , between the first and the second solvation shell, extracted from the curves
  in Fig.
-\begin_inset space \space{}
+\begin_inset space ~
 \end_inset
 
 
@@ -6563,6 +6635,13 @@ name "tab:pmf-extrema"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -6570,7 +6649,7 @@ status open
 
 
 \backslash
-begin{ruledtabular}
+small
 \end_layout
 
 \end_inset
@@ -6579,6 +6658,7 @@ begin{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="8">
 <features tabularvalignment="middle">
@@ -6591,7 +6671,7 @@ begin{ruledtabular}
 <column alignment="right" valignment="top" width="0">
 <column alignment="right" valignment="top" width="0">
 <row>
-<cell alignment="left" valignment="top" bottomline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6600,7 +6680,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6612,7 +6692,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6624,7 +6704,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6636,7 +6716,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6648,7 +6728,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="right" valignment="top" bottomline="true" usebox="none">
+<cell alignment="right" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6660,7 +6740,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6672,7 +6752,7 @@ begin{ruledtabular}
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6926,7 +7006,7 @@ PSE3
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6935,7 +7015,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6944,7 +7024,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6956,7 +7036,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6965,7 +7045,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6974,7 +7054,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6983,7 +7063,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -6995,7 +7075,7 @@ MD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
+<cell alignment="center" valignment="top" bottomline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -7013,6 +7093,10 @@ MD
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace smallskip
+\end_inset
+
+
 \begin_inset ERT
 status open
 
@@ -7020,7 +7104,7 @@ status open
 
 
 \backslash
-end{ruledtabular}
+footnotesize
 \end_layout
 
 \end_inset
@@ -7029,19 +7113,6 @@ end{ruledtabular}
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-footnotetext{
-\end_layout
-
-\end_inset
-
-
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -7064,17 +7135,6 @@ Distances in pm, energies in kcal/mol.
 \end_inset
 
  marks the highest point of the PMF curve between the two minima.
- 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-}
-\end_layout
-
-\end_inset
-
  
 \end_layout
 
@@ -7132,6 +7192,13 @@ NR: Note the change in the designators of the axes.
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace smallskip
 \end_inset
 
 
@@ -7240,6 +7307,11 @@ NR: 5+1 explicit water molecules? In any case, the models need to characterized
 \end_layout
 
 \begin_layout Plain Layout
+\align center
+\begin_inset VSpace smallskip
+\end_inset
+
+
 \begin_inset Graphics
 	filename uo2-II.d/profiles.svg
 	width 100line%
@@ -8209,10 +8281,15 @@ Jager for providing the source of BGY3D program package.
 01RC1106A).
 \end_layout
 
+\begin_layout Section*
+References
+\end_layout
+
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "uo2"
+options "elsarticle-num"
 
 \end_inset
 
