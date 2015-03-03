@@ -1665,7 +1665,7 @@ For superpositions of point charges
 \end_inset
 
  representing solute sites at 
-\begin_inset Formula $r_{i}$
+\begin_inset Formula $\vec{r}_{i}$
 \end_inset
 
  the form factor is evaluated on the 3D 
@@ -1695,7 +1695,7 @@ key "FFTW05"
 \color inherit
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 NR: Some more details pls.
@@ -1797,7 +1797,7 @@ key "Kovalenko00b"
 \color inherit
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 NR: Incomprehensible.
