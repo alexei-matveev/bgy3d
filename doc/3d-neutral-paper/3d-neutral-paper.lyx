@@ -5052,7 +5052,7 @@ Griebel for providing the source of the BGY3D program package.
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "3d-neutral-paper,../uo2_paper/uo2"
+bibfiles "../bibliography"
 
 \end_inset
 
