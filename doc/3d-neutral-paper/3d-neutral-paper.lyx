@@ -1722,7 +1722,7 @@ Max deviation of PMV gp vs mm: 5%, aq vs gp 2%.
 \end_layout
 
 \begin_layout Subsection
-MM-RISM
+Force field solute model: MM-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4370,7 +4370,7 @@ ed results is 4.88, higher than the correction coefficient 4.22 which we derived
 \end_layout
 
 \begin_layout Subsection
-PT1-RISM
+Unperturbed QM solute in solution: PT1-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4588,7 +4588,7 @@ reference "fig:Dipole-moment"
 \end_layout
 
 \begin_layout Subsection
-PT2-RISM
+Estimating response to the solvent field: PT2-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4794,7 +4794,7 @@ kcal/mol.
 \end_layout
 
 \begin_layout Subsection
-SCF-RISM
+Self-consistent reaction field: SCF-RISM
 \end_layout
 
 \begin_layout Standard
