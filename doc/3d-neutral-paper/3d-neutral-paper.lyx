@@ -4372,6 +4372,75 @@ kcal/mol, higher than the correction coefficient 4.22
 \end_inset
 
 kcal/mol which we derived from the solvent.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+AM: It appears that the correlation coefficient 
+\begin_inset Formula $-1\leq r\leq1$
+\end_inset
+
+ (signed in general) of two 
+\begin_inset Quotes eld
+\end_inset
+
+random
+\begin_inset Quotes erd
+\end_inset
+
+ variables 
+\begin_inset Formula $Y$
+\end_inset
+
+ and 
+\begin_inset Formula $X$
+\end_inset
+
+ is related to the (unsigned) 
+\begin_inset Formula $R^{2}\leq1$
+\end_inset
+
+ of the linear fit 
+\begin_inset Formula $Y=AX+B$
+\end_inset
+
+ in an obvious manner.
+ However I could live with two slightly different notations as long as we
+ use the correlation 
+\begin_inset Formula $r$
+\end_inset
+
+ for the 
+\emph on
+like-variables
+\emph default
+ (e.g.
+ computed energy vs.
+ experimental energy) and 
+\begin_inset Formula $R$
+\end_inset
+
+-squared for the 
+\emph on
+factor roles
+\emph default
+ 
+\begin_inset Quotes eld
+\end_inset
+
+explaining
+\begin_inset Quotes erd
+\end_inset
+
+ variations of, say, energy by variation of the molar volume.
+ Treating cross correlations of energies and volumes on equal footing would
+ be way too abstract in the current context.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
