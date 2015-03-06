@@ -1782,10 +1782,14 @@ reference "tab:mad-matrix"
 kcal/mol in average.
  After the PMV correction was applied, the linear correlation relationship
  between MM-RISM and experiments are greatly improved, with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.88$
 \end_inset
 
-=0.88 and MAD=1.57
+ and 
+\begin_inset Formula $\text{MAD}=1.57$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4365,8 +4369,15 @@ kcal/mol.
  for the error of solvation free energy in 3D RISM calculation.
  The remaining error noises in corrected results are partially due to the
  accuracy of the correction coefficient, since the fitted slope in the uncorrect
-ed results is 4.88, higher than the correction coefficient 4.22 which we derived
- from the solvent.
+ed results is 4.88
+\begin_inset space ~
+\end_inset
+
+kcal/mol, higher than the correction coefficient 4.22
+\begin_inset space ~
+\end_inset
+
+kcal/mol which we derived from the solvent.
 \end_layout
 
 \begin_layout Subsection
@@ -4395,10 +4406,14 @@ reference "tab:correcoeff-matrix"
 
  one could notice that the uncorrected PT1-RISM and uncorrected MM-RISM
  are strongly linear correlated, with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.98$
 \end_inset
 
-=0.98, and MAD=0.95
+, and 
+\begin_inset Formula $\text{MAD}=0.95$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4417,30 +4432,42 @@ reference "tab:mad-matrix"
  Therefore, it is not surprising to find again the weak linear correlation
  relationship when comparing uncorrected PT1-RISM with experimental values,
  with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.33$
 \end_inset
 
-=0.33 and MAD=17.57
+ and 
+\begin_inset Formula $\text{MAD}=17.57$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
  Again the linear correlation was dramatically increased when PMV correction
  was introduced, with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.88$
 \end_inset
 
-=0.88 and MAD=1.40
+ and 
+\begin_inset Formula $\text{MAD}=1.40$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
  By comparing the MM and PT1 methods both with the PMV correction, we found
  that the results are still quite close to each other, with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.90$
 \end_inset
 
-=0.90 and MAD=0.94
+ and 
+\begin_inset Formula $\text{MAD}=0.94$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4524,10 +4551,10 @@ reference "tab:Linear-correlation-Delta2G"
  The difference between uncorrected solvation free energy with experimental
  value shows the significant linear correlation with PMV, of which the linear
  fitting gives results with 
-\begin_inset Formula $R^{2}$
+\begin_inset Formula $R^{2}=0.97$
 \end_inset
 
-=0.97 and intercept equal to 
+ and intercept equal to 
 \begin_inset Formula $-$
 \end_inset
 
@@ -4553,7 +4580,15 @@ kcal/mol.
  The performance of applying correction term is similar as in MM method,
  yet with higher residence error.
  Here we need to emphasize that the slope fitted from uncorrected PT1 result
- is 5.12, slightly higher than 4.88 in MM method.
+ is 5.12
+\begin_inset space ~
+\end_inset
+
+kcal/mol, slightly higher than 4.88
+\begin_inset space ~
+\end_inset
+
+kcal/mol in MM method.
  And this difference is due to be expected, since the ESP derived from atomic
  charge based on force field database, is not necessarily the same with
  that from electron density.
@@ -4572,10 +4607,10 @@ reference "fig:Dipole-moment"
 , in which the dipole moments of gas phase solutes, calculated with MM method
  and unperturbed gas-phase charge density, show a moderate linear correlation.
  The slope of linear fitting is 0.84, with 
-\begin_inset Formula $R^{2}$
+\begin_inset Formula $R^{2}=0.68$
 \end_inset
 
-=0.68.
+.
  Despite the tiny difference between the electrostatic property of solutes
  obtained from MM and PT1 method, we could still reach the conclusion that
  by replacing the atomic partial charge on neutral solute sites as unperturbed
@@ -4646,18 +4681,26 @@ reference "tab:mad-matrix"
 , we find that the solvation free energy from the uncorrected PT2-RISM calculati
 on is strongly linear correlated with the MM and PT1 treatment of solute,
  with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.99$
 \end_inset
 
-=0.99, MAD=1.28
+, 
+\begin_inset Formula $\text{MAD}=1.28$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
 kcal/mol and 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.96$
 \end_inset
 
-=0.96, MAD=1.66
+, 
+\begin_inset Formula $\text{MAD}=1.66$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4667,10 +4710,14 @@ kcal/mol respectively.
  value, is the same in both methods.
  When comparing the uncorrected PT2 results with experiments, we could observe
  that the linear correlation between them is even weakened, with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.20$
 \end_inset
 
-=0.20 and MAD=19.10
+ and 
+\begin_inset Formula $\text{MAD}=19.10$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4680,7 +4727,7 @@ kcal/mol, which is more than 1
 
 kcal/mol higher than the MM and PT1 results.
  The increase of deviation is caused by the electron relaxation effect introduce
-d in PT2/RISM combination.
+d in PT2-RISM combination.
  Since from the previous discussion we already know that the solute cavity
  formation contributes the most for the error of solvation free energy,
  therefore it will be interesting to investigate the contribution of electron
@@ -4698,11 +4745,11 @@ reference "tab:correcoeff-matrix"
 
 , the correlation coefficient between PT2-RISM with experimental results
  increases to 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.89$
 \end_inset
 
-=0.89, after PMV correction is applied, which is almost the same with MM
- and PT1 method.
+, after PMV correction is applied, which is almost the same with MM and
+ PT1 method.
  However, the existence of the error induced by the solute electronic relaxation
  could be found in Table
 \begin_inset space ~
@@ -4755,11 +4802,15 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- with PMV gives the slope for fitted line equal to 4.91, 
-\begin_inset Formula $R^{2}$
+ with PMV gives the slope for fitted line equal to 4.91
+\begin_inset space ~
 \end_inset
 
-=0.98, with intercept equal to 
+kcal/mol, 
+\begin_inset Formula $R^{2}=0.98$
+\end_inset
+
+, with intercept equal to 
 \begin_inset Formula $-$
 \end_inset
 
@@ -4770,10 +4821,10 @@ reference "tab:Linear-correlation-Delta2G"
 kcal/mol.
  With PMV correction applied, the linearity diminished with the slope of
  fitting line equal to 0.69, 
-\begin_inset Formula $R^{2}$
+\begin_inset Formula $R^{2}=0.49$
 \end_inset
 
- = 0.49, yet the intercept remained as 
+ , yet the intercept remained as 
 \begin_inset Formula $-$
 \end_inset
 
@@ -4862,10 +4913,14 @@ t combination of QM with 3D RISM.
  With no correction term applied in SCF-RISM calculation, the solute cavity
  formation effect still dominates the error in solvation free energy results,
  with 
-\begin_inset Formula $r$
+\begin_inset Formula $r=0.36$
 \end_inset
 
- = 0.36 and MAD = 16.06
+ and 
+\begin_inset Formula $\text{MAD}=16.06$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
@@ -4907,8 +4962,15 @@ kcal/mol.
  structure and solvent medium to each other simultaneously, the results
  are different with cases in which only one-way response is considered.
  After PMV correction is applied in SCF-RISM calculation, we also obtained
- results which are in good agreement with experimental values, with r =
- 0.86 and MAD = 1.55 kcal/mol.
+ results which are in good agreement with experimental values, with 
+\begin_inset Formula $r=0.86$
+\end_inset
+
+ and 
+\begin_inset Formula $\text{MAD}=1.55$
+\end_inset
+
+ kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
  slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
  kcal/mol for MM, PT1 and PT2 method respectively.
@@ -4947,11 +5009,15 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- with PMV, which has the fitted slope equal to 5.13, 
-\begin_inset Formula $R^{2}$
+ with PMV, which has the fitted slope equal to 5.13
+\begin_inset space ~
 \end_inset
 
- = 0.92 and intercept equal to 
+kcal/mol, 
+\begin_inset Formula $R^{2}=0.92$
+\end_inset
+
+ and intercept equal to 
 \begin_inset Formula $-$
 \end_inset
 
@@ -4988,10 +5054,10 @@ kcal/mol.
 \end_inset
 
 kcal/mol, with the slope equal to 0.92 and 
-\begin_inset Formula $R^{2}$
+\begin_inset Formula $R^{2}=0.27$
 \end_inset
 
- = 0.27.
+ .
  From the results of SCF-RISM results, we find that for neutral solutes,
  the correction which is responsible for the solute cavity formation is
  not enough to determine the accuracy of solvation free energy calculation.
@@ -5007,15 +5073,15 @@ Conclusions
 \end_layout
 
 \begin_layout Standard
-The investigation of SCF QM combination with RISM model reveals that for
- neutral solutes, the accuracy of the calculated solvation free energy is
- mainly determined by the solute cavity formation.
+The investigation of self-cosistent QM combination with RISM model reveals
+ that for neutral solutes, the accuracy of the calculated solvation free
+ energy is mainly determined by the solute cavity formation.
  The better agreement with experimental results could be obtained by applying
  partial molar volume correction as reported also in previous non-SCF studies.
  Another important factor, the change of the solute electrostatic property,
  which is perturbed by the solvent medium, is also found to have noticeable
  contribution to the solvation free energy calculation.
- Meanwhile, from the RDF in SCF/RISM, we found that the rearrangement of
+ Meanwhile, from the RDF in SCF-RISM, we found that the rearrangement of
  the solute charge density calculation causes the strengthening of the hydrogen
  bond between solute and water solvent.
 \end_layout
