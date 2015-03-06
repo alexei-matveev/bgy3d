@@ -10273,7 +10273,7 @@ Chiorescu for helpful discussions.
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-bibfiles "uo2"
+bibfiles "../bibliography"
 
 \end_inset
 

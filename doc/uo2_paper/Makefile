@@ -16,7 +16,7 @@ $d/fig1.svg: $d/mkfig1.py $d/md-oh.dat $d/md-oo.dat $d/md-uh.dat $d/md-uo.dat $d
 # PDF2  format  is  produced  by  pdfTeX.  LyX  uses  rsvg-convert  or
 # Inkscape to convert SVG -> PDF:
 #
-%.pdf: %.lyx %.bib $d/fig1.svg $d/fig2.svg $d/fig3.pdf
+%.pdf: %.lyx ../bibliography.bib $d/fig1.svg $d/fig2.svg $d/fig3.pdf
 	lyx --export pdf2 $(<)
 
 %.pdf: %.svg
