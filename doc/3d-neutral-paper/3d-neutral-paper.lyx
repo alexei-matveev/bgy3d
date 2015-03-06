@@ -4554,14 +4554,14 @@ reference "tab:Linear-correlation-Delta2G"
 kcal/mol.
  With PMV correction applied, the linear correlation breaks as in MM model,
  with 
-\begin_inset Formula $R^{2}$
+\begin_inset Formula $R^{2}=0.51$
 \end_inset
 
-=0.51 and intercept = 
-\begin_inset Formula $-$
+ and intercept 
+\begin_inset Formula $B=-2.49$
 \end_inset
 
-2.49
+
 \begin_inset space ~
 \end_inset
 
