@@ -3524,7 +3524,7 @@ Correlation between the calculated partial molar volume
 \end_inset
 
  between the experiments and solvation free energy calculated by 3D-RISM
- with different solute representations: a) MM, b) PT1, c) QM and d) SCF.
+ with different solute representations: a) MM, b) PT1, c) PT2 and d) SCF.
  Gray squares stand for uncorrected results and white solid circles for
  corrected results, both with the linear fitting line shown for clarification.
  
@@ -4462,7 +4462,7 @@ status open
 
 \begin_layout Plain Layout
 Comparison of dipole moment of solute: a) in gas phase between MM with PT1
- model, and b) in aqueous phase between QM, SCF with PCM model.
+ model, and b) in aqueous phase between PT2, SCF with PCM model.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -4646,7 +4646,7 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, we find that the solvation free energy from the uncorrected QM/3D-RISM
+, we find that the solvation free energy from the uncorrected PT2/3D-RISM
  calculation is strongly linear correlated with the MM and PT1 treatment
  of solute, with 
 \begin_inset Formula $r$
@@ -4665,10 +4665,10 @@ kcal/mol and
 \end_inset
 
 kcal/mol respectively.
- The better agreement between QM and MM is easy to understand, because the
- excess chemical potential which dominates the solvation free energy value,
- is the same in both methods.
- When comparing the uncorrected QM results with experiments, we could observe
+ The better agreement between PT2 and MM is easy to understand, because
+ the excess chemical potential which dominates the solvation free energy
+ value, is the same in both methods.
+ When comparing the uncorrected PT2 results with experiments, we could observe
  that the linear correlation between them is even weakened, with 
 \begin_inset Formula $r$
 \end_inset
@@ -4683,7 +4683,7 @@ kcal/mol, which is more than 1
 
 kcal/mol higher than the MM and PT1 results.
  The increase of deviation is caused by the electron relaxation effect introduce
-d in QM/RISM combination.
+d in PT2/RISM combination.
  Since from the previous discussion we already know that the solute cavity
  formation contributes the most for the error of solvation free energy,
  therefore it will be interesting to investigate the contribution of electron
@@ -4699,7 +4699,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
-, the correlation coefficient between QM/3D-RISM with experimental results
+, the correlation coefficient between PT2/3D-RISM with experimental results
  increases to 
 \begin_inset Formula $r$
 \end_inset
@@ -4718,7 +4718,7 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, in which the MAD of QM/3D-RISM with experimental results is 2.62
+, in which the MAD of PT2/3D-RISM with experimental results is 2.62
 \begin_inset space ~
 \end_inset
 
@@ -4900,7 +4900,7 @@ reference "tab:mad-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- equal to 0.94, 0.97 and 0.93 with MM, PT1 and QM method respectively, the
+ equal to 0.94, 0.97 and 0.93 with MM, PT1 and PT2 method respectively, the
  deviations are noticeable, which are 2.20, 1.74 and 3.19
 \begin_inset space ~
 \end_inset
@@ -4914,7 +4914,7 @@ kcal/mol.
  0.86 and MAD = 1.55 kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
  slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
- kcal/mol for MM, PT1 and QM method respectively.
+ kcal/mol for MM, PT1 and PT2 method respectively.
  
 \end_layout
 
