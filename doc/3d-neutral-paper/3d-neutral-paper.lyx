@@ -1729,19 +1729,26 @@ MM/3D-RISM
 \end_layout
 
 \begin_layout Standard
-The theory of 3D-RISM was originally derived from the pair-wise interaction
- between solute and solvent site, thus it is natural to start our calculations
- using both the LJ potential parameters together with atomic charges selected
- from the well-tested standard force field database.
- Similar with those were observed in previous researches 
+The theory of 3D-RISM was originally developed in the assumption of pair-wise
+ interactions between solute and solvent sites, thus it is natural to start
+ our calculations with the LJ parameters and site charges from the well-tested
+ standard force field database for solute and solvent 
 \begin_inset CommandInset citation
-LatexCommand citep
-key "Kovalenko00a,Du03,book:Hirata03"
+LatexCommand cite
+key "Pettitt82,Jorgensen83,Jorgensen04"
 
 \end_inset
 
-, the solvation free energies for the 43 neutral solutes calculated with
- MM/3D-RISM are highly estimated.
+.
+ Similarly to other studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kovalenko00a,Du03,Palmer10,Sergiievskyi14"
+
+\end_inset
+
+, we find the solvation free energies for the 43 neutral solutes calculated
+ with MM/3D-RISM significantly overestimated.
  As can be seen from Table
 \begin_inset space ~
 \end_inset
