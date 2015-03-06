@@ -866,11 +866,8 @@ Surface tension:
 
 \begin_layout Standard
 The PMV correction term intended to compensate the asymptotic deficiency
- of the 3D RISM expression is based on the “universal correction
-\begin_inset Quotes erd
-\end_inset
-
- (UC) term for 3D-RISM proposed by Palmer et al.
+ of the 3D RISM expression is based on the universal correction (UC) term
+ for 3D-RISM proposed by Palmer et al.
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -4970,7 +4967,11 @@ kcal/mol.
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- in SCF/3D-RISM exists even in the “ideal” fitting line.
+ in SCF/3D-RISM exists even in the "ideal
+\begin_inset Quotes erd
+\end_inset
+
+ fitting line.
  By eliminating the dependence of 
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
