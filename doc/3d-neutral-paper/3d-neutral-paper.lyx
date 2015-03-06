@@ -396,8 +396,8 @@ key "Palmer10,Sergiievskyi14"
  strategies: (1) The EPS of solutes are derived from the atomic partial
  charges assigned on each solute site, which are also tabulated in standard
  force field database as the Lennard--Jones (LJ) parameters in a MM manner;
- (2) By replacing the atomic charge as frozen electron density (FED) which
- is determined from gas-phase QM calculation, solving the solvent correlation
+ (2) By replacing the atomic charge as frozen electron density which is
+ determined from gas-phase QM calculation, solving the solvent correlation
  functions from 3D-RISM equation; (3) QM solute is perturbed by the solvent
  field obtained from MM/3D-RISM; (4) The combination of (2) and (3), in
  which the solvent correlation functions and solute electronic structures
@@ -3524,7 +3524,7 @@ Correlation between the calculated partial molar volume
 \end_inset
 
  between the experiments and solvation free energy calculated by 3D-RISM
- with different solute representations: a) MM, b) FED, c) QM and d) SCF-QM.
+ with different solute representations: a) MM, b) PT1, c) QM and d) SCF-QM.
  Gray squares stand for uncorrected results and white solid circles for
  corrected results, both with the linear fitting line shown for clarification.
  
@@ -4418,7 +4418,7 @@ reference "tab:mad-matrix"
 
 , which proves the small difference between them.
  Therefore, it is not surprising to find again the weak linear correlation
- relationship when comparing uncorrected FED/3D-RISM with experimental values,
+ relationship when comparing uncorrected PT1/3D-RISM with experimental values,
  with 
 \begin_inset Formula $r$
 \end_inset
@@ -4438,7 +4438,7 @@ kcal/mol.
 \end_inset
 
 kcal/mol.
- By comparing the MM and FED methods both with the PMV correction, we found
+ By comparing the MM and PT1 methods both with the PMV correction, we found
  that the results are still quite close to each other, with 
 \begin_inset Formula $r$
 \end_inset
@@ -4461,7 +4461,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Comparison of dipole moment of solute: a) in gas phase between MM with FED
+Comparison of dipole moment of solute: a) in gas phase between MM with PT1
  model, and b) in aqueous phase between QM, SCF-QM with PCM model.
  
 \begin_inset CommandInset label
@@ -4647,7 +4647,7 @@ reference "tab:mad-matrix"
 \end_inset
 
 , we find that the solvation free energy from the uncorrected QM/3D-RISM
- calculation is strongly linear correlated with the MM and FED treatment
+ calculation is strongly linear correlated with the MM and PT1 treatment
  of solute, with 
 \begin_inset Formula $r$
 \end_inset
@@ -4681,7 +4681,7 @@ kcal/mol, which is more than 1
 \begin_inset space ~
 \end_inset
 
-kcal/mol higher than the MM and FED results.
+kcal/mol higher than the MM and PT1 results.
  The increase of deviation is caused by the electron relaxation effect introduce
 d in QM/RISM combination.
  Since from the previous discussion we already know that the solute cavity
@@ -4705,7 +4705,7 @@ reference "tab:correcoeff-matrix"
 \end_inset
 
 =0.89, after PMV correction is applied, which is almost the same with MM
- and FED method.
+ and PT1 method.
  However, the existence of the error induced by the solute electronic relaxation
  could be found in Table
 \begin_inset space ~
@@ -4722,7 +4722,7 @@ reference "tab:mad-matrix"
 \begin_inset space ~
 \end_inset
 
-kcal/mol, with the close margin higher than MM and FED cases without correction.
+kcal/mol, with the close margin higher than MM and PT1 cases without correction.
 \end_layout
 
 \begin_layout Standard
@@ -4900,7 +4900,7 @@ reference "tab:mad-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- equal to 0.94, 0.97 and 0.93 with MM, FED and QM method respectively, the
+ equal to 0.94, 0.97 and 0.93 with MM, PT1 and QM method respectively, the
  deviations are noticeable, which are 2.20, 1.74 and 3.19
 \begin_inset space ~
 \end_inset
@@ -4914,7 +4914,7 @@ kcal/mol.
  with r = 0.86 and MAD = 1.55 kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
  slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
- kcal/mol for MM, FED and QM method respectively.
+ kcal/mol for MM, PT1 and QM method respectively.
  
 \end_layout
 
@@ -4963,7 +4963,7 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 kcal/mol.
- Unlike the absence of solute electron relaxation in MM and FED method,
+ Unlike the absence of solute electron relaxation in MM and PT1 method,
  in which the solute electronic structure does not change, and the coincident
  offset when the solute is perturbed by a fixed solvent field, the significant
  deviation of 
