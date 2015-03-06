@@ -3524,7 +3524,7 @@ Correlation between the calculated partial molar volume
 \end_inset
 
  between the experiments and solvation free energy calculated by 3D-RISM
- with different solute representations: a) MM, b) PT1, c) QM and d) SCF-QM.
+ with different solute representations: a) MM, b) PT1, c) QM and d) SCF.
  Gray squares stand for uncorrected results and white solid circles for
  corrected results, both with the linear fitting line shown for clarification.
  
@@ -4462,7 +4462,7 @@ status open
 
 \begin_layout Plain Layout
 Comparison of dipole moment of solute: a) in gas phase between MM with PT1
- model, and b) in aqueous phase between QM, SCF-QM with PCM model.
+ model, and b) in aqueous phase between QM, SCF with PCM model.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -4862,7 +4862,7 @@ In the last section, for evaluation purpose we do not consider the change
  solute electron relaxation, the response of solvent medium to the change
  of solute electronic structure must be taken into account in the self-consisten
 t combination of QM with 3D-RISM.
- With no correction term applied in SCF-QM/3D-RISM calculation, the solute
+ With no correction term applied in SCF/3D-RISM calculation, the solute
  cavity formation effect still dominates the error in solvation free energy
  results, with 
 \begin_inset Formula $r$
@@ -4909,9 +4909,9 @@ kcal/mol.
  This indicates that by properly consider the perturbation of solute electronic
  structure and solvent medium to each other simultaneously, the results
  are different with cases in which only one-way response is considered.
- After PMV correction is applied in SCF-QM/3D-RISM calculation, we also
- obtained results which are in good agreement with experimental values,
- with r = 0.86 and MAD = 1.55 kcal/mol.
+ After PMV correction is applied in SCF/3D-RISM calculation, we also obtained
+ results which are in good agreement with experimental values, with r =
+ 0.86 and MAD = 1.55 kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
  slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
  kcal/mol for MM, PT1 and QM method respectively.
@@ -4970,7 +4970,7 @@ kcal/mol.
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- in SCF-QM/3D-RISM exists even in the “ideal” fitting line.
+ in SCF/3D-RISM exists even in the “ideal” fitting line.
  By eliminating the dependence of 
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
@@ -4991,7 +4991,7 @@ kcal/mol, with the slope equal to 0.92 and
 \end_inset
 
  = 0.27.
- From the results of SCF-QM/3D-RISM results, we find that for neutral solutes,
+ From the results of SCF/3D-RISM results, we find that for neutral solutes,
  the correction which is responsible for the solute cavity formation is
  not enough to determine the accuracy of solvation free energy calculation.
  The error noise caused by the solute electron relaxation, which shares
@@ -5014,9 +5014,9 @@ The investigation of SCF QM combination with RISM model reveals that for
  Another important factor, the change of the solute electrostatic property,
  which is perturbed by the solvent medium, is also found to have noticeable
  contribution to the solvation free energy calculation.
- Meanwhile, from the RDF in SCF-QM/RISM, we found that the rearrangement
- of the solute charge density calculation causes the strengthening of the
- hydrogen bond between solute and water solvent.
+ Meanwhile, from the RDF in SCF/RISM, we found that the rearrangement of
+ the solute charge density calculation causes the strengthening of the hydrogen
+ bond between solute and water solvent.
 \end_layout
 
 \begin_layout Section*
