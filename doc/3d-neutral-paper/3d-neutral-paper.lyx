@@ -4270,7 +4270,6 @@ status open
 
 \begin_layout Standard
 The effect of the PMV correction could be confirmed from Fig.
- 
 \begin_inset space ~
 \end_inset
 
@@ -4308,7 +4307,6 @@ reference "tab:Linear-correlation-Delta2G"
 
 .
  As shown in Fig.
- 
 \begin_inset space ~
 \end_inset
 
@@ -4319,11 +4317,7 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-
-\begin_inset space ~
-\end_inset
-
-(a), when PMV correction is not applied, the solvation free energy difference
+a, when PMV correction is not applied, the solvation free energy difference
  between MM-RISM calculation and experimental result are is in a significant
  linear correlation with PMV.
  By referring to Table
@@ -4521,7 +4515,6 @@ name "fig:Dipole-moment"
 \begin_layout Standard
 Again we could easily inspect how the correction works in PT1 calculation
  from Fig.
- 
 \begin_inset space ~
 \end_inset
 
@@ -4532,11 +4525,7 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-
-\begin_inset space ~
-\end_inset
-
-(b) and Table
+b and Table
 \begin_inset space ~
 \end_inset
 
@@ -4593,7 +4582,6 @@ kcal/mol in MM method.
  charge based on force field database, is not necessarily the same with
  that from electron density.
  The evidence could be found from Fig.
- 
 \begin_inset space ~
 \end_inset
 
@@ -4771,7 +4759,6 @@ kcal/mol, with the close margin higher than MM and PT1 cases without correction.
 
 \begin_layout Standard
 The more direct evidence could be observed from Fig.
- 
 \begin_inset space ~
 \end_inset
 
@@ -4782,11 +4769,7 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-
-\begin_inset space ~
-\end_inset
-
-(c) and Table
+c and Table
 \begin_inset space ~
 \end_inset
 
@@ -4979,7 +4962,6 @@ kcal/mol.
 
 \begin_layout Standard
 From Fig.
- .
 \begin_inset space ~
 \end_inset
 
@@ -5004,8 +4986,18 @@ reference "tab:Linear-correlation-Delta2G"
  we can confirm the importance of the unsettled error caused by SCF response
  between solute electronic structure and solvent environment.
  As can be seen from Fig.
- 1 (d), we could notice the significant error noise in the linear fitting
- of 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+d, we could notice the significant error noise in the linear fitting of
+ 
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
