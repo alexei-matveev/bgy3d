@@ -112,23 +112,23 @@ Oct 2014
 
 \begin_layout Abstract
 We implement and apply the combination of three-dimensional reference interactio
-n site model (3D-RISM) with self-consistent field quantum mechanics (SCF
- QM) calculation, in which the electrostatic potential induced by the solute
- is directly derived from its electron density.
+n site model (3D RISM) with quantum mechanics (QM) calculation, in which
+ the electrostatic potential induced by the solute is directly derived from
+ its electron density.
  The accuracy of the calculation of solvation free energy for neutral solutes
  is analyzed, of which the mainly determining factor is confirmed as the
  solute cavity formation effect.
  Another contribution from the solute electronic structure relaxation in
  aqueous medium, which is possibly induced by the hydrogen bond between
  solute and water solvent, also has noticeable influence on the results
- of SCF QM/3D-RISM calculation.
+ of SCF-RISM calculation.
  By applying the partial molar volume correction, our hybrid model shows
  results in good agreement with experiment and a polarizable continuum model,
  while in the latter the hydrogen bond effect is missing.
 \end_layout
 
 \begin_layout Keywords
-3D-RISM, electron density, SCF, partial molar volume
+self-consistent reference interaction site model, partial molar volume
 \end_layout
 
 \begin_layout Section
@@ -201,7 +201,7 @@ key "Tenno93"
  distance between interaction sites.
  To take into account the solvent structure information presented in three
  dimensional (3D) space around the solute molecule, Kovalenko and Hirata
- combined the Kohn-Sham density functional theory (KS-DFT) with 3D-RISM
+ combined the Kohn-Sham density functional theory (KS-DFT) with 3D RISM
  to investigate the electronic structure for a metal--water interface 
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -217,7 +217,7 @@ key "Kovalenko99a"
 \end_layout
 
 \begin_layout Standard
-For example, the hybridization of 3D-RISM with ab inito molecular orbital
+For example, the hybridization of 3D RISM with ab inito molecular orbital
  theory was carried out by Sato et al.
  
 \begin_inset CommandInset citation
@@ -234,7 +234,7 @@ key "Du03"
 
 \end_inset
 
- independently combined 3D-RISM equation with hypernetted chain (HNC) closure
+ independently combined 3D RISM equation with hypernetted chain (HNC) closure
  with Gaussian 94 package to study the solvation and polarization of the
  N-methyl amine molecule in aqueous solution.
  Gusarov et al.
@@ -245,7 +245,7 @@ key "Gusarov06"
 
 \end_inset
 
- also reported their implementation of 3D-RISM with Amsterdam Density Functional
+ also reported their implementation of 3D RISM with Amsterdam Density Functional
  (ADF) package with analytical gradients, and later applied to study solvation
  effect on conformational equilibria, tautomerization energies and activation
  barriers 
@@ -256,7 +256,7 @@ key "Casanova07"
 \end_inset
 
 .
- A most recent combination of Gaussian (Gaussian 03) with 3D-RISM was carried
+ A most recent combination of Gaussian (Gaussian 03) with 3D RISM was carried
  out by Kloss et al.
  
 \begin_inset CommandInset citation
@@ -270,7 +270,7 @@ key "Kloss08"
  The latest release of NWChem Package.
  To investigate the solvent effects on the electronic structure of solvated
  large-molecular system, Yoshida et al.
- proposed the combination of 3D-RISM with the QM/MM procedure 
+ proposed the combination of 3D RISM with the QM/MM procedure 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yoshida11"
@@ -344,7 +344,7 @@ key "Minezawa07"
 
 \end_inset
 
- also reported their 3D-RISM-SCF implementation in which the ESP map on
+ also reported their 3D RISM SCF implementation in which the ESP map on
  a 3D grid is constructed directly from the electron density.
  In this article, we proposed a new method to derive ESP directly from the
  real-space electron density of KS-DFT orbitals, and combine it with the
@@ -357,14 +357,14 @@ key "ParaGaussV3.1"
 
 .
  By utilizing the soft-core pseudopotentials, our hybrid method provides
- an alternative approach for accurate and robust implementation for 3D-RISM-SCF
- implementation, which could be extended to other QM code by coupling the
- real-space representation of solute with 3D RISM solvent medium via an
- convenient interface.
+ an alternative approach for accurate and robust implementation for 3D RISM
+ SCF implementation, which could be extended to other QM code by coupling
+ the real-space representation of solute with 3D RISM solvent medium via
+ an convenient interface.
 \end_layout
 
 \begin_layout Standard
-It is well known that the solvation free energy calculated from 3D-RISM
+It is well known that the solvation free energy calculated from 3D RISM
  overestimates the energy of forming cavity for solute, which is problematic
  especially for neutral ones, since their solvation free energy values are
  around several kcal/mol.
@@ -392,16 +392,16 @@ key "Palmer10,Sergiievskyi14"
 
  term.
  In this paper, we applied the most recently reported PMV correction term
- with 3D-RISM while the ESP of solutes are represented with four different
- strategies: (1) The EPS of solutes are derived from the atomic partial
+ with 3D RISM while the ESP of solutes are represented with four different
+ strategies: (1) The ESP of solutes are derived from the atomic partial
  charges assigned on each solute site, which are also tabulated in standard
- force field database as the Lennard--Jones (LJ) parameters in a MM manner;
- (2) By replacing the atomic charge as frozen electron density which is
- determined from gas-phase QM calculation, solving the solvent correlation
- functions from 3D-RISM equation; (3) QM solute is perturbed by the solvent
- field obtained from MM/3D-RISM; (4) The combination of (2) and (3), in
- which the solvent correlation functions and solute electronic structures
- are determined in the self consistent field (SCF) QM calculation.
+ force field database as the Lennard--Jones (LJ) parameters in a MM manner
+ (MM-RISM); (2) By replacing the atomic charge as frozen electron density
+ which is determined from gas-phase QM calculation, solving the solvent
+ correlation functions from 3D RISM equation (PT1-RISM); (3) QM solute is
+ perturbed by the solvent reaction field (PT2-RISM); (4) The combination
+ of (2) and (3), in which the solvent correlation functions and solute electroni
+c structures are determined in the self consistent fashion (SCF-RISM).
 \end_layout
 
 \begin_layout Section
@@ -409,11 +409,11 @@ Methodology
 \end_layout
 
 \begin_layout Subsection
-3D-RISM theory
+3D RISM theory
 \end_layout
 
 \begin_layout Standard
-The detailed aspects of 3D-RISM theory have been thoroughly discussed in
+The detailed aspects of 3D RISM theory have been thoroughly discussed in
  previous work 
 \begin_inset CommandInset citation
 LatexCommand citealp
@@ -423,7 +423,7 @@ key "Sato13,Kovalenko99a,Kovalenko00b,book:Hirata03"
 
 .
  thus here we shortly go through the fundamental formulas in the theory.
- The solute-solvent 3D-RISM integral equation has the following convolution
+ The solute-solvent 3D RISM integral equation has the following convolution
  form:
 \end_layout
 
@@ -482,7 +482,7 @@ reference "eq:rism-uv"
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
- and could be obtained self-consistently from the pure solvent 1D-RISM equation
+ and could be obtained self-consistently from the pure solvent 1D RISM equation
  
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -533,7 +533,7 @@ key "Perkyns92"
 \end_layout
 
 \begin_layout Standard
-Similar to 1D-RISM case, the closure relation is needed to render the Eq.
+Similar to 1D RISM case, the closure relation is needed to render the Eq.
 \begin_inset space ~
 \end_inset
 
@@ -867,7 +867,7 @@ Surface tension:
 \begin_layout Standard
 The PMV correction term intended to compensate the asymptotic deficiency
  of the 3D RISM expression is based on the universal correction (UC) term
- for 3D-RISM proposed by Palmer et al.
+ for 3D RISM proposed by Palmer et al.
  
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -1015,7 +1015,7 @@ Interaction between QM solute and RISM solvent
 \end_layout
 
 \begin_layout Standard
-As in the 3D-RISM MM theory, the solute potential acting on solvent site
+As in the 3D RISM MM theory, the solute potential acting on solvent site
  
 \begin_inset Formula $\alpha$
 \end_inset
@@ -1722,11 +1722,11 @@ Max deviation of PMV gp vs mm: 5%, aq vs gp 2%.
 \end_layout
 
 \begin_layout Subsection
-MM/3D-RISM
+MM-RISM
 \end_layout
 
 \begin_layout Standard
-The theory of 3D-RISM was originally developed in the assumption of pair-wise
+The theory of 3D RISM was originally developed in the assumption of pair-wise
  interactions between solute and solvent sites, thus it is natural to start
  our calculations with the LJ parameters and site charges from the well-tested
  standard force field database for solute and solvent 
@@ -1745,7 +1745,7 @@ key "Kovalenko00a,Du03,Palmer10,Sergiievskyi14"
 \end_inset
 
 , we find the solvation free energies for the 43 neutral solutes calculated
- with MM/3D-RISM significantly overestimated.
+ with MM-RISM significantly overestimated.
  As can be seen from Table
 \begin_inset space ~
 \end_inset
@@ -1761,9 +1761,9 @@ reference "tab:correcoeff-matrix"
 \begin_inset Formula $r$
 \end_inset
 
- between MM/3D-RISM with experimental values is only 0.30, which means that
+ between MM-RISM with experimental values is only 0.30, which means that
  calculation results are poorly linear correlated with experiments.
- The mean absolute deviation (MAD) between MM/3D-RISM and experimental values
+ The mean absolute deviation (MAD) between MM-RISM and experimental values
  could be found in Table
 \begin_inset space ~
 \end_inset
@@ -1781,7 +1781,7 @@ reference "tab:mad-matrix"
 
 kcal/mol in average.
  After the PMV correction was applied, the linear correlation relationship
- between MM/3D-RISM and experiments are greatly improved, with 
+ between MM-RISM and experiments are greatly improved, with 
 \begin_inset Formula $r$
 \end_inset
 
@@ -1803,7 +1803,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Correlation coefficient matrix of calculated 3D-RISM with PCM and Experiments
+Correlation coefficient matrix of calculated 3D RISM with PCM and Experiments
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:correcoeff-matrix"
@@ -2676,7 +2676,7 @@ Mean absolute deviation (MAD)
 \begin_inset Formula $^{a}$
 \end_inset
 
- matrix of calculated 3D-RISM with PCM and Experiments
+ matrix of calculated 3D RISM with PCM and Experiments
 \begin_inset CommandInset label
 LatexCommand label
 name "tab:mad-matrix"
@@ -3520,7 +3520,7 @@ Correlation between the calculated partial molar volume
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- between the experiments and solvation free energy calculated by 3D-RISM
+ between the experiments and solvation free energy calculated by 3D RISM
  with different solute representations: a) MM, b) PT1, c) PT2 and d) SCF.
  Gray squares stand for uncorrected results and white solid circles for
  corrected results, both with the linear fitting line shown for clarification.
@@ -4297,7 +4297,7 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $\rho$
 \end_inset
 
-, and the difference between the experimental and 3D-RISM calculated solvation
+, and the difference between the experimental and 3D RISM calculated solvation
  free energy 
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
@@ -4320,7 +4320,7 @@ reference "fig:Correlation-of-solvation"
 \end_inset
 
 (a), when PMV correction is not applied, the solvation free energy difference
- between MM/3D-RISM calculation and experimental result are is in a significant
+ between MM-RISM calculation and experimental result are is in a significant
  linear correlation with PMV.
  By referring to Table
 \begin_inset space ~
@@ -4362,7 +4362,7 @@ kcal/mol.
 
 kcal/mol.
  This indicates that the cavity formation of the solute is mainly responsible
- for the error of solvation free energy in 3D-RISM calculation.
+ for the error of solvation free energy in 3D RISM calculation.
  The remaining error noises in corrected results are partially due to the
  accuracy of the correction coefficient, since the fitted slope in the uncorrect
 ed results is 4.88, higher than the correction coefficient 4.22 which we derived
@@ -4370,7 +4370,7 @@ ed results is 4.88, higher than the correction coefficient 4.22 which we derived
 \end_layout
 
 \begin_layout Subsection
-PT1/3D-RISM
+PT1-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4379,7 +4379,7 @@ Our second combination strategy is to replace the partial atomic charge
  the simulation cell.
  Here the charge density of solute is determined from the unperturbed gas-phase
  QM calculations, while the water solvent distribution functions around
- solutes are solved from 3D-RISM equation, with the electrostatic interaction
+ solutes are solved from 3D RISM equation, with the electrostatic interaction
  between solute and solvent calculated by placing the solvent site in the
  ESP field of solute charge density.
  From the correlation coefficient matrix of Table
@@ -4393,7 +4393,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- one could notice that the uncorrected PT1/3D-RISM and uncorrected MM/3D-RISM
+ one could notice that the uncorrected PT1-RISM and uncorrected MM-RISM
  are strongly linear correlated, with 
 \begin_inset Formula $r$
 \end_inset
@@ -4415,7 +4415,7 @@ reference "tab:mad-matrix"
 
 , which proves the small difference between them.
  Therefore, it is not surprising to find again the weak linear correlation
- relationship when comparing uncorrected PT1/3D-RISM with experimental values,
+ relationship when comparing uncorrected PT1-RISM with experimental values,
  with 
 \begin_inset Formula $r$
 \end_inset
@@ -4579,7 +4579,7 @@ reference "fig:Dipole-moment"
  Despite the tiny difference between the electrostatic property of solutes
  obtained from MM and PT1 method, we could still reach the conclusion that
  by replacing the atomic partial charge on neutral solute sites as unperturbed
- gas-phase charge density, the solvation free energy calculated from PT1/3D-RISM
+ gas-phase charge density, the solvation free energy calculated from PT1-RISM
  is at the same level of accuracy with MM method.
  The effect of solute cavity formation contributes the most part to the
  error of solvation free energy calculation for neutral solute, thus by
@@ -4588,7 +4588,7 @@ reference "fig:Dipole-moment"
 \end_layout
 
 \begin_layout Subsection
-PT2/3D-RISM
+PT2-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4598,9 +4598,9 @@ In the previous two combinations, the electronic structures of solutes are
  into the solution environment.
  From here we introduce the perturbation of solvent medium to solute in
  the reaction field manner.
- As the start, the solvent field is generated by MM/3D-RISM calculation
- and fixed during the calculation, then applied to the total Hamiltonian
- of solute by Eqs.
+ As the start, the solvent field is generated by MM-RISM calculation and
+ fixed during the calculation, then applied to the total Hamiltonian of
+ solute by Eqs.
 \begin_inset space ~
 \end_inset
 
@@ -4643,9 +4643,9 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, we find that the solvation free energy from the uncorrected PT2/3D-RISM
- calculation is strongly linear correlated with the MM and PT1 treatment
- of solute, with 
+, we find that the solvation free energy from the uncorrected PT2-RISM calculati
+on is strongly linear correlated with the MM and PT1 treatment of solute,
+ with 
 \begin_inset Formula $r$
 \end_inset
 
@@ -4696,7 +4696,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
-, the correlation coefficient between PT2/3D-RISM with experimental results
+, the correlation coefficient between PT2-RISM with experimental results
  increases to 
 \begin_inset Formula $r$
 \end_inset
@@ -4715,7 +4715,7 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-, in which the MAD of PT2/3D-RISM with experimental results is 2.62
+, in which the MAD of PT2-RISM with experimental results is 2.62
 \begin_inset space ~
 \end_inset
 
@@ -4794,7 +4794,7 @@ kcal/mol.
 \end_layout
 
 \begin_layout Subsection
-SCF QM/3D-RISM
+SCF-RISM
 \end_layout
 
 \begin_layout Standard
@@ -4858,10 +4858,10 @@ In the last section, for evaluation purpose we do not consider the change
  However in order to properly include the energy perturbation caused by
  solute electron relaxation, the response of solvent medium to the change
  of solute electronic structure must be taken into account in the self-consisten
-t combination of QM with 3D-RISM.
- With no correction term applied in SCF/3D-RISM calculation, the solute
- cavity formation effect still dominates the error in solvation free energy
- results, with 
+t combination of QM with 3D RISM.
+ With no correction term applied in SCF-RISM calculation, the solute cavity
+ formation effect still dominates the error in solvation free energy results,
+ with 
 \begin_inset Formula $r$
 \end_inset
 
@@ -4906,7 +4906,7 @@ kcal/mol.
  This indicates that by properly consider the perturbation of solute electronic
  structure and solvent medium to each other simultaneously, the results
  are different with cases in which only one-way response is considered.
- After PMV correction is applied in SCF/3D-RISM calculation, we also obtained
+ After PMV correction is applied in SCF-RISM calculation, we also obtained
  results which are in good agreement with experimental values, with r =
  0.86 and MAD = 1.55 kcal/mol.
  Yet the mean absolute deviations with other three methods are decreased
@@ -4967,7 +4967,7 @@ kcal/mol.
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- in SCF/3D-RISM exists even in the "ideal
+ in SCF-RISM exists even in the "ideal
 \begin_inset Quotes erd
 \end_inset
 
@@ -4992,7 +4992,7 @@ kcal/mol, with the slope equal to 0.92 and
 \end_inset
 
  = 0.27.
- From the results of SCF/3D-RISM results, we find that for neutral solutes,
+ From the results of SCF-RISM results, we find that for neutral solutes,
  the correction which is responsible for the solute cavity formation is
  not enough to determine the accuracy of solvation free energy calculation.
  The error noise caused by the solute electron relaxation, which shares
