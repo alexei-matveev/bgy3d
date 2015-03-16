@@ -1804,10 +1804,12 @@ key "Cabani81,Mobley09"
 .
  
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
-AM: Cabani81? Not from the Mobley dataset?
+AM: Cabani81? Not from the Mobley dataset? BL: Experimental values of Cabani81
+ are used for the original dataset of 15 solutes, which are not all available
+ Mobley09 dataset.
 \end_layout
 
 \end_inset
@@ -2697,7 +2699,18 @@ key "Cabani81"
 
 \end_inset
 
- 
+ and Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mobley09"
+
+\end_inset
+
+
 \begin_inset ERT
 status open
 
@@ -3547,6 +3560,17 @@ Ref.
 \begin_inset CommandInset citation
 LatexCommand citet
 key "Cabani81"
+
+\end_inset
+
+ and Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mobley09"
 
 \end_inset
 
@@ -4423,7 +4447,7 @@ reference "tab:Linear-correlation-Delta2G"
  of 3D RISM solvation energy.
  
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 AM: explanation of the intercept as a 
@@ -4437,13 +4461,16 @@ value, which evaluates the average deviation between fitted and measured
 
  is wrong.
  Or I dont quite get what you, Bo, wanted to say.
+ BL: Yes thank you for the correction, the truth is I didn't find a good
+ explanation for the meaning of intercept.
+ 
 \end_layout
 
 \end_inset
 
  
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 AM: It appears that the correlation coefficient 
@@ -4505,6 +4532,83 @@ explaining
  variations of, say, energy by variation of the molar volume.
  Treating cross correlations of energies and volumes on equal footing would
  be way too abstract in the current context.
+ BL: Yes you are right, in Keryszig's book 
+\begin_inset Quotes eld
+\end_inset
+
+Advanced Engineering Mathematics
+\begin_inset Quotes erd
+\end_inset
+
+, random experiments are divided as two kinds: In 
+\series bold
+regression analysis
+\series default
+ one of the quantities, 
+\begin_inset Formula $x$
+\end_inset
+
+, is an ordinary variable and the other, 
+\begin_inset Formula $Y$
+\end_inset
+
+, is a random variable whose mean 
+\begin_inset Formula $\mu$
+\end_inset
+
+ depends on 
+\begin_inset Formula $x$
+\end_inset
+
+, say, 
+\begin_inset Formula $\mu(x)=\kappa_{0}+\kappa_{1}x$
+\end_inset
+
+.
+ In 
+\series bold
+correlation analysis
+\series default
+ both quantities are random variables and we are interested in relations
+ between them.
+ I tried to distinguish the results, when one variable is dependent on the
+ other, e.g.
+ 
+\begin_inset Formula $\Delta^{2}G$
+\end_inset
+
+ vs.
+ 
+\begin_inset Formula $\rho V$
+\end_inset
+
+, with regression analysis and with correlation analysis when both variables
+ are independent, e.g.
+ computed energy vs.
+ experimental energy.
+ For the connection between 
+\begin_inset Formula $r$
+\end_inset
+
+ and 
+\begin_inset Formula $R^{2}$
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Similarly, in linear least squares regression with an estimated intercept
+ term, 
+\begin_inset Formula $R^{2}$
+\end_inset
+
+ equals the square of the Pearson correlation coefficient between the observed
+ and modeled (predicted) data values of the dependent variable.
+\begin_inset Quotes erd
+\end_inset
+
+(http://en.wikipedia.org/wiki/Coefficient_of_determination)
 \end_layout
 
 \end_inset
