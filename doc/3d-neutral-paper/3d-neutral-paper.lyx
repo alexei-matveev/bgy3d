@@ -1220,6 +1220,10 @@ sic! The later change to analytically compute FT of the long-range nuclear
  cartesian grid representation of electron charge density.
 \end_layout
 
+\begin_layout Subsection
+Free energy functional
+\end_layout
+
 \begin_layout Standard
 In DFT the electronic structure of solute in gas phase is determined by
  minimizing the Kohn--Sham energy functional with respect to the the electronic
