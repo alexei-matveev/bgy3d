@@ -4382,30 +4382,7 @@ reference "tab:Linear-correlation-Delta2G"
  of 3D RISM solvation energy.
  
 \begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-AM: explanation of the intercept as a 
-\begin_inset Quotes eld
-\end_inset
-
-value, which evaluates the average deviation between fitted and measured
- results
-\begin_inset Quotes erd
-\end_inset
-
- is wrong.
- Or I dont quite get what you, Bo, wanted to say.
- BL: Yes thank you for the correction, the truth is I didn't find a good
- explanation for the meaning of intercept.
- 
-\end_layout
-
-\end_inset
-
- 
-\begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 AM: It appears that the correlation coefficient 
@@ -4467,7 +4444,10 @@ explaining
  variations of, say, energy by variation of the molar volume.
  Treating cross correlations of energies and volumes on equal footing would
  be way too abstract in the current context.
- BL: Yes you are right, in Keryszig's book 
+\end_layout
+
+\begin_layout Plain Layout
+BL: Yes you are right, in Keryszig's book 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5008,7 +4988,7 @@ kcal/mol and
 status collapsed
 
 \begin_layout Plain Layout
-AM: how much lower than 1 is it?
+AM: how much lower than 1 is it? The table shows 1.00.
 \end_layout
 
 \end_inset
