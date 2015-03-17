@@ -1357,6 +1357,13 @@ Conversely, since
 \begin_inset Formula $-2$
 \end_inset
 
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gao92,Gao96,Sato07a"
+
+\end_inset
+
 :
 \begin_inset Formula 
 \begin{equation}
