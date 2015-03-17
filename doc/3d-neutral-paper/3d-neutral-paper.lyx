@@ -5077,7 +5077,7 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 .
- However because of the net negative shift due the second-order relaxation
+ However, because of the net negative shift due the second-order relaxation
  term the PMV-corrected results are, on average, closer to the base line
  which is reflected in a marginally better comparison to experiment as discussed
  above.
@@ -5160,27 +5160,25 @@ name "fig:relaxation-terms"
 \end_layout
 
 \begin_layout Standard
-In the last section, for evaluation purpose we do not consider the change
- of solvent medium when the solute electronic structure is relaxed.
- However in order to properly include the energy perturbation caused by
- solute electron relaxation, the response of solvent medium to the change
- of solute electronic structure must be taken into account in the self-consisten
-t combination of QM with 3D RISM.
- With no correction term applied in SCF-RISM calculation, the solute cavity
- formation effect still dominates the error in solvation free energy results,
- with 
-\begin_inset Formula $r=0.36$
+In previous sections, we did not explicitly consider redistribution of the
+ solvent medium in response to relaxation of the solute electronic structure.
+ In this section we treat the relaxation of electron- and solvent distributions
+ self-consistently.
+ Without PMV correction applied to SCF-RISM solvation energies, the error
+ of the solute cavity formation energy leads to a poor correlation with
+ experiment: 
+\begin_inset Formula $r=0.41$
 \end_inset
 
  and 
-\begin_inset Formula $\text{MAD}=16.06$
+\begin_inset Formula $\text{MAD}=16.1$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-kcal/mol, according to Table
+kcal/mol (Tables
 \begin_inset space ~
 \end_inset
 
@@ -5191,7 +5189,60 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and Table
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:mad-matrix"
+
+\end_inset
+
+).
+ Approximations considered in previous sections appear to correlate strongly
+ with self-consistent approach: the correlation coefficient 
+\begin_inset Formula $r=0.97$
+\end_inset
+
+, 0.99, and 1.00 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+AM: again r=1.00 may be misleading, because it is still less than 1.
+ By how much?
+\end_layout
+
+\end_inset
+
+ to MM, PT1, and PT2 methods respectively (Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:correcoeff-matrix"
+
+\end_inset
+
+).
+ The mean absolute deviations of self-consistent and approximate results
+ are noticeable, however: 
+\begin_inset Formula $\text{MAD}=2.01$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, 1.52
+\begin_inset space ~
+\end_inset
+
+kcal/mol, and 0.37
+\begin_inset space ~
+\end_inset
+
+kcal/mol for MM, PT1, and PT2, respectively (Table
 \begin_inset space ~
 \end_inset
 
@@ -5202,39 +5253,227 @@ reference "tab:mad-matrix"
 
 \end_inset
 
-.
- Despite the strong linear correlation with other combination strategies,
- of which the correlation coefficient 
-\begin_inset Formula $r$
+).
+ Note how a rough estimate of the second-order correction makes the comparison
+ PT2 and SCF results noticeably better than for the other two first-order
+ approximations.
+ With SCF results we now can verify the assumptions of the previous section.
+ The self-consistent approach produces solute polarization energies 
+\begin_inset Formula $\delta E$
 \end_inset
 
- equal to 0.94, 0.97 and 0.93 with MM, PT1 and PT2 method respectively, the
- deviations are noticeable, which are 2.20, 1.74 and 3.19
+ that are larger than the PT2 estimates for nearly all solutes, which is
+ reflected in a wider range: 
+\begin_inset Formula $0\leq\delta E\leq4.1$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:relaxation-terms"
+
+\end_inset
+
+.
+ The relaxation of the solvent chemical potential 
+\begin_inset Formula $\delta\mu$
+\end_inset
+
+ is indeed strongly correlated with the polarization energy 
+\begin_inset Formula $\delta E$
+\end_inset
+
+, however the ratio of the two contributions to the relaxation energy as
+ estimated from a linear regression is about 
+\begin_inset Formula $-1.69$
+\end_inset
+
+, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:relaxation-terms"
+
+\end_inset
+
+.
+ The net effect of the self-consistent relaxation is slightly more negative
+ than the second-order correction.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+AM: this is not in the tables and hardly visible from the scatter plots.
+ But PT2 on average underestimates experiment by 
+\begin_inset Formula $-0.16$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol while SCF underestimates it by 
+\begin_inset Formula $-0.39$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
- This indicates that by properly consider the perturbation of solute electronic
- structure and solvent medium to each other simultaneously, the results
- are different with cases in which only one-way response is considered.
- After PMV correction is applied in SCF-RISM calculation, we also obtained
- results which are in good agreement with experimental values, with 
+ Hence, SCF is by 
+\begin_inset Formula $-0.23$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol lower.
+ This data comes from a MSD (mean signed deviation) analogue of the MAD
+ matrix of 
+\emph on
+PMV-corrected
+\emph default
+ numbers.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The PMV is hardly affected by redistribution of the solute charge density
+ in response to solvent field --- for 43 solutes studied here the differences
+ are below 2%.
+ Therefore, the PMV correction of solvation energies has nearly the same
+ effect as for the other three approximations: the PMV-corrected SCF-RISM
+ results are in a reasonable agreement with experiment, cf.
+\begin_inset space \space{}
+\end_inset
+
+the correlation coefficient 
 \begin_inset Formula $r=0.86$
 \end_inset
 
  and 
-\begin_inset Formula $\text{MAD}=1.55$
+\begin_inset Formula $\text{MAD}=1.51$
 \end_inset
 
- kcal/mol.
- Yet the mean absolute deviations with other three methods are decreased
- slightly even the major errors are removed, which are 1.86, 1.44 and 3.07
- kcal/mol for MM, PT1 and PT2 method respectively.
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol (Tables
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:correcoeff-matrix"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:mad-matrix"
+
+\end_inset
+
+).
  
 \end_layout
 
 \begin_layout Standard
-From Fig.
+By these metrics, the SCF-RISM method with PMV correction does not perform
+ any better than PT2 or even PT1 counterparts (Tables
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:correcoeff-matrix"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:mad-matrix"
+
+\end_inset
+
+).
+ A possible reason is an overestimation of the solute polarization by volume
+ charge of solvent medium due to neglect of the repulsive exchange interaction
+ between solute- and solvent electrons.
+ Unphysical distortion of an electron cloud by a positive charge is known
+ to cause artifacts in hybrid models 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yudanov97"
+
+\end_inset
+
+; omission of exchange repulsion from negatively charged model atoms is
+ less critical 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Matveev99"
+
+\end_inset
+
+.
+ We note that the solvation energies obtained by methods that account for
+ electron polarization, PT2 and SCF, are, on average, slightly too negative
+ in comparison to experiment; more so for self-consistent variant.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+AM: again, the reader has to believe us.
+ It is difficult to see this from the scatter plot or the regression line.
+\end_layout
+
+\end_inset
+
+ A comparison of solute dipole moments in aqueous- and gas phase, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dipole-moment"
+
+\end_inset
+
+b, suggests an increase by about 40% on average in SCF-RISM and only 30%
+ in PCM.
+ This discrepancy may be another indication of overestimated solute polarization
+ in SCF-RISM.
+\end_layout
+
+\begin_layout Standard
+The scatter plot for SCF-RISM solvation energies, Fig.
 \begin_inset space ~
 \end_inset
 
@@ -5245,7 +5484,23 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
- and Table
+d, is similar to that of PT2-RISM, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Correlation-of-solvation"
+
+\end_inset
+
+d.
+ The magnitude of the error uncorrelated with the PMV factor is slightly
+ larger for SCF-RISM than for PT2-RISM.
+ This error is manifested by a scattering around the regression line.
+ Visual perception is confirmed by the larger MAD from the regression line
+ (Table
 \begin_inset space ~
 \end_inset
 
@@ -5256,74 +5511,62 @@ reference "tab:Linear-correlation-Delta2G"
 
 \end_inset
 
- we can confirm the importance of the unsettled error caused by SCF response
- between solute electronic structure and solvent environment.
- As can be seen from Fig.
+).
+ Still, the correlation of the SCF-RISM error with PMV is obvious with 
+\begin_inset Formula $R^{2}=0.92$
+\end_inset
+
+ and fitted slope 
+\begin_inset Formula $A=5.13$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol close to PT2 and PT1 results (Table
 \begin_inset space ~
 \end_inset
 
 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "fig:Correlation-of-solvation"
+reference "tab:Linear-correlation-Delta2G"
 
 \end_inset
 
-d, we could notice the significant error noise in the linear fitting of
- 
-\begin_inset Formula $\Delta^{2}G$
+).
+ The PMV correction reduces these to 
+\begin_inset Formula $R^{2}=0.27$
 \end_inset
 
- with PMV, which has the fitted slope equal to 5.13
-\begin_inset space ~
+ and 
+\begin_inset Formula $A^{\prime}=0.92$
 \end_inset
 
-kcal/mol, 
-\begin_inset Formula $R^{2}=0.92$
-\end_inset
 
- and intercept equal to 
-\begin_inset Formula $-$
-\end_inset
-
-3.97
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
- Unlike the absence of solute electron relaxation in MM and PT1 method,
- in which the solute electronic structure does not change, and the coincident
- offset when the solute is perturbed by a fixed solvent field, the significant
- deviation of 
-\begin_inset Formula $\Delta^{2}G$
+ The net negative shift due to self-consistent relaxation is slightly larger
+ which is reflected in the most negative intercept 
+\begin_inset Formula $B=-3.97$
 \end_inset
 
- in SCF-RISM exists even in the "ideal
-\begin_inset Quotes erd
-\end_inset
 
- fitting line.
- By eliminating the dependence of 
-\begin_inset Formula $\Delta^{2}G$
-\end_inset
-
- with PMV, we can see that the source of this deviation is due to the solute
- electron relaxation.
- The intercept of the linear fitting line for corrected results is still
- 
-\begin_inset Formula $-$
-\end_inset
-
-3.97
 \begin_inset space ~
 \end_inset
 
-kcal/mol, with the slope equal to 0.92 and 
-\begin_inset Formula $R^{2}=0.27$
-\end_inset
+kcal/mol of the corresponding regression line.
+\end_layout
 
- .
- From the results of SCF-RISM results, we find that for neutral solutes,
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+From the results of SCF-RISM results, we find that for neutral solutes,
  the correction which is responsible for the solute cavity formation is
  not enough to determine the accuracy of solvation free energy calculation.
  The error noise caused by the solute electron relaxation, which shares
@@ -5333,12 +5576,8 @@ kcal/mol, with the slope equal to 0.92 and
  
 \end_layout
 
-\begin_layout Section
-Conclusions
-\end_layout
-
 \begin_layout Standard
-The investigation of self-cosistent QM combination with RISM model reveals
+The investigation of self-consistent QM combination with RISM model reveals
  that for neutral solutes, the accuracy of the calculated solvation free
  energy is mainly determined by the solute cavity formation.
  The better agreement with experimental results could be obtained by applying
