@@ -3612,7 +3612,7 @@ Parameters of linear regression,
 \begin_inset Formula $y=\Delta^{2}G$
 \end_inset
 
- between computed and experimental results for four different models without
+ between computed and experimental results for four solvation models without
  and with PMV correction.
 \begin_inset Formula $^{a}$
 \end_inset
@@ -3634,10 +3634,9 @@ name "tab:Linear-correlation-Delta2G"
 
 \begin_layout Plain Layout
 \begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="9">
+<lyxtabular version="3" rows="6" columns="8">
 <features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -3705,15 +3704,6 @@ uncorr.
 
 \begin_layout Plain Layout
 corr.
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \end_inset
@@ -3816,15 +3806,6 @@ MAD
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-MAD
-\end_layout
-
-\end_inset
-</cell>
 </row>
 <row>
 <cell alignment="left" valignment="top" usebox="none">
@@ -3898,15 +3879,6 @@ MM
 
 \begin_layout Plain Layout
 0.37
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.73
 \end_layout
 
 \end_inset
@@ -3988,15 +3960,6 @@ PT1
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.72
-\end_layout
-
-\end_inset
-</cell>
 </row>
 <row>
 <cell alignment="left" valignment="top" usebox="none">
@@ -4070,15 +4033,6 @@ PT2
 
 \begin_layout Plain Layout
 0.33
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.03
 \end_layout
 
 \end_inset
@@ -4160,15 +4114,6 @@ SCF
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.24
-\end_layout
-
-\end_inset
-</cell>
 </row>
 </lyxtabular>
 
@@ -4207,10 +4152,15 @@ Slopes
 \end_inset
 
 , intercept 
-\begin_inset Formula $B=B^{\prime}$
+\begin_inset Formula $B$
 \end_inset
 
-, and mean average deviations (MAD) in kcal/mol.
+, and mean average deviation (MAD) in kcal/mol.
+ Intercept 
+\begin_inset Formula $B$
+\end_inset
+
+ and MAD are the same for two regression models.
 \begin_inset ERT
 status open
 
