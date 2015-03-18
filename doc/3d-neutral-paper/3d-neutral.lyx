@@ -111,10 +111,10 @@ Oct 2014
 \end_layout
 
 \begin_layout Abstract
-We implement and apply the combination of three-dimensional reference interactio
-n site model (3D RISM) with quantum mechanics (QM) calculation, in which
- the electrostatic potential induced by the solute is directly derived from
- its electron density.
+We implement and applied a hybrid approach combining the three-dimensional
+ reference interaction site model (3D RISM) with quantum mechanics (QM)
+ calculation, in which the electrostatic potential induced by the solute
+ is directly derived from its electron density.
  The accuracy of the calculation of solvation free energy for neutral solutes
  is analyzed, of which the mainly determining factor is confirmed as the
  solute cavity formation effect.
@@ -1049,7 +1049,7 @@ reference "eq:mu-asymptotic-rism"
 \end_layout
 
 \begin_layout Subsection
-Interaction between QM solute and RISM solvent
+Interaction of QM solute and RISM solvent
 \end_layout
 
 \begin_layout Standard
@@ -5771,13 +5771,17 @@ kcal/mol from experiment.
 \end_inset
 
 kcal/mol.
+ Although the ratio of two relaxation terms, solute polarization and solvent
+ relaxation energies, is nearly constant for all solutes the value of this
+ ratio differs notably from the intuitive linear electrostatic response
+ limit.
  
 \end_layout
 
 \begin_layout Standard
 The relaxation terms are supposed to be important for neutral molecules
- with overall very moderate solvation energies; the scale of the relaxation
- terms seems to support that.
+ with overall very moderate solvation energies; the observed scale of the
+ relaxation terms seems to support that.
  In spite, we find that the approximate method to address relaxation terms
  only slightly improves comparison to experiment, while a self-consistent
  approach hardly improves it.
