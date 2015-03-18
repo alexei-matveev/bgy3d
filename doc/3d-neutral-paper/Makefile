@@ -1,4 +1,4 @@
-all: 3d-neutral-paper.pdf
+all: 3d-neutral.pdf
 
 # Auxilary files are put there:
 d=3d-neutral.d
@@ -18,7 +18,7 @@ $d/fig3.svg: $d/mkfig3.py $d/relax.dat
 # PDF2  format  is  produced  by  pdfTeX.  LyX  uses  rsvg-convert  or
 # Inkscape to convert SVG -> PDF:
 #
-%.pdf: %.lyx %.bib $d/fig1.svg $d/fig2.svg $d/fig3.svg
+%.pdf: %.lyx ../bibliography.bib $d/fig1.svg $d/fig2.svg $d/fig3.svg
 	lyx --export pdf2 $(<)
 
 # 300  DPI is a  moderate quality,  just make  sure that  the physical
