@@ -597,11 +597,14 @@ reference "eq:rism-uv"
 \end_inset
 
  for the compressibility factor, one obtains 
-\begin_inset Formula $\beta\mu\approx\rho V_{0}(z^{-1}+1)/2$
+\begin_inset Formula 
+\begin{equation}
+\beta\mu\approx\rho V_{0}(z^{-1}+1)/2.\label{eq:mu-asymptotic-rism}
+\end{equation}
+
 \end_inset
 
-.
- Water is nearly incompressible --- the corresponding compressibility factor
+Water is nearly incompressible --- the corresponding compressibility factor
  
 \begin_inset Formula $z\approx1/16$
 \end_inset
@@ -614,7 +617,7 @@ status collapsed
 
 \begin_layout Plain Layout
 The compressibility factor 
-\begin_inset Formula $\rho\kappa/\beta$
+\begin_inset Formula $z=\rho\kappa/\beta$
 \end_inset
 
  derived from the experimental water compressibility of 0.46 GPa^-1 and density/t
@@ -638,7 +641,7 @@ emperature we use in this work is about 1/16:
 A 1D RISM KH with PR-SPC/E water [1] gives
 \begin_inset Formula 
 \[
-\rho\kappa/\beta\approx1/15.628775452991835
+z\approx1/15.628775452991835
 \]
 
 \end_inset
@@ -646,29 +649,99 @@ A 1D RISM KH with PR-SPC/E water [1] gives
 A 1D RISM HNC with PR-SPC/E [1] water gives
 \begin_inset Formula 
 \[
-\rho\kappa/\beta\approx1/11.697126403306534
+z\approx1/11.697126403306534
 \]
 
 \end_inset
 
 Both estimated from the formula 
-\begin_inset Formula $\rho\kappa/\beta=1/\left(1-4\pi\rho\int c(r)r^{2}dr\right)$
+\begin_inset Formula $z=1/\left(1-4\pi\rho\int c(r)r^{2}dr\right)$
 \end_inset
 
 .
 \end_layout
 
 \begin_layout Plain Layout
-Bo reported an estimate for the compressibility factor estimated from pure
- water calculations using 3D machinery: 
+Bo reported an estimate for the compressibility factor from pure water calculati
+ons using 
+\series bold
+3D machinery
+\series default
+ he relied on: 
 \begin_inset Formula 
 \[
-\rho\kappa/\beta\approx1/15.2408554670
+z\approx1/15.2408554670
 \]
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+Therefore for 
+\begin_inset Formula $\beta=1.6889$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal
+\begin_inset Formula $^{-1}$
+\end_inset
+
+ one gets
+\begin_inset Formula 
+\[
+a=\beta^{-1}\frac{z^{-1}-1}{2}=4.216015\,\text{kcal}
+\]
+
+\end_inset
+
+In fact the value of 
+\begin_inset Formula $z$
+\end_inset
+
+ reported by Bo was derived from this rate.
+ However, if one would use the alternative expression
+\begin_inset Formula 
+\[
+a=\beta^{-1}\frac{z^{-1}+1}{2}=4.80811636775415951203\,\text{kcal}
+\]
+
+\end_inset
+
+the rate would be higher by 0.59
+\begin_inset space ~
+\end_inset
+
+kcal.
+ Use of this rate coefficient in the paper would lead to 
+\begin_inset Quotes eld
+\end_inset
+
+flatter
+\begin_inset Quotes erd
+\end_inset
+
+ regression lines of PMV-corrected results, see 
+\begin_inset Formula $A^{\prime}$
+\end_inset
+
+ in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:Linear-correlation-Delta2G"
+
+\end_inset
+
+.
+ BUT it will also lead to PT2 and SCF regression lines 
+\series bold
+below the base line
+\series default
+.
 \end_layout
 
 \begin_layout Plain Layout
@@ -824,7 +897,7 @@ key "Palmer10"
 
 \end_inset
 
-However, instead of fitting the parameters 
+However, instead of fitting parameters 
 \begin_inset Formula $a$
 \end_inset
 
@@ -946,6 +1019,33 @@ key "Song15"
 \end_inset
 
 .
+ Another recent work 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Misin15"
+
+\end_inset
+
+ favors an slightly different rate coefficient, 
+\begin_inset Formula $\beta a=-(z^{-1}+1)/2$
+\end_inset
+
+, which is consistent with our asymptotic analysis for simple liquids, Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:mu-asymptotic-rism"
+
+\end_inset
+
+, assuming 
+\begin_inset Formula $V_{\text{u}}\approx V_{0}$
+\end_inset
+
+ and neglect of pressure term.
 \end_layout
 
 \begin_layout Subsection
@@ -1746,7 +1846,7 @@ key "Cabani81,Mobley09"
 .
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 AM: Cabani81? Not from the Mobley dataset? BL: Experimental values of Cabani81
@@ -4976,7 +5076,7 @@ reference "tab:mad-matrix"
 
 \end_inset
 
- without PMVcorrection).
+ without PMV correction).
  Again, without PMV correction the PT2 results do not compare well to the
  experiment with corresponding 
 \begin_inset Formula $\text{MAD}=16.4$
@@ -5566,28 +5666,147 @@ Conclusions
 \end_layout
 
 \begin_layout Standard
-From the results of SCF-RISM results, we find that for neutral solutes,
- the correction which is responsible for the solute cavity formation is
- not enough to determine the accuracy of solvation free energy calculation.
- The error noise caused by the solute electron relaxation, which shares
- the same magnitude as the experimental value of the solvation free energy
- of neutral solute in aqueous medium, should be examined carefully in relevant
- studies.
+A series of approximations and a self-consistent hybrid approach combining
+ QM solute description with 3D RISM for solvent medium reveals that for
+ neutral solutes, the accuracy of calculated solvation free energies is
+ mainly determined by the asymptotic error of cavity formation energies.
+ Significantly better agreement with experimental results could be obtained
+ by applying partial molar volume correction as also reported in previous
+ non-hybrid studies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Palmer10,Sergiievskyi14,Misin15"
+
+\end_inset
+
+.
+ The undeniably useful partial molar volume correction has been previously
+ justified empirically 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Palmer10"
+
+\end_inset
+
+ and by thermodynamic arguments 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sergiievskyi14"
+
+\end_inset
+
+ which were later disputed, however 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Song15"
+
+\end_inset
+
+; also a recent work advocates a different choice of the prefactor 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Misin15"
+
+\end_inset
+
+.
+ We presented an asymptotic analysis that offers an alternative interpretation
+ of the error origin and leads, in case of simple liquids, to the same prefactor
+ as in Ref.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Misin15"
+
+\end_inset
+
+ without relying on thermodynamic ensemble arguments.
+\end_layout
+
+\begin_layout Standard
+In a comparison of approximate methods we found that two representations
+ of the solute charge density, by point charges of a force-field and by
+ gas-phase QM density, lead to quite comparable solvation energies with
+ mean absolute deviation of about 1
+\begin_inset space ~
+\end_inset
+
+kcal/mol from each other and 1.4--1.6
+\begin_inset space ~
+\end_inset
+
+kcal/mol from experiment.
+ We investigated an approximate way to estimate electron relaxation in response
+ to solvent reaction field and a magnitude of the corresponding solvent
+ relaxation energy.
+ It appears that an approximate and self-consistent approaches agree on
+ average to better than 0.4
+\begin_inset space ~
+\end_inset
+
+kcal/mol.
  
 \end_layout
 
 \begin_layout Standard
-The investigation of self-consistent QM combination with RISM model reveals
- that for neutral solutes, the accuracy of the calculated solvation free
- energy is mainly determined by the solute cavity formation.
- The better agreement with experimental results could be obtained by applying
- partial molar volume correction as reported also in previous non-SCF studies.
- Another important factor, the change of the solute electrostatic property,
+The relaxation terms are supposed to be important for neutral molecules
+ with overall very moderate solvation energies; the scale of the relaxation
+ terms seems to support that.
+ In spite, we find that the approximate method to address relaxation terms
+ only slightly improves comparison to experiment, while a self-consistent
+ approach hardly improves it.
+ One of the possible reason might be an artifact of electron cloud polarization
+ by localized positive volume charge of the solvent medium which is likely
+ to be overestimated in the absence of repulsive exchange interactions of
+ solute- and solvent electrons.
+ We demonstrated a slight overestimation of induced solute dipoles in comparison
+ to PCM which may be an indication of such an artifact.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+BL: text was 
+\begin_inset Quotes eld
+\end_inset
+
+Another important factor, the change of the solute electrostatic property,
  which is perturbed by the solvent medium, is also found to have noticeable
  contribution to the solvation free energy calculation.
  Meanwhile, from the RDF in SCF-RISM, we found that the rearrangement of
  the solute charge density calculation causes the strengthening of the hydrogen
  bond between solute and water solvent.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+AM: there was not a single word about it in the text.
+ Is there any number that could be quoted in support of this claim (to convince
+ me, when not for the reader's eyes)?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Another possibility is that an asymptotic correction limited to a term strictly
+ proportional to the solute volume is insufficient to reduce the intrinsic
+ error of 3D RISM to better than 1--2
+\begin_inset space ~
+\end_inset
+
+kcal/mol for these solute/solvent combinations.
+ It is likely that a careful analysis of the 3D RISM asymptotic behavior
+ may offer a more accurate error estimate and resolve some of the controversies.
+ 
 \end_layout
 
 \begin_layout Section*
