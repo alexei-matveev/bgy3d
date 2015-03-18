@@ -11,7 +11,8 @@ kw = {"linewidth": 1.5,
       "markeredgewidth": 1.0,
       "markersize": 6}
 
-source = ["mm.dat", "fed.dat", "qm.dat", "scf-qm.dat"]
+
+source = ["mm.dat", "fed.dat", "fed-R.dat", "scf-qm.dat"]
 
 data = [loadtxt(_) for _ in source]
 
