@@ -24,6 +24,7 @@ ax2.set_aspect (1)
 # GP : d[:, 4]
 # ax1.set_title('Gas phase', loc="left")
 ax1.plot(d[:, 4], d[:, 3], 'o', color="white", **kw)
+print (polyfit(d[:, 4], d[:, 3], 1))
 
 #xlim ((dmin, xdmax))
 #ylim ((dmin, dmax))
@@ -59,7 +60,7 @@ ax2.plot (two, fit_fn2 (two), '-', color="0.00",
 # ax2.set_title('Aqueous phase', loc="left")
 ax2.plot(d[:, 4], d[:, 0], 's', color="0.75", label="PCM, " + txt1,
          markeredgecolor="0.50", **kw)
-ax2.plot(d[:, 4], d[:, 2], 'o', color="1.00", label="AQ, " + txt2,
+ax2.plot(d[:, 4], d[:, 2], 'o', color="1.00", label="SCF, " + txt2,
          **kw)
 
 #xlim ((dmin, xdmax))
