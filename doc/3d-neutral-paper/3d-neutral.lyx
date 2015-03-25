@@ -5065,10 +5065,11 @@ kcal/mol and
 
 , 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 AM: how much lower than 1 is it? The table shows 1.00.
+ BL: It's 0.9951 in the raw data.
 \end_layout
 
 \end_inset
@@ -5327,11 +5328,11 @@ reference "tab:mad-matrix"
 
 , 0.99, and 1.00 
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 AM: again r=1.00 may be misleading, because it is still less than 1.
- By how much?
+ By how much? BL: raw data is 0.9983
 \end_layout
 
 \end_inset
