@@ -5594,6 +5594,115 @@ b, suggests an increase by about 40% on average in SCF-RISM and only 30%
  in PCM.
  This discrepancy may be another indication of overestimated solute polarization
  in SCF-RISM.
+ Direct evidence could also be found from the radial distribution functions
+ (RDFs).
+ Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Radial-distribution-functions"
+
+\end_inset
+
+ demonstrates the RDFs of carbonyl oxygen -- water hydrogen (O--H
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+) and hydroxyl hydrogen -- water oxygen (H--O
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+) of solvated acetic acid.
+ Comparing the results obtained with MM, PT1 and SCF methods respectively,
+ we could notice that the peak of positively charge H
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+ around O has significantly increased by ~50% when the electronic structure
+ of the solute is relaxed self consistently in the solvent field, while
+ that of the negatively charge O
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+ around H is with less than 10% increase.
+ These findings are in agreement with the results reported by Du et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Du03"
+
+\end_inset
+
+, in which they observed the increase of water hydrogen and oxygen distribution
+ around t-NMA from cycle 0 to cycle 5 during the QM/3d-RISM-HNC iterations.
+ Similarly, an earlier RISM-SCF study by Kawata et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kawata96"
+
+\end_inset
+
+ also confirmed the increasing of water hydrogen atoms covalently bonded
+ to nitrogen atom of amine when switching the electrostatic potential from
+ without to with the self-consistent treatment.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Radial distribution functions of the solvated acetic acid: O--H
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+(top panel) and H--O
+\begin_inset Formula $_{\text{W}}$
+\end_inset
+
+(bottom panel).
+ Results obtained with the MM, PT1 and SCF methods are shown as dotted line,
+ dashed line and solid line respectively.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Radial-distribution-functions"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 3d-neutral.d/fig4.svg
+	width 100line%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5792,9 +5901,11 @@ The relaxation terms are supposed to be important for neutral molecules
  solute- and solvent electrons.
  We demonstrated a slight overestimation of induced solute dipoles in comparison
  to PCM which may be an indication of such an artifact.
- 
+ Meanwhile, increase of water hydrogen and oxygen distribution from unperturbed
+ to self-consistently relaxed solute in solvent field also supports our
+ surmise.
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 BL: text was 
@@ -5817,6 +5928,10 @@ Another important factor, the change of the solute electrostatic property,
 AM: there was not a single word about it in the text.
  Is there any number that could be quoted in support of this claim (to convince
  me, when not for the reader's eyes)?
+\end_layout
+
+\begin_layout Plain Layout
+BL: updated discussion text, here recover one statement.
 \end_layout
 
 \end_inset
