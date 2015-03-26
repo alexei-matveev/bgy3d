@@ -237,10 +237,17 @@ BL: mention other implementations of QM-RISM once instead of using a whole
 Despite the numerous implementations, the keys determining the energetic
  accuracy of the hybrid methods of RISM with QM calculation are not thoroughly
  discussed.
- On one hand, it is well known that the solvation free energy calculated
- from 3D RISM overestimates the energy of forming cavity for solute, which
- is problematic especially for neutral ones, since their solvation free
- energy values are around several kcal/mol.
+ On one hand, it is well known
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+ that the solvation free energy calculated from 3D RISM overestimates the
+ energy of forming cavity for solute, which is problematic especially for
+ neutral ones, since their solvation free energy values are around several
+ kcal/mol.
  The possible correction strategies include the repulsive bridge correction
  (RBC) 
 \begin_inset CommandInset citation
@@ -258,8 +265,8 @@ key "Truchon14"
 
  term and polar molar volume (PMV) correction 
 \begin_inset CommandInset citation
-LatexCommand citet
-key "Palmer10,Sergiievskyi14"
+LatexCommand cite
+key "Palmer10,Sergiievskyi14,Misin15"
 
 \end_inset
 
@@ -326,13 +333,16 @@ key "ParaGaussV3.1"
  In order to investigate the energetic accuracy, we applied the most recently
  reported PMV correction term with 3D RISM while the free energy functional
  of solutes are determined with four different representation of the solvated
- system: (1) The solutes are represented by the atomic partial charges assigned
- on each solute site, which are also tabulated in standard force field database
- as the Lennard--Jones (LJ) parameters in a MM manner (MM-RISM); (2) The
- free energy functional is perturbed by the first order perturbation theory
- manner (PT1-RISM); (3) The free energy functional is perturbed by the second
- order perturbation theory manner (PT2-RISM); (4) The free energy functional
- is determined self consistently with the relaxation of QM and RISM theory.
+ system, which gradually demonstrates the effect of solvent medium to the
+ solute electronic structure, from the perturbation manner to a full SCF
+ relaxation: (1) The solutes are represented by the atomic partial charges
+ assigned on each solute site, which are also tabulated in standard force
+ field database as the Lennard--Jones (LJ) parameters in a MM manner (MM-RISM);
+ (2) The free energy functional is perturbed by the first order perturbation
+ theory manner (PT1-RISM); (3) The free energy functional is perturbed by
+ the second order perturbation theory manner (PT2-RISM); (4) The free energy
+ functional is determined self consistently with the relaxation of QM and
+ RISM theory.
 \end_layout
 
 \begin_layout Section
