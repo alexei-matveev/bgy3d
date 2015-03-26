@@ -7,7 +7,7 @@
 \usepackage{mathptmx}
 \usepackage{times}
 \end_preamble
-\options showkeys,superscriptaddress,twocolumn
+\options showkeys,superscriptaddress,preprint
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -3710,7 +3710,8 @@ name "fig:Correlation-of-solvation"
 \align center
 \begin_inset Graphics
 	filename 3d-neutral.d/fig1.svg
-	width 85line%
+	width 75pheight%
+	height 75pheight%
 
 \end_inset
 
