@@ -1593,29 +1593,61 @@ key "Perkyns92,Cummings81,Kovalenko00b"
 \end_inset
 
 .
- The result of the convolution, 
+ The result of the
+\color blue
+ convolution, 
 \begin_inset Formula 
 \begin{equation}
-\tilde{\tau}_{\alpha}(\vec{k})=\tilde{n}(\vec{k})\left[\tilde{\varphi}(k)\sum_{\gamma}\tilde{\chi}_{\alpha\gamma}(k)q_{\gamma}\right]\sim2\pi Q\sum_{\gamma}d_{\alpha\gamma}q_{\gamma}\label{eq:tau}
+\tilde{\tau}_{\alpha}(\vec{k})=\tilde{n}(\vec{k})\tilde{\theta}_{\alpha}(k)\label{eq:tau}
 \end{equation}
 
 \end_inset
 
-is regular for an overall neutral solvent, 
+expressed here via the regular auxiliary functions
+\begin_inset Formula 
+\begin{equation}
+\tilde{\theta}_{\alpha}(k)=\tilde{\varphi}(k)\sum_{\gamma}\tilde{\chi}_{\alpha\gamma}(k)q_{\gamma}\sim2\pi\sum_{\gamma}d_{\alpha\gamma}q_{\gamma}\label{eq:theta}
+\end{equation}
+
+\end_inset
+
+is also
+\color inherit
+ regular for an overall neutral solvent, 
 \begin_inset Formula $\sum_{\gamma}q_{\gamma}=0$
 \end_inset
 
-; in that case, the compressibility term is also zero.
- Note that the terms in square brackets, 
-\begin_inset Formula $\tilde{\varphi}(k)\sum_{\gamma}\tilde{\chi}_{\alpha\gamma}(k)q_{\gamma}=:\tilde{\theta}_{\alpha}(k)$
+.
+ In that case, the compressibility term
+\color blue
+ in Eq.
+\begin_inset space ~
 \end_inset
 
- (one per solvent site 
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:theta"
+
+\end_inset
+
+ vanishes after summation.
+
+\color inherit
+ 
+\color blue
+Note that the functions 
+\begin_inset Formula $\tilde{\theta}_{\alpha}(k)$
+\end_inset
+
+ 
+\color inherit
+(one per solvent site 
 \begin_inset Formula $\alpha$
 \end_inset
 
-), are convolutions of spherically symmetric functions neither of which
- is solute specific.
+) are convolutions of spherically symmetric functions neither of which is
+ solute specific.
  The functions 
 \begin_inset Formula $\tilde{\theta}_{\alpha}(k)$
 \end_inset
