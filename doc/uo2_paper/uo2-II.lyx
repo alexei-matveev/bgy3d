@@ -309,14 +309,18 @@ key "Fuchs02,Moskaleva04,Cao05,Shamov05,Gutowski06"
  On the other hand, significant efforts are being made on improving the
  empirical model potentials for MM simulations, be it molecular dynamics
  (MD) or Monte-Carlo (MC) methods, that yield the most explicit statistical
- description of the solvent 
+ description of the 
+\color blue
+solvent 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Kerisit13,Tiwari14"
+LatexCommand citep
+key "Guilbaud93,Guilbaud96,Rai12,Pomogaev13,Kerisit13,Tiwari14,book:Griebel07"
 
 \end_inset
 
 .
+
+\color inherit
  Although several studies 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -379,7 +383,20 @@ key "Singer85,Kast08"
 
 , hence admit intuitive expressions for the first-order derivatives with
  respect to nuclear displacements.
- Note that the dielectrically consistent RISM (DRISM) 
+ 
+\color blue
+Lack of a practical free energy expression for another class of integral
+ equations based on the Born--Green--Yvon hierarchy 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Fischer80,Griebel08"
+
+\end_inset
+
+ complicates exploration of free energy landscapes.
+ The
+\color inherit
+ dielectrically consistent RISM (DRISM) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
@@ -445,6 +462,19 @@ key "Perkyns10"
 \end_inset
 
 .
+ 
+\color blue
+Very recently, an new efficient technique to avoid integration of long range
+ contributions to solvation energy in real space has been presented 
+\begin_inset CommandInset citation
+LatexCommand citep
+key "Heil15"
+
+\end_inset
+
+.
+
+\color inherit
  In this work we present a generalization of the exact re-summation technique
  for arbitrary solute charge densities.
 \end_layout
@@ -1617,7 +1647,33 @@ key "FFTW05"
 \end_inset
 
 .
- An arbitrary solute charge distribution 
+ 
+\color blue
+A similar approach was applied before to a monopole field of the solute
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kloss08b"
+
+\end_inset
+
+ and to a superposition of Gaussian-type charge distributions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Perkyns10"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+An
+\color inherit
+ arbitrary solute charge distribution 
 \begin_inset Formula $n(\vec{r})$
 \end_inset
 
@@ -1661,22 +1717,37 @@ key "FFTW05"
 \end_inset
 
 .
- A similar approach was applied before to a monopole field of the solute
  
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Kloss08b"
-
+\color blue
+A particle mesh Ewald method has been recently shown to significantly accelerate
+ construction of a form factor 
+\begin_inset Formula $\tilde{n}(\vec{k})$
 \end_inset
 
- and to a superposition of Gaussian-type charge distributions 
+ and its convolution with a (renormalized) Coulomb kernel 
+\begin_inset Formula $\tilde{\varphi}(k)$
+\end_inset
+
+ for 3D RISM calculations involving many charged solute sites 
 \begin_inset CommandInset citation
-LatexCommand cite
-key "Perkyns10"
+LatexCommand citep
+key "Heil15"
 
 \end_inset
 
 .
+ The same technique should, in principle, be applicable to combinations
+ of the form factor 
+\begin_inset Formula $\tilde{n}(\vec{k})$
+\end_inset
+
+ and site-specific response functions 
+\begin_inset Formula $\tilde{\theta}_{\alpha}(k)$
+\end_inset
+
+ without the need of the renormalization.
+
+\color inherit
  
 \end_layout
 
