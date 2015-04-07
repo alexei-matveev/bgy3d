@@ -1217,9 +1217,9 @@ The solvation energy of uranyl is estimated as
 \color inherit
 
 \begin_inset Formula 
-\begin{eqnarray}
-\Delta G_{\text{sol}} & = & G[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-nG[\text{H}_{2}\text{O}]-E[\text{UO}_{2}^{2+}]\label{eq:dG-sol-definition}
-\end{eqnarray}
+\begin{equation}
+\Delta G_{\text{sol}}=G[\text{UO}_{2}(\text{H}_{2}\text{O})_{n}^{2+}]-nG[\text{H}_{2}\text{O}]-E[\text{UO}_{2}^{2+}]\label{eq:dG-sol-definition}
+\end{equation}
 
 \end_inset
 
@@ -1391,9 +1391,9 @@ key "Ng74"
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{eqnarray}
-T_{\text{S}}[t_{\text{S}}] & = & (\chi-1)\ast c_{\text{S}}(t_{\text{S}})-\tau
-\end{eqnarray}
+\begin{equation}
+T_{\text{S}}[t_{\text{S}}]=(\chi-1)\ast c_{\text{S}}(t_{\text{S}})-\tau
+\end{equation}
 
 \end_inset
 
