@@ -2,14 +2,18 @@
 \lyxformat 413
 \begin_document
 \begin_header
-\textclass elsarticle
+\textclass achemso
 \begin_preamble
-%\usepackage{mathptmx}
-%\usepackage{times}
-\usepackage{microtype}
+\usepackage{mathptmx}
+\usepackage{times}
+%\usepackage{microtype}
 %\def\thetable{\arabic{table}}
+%\usepackage{ragged2e}
+%\usepackage[textfont=it]{caption}
+\captionsetup{font={bf}}
+\usepackage{natmove}
 \end_preamble
-\options 5p,sort&compress,times
+\options journal=jpcafh,layout=twocolumn
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -31,7 +35,7 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\float_placement t
+\float_placement tbph
 \paperfontsize default
 \spacing single
 \use_hyperref false
@@ -74,26 +78,6 @@ Uranyl solvation by a three-dimensional reference interaction site model
 
 \begin_layout Author
 Alexei Matveev
-\begin_inset Flex CorAuthormark
-status open
-
-\begin_layout Plain Layout
-corr
-\end_layout
-
-\end_inset
-
-
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-tum
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Email
@@ -102,102 +86,28 @@ alexei.matveev@gmail.com
 
 \begin_layout Author
 Bo Li
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-tum
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Author
 Notker Rösch
-\begin_inset Flex CorAuthormark
-status open
-
-\begin_layout Plain Layout
-corr
-\end_layout
-
-\end_inset
-
-
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-crc,ihpc
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Email
 roesch@mytum.de
 \end_layout
 
-\begin_layout Corresponding author
-Corresponding authors
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-corr
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Address
+\begin_layout Affiliation
 Department Chemie, Technische Universität München, 85747 Garching, Germany
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-tum
 \end_layout
 
-\end_inset
-
-
+\begin_layout Also Affiliation
+Catalysis Research Center, Technische Universität München, 85747 Garching,
+ Germany
 \end_layout
 
-\begin_layout Address
-Department Chemie and Catalysis Research Center, Technische Universität
- München, 85747 Garching, Germany
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-crc
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Address
+\begin_layout Also Affiliation
 Institute of High Performance Computing, Agency for Science, Technology
  and Research, 1 Fusionopolis Way, Connexis #16-16, Singapore 138632, Singapore
-\begin_inset Argument
-status open
-
-\begin_layout Plain Layout
-ihpc
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Abstract
@@ -241,10 +151,17 @@ Comp.
  water molecules.
  The calculated result agrees very well with experiment and the best theoretical
  estimates.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Reference interaction site model, aqueous solution, uranyl, solvation
 \end_layout
 
-\begin_layout Keywords
-Reference interaction site model, aqueous solution, uranyl, solvation
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -2370,7 +2287,7 @@ overcorrecting
 
 \begin_layout Standard
 \begin_inset Float table
-wide false
+wide true
 sideways false
 status open
 
@@ -3046,10 +2963,15 @@ Exp
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset VSpace smallskip
 \end_inset
 
 
+\end_layout
+
+\begin_layout Plain Layout
+\align left
 \begin_inset ERT
 status open
 
@@ -3066,6 +2988,7 @@ footnotesize
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -4238,6 +4161,7 @@ na
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset VSpace smallskip
 \end_inset
 
@@ -4258,6 +4182,7 @@ footnotesize
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -5952,6 +5877,7 @@ PSE3
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset VSpace smallskip
 \end_inset
 
@@ -5972,6 +5898,7 @@ footnotesize
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -6818,7 +6745,7 @@ name "fig:potential-of-mean-force"
 
 \begin_layout Standard
 \begin_inset Float table
-wide false
+wide true
 sideways false
 status open
 
@@ -7327,6 +7254,7 @@ MD
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset VSpace smallskip
 \end_inset
 
@@ -7347,6 +7275,7 @@ footnotesize
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -7969,6 +7898,7 @@ hard
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset VSpace smallskip
 \end_inset
 
@@ -7989,6 +7919,7 @@ footnotesize
 \end_layout
 
 \begin_layout Plain Layout
+\align left
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -8932,15 +8863,41 @@ Jager making his BGY3D program package available.
 01RC1106A).
 \end_layout
 
-\begin_layout Section*
-References
-\end_layout
-
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "../bibliography"
 options "elsarticle-num"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tocentry}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+includegraphics[height=3.5cm]{uo2-II.d/4w-composite}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tocentry}
+\end_layout
 
 \end_inset
 
