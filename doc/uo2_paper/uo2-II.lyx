@@ -13,7 +13,7 @@
 \captionsetup{font={bf}}
 \usepackage{natmove}
 \end_preamble
-\options journal=jpcafh,layout=twocolumn
+\options journal=jpcafh,layout=twocolumn,maxauthors=0
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -8867,7 +8867,7 @@ Jager making his BGY3D program package available.
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "../bibliography"
-options "elsarticle-num"
+options "achemso"
 
 \end_inset
 
