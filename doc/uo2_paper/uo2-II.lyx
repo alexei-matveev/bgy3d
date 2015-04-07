@@ -8867,7 +8867,6 @@ Jager making his BGY3D program package available.
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "../bibliography"
-options "achemso"
 
 \end_inset
 
