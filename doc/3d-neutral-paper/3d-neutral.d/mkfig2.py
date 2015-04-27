@@ -23,7 +23,13 @@ ax2.set_aspect (1)
 # MM : d[:, 3]
 # GP : d[:, 4]
 # ax1.set_title('Gas phase', loc="left")
-ax1.plot(d[:, 4], d[:, 3], 'o', color="white", **kw)
+# also fit the MM vs. GP
+fit = polyfit(d[:, 4], d[:, 3], 1)
+fit_fn0 = poly1d(fit)
+txt0 = "y = %.2fx + %.3f" % tuple (fit)
+one = [dmin, xdmax]
+ax1.plot (one, fit_fn0 (one), '-', color="0.00", **kw)
+ax1.plot(d[:, 4], d[:, 3], 'o', color="white", label=txt0,  **kw)
 print (polyfit(d[:, 4], d[:, 3], 1))
 
 #xlim ((dmin, xdmax))
@@ -69,6 +75,8 @@ ax2.plot(d[:, 4], d[:, 2], 'o', color="1.00", label="SCF, " + txt2,
 ax1.set_xlabel(u"Dipole (Gas Phase), eÅ")
 ax2.set_xlabel(u"Dipole (Gas Phase), eÅ")
 ax2.set_ylabel(u"Dipole (Aqueous Phase), eÅ")
+ax1.legend (ncol=1, numpoints=1, frameon=False,
+	fontsize=fontsize, loc="lower right")
 ax2.legend (ncol=1, numpoints=1, frameon=False,
 	fontsize=fontsize, loc="lower right")
 
