@@ -66,7 +66,8 @@
 \begin_body
 
 \begin_layout Title
-Combination of three dimensional reference interaction site model with ParaGauss
+Three-dimensional reference interaction site model solvent combined with
+ a quantum mechanical treatment of the solute
 \end_layout
 
 \begin_layout Author
@@ -107,28 +108,32 @@ Department Chemie and Catalysis Research Center, Technische Universität
 \end_layout
 
 \begin_layout Date
-Oct 2014
+May 2015
 \end_layout
 
 \begin_layout Abstract
-We implement and applied a hybrid approach combining the three-dimensional
- reference interaction site model (3D RISM) with quantum mechanics (QM)
- calculation, in which the electrostatic potential induced by the solute
- is directly derived from its electron density.
- The accuracy of the calculation of solvation free energy for neutral solutes
- is analyzed, of which the mainly determining factor is confirmed as the
- solute cavity formation effect.
- Another contribution from the solute electronic structure relaxation in
- aqueous medium, which is possibly induced by the hydrogen bond between
- solute and water solvent, also has noticeable influence on the results
- of SCF-RISM calculation.
- By applying the partial molar volume correction, our hybrid model shows
- results in good agreement with experiment and a polarizable continuum model,
- while in the latter the hydrogen bond effect is missing.
+We implemented and applied a hybrid approach for modelling the solvation
+ of molecules where we combined a three-dimensional reference interaction
+ site model (3D RISM) with quantum mechanical (QM) calculations of the solute.
+ The electrostatic potential induced by the solute is derived directly from
+ its electron density.
+ For neutral solutes, we analyzed the accuracy of calculated solvation free
+ energies which are mainly determined by the cavity formation energy.
+ As a second contribution, the solute electronic structure relaxation in
+ an aqueous medium also has a noticeable influence on the results of SCF-RISM
+ calculations.
+ By applying a known partial molar volume correction, for which we give
+ an alternative interpretation, our hybrid model shows results in good agreement
+ with experiment and results calculated with a polarizable continuum model
+ (PCM).
+ As a model with an atomic solvent representation, RISM accounts for the
+ effect of discrete hydrogen bonds which is included only on average in
+ PCM models.
 \end_layout
 
 \begin_layout Keywords
-self-consistent reference interaction site model, partial molar volume
+Solvation free energy, self-consistent reference interaction site model,
+ partial molar volume correction
 \end_layout
 
 \begin_layout Section
@@ -136,60 +141,130 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-The environment of an aqueous solution can completely change the products,
- mechanism and rate of a given chemical reaction.
- Therefore, its modelling is of central importance of understanding many
- chemical reactions of organic and inorganic species as well as for industrial
- applications.
- Example of pertinent application fields are catalytic reactions like hydrogen
- production, CO
+The solvent environment of a molecule can considerably affect its properties
+ and thus also change the products as well as the rate of its chemical reactions
+ and even the mechanism of such transformations.
+ Therefore, modelling solvation effects is of central importance for understandi
+ng many chemical reactions of organic and inorganic species as well as for
+ industrial applications 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+.
+ Examples of pertinent application fields, also of industrial importance,
+ are catalytic reactions for the production of hydrogen 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lewis06"
+
+\end_inset
+
+, the conversion of CO
 \begin_inset Formula $_{2}$
 \end_inset
 
- conversion, biomass conversion, or solution chemistry of actinides, which
- is important for radioactive waste disposal.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Roy10"
+
+\end_inset
+
+, transformations of biomass 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ragauskas06"
+
+\end_inset
+
+, and the complex chemistry of actinides in aqueous solution, which is highly
+ relevant for the nuclear fuel cycle and radioactive waste disposal 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Choppin06"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-To support current experimental efforts in various areas of catalysis and
- materials science in aqueous media, computational studies are needed to
- examine/predict species and processes at the atomic level.
- One of the two most popular strategies in computational chemistry to study
+In support of current experimental efforts in various areas of chemistry
+ and materials science in aqueous media, computational studies are needed
+ to examine or predict species and processes at the atomic level.
+ One of the two most popular strategies in computational chemistry for studying
  solution systems is the combination of quantum mechanics (QM) calculations
- with implicit solvation models, for example, polarizable continuum model
- (PCM) and its variant based the conductor-like solvation model (COSMO).
- Although implicit solvation models have been applied to various chemical
- processes in solution, they provide no insight into the structure and statistic
-al fluctuations of the solvent.
- Another type of model is the so-called explicit solvation model, which
- includes the hybrid method between QM calculation and molecular mechanics
- (MM) description of the solvent medium (QM/MM method), and the more accurate
- approach by directly performing molecular dynamics (MD) simulation from
- first principle (ab initio MD, shorthanded as AIMD).
- However, the results of statistical sampling in QM/MM method are only as
- good as the effective force field used to parameterize the solvent-solvent
- and solute-solvent interactions, and the polarizability of the solvent
- medium has to be taken into account to compete with continuum models in
- reproducing electrostatic interactions.
- Also, the statistical sampling of large numbers of solvent configurations
- entails significant computational cost to the combination of QM and MM
- calculations.
- For that same reason, more accurate QM dynamic simulations are restricted
- to a comparably small number of solvent molecules due to their very high
- computational demand.
+ with implicit solvation models, e.g., the polarizable continuum model (PCM)
+ and its variants, based the conductor-like solvation model (COSMO) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Klamt95,Tomasi05"
+
+\end_inset
+
+.
+ Yet, despite the importance of solvation models, these implicit methods
+ do not provide insight into the structure and the statistical fluctuations
+ of the solvent.
+ Another approach to solvation is the so-called explicit solvation model,
+ where one treats solute and solvent equivalently by performing molecular
+ dynamics (MD) simulation from first principle (ab initio MD – AIMD) or
+ MD simulations based on a force-field (molecular mechanics – MM) description
+ of both the solute and the solvent medium (MM-MD).
+ However, the statistical sampling of large numbers of solvent configurations
+ entails significant computational cost.
+ Therefore QM dynamic simulations are restricted to models with a comparably
+ small numbers of solvent molecules.
+ The MM solvent description of MM-MD or hybrid QM/MM methods 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Gao96,Gao92"
+
+\end_inset
+
+ reduce the computational cost.
+ Yet, the results of statistical sampling are only as good as the effective
+ force field used to parameterize the solvent-solvent and solute-solvent
+ interactions.
+ Also, to compete with continuum models in reproducing electrostatic interaction
+s, one has to account for the polarizability of the solvent medium 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Leontyev11"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
 Given the difficulties mentioned above, strategies which combine QM methods
- with integral equation theory of molecular liquids are regarded as a promising
- direction to study ions and complexes and their chemical reactions in aqueous
- solution with sufficient accuracy and at affordable cost.
+ with integral equation theory of molecular liquids 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,book:Hansen06"
+
+\end_inset
+
+ are regarded as a promising direction to study ions and complexes and their
+ chemical reactions in aqueous solution with sufficient accuracy and at
+ affordable cost.
  One successful approach of this type is the reference interaction site
- model (RISM) which provides solvation energies and also averaged solvent
- structures via site-site radial distribution functions (RDF).
- The hybrid approach of RISM with self-consistent field (SCF) QM calculation
- was first proposed by Ten-no, Hirata and Kato on the basis of a variational
- method to Hartree-Fock equation 
+ model (RISM) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Chandler72"
+
+\end_inset
+
+ which provides solvation (free) energies and also averaged solvent structures
+ via site-site radial distribution functions (RDF).
+ The hybrid approach of RISM together with a self-consistent field (SCF)
+ QM solute description was first proposed at the level of Hartree-Fock theory
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Tenno93"
@@ -197,94 +272,119 @@ key "Tenno93"
 \end_inset
 
 .
- To take into account the solvent structure information presented in three
- dimensional (3D) space around the solute molecule, Kovalenko and Hirata
- combined the Kohn-Sham density functional theory (KS-DFT) with 3D RISM
- to investigate the electronic structure for a metal--water interface 
+ Later-on Kohn-Sham density functional theory (KS-DFT) was combined with
+ 3D RISM to investigate the electronic structure of a metal–water interface
+ 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand cite
 key "Kovalenko99a"
 
 \end_inset
 
 .
- Until now, many implementations
+ Thus far, several implementations 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sato00,Du03,Gusarov06,Casanova07,Kloss08,Yoshida11,Yoshida14"
 
 \end_inset
 
- have been made to combine RISM theory with state-of-the-art QM method to
- provide researchers an alternative approach for classical implicit and
- explicit solvation models to study chemical reactions and processes in
- solutions.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-BL: mention other implementations of QM-RISM once instead of using a whole
- paragraph
-\end_layout
+ combine RISM theory with a state-of-the-art QM method to provide an alternative
+ approach for classical implicit and explicit solvation models.
+ The applications of the hybrid RISM-SCF method has successfully ben applied
+ to calculate acidity and basicity, the chemical equilibrium and the molecular
+ structure as well as chemical reactions and excited states in solution
+ systems 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Sato13"
 
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Standard
-Despite the numerous implementations, the keys determining the energetic
- accuracy of the hybrid methods of RISM with QM calculation are not thoroughly
- discussed.
- On one hand, it is well known
+Mainly two factors determine the solvent effect in the SCF-RISM method,
+ the contributions of the solute electronic relaxation and the excess chemical
+ potential 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "book:Hirata03"
 
 \end_inset
 
- that the solvation free energy calculated from 3D RISM overestimates the
- energy of forming cavity for solute, which is problematic especially for
- neutral ones, since their solvation free energy values are around several
- kcal/mol.
- The possible correction strategies include the repulsive bridge correction
- (RBC) 
+.
+ The excess chemical potential, which measures the free energy change of
+ coupling a solute molecule to the solvent, serves as the approximation
+ of the solvation free energy in MM-RISM methods.
+ The excess chemical potential calculated from 3D RISM is well known 
 \begin_inset CommandInset citation
-LatexCommand citet
-key "Kovalenko00a,book:Hirata03"
+LatexCommand cite
+key "book:Hirata03"
 
 \end_inset
 
- term, cavity formation energy correction 
+ to overestimate the energy required for the formation of the solute cavity.
+ Thus 3D RISM poorly predicts the thermodynamics of hydrophobic hydration
+ of neutral solutes 
 \begin_inset CommandInset citation
-LatexCommand citet
+LatexCommand cite
+key "Kovalenko00a"
+
+\end_inset
+
+.
+ To overcome this weakness, several correction methods of the solvation
+ free energy have been proposed, including the repulsive bridge correction
+ (RBC) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03,Kovalenko00a"
+
+\end_inset
+
+, the cavity formation energy correction 
+\begin_inset CommandInset citation
+LatexCommand cite
 key "Truchon14"
 
 \end_inset
 
- term and polar molar volume (PMV) correction 
+ and the 
+\series bold
+polar
+\series default
+ molar volume (PMV) correction 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Palmer10,Sergiievskyi14,Misin15"
 
 \end_inset
 
- term.
- On the other hand, in SCF RISM-QM calculations, the energy of solute electronic
- structure relaxation upon the solvation of the solute from gas phase to
- aqueous phase must be considered, since it is reported that the change
- in the solvation energy due to the polarization is nearly proportional
- to this term 
+.
+ These correction methods are mainly applied in MM-RISM calculations, in
+ which the solute electronic structure is assumed not to be relaxed.
+ Yet, as in the PCM method 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Orozco07"
+
+\end_inset
+
+, the energy due to the electronic relaxation of the solute is not negligible
+ in the SCF-RISM method.
+ The change of the solvation free energy due to solute polarization is almost
+ proportional to this term 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Sato13,Sato07a"
 
 \end_inset
 
-.
+, 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 BL: linear response regime is mentioned in 
@@ -303,46 +403,34 @@ key "Sato07a"
 
 \end_inset
 
- Therefore, it will be also interesting to clarify the influence of electronic
- relaxation of the solute, before applying QM-RISM hybrid method energetically
- describing chemical reactions in solution.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-BL: The initial version contained a paragraph saying the difference of atomic
- charge representation with others, removed.
-\end_layout
-
-\end_inset
-
-
+ but the influence of solute polarization on the accuracy of the solvation
+ free energy has not been well studied in SCF-RISM calculations.
+ 
 \end_layout
 
 \begin_layout Standard
-In this paper, we proposed a new method to derive the electrostatic potential
- (ESP) directly from the real-space electron density of KS-DFT orbitals,
- and combine it with the parallel code ParaGauss 
+Therefore, we examine in the following the accuracy of the solvation free
+ energy in hybrid QM RISM calculations for a test set of 43 neutral organic
+ solute molecules in aqueous solution.
+ The test solutes include hydrocarbon chains and aromatic rings, and various
+ organic molecules with functional groups.
+ A list of all species is given in the Supporting Information (SI).
+ We explore the effect of solute electronic relaxation in stepwise fashion.
+ Starting from MM-RISM as a reference, we introduce the polarization of
+ the solute in the solvent medium, first by applying first-order perturbation
+ theory (PT1-RISM), going on to a second-order perturbation theory treatment
+ (PT2-RISM), and finally moving on to the full SCF-RISM relaxation.
+ For all method variants, we compare the performance of the recently reported
+ PMV correction term 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "ParaGaussV3.1"
+key "Sergiievskyi14"
 
 \end_inset
 
-.
- In order to investigate the energetic accuracy, we applied the most recently
- reported PMV correction term with 3D RISM while the free energy functional
- of solutes are determined with four different representation of the solvated
- system, which gradually demonstrates the effect of solvent medium to the
- solute electronic structure, from the perturbation manner to a full SCF
- relaxation: (1) The solutes are represented by the atomic partial charges
- assigned on each solute site, which are also tabulated in standard force
- field database as the Lennard--Jones (LJ) parameters in a MM manner (MM-RISM);
- (2) The free energy functional is perturbed by the first order perturbation
- theory manner (PT1-RISM); (3) The free energy functional is perturbed by
- the second order perturbation theory manner (PT2-RISM); (4) The free energy
- functional is determined self consistently with the relaxation of QM and
- RISM theory.
+ to the solvation free energy.
+ To analyze the accuracy the RISM approach, we discuss these results in
+ comparison to those of PCM calculations and to experiment.
 \end_layout
 
 \begin_layout Section
