@@ -352,9 +352,9 @@ key "Truchon14"
 \end_inset
 
  and the 
-\series bold
-polar
-\series default
+\color blue
+partial
+\color inherit
  molar volume (PMV) correction 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -449,8 +449,10 @@ name "sub:theory"
 \end_layout
 
 \begin_layout Standard
-The detailed aspects of 3D RISM theory have been thoroughly discussed in
- previous work 
+As a recent development of the liquid state theory, the 3D RISM provides
+ a discrete description of the solvent around the solute, using solute-solvent
+ correlation functions as fundamental variables.
+ The relevant theory has been thoroughly discussed 
 \begin_inset CommandInset citation
 LatexCommand citealp
 key "Sato13,Kovalenko99a,Kovalenko00b,book:Hirata03"
@@ -458,9 +460,15 @@ key "Sato13,Kovalenko99a,Kovalenko00b,book:Hirata03"
 \end_inset
 
 .
- thus here we shortly go through the fundamental formulas in the theory.
- The solute-solvent 3D RISM integral equation has the following convolution
- form:
+ Therefore we sketch here only the fundamental formulae of the solute-solvent
+ 3D RISM integral equation, in the form of a convolution 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
@@ -471,7 +479,7 @@ h^{uv}=c^{uv}\ast\chi^{v}.\label{eq:rism-uv}
 
 \end_inset
 
-Here 
+
 \begin_inset Formula $h^{uv}$
 \end_inset
 
@@ -518,7 +526,7 @@ reference "eq:rism-uv"
 \begin_inset Formula $\chi^{v}=\omega^{v}+\rho h^{vv}$
 \end_inset
 
- and could be obtained self-consistently from the pure solvent 1D RISM equation
+ which can be obtained self-consistently from the pure solvent RISM equation
  
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -526,8 +534,7 @@ key "book:Hirata03,Kovalenko99b"
 
 \end_inset
 
-.
- In practice one operates with the dimensionless Fourier transform 
+; in practice one operates with the dimensionless Fourier transform 
 \begin_inset Formula $\tilde{\chi}^{v}(k)$
 \end_inset
 
@@ -548,8 +555,11 @@ key "book:Hirata03,Kovalenko99b"
 \begin_inset Formula $o(k^{2})$
 \end_inset
 
- terms corrected by DRISM control the dielectric response of the solvent
  
+\color blue
+term
+\color inherit
+ is calibrated by the dielectric response of the solvent 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Perkyns92"
@@ -557,7 +567,7 @@ key "Perkyns92"
 \end_inset
 
 .
- As usual 
+ 
 \begin_inset Formula $\beta=1/T$
 \end_inset
 
@@ -569,7 +579,7 @@ key "Perkyns92"
 \end_layout
 
 \begin_layout Standard
-Similar to 1D RISM case, the closure relation is needed to render the Eq.
+Similar to the 1D RISM, a closure relation is needed to render Eq.
 \begin_inset space ~
 \end_inset
 
@@ -581,18 +591,23 @@ reference "eq:rism-uv"
 \end_inset
 
  solvable.
- In this paper, the Kovalenko and Hirata (KH) 
+ In all RISM calculations we use the closure proposed by Kovalenko and Hirata
+ (KH) 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Kovalenko99a"
 
 \end_inset
 
- closure is used, which reads 
+: 
+\color blue
+
 \begin_inset Formula $h_{\alpha}=f(-\beta u_{\alpha}+h_{\alpha}-c_{\alpha}$
 \end_inset
 
-) with 
+)
+\color inherit
+ with 
 \begin_inset Formula $f(x)=\exp(x)-1$
 \end_inset
 
@@ -606,10 +621,14 @@ key "Kovalenko99a"
 
  otherwise.
  Here 
+\color blue
+
 \begin_inset Formula $u_{\alpha}(\vec{r})$
 \end_inset
 
- is the interaction potential between solvent site 
+ 
+\color inherit
+is the interaction potential between solvent site 
 \begin_inset Formula $\alpha$
 \end_inset
 
@@ -617,12 +636,12 @@ key "Kovalenko99a"
 \end_layout
 
 \begin_layout Standard
-Finally, the excess chemical potential of solvation could be analytically
- derived from distribution functions.
- For HNC closure, it has the following form 
+The excess chemical potential of solvation is given by the distribution
+ functions.
+ For the KH closure, it has the analytical form 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Singer85"
+key "book:Hirata03,Kovalenko99a"
 
 \end_inset
 
@@ -630,21 +649,33 @@ key "Singer85"
 \end_layout
 
 \begin_layout Standard
+
+\color blue
 \begin_inset Formula 
 \begin{equation}
-\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[|h_{\alpha}|^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r\label{eq:mu}
+\mu=\frac{\rho}{\beta}\int\sum_{\alpha=1}^{N_{\text{v}}}\left[\Theta(-h_{\alpha})h_{\alpha}^{2}/2-c_{\alpha}-c_{\alpha}h_{\alpha}/2\right]d^{3}r\label{eq:mu}
 \end{equation}
 
 \end_inset
 
-and in the corresponding expression for the KH closure the 
+
+\color inherit
+Here 
+\begin_inset Formula $\Theta(x)$
+\end_inset
+
+ is the Heaviside step function which ensures that the terms 
 \begin_inset Formula $h^{2}$
 \end_inset
 
--terms contribute only in the depletion regions where 
+ contribute only in the depletion regions,
+\color blue
+ 
 \begin_inset Formula $h_{\alpha}<0$
 \end_inset
 
+
+\color inherit
  
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -672,7 +703,14 @@ reference "eq:rism-uv"
 \begin_inset Formula $c$
 \end_inset
 
- leads to seriously overestimated cavity formation energies.
+, leads to seriously overestimated cavity formation energies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Palmer10,Frolov11"
+
+\end_inset
+
+.
  Indeed, by assuming a simple liquid exposed to a potential sufficiently
  repulsive within an extended volume 
 \begin_inset Formula $V_{0}$
@@ -690,11 +728,7 @@ reference "eq:rism-uv"
 \begin_inset Formula $V_{0}$
 \end_inset
 
-, by way of the convolution relation and using a short hand notation 
-\begin_inset Formula $z=\rho\kappa/\beta$
-\end_inset
-
- for the compressibility factor, one obtains 
+ one obtains: 
 \begin_inset Formula 
 \begin{equation}
 \beta\mu\approx\rho V_{0}(z^{-1}+1)/2.\label{eq:mu-asymptotic-rism}
@@ -702,13 +736,36 @@ reference "eq:rism-uv"
 
 \end_inset
 
-Water is nearly incompressible --- the corresponding compressibility factor
+To this end, one uses the convolution relation and the short hand notation
  
-\begin_inset Formula $z\approx1/16$
+\begin_inset Formula $z=\rho\kappa/\beta$
 \end_inset
 
- at normal conditions; RISM theories predict comparable numbers depending
- on the closure and water model.
+ for the compressibility factor.
+\end_layout
+
+\begin_layout Standard
+Water is nearly incompressible: 
+\begin_inset Formula $z\approx1/15.8$
+\end_inset
+
+ at normal conditions 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rodnikova07"
+
+\end_inset
+
+.
+ With RISM theories one obtains a comparable value, 1/15.2, using the KH
+ closure and a modified TIP3P water model 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pettitt82,Jorgensen83"
+
+\end_inset
+
+.
  
 \begin_inset Note Note
 status collapsed
@@ -854,20 +911,24 @@ _____________________________
 
 \end_inset
 
- Thus the asymptotic RISM expression for cavity formation energy suggests
- a rate of 
-\begin_inset Formula $a=5$
+ Thus the asymptotic RISM expression for the formation energy of the solute
+ cavity suggests 
+\color blue
+that to displace each of 
+\begin_inset Formula $\rho V_{0}$
+\end_inset
+
+ water solvent molecules to form the cavity, the required energy is 
+\begin_inset Formula $a=\beta^{-1}(z^{-1}+1)/2\approx5$
 \end_inset
 
 
 \begin_inset space ~
 \end_inset
 
-kcal/mol per each of the 
-\begin_inset Formula $\Delta N=\rho V_{0}$
-\end_inset
+kcal/mol at normal conditions.
 
- displaced water molecules at normal conditions.
+\color inherit
  This asymptotic behavior is far too hydrophobic in comparison to the correct
  asymptote, 
 \begin_inset Formula $\mu\approx pV_{0}$
@@ -877,7 +938,7 @@ kcal/mol per each of the
 \begin_inset Formula $a=p/\rho$
 \end_inset
 
- of 0.4
+ which amounts to 0.4
 \begin_inset space ~
 \end_inset
 
@@ -920,7 +981,11 @@ cal/mol/Å
 \begin_inset Formula $^{2}$
 \end_inset
 
- is significantly more important for medium sized cavities 
+ is significantly more important 
+\color blue
+for nanosized solutes
+\color inherit
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dzubiella04"
@@ -946,27 +1011,49 @@ Surface tension:
 
 \end_inset
 
- On the other hand, the large error of the RISM expression for chemical
- potential cannot be ignored in practical calculations.
- In passing, we note that an immediate reason for the erroneous behavior
- is the reliance on the solvent susceptibility 
+ Nevertheless, the large error of the RISM expression for the chemical potential
+ cannot be ignored in practical calculations.
+\end_layout
+
+\begin_layout Standard
+
+\color blue
+The erroneous asymptotic behavior of Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:mu-asymptotic-rism"
+
+\end_inset
+
+ is likely due to the fact that the method relies on the solvent susceptibility
+ 
 \begin_inset Formula $\chi$
 \end_inset
 
- for the particular water density at normal conditions even in the regions
- with vanishingly small densities.
- It may be instructive to note that by using the ideal gas equation of state,
- 
-\begin_inset Formula $p=\rho/\beta$
-\end_inset
-
-, and corresponding compressibility factor 
+ for the (dense) liquid water also inside the cavity where the solvent density
+ is vanishingly small, however.
+ Note that by substituting the compressibility factor by its low-density
+ (ideal gas) limit 
 \begin_inset Formula $z=1$
 \end_inset
 
- which must be obeyed in the low density regions the RISM asymptotic expression
- acquires the correct form 
-\begin_inset Formula $\mu\approx pV_{0}$
+ in Eq.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:mu-asymptotic-rism"
+
+\end_inset
+
+ the RISM asymptotic expression acquires the correct form 
+\begin_inset Formula $\mu\approx\rho V_{0}/\beta=pV_{0}$
 \end_inset
 
 .
@@ -974,10 +1061,21 @@ Surface tension:
 \end_layout
 
 \begin_layout Standard
-The PMV correction term intended to compensate the asymptotic deficiency
- of the 3D RISM expression is based on the universal correction (UC) term
- for 3D RISM proposed by Palmer et al.
- 
+Palmer et al.
+\begin_inset space \thinspace{}
+\end_inset
+
+noted that the 
+\color blue
+partial molar volume (PMV)
+\color inherit
+ correlates with the difference between experimental and RISM calculated
+ solvation free energy values.
+ Therefore, they suggested 
+\color blue
+the PMV
+\color inherit
+ correction 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Palmer10"
@@ -990,12 +1088,13 @@ key "Palmer10"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\mu^{\text{UC}}=\mu+(a\rho V_{\text{u}}+b),\label{eq:3DRISM-UC}
+\mu^{\text{PMV}}=\mu+(a\rho V_{\text{u}}+b),\label{eq:3DRISM-UC}
 \end{equation}
 
 \end_inset
 
-However, instead of fitting parameters 
+to compensate the asymptotic deficiency of the 3D RISM expression.
+ However, instead of fitting the parameters 
 \begin_inset Formula $a$
 \end_inset
 
@@ -1003,19 +1102,25 @@ However, instead of fitting parameters
 \begin_inset Formula $b$
 \end_inset
 
-, here the correction coefficients are chosen following the strategy of
- Sergiievskyi et al.
- 
+, we follow the strategy of Sergiievskyi et al.
+\begin_inset space \thinspace{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Sergiievskyi14"
 
 \end_inset
 
-, with 
+ and chose the correction coefficients as 
+\color blue
+
 \begin_inset Formula $\beta a=(\rho/2)\sum_{\alpha\gamma}\tilde{c}_{\alpha\gamma}^{\text{v}}(0)$
 \end_inset
 
+
+\color inherit
  and 
 \begin_inset Formula $b=0$
 \end_inset
@@ -1024,23 +1129,38 @@ key "Sergiievskyi14"
 \begin_inset Formula $\tilde{c}_{\alpha\gamma}^{\text{v}}(k)$
 \end_inset
 
- is the Fourier representation of direct correlation function of pure solvent.
- By way of the 1D RISM equations used to evaluate the solvent properties
- the rate coefficient may be alternatively expressed via the solvent compressibi
-lity factor: 
+ is the Fourier representation of the direct correlation function of the
+ pure solvent.
+ By way of the 1D RISM equations used to evaluate the solvent properties,
+ the correction coefficient 
+\begin_inset Formula $a$
+\end_inset
+
+ may alternatively be expressed via the solvent compressibility factor:
+ 
 \begin_inset Formula $\beta a=-(z^{-1}-1)/2$
 \end_inset
 
 .
- The dimensionless PMV of solute 
+ The dimensionless PMV of the solute, 
+\color blue
+
 \begin_inset Formula $\rho V_{\text{u}}=z\left(1-\rho\sum_{\alpha}\tilde{c}_{\alpha}(0)\right)$
 \end_inset
 
- involves the 3D direct correlation functions 
+,
+\color inherit
+ involves the Fourier representation of the solvent-solute direct correlation
+ functions 
 \begin_inset Formula $\tilde{c}_{\alpha}(\vec{k})$
 \end_inset
 
- and could be obtained from the standard expression 
+ at 
+\begin_inset Formula $k=0$
+\end_inset
+
+; it can be obtained from the standard expression derived in RISM theory
+ 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "book:Hirata03,Palmer10"
@@ -1048,14 +1168,21 @@ key "book:Hirata03,Palmer10"
 \end_inset
 
 .
- Both 
+\end_layout
+
+\begin_layout Standard
+However, both 
 \begin_inset Formula $\tilde{c}_{\alpha\gamma}^{\text{v}}(0)$
 \end_inset
 
  and 
+\color blue
+
 \begin_inset Formula $\tilde{c}_{\alpha}(0)$
 \end_inset
 
+
+\color inherit
  are rather computed as volume integrals of real-space representations 
 \begin_inset Formula $c_{\alpha\gamma}^{\text{v}}(r)$
 \end_inset
@@ -1066,11 +1193,11 @@ key "book:Hirata03,Palmer10"
 
 , respectively.
  An extension of the asymptotic analysis for simple liquids to the PMV correctio
-n shows that it cancels the major 
+n shows that it cancels the main term 
 \begin_inset Formula $(\beta z)^{-1}\rho V_{0}/2$
 \end_inset
 
- part of the asymptotic 3D RISM error in excess chemical potential for nearly
+ of the asymptotic 3D RISM error in the excess chemical potential for nearly
  incompressible liquids with 
 \begin_inset Formula $z\ll1$
 \end_inset
@@ -1102,14 +1229,14 @@ status collapsed
 
 \end_inset
 
- Note that the derivation of this particular PMV correction form 
+ The derivation of this particular PMV correction form 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Sergiievskyi14"
 
 \end_inset
 
- involves thermodynamic arguments that have been questioned later 
+ involves thermodynamic arguments that have been questioned later on 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Song15"
@@ -1117,14 +1244,14 @@ key "Song15"
 \end_inset
 
 .
- Another recent work 
+ A recent work 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Misin15"
 
 \end_inset
 
- favors an slightly different rate coefficient, 
+ favors a different correction coefficient, 
 \begin_inset Formula $\beta a=-(z^{-1}+1)/2$
 \end_inset
 
@@ -1143,11 +1270,11 @@ reference "eq:mu-asymptotic-rism"
 \begin_inset Formula $V_{\text{u}}\approx V_{0}$
 \end_inset
 
- and neglect of pressure term.
+ and neglecting the pressure term.
 \end_layout
 
 \begin_layout Subsection
-Interaction of QM solute and RISM solvent
+Interaction between QM solute and RISM solvent
 \end_layout
 
 \begin_layout Standard
