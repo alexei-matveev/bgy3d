@@ -3925,7 +3925,6 @@ name "fig:Correlation-of-solvation"
 \align center
 \begin_inset Graphics
 	filename 3d-neutral.d/fig1.svg
-	width 75pheight%
 	height 75pheight%
 
 \end_inset
