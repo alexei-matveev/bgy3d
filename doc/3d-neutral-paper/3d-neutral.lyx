@@ -5307,7 +5307,7 @@ far from ideal
 \end_layout
 
 \begin_layout Subsection
-Estimating response to the solvent field: PT2-RISM 
+Perturbed QM solute model: PT2-RISM 
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:pt2-rism"
@@ -5318,23 +5318,24 @@ name "sub:pt2-rism"
 \end_layout
 
 \begin_layout Standard
-In two preceding sections charge distribution of a solute was not perturbed
- by solvent medium.
- This corresponds to an embedding of a static species in solution.
- From this section on we introduce the perturbation of the solute electronic
- structure by the reaction field of solvent medium.
- However, the solvent field taken from MM-RISM calculation is fixed during
- the electronic structure calculations in this section.
- Polarization energy 
+In the MM- and PT1-RISM approaches, the charge distribution of the solute
+ does not react in response to the solvent medium.
+ In both cases, the solute is embedded as static species in the solvent
+ environment.
+ Next, we introduce the perturbation of the solute electronic structure
+ due to the reaction field of the solvent medium.
+ However, the solvent field, as taken from a MM-RISM calculation, is fixed
+ during the electronic structure calculations.
+ The polarization energy 
 \begin_inset Formula $\delta E\geq0$
 \end_inset
 
- of the QM subsystem is then used to also estimate the relaxation of the
- excess chemical potential 
+ of the QM subsystem is then used to estimate the relaxation of the excess
+ chemical potential 
 \begin_inset Formula $\delta\mu\approx-2\delta E$
 \end_inset
 
- and so compute the second-order free energy contribution, Eq.
+ and to compute the second-order free energy contribution, Eq.
 \begin_inset space ~
 \end_inset
 
@@ -5346,12 +5347,11 @@ reference "eq:dG-models-2"
 \end_inset
 
 .
- 
 \end_layout
 
 \begin_layout Standard
-For our systems polarization by the reaction field affects energies only
- moderately: 
+For the systems under study, the polarization by the reaction field affects
+ the solute electronic energies only moderately: 
 \begin_inset Formula $\delta E\leq2.1$
 \end_inset
 
@@ -5362,7 +5362,7 @@ For our systems polarization by the reaction field affects energies only
 kcal/mol.
  Because of the small scale of the second-order correction, solvation free
  energies from PT2-RISM calculations are strongly correlated with the MM-RISM
- and PT1-RISM results with 
+ and PT1-RISM results, with 
 \begin_inset Formula $r=0.98$
 \end_inset
 
@@ -5380,7 +5380,7 @@ kcal/mol and
 
 , 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 AM: how much lower than 1 is it? The table shows 1.00.
@@ -5397,7 +5397,7 @@ AM: how much lower than 1 is it? The table shows 1.00.
 \begin_inset space ~
 \end_inset
 
-kcal/mol respectively (Tables
+kcal/mol, respectively (Tables
 \begin_inset space ~
 \end_inset
 
@@ -5408,16 +5408,17 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
 
 \end_inset
 
- without PMV correction).
- Again, without PMV correction the PT2 results do not compare well to the
- experiment with corresponding 
+; without PMV correction).
+ Again, without PMV correction the PT2 results do not compare well with
+ experiment, e.g.
+ see the corresponding 
 \begin_inset Formula $\text{MAD}=16.4$
 \end_inset
 
@@ -5437,8 +5438,12 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- Upon applying PMV correction the correlation coefficient experiment improves
- with 
+ Applying the PMV correction, the correlation with experiment improves from
+ 
+\begin_inset Formula $r=0.4$
+\end_inset
+
+ to 
 \begin_inset Formula $r=0.89$
 \end_inset
 
@@ -5461,7 +5466,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5469,8 +5474,8 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- This is slightly better than MM, PT1, and PCM approaches: the latter features
- 
+ This is comparable to MM and PT1 approaches, and slightly better than the
+ PCM results; the latter feature 
 \begin_inset Formula $r=0.73$
 \end_inset
 
@@ -5483,14 +5488,14 @@ reference "tab:mad-matrix"
 \end_inset
 
 kcal/mol.
- Though the magnitude of the second-order effect is comparable to the accuracy
- of MM and PT1 results, its addition does not radically improve accuracy,
- suggesting that other error sources dominate PMV-corrected MM and PT1 results.
- 
+ Although the magnitude of the second-order effect is comparable to the
+ accuracy of the MM and PT1 results, its addition does not improve the overall
+ accuracy, suggesting (again) that other error sources dominate the PMV-correcte
+d RISM results.
 \end_layout
 
 \begin_layout Standard
-Visually the effect of the second-order correction can be examined in Fig.
+Visually the effect of the second-order correction can be examined in Figure
 \begin_inset space ~
 \end_inset
 
@@ -5503,8 +5508,7 @@ reference "fig:Correlation-of-solvation"
 
 c.
  The scattering around the linear regression line increases slightly in
- comparison to MM and PT1; this is confirmed by slightly larger MAD from
- the fitted line, Table
+ comparison to MM and PT1; this is confirmed by a slightly larger MAD, Table
 \begin_inset space ~
 \end_inset
 
@@ -5517,11 +5521,11 @@ reference "tab:Linear-correlation-Delta2G"
 
 .
  However, because of the net negative shift due the second-order relaxation
- term the PMV-corrected results are, on average, closer to the base line
+ term, the PMV-corrected results are, on average, closer to the base line
  which is reflected in a marginally better comparison to experiment as discussed
  above.
- The slope of the regression lines for PT2 results is very similar to PT1,
- the intercept 
+ The slope of the regression line for the corrected PT2 results is very
+ similar to PT1; the intercept 
 \begin_inset Formula $B=-3.59$
 \end_inset
 
@@ -5529,11 +5533,15 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset space ~
 \end_inset
 
-kcal/mol is lower by about 2.1 kcal/mol because of the negative shift.
+kcal/mol is lower by ~2.1
+\begin_inset space ~
+\end_inset
+
+kcal/mol because of the overall negative shift.
 \end_layout
 
 \begin_layout Subsection
-Self-consistent reaction field: SCF-RISM 
+Self-consistent QM solute model: SCF-RISM 
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:scf-rism"
@@ -5599,17 +5607,17 @@ name "fig:relaxation-terms"
 \end_layout
 
 \begin_layout Standard
-In previous sections, we did not explicitly consider redistribution of the
- solvent medium in response to relaxation of the solute electronic structure.
- In this section we treat the relaxation of electron- and solvent distributions
- self-consistently.
- Without PMV correction applied to SCF-RISM solvation energies, the error
- of the solute cavity formation energy leads to a poor correlation with
- experiment: 
+Finally, we treat the relaxation of the solute electron distribution and
+ the solvent distributions self‑consistently.
+ Compared to the method variants discussed above, now the solvent rearrangement
+ is taken into account.
+ For SCF-RISM solvation energies without PMV corrections, the error in the
+ energy for forming the solute cavity leads to a poor correlation with experimen
+t: 
 \begin_inset Formula $r=0.41$
 \end_inset
 
- and 
+, 
 \begin_inset Formula $\text{MAD}=16.1$
 \end_inset
 
@@ -5628,7 +5636,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5636,14 +5644,15 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- Approximations considered in previous sections appear to correlate strongly
- with self-consistent approach: the correlation coefficient 
+ The approximations considered in the previous sections correlate strongly
+ with the self-consistent approach.
+ The correlation coefficients are 
 \begin_inset Formula $r=0.97$
 \end_inset
 
-, 0.99, and 1.00 
+, 0.99, and 1.0 
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 AM: again r=1.00 may be misleading, because it is still less than 1.
@@ -5652,7 +5661,7 @@ AM: again r=1.00 may be misleading, because it is still less than 1.
 
 \end_inset
 
- to MM, PT1, and PT2 methods respectively (Table
+ for the MM, PT1, and PT2 methods, respectively (Table
 \begin_inset space ~
 \end_inset
 
@@ -5665,11 +5674,8 @@ reference "tab:correcoeff-matrix"
 
 ).
  The mean absolute deviations of self-consistent and approximate results
- are noticeable, however: 
-\begin_inset Formula $\text{MAD}=2.01$
-\end_inset
-
-
+ are noticeable.
+ They amount to 2.01
 \begin_inset space ~
 \end_inset
 
@@ -5693,16 +5699,20 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- Note how a rough estimate of the second-order correction makes the comparison
- PT2 and SCF results noticeably better than for the other two first-order
- approximations.
- With SCF results we now can verify the assumptions of the previous section.
- The self-consistent approach produces solute polarization energies 
+ Note that the rough estimate of the second-order correction brings the
+ PT2 data somewhat closer to the SCF results than the corrections due to
+ the two approximations of first order.
+ 
+\end_layout
+
+\begin_layout Standard
+With the SCF results we now can verify the assumptions of the previous section.
+ The self-consistent approach yields solute polarization energies 
 \begin_inset Formula $\delta E$
 \end_inset
 
  that are larger than the PT2 estimates for nearly all solutes, which is
- reflected in a wider range: 
+ reflected in a wider range 
 \begin_inset Formula $0\leq\delta E\leq4.1$
 \end_inset
 
@@ -5710,7 +5720,7 @@ reference "tab:mad-matrix"
 \begin_inset space ~
 \end_inset
 
-kcal/mol, Fig.
+kcal/mol (Figure
 \begin_inset space ~
 \end_inset
 
@@ -5721,7 +5731,7 @@ reference "fig:relaxation-terms"
 
 \end_inset
 
-.
+).
  The relaxation of the solvent chemical potential 
 \begin_inset Formula $\delta\mu$
 \end_inset
@@ -5730,12 +5740,13 @@ reference "fig:relaxation-terms"
 \begin_inset Formula $\delta E$
 \end_inset
 
-, however the ratio of the two contributions to the relaxation energy as
- estimated from a linear regression is about 
+.
+ The ratio of the two contributions to the relaxation energy as estimated
+ from a linear regression is about 
 \begin_inset Formula $-1.69$
 \end_inset
 
-, Fig.
+, Figure
 \begin_inset space ~
 \end_inset
 
@@ -5746,9 +5757,56 @@ reference "fig:relaxation-terms"
 
 \end_inset
 
-.
- The net effect of the self-consistent relaxation is slightly more negative
- than the second-order correction.
+, which is in between the limits of 
+\begin_inset Formula $-1$
+\end_inset
+
+ and 
+\begin_inset Formula $-2$
+\end_inset
+
+ derived from a simple quadratic model (Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:theory"
+
+\end_inset
+
+ and Appendix
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:linear-model"
+
+\end_inset
+
+).
+ The mean signed deviation (MSD) of PMV-corrected data shows that PT2 model
+ on average underestimates experiment by 
+\begin_inset Formula $-0.16$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol while the SCF results underestimate experiment by 
+\begin_inset Formula $-0.39$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+kcal/mol on average, indicating that the net effect of the self-consistent
+ relaxation is slightly more negative than the second-order correction.
  
 \begin_inset Note Note
 status collapsed
@@ -5796,20 +5854,19 @@ PMV-corrected
 \end_layout
 
 \begin_layout Standard
-The PMV is hardly affected by redistribution of the solute charge density
- in response to solvent field --- for 43 solutes studied here the differences
- are below 2%.
+The PMV correction is hardly affected by the redistribution of the solute
+ charge density in response to the solvent field.
+ For the 43 solutes studied here, the effect is below 2%.
  Therefore, the PMV correction of solvation energies has nearly the same
- effect as for the other three approximations: the PMV-corrected SCF-RISM
- results are in a reasonable agreement with experiment, cf.
-\begin_inset space \space{}
-\end_inset
-
-the correlation coefficient 
+ effect as for the other three approximations.
+ In consequence, the PMV-corrected SCF-RISM results agree reasonably well
+ with experiment: 
 \begin_inset Formula $r=0.86$
 \end_inset
 
- and 
+, 
+\color blue
+
 \begin_inset Formula $\text{MAD}=1.51$
 \end_inset
 
@@ -5817,7 +5874,9 @@ the correlation coefficient
 \begin_inset space ~
 \end_inset
 
-kcal/mol (Tables
+kcal/mol
+\color inherit
+ (Tables
 \begin_inset space ~
 \end_inset
 
@@ -5828,7 +5887,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5836,12 +5895,11 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- 
 \end_layout
 
 \begin_layout Standard
-By these metrics, the SCF-RISM method with PMV correction does not perform
- any better than PT2 or even PT1 counterparts (Tables
+Judged by these metrics, the SCF-RISM method together with the PMV correction
+ does not perform any better than PT2 or even PT1 (Tables
 \begin_inset space ~
 \end_inset
 
@@ -5852,7 +5910,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5860,18 +5918,19 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- A possible reason is an overestimation of the solute polarization by volume
- charge of solvent medium due to neglect of the repulsive exchange interaction
- between solute- and solvent electrons.
- Unphysical distortion of an electron cloud by a positive charge is known
- to cause artifacts in hybrid models 
+ A possible reason may be the overestimation of the solute polarization
+ due to the volume charge of the solvent medium as the repulsive exchange
+ interaction between solute and solvent electrons is neglected in the SCF-RISM
+ model.
+ An unphysical distortion of the electron cloud by a positive charge in
+ the vicinity is known to cause artifacts in hybrid models 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Yudanov97"
 
 \end_inset
 
-; omission of exchange repulsion from negatively charged model atoms is
+; omission of the exchange repulsion in negatively charged model atoms is
  less critical 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -5880,9 +5939,10 @@ key "Matveev99"
 \end_inset
 
 .
- We note that the solvation energies obtained by methods that account for
- electron polarization, PT2 and SCF, are, on average, slightly too negative
- in comparison to experiment; more so for self-consistent variant.
+ Solvation energies calculated by the methods variants PT2 and SCF, that
+ account for electron polarization, are, on average, slightly too negative
+ in comparison to experiment.
+ This holds even more so for the self-consistent variant.
  
 \begin_inset Note Note
 status collapsed
@@ -5894,7 +5954,8 @@ AM: again, the reader has to believe us.
 
 \end_inset
 
- A comparison of solute dipole moments in aqueous- and gas phase, Fig.
+ A comparison of the dipole moments of the solute molecules in an aqueous
+ environment and in the gas phase, Figure
 \begin_inset space ~
 \end_inset
 
@@ -5905,13 +5966,18 @@ reference "fig:Dipole-moment"
 
 \end_inset
 
-b, suggests an increase by about 40% on average in SCF-RISM and only 30%
- in PCM.
- This discrepancy may be another indication of overestimated solute polarization
- in SCF-RISM.
- Direct evidence could also be found from the radial distribution functions
- (RDFs).
- Fig.
+b, shows an increase by about 40% on average in SCF-RISM and by only 30%
+ in PCM calculations, a method that also does not explicitly account for
+ exchange repulsion.
+ 
+\end_layout
+
+\begin_layout Standard
+Yet, this discrepancy may be another indication of an overestimated solute
+ polarization in SCF-RISM.
+ Related evidence can also be obtained by inspecting radial distribution
+ functions (RDFs).
+ Figure
 \begin_inset space ~
 \end_inset
 
@@ -5922,46 +5988,56 @@ reference "fig:Radial-distribution-functions"
 
 \end_inset
 
- demonstrates the RDFs of carbonyl oxygen -- water hydrogen (O--H
+ shows the RDFs of the pairs carbonyl oxygen – water hydrogen (O--H
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
-) and hydroxyl hydrogen -- water oxygen (H--O
+) and hydroxyl hydrogen – water oxygen (H--O
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
 ) of solvated acetic acid.
- Comparing the results obtained with MM, PT1 and SCF methods respectively,
- we could notice that the peak of positively charge H
+ Comparing the results of MM, PT1 and SCF methods, we notice that the peak
+ of positively charged H
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
- around O has significantly increased by ~50% when the electronic structure
- of the solute is relaxed self consistently in the solvent field, while
- that of the negatively charge O
+ around O is significantly increased, by ~50%, when the electronic structure
+ of the solute is relaxed self-consistently in the solvent field, while
+ that of the negatively charged O
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
- around H is with less than 10% increase.
- These findings are in agreement with the results reported by Du et al.
+ around H increases by less than 10%.
+ These findings agree with the results reported by Du et al.
+\begin_inset space \thinspace{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Du03"
 
 \end_inset
 
-, in which they observed the increase of water hydrogen and oxygen distribution
- around t-NMA from cycle 0 to cycle 5 during the QM/3d-RISM-HNC iterations.
+.
+ They observed an increase of water hydrogen and oxygen distributions around
+ trans-N-methylamine from cycle 0 to cycle 5 during the QM/3D‑RISM‑HNC SCF
+ iterations.
  Similarly, an earlier RISM-SCF study by Kawata et al.
+\begin_inset space \thinspace{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kawata96"
 
 \end_inset
 
- also confirmed the increasing of water hydrogen atoms covalently bonded
- to nitrogen atom of amine when switching the electrostatic potential from
- without to with the self-consistent treatment.
+ also confirmed an increasing water hydrogen density covalently bonded to
+ nitrogen of amine when switching on the electrostatic potential in a self-consi
+stent treatment.
 \end_layout
 
 \begin_layout Standard
@@ -6021,7 +6097,7 @@ name "fig:Radial-distribution-functions"
 \end_layout
 
 \begin_layout Standard
-The scatter plot for SCF-RISM solvation energies, Fig.
+The plot of RISM solvation energies, Figure
 \begin_inset space ~
 \end_inset
 
@@ -6032,7 +6108,7 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-d, is similar to that of PT2-RISM, Fig.
+d, is similar to that of PT2-RISM, Figure
 \begin_inset space ~
 \end_inset
 
@@ -6043,10 +6119,9 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-d.
+c.
  The magnitude of the error uncorrelated with the PMV factor is slightly
  larger for SCF-RISM than for PT2-RISM.
- This error is manifested by a scattering around the regression line.
  Visual perception is confirmed by the larger MAD from the regression line
  (Table
 \begin_inset space ~
@@ -6064,7 +6139,7 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $R^{2}=0.92$
 \end_inset
 
- and fitted slope 
+ and the fitted slope of 
 \begin_inset Formula $A=5.13$
 \end_inset
 
@@ -6072,7 +6147,7 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset space ~
 \end_inset
 
-kcal/mol close to PT2 and PT1 results (Table
+kcal/mol is close to the PT2 and PT1 results (Table
 \begin_inset space ~
 \end_inset
 
@@ -6097,8 +6172,9 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 kcal/mol.
- The net negative shift due to self-consistent relaxation is slightly larger
- which is reflected in the most negative intercept 
+ The net negative shift due to self-consistent solute density relaxation
+ is slightly larger than for PT2, which is reflected in the most negative
+ intercept 
 \begin_inset Formula $B=-3.97$
 \end_inset
 
@@ -6106,7 +6182,7 @@ kcal/mol.
 \begin_inset space ~
 \end_inset
 
-kcal/mol of the corresponding regression line.
+kcal/mol of the corresponding regression line for all methods considered.
 \end_layout
 
 \begin_layout Section
