@@ -6186,17 +6186,21 @@ kcal/mol of the corresponding regression line for all methods considered.
 \end_layout
 
 \begin_layout Section
-Conclusions
+
+\color blue
+Concluding
+\color inherit
+ remarks
 \end_layout
 
 \begin_layout Standard
-A series of approximations and a self-consistent hybrid approach combining
- QM solute description with 3D RISM for solvent medium reveals that for
- neutral solutes, the accuracy of calculated solvation free energies is
- mainly determined by the asymptotic error of cavity formation energies.
+A series of approximations and a fully self-consistent hybrid approach combining
+ a QM solute description with 3D RISM for the solvent medium reveals that,
+ for neutral solutes, the accuracy of the calculated solvation free energies
+ is mainly determined by the asymptotic error of the cavity formation energies.
  Significantly better agreement with experimental results could be obtained
- by applying partial molar volume correction as also reported in previous
- non-hybrid studies 
+ by applying the “partial molar volume” (PMV) correction, as also reported
+ in previous non-hybrid studies 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Palmer10,Sergiievskyi14,Misin15"
@@ -6204,8 +6208,8 @@ key "Palmer10,Sergiievskyi14,Misin15"
 \end_inset
 
 .
- The undeniably useful partial molar volume correction has been previously
- justified empirically 
+ Thus far, the certainly useful PMV correction was justified empirically
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Palmer10"
@@ -6226,7 +6230,8 @@ key "Song15"
 
 \end_inset
 
-; also a recent work advocates a different choice of the prefactor 
+.
+ Recently, a different pre-factor was advocated 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Misin15"
@@ -6235,8 +6240,8 @@ key "Misin15"
 
 .
  We presented an asymptotic analysis that offers an alternative interpretation
- of the error origin and leads, in case of simple liquids, to the same prefactor
- as in Ref.
+ of the origin of the error.
+ For simple liquids, our analysis leads to the same pre-factor as in Ref.
 \begin_inset space ~
 \end_inset
 
@@ -6247,14 +6252,14 @@ key "Misin15"
 
 \end_inset
 
- without relying on thermodynamic ensemble arguments.
+, but does not rely on thermodynamic ensemble arguments.
 \end_layout
 
 \begin_layout Standard
-In a comparison of approximate methods we found that two representations
- of the solute charge density, by point charges of a force-field and by
- gas-phase QM density, lead to quite comparable solvation energies with
- mean absolute deviation of about 1
+Comparing approximate methods we found that representing the solute charge
+ density by point charges of a force field or by the gas-phase QM electron
+ density leads to quite comparable solvation energies with a mean absolute
+ deviations of ~1
 \begin_inset space ~
 \end_inset
 
@@ -6263,83 +6268,67 @@ kcal/mol from each other and 1.4--1.6
 \end_inset
 
 kcal/mol from experiment.
- We investigated an approximate way to estimate electron relaxation in response
- to solvent reaction field and a magnitude of the corresponding solvent
- relaxation energy.
- It appears that an approximate and self-consistent approaches agree on
- average to better than 0.4
+ We also examined an approximate way to estimate the electron relaxation
+ caused by the solvent reaction field and the resulting solvent relaxation
+ energy.
+ This approximate approach and the fully self-consistent 3D RISM QM method
+ agree on average to better than 0.4
 \begin_inset space ~
 \end_inset
 
 kcal/mol.
- Although the ratio of two relaxation terms, solute polarization and solvent
- relaxation energies, is nearly constant for all solutes the value of this
- ratio differs notably from the intuitive linear electrostatic response
- limit.
- 
-\end_layout
-
-\begin_layout Standard
-The relaxation terms are supposed to be important for neutral molecules
- with overall very moderate solvation energies; the observed scale of the
- relaxation terms seems to support that.
- In spite, we find that the approximate method to address relaxation terms
- only slightly improves comparison to experiment, while a self-consistent
- approach hardly improves it.
- One of the possible reason might be an artifact of electron cloud polarization
- by localized positive volume charge of the solvent medium which is likely
- to be overestimated in the absence of repulsive exchange interactions of
- solute- and solvent electrons.
- We demonstrated a slight overestimation of induced solute dipoles in comparison
- to PCM which may be an indication of such an artifact.
- Meanwhile, increase of water hydrogen and oxygen distribution from unperturbed
- to self-consistently relaxed solute in solvent field also supports our
- surmise.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-BL: text was 
-\begin_inset Quotes eld
+ The ratio of the solute polarization and the solvent relaxation energies
+ is nearly constant for all solutes studied; the value of this ratio differs
+ notably from the linear-response electrostatic limit of 
+\begin_inset Formula $-2$
 \end_inset
 
-Another important factor, the change of the solute electrostatic property,
- which is perturbed by the solvent medium, is also found to have noticeable
- contribution to the solvation free energy calculation.
- Meanwhile, from the RDF in SCF-RISM, we found that the rearrangement of
- the solute charge density calculation causes the strengthening of the hydrogen
- bond between solute and water solvent.
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-AM: there was not a single word about it in the text.
- Is there any number that could be quoted in support of this claim (to convince
- me, when not for the reader's eyes)?
-\end_layout
-
-\begin_layout Plain Layout
-BL: updated discussion text, here recover one statement.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Another possibility is that an asymptotic correction limited to a term strictly
- proportional to the solute volume is insufficient to reduce the intrinsic
- error of 3D RISM to better than 1--2
+ (Appendix
 \begin_inset space ~
 \end_inset
 
-kcal/mol for these solute/solvent combinations.
- It is likely that a careful analysis of the 3D RISM asymptotic behavior
- may offer a more accurate error estimate and resolve some of the controversies.
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:linear-model"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Relaxation terms have been suggested to be important for neutral molecules
+ with overall rather small solvation energies 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sato13,Sato07a"
+
+\end_inset
+
+.
+ The size of the relaxation terms determined here seems to support this
+ argument.
+ Nevertheless, the approximate PT2 method of second order for addressing
+ relaxation terms only slightly improves the comparison to experiment, while
+ a self-consistent approach hardly improves it.
+ This latter finding may be due to an artificial polarization of the electron
+ density by nearby localized positive volume charges of the solvent medium.
+ That effect likely is overestimated in the absence of repulsive exchange
+ interactions between solute and solvent electrons.
+ It may be indicative for this artifact that the induced solute dipole moments
+ are slightly overestimated in comparison to the PCM approach.
+ An increased water hydrogen and oxygen density around the solute in the
+ SCF-RISM also supports this hypothesis.
+ Another possibility is that an asymptotic correction limited to a term
+ strictly proportional to the solute volume does not suffice for reducing
+ the intrinsic error of 3D RISM to better than 1--2
+\begin_inset space ~
+\end_inset
+
+kcal/mol for neutral solutes in water.
+ A careful analysis of the asymptotic behavior of 3D RISM may offer a more
+ accurate error estimate and resolve some of remaining issues.
  
 \end_layout
 
