@@ -4939,7 +4939,7 @@ Similarly, in linear least squares regression with an estimated intercept
 \end_layout
 
 \begin_layout Subsection
-Unperturbed QM solute in solution: PT1-RISM 
+Unperturbed QM solute model: PT1-RISM 
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:pt1-rism"
@@ -4950,26 +4950,17 @@ name "sub:pt1-rism"
 \end_layout
 
 \begin_layout Standard
-The second step towards self-consistency is to replace the partial atomic
- charge representation of solute sites by a charge density of QM solute
- distributed over the simulation cell.
- In this section the charge density of a solute is determined from a gas-phase
- QM calculation.
- The corresponding solvent distribution functions are solutions of 3D RISM
- equations with the electrostatic field of such unperturbed gas-phase solute
- replacing the field of point charges in the definition of 
-\begin_inset Quotes eld
+In the second step towards self-consistency, the point charge representation
+ of the solute charge density is replaced by the QM charge density of the
+ solute in the gas phase.
+ The corresponding solvent distribution functions are solutions of the 3D
+ RISM equations with the electrostatic field of the unperturbed solute in
+ the gas phase replacing the field of point charges when definining the
+ interaction potential 
+\begin_inset Formula $u_{\alpha}(\vec{r})$
 \end_inset
 
-external
-\begin_inset Quotes erd
-\end_inset
-
- field 
-\begin_inset Formula $v(\vec{r})$
-\end_inset
-
- in the closure relation, Section
+ of the “external” field in the closure relation, Section
 \begin_inset space ~
 \end_inset
 
@@ -4981,7 +4972,7 @@ reference "sub:theory"
 \end_inset
 
 .
- From the correlation coefficient matrix in Table
+ From the matrix of correlation coefficients (Table
 \begin_inset space ~
 \end_inset
 
@@ -4992,8 +4983,8 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- one could notice that PT1-RISM and MM-RISM solvation energy are strongly
- correlated with 
+) one notices that PT1-RISM and MM-RISM solvation energies are strongly
+ correlated, with 
 \begin_inset Formula $r=0.98$
 \end_inset
 
@@ -5018,16 +5009,12 @@ reference "tab:mad-matrix"
 \end_inset
 
 ) is another measure of similarity between these computational approaches.
- Therefore, it is also not surprising to find again the weak correlation
- between uncorrected PT1-RISM and experimental results with 
+ Therefore, it is also not surprising to find again a weak correlation between
+ uncorrected PT1-RISM and experimental results, 
 \begin_inset Formula $r=0.33$
 \end_inset
 
- and 
-\begin_inset Formula $\text{MAD}=17.6$
-\end_inset
-
-
+, and a MAD of 17.6
 \begin_inset space ~
 \end_inset
 
@@ -5042,7 +5029,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5050,12 +5037,12 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- Again the correlation is significantly improved when PMV correction is
+ Again, the correlation significantly improves when the PMV correction is
  introduced: 
 \begin_inset Formula $r=0.88$
 \end_inset
 
- and 
+, 
 \begin_inset Formula $\text{MAD}=1.40$
 \end_inset
 
@@ -5074,9 +5061,9 @@ Max deviation of PMV: PT1 vs MM ~5%, SCF vs PT1 ~2%.
 
 \end_inset
 
- The PMV values differ by no more than 5% between two models, PT1 and MM.
- Therefore the cross correlation of PMV-corrected MM and PT1 solvation energies
- is nearly as strong as that of uncorrected variants with 
+ The PMV values differ by no more than 5% between PT1 and MM.
+ Therefore the cross correlation of the PMV-corrected MM and PT1 solvation
+ energies is nearly as strong as that of the uncorrected variants with 
 \begin_inset Formula $r=0.90$
 \end_inset
 
@@ -5099,7 +5086,7 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
- and 
+, 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:mad-matrix"
@@ -5107,7 +5094,6 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- 
 \end_layout
 
 \begin_layout Standard
@@ -5155,8 +5141,8 @@ name "fig:Dipole-moment"
 \end_layout
 
 \begin_layout Standard
-Again, a visual inspection of solvation energy errors in PT1-RISM calculations,
- Fig.
+Visual inspection of the errors in the solvation energy from PT1-RISM calculatio
+ns, Figure
 \begin_inset space ~
 \end_inset
 
@@ -5167,9 +5153,9 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-b, suggest a very similar correlation to PMV.
- The error of uncorrected solvation free energy shows a linear correlation
- with the dimensionless PMV with the slope 
+b, suggests a very similar correlation to PMV as for the MM-RISM approach.
+ The error of the uncorrected solvation free energy correlates linearly
+ with the dimensionless PMV, with slope 
 \begin_inset Formula $A=5.12$
 \end_inset
 
@@ -5209,8 +5195,8 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset space ~
 \end_inset
 
-kcal/mol the most of the linear correlation is removed reducing the correspondin
-g measures to 
+kcal/mol, most of the linear correlation is removed, reducing the corresponding
+ measures to 
 \begin_inset Formula $A^{\prime}=0.91$
 \end_inset
 
@@ -5234,8 +5220,8 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 ).
- Some growth of remaining error with system size (here measured by PMV)
- is visually detectable in Fig.
+ A slight growth of the remaining error with the system size (here measured
+ by PMV) is visually detectable in Figure
 \begin_inset space ~
 \end_inset
 
@@ -5247,18 +5233,17 @@ reference "fig:Correlation-of-solvation"
 \end_inset
 
 b, notwithstanding the scattering due to other factors affecting the error.
- Nevertheless, the extensive error of solute cavity formation energy appears
- to constitute the most of the error of solvation free energy for these
- neutral solutes, so that the correction term makes the results quite comparable
- with experiment.
+ Nevertheless, for the neutral solutes examined here, the error in the formation
+ energy of the solute cavity appears to constitute the largest part of the
+ deviation of the solvation free energy from experiment.
 \end_layout
 
 \begin_layout Standard
-Some difference between MM and PT1 approaches is to be expected, since the
- electrostatic field derived from the atomic charges of the force field
- representation is a crude approximation of that from more sophisticated
- QM model.
- The evidence could be found in Fig.
+Some difference between the MM and PT1 approaches is to be expected as the
+ electrostatic field derived from the atomic charges of the force-field
+ representation is a relatively crude approximation of the field of the
+ charge distribution of the more sophisticated QM model.
+ Figure
 \begin_inset space ~
 \end_inset
 
@@ -5269,10 +5254,10 @@ reference "fig:Dipole-moment"
 
 \end_inset
 
-a, in which the solute dipole moments of MM and PT1 models are drawn against
- each other.
- The correlation is far from ideal with the slope of linear fit of 0.84 and
- 
+a provide evidences for this suggestion, as it shows how the solute dipole
+ moments of the MM and PT1 solute models are related.
+ The correlation is far from ideal, with the slope of the linear fit at
+ 0.84 and 
 \begin_inset Formula $R^{2}=0.68$
 \end_inset
 
@@ -5314,9 +5299,11 @@ far from ideal
 
 \end_inset
 
- Despite the differences of basic electrostatic solute properties in MM
- and PT1 approaches, we still conclude that the solvation free energies
- calculated using these two methods are at the same level of accuracy.
+ Apparently, there is no clear trend regarding the difference between the
+ MM and PT1 approaches.
+ Despite the differences of basic electrostatic solute properties in the
+ MM and PT1 approaches, we still conclude that the solvation free energies
+ calculated using these two methods are at the similar levels of accuracy.
 \end_layout
 
 \begin_layout Subsection
