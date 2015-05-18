@@ -1528,13 +1528,13 @@ tion of the electron charge density
 \end_layout
 
 \begin_layout Subsection
-Free energy functional
+Free energy functionals
 \end_layout
 
 \begin_layout Standard
-In DFT the electronic structure of solute in gas phase is determined by
- minimizing the Kohn--Sham energy functional with respect to the the electronic
- density 
+In electronic DFT, the ground state of the electronic structure of a solute
+ in the gas phase is determined by minimizing the Kohn–Sham energy functional
+ with respect to the electronic density 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "kochDFT"
@@ -1547,25 +1547,24 @@ key "kochDFT"
 \begin_inset Formula $E[n_{\text{u}}]$
 \end_inset
 
-, instead.
- The corresponding solution will be denoted as 
+ where 
 \begin_inset Formula $n_{\text{u}}^{(0)}$
 \end_inset
 
-.
- The distribution of the site charges of the solute force-field parameterization
- is a coarse approximation 
+ is the corresponding ground-state charge density of the solute.
+ The distribution of the site charges of the solute force-field yields a
+ coarse approximation 
 \begin_inset Formula $\bar{n}_{\text{u}}^{(0)}$
 \end_inset
 
- of the solute charge distribution 
+ of 
 \begin_inset Formula $n_{\text{u}}^{(0)}$
 \end_inset
 
 .
- Hence, RISM calculations of the excess chemical potential with the discrete
- force-field and delocalized gas-phase charge distributions as inputs will
- give two lowest approximations, 
+ Correspondingly, RISM calculations of the excess chemical potential with
+ a discrete force-field and a delocalized gas-phase charge distribution
+ as input will give two approximations, 
 \begin_inset Formula $\mu[\bar{n}_{\text{u}}^{(0)}]$
 \end_inset
 
@@ -1573,8 +1572,8 @@ key "kochDFT"
 \begin_inset Formula $\mu[n_{\text{u}}^{(0)}]$
 \end_inset
 
-, for the excess chemical potential of the solute in solvent environment.
- The two approximations for the free energy 
+, for the excess chemical potential of the solute in the solvent environment.
+ The corresponding two values for the free energy, 
 \begin_inset Formula $G_{\text{MM}}=E[n_{\text{u}}^{(0)}]+\mu[\bar{n}_{\text{u}}^{(0)}]$
 \end_inset
 
@@ -1583,25 +1582,28 @@ key "kochDFT"
 \end_inset
 
  will be referred to as MM and PT1 in this work.
- We explain the reference to the first order perturbation theory (PT1) by
- declaring the excess chemical potential 
-\begin_inset Formula $\mu[n_{\text{u}}]$
-\end_inset
+ The first-order perturbation theory (PT1) expression 
+\color blue
+is derived from a
+\color inherit
+ self-consistent field (SCF) QM+RISM model with a free-energy 
+\color blue
+functional,
+\end_layout
 
- to be a perturbation of the energy functional 
-\begin_inset Formula $E[n_{\text{u}}]$
-\end_inset
-
- in a self-consistent field (SCF) QM+RISM model with a free energy functional
+\begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-G[n_{\text{u}}]=E[n_{\text{u}}]+\mu[n_{\text{u}}].\label{eq:free-energy-functional}
+G[n_{\text{u}}]=E[n_{\text{u}}]+\mu[n_{\text{u}}],\label{eq:free-energy-functional}
 \end{equation}
 
 \end_inset
 
-The PT1 free energy is obtained by evaluating the free energy functional
- 
+
+\color blue
+by evaluating
+\color inherit
+ the free energy functional 
 \begin_inset Formula $G[n_{\text{u}}]$
 \end_inset
 
@@ -1621,46 +1623,45 @@ reference "eq:free-energy-functional"
 
 \end_inset
 
-, will be, in general, minimized by a different solution 
-\begin_inset Formula $n_{\text{u}}^{(1)}$
+, will be, in general, minimized by the self-consistent solution 
+\begin_inset Formula $n_{\text{u}}$
 \end_inset
 
 .
- The self-consistent model and corresponding free-energy values, 
-\begin_inset Formula $G_{\text{SCF}}=G[n_{\text{u}}^{(1)}]$
-\end_inset
-
-, will be annotated by 
-\begin_inset Quotes eld
-\end_inset
-
-SCF
-\begin_inset Quotes erd
+ The self-consistent model and the corresponding free energy will be labeled
+ by “SCF”, i.e.
+ as 
+\begin_inset Formula $G_{\text{SCF}}=G[n_{\text{u}}]$
 \end_inset
 
 .
- Further, it will be more convenient to operate with the free energy values
- offset by 
+ In the following, it will be more convenient to operate with the free energy
+ values offset by 
 \begin_inset Formula $-E[n_{\text{u}}^{(0)}]$
 \end_inset
 
-, the gas-phase energy of the solute: 
+, the energy of the solute in the gas phase.
+ Then these deviations 
+\begin_inset Formula $\Delta G$
+\end_inset
+
+ read 
 \begin_inset Formula 
 \begin{eqnarray}
 \Delta G_{\text{MM}} & = & \mu[\bar{n}_{\text{u}}^{(0)}]\nonumber \\
 \Delta G_{\text{PT1}} & = & \mu[n_{\text{u}}^{(0)}]\nonumber \\
-\Delta G_{\text{SCF}} & = & \left(E[n_{\text{u}}^{(1)}]-E[n_{\text{u}}^{(0)}]\right)+\mu[n_{\text{u}}^{(1)}]\label{eq:dG-models-1}
+\Delta G_{\text{SCF}} & = & \left(E[n_{\text{u}}]-E[n_{\text{u}}^{(0)}]\right)+\mu[n_{\text{u}}]\label{eq:dG-models-1}
 \end{eqnarray}
 
 \end_inset
 
 The difference 
-\begin_inset Formula $\Delta E_{\text{SCF}}=E[n_{\text{u}}^{(1)}]-E[n_{\text{u}}^{(0)}]$
+\begin_inset Formula $\Delta E_{\text{SCF}}=E[n_{\text{u}}]-E[n_{\text{u}}^{(0)}]$
 \end_inset
 
- in the last equation is the energy corresponding to the solute polarization
- by the solvent, a non-negative value for any 
-\begin_inset Formula $n_{u}^{(1)}$
+ in the last equation is the energy due to the solute polarization by the
+ solvent, a non-negative quantity for any 
+\begin_inset Formula $n_{\text{u}}$
 \end_inset
 
 .
@@ -1668,10 +1669,10 @@ The difference
 \begin_inset Formula $\delta\mu/\delta n_{\text{u}}=\phi_{\text{u}}$
 \end_inset
 
-, is an electrostatic addition to the Kohn--Sham potential; the corresponding
- electric field leads to the redistribution of the electron charge density
- 
-\begin_inset Formula $n_{\text{u}}^{(1)}-n_{\text{u}}^{(0)}$
+, forms an electrostatic potential to be added to the Kohn--Sham potential.
+ The corresponding electric field leads to a redistribution of the electron
+ charge density 
+\begin_inset Formula $\Delta n_{\text{u}}^{\text{SCF}}=n_{\text{u}}-n_{\text{u}}^{(0)}$
 \end_inset
 
 .
@@ -1679,11 +1680,11 @@ The difference
 
 \begin_layout Standard
 Conversely, since 
-\begin_inset Formula $G[n_{\text{u}}^{(1)}]\leq G[n_{\text{u}}^{(0)}]$
+\begin_inset Formula $G[n_{\text{u}}]\leq G[n_{\text{u}}^{(0)}]$
 \end_inset
 
 , the SCF relaxation of the excess chemical potential 
-\begin_inset Formula $\Delta\mu_{\text{SCF}}=\mu[n_{\text{u}}^{(1)}]-\mu[n_{\text{u}}^{(0)}]$
+\begin_inset Formula $\Delta\mu_{\text{SCF}}=\mu[n_{\text{u}}]-\mu[n_{\text{u}}^{(0)}]$
 \end_inset
 
  is necessarily a non-positive value with a magnitude larger or equal to
@@ -1700,16 +1701,15 @@ Conversely, since
 \begin_inset Formula $\mu$
 \end_inset
 
- predicts the upper and lower bonds for the ratio of two relaxation terms,
- 
-\begin_inset Formula $-2\leq\Delta\mu_{\text{SCF}}/\Delta E_{\text{SCF}}\leq-1,$
+ and predicts the upper and lower 
+\color blue
+bounds
+\color inherit
+ for the ratio of two relaxation terms, 
+\begin_inset Formula $-2\leq\Delta\mu_{\text{SCF}}/\Delta E_{\text{SCF}}\leq-1$
 \end_inset
 
- with the lower bound realized in the limiting case of a linear 
-\begin_inset Formula $\mu$
-\end_inset
-
- that corresponds to a static reaction field, Appendix
+, see Appendix
 \begin_inset space ~
 \end_inset
 
@@ -1732,23 +1732,28 @@ FIXME: move to supplementary material and adapt the cross ref once reviewd
 
 \end_inset
 
- We will demonstrate that for organic solutes in water examined in this
- work that ratio is not very far from 
+ The lower bound is realized in the limiting case of a linear 
+\begin_inset Formula $\mu$
+\end_inset
+
+ that corresponds to a static reaction field.
+ For organic solutes in water, as examined in this work, we will demonstrate
+ that that ratio is rather close to the value 
 \begin_inset Formula $-2$
 \end_inset
 
 .
- We will estimate the magnitude of the polarization term, 
-\begin_inset Formula $E[n_{\text{u}}^{(1^{\prime})}]-E[n_{\text{u}}^{(0)}]$
+ We estimate the magnitude of the polarization term, 
+\begin_inset Formula $E[n_{\text{u}}^{(1)}]-E[n_{\text{u}}^{(0)}]$
 \end_inset
 
 , by applying a static solvent reaction field, 
 \begin_inset Formula $\delta\mu[\bar{n}_{\text{u}}^{(0)}]/\delta n_{\text{u}}$
 \end_inset
 
-, determined from the force field model of the solute to the QM system,
+, determined from the force-field model of the solute, to the QM system,
  thus approximating 
-\begin_inset Formula $n_{\text{u}}^{(1^{\prime})}\approx n_{\text{u}}^{(1)}$
+\begin_inset Formula $n_{\text{u}}^{(1)}\approx n_{\text{u}}$
 \end_inset
 
 , and assuming a fixed ratio of the two relaxation terms of 
@@ -1763,27 +1768,28 @@ key "Gao92,Gao96,Sato07a"
 \end_inset
 
 :
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\Delta G_{\text{PT2}}=\Delta G_{\text{PT1}}-\left(E[n_{\text{u}}^{(1^{\prime})}]-E[n_{\text{u}}^{(0)}]\right).\label{eq:dG-models-2}
+\Delta G_{\text{PT2}}=\Delta G_{\text{PT1}}-\left(E[n_{\text{u}}^{(1)}]-E[n_{\text{u}}^{(0)}]\right).\label{eq:dG-models-2}
 \end{equation}
 
 \end_inset
 
-The so introduced PT2 expression thus includes a term of second order in
- the solvent reaction field, though in a very approximate fashion.
- 
+We refer to this expression as PT2 as it includes an approximate term of
+ second order in the solvent reaction field.
 \end_layout
 
 \begin_layout Standard
-An intuitive result for the reaction field contributing to the Kohn--Sham
- potential, 
+The intuitive result 
 \begin_inset Formula $\phi_{\text{u}}=\delta\mu/\delta n_{\text{u}}$
 \end_inset
 
-, to be a mean Coulomb field of the solvent volume charge relies on the
- observation that HNC and KH expressions for the excess chemical potential,
- Eq.
+ for the reaction field contributing to the Kohn--Sham potential as a mean
+ Coulomb field of the solvent volume charge relies on the observation that
+ the KH term for the excess chemical potential, Eq.
 \begin_inset space ~
 \end_inset
 
@@ -1794,15 +1800,16 @@ reference "eq:mu"
 
 \end_inset
 
-, are path-independent work integrals 
+, as well as the other expressions, are path-independent integral expressions
+ of work 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Singer85,Kast08"
 
 \end_inset
 
- and the model assumption that electrons interact with solvent sites by
- Coulomb law 
+ and the model assumption that electrons interact with solvent sites via
+ an (unscreened) Coulomb law 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Gusarov06"
@@ -1810,8 +1817,8 @@ key "Gusarov06"
 \end_inset
 
 .
- The PMV correction, 
-\begin_inset Formula $\mu^{\text{UC}}-\mu$
+ On the other hand, the PMV correction, 
+\begin_inset Formula $\mu^{\text{PMV}}-\mu$
 \end_inset
 
 , Eq.
@@ -1825,8 +1832,8 @@ reference "eq:3DRISM-UC"
 
 \end_inset
 
-, on the other hand, is considered an empiric post-SCF addition and not
- a part of the self-consistent free energy functional, Eq.
+, thus far was considered as an empiric post-SCF addition and not as part
+ of the self-consistent free energy functional, Eq.
 \begin_inset space ~
 \end_inset
 
@@ -1838,22 +1845,40 @@ reference "eq:free-energy-functional"
 \end_inset
 
 .
- Such a post-SCF treatment of the PMV correction along the lines of the
- first order perturbation theory can be justified, though, as we will show
- that the molar volume is nearly independent of the approximation, 
-\begin_inset Formula $\bar{n}_{\text{u}}^{(0)}$
+ The post-SCF treatment of the PMV 
+\color blue
+correction
+\color inherit
+ can be justified 
+\color blue
+because
+\color inherit
+ the molar 
+\color blue
+volume 
+\begin_inset Formula $V_{\text{u}}$
 \end_inset
 
-, 
-\begin_inset Formula $n_{\text{u}}^{(0)}$
-\end_inset
-
- or 
-\begin_inset Formula $n_{\text{u}}^{(1)}$
-\end_inset
-
-, used to describe the solute charge distribution 
+ is nearly independent of the approximation of the solute charge density
+ 
 \begin_inset Formula $n_{\text{u}}$
+\end_inset
+
+
+\color inherit
+, as 
+\color blue
+will be
+\color inherit
+ shown by specific applications, Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:results-and-discussion"
+
 \end_inset
 
 .
@@ -2052,7 +2077,14 @@ key "Kremleva12b"
 \end_layout
 
 \begin_layout Section
-Results and discussion
+Results and discussion 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:results-and-discussion"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
