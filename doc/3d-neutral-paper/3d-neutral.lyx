@@ -1889,11 +1889,15 @@ Computational details
 \end_layout
 
 \begin_layout Standard
-All our calculations were carried out at the temperature of 298
+All our calculations were carried out for the temperature 
+\begin_inset Formula $T=298$
+\end_inset
+
+
 \begin_inset space ~
 \end_inset
 
-K, with a corresponding water solvent density of 
+K, with a corresponding water solvent particle density of 
 \begin_inset Formula $\rho=0.033427745$
 \end_inset
 
@@ -1906,20 +1910,13 @@ K, with a corresponding water solvent density of
 \end_inset
 
 .
- The grid which was used to represent correlation functions was chosen with
- a uniform grid spacing of 0.15625
+ To represent correlation functions we chose a uniform grid with a spacing
+ of 0.15625
 \begin_inset space ~
 \end_inset
 
-Å and 128 grid points in three dimensions, which amounts to a 20
-\begin_inset space ~
-\end_inset
-
-Å 
-\begin_inset Formula $\times$
-\end_inset
-
- 20
+Å and 128 grid points in each of the three dimensions, which amounts to
+ a cubic grid of 20
 \begin_inset space ~
 \end_inset
 
@@ -1931,38 +1928,65 @@ K, with a corresponding water solvent density of
 \begin_inset space ~
 \end_inset
 
-Å cubic grid.
+Å 
+\begin_inset Formula $\times$
+\end_inset
+
+ 20
+\begin_inset space ~
+\end_inset
+
+Å.
+ A further refinement of the grid resolution did not yield significantly
+ improved results 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Matveev15"
+
+\end_inset
+
+.
  
 \end_layout
 
 \begin_layout Standard
-The geometries of 43 neutral solutes were taken from the database used by
- Mobley et al.
- 
+The geometries of 43 neutral organic molecules we chose as solutes were
+ taken from the database used by Mobley et al.
+\begin_inset space \thinspace{}
+\end_inset
+
+
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Mobley09"
 
 \end_inset
 
- and NIST database.
- The LJ parameters and solute site charges were taken from OPLS-AA force
- field 
+ and the NIST database 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "nist-chemistry-webbook"
+
+\end_inset
+
+.
+ The LJ parameters and the solute site charges were taken from the OPLS-AA
+ force field 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Jorgensen04"
 
 \end_inset
 
- as distributed with Tinker software.
- The water solvent model was originated from TIP3P 
+.
+ We used the TIP3P water model 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Jorgensen83"
 
 \end_inset
 
- water model, with LJ parameters on hydrogen atom modified with 
+, with the modified LJ parameters for hydrogen atoms, 
 \begin_inset Formula $\sigma=0.4$
 \end_inset
 
@@ -1978,7 +2002,7 @@ key "Jorgensen83"
 \begin_inset space ~
 \end_inset
 
-kcal/mol as suggested by Pettitt and Rosky 
+kcal/mol, as suggested by Pettitt and Rosky 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pettitt82"
@@ -1986,7 +2010,6 @@ key "Pettitt82"
 \end_inset
 
 .
- 
 \end_layout
 
 \begin_layout Standard
@@ -2022,15 +2045,20 @@ key "Perdew96a,Perdew97"
 \end_inset
 
 .
- The CRENBL effective core potential 
+ In the QM calculations, we employed the CRENBL effective core potential
+ (ECP) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Dunning77,Fernandez85,Hurley86,LaJohn87"
 
 \end_inset
 
- was used in the QM calculations, with the Coulomb fitting basis set developed
- by Ahlrichs and coworkers 
+ which contains 
+\color blue
+an orbital basis with a large-core
+\color inherit
+ ECP, together with the Coulomb fitting basis set developed by Ahlrichs
+ and coworkers 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Eichkorn95,Eichkorn97"
@@ -2041,15 +2069,18 @@ key "Eichkorn95,Eichkorn97"
 \end_layout
 
 \begin_layout Standard
-We used the COSMO PCM solvation model for comparison 
+For comparison, we used the COSMO PCM solvation model 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Fuchs02"
 
 \end_inset
 
-, with the cavity defined via an effective solvent radius of 1.4 Å and van
- der Waals radii of solute atoms as tabulated by Bondi 
+, with the solute cavity defined via an effective solvent radius of 1.4
+\begin_inset space ~
+\end_inset
+
+Å and van der Waals radii of solute atoms as tabulated by Bondi 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Bondi64"
@@ -2057,7 +2088,7 @@ key "Bondi64"
 \end_inset
 
  and scaled by 1.125 (except for hydrogen).
- We carried out the cavity tessellation with the FIXPVA approach 
+ The cavity tessellation was carried out with the FIXPVA approach 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kremleva12b,Su09"
@@ -2065,7 +2096,7 @@ key "Kremleva12b,Su09"
 \end_inset
 
  (fixed points with variable areas) to obtain numerically stable energies
- and forces 
+ 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Kremleva12b"
