@@ -1278,13 +1278,19 @@ Interaction between QM solute and RISM solvent
 \end_layout
 
 \begin_layout Standard
-As in the 3D RISM MM theory, the solute potential acting on solvent site
- 
+As in the 3D RISM MM theory 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+, the solute interaction potential acting on solvent site 
 \begin_inset Formula $\alpha$
 \end_inset
 
  is derived from the site-specific contribution of a solvent-solute interaction
- defined as the sum of the LJ and Coulomb terms.
+ defined as the sum of the Lennard-Jones (LJ) and Coulomb terms.
  The LJ energy term, 
 \begin_inset Formula $U^{\text{LJ}}=4\sum_{i\alpha}\epsilon_{i\alpha}\left[(\sigma_{i\alpha}/r_{i\alpha})^{12}-(\sigma_{i\alpha}/r_{i\alpha})^{6}\right]$
 \end_inset
@@ -1294,20 +1300,29 @@ As in the 3D RISM MM theory, the solute potential acting on solvent site
 \end_inset
 
 , accounts for short-range repulsion and dispersion interactions and is
- the sum of pairwise site-site contributions as in the MM case.
- Electrostatic interaction between the charge density of the QM solute and
- charged solvent sites reads:
+ the sum of pairwise site-site contributions between solute and solvent
+ site 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+, respectively, as in the MM case.
+ The electrostatic interaction between the charge density of the QM solute
+ and the charged solvent sites reads:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-U^{\text{C}}=\int n_{\text{v}}(\vec{r})f_{\text{C}}(|\vec{r}-\vec{r}'|)n_{\text{u}}(\vec{r}')d^{3}rd^{3}r'\label{eq:solute-solvent-interaction}
+U^{\text{C}}=\int n_{\text{v}}(\vec{r})f_{\text{C}}(|\vec{r}-\vec{r}'|)n_{\text{u}}(\vec{r}')d^{3}rd^{3}r'.\label{eq:solute-solvent-interaction}
 \end{equation}
 
 \end_inset
 
-Here 
+The quantities 
 \begin_inset Formula $n_{\text{v}}(\vec{r})$
 \end_inset
 
@@ -1315,13 +1330,13 @@ Here
 \begin_inset Formula $n_{\text{u}}(\vec{r})$
 \end_inset
 
- are the solvent and solute charge densities, respectively, and 
+ are the solvent and the solute charge densities, respectively, and 
 \begin_inset Formula $f_{\text{C}}(r)=1/r$
 \end_inset
 
  is the Coulomb kernel.
- In self-consistent calculation this expression for the electrostatic interactio
-ns is used to define two types of potentials, 
+ In self-consistent calculations this expression for the electrostatic interacti
+ons is used to define two types of potentials, 
 \begin_inset Formula $\phi_{\text{u}}=f_{\text{C}}\ast n_{\text{u}}$
 \end_inset
 
@@ -1329,14 +1344,13 @@ ns is used to define two types of potentials,
 \begin_inset Formula $\phi_{\text{v}}=f_{\text{C}}\ast n_{\text{v}}$
 \end_inset
 
-, acting on charged solvent sites or solute charges (such as electrons),
- respectively.
- 
+, acting on charged solvent sites and the solute charges (electrons and
+ nucleus), respectively.
 \end_layout
 
 \begin_layout Standard
-The evaluation strategy for these two potentials differs slightly due to
- the nature of the charge densities 
+The strategy for evaluating these two potentials differs slightly due to
+ the nature of the charged densities 
 \begin_inset Formula $n_{\text{u}}$
 \end_inset
 
@@ -1345,29 +1359,38 @@ The evaluation strategy for these two potentials differs slightly due to
 \end_inset
 
 .
- The solvent charge density, when it appears in an expression for solvent
- electrostatic potential 
+ The solvent charge density, 
+\begin_inset Formula $n_{\text{v}}=\rho\sum_{\alpha}q_{\alpha}g_{\alpha}$
+\end_inset
+
+, appearing in the expression for the solvent electrostatic potential 
 \begin_inset Formula $\phi_{\text{v}}$
 \end_inset
 
-, has a meaning of a statistically average charge density, 
-\begin_inset Formula $n_{\text{v}}=\rho\sum_{\alpha}q_{\alpha}h_{\alpha}$
+, represents statistical average that is represented on a uniform Cartesian
+ grid.
+ For a neutral solute, the integral of 
+\begin_inset Formula $n_{\text{v}}$
 \end_inset
 
-; it carries net zero charge (for neutral solutes) and is represented on
- a uniform Cartesian grid.
- The corresponding potential is obtained by solving Poisson equation with
- periodic boundary conditions using fast Fourier transform.
- For neutral solutes with typical dipole moments and large periodic cells
- this may be justified 
+ is zero.
+ The corresponding potential 
+\begin_inset Formula $\phi_{\text{v }}$
+\end_inset
+
+ can be obtained by solving the Poisson equation with periodic boundary
+ conditions, using fast Fourier transform techniques.
+ For neutral solutes with typical dipole moments and a sufficiently large
+ unit cell this may be justified 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Makov95"
 
 \end_inset
 
-; an estimate of the magnitude of the dipole correction for our systems
- is 0.1 kcal/mol or below.
+.
+ In the present work we estimated the resulting dipole correction to at
+ most 0.1 kcal/mol.
  
 \begin_inset Note Note
 status collapsed
@@ -1403,8 +1426,8 @@ The solute charge density
 \begin_inset Formula $n_{\text{u}}$
 \end_inset
 
-, on the other hand, is a sum of distributed electron- and localized atomic
- core densities, 
+, on the other hand, is the sum of the distributed electron density and
+ localized atomic core densities, 
 \begin_inset Formula $n_{\text{u}}=n_{\text{e}}+n_{\text{n}}$
 \end_inset
 
@@ -1413,24 +1436,41 @@ The solute charge density
 \end_inset
 
 .
- Hence, we apply a simplified Ewald scheme: a convolution 
+ Hence, we apply a simplified Ewald scheme where the convolution 
 \begin_inset Formula $n_{\text{n}}^{\prime}=p\ast n_{\text{n}}$
 \end_inset
 
- of this singular charge density with a unit gaussian kernel 
+ of the singular charge density with a unit Gaussian kernel 
 \begin_inset Formula $p$
 \end_inset
 
- together with the electron charge density 
+ with 
+\color blue
+a scale parameter 
+\begin_inset Formula $\eta=1.2$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Å
+\begin_inset Formula $^{-1}$
+\end_inset
+
+,
+\color inherit
+ is evaluated together with the electron charge density 
 \begin_inset Formula $n_{\text{e}}$
 \end_inset
 
- are evaluated on the uniform grid and Poisson equation is then solved for
- the net neutral charge distribution 
+ on a uniform Cartesian grid.
+ The Poisson equation is then solved for the net neutral charge distribution
+ 
 \begin_inset Formula $n_{\text{e}}+n_{\text{n}}^{\prime}$
 \end_inset
 
- by the same technique as for the solvent charge density 
+ by the same techniques as for the solvent charge density 
 \begin_inset Formula $n_{\text{v}}$
 \end_inset
 
@@ -1447,21 +1487,28 @@ sic! The later change to analytically compute FT of the long-range nuclear
 
 \end_inset
 
- The resulting potential is non-singular and accounts for the Coulomb field
- of electrons, 
+ The resulting potential 
+\begin_inset Formula $\phi_{\text{u}}$
+\end_inset
+
+ is non-singular and accounts for the Coulomb field of electrons, 
 \begin_inset Formula $f_{\text{C}}\ast n_{\text{e}}$
 \end_inset
 
-, and the long range field of atomic cores, 
+, and the long-range field of atomic cores, 
 \begin_inset Formula $f_{\text{CL}}\ast n_{\text{n}}$
 \end_inset
 
  with 
-\begin_inset Formula $f_{\text{CL}}=f_{\text{C}}\ast p=\mathrm{erf}(ar)/r$
+\color blue
+
+\begin_inset Formula $f_{\text{CL}}=f_{\text{C}}\ast p=\mathrm{erf}(\eta r)/r$
 \end_inset
 
+
+\color inherit
 .
- The remaining singular short range potential of the cores, 
+ The remaining singular short-range potential of the cores, 
 \begin_inset Formula $\sum_{i}z_{i}f_{\text{CS}}(|\vec{r}-\vec{r}_{i}|)$
 \end_inset
 
@@ -1469,11 +1516,15 @@ sic! The later change to analytically compute FT of the long-range nuclear
 \begin_inset Formula $f_{\text{CS}}=f_{\text{C}}-f_{\text{CL}}$
 \end_inset
 
-, is treated in the same way as the LJ field by evaluating explicit expression
- at each grid point.
- Notably, the overall method is only practical when employing effective
- core potentials in QM calculations because of the reliance on the uniform
- cartesian grid representation of electron charge density.
+, is treated in the same way as the LJ field by evaluating the explicit
+ expression at each grid point.
+ The overall method is only practical when one employs effective core potentials
+ in the QM calculations because it relies on a uniform Cartesian grid representa
+tion of the electron charge density 
+\begin_inset Formula $n_{\text{e}}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
