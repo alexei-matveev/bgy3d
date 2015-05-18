@@ -2130,11 +2130,18 @@ name "sub:mm-rism"
 \end_layout
 
 \begin_layout Standard
-The theory of 3D RISM was originally developed in the assumption of pair-wise
- interactions between solute and solvent sites.
- Thus we start our analysis with the MM-RISM model where LJ parameters and
- site charges were taken from the well-tested standard force field database
- for solute and solvent 
+The theory of 3D-RISM was originally developed based on pair-wise interactions
+ between solute and solvent sites 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "book:Hirata03"
+
+\end_inset
+
+.
+ Thus we start our analysis with a MM-RISM model where LJ parameters and
+ site charges were taken from a well-tested standard force-field for organic
+ solutes in water 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Pettitt82,Jorgensen83,Jorgensen04"
@@ -2149,9 +2156,8 @@ key "Kovalenko00a,Du03,Palmer10,Sergiievskyi14"
 
 \end_inset
 
-, we find the solvation free energies for the 43 neutral solutes calculated
- with MM-RISM significantly overestimated.
- As can be seen from Table
+, we determined the solvation free energies for 43 neutral organic solutes,
+ calculated with MM-RISM, as significantly overestimating experiment (Table
 \begin_inset space ~
 \end_inset
 
@@ -2162,18 +2168,23 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
-, without PMV correction the correlation coefficient 
+).
+ Without the PMV correction, the correlation coefficient 
 \begin_inset Formula $r$
 \end_inset
 
  between MM-RISM and experimental values is only 0.30.
- The dimensionless PMV factor, 
+ 
+\end_layout
+
+\begin_layout Standard
+The dimensionless PMV factor, 
 \begin_inset Formula $\rho V_{\text{u}}$
 \end_inset
 
-, ranges from about 1.9 to 5.5 for the 43 solutes we examined in this work.
- An error that grows with (dimensionless) molar volume at a rate of about
- 5
+, ranges from about 1.9 to 5.5 for the 43 solutes examined.
+ An error that grows with the (dimensionless) molar volume at a rate of
+ ~5
 \begin_inset space ~
 \end_inset
 
@@ -2188,8 +2199,8 @@ reference "sub:theory"
 
 \end_inset
 
-, will dominate the energy of a relatively weak solvation of these organic
- molecules ranging from 
+, dominates the energy of the relatively weak solvation of these organic
+ molecules, ranging from 
 \begin_inset Formula $-7$
 \end_inset
 
@@ -2197,7 +2208,11 @@ reference "sub:theory"
 \begin_inset space ~
 \end_inset
 
-kcal/mol to about zero 
+kcal/mol to ~0
+\begin_inset space ~
+\end_inset
+
+kcal/mol 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Cabani81,Mobley09"
@@ -2217,18 +2232,13 @@ AM: Cabani81? Not from the Mobley dataset? BL: Experimental values of Cabani81
 
 \end_inset
 
- Inevitably, the correlation of calculated solvation energies with experiment
- is poor.
- The calculated values are overestimated by 18
+ The correlation of calculated solvation energies with experiment is poor.
+ The calculated values are overestimated, by 18
 \begin_inset space ~
 \end_inset
 
-kcal/mol on average, cp.
-\begin_inset space \space{}
-\end_inset
-
-the mean absolute deviation (MAD) between MM-RISM and experimental values
- in Table
+kcal/mol on average; see the mean absolute deviation (MAD) between MM-RISM
+ and experimental values in Table
 \begin_inset space ~
 \end_inset
 
@@ -2240,8 +2250,8 @@ reference "tab:mad-matrix"
 \end_inset
 
 .
- After the PMV correction is applied, the linear correlation relationship
- between MM-RISM and experiments improves significantly, with correlation
+ With the PMV correction applied, the quality of the linear correlation
+ between MM‑RISM and experiments improves significantly, showing a correlation
  coefficient 
 \begin_inset Formula $r=0.88$
 \end_inset
@@ -2257,8 +2267,8 @@ reference "tab:correcoeff-matrix"
 
 \end_inset
 
-) and 
-\begin_inset Formula $\text{MAD}=1.57$
+) and MAD 
+\begin_inset Formula $=1.57$
 \end_inset
 
 
@@ -2277,7 +2287,6 @@ reference "tab:mad-matrix"
 \end_inset
 
 ).
- 
 \end_layout
 
 \begin_layout Standard
@@ -4641,7 +4650,7 @@ status open
 \end_layout
 
 \begin_layout Standard
-The scale and effect of the PMV correction could be confirmed from Fig.
+The effect of the PMV correction is confirmed in Figure
 \begin_inset space ~
 \end_inset
 
@@ -4652,7 +4661,8 @@ reference "fig:Correlation-of-solvation"
 
 \end_inset
 
-a --- note an obvious linear correlation of deviation from the experiment
+a.
+ We note an obvious linear correlation of the deviation from experiment
  and the solute molar volume.
  Table
 \begin_inset space ~
@@ -4670,13 +4680,13 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $\rho V_{\text{u}}$
 \end_inset
 
- and deviation 
+ and the difference 
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- from the experimental solvation free energy.
- According to this regression, the coefficient of determination from the
- linear fitting of the uncorrected results is 
+ between the calculated and the experimental solvation free energy.
+ According to this regression, the coefficient of determination of the linear
+ fit of the uncorrected results is 
 \begin_inset Formula $R^{2}=0.97$
 \end_inset
 
@@ -4686,7 +4696,7 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset Formula $\Delta^{2}G$
 \end_inset
 
- with PMV is weakened significantly with the resulting 
+ is significantly weakened, resulting in 
 \begin_inset Formula $R^{2}=0.37$
 \end_inset
 
@@ -4702,9 +4712,9 @@ reference "tab:Linear-correlation-Delta2G"
 \end_inset
 
 ).
- This reduction indicates displacing the asymptotic cavity formation error
- by other factors affecting overall accuracy of solvation free energy in
- 3D RISM.
+ This reduction indicates that it is not the cavity formation error, but
+ other factors that affect the overall accuracy of the solvation free energy
+ in 3D RISM.
  The remaining correlation of the corrected results with PMV, manifested
  by the finite slope 
 \begin_inset Formula $A^{\prime}=0.66$
@@ -4765,7 +4775,7 @@ reference "tab:Linear-correlation-Delta2G"
 \begin_inset space ~
 \end_inset
 
-kcal/mol derived from the solvent properties according to the Ref.
+kcal/mol derived from the solvent properties, as suggested in Ref.
 \begin_inset space ~
 \end_inset
 
@@ -4777,27 +4787,6 @@ key "Sergiievskyi14"
 \end_inset
 
 .
- To interpret the finite and negative intercept, 
-\begin_inset Formula $B=-1.22$
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-kcal/mol (Table
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:Linear-correlation-Delta2G"
-
-\end_inset
-
-) one may need to go beyond the leading volume term in the asymptotic analysis
- of 3D RISM solvation energy.
  
 \begin_inset Note Note
 status collapsed
