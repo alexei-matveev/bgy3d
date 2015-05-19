@@ -6392,13 +6392,21 @@ name "sec:linear-model"
 \end_layout
 
 \begin_layout Standard
-For simplicity assume a model is characterized by a single degree of freedom
- 
+For simplicity, assume a model that is characterized by a single degree
+ of freedom 
 \begin_inset Formula $d$
 \end_inset
 
- such as a dipole moment.
- Minimization of an energy expression 
+, e.g.
+\begin_inset space \thinspace{}
+\end_inset
+
+the dipole moment.
+ Minimization of an energy expression, for 
+\begin_inset Formula $a>0$
+\end_inset
+
+, 
 \begin_inset Formula 
 \[
 e[d]=a(d-d_{0})^{2}/2,
@@ -6406,133 +6414,94 @@ e[d]=a(d-d_{0})^{2}/2,
 
 \end_inset
 
-given 
-\begin_inset Formula $a>0$
-\end_inset
-
-, leads to a 
-\begin_inset Quotes eld
-\end_inset
-
-permanent
-\begin_inset Quotes erd
-\end_inset
-
- dipole moment 
+leads to a “permanent” dipole moment 
 \begin_inset Formula $d_{0}$
 \end_inset
 
 .
- Response to an electric field addition, 
+ The response to an additional electric field, 
 \begin_inset Formula $\delta e=-fd$
 \end_inset
 
-, is given by 
+, results in 
 \begin_inset Formula $d-d_{0}=a^{-1}f$
 \end_inset
 
- and lets us identify 
+ and suggests to identify 
 \begin_inset Formula $a^{-1}$
 \end_inset
 
- with the 
-\begin_inset Quotes eld
-\end_inset
-
-polarizability
-\begin_inset Quotes erd
-\end_inset
-
- of the system.
-\end_layout
-
-\begin_layout Standard
-A simple expression for the solvation energy of a rigid dipole 
+ with the “polarizability” of the system.
+ Using a simple expression for the solvation energy of a rigid dipole, 
 \begin_inset Formula 
 \[
-\mu[d]=-b(d-d_{\ast})^{2}/2
+\mu[d]=-b(d-d_{\ast})^{2}/2,
 \]
 
 \end_inset
 
-is sufficiently flexible to parametrize the electric cavity reaction field
- 
+is sufficiently flexible for parametrizing the electric cavity reaction
+ field 
 \begin_inset Formula $f_{\ast}[d]=-\partial\mu/\partial d$
 \end_inset
 
- to have the linear form with some, in general, non-zero intercept 
+ to have a linear form with some, in general, non-zero intercept 
 \begin_inset Formula $f_{\ast}[0]=-bd_{\ast}$
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-Note that embedding a frozen 
-\begin_inset Quotes eld
-\end_inset
-
-gas phase
-\begin_inset Quotes erd
-\end_inset
-
- system 
+ Note that embedding a frozen system 
 \begin_inset Formula $d_{0}$
 \end_inset
 
- into a solvent would lead to 
-\begin_inset Formula 
-\[
-\mu[d_{0}]=-\frac{b}{2}(d_{0}-d_{\ast})^{2}
-\]
-
-\end_inset
-
- solvation energy.
+ in the “gas phase” into a solvent would lead to the solvation energy:
 \end_layout
 
 \begin_layout Standard
-However, by minimizing the sum
 \begin_inset Formula 
 \[
-G[d]=e[d]+\mu[d]
+\mu[d_{0}]=-b(d_{0}-d_{\ast})^{2}/2.
 \]
 
 \end_inset
 
- with respect to 
-\begin_inset Formula $d$
+By minimizing the sum 
+\begin_inset Formula $G[d]=e[d]+\mu[d]$
 \end_inset
 
- we find a new minimum (given that 
+, one finds a new minimum at
+\begin_inset Formula 
+\[
+d_{1}=\frac{ad_{0}-bd_{\ast}}{a-b},
+\]
+
+\end_inset
+
+ assuming 
 \begin_inset Formula $0<b<a$
 \end_inset
 
-) at 
+.
+ Finally one obtains the energy 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-d_{1}=\frac{ad_{0}-bd_{\ast}}{a-b}.
+e[d_{1}]=\frac{a}{2}\left[\frac{b}{a-b}\right]^{2}(d_{0}-d_{\ast})^{2},
 \]
 
 \end_inset
 
- The values of the energy expression and solvation energy are given by
+ the “solvation” energy 
 \begin_inset Formula 
 \[
-e[d_{1}]=\frac{a}{2}\left[\frac{b}{a-b}\right]^{2}(d_{0}-d_{\ast})^{2}
+\mu[d_{1}]=-\frac{b}{2}\left[\frac{a}{a-b}\right]^{2}(d_{0}-d_{\ast})^{2},
 \]
 
 \end_inset
 
- and 
-\begin_inset Formula 
-\[
-\mu[d_{1}]=-\frac{b}{2}\left[\frac{a}{a-b}\right]^{2}(d_{0}-d_{\ast})^{2}.
-\]
-
-\end_inset
-
- The total is given by
+ and the total free energy
 \begin_inset Formula 
 \[
 G[d_{1}]=-\frac{ab}{2(a-b)}(d_{0}-d_{\ast})^{2}.
@@ -6540,7 +6509,11 @@ G[d_{1}]=-\frac{ab}{2(a-b)}(d_{0}-d_{\ast})^{2}.
 
 \end_inset
 
-The ratio of the changes
+Assuming 
+\begin_inset Formula $0<b<a$
+\end_inset
+
+, the ratio of the changes
 \begin_inset Formula 
 \[
 \frac{\mu[d_{1}]-\mu[d_{0}]}{e[d_{1}]-e[d_{0}]}=-\left[2-\frac{b}{a}\right]
@@ -6548,7 +6521,7 @@ The ratio of the changes
 
 \end_inset
 
-is a negative number between 
+has a value between 
 \begin_inset Formula $-2$
 \end_inset
 
@@ -6556,11 +6529,7 @@ is a negative number between
 \begin_inset Formula $-1$
 \end_inset
 
- assuming 
-\begin_inset Formula $0<b<a$
-\end_inset
-
- and is independent of system parameters 
+, independent of the system parameters 
 \begin_inset Formula $d_{0}$
 \end_inset
 
@@ -6577,12 +6546,8 @@ is a negative number between
 \begin_inset Formula $b$
 \end_inset
 
- defining the scale of two contributions matters for this result.
- The relaxation effect of the free energy is 
-\begin_inset Formula $o(b^{2})$
-\end_inset
-
-
+, defining the scale of the two contributions, matters for this result.
+ The relaxation effect of the free energy, 
 \begin_inset Formula 
 \[
 G[d_{1}]-G[d_{0}]=-\frac{b^{2}}{2(a-b)}(d_{0}-d_{\ast})^{2}
@@ -6590,11 +6555,15 @@ G[d_{1}]-G[d_{0}]=-\frac{b^{2}}{2(a-b)}(d_{0}-d_{\ast})^{2}
 
 \end_inset
 
-to be compared to the 
-\begin_inset Formula $o(b)$
+is 
+\begin_inset Formula $\mathcal{O}(b^{2})$
 \end_inset
 
- scale of 
+, compared to the 
+\begin_inset Formula $\mathcal{O}(b)$
+\end_inset
+
+ of 
 \begin_inset Formula $G[d_{0}]$
 \end_inset
 
@@ -6603,7 +6572,7 @@ to be compared to the
 \begin_inset Formula $b\to0$
 \end_inset
 
- should be performed carefully, for instance, by setting 
+ has to be carried out with care, for instance, by setting 
 \begin_inset Formula $b=\epsilon$
 \end_inset
 
@@ -6619,11 +6588,12 @@ to be compared to the
 \begin_inset Formula $bd_{\ast}=-f_{\ast}=\text{const}$
 \end_inset
 
- and discarding the divergent but 
+.
+ By discarding divergent terms, independent of 
 \begin_inset Formula $d$
 \end_inset
 
--independent term off 
+, from 
 \begin_inset Formula $\mu[d]$
 \end_inset
 
@@ -6631,8 +6601,10 @@ to be compared to the
 \begin_inset Formula $G[d]$
 \end_inset
 
-.
- In this case 
+, one obtains
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
 G[d_{1}]-G[d_{0}]\to\frac{f_{\ast}^{2}}{2a}
@@ -6640,8 +6612,8 @@ G[d_{1}]-G[d_{0}]\to\frac{f_{\ast}^{2}}{2a}
 
 \end_inset
 
- and the ratio of the two contributions to this relaxation energy is exactly
- 
+and the above ratio of the two contributions to this form of the relaxation
+ energy is exactly 
 \begin_inset Formula $-2$
 \end_inset
 
