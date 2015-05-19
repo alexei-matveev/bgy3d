@@ -2033,7 +2033,7 @@ key "ParaGaussV3.1"
  gradient approximation, GGA) 
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Goerling99,Koch01"
+key "Goerling99,kochDFT"
 
 \end_inset
 
