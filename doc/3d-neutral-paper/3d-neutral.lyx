@@ -7,7 +7,7 @@
 \usepackage{mathptmx}
 \usepackage{times}
 \end_preamble
-\options showkeys,superscriptaddress,preprint
+\options showkeys,superscriptaddress,twocolumn
 \use_default_options false
 \maintain_unincluded_children false
 \language english
@@ -84,13 +84,8 @@ Alexei V.
 alexei.matveev@gmail.com
 \end_layout
 
-\begin_layout Author
-Sven Krüger
-\end_layout
-
 \begin_layout Affiliation
-Department Chemie and Catalysis Research Center, Technische Universität
- München, 85747 Garching, Germany
+Department Chemie, Technische Universität München, 85747 Garching, Germany
 \end_layout
 
 \begin_layout Author
@@ -105,6 +100,11 @@ roesch@mytum.de
 \begin_layout Affiliation
 Department Chemie and Catalysis Research Center, Technische Universität
  München, 85747 Garching, Germany
+\end_layout
+
+\begin_layout Affiliation
+Institute of High Performance Computing, Agency for Science, Technology
+ and Research, 1 Fusionopolis Way, Connexis #16-16, Singapore 138632, Singapore
 \end_layout
 
 \begin_layout Date
@@ -6421,7 +6421,19 @@ Acknowledgments
 \end_layout
 
 \begin_layout Standard
-We thank Prof.
+We thank 
+\color blue
+Dr.
+\begin_inset space \thinspace{}
+\end_inset
+
+S.
+\begin_inset space \thinspace{}
+\end_inset
+
+Krüger, 
+\color inherit
+Prof.
 \begin_inset space ~
 \end_inset
 
