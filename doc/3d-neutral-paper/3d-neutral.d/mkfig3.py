@@ -39,8 +39,8 @@ xlim ((0.0, emax))
 ylim ((-2 * emax, 0))
 #plt.text(0.72, 0.75, 'a', fontsize=15)
 
-ax.legend (ncol=1, numpoints=1, frameon=False,
-           fontsize=fontsize, loc='lower left')
+#ax.legend (ncol=1, numpoints=1, frameon=False,
+#           fontsize=fontsize, loc='lower left')
 # plt.text(1.08, 1.12, 'b', fontsize=15)
 
 ax.locator_params (tight=True, nbins=6)
