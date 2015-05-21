@@ -2299,11 +2299,13 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Correlation coefficient matrix of calculated 3D RISM solvation energies
- with PCM and experiment.
-\begin_inset Formula $^{a}$
+Matrix of correlation coefficients 
+\begin_inset Formula $r$
 \end_inset
 
+ of solvation free energies, calculated with variants of 3D RISM and PCM
+ as well as from experiment.
+ Values are given both without (uncorr.) and with (corr.) a PMV correction.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -2356,6 +2358,10 @@ Method
 
 \begin_layout Plain Layout
 MM
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2365,6 +2371,10 @@ MM
 
 \begin_layout Plain Layout
 PT1
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2374,6 +2384,10 @@ PT1
 
 \begin_layout Plain Layout
 PT2
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2383,6 +2397,10 @@ PT2
 
 \begin_layout Plain Layout
 SCF
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2392,6 +2410,10 @@ SCF
 
 \begin_layout Plain Layout
 PCM
+\begin_inset Formula $^{a}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2401,6 +2423,10 @@ PCM
 
 \begin_layout Plain Layout
 Exp
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3100,7 +3126,16 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Ref.
+This work.
+ 
+\begin_inset Formula $^{b}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Refs.
 \begin_inset space \space{}
 \end_inset
 
@@ -3111,17 +3146,16 @@ key "Cabani81"
 
 \end_inset
 
- and Ref.
-\begin_inset space ~
-\end_inset
-
-
+, 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mobley09"
 
 \end_inset
 
+
+.
+\lang english
 
 \begin_inset ERT
 status open
@@ -3151,14 +3185,12 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Mean absolute deviation (MAD)
+Matrix of mean absolute deviations (MAD) of solvation free energies, calculated
+ with variants of 3D RISM and PCM as well as from experiment.
 \begin_inset Formula $^{a}$
 \end_inset
 
- matrix of calculated 3D RISM solvation energies with PCM and experiment.
-\begin_inset Formula $^{b}$
-\end_inset
-
+ Values are given both without (uncorr.) and with (corr.) a PMV correction.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -3211,6 +3243,10 @@ Method
 
 \begin_layout Plain Layout
 MM
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3220,6 +3256,10 @@ MM
 
 \begin_layout Plain Layout
 PT1
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3229,6 +3269,10 @@ PT1
 
 \begin_layout Plain Layout
 PT2
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3238,6 +3282,10 @@ PT2
 
 \begin_layout Plain Layout
 SCF
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3247,6 +3295,10 @@ SCF
 
 \begin_layout Plain Layout
 PCM
+\begin_inset Formula $^{b}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3256,6 +3308,10 @@ PCM
 
 \begin_layout Plain Layout
 Exp
+\begin_inset Formula $^{c}$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -3955,7 +4011,7 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Units in kcal/mol.
+In kcal/mol.
  
 \begin_inset Formula $^{b}$
 \end_inset
@@ -3964,7 +4020,16 @@ Units in kcal/mol.
 \begin_inset space ~
 \end_inset
 
-Ref.
+This work.
+ 
+\begin_inset Formula $^{c}$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+Refs.
 \begin_inset space \space{}
 \end_inset
 
@@ -3975,19 +4040,17 @@ key "Cabani81"
 
 \end_inset
 
- and Ref.
-\begin_inset space ~
-\end_inset
-
-
+, 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Mobley09"
 
 \end_inset
 
+
 .
- 
+\lang english
+
 \begin_inset ERT
 status open
 
@@ -4016,7 +4079,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Correlation between the calculated partial molar volume measure 
+Correlation between the calculated solute partial molar volume 
 \begin_inset Formula $\rho V_{\text{u}}$
 \end_inset
 
@@ -4025,10 +4088,11 @@ Correlation between the calculated partial molar volume measure
 \end_inset
 
  between computed and experimental solvation free energies.
- Four approaches to solute-solvent interactions are shown: a) MM, b) PT1,
- c) PT2 and d) SCF.
- Gray squares stand for uncorrected results and white solid circles for
- PMV corrected results, both with the fitted line.
+ Results for four approaches to solute-solvent interactions are shown: a)
+ MM, b) PT1, c) PT2 and d) SCF.
+ Gray squares represent uncorrected results, white circles PMV-corrected
+ results.
+ For both datasets a linear regression line is shown.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -4078,12 +4142,12 @@ Parameters of linear regression,
 \begin_inset Formula $x=\rho V_{\text{u}}$
 \end_inset
 
- and solvation free energy difference 
+ and the solvation free energy difference 
 \begin_inset Formula $y=\Delta^{2}G$
 \end_inset
 
- between computed and experimental results for four solvation models without
- and with PMV correction.
+ between computed and experimental results for four variants of 3D RISM
+ solvation models, without and with PMV correction.
 \begin_inset Formula $^{a}$
 \end_inset
 
@@ -4613,7 +4677,7 @@ footnotetext{
 \begin_inset space ~
 \end_inset
 
-Slopes 
+Slope 
 \begin_inset Formula $A$
 \end_inset
 
@@ -4630,7 +4694,7 @@ Slopes
 \begin_inset Formula $B$
 \end_inset
 
- and MAD are the same for two regression models.
+ and MAD are the same for the two regression models.
 \begin_inset ERT
 status open
 
@@ -5106,9 +5170,24 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Comparison of dipole moment of solute: a) MM vs.
- gas phase QM and b) aqueous phase vs.
+Comparison of dipole moment of solutes: a) MM vs.
+ gas phase QM, a linear regression line 
+\begin_inset Formula $y=0.84x+0.086$
+\end_inset
+
+ is shown, b) aqueous phase vs.
  gas phase for SCF-RISM and PCM solvent models.
+ In b), gray square represent PCM results, of which a linear regression
+ line 
+\begin_inset Formula $y=1.30x+0.001$
+\end_inset
+
+ is show, and white solid cycles represent SCF-RISM results, of which a
+ linear regression line 
+\begin_inset Formula $y=1.40x+0.001$
+\end_inset
+
+ is shown.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -5569,8 +5648,13 @@ Correlation of two contributions to the relaxation energy
 \begin_inset Formula $\delta G=\delta E+\delta\mu$
 \end_inset
 
- due to self-consistent treatment of electronic charge distribution and
+ from the self-consistent treatment of electronic charge distribution and
  solvent charge density.
+ A linear regression line 
+\begin_inset Formula $\delta\mu=-1.69\delta E-0.10$
+\end_inset
+
+ is shown.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -6050,17 +6134,17 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Radial distribution functions of the solvated acetic acid: O--H
+Radial distribution functions of the solvated acetic acid: a) O--H
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
-(top panel) and H--O
+ and b) H--O
 \begin_inset Formula $_{\text{W}}$
 \end_inset
 
-(bottom panel).
+.
  Results obtained with the MM, PT1 and SCF methods are shown as dotted line,
- dashed line and solid line respectively.
+ dashed line and solid line, respectively.
  
 \begin_inset CommandInset label
 LatexCommand label
