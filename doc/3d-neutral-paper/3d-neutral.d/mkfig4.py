@@ -6,7 +6,7 @@ from numpy import loadtxt, shape, asarray
 from pylab import *
 import matplotlib.pyplot as plt
 
-fontsize = 10
+fontsize = 15
 color = "black"
 linewidth = 2
 
@@ -31,21 +31,26 @@ def plot_one (d, title):
 
     plt.xlim ((1, 8))
 
-    plt.ylabel ("g(r)")
+    plt.ylabel ("g(r)", fontsize=fontsize)
 
-    plt.title (title, loc="left")
+    plt.title (title, loc="left", fontsize=fontsize)
+
+    plt.xticks (fontsize=fontsize)
+    plt.yticks (fontsize=fontsize)
 
 
-figure(figsize=(8, 8))
+figure(figsize=(4, 4 * 2))
 
 subplot (2, 1, 1)
 plot_one (data[0:3, :, :], "O-HW")
 plt.ylim ((0, 1.4))
+plt.text (7.6, 1.3, 'a', fontsize=fontsize)
 
 subplot (2, 1, 2)
 plot_one (data[3:6, :, :], "H-OW")
 plt.ylim ((0, 1.2))
-plt.xlabel (u"r, Å")
+plt.xlabel (u"r, Å", fontsize=fontsize)
+plt.text (7.6, 1.1, 'b', fontsize=fontsize)
 
 
 # show()
