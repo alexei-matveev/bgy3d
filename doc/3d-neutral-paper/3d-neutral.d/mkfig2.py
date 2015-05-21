@@ -15,10 +15,10 @@ kw = {"linewidth": 1.5,
 
 d = loadtxt("dipole.dat")
 
-figure(figsize=(4, 2 * 4.25))
-fig, (ax1, ax2) = subplots (1, 2, sharex=True, sharey=True)
-ax1.set_aspect (1)
-ax2.set_aspect (1)
+figure(figsize=(8, 2 * 8.5))
+fig, (ax1, ax2) = subplots (2, 1, sharex=False, sharey=False)
+ax1.set_aspect (0.5)
+ax2.set_aspect (0.5)
 
 # MM : d[:, 3]
 # GP : d[:, 4]
@@ -31,6 +31,8 @@ one = [dmin, xdmax]
 ax1.plot (one, fit_fn0 (one), '-', color="0.00", **kw)
 ax1.plot(d[:, 4], d[:, 3], 'o', color="white", label=txt0,  **kw)
 print (polyfit(d[:, 4], d[:, 3], 1))
+ax1.set_xlim ((-0.05, 0.8))
+ax1.set_ylim ((-0.05, 1.2))
 
 #xlim ((dmin, xdmax))
 #ylim ((dmin, dmax))
@@ -72,20 +74,24 @@ ax2.plot(d[:, 4], d[:, 2], 'o', color="1.00", label="SCF, " + txt2,
 #xlim ((dmin, xdmax))
 #ylim ((dmin, dmax))
 
-ax1.set_xlabel(u"Dipole (Gas Phase), eÅ")
+xlim ((-0.05, 0.8))
+ylim ((-0.05, 1.2))
+
+# ax1.set_xlabel(u"Dipole (Gas Phase), eÅ")
 ax2.set_xlabel(u"Dipole (Gas Phase), eÅ")
 ax2.set_ylabel(u"Dipole (Aqueous Phase), eÅ")
-ax1.legend (ncol=1, numpoints=1, frameon=False,
-	fontsize=fontsize, loc="lower right")
-ax2.legend (ncol=1, numpoints=1, frameon=False,
-	fontsize=fontsize, loc="lower right")
+# ax1.legend (ncol=1, numpoints=1, frameon=False,
+	# fontsize=fontsize, loc="lower right")
+# ax2.legend (ncol=1, numpoints=1, frameon=False,
+	# fontsize=fontsize, loc="lower right")
 
 xmin, xmax = xlim()
 ymin, ymax = ylim()
-ax1.text (xmin + 0.1, ymax - 0.05, 'a', fontsize=15)
-ax2.text (xmin + 0.1, ymax - 0.05, 'b', fontsize=15)
+ax1.text (xmin + 0.05, ymax - 0.15, 'a', fontsize=15)
+ax2.text (xmin + 0.05, ymax - 0.15, 'b', fontsize=15)
 
 ax1.locator_params (tight=True, nbins=8)
+ax2.locator_params (tight=True, nbins=8)
 
 # show()
 savefig(sys.argv[1], transparent=True, bbox_inches='tight')
