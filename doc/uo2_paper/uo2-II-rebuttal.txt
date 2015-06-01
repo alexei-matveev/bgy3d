@@ -1,0 +1,157 @@
+------------------------------------
+
+Reviewer(s)' Comments to Author:
+
+Reviewer: 1
+
+Recommendation: This paper is publishable subject to minor revisions
+noted.  Further review is not needed.
+
+Comments:
+
+The manuscript by Matveev and coworkers presents structure and
+energetics of solvated uranyl aqua ion using 3d reference interaction
+site model (RISM) for the solvent. Authors have coupled RIS model for
+water with pair-wise additive (LJ+Coul) force field and QM (BP86) to
+model uranyl ion with 4-6 water ligands that are explicitly considered
+in this study. The results show that 3D-RIS model is a significant
+improvement on their prior work using 1D RISM approach. The structural
+features (of the urnayl aqua ion) presented in this work are in good
+agreement with the previous computational work and experimental
+data. The new solvent model with QM representation of the aqua uranyl
+ion reproduces the experimentally observed activation energy barrier
+for the water exchange. This is the key highlight of the work as most
+other simulations significantly under predict this value. Authors
+attribute this to the inability of force field models to capture
+hydrogen boding. The manuscript is well written and presents an
+alternate approach to continuum solvation models and atomistic
+simulations. The manuscript can be published after authors address the
+following comments:
+
+1: I was some what surprised at the use of BP86 functional in this
+work given how dated is the functional until I read the water exchange
+(dynamics) part of the manuscript. Could authors repeat this
+calculations with either M06-2X or PBE0 (does quite well for water)
+and see the effect of the functional on exchange energetics?
+
+2: When discussing the structural feature with QM/RISM, symmetry was
+imposed uranyl aqua ion. Will relaxing the symmetry constraint result
+in enhanced water density in the under coordinated uranyl ion?
+
+3: Page 17, line 26: Authors explain shortening of U-Ow bond length is
+due to medium screening of ligand-ligand interaction in first
+solvation shell. I can't understand how that is feasible. If RISM
+results in water density within the first solvation shell then I would
+think that it should increase the bond length rather than shortening
+it. Perhaps adding some quantitative discussion can be helpful here.
+
+4: The figures (rdf) could benefit from using different line styles
+(with possibly color) rather than linewidths.
+
+
+------------------------------------
+Reviewer: 2
+
+Recommendation: This paper is probably publishable, but should be
+reviewed again in revised form before it is accepted.
+
+Comments:
+
+The manuscript presents a computational study of partially hydrated
+UO22+ obtained via a new 3D RISM implementation developed by the
+authors. This work is a continuation of a previous study using an 1D
+RISM approach, which was shown to be not sufficiently accurate to
+investigate this system.
+
+Both a force field approach and DFT-based quantum chemical 3D-RISM
+investigations are reported and compared to quantum mechanical cluster
+calculations in combination with the COSMO solvent model. Special
+focus has been given on the influence of the order of the closure
+relation (partial series closure of order 1 to 3). A further focus of
+this investigation was the prediction of the water exchange rate of
+ligands bound to the uranium atom of UO22+.
+
+The new aspects of the implementation of the 3D RISM methodology and
+the results for aqueous uranyl(VI) are of interest to readers in
+physical chemistry and related disciplines. Nevertheless, the
+following points should be addressed by the authors before the
+manuscript can be considered for publication:
+
+
+1. The investigated uranyl(VI) complexes contained four to six water
+molecules bound to the uranium atom. Why didn't the authors considered
+adding further solvent molecules via hydrogen bonds to the oxygen
+atoms of the uranyl, since they act as H-bond acceptors? Does the
+current implementation not permit coordination of further molecules to
+the uranyl oxygens? If not, this would be a noticable limitation of
+the implemenation that should be outlined and discussed in the
+text. Especially in case of the force field based methodology, the
+authors report a mere computing time of 40s when "starting from
+scratch". The authors should in any case include data obtained for a
+fully hydrated uranly(VI) and compare it to the results of the
+partially hydrated ion (assuming the implementaion permits such a
+treatment).
+
+2. In the methods section the authors note that “in QM+RISM
+calculations of the symmetric uranly aqua complexes the U-O bonds were
+relaxed...” and later “that the SPC/E geometry of explicit water
+ligands in the aqua complexes … features an O-H distance of 100 pm and
+an H-O-H angel of 109.47°.”
+
+Does this mean that the intramolecular degrees of freedom of the
+ligand molecules have been kept rigid at bulk configuration? If yes,
+this implies that the water molecules have a wrong (geometric) solvent
+polarisation, since the geometry of water molecules coordinated to
+polarising agents such as ions differ significantly from that of the
+bulk. The authors should critically discuss the associated errors
+resulting from such a constraint in their revised manuscript.
+
+Furthermore, if the geometric polarisation in the partial hydration
+shell is truly negelected, it is highly surprising that the associated
+free energy data is still in reasonable agreement with other
+sources. Also this point should be critically discussed in the
+manuscript.
+
+3. Different versions of the SPC/E water model have been employed,
+namely PR-SPC/E and cSPC/E. The reason for choosing different models
+is not clear and should be discussed in detail in the
+manuscript. Since the respective benchmark computations for the
+monoatomic alkali and halide ions presumably require only seconds to
+minutes, a comparison of the influence on the water molecule on the
+resulting free energy appears feasible and should be included in the
+manuscript for comparison.
+
+Minor point: On page 15 the authors write that “the solvation energy
+             .. is about 5 kcal higher”.  The unit of energy is most
+             likely kcal/mol.
+
+
+
+------------------------------------
+Reviewer: 3
+
+Recommendation: This paper is publishable subject to minor revisions
+noted.  Further review is not needed.
+
+Comments:
+
+This is a QM and MM study of aqueous uranyl hydrate complexes using a
+specific variant of a solvation model (3D-RISM), as implemented by the
+authors. I am not qualified to judge the validity of the equations in
+the Methodology section (or their correct implementation). The methods
+employed (XC functional, MM force fields) appear to be appropriate,
+however. Extending their previous study that used a simpler version of
+the solvation model (1D-RISM), the authors find that the more refined
+3D variant improves the accuracy and numerical stability of the
+results. The paper is well written, and the results clearly presented
+and discussed. I can recommend acceptance; even though the paper could
+be published as is, I have a couple of minor suggestions, which the
+authors may want to address before it goes to print:
+
+1) There are force fields for uranyl that do not require freezing of
+U-O bond lengths (e.g. by Guilbaud and Wipff); some justification why
+this was necessary in the present study would seem in order.
+
+2) An indication of the relative timings for QM+(1D-)RISM and
+QM+(3D-)RISM calculations would be interesting.
+
