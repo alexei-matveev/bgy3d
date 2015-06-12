@@ -1909,6 +1909,12 @@ reference "eq:tau"
 \end_inset
 
 GHz CPUs, where one achieves a parallel efficiency above 40%.
+ 
+\color blue
+With the same computing power, a comparable 1D-RISM calculation takes about
+ 10 seconds.
+
+\color inherit
  The non-linear solver converges in 8 iterations with about 380 Jacobian
  applications.
  
@@ -1934,6 +1940,14 @@ Uranyl with 6w (8 SNES iterations, 378 Krylov iterations):
 
 \begin_layout Plain Layout
 Speedup: 3.39; efficiency: 0.42.
+\end_layout
+
+\begin_layout Plain Layout
+For 1D-RISM:
+\end_layout
+
+\begin_layout Itemize
+8 cores, energy: 9.957 sec = (9.974 + 9.936 + 9.960) / 3
 \end_layout
 
 \end_inset
@@ -3346,7 +3360,11 @@ reference "eq:dG-sol-definition"
 \begin_inset space ~
 \end_inset
 
-kcal higher (in absolute terms) in the latter case.
+
+\color blue
+kcal/mol
+\color inherit
+ higher (in absolute terms) in the latter case.
  This is likely an artifact of the missing statistical averaging over positions
  and orientations of the water molecule in the second shell.
  Hence, in order to yield numerically stable results, independent of the
@@ -4280,7 +4298,11 @@ name "sub:QM+RISM"
 In QM calculations, we use symmetric models of uranyl aqua complexes to
  compare PCM and RISM representations of the solvent in QM calculations.
  The under-coordinated species does not feature a vacancy in the first solvation
- shell.
+ shell 
+\color blue
+without the symmetry constraint
+\color inherit
+.
  Instead, all water ligands are equivalent due to symmetry, also for the
  five- and six-coordinated uranyl.
  These models feature an additional intra-molecular degree of freedom, the
