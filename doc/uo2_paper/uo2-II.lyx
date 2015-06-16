@@ -73,7 +73,7 @@
 \begin_body
 
 \begin_layout Title
-Uranyl solvation by a three-dimensional reference interaction site model
+Uranyl Solvation by a Three-Dimensional Reference Interaction Site Model
 \end_layout
 
 \begin_layout Author
@@ -1911,8 +1911,8 @@ reference "eq:tau"
 GHz CPUs, where one achieves a parallel efficiency above 40%.
  
 \color blue
-With the same computing power, a comparable 1D-RISM calculation takes about
- 10 seconds.
+With the same computing equipment, a comparable 1D-RISM calculation takes
+ about 10 seconds.
 
 \color inherit
  The non-linear solver converges in 8 iterations with about 380 Jacobian
@@ -6030,22 +6030,45 @@ Radial distribution functions of solvated uranyl without explicit aqua ligands:
 \begin_inset Formula $_{\text{w}}$
 \end_inset
 
- (top panel, black), U--H
+ (top panel, 
+\color blue
+red
+\color inherit
+), U--H
 \begin_inset Formula $_{\text{w}}$
 \end_inset
 
- (top panel, gray), O--O
+ (top panel, 
+\color blue
+blue
+\color inherit
+), O--O
 \begin_inset Formula $_{\text{w}}$
 \end_inset
 
- (bottom panel, black) and O--H
+ (bottom panel, 
+\color blue
+red
+\color inherit
+) and O--H
 \begin_inset Formula $\text{_{w}}$
 \end_inset
 
- (bottom panel, gray).
- Results obtained with the PSE1 closure are shown as thick lines in the
- foreground, results obtained with the closure relations PSE2 and PSE3 are
- displayed in the background using thinner lines.
+ (bottom panel, 
+\color blue
+blue
+\color inherit
+).
+ Results obtained with the PSE1 closure are shown as 
+\color blue
+solid
+\color inherit
+ lines, results obtained with the closure relations PSE2 and PSE3 are displayed
+ 
+\color blue
+using dashed lines and dotted lines respectively
+\color inherit
+.
  
 \begin_inset Note Note
 status collapsed
@@ -6700,8 +6723,16 @@ Potential of mean force,
 \end_inset
 
  radial distribution function, determined with the closure relations PSE1,
- PSE2 and PSE3 (solid lines of decreasing weight).
- The dashed line represents the MD result of Ref.
+ PSE2 and PSE3, 
+\color blue
+are displayed as solid, dashed and dot-dashed lines repectively
+\color inherit
+.
+ The 
+\color blue
+dotted
+\color inherit
+ line represents the MD result of Ref.
 \begin_inset space ~
 \end_inset
 
