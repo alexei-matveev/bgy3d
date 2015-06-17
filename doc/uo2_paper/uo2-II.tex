@@ -2,6 +2,7 @@
 %% Do not edit unless you really know what you are doing.
 \documentclass[english,journal=jpcafh,manuscript=article,maxauthors=0]{achemso}
 \usepackage[T1]{fontenc}
+\usepackage{color,soul}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -30,6 +31,7 @@ Singapore}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\newcommand{\hlc}[2][yellow]{ {\sethlcolor{#1} \hl{#2}} }
 \usepackage{mathptmx}
 \usepackage{times}
 %\usepackage{microtype}
@@ -447,7 +449,7 @@ calculation of the solvent susceptibility, the solvation energy, and
 the corresponding forces for uranyl with six explicit water ligands
 takes about 40 seconds on 8 cores of two Intel$^{\circledR}$ Xeon$^{\circledR}$
 E5630 @ 2.53~GHz CPUs, where one achieves a parallel efficiency above
-40\%. The non-linear solver converges in 8 iterations with about 380
+40\%. \hlc[green]{With the same computing power, a comparable 1D-RISM calculation takes about 10 seconds.} The non-linear solver converges in 8 iterations with about 380
 Jacobian applications.  
 
 All-electron QM calculations were carried out with the linear combination
@@ -623,7 +625,7 @@ water molecules illustrates the point; in that structure, one water
 molecule is in the second shell ($n=5+1$, Table~\ref{tab:mm-rism}).
 Whereas the structure of the first solvation shell is very similar
 for $n=5$ and $n=5+1$ explicit water molecules, the solvation energy,
-calculated by Eq.~\ref{eq:dG-sol-definition}, is by about 5~kcal
+calculated by Eq.~\ref{eq:dG-sol-definition}, is by about \hlc[green]{5~kcal/mol}
 higher (in absolute terms) in the latter case. This is likely an artifact
 of the missing statistical averaging over positions and orientations
 of the water molecule in the second shell. Hence, in order to yield
@@ -699,7 +701,7 @@ with $d$(U--O) = 179~pm.
 In QM calculations, we use symmetric models of uranyl aqua complexes
 to compare PCM and RISM representations of the solvent in QM calculations.
 The under-coordinated species does not feature a vacancy in the first
-solvation shell. Instead, all water ligands are equivalent due to
+solvation shell \hlc[green]{without the symmetry constraint}. Instead, all water ligands are equivalent due to
 symmetry, also for the five- and six-coordinated uranyl. These models
 feature an additional intra-molecular degree of freedom, the uranyl
 bond length, in contrast to the MM models discussed in the previous
